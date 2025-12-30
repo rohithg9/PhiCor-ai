@@ -1,0 +1,553 @@
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  AlertCircle, CheckCircle, ChevronRight, ChevronDown,
+  Pill, Stethoscope, Activity, FileText, Target,
+  Heart, AlertTriangle, Info, BookOpen, Beaker,
+  Zap, Shield, Clock, TrendingUp
+} from 'lucide-react';
+import 'katex/dist/katex.min.css';
+import { InlineMath, BlockMath } from 'react-katex';
+
+import { DISEASE_TREATMENT_GUIDELINES, TREATMENT_EVIDENCE_LEVELS } from '../data/diseaseGuidelines';
+
+// Evidence Badge Component
+const EvidenceBadge = ({ level }) => {
+  const evidence = TREATMENT_EVIDENCE_LEVELS[level];
+  if (!evidence) return null;
+
+  const getColor = () => {
+    if (level.startsWith('I') && !level.startsWith('II') && !level.startsWith('III')) {
+      return 'bg-green-500/20 text-green-400 border-green-500/30';
+    }
+    if (level.startsWith('IIa')) return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
+    if (level.startsWith('IIb')) return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+    if (level.startsWith('III')) return 'bg-red-500/20 text-red-400 border-red-500/30';
+    return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+  };
+
+  return (
+    <span 
+      className={`px-2 py-0.5 rounded text-[10px] font-medium border ${getColor()}`}
+      title={`${evidence.description}\n${evidence.strength}`}
+    >
+      {evidence.label}
+    </span>
+  );
+};
+
+// Treatment Card Component
+const TreatmentCard = ({ treatment, expanded, onToggle }) => {
+  return (
+    <div className="bg-gray-800/50 rounded-lg border border-gray-700/50 overflow-hidden">
+      <button
+        onClick={onToggle}
+        className="w-full p-3 flex items-center justify-between text-left hover:bg-gray-700/30 transition"
+      >
+        <div className="flex items-center gap-3">
+          <Pill className="text-pink-400" size={18} />
+          <div>
+            <span className="font-medium text-white">{treatment.name}</span>
+            {treatment.drugs && (
+              <div className="text-xs text-gray-400 mt-0.5">
+                {treatment.drugs.slice(0, 3).join(', ')}
+                {treatment.drugs.length > 3 && '...'}
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <EvidenceBadge level={treatment.evidence} />
+          {expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+        </div>
+      </button>
+
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="p-3 pt-0 space-y-3 border-t border-gray-700/50">
+              {/* Drugs */}
+              {treatment.drugs && (
+                <div>
+                  <div className="text-xs text-gray-500 mb-1">Medications</div>
+                  <div className="flex flex-wrap gap-1">
+                    {treatment.drugs.map((drug, i) => (
+                      <span key={i} className="px-2 py-1 bg-pink-900/30 rounded text-xs text-pink-300">
+                        {drug}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Target/Dose */}
+              {treatment.target && (
+                <div className="flex items-start gap-2">
+                  <Target size={14} className="text-blue-400 mt-0.5" />
+                  <div className="text-sm text-gray-300">
+                    <span className="text-gray-500">Target: </span>{treatment.target}
+                  </div>
+                </div>
+              )}
+
+              {treatment.dose && (
+                <div className="flex items-start gap-2">
+                  <Beaker size={14} className="text-purple-400 mt-0.5" />
+                  <div className="text-sm text-gray-300">
+                    <span className="text-gray-500">Dose: </span>{treatment.dose}
+                  </div>
+                </div>
+              )}
+
+              {/* Mechanism */}
+              {treatment.mechanism && (
+                <div className="flex items-start gap-2">
+                  <Zap size={14} className="text-yellow-400 mt-0.5" />
+                  <div className="text-sm text-gray-300">
+                    <span className="text-gray-500">Mechanism: </span>{treatment.mechanism}
+                  </div>
+                </div>
+              )}
+
+              {/* Source/Evidence */}
+              {treatment.source && (
+                <div className="flex items-start gap-2">
+                  <BookOpen size={14} className="text-green-400 mt-0.5" />
+                  <div className="text-sm text-green-300">
+                    <span className="text-gray-500">Source: </span>{treatment.source}
+                  </div>
+                </div>
+              )}
+
+              {/* Contraindications */}
+              {treatment.contraindications && treatment.contraindications.length > 0 && (
+                <div className="p-2 bg-red-900/20 rounded border border-red-500/30">
+                  <div className="flex items-center gap-1 text-xs text-red-400 mb-1">
+                    <AlertTriangle size={12} />
+                    Contraindications
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {treatment.contraindications.map((ci, i) => (
+                      <span key={i} className="text-xs text-red-300">
+                        {i > 0 && '• '}{ci}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Monitoring */}
+              {treatment.monitoring && treatment.monitoring.length > 0 && (
+                <div className="flex items-start gap-2">
+                  <Activity size={14} className="text-cyan-400 mt-0.5" />
+                  <div className="text-sm text-gray-300">
+                    <span className="text-gray-500">Monitor: </span>
+                    {treatment.monitoring.join(', ')}
+                  </div>
+                </div>
+              )}
+
+              {/* Mathematical Equation */}
+              {treatment.equation && (
+                <div className="p-2 bg-indigo-900/20 rounded border border-indigo-500/30">
+                  <div className="text-xs text-indigo-400 mb-1">Effect Size</div>
+                  <InlineMath math={treatment.equation} />
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+// Diagnostic Criteria Panel
+const DiagnosticCriteriaPanel = ({ criteria }) => {
+  if (!criteria) return null;
+
+  return (
+    <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/50">
+      <h4 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
+        <Stethoscope className="text-green-400" size={16} />
+        Diagnostic Criteria
+      </h4>
+      
+      {Object.entries(criteria).map(([key, items]) => (
+        <div key={key} className="mb-3 last:mb-0">
+          <div className="text-xs text-gray-500 uppercase mb-1">{key}</div>
+          <div className="space-y-1">
+            {Array.isArray(items) ? items.map((item, i) => (
+              <div key={i} className="flex items-start gap-2 text-sm">
+                <CheckCircle size={14} className="text-green-400 mt-0.5 shrink-0" />
+                <div>
+                  <span className="text-gray-300">{item.criterion || item.stage}</span>
+                  {item.method && <span className="text-gray-500"> ({item.method})</span>}
+                  {item.source && <span className="text-xs text-blue-400 ml-1">[{item.source}]</span>}
+                  {item.fev1 && <span className="text-gray-500"> - FEV1: {item.fev1}</span>}
+                  {item.systolic && <span className="text-gray-500"> - SBP: {item.systolic}, DBP: {item.diastolic}</span>}
+                  {item.gfr && <span className="text-gray-500"> - eGFR: {item.gfr}</span>}
+                </div>
+              </div>
+            )) : (
+              <div className="text-sm text-gray-400">{items}</div>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// Treatment Category Section
+const TreatmentCategory = ({ title, icon: Icon, treatments, color }) => {
+  const [expandedIndex, setExpandedIndex] = useState(null);
+
+  if (!treatments || treatments.length === 0) return null;
+
+  return (
+    <div className="mb-4">
+      <div className={`flex items-center gap-2 mb-2 text-sm font-medium ${color}`}>
+        <Icon size={16} />
+        {title}
+      </div>
+      <div className="space-y-2">
+        {treatments.map((treatment, i) => (
+          <TreatmentCard
+            key={i}
+            treatment={treatment}
+            expanded={expandedIndex === i}
+            onToggle={() => setExpandedIndex(expandedIndex === i ? null : i)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Main Treatment Guidelines Panel
+const TreatmentGuidelinesPanel = ({ diseaseId }) => {
+  const [activeTab, setActiveTab] = useState('diagnosis');
+  
+  // Map disease IDs to our guidelines keys
+  const guidelineKeyMap = {
+    'heart_failure': 'heart_failure_hfref',
+    'hfref': 'heart_failure_hfref',
+    'I50.2': 'heart_failure_hfref',
+    'acute_coronary_syndrome': 'acute_coronary_syndrome',
+    'I21': 'acute_coronary_syndrome',
+    'atrial_fibrillation': 'atrial_fibrillation',
+    'I48': 'atrial_fibrillation',
+    'hypertension': 'hypertension',
+    'I10': 'hypertension',
+    'type2_diabetes': 'type2_diabetes',
+    'E11': 'type2_diabetes',
+    'copd': 'copd',
+    'J44': 'copd',
+    'chronic_kidney_disease': 'chronic_kidney_disease',
+    'N18': 'chronic_kidney_disease',
+  };
+
+  const guidelineKey = guidelineKeyMap[diseaseId] || diseaseId;
+  const guidelines = DISEASE_TREATMENT_GUIDELINES[guidelineKey];
+
+  if (!guidelines) {
+    return (
+      <div className="p-6 text-center">
+        <Info className="w-12 h-12 mx-auto text-gray-500 mb-3" />
+        <p className="text-gray-400">
+          Evidence-based guidelines for this condition are being developed.
+        </p>
+        <p className="text-xs text-gray-500 mt-2">
+          Check back soon for treatment recommendations with source citations.
+        </p>
+      </div>
+    );
+  }
+
+  const tabs = [
+    { id: 'diagnosis', name: 'Diagnosis', icon: Stethoscope },
+    { id: 'treatment', name: 'Treatment', icon: Pill },
+    { id: 'monitoring', name: 'Monitoring', icon: Activity },
+    { id: 'equations', name: 'Equations', icon: FileText },
+  ];
+
+  return (
+    <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl border border-gray-700/50 overflow-hidden">
+      {/* Header */}
+      <div className="p-4 border-b border-gray-700/50 bg-gradient-to-r from-indigo-900/30 to-purple-900/30">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-serif text-indigo-400">Φ</span>
+              <h3 className="font-bold text-white">{guidelines.name}</h3>
+            </div>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-xs px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded">
+                ICD-10: {guidelines.icd10}
+              </span>
+              {guidelines.affectedOrgans && (
+                <span className="text-xs text-gray-500">
+                  Affects: {guidelines.affectedOrgans.join(', ')}
+                </span>
+              )}
+            </div>
+          </div>
+          <Shield className="text-indigo-400" size={24} />
+        </div>
+      </div>
+
+      {/* Tab Navigation */}
+      <div className="flex gap-1 p-2 border-b border-gray-700/50 bg-gray-900/50 overflow-x-auto">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition whitespace-nowrap ${
+              activeTab === tab.id
+                ? 'bg-indigo-600 text-white'
+                : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+            }`}
+          >
+            <tab.icon size={14} />
+            {tab.name}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab Content */}
+      <div className="p-4 max-h-[600px] overflow-y-auto">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.15 }}
+          >
+            {activeTab === 'diagnosis' && (
+              <div className="space-y-4">
+                <DiagnosticCriteriaPanel criteria={guidelines.diagnosticCriteria} />
+                
+                {/* Targets */}
+                {guidelines.targets && (
+                  <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/50">
+                    <h4 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
+                      <Target className="text-cyan-400" size={16} />
+                      Treatment Targets
+                    </h4>
+                    <div className="space-y-2">
+                      {typeof guidelines.targets === 'object' && Object.entries(guidelines.targets).map(([key, value]) => (
+                        <div key={key} className="flex items-start gap-2">
+                          <span className="text-xs text-gray-500 uppercase w-20">{key}:</span>
+                          <span className="text-sm text-gray-300">
+                            {typeof value === 'object' 
+                              ? Object.entries(value).map(([k, v]) => `${k}: ${v}`).join(', ')
+                              : value}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'treatment' && (
+              <div className="space-y-4">
+                {guidelines.treatments?.lifestyle && (
+                  <TreatmentCategory
+                    title="Lifestyle Modifications"
+                    icon={Heart}
+                    treatments={guidelines.treatments.lifestyle.map(l => ({
+                      name: l.intervention,
+                      evidence: l.evidence,
+                      source: l.source,
+                      equation: l.effect ? `\\Delta = ${l.effect}` : null,
+                    }))}
+                    color="text-green-400"
+                  />
+                )}
+
+                {guidelines.treatments?.firstLine && (
+                  <TreatmentCategory
+                    title="First-Line Treatment"
+                    icon={Pill}
+                    treatments={guidelines.treatments.firstLine}
+                    color="text-pink-400"
+                  />
+                )}
+
+                {guidelines.treatments?.immediate && (
+                  <TreatmentCategory
+                    title="Immediate Management"
+                    icon={Zap}
+                    treatments={guidelines.treatments.immediate}
+                    color="text-red-400"
+                  />
+                )}
+
+                {guidelines.treatments?.secondLine && (
+                  <TreatmentCategory
+                    title="Second-Line Treatment"
+                    icon={Pill}
+                    treatments={guidelines.treatments.secondLine}
+                    color="text-blue-400"
+                  />
+                )}
+
+                {guidelines.treatments?.secondary && (
+                  <TreatmentCategory
+                    title="Secondary Prevention"
+                    icon={Shield}
+                    treatments={guidelines.treatments.secondary}
+                    color="text-purple-400"
+                  />
+                )}
+
+                {guidelines.treatments?.cvdBenefit && (
+                  <TreatmentCategory
+                    title="CV Risk Reduction"
+                    icon={Heart}
+                    treatments={guidelines.treatments.cvdBenefit}
+                    color="text-red-400"
+                  />
+                )}
+
+                {guidelines.treatments?.devices && (
+                  <TreatmentCategory
+                    title="Device Therapy"
+                    icon={Activity}
+                    treatments={guidelines.treatments.devices}
+                    color="text-cyan-400"
+                  />
+                )}
+
+                {guidelines.treatments?.advanced && (
+                  <TreatmentCategory
+                    title="Advanced Therapies"
+                    icon={Beaker}
+                    treatments={guidelines.treatments.advanced}
+                    color="text-orange-400"
+                  />
+                )}
+              </div>
+            )}
+
+            {activeTab === 'monitoring' && (
+              <div className="space-y-4">
+                {guidelines.monitoringProtocol && (
+                  <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/50">
+                    <h4 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
+                      <Clock className="text-yellow-400" size={16} />
+                      Monitoring Protocol
+                    </h4>
+                    
+                    {guidelines.monitoringProtocol.frequency && (
+                      <div className="mb-3">
+                        <span className="text-xs text-gray-500">Frequency: </span>
+                        <span className="text-sm text-gray-300">{guidelines.monitoringProtocol.frequency}</span>
+                      </div>
+                    )}
+
+                    {guidelines.monitoringProtocol.parameters && (
+                      <div className="mb-3">
+                        <div className="text-xs text-gray-500 mb-1">Parameters to Monitor:</div>
+                        <div className="flex flex-wrap gap-1">
+                          {guidelines.monitoringProtocol.parameters.map((param, i) => (
+                            <span key={i} className="px-2 py-1 bg-yellow-900/30 rounded text-xs text-yellow-300">
+                              {param}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {guidelines.monitoringProtocol.targets && (
+                      <div>
+                        <div className="text-xs text-gray-500 mb-1">Targets:</div>
+                        <div className="space-y-1">
+                          {Object.entries(guidelines.monitoringProtocol.targets).map(([key, value]) => (
+                            <div key={key} className="flex items-center gap-2 text-sm">
+                              <span className="text-gray-500">{key}:</span>
+                              <span className="text-green-400">{value}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {!guidelines.monitoringProtocol && (
+                  <div className="text-center p-6">
+                    <Info className="w-8 h-8 mx-auto text-gray-500 mb-2" />
+                    <p className="text-sm text-gray-400">
+                      Monitoring protocol details coming soon
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'equations' && (
+              <div className="space-y-4">
+                {guidelines.physiologicalChanges && Object.entries(guidelines.physiologicalChanges).map(([organ, data]) => (
+                  <div key={organ} className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/50">
+                    <h4 className="text-sm font-medium text-white mb-3 capitalize flex items-center gap-2">
+                      <TrendingUp className="text-indigo-400" size={16} />
+                      {organ} Changes
+                    </h4>
+
+                    {/* Parameter Changes */}
+                    {data.parameters && (
+                      <div className="mb-3 space-y-2">
+                        {Object.entries(data.parameters).map(([key, param]) => (
+                          <div key={key} className="flex items-center justify-between text-sm p-2 bg-gray-900/50 rounded">
+                            <span className="text-gray-400">{key}</span>
+                            <span className={param.direction === 'increase' ? 'text-red-400' : 'text-blue-400'}>
+                              {param.direction === 'increase' ? '↑' : '↓'} {param.change}{param.unit || ''}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Equations */}
+                    {data.equations && data.equations.map((eq, i) => (
+                      <div key={i} className="p-3 bg-indigo-900/20 rounded border border-indigo-500/30 mb-2 last:mb-0">
+                        <div className="text-xs text-indigo-400 mb-1">{eq.id}</div>
+                        <div className="overflow-x-auto">
+                          <BlockMath math={eq.latex} />
+                        </div>
+                        {eq.description && (
+                          <div className="text-xs text-gray-500 mt-1">{eq.description}</div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ))}
+
+                {!guidelines.physiologicalChanges && (
+                  <div className="text-center p-6">
+                    <FileText className="w-8 h-8 mx-auto text-gray-500 mb-2" />
+                    <p className="text-sm text-gray-400">
+                      Mathematical models being developed
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+};
+
+export default TreatmentGuidelinesPanel;
