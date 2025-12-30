@@ -639,6 +639,35 @@ export const HEPATIC_DISEASES = {
       ultrasound: ["Cirrhotic liver", "Ascites", "Portal vein assessment"],
       ctScan: ["Varices", "HCC screening"]
     },
+    modifications: {
+      liver: {
+        geometry: {
+          liver_weight: { factor: 0.65, note: "Shrunken cirrhotic liver" },
+          liver_volume: { factor: 0.65, note: "Reduced volume" },
+          hepatocyte_count: { factor: 0.4, note: "Severe hepatocyte loss" }
+        },
+        physiology: {
+          bilirubin: { factor: 6.0, note: "Elevated" },
+          albumin: { factor: 0.5, note: "Severely reduced" },
+          inr: { factor: 2.0, note: "Coagulopathy" },
+          albumin_synthesis: { factor: 0.3, note: "Severely impaired" },
+          bile_production: { factor: 0.4, note: "Reduced" },
+          hepatic_blood_flow: { factor: 0.5, note: "Severely reduced" },
+          portal_flow: { factor: 0.4, note: "Reduced with extensive shunting" }
+        },
+        pressures: {
+          portal_pressure: { factor: 3.0, note: "Severe portal hypertension" }
+        },
+        structure: {
+          collagen_content: { factor: 10, note: "Extensive fibrosis" }
+        }
+      },
+      kidneys: {
+        physiology: {
+          gfr: { factor: 0.5, note: "Hepatorenal syndrome" }
+        }
+      }
+    },
     severity: {
       mild: { description: "Compensated cirrhosis, MELD <10" },
       moderate: { description: "Decompensated, MELD 10-20" },
@@ -686,6 +715,21 @@ export const HEPATIC_DISEASES = {
       ultrasound: ["Portal vein dilation (>13mm)", "Splenomegaly", "Ascites", "Reversed portal flow"],
       egd: ["Esophageal/gastric varices"],
       hvpg: ["Hepatic venous pressure gradient >10 mmHg (clinically significant >12)"]
+    },
+    modifications: {
+      liver: {
+        physiology: {
+          portal_flow: { factor: 1.5, note: "Increased portal flow" },
+          hepatic_blood_flow: { factor: 0.7, note: "Reduced" }
+        },
+        pressures: {
+          portal_pressure: { factor: 2.5, note: "Elevated (>10 mmHg)" },
+          hvpg: { factor: 3.0, note: ">12 mmHg clinically significant" }
+        },
+        structure: {
+          sinusoid_diameter: { factor: 0.6, note: "Capillarized, narrowed" }
+        }
+      }
     },
     severity: {
       mild: { description: "HVPG 6-10 mmHg, no varices" },
