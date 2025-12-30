@@ -86,20 +86,22 @@ const LandingPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-panel mb-8">
-              <span className="text-2xl font-serif text-indigo-400">Φ</span>
-              <span className="text-sm text-muted-foreground">Decoding the Equations of Life</span>
+            {/* Logo */}
+            <div className="inline-flex items-center gap-3 mb-8">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center border border-indigo-500/30">
+                <span className="text-3xl font-serif text-indigo-400">Φ</span>
+              </div>
+              <span className="font-manrope font-bold text-2xl bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">PhiCor.ai</span>
             </div>
 
             {/* Main headline */}
             <h1 className="font-manrope text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6 leading-tight">
               <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-                Solving for the
+                Decoding the
               </span>
               <br />
               <span className="text-foreground">
-                Precision of Life.
+                Equations of Life.
               </span>
             </h1>
 
