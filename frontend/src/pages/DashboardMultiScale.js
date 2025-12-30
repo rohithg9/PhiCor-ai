@@ -2396,6 +2396,11 @@ const DashboardMultiScale = () => {
                           equation={eq}
                           expanded={expandedEquations[eq.id]}
                           onToggle={() => toggleEquation(eq.id)}
+                          currentParams={Object.fromEntries(
+                            currentScale.parameters.map(p => [p.id, p.value])
+                          )}
+                          diseaseSeverity={diseaseSeverity}
+                          isDiseasedState={!!currentDisease}
                         />
                       ))}
                     </div>
