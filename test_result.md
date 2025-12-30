@@ -168,6 +168,18 @@ frontend:
         agent: "testing"
         comment: "TESTED: Hepatic diseases successfully integrated and searchable. Search functionality verified for 'alcoholic', 'hepatitis', 'NAFLD', 'cholecystitis', 'cholangitis' - all return appropriate results. Alcoholic Cirrhosis (K70.3) successfully selected and displays clinical details. All 13 hepatic diseases properly categorized under 'Other' tab in Hepatic/Liver subcategory. Disease data structure verified with comprehensive clinical presentations, laboratory findings, imaging findings, and pathophysiology."
 
+  - task: "Metabolic/Endocrine Diseases Integration"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/data/metabolicDiseases.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Created metabolicDiseases.js with 15 diseases including: Type 2 Diabetes (E11.9), Type 1 Diabetes (E10.9), DKA (E13.10), Graves Disease (E05.0), Hypothyroidism (E03.9), Hashimoto's Thyroiditis (E06.3), Cushing's Syndrome (E24.0), Addison's Disease (E27.1), Familial Hypercholesterolemia (E78.0), Hypertriglyceridemia (E78.1), Obesity (E66.9), Metabolic Syndrome (E88.81), Gout (M10.9), Osteoporosis (M81.0), Pheochromocytoma (D35.0). All diseases have comprehensive clinical presentations, laboratory findings, imaging findings, modifications, and pathophysiology. Disease count increased from 171 to 186."
+
 metadata:
   created_by: "main_agent"
   version: "1.0"
