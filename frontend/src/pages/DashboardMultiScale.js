@@ -31,34 +31,44 @@ const transformCardiacDisease = (code, disease) => {
   // Convert ICD10 code from I35_0 format to icd10 property format
   const icd10Code = code.replace('_', '.');
   
+  // Find matching disease in DISEASE_MODELS to get modifications
+  const matchingDiseaseKey = Object.keys(DISEASE_MODELS).find(key => {
+    const dm = DISEASE_MODELS[key];
+    return (dm.icd10 === icd10Code || dm.icd10 === disease.icd10 || 
+            dm.name?.toLowerCase() === disease.name?.toLowerCase());
+  });
+  const matchingDisease = matchingDiseaseKey ? DISEASE_MODELS[matchingDiseaseKey] : null;
+  
   return {
     name: disease.name,
     icd10: disease.icd10 || icd10Code,
     category: disease.category || 'cardiac',
     description: disease.definition || disease.name,
     definition: disease.definition,
-    primaryOrgan: disease.primaryOrgan || 'heart',
-    affectedOrgans: disease.affectedOrgans || ['heart'],
-    progression: disease.pathophysiology?.natural_history ? [
+    primaryOrgan: disease.primaryOrgan || matchingDisease?.primaryOrgan || 'heart',
+    affectedOrgans: disease.affectedOrgans || matchingDisease?.affectedOrgans || ['heart'],
+    progression: matchingDisease?.progression || (disease.pathophysiology?.natural_history ? [
       { stage: 1, name: "Early", severity: 0.25 },
       { stage: 2, name: "Moderate", severity: 0.5 },
       { stage: 3, name: "Advanced", severity: 0.75 },
       { stage: 4, name: "Severe", severity: 1.0 }
-    ] : disease.progression,
-    clinicalPresentation: disease.clinicalPresentation,
-    laboratoryFindings: disease.laboratoryFindings,
-    imagingFindings: disease.imagingFindings,
-    pathophysiology: disease.pathophysiology, // Pass through full pathophysiology
-    modifications: disease.modifications || {},
-    novelEquations: disease.pathophysiology?.novelEquations || 
+    ] : disease.progression),
+    clinicalPresentation: disease.clinicalPresentation || matchingDisease?.clinicalPresentation,
+    laboratoryFindings: disease.laboratoryFindings || matchingDisease?.laboratoryFindings,
+    imagingFindings: disease.imagingFindings || matchingDisease?.imagingFindings,
+    pathophysiology: disease.pathophysiology,
+    // IMPORTANT: Use modifications from DISEASE_MODELS if available
+    modifications: matchingDisease?.modifications || disease.modifications || {},
+    novelEquations: matchingDisease?.novelEquations || disease.pathophysiology?.novelEquations || 
                    (disease.pathophysiology?.equations ? 
                      Object.values(disease.pathophysiology.equations).filter(eq => eq.isNovel) : []),
-    severity: disease.severity || {
+    severity: matchingDisease?.severity || disease.severity || {
       mild: { description: "Early stage" },
       moderate: { description: "Moderate progression" },
       severe: { description: "Advanced disease" }
     },
-    isFromCardiacDB: true // Flag to identify source
+    isFromCardiacDB: true,
+    hasModifications: !!(matchingDisease?.modifications || disease.modifications)
   };
 };
 
@@ -66,40 +76,76 @@ const transformCardiacDisease = (code, disease) => {
 const transformRespiratoryDisease = (code, disease) => {
   const icd10Code = code.replace('_', '.');
   
+  // Find matching disease in DISEASE_MODELS to get modifications
+  const matchingDiseaseKey = Object.keys(DISEASE_MODELS).find(key => {
+    const dm = DISEASE_MODELS[key];
+    return (dm.icd10 === icd10Code || dm.icd10 === disease.icd10 || 
+            dm.name?.toLowerCase() === disease.name?.toLowerCase());
+  });
+  const matchingDisease = matchingDiseaseKey ? DISEASE_MODELS[matchingDiseaseKey] : null;
+  
   return {
     name: disease.name,
     icd10: disease.icd10 || icd10Code,
     category: disease.category || 'respiratory',
     description: disease.definition || disease.name,
     definition: disease.definition,
-    primaryOrgan: disease.primaryOrgan || 'lungs',
-    affectedOrgans: disease.affectedOrgans || ['lungs'],
-    progression: disease.pathophysiology?.natural_history ? [
+    primaryOrgan: disease.primaryOrgan || matchingDisease?.primaryOrgan || 'lungs',
+    affectedOrgans: disease.affectedOrgans || matchingDisease?.affectedOrgans || ['lungs'],
+    progression: matchingDisease?.progression || (disease.pathophysiology?.natural_history ? [
       { stage: 1, name: "Early", severity: 0.25 },
       { stage: 2, name: "Moderate", severity: 0.5 },
       { stage: 3, name: "Advanced", severity: 0.75 },
       { stage: 4, name: "Severe", severity: 1.0 }
-    ] : disease.progression,
-    clinicalPresentation: disease.clinicalPresentation,
-    laboratoryFindings: disease.laboratoryFindings,
-    imagingFindings: disease.imagingFindings,
+    ] : disease.progression),
+    clinicalPresentation: disease.clinicalPresentation || matchingDisease?.clinicalPresentation,
+    laboratoryFindings: disease.laboratoryFindings || matchingDisease?.laboratoryFindings,
+    imagingFindings: disease.imagingFindings || matchingDisease?.imagingFindings,
     pathophysiology: disease.pathophysiology,
-    modifications: disease.modifications || {},
-    novelEquations: disease.pathophysiology?.novelEquations || 
+    modifications: matchingDisease?.modifications || disease.modifications || {},
+    novelEquations: matchingDisease?.novelEquations || disease.pathophysiology?.novelEquations || 
                    (disease.pathophysiology?.equations ? 
                      Object.values(disease.pathophysiology.equations).filter(eq => eq.isNovel) : []),
-    severity: disease.severity || {
+    severity: matchingDisease?.severity || disease.severity || {
       mild: { description: "Early stage" },
       moderate: { description: "Moderate progression" },
       severe: { description: "Advanced disease" }
     },
-    isFromRespiratoryDB: true // Flag to identify source
+    isFromRespiratoryDB: true,
+    hasModifications: !!(matchingDisease?.modifications || disease.modifications)
   };
 };
 
-// Merge cardiac and respiratory diseases with existing disease models
+// Get keys to exclude from DISEASE_MODELS (already covered by ICD-10 diseases)
+const getDiseaseModelKeysByIcd10 = () => {
+  const icd10Covered = new Set();
+  
+  Object.values(ALL_CARDIAC_DISEASES).forEach(d => {
+    if (d.icd10) icd10Covered.add(d.icd10);
+  });
+  Object.values(ALL_RESPIRATORY_DISEASES).forEach(d => {
+    if (d.icd10) icd10Covered.add(d.icd10);
+  });
+  
+  const excludeKeys = [];
+  Object.entries(DISEASE_MODELS).forEach(([key, disease]) => {
+    if (disease.icd10 && icd10Covered.has(disease.icd10)) {
+      excludeKeys.push(key);
+    }
+  });
+  return excludeKeys;
+};
+
+const excludedDiseaseKeys = getDiseaseModelKeysByIcd10();
+
+// Filter DISEASE_MODELS to remove duplicates
+const filteredDiseaseModels = Object.fromEntries(
+  Object.entries(DISEASE_MODELS).filter(([key]) => !excludedDiseaseKeys.includes(key))
+);
+
+// Merge cardiac and respiratory diseases with existing disease models (deduplicated)
 const MERGED_DISEASE_MODELS = {
-  ...DISEASE_MODELS,
+  ...filteredDiseaseModels,
   ...Object.fromEntries(
     Object.entries(ALL_CARDIAC_DISEASES).map(([code, disease]) => [
       code, transformCardiacDisease(code, disease)
