@@ -526,11 +526,66 @@ const TreatmentGuidelinesPanel = ({ diseaseId }) => {
                 )}
 
                 {!guidelines.monitoringProtocol && (
-                  <div className="text-center p-6">
-                    <Info className="w-8 h-8 mx-auto text-gray-500 mb-2" />
-                    <p className="text-sm text-gray-400">
-                      Monitoring protocol details coming soon
-                    </p>
+                  <div className="space-y-4">
+                    {/* Default monitoring protocol when not available */}
+                    <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/50">
+                      <h4 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
+                        <Clock className="text-blue-400" size={16} />
+                        Follow-up Schedule
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div className="p-2 bg-gray-900/50 rounded text-xs">
+                          <span className="text-gray-400">Initial:</span>
+                          <span className="text-white ml-2">2-4 weeks</span>
+                        </div>
+                        <div className="p-2 bg-gray-900/50 rounded text-xs">
+                          <span className="text-gray-400">Stable:</span>
+                          <span className="text-white ml-2">3-6 months</span>
+                        </div>
+                        <div className="p-2 bg-gray-900/50 rounded text-xs">
+                          <span className="text-gray-400">Labs:</span>
+                          <span className="text-white ml-2">Every 3-12 months</span>
+                        </div>
+                        <div className="p-2 bg-gray-900/50 rounded text-xs">
+                          <span className="text-gray-400">Imaging:</span>
+                          <span className="text-white ml-2">As clinically indicated</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/50">
+                      <h4 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
+                        <TrendingUp className="text-green-400" size={16} />
+                        Key Parameters to Monitor
+                      </h4>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-xs p-2 bg-gray-900/50 rounded">
+                          <span className="text-gray-400">Vital Signs</span>
+                          <span className="text-green-400">BP, HR, SpO2</span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs p-2 bg-gray-900/50 rounded">
+                          <span className="text-gray-400">Symptom Assessment</span>
+                          <span className="text-green-400">Functional capacity, QoL</span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs p-2 bg-gray-900/50 rounded">
+                          <span className="text-gray-400">Laboratory</span>
+                          <span className="text-green-400">Per clinical guideline</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-amber-900/20 rounded-lg p-3 border border-amber-500/30">
+                      <div className="flex items-start gap-2">
+                        <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                        <div>
+                          <div className="text-sm font-medium text-amber-400">Warning Signs</div>
+                          <p className="text-xs text-gray-400 mt-1">
+                            Contact healthcare provider for: worsening symptoms, new symptoms, 
+                            medication side effects, or significant vital sign changes.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
