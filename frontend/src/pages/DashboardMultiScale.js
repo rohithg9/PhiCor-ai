@@ -58,8 +58,9 @@ const transformCardiacDisease = (code, disease) => {
     laboratoryFindings: disease.laboratoryFindings || matchingDisease?.laboratoryFindings,
     imagingFindings: disease.imagingFindings || matchingDisease?.imagingFindings,
     pathophysiology: disease.pathophysiology,
-    // IMPORTANT: Use modifications from DISEASE_MODELS if available
-    modifications: matchingDisease?.modifications || disease.modifications || {},
+    // IMPORTANT: Use modifications from DISEASE_MODELS, or generate from templates
+    modifications: matchingDisease?.modifications || disease.modifications || 
+                   generateModifications({ ...disease, icd10: disease.icd10 || icd10Code }),
     novelEquations: matchingDisease?.novelEquations || disease.pathophysiology?.novelEquations || 
                    (disease.pathophysiology?.equations ? 
                      Object.values(disease.pathophysiology.equations).filter(eq => eq.isNovel) : []),
@@ -69,7 +70,7 @@ const transformCardiacDisease = (code, disease) => {
       severe: { description: "Advanced disease" }
     },
     isFromCardiacDB: true,
-    hasModifications: !!(matchingDisease?.modifications || disease.modifications)
+    hasModifications: true // Now always true with template fallback
   };
 };
 
