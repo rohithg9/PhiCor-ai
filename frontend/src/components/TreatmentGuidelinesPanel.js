@@ -234,23 +234,64 @@ const TreatmentCategory = ({ title, icon: Icon, treatments, color }) => {
 const TreatmentGuidelinesPanel = ({ diseaseId }) => {
   const [activeTab, setActiveTab] = useState('diagnosis');
   
-  // Map disease IDs to our guidelines keys
+  // Map disease IDs to our guidelines keys (comprehensive mapping)
   const guidelineKeyMap = {
+    // Heart Failure variants
     'heart_failure': 'heart_failure_hfref',
     'hfref': 'heart_failure_hfref',
+    'I50_2': 'heart_failure_hfref',
     'I50.2': 'heart_failure_hfref',
+    'I50_1': 'heart_failure_hfref',
+    'I50_0': 'heart_failure_hfref',
+    'I50_9': 'heart_failure_hfref',
+    // ACS variants
     'acute_coronary_syndrome': 'acute_coronary_syndrome',
     'I21': 'acute_coronary_syndrome',
+    'I21_0': 'acute_coronary_syndrome',
+    'I21_1': 'acute_coronary_syndrome',
+    'I21_2': 'acute_coronary_syndrome',
+    'I21_3': 'acute_coronary_syndrome',
+    'I21_4': 'acute_coronary_syndrome',
+    'I21_9': 'acute_coronary_syndrome',
+    // Atrial Fibrillation
     'atrial_fibrillation': 'atrial_fibrillation',
     'I48': 'atrial_fibrillation',
+    'I48_0': 'atrial_fibrillation',
+    'I48_1': 'atrial_fibrillation',
+    'I48_2': 'atrial_fibrillation',
+    'I48_9': 'atrial_fibrillation',
+    // Hypertension
     'hypertension': 'hypertension',
     'I10': 'hypertension',
+    'I11': 'hypertension',
+    'I12': 'hypertension',
+    'I13': 'hypertension',
+    // Diabetes
     'type2_diabetes': 'type2_diabetes',
+    'diabetes': 'type2_diabetes',
     'E11': 'type2_diabetes',
+    'E11_9': 'type2_diabetes',
+    // COPD
     'copd': 'copd',
     'J44': 'copd',
+    'J44_0': 'copd',
+    'J44_1': 'copd',
+    'J44_9': 'copd',
+    // CKD
     'chronic_kidney_disease': 'chronic_kidney_disease',
     'N18': 'chronic_kidney_disease',
+    'N18_1': 'chronic_kidney_disease',
+    'N18_2': 'chronic_kidney_disease',
+    'N18_3': 'chronic_kidney_disease',
+    'N18_4': 'chronic_kidney_disease',
+    'N18_5': 'chronic_kidney_disease',
+    'N18_9': 'chronic_kidney_disease',
+    // Cardiomyopathies - map to heart failure
+    'dilated_cardiomyopathy': 'heart_failure_hfref',
+    'I42_0': 'heart_failure_hfref',
+    'hypertrophic_cardiomyopathy': 'hypertension', // Often treated similarly
+    'I42_1': 'hypertension',
+    'I42_2': 'hypertension',
   };
 
   const guidelineKey = guidelineKeyMap[diseaseId] || diseaseId;
