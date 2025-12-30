@@ -420,9 +420,30 @@ const ClinicalFindingsPanel = ({ disease, isExpanded, onToggle }) => {
   const pathophysiology = disease.pathophysiology || {};
   
   // Safely extract symptoms and signs - handle both array and object formats
+  // Also handles array of objects like {name: "Dyspnea", progression: "..."}
   const safeArray = (data) => {
-    if (Array.isArray(data)) return data;
-    if (typeof data === 'object' && data !== null) return Object.values(data).flat();
+    if (!data) return [];
+    if (Array.isArray(data)) {
+      // Map each item: if it's a string, keep it; if it's an object, extract name
+      return data.map(item => {
+        if (typeof item === 'string') return item;
+        if (typeof item === 'object' && item !== null) {
+          // Return name if available, otherwise stringify
+          return item.name || item.description || JSON.stringify(item);
+        }
+        return String(item);
+      });
+    }
+    if (typeof data === 'object' && data !== null) {
+      // For nested objects, flatten and extract names
+      return Object.values(data).flat().map(item => {
+        if (typeof item === 'string') return item;
+        if (typeof item === 'object' && item !== null) {
+          return item.name || item.description || JSON.stringify(item);
+        }
+        return String(item);
+      });
+    }
     return [];
   };
   
