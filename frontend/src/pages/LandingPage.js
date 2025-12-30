@@ -69,16 +69,19 @@ const LandingPage = () => {
           >
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-panel mb-8">
-              <Sparkles className="w-4 h-4 text-primary" />
-              <span className="text-sm text-muted-foreground">Research-Grade Digital Physiology</span>
+              <span className="text-2xl font-serif text-primary">Φ</span>
+              <span className="text-sm text-muted-foreground">PhiCore.ai — Digital Physiology Platform</span>
             </div>
 
             {/* Main heading */}
             <h1 className="font-manrope text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight mb-6">
-              <span className="text-foreground">The Mathematical</span>
+              <span className="text-foreground">The </span>
+              <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                PhiCore
+              </span>
               <br />
-              <span className="bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
-                Human
+              <span className="text-foreground text-4xl sm:text-5xl lg:text-6xl">
+                Mathematical Human
               </span>
             </h1>
 
