@@ -4,7 +4,7 @@ import {
   AlertCircle, CheckCircle, ChevronRight, ChevronDown,
   Pill, Stethoscope, Activity, FileText, Target,
   Heart, AlertTriangle, Info, BookOpen, Beaker,
-  Zap, Shield, Clock, TrendingUp
+  Zap, Shield, Clock, TrendingUp, Lightbulb
 } from 'lucide-react';
 import 'katex/dist/katex.min.css';
 import { InlineMath, BlockMath } from 'react-katex';
