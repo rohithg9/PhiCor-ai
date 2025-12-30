@@ -453,6 +453,18 @@ export const HEPATIC_DISEASES = {
       fibroscan: ["Assess fibrosis stage"],
       ultrasound: ["Screen for HCC if cirrhotic"]
     },
+    modifications: {
+      liver: {
+        physiology: {
+          alt: { factor: 1.8, note: "Variable elevation" },
+          ast: { factor: 1.6, note: "Variable elevation" },
+          hepatic_blood_flow: { factor: 0.9, note: "Reduced with fibrosis" }
+        },
+        structure: {
+          collagen_content: { factor: 2.0, note: "Progressive fibrosis" }
+        }
+      }
+    },
     severity: {
       mild: { description: "F0-F1 fibrosis, normal ALT" },
       moderate: { description: "F2-F3 fibrosis" },
