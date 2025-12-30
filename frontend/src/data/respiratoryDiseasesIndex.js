@@ -5,11 +5,13 @@
 
 import { RESPIRATORY_DISEASES } from './respiratoryDiseases';
 import { RESPIRATORY_DISEASES_PART2 } from './respiratoryDiseasesPart2';
+import { RESPIRATORY_DISEASES_PART3 } from './respiratoryDiseasesPart3';
 
 // Merge all respiratory diseases into single object
 export const ALL_RESPIRATORY_DISEASES = {
   ...RESPIRATORY_DISEASES,
-  ...RESPIRATORY_DISEASES_PART2
+  ...RESPIRATORY_DISEASES_PART2,
+  ...RESPIRATORY_DISEASES_PART3
 };
 
 // Categories for respiratory diseases
