@@ -23,6 +23,7 @@ import { ALL_CARDIAC_DISEASES, CARDIAC_CATEGORIES, getNovelEquations } from '../
 import { ALL_RESPIRATORY_DISEASES } from '../data/respiratoryDiseasesIndex';
 import { ALL_RENAL_DISEASES, RENAL_CATEGORIES } from '../data/renalDiseasesIndex';
 import { ALL_NEUROLOGICAL_DISEASES, NEUROLOGICAL_CATEGORIES } from '../data/neurologicalDiseasesIndex';
+import { ALL_HEPATIC_DISEASES, HEPATIC_CATEGORIES } from '../data/hepaticDiseasesIndex';
 import { enhanceDiseaseWithTemplates, generateModifications } from '../data/diseaseTemplates';
 import LungCancerModule from '../components/LungCancerModule';
 import TreatmentGuidelinesPanel from '../components/TreatmentGuidelinesPanel';
