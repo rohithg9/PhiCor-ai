@@ -973,6 +973,7 @@ const OrganSidebar = ({
   selectedOrgan, 
   onSelectOrgan, 
   currentDisease, 
+  affectedCounts = {},
   onToggleTheme, 
   isDark, 
   isMobile = false 
@@ -1000,6 +1001,7 @@ const OrganSidebar = ({
       {organs.map(([id, organ]) => {
         const isAffected = currentDisease?.affectedOrgans?.includes(id);
         const isPrimary = currentDisease?.primaryOrgan === id;
+        const count = affectedCounts[id] || 0;
         
         return (
           <button
@@ -1016,8 +1018,22 @@ const OrganSidebar = ({
           >
             <span className="text-xl">{organ.icon}</span>
             <span className="flex-1 text-left text-sm">{organ.name}</span>
-            {isPrimary && <span className="w-2 h-2 rounded-full bg-destructive" />}
-            {isAffected && !isPrimary && <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />}
+            {/* Affected count badge */}
+            {count > 0 && (
+              <motion.span
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className={`min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold flex items-center justify-center ${
+                  isPrimary 
+                    ? 'bg-destructive text-destructive-foreground' 
+                    : 'bg-orange-500/20 text-orange-500 border border-orange-500/30'
+                }`}
+              >
+                {count}
+              </motion.span>
+            )}
+            {isPrimary && count === 0 && <span className="w-2 h-2 rounded-full bg-destructive" />}
+            {isAffected && !isPrimary && count === 0 && <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />}
           </button>
         );
       })}
