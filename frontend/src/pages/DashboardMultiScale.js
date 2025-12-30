@@ -864,12 +864,18 @@ const DiseasePanel = ({
       if (disease.name?.toLowerCase().includes(query)) return true;
       // Search in ICD10 code
       if (disease.icd10?.toLowerCase().includes(query)) return true;
-      // Search in symptoms (safely check if array exists)
+      // Search in symptoms (safely check if array exists, handle object format)
       const symptoms = disease.clinicalPresentation?.symptoms;
-      if (Array.isArray(symptoms) && symptoms.some(s => s?.toLowerCase()?.includes(query))) return true;
-      // Search in signs (safely check if array exists)
+      if (Array.isArray(symptoms) && symptoms.some(s => {
+        const symptomText = typeof s === 'string' ? s : s?.name;
+        return symptomText?.toLowerCase()?.includes(query);
+      })) return true;
+      // Search in signs (safely check if array exists, handle object format)
       const signs = disease.clinicalPresentation?.signs;
-      if (Array.isArray(signs) && signs.some(s => s?.toLowerCase()?.includes(query))) return true;
+      if (Array.isArray(signs) && signs.some(s => {
+        const signText = typeof s === 'string' ? s : s?.name;
+        return signText?.toLowerCase()?.includes(query);
+      })) return true;
       // Search in lab findings (safely check if array exists)
       const labs = disease.laboratoryFindings;
       if (Array.isArray(labs) && labs.some(l => l?.name?.toLowerCase()?.includes(query))) return true;
