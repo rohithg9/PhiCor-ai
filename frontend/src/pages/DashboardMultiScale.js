@@ -1127,6 +1127,9 @@ const DiseasePanel = ({
       else if (cat === 'neurological') {
         groups.other.subcategories.neurological.diseases.push([id, disease]);
       }
+      else if (cat === 'hepatic') {
+        groups.other.subcategories.hepatic.diseases.push([id, disease]);
+      }
       else if (cat === 'vascular') {
         groups.other.subcategories.vascular.diseases.push([id, disease]);
       }
