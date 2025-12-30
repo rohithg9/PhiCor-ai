@@ -926,6 +926,9 @@ export const ORGAN_MODELS = {
     },
 
     physiology: {
+      title: "Physiology & Function",
+      parameters: [
+        { id: "cbf", name: "Cerebral Blood Flow", value: 50, unit: "mL/100g/min", range: [40, 60], evidence: "established" },
         { id: "cmro2", name: "Cerebral O₂ Consumption", value: 3.5, unit: "mL/100g/min", range: [3.0, 4.0], evidence: "established" },
         { id: "glucose_consumption", name: "Glucose Consumption", value: 30, unit: "μmol/100g/min", range: [25, 35], evidence: "established" },
         { id: "csf_production", name: "CSF Production", value: 500, unit: "mL/day", range: [400, 600], evidence: "established" },
