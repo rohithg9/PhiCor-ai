@@ -279,6 +279,9 @@ const getDiseaseModelKeysByIcd10 = () => {
   Object.values(ALL_HEPATIC_DISEASES).forEach(d => {
     if (d.icd10) icd10Covered.add(d.icd10);
   });
+  Object.values(ALL_METABOLIC_DISEASES).forEach(d => {
+    if (d.icd10) icd10Covered.add(d.icd10);
+  });
   
   const excludeKeys = [];
   Object.entries(DISEASE_MODELS).forEach(([key, disease]) => {
