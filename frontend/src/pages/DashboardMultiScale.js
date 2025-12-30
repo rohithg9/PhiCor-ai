@@ -191,6 +191,40 @@ const transformNeurologicalDisease = (code, disease) => {
   };
 };
 
+// Transform hepatic diseases to match existing format
+const transformHepaticDisease = (code, disease) => {
+  const icd10Code = code.replace('_', '.');
+  
+  return {
+    name: disease.name,
+    icd10: disease.icd10 || icd10Code,
+    category: disease.category || 'hepatic',
+    description: disease.definition || disease.name,
+    definition: disease.definition,
+    primaryOrgan: disease.primaryOrgan || 'liver',
+    affectedOrgans: disease.affectedOrgans || ['liver'],
+    progression: disease.progression || [
+      { stage: 1, name: "Early", severity: 0.25 },
+      { stage: 2, name: "Moderate", severity: 0.5 },
+      { stage: 3, name: "Advanced", severity: 0.75 },
+      { stage: 4, name: "Severe", severity: 1.0 }
+    ],
+    clinicalPresentation: disease.clinicalPresentation,
+    laboratoryFindings: disease.laboratoryFindings,
+    imagingFindings: disease.imagingFindings,
+    pathophysiology: disease.pathophysiology,
+    modifications: disease.modifications || 
+                   generateModifications({ ...disease, icd10: disease.icd10 || icd10Code, category: 'hepatic' }),
+    severity: disease.severity || {
+      mild: { description: "Early stage" },
+      moderate: { description: "Moderate progression" },
+      severe: { description: "Advanced disease" }
+    },
+    isFromHepaticDB: true,
+    hasModifications: true
+  };
+};
+
 // Get keys to exclude from DISEASE_MODELS (already covered by ICD-10 diseases)
 const getDiseaseModelKeysByIcd10 = () => {
   const icd10Covered = new Set();
