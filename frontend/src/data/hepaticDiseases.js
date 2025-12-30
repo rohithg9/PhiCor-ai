@@ -778,6 +778,17 @@ export const HEPATIC_DISEASES = {
       ultrasound: ["Gallstones", "Gallbladder wall thickening (>3mm)", "Pericholecystic fluid", "Sonographic Murphy's sign"],
       hida: ["Non-visualization of gallbladder (cystic duct obstruction)"]
     },
+    modifications: {
+      liver: {
+        physiology: {
+          alt: { factor: 1.5, note: "Mildly elevated" },
+          ast: { factor: 1.5, note: "Mildly elevated" },
+          bilirubin: { factor: 1.8, note: "Elevated if CBD stone" },
+          alkaline_phosphatase: { factor: 2.0, note: "Elevated" },
+          bile_production: { factor: 0.7, note: "Impaired due to obstruction" }
+        }
+      }
+    },
     severity: {
       mild: { description: "Grade I: No organ dysfunction, no severe local signs" },
       moderate: { description: "Grade II: WBC >18K, palpable mass, symptoms >72h" },
@@ -819,6 +830,20 @@ export const HEPATIC_DISEASES = {
       ultrasound: ["Dilated bile ducts", "CBD stone (if visible)", "Gallstones"],
       mrcp: ["CBD stone/stricture visualization"],
       ercp: ["Diagnostic and therapeutic (stone removal, stent)"]
+    },
+    modifications: {
+      liver: {
+        physiology: {
+          bilirubin: { factor: 5.0, note: "Elevated (obstructive)" },
+          alkaline_phosphatase: { factor: 3.5, note: "Markedly elevated" },
+          alt: { factor: 2.5, note: "Elevated" },
+          ast: { factor: 2.5, note: "Elevated" },
+          bile_production: { factor: 0.3, note: "Severely impaired due to obstruction" }
+        },
+        structure: {
+          bile_duct_diameter: { factor: 2.0, note: "Dilated" }
+        }
+      }
     },
     severity: {
       mild: { description: "Grade I: Responds to initial treatment" },
