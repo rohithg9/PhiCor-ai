@@ -1909,6 +1909,7 @@ const DashboardMultiScale = () => {
               selectedOrgan={selectedOrgan}
               onSelectOrgan={handleOrganSelect}
               currentDisease={currentDisease}
+              affectedCounts={affectedCounts}
               onToggleTheme={toggleTheme}
               isDark={isDark}
               isMobile
