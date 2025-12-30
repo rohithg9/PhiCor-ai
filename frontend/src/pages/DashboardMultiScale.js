@@ -1950,7 +1950,7 @@ const DashboardMultiScale = () => {
             <DiseasePanel 
               diseases={diseases}
               selectedDisease={selectedDisease}
-              onSelectDisease={setSelectedDisease}
+              onSelectDisease={handleDiseaseSelect}
               currentDisease={currentDisease}
               diseaseSeverity={diseaseSeverity}
               onChangeSeverity={setDiseaseSeverity}
@@ -2298,7 +2298,7 @@ const DashboardMultiScale = () => {
             <DiseasePanel 
               diseases={diseases}
               selectedDisease={selectedDisease}
-              onSelectDisease={setSelectedDisease}
+              onSelectDisease={handleDiseaseSelect}
               currentDisease={currentDisease}
               diseaseSeverity={diseaseSeverity}
               onChangeSeverity={setDiseaseSeverity}
