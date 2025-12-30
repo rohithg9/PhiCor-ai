@@ -1025,23 +1025,25 @@ const DiseasePanel = ({
       {/* Category Tabs - Only show when not searching */}
       {!searchQuery && (
         <Tabs defaultValue="cardiac" className="flex-1 flex flex-col min-h-0">
-          <TabsList className="mx-3 mt-3 bg-accent/10 grid grid-cols-5 shrink-0">
-            <TabsTrigger value="cardiac" className="text-xs">
-              ❤️ Cardiac <span className="ml-1 opacity-60">({getCategoryCount(groupedDiseases.cardiac)})</span>
-            </TabsTrigger>
-            <TabsTrigger value="respiratory" className="text-xs">
-              🫁 Respiratory
-            </TabsTrigger>
-            <TabsTrigger value="metabolic" className="text-xs">
-              🔬 Metabolic
-            </TabsTrigger>
-            <TabsTrigger value="neuro" className="text-xs">
-              🧠 Neuro
-            </TabsTrigger>
-            <TabsTrigger value="other" className="text-xs">
-              🔄 Other
-            </TabsTrigger>
-          </TabsList>
+          <div className="mx-3 mt-3 overflow-x-auto scrollbar-hide">
+            <TabsList className="bg-accent/10 inline-flex w-auto min-w-full gap-1">
+              <TabsTrigger value="cardiac" className="text-[10px] px-2 py-1.5 whitespace-nowrap">
+                ❤️ <span className="hidden sm:inline">Cardiac</span>
+              </TabsTrigger>
+              <TabsTrigger value="respiratory" className="text-[10px] px-2 py-1.5 whitespace-nowrap">
+                🫁 <span className="hidden sm:inline">Resp</span>
+              </TabsTrigger>
+              <TabsTrigger value="metabolic" className="text-[10px] px-2 py-1.5 whitespace-nowrap">
+                🔬 <span className="hidden sm:inline">Meta</span>
+              </TabsTrigger>
+              <TabsTrigger value="neuro" className="text-[10px] px-2 py-1.5 whitespace-nowrap">
+                🧠 <span className="hidden sm:inline">Neuro</span>
+              </TabsTrigger>
+              <TabsTrigger value="other" className="text-[10px] px-2 py-1.5 whitespace-nowrap">
+                🔄 <span className="hidden sm:inline">Other</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <div className="flex-1 overflow-y-auto p-3 min-h-0">
             {/* Cardiac Tab Content */}
