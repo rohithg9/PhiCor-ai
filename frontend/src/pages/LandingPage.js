@@ -89,7 +89,7 @@ const LandingPage = () => {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-panel mb-8">
               <span className="text-2xl font-serif text-indigo-400">Φ</span>
-              <span className="text-sm text-muted-foreground">PhiCor.ai — Digital Physiology Platform</span>
+              <span className="text-sm text-muted-foreground">Decoding the Equations of Life</span>
             </div>
 
             {/* Main headline */}
