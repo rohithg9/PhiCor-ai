@@ -44,6 +44,22 @@ export const HEPATIC_DISEASES = {
       ctScan: ["Decreased liver attenuation (fat is dark on CT)"],
       fibroscan: ["Elevated CAP score (controlled attenuation parameter)"]
     },
+    modifications: {
+      liver: {
+        geometry: {
+          liver_weight: { factor: 1.15, note: "Hepatomegaly from fat accumulation" },
+          liver_volume: { factor: 1.15, note: "Increased due to steatosis" }
+        },
+        physiology: {
+          alt: { factor: 1.8, note: "Mildly elevated" },
+          ast: { factor: 2.2, note: "Elevated, AST>ALT typical for alcohol" },
+          hepatic_blood_flow: { factor: 0.95, note: "Minimally reduced" }
+        },
+        structure: {
+          hepatocyte_size: { factor: 1.3, note: "Swollen with fat droplets" }
+        }
+      }
+    },
     severity: {
       mild: { description: "Steatosis <33% of hepatocytes" },
       moderate: { description: "Steatosis 33-66% of hepatocytes" },
@@ -79,6 +95,135 @@ export const HEPATIC_DISEASES = {
         "Hepatic encephalopathy (severe cases)"
       ]
     },
+    laboratoryFindings: [
+      { name: "AST", normalRange: "10-40 U/L", abnormalInDisease: "Elevated 2-6x (rarely >300-500, AST:ALT >2)" },
+      { name: "Bilirubin", normalRange: "0.1-1.2 mg/dL", abnormalInDisease: "Markedly elevated (often >5 mg/dL)" },
+      { name: "WBC", normalRange: "4-11 ×10⁹/L", abnormalInDisease: "Leukocytosis" },
+      { name: "INR", normalRange: "0.9-1.1", abnormalInDisease: "Elevated (synthetic dysfunction)" },
+      { name: "Maddrey DF", normalRange: "N/A", abnormalInDisease: ">32 indicates severe disease, consider steroids" }
+    ],
+    imagingFindings: {
+      ultrasound: ["Hepatomegaly", "Heterogeneous echotexture", "Ascites"],
+      ctScan: ["Hepatomegaly", "Periportal edema"]
+    },
+    modifications: {
+      liver: {
+        geometry: {
+          liver_weight: { factor: 1.2, note: "Hepatomegaly from inflammation" },
+          liver_volume: { factor: 1.2, note: "Swollen liver" }
+        },
+        physiology: {
+          alt: { factor: 3.0, note: "Moderately elevated" },
+          ast: { factor: 5.0, note: "Significantly elevated, AST>ALT" },
+          bilirubin: { factor: 8.0, note: "Markedly elevated (jaundice)" },
+          albumin: { factor: 0.75, note: "Reduced synthesis" },
+          inr: { factor: 1.5, note: "Coagulopathy" },
+          albumin_synthesis: { factor: 0.6, note: "Impaired synthetic function" },
+          bile_production: { factor: 0.7, note: "Cholestasis" }
+        },
+        pressures: {
+          portal_pressure: { factor: 1.3, note: "Elevated from inflammation" }
+        },
+        structure: {
+          kupffer_cells: { factor: 1.5, note: "Activated inflammatory cells" }
+        }
+      },
+      kidneys: {
+        physiology: {
+          gfr: { factor: 0.85, note: "Hepatorenal risk" }
+        }
+      }
+    },
+    severity: {
+      mild: { description: "Maddrey DF <32, no encephalopathy" },
+      moderate: { description: "Maddrey DF 32-54" },
+      severe: { description: "Maddrey DF >54, encephalopathy, renal failure (high mortality)" }
+    }
+  },
+
+  K70_3: {
+    name: "Alcoholic Cirrhosis",
+    icd10: "K70.3",
+    category: "hepatic",
+    definition: "End-stage alcoholic liver disease with irreversible fibrosis and nodular regeneration",
+    primaryOrgan: "liver",
+    affectedOrgans: ["liver", "kidneys", "brain"],
+    pathophysiology: {
+      mechanism: "Chronic inflammation → stellate cell activation → collagen deposition → architectural distortion → portal hypertension",
+      molecularBasis: "TGF-β mediated fibrogenesis, hepatocyte apoptosis, angiogenesis, sinusoidal capillarization"
+    },
+    clinicalPresentation: {
+      symptoms: [
+        "Fatigue",
+        "Jaundice",
+        "Abdominal distension (ascites)",
+        "Easy bruising/bleeding",
+        "Confusion (encephalopathy)",
+        "Muscle wasting"
+      ],
+      signs: [
+        "Jaundice",
+        "Spider angiomata",
+        "Palmar erythema",
+        "Gynecomastia",
+        "Ascites",
+        "Caput medusae",
+        "Asterixis",
+        "Fetor hepaticus"
+      ]
+    },
+    laboratoryFindings: [
+      { name: "Albumin", normalRange: "3.5-5.0 g/dL", abnormalInDisease: "Low (synthetic dysfunction)" },
+      { name: "INR", normalRange: "0.9-1.1", abnormalInDisease: "Elevated" },
+      { name: "Bilirubin", normalRange: "0.1-1.2 mg/dL", abnormalInDisease: "Elevated" },
+      { name: "Platelets", normalRange: "150-400 ×10⁹/L", abnormalInDisease: "Low (splenic sequestration)" },
+      { name: "MELD score", normalRange: "6-9", abnormalInDisease: "Elevated (predicts mortality)" }
+    ],
+    imagingFindings: {
+      ultrasound: ["Nodular liver surface", "Splenomegaly", "Ascites", "Portal vein dilation"],
+      ctScan: ["Nodular liver", "Varices", "Splenomegaly"],
+      fibroscan: ["Elevated liver stiffness (>12.5 kPa)"]
+    },
+    modifications: {
+      liver: {
+        geometry: {
+          liver_weight: { factor: 0.7, note: "Shrunken cirrhotic liver" },
+          liver_volume: { factor: 0.7, note: "Reduced volume" },
+          hepatocyte_count: { factor: 0.5, note: "Massive hepatocyte loss" }
+        },
+        physiology: {
+          alt: { factor: 1.5, note: "Mildly elevated or normal (burned-out)" },
+          ast: { factor: 2.0, note: "Elevated" },
+          bilirubin: { factor: 4.0, note: "Elevated" },
+          albumin: { factor: 0.6, note: "Severely reduced (2.0-2.5 g/dL)" },
+          inr: { factor: 1.8, note: "Coagulopathy" },
+          albumin_synthesis: { factor: 0.4, note: "Severely impaired" },
+          bile_production: { factor: 0.5, note: "Reduced" },
+          hepatic_blood_flow: { factor: 0.6, note: "Reduced due to fibrosis" },
+          portal_flow: { factor: 0.5, note: "Reduced with shunting" }
+        },
+        pressures: {
+          portal_pressure: { factor: 2.5, note: "Portal hypertension (>12 mmHg)" },
+          hvpg: { factor: 4.0, note: "Clinically significant portal HTN" }
+        },
+        structure: {
+          collagen_content: { factor: 8.0, note: "Extensive fibrosis (20-25%)" },
+          stellate_cells: { factor: 3.0, note: "Activated myofibroblasts" },
+          sinusoid_fenestration: { factor: 0.3, note: "Capillarization of sinusoids" }
+        }
+      },
+      kidneys: {
+        physiology: {
+          gfr: { factor: 0.7, note: "Hepatorenal syndrome risk" }
+        }
+      }
+    },
+    severity: {
+      mild: { description: "Child-Pugh A (5-6 points)" },
+      moderate: { description: "Child-Pugh B (7-9 points)" },
+      severe: { description: "Child-Pugh C (10-15 points)" }
+    }
+  },
     laboratoryFindings: [
       { name: "AST", normalRange: "10-40 U/L", abnormalInDisease: "Elevated 2-6x (rarely >300-500, AST:ALT >2)" },
       { name: "Bilirubin", normalRange: "0.1-1.2 mg/dL", abnormalInDisease: "Markedly elevated (often >5 mg/dL)" },
