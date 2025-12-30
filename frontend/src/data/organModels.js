@@ -1028,10 +1028,57 @@ export const ORGAN_MODELS = {
       ]
     },
 
-    physiology: {
-      title: "Physiology & Function",
+    pressures: {
+      title: "Pressures & Gradients",
       parameters: [
-        { id: "fasting_glucose", name: "Fasting Glucose", value: 90, unit: "mg/dL", range: [70, 100], evidence: "established" },
+        { id: "pancreatic_duct_pressure", name: "Pancreatic Duct Pressure", value: 15, unit: "cmH₂O", range: [10, 20], evidence: "established" },
+        { id: "sphincter_oddi", name: "Sphincter of Oddi Pressure", value: 10, unit: "mmHg", range: [5, 15], evidence: "established" },
+        { id: "interstitial_pressure", name: "Interstitial Pressure", value: 5, unit: "mmHg", range: [3, 8], evidence: "established" },
+        { id: "portal_venous_drainage", name: "Portal Venous Drainage Pressure", value: 7, unit: "mmHg", range: [5, 10], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "ductal_flow",
+          name: "Ductal Flow",
+          latex: "Q_{duct} = \\frac{\\Delta P}{R_{duct}} = \\frac{P_{duct} - P_{duodenum}}{R_{sphincter}}",
+          description: "Pancreatic secretion flow",
+          evidence: "established",
+          source: "Fluid mechanics"
+        }
+      ]
+    },
+
+    structure: {
+      title: "Structure & Tissue",
+      parameters: [
+        { id: "acinar_cell_fraction", name: "Acinar Cell Fraction", value: 80, unit: "%", range: [75, 85], evidence: "established" },
+        { id: "islet_fraction", name: "Islet Fraction", value: 2, unit: "%", range: [1, 3], evidence: "established" },
+        { id: "ductal_fraction", name: "Ductal Cell Fraction", value: 5, unit: "%", range: [3, 7], evidence: "established" },
+        { id: "beta_cell_fraction", name: "β-Cells in Islets", value: 60, unit: "%", range: [50, 70], evidence: "established" },
+        { id: "alpha_cell_fraction", name: "α-Cells in Islets", value: 25, unit: "%", range: [20, 30], evidence: "established" },
+        { id: "islet_vascular_density", name: "Islet Vascular Density", value: 5, unit: "× body average", range: [4, 7], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "beta_cell_replication",
+          name: "β-Cell Replication Model",
+          latex: "\\frac{dM_\\beta}{dt} = r \\cdot M_\\beta \\cdot (1 - \\frac{M_\\beta}{K}) - \\delta \\cdot M_\\beta \\cdot [Glucose]^n",
+          description: "β-cell mass dynamics (replication, apoptosis)",
+          evidence: "novel",
+          source: "Glucotoxicity model"
+        },
+        {
+          id: "islet_architecture",
+          name: "Islet Architecture Score",
+          latex: "IAS = \\frac{\\beta_{central}}{\\alpha_{peripheral}} \\times f_{vascular}",
+          description: "Architectural disruption in diabetes",
+          evidence: "novel",
+          source: "Histomorphometry"
+        }
+      ]
+    },
+
+    physiology: {
         { id: "fasting_insulin", name: "Fasting Insulin", value: 10, unit: "μU/mL", range: [5, 20], evidence: "established" },
         { id: "hba1c", name: "HbA1c", value: 5.5, unit: "%", range: [4.5, 5.7], evidence: "established" },
         { id: "homa_ir", name: "HOMA-IR", value: 2.0, unit: "", range: [0.5, 2.5], evidence: "established" },
