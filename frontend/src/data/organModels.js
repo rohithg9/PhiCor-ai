@@ -891,10 +891,38 @@ export const ORGAN_MODELS = {
       ]
     },
 
-    physiology: {
-      title: "Physiology & Function",
+    structure: {
+      title: "Structure & Tissue",
       parameters: [
-        { id: "cbf", name: "Cerebral Blood Flow", value: 50, unit: "mL/100g/min", range: [40, 60], evidence: "established" },
+        { id: "neuron_density", name: "Cortical Neuron Density", value: 16, unit: "×10⁹/cm³", range: [12, 20], evidence: "established" },
+        { id: "glia_ratio", name: "Glia to Neuron Ratio", value: 1.0, unit: "", range: [0.8, 1.2], evidence: "established" },
+        { id: "myelin_volume", name: "Myelin Volume Fraction", value: 35, unit: "%", range: [30, 40], evidence: "established" },
+        { id: "bbb_thickness", name: "Blood-Brain Barrier Thickness", value: 300, unit: "nm", range: [200, 400], evidence: "established" },
+        { id: "capillary_density", name: "Capillary Density", value: 400, unit: "per mm²", range: [300, 500], evidence: "established" },
+        { id: "astrocyte_coverage", name: "Astrocyte Coverage of Capillaries", value: 99, unit: "%", range: [98, 100], evidence: "established" },
+        { id: "ventricle_volume", name: "Ventricular Volume", value: 25, unit: "mL", range: [15, 40], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "bbb_permeability",
+          name: "BBB Permeability",
+          latex: "P = P_0 \\times MW^{-0.6} \\times f_{lipophilicity}",
+          description: "Permeability decreases with molecular weight",
+          evidence: "novel",
+          source: "Lipinski-like BBB model"
+        },
+        {
+          id: "neurodegeneration",
+          name: "Neurodegeneration Model",
+          latex: "\\frac{dN}{dt} = -k_{death} \\cdot N \\cdot (1 + \\alpha_{amyloid}[A\\beta] + \\alpha_{tau}[\\tau_p])",
+          description: "Neuron loss accelerated by protein aggregates",
+          evidence: "novel",
+          source: "Amyloid-tau cascade model"
+        }
+      ]
+    },
+
+    physiology: {
         { id: "cmro2", name: "Cerebral O₂ Consumption", value: 3.5, unit: "mL/100g/min", range: [3.0, 4.0], evidence: "established" },
         { id: "glucose_consumption", name: "Glucose Consumption", value: 30, unit: "μmol/100g/min", range: [25, 35], evidence: "established" },
         { id: "csf_production", name: "CSF Production", value: 500, unit: "mL/day", range: [400, 600], evidence: "established" },
