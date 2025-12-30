@@ -203,11 +203,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Verify metabolic diseases display correctly with clinical data"
-    - "Verify disease count shows 186 diseases"
-    - "Test Metabolic tab categorization (Diabetes, Thyroid, Adrenal, Lipid, Obesity)"
-    - "Verify Type 2 Diabetes parameter modifications"
-    - "Verify Pancreas organ parameters display correctly"
+    - "Disease Parameter Visualization UX Improvements"
+    - "Implement affected organs summary bar for desktop view"
+    - "Add organ sidebar count badges with proper colors"
+    - "Implement parameter highlighting for abnormal values"
+    - "Add scale tab modification indicators"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
