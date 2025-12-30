@@ -1048,13 +1048,18 @@ const DiseasePanel = ({
                   )}
                 </div>
                 {Array.isArray(disease.clinicalPresentation?.symptoms) && 
-                 disease.clinicalPresentation.symptoms.slice(0, 2).some(s => 
-                  s?.toLowerCase()?.includes(searchQuery.toLowerCase())
+                 disease.clinicalPresentation.symptoms.slice(0, 2).some(s => {
+                   const symptomText = typeof s === 'string' ? s : s?.name;
+                   return symptomText?.toLowerCase()?.includes(searchQuery.toLowerCase());
+                 }
                 ) && (
                   <p className="text-[10px] text-muted-foreground mt-1">
-                    Symptoms: {disease.clinicalPresentation.symptoms.slice(0, 2).map((s, i) => (
-                      <span key={i}>{i > 0 && ', '}{highlightMatch(s, searchQuery)}</span>
-                    ))}
+                    Symptoms: {disease.clinicalPresentation.symptoms.slice(0, 2).map((s, i) => {
+                      const symptomText = typeof s === 'string' ? s : s?.name;
+                      return (
+                        <span key={i}>{i > 0 && ', '}{highlightMatch(symptomText || '', searchQuery)}</span>
+                      );
+                    })}
                   </p>
                 )}
               </button>
