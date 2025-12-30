@@ -1778,6 +1778,61 @@ const DashboardMultiScale = () => {
   const currentScale = currentOrgan?.[selectedScale];
   const currentDisease = selectedDisease ? MERGED_DISEASE_MODELS[selectedDisease] : null;
 
+  // Calculate affected parameters count for each organ
+  const getAffectedCounts = useCallback(() => {
+    if (!currentDisease?.modifications) return {};
+    
+    const counts = {};
+    const mods = currentDisease.modifications;
+    
+    Object.entries(mods).forEach(([organId, organMods]) => {
+      let count = 0;
+      Object.entries(organMods).forEach(([scaleId, scaleMods]) => {
+        count += Object.keys(scaleMods).length;
+      });
+      counts[organId] = count;
+    });
+    
+    return counts;
+  }, [currentDisease]);
+
+  const affectedCounts = useMemo(() => getAffectedCounts(), [getAffectedCounts]);
+
+  // Calculate total affected count for an organ
+  const getOrganAffectedCount = useCallback((organId) => {
+    return affectedCounts[organId] || 0;
+  }, [affectedCounts]);
+
+  // Get all affected organs with their counts for summary tabs
+  const affectedOrgansSummary = useMemo(() => {
+    if (!currentDisease) return [];
+    
+    const summary = [];
+    Object.entries(ORGAN_MODELS).forEach(([id, organ]) => {
+      const count = affectedCounts[id] || 0;
+      const isPrimary = currentDisease?.primaryOrgan === id;
+      const isAffected = currentDisease?.affectedOrgans?.includes(id);
+      
+      if (count > 0 || isAffected) {
+        summary.push({
+          id,
+          name: organ.name,
+          icon: organ.icon,
+          count,
+          isPrimary,
+          isAffected
+        });
+      }
+    });
+    
+    // Sort: primary first, then by count
+    return summary.sort((a, b) => {
+      if (a.isPrimary) return -1;
+      if (b.isPrimary) return 1;
+      return b.count - a.count;
+    });
+  }, [currentDisease, affectedCounts]);
+
   // Calculate modified parameters based on disease
   const getModifiedValue = useCallback((organId, scaleId, paramId, baseValue) => {
     if (!currentDisease) return { value: baseValue, modified: false };
@@ -1786,8 +1841,10 @@ const DashboardMultiScale = () => {
     if (!mods) return { value: baseValue, modified: false };
     
     let newValue = baseValue;
-    if (mods.multiplier) {
-      const factor = 1 + (mods.multiplier - 1) * diseaseSeverity;
+    // Support both 'multiplier' and 'factor' for compatibility
+    const multiplier = mods.multiplier || mods.factor;
+    if (multiplier) {
+      const factor = 1 + (multiplier - 1) * diseaseSeverity;
       newValue = baseValue * factor;
     }
     if (mods.absolute) {
