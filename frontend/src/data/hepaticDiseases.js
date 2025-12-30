@@ -388,6 +388,25 @@ export const HEPATIC_DISEASES = {
       fibroscan: ["Elevated liver stiffness", "Elevated CAP"],
       liverBiopsy: ["Gold standard: steatosis + ballooning + lobular inflammation ± fibrosis"]
     },
+    modifications: {
+      liver: {
+        geometry: {
+          liver_weight: { factor: 1.15, note: "Hepatomegaly" },
+          liver_volume: { factor: 1.15, note: "Enlarged" }
+        },
+        physiology: {
+          alt: { factor: 2.5, note: "Elevated (1.5-3x ULN)" },
+          ast: { factor: 2.0, note: "Elevated" },
+          albumin_synthesis: { factor: 0.9, note: "Mildly impaired if fibrosis" },
+          hepatic_blood_flow: { factor: 0.85, note: "Reduced with fibrosis" }
+        },
+        structure: {
+          hepatocyte_size: { factor: 1.3, note: "Ballooned hepatocytes" },
+          collagen_content: { factor: 2.5, note: "Increased with fibrosis" },
+          stellate_cells: { factor: 1.8, note: "Activated" }
+        }
+      }
+    },
     severity: {
       mild: { description: "NASH with F0-F1 fibrosis" },
       moderate: { description: "NASH with F2-F3 fibrosis" },
