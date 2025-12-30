@@ -1029,6 +1029,7 @@ const DiseasePanel = ({
         subcategories: {
           respiratory: { label: "Respiratory", diseases: [] },
           renal: { label: "Renal", diseases: [] },
+          neurological: { label: "Neurological", diseases: [] },
           vascular: { label: "Vascular", diseases: [] },
           cerebrovascular: { label: "Cerebrovascular", diseases: [] },
           acute: { label: "Acute/Critical", diseases: [] },
