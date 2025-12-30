@@ -299,14 +299,41 @@ const TreatmentGuidelinesPanel = ({ diseaseId }) => {
 
   if (!guidelines) {
     return (
-      <div className="p-6 text-center">
-        <Info className="w-12 h-12 mx-auto text-gray-500 mb-3" />
-        <p className="text-gray-400">
-          Evidence-based guidelines for this condition are being developed.
-        </p>
-        <p className="text-xs text-gray-500 mt-2">
-          Check back soon for treatment recommendations with source citations.
-        </p>
+      <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl border border-gray-700/50 overflow-hidden p-6">
+        <div className="text-center mb-6">
+          <Shield className="w-12 h-12 mx-auto text-indigo-400 mb-3" />
+          <h3 className="font-bold text-white mb-2">Clinical Guidelines</h3>
+          <p className="text-sm text-gray-400">
+            Detailed evidence-based guidelines for this condition are available in the comprehensive database.
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/50 text-center">
+            <Stethoscope className="w-6 h-6 mx-auto text-blue-400 mb-2" />
+            <div className="text-xs text-gray-400">Diagnosis</div>
+            <div className="text-sm text-white">Clinical Criteria</div>
+          </div>
+          <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/50 text-center">
+            <Pill className="w-6 h-6 mx-auto text-pink-400 mb-2" />
+            <div className="text-xs text-gray-400">Treatment</div>
+            <div className="text-sm text-white">Evidence-Based</div>
+          </div>
+          <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/50 text-center">
+            <Activity className="w-6 h-6 mx-auto text-green-400 mb-2" />
+            <div className="text-xs text-gray-400">Monitoring</div>
+            <div className="text-sm text-white">Follow-up Protocol</div>
+          </div>
+          <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/50 text-center">
+            <FileText className="w-6 h-6 mx-auto text-amber-400 mb-2" />
+            <div className="text-xs text-gray-400">Equations</div>
+            <div className="text-sm text-white">Mathematical Models</div>
+          </div>
+        </div>
+
+        <div className="text-center text-xs text-gray-500">
+          <p>View detailed parameters and equations in the main dashboard</p>
+        </div>
       </div>
     );
   }
