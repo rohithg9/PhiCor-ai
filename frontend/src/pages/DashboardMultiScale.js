@@ -1884,6 +1884,19 @@ const DashboardMultiScale = () => {
     setDiseaseSeverity(0.5);
   }, []);
 
+  // Handle disease selection with auto-navigation to primary organ
+  const handleDiseaseSelect = useCallback((diseaseId) => {
+    setSelectedDisease(diseaseId);
+    
+    // Auto-navigate to primary affected organ
+    if (diseaseId) {
+      const disease = MERGED_DISEASE_MODELS[diseaseId];
+      if (disease?.primaryOrgan && ORGAN_MODELS[disease.primaryOrgan]) {
+        setSelectedOrgan(disease.primaryOrgan);
+      }
+    }
+  }, []);
+
   const handleOrganSelect = useCallback((organId) => {
     setSelectedOrgan(organId);
     setMobileMenuOpen(false);
