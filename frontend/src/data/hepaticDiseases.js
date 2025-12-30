@@ -891,6 +891,24 @@ export const HEPATIC_DISEASES = {
       ctHead: ["Rule out other causes (stroke, SDH)"],
       mri: ["T1 hyperintensity in globus pallidus (manganese deposition)"]
     },
+    modifications: {
+      liver: {
+        physiology: {
+          albumin: { factor: 0.65, note: "Reduced (cirrhosis)" },
+          albumin_synthesis: { factor: 0.5, note: "Impaired" },
+          ammonia_clearance: { factor: 0.3, note: "Severely impaired" }
+        }
+      },
+      brain: {
+        physiology: {
+          cerebral_blood_flow: { factor: 1.15, note: "Mildly increased" },
+          intracranial_pressure: { factor: 1.3, note: "May be elevated" }
+        },
+        structure: {
+          astrocyte_swelling: { factor: 2.0, note: "Glutamine accumulation" }
+        }
+      }
+    },
     severity: {
       mild: { description: "Grade 1: Mild confusion, sleep disturbance, shortened attention" },
       moderate: { description: "Grade 2: Lethargy, disorientation, asterixis" },
