@@ -428,8 +428,8 @@ const LandingPage = () => {
             <h2 className="font-manrope text-3xl sm:text-4xl font-bold mb-4">
               Ready to <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">solve</span> for the future of medicine?
             </h2>
-            <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-              Join us as we build the mathematical foundation for the next generation of clinical care.
+            <p className="text-muted-foreground mb-8 max-w-lg mx-auto leading-relaxed">
+              Join us as we build the mathematical foundation for next-generation clinical care.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button
@@ -442,10 +442,11 @@ const LandingPage = () => {
               </Button>
               <Button
                 variant="outline"
-                onClick={() => navigate('/auth')}
+                onClick={() => window.open('https://www.youtube.com/watch?v=demo', '_blank')}
                 className="px-8 py-6 text-lg border-white/20 hover:bg-white/5"
               >
-                Create Account
+                <Play className="mr-2 w-5 h-5" />
+                Watch Demo
               </Button>
             </div>
           </motion.div>
