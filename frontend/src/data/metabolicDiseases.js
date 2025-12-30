@@ -83,7 +83,7 @@ export const METABOLIC_DISEASES = {
       },
       brain: {
         physiology: {
-          cerebral_blood_flow: { factor: 0.95, note: "Microvascular changes" }
+          cbf: { factor: 0.95, note: "Microvascular changes" }
         }
       }
     },
