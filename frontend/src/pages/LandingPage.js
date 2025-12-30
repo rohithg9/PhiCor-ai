@@ -263,9 +263,12 @@ const LandingPage = () => {
       {/* Footer */}
       <footer className="border-t border-white/5 py-8 px-6">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="font-manrope font-bold text-lg">The Mathematical Human</div>
+          <div className="flex items-center gap-2">
+            <span className="text-2xl font-serif bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">Φ</span>
+            <span className="font-manrope font-bold text-lg bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">PhiCore.ai</span>
+          </div>
           <p className="text-sm text-muted-foreground">
-            Research-grade digital physiology platform
+            Digital Physiology Platform — The Mathematical Human
           </p>
         </div>
       </footer>
