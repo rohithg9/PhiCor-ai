@@ -130,6 +130,7 @@ export const DISEASE_MODELS = {
 
   dilated_cardiomyopathy: {
     name: "Dilated Cardiomyopathy",
+    icd10: "I42.0",
     category: "cardiac",
     description: "LV dilation with systolic dysfunction",
     
