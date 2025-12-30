@@ -464,9 +464,134 @@ const ClinicalInsightsPanel = ({ disease, severity }) => {
   );
 };
 
-// Equation Derivation Component
-const EquationDerivation = ({ equation, expanded, onToggle }) => {
+// Equation Derivation Component with Calculated Results
+const EquationDerivation = ({ equation, expanded, onToggle, currentParams = {}, diseaseSeverity = 0.5, isDiseasedState = false }) => {
   const isNovel = equation.evidence === 'novel' || equation.isNovel;
+  
+  // Calculate values based on equation type
+  const getCalculatedValues = () => {
+    const params = currentParams || {};
+    const severity = diseaseSeverity;
+    
+    // Common cardiac equations
+    if (equation.id === 'stroke_volume' || equation.name?.includes('Stroke Volume')) {
+      const edv = params.lv_edv || 120;
+      const esv = params.lv_esv || 50;
+      const diseasedEdv = isDiseasedState ? edv * (1 - 0.2 * severity) : edv;
+      const diseasedEsv = isDiseasedState ? esv * (1 + 0.3 * severity) : esv;
+      return {
+        normal: { edv: 120, esv: 50, result: 70, unit: 'mL' },
+        current: { edv: diseasedEdv.toFixed(0), esv: diseasedEsv.toFixed(0), result: (diseasedEdv - diseasedEsv).toFixed(0), unit: 'mL' },
+        formula: 'SV = EDV - ESV',
+        calculation: `SV = ${diseasedEdv.toFixed(0)} - ${diseasedEsv.toFixed(0)} = ${(diseasedEdv - diseasedEsv).toFixed(0)} mL`
+      };
+    }
+    
+    if (equation.id === 'cardiac_output' || equation.name?.includes('Cardiac Output')) {
+      const sv = params.stroke_volume || 70;
+      const hr = params.heart_rate || 70;
+      const diseasedSv = isDiseasedState ? sv * (1 - 0.25 * severity) : sv;
+      const diseasedHr = isDiseasedState ? hr * (1 + 0.15 * severity) : hr;
+      return {
+        normal: { sv: 70, hr: 70, result: 4.9, unit: 'L/min' },
+        current: { sv: diseasedSv.toFixed(0), hr: diseasedHr.toFixed(0), result: ((diseasedSv * diseasedHr) / 1000).toFixed(1), unit: 'L/min' },
+        formula: 'CO = SV × HR',
+        calculation: `CO = ${diseasedSv.toFixed(0)} × ${diseasedHr.toFixed(0)} / 1000 = ${((diseasedSv * diseasedHr) / 1000).toFixed(1)} L/min`
+      };
+    }
+    
+    if (equation.id === 'ef_calc' || equation.name?.includes('Ejection Fraction')) {
+      const edv = params.lv_edv || 120;
+      const esv = params.lv_esv || 50;
+      const diseasedEdv = isDiseasedState ? edv * (1 - 0.15 * severity) : edv;
+      const diseasedEsv = isDiseasedState ? esv * (1 + 0.4 * severity) : esv;
+      const ef = ((diseasedEdv - diseasedEsv) / diseasedEdv * 100);
+      return {
+        normal: { edv: 120, esv: 50, result: 58, unit: '%' },
+        current: { edv: diseasedEdv.toFixed(0), esv: diseasedEsv.toFixed(0), result: ef.toFixed(0), unit: '%' },
+        formula: 'EF = (EDV - ESV) / EDV × 100',
+        calculation: `EF = (${diseasedEdv.toFixed(0)} - ${diseasedEsv.toFixed(0)}) / ${diseasedEdv.toFixed(0)} × 100 = ${ef.toFixed(0)}%`
+      };
+    }
+    
+    if (equation.id === 'homa_ir_calc' || equation.name?.includes('HOMA-IR')) {
+      const glucose = params.fasting_glucose || 90;
+      const insulin = params.fasting_insulin || 10;
+      const diseasedGlucose = isDiseasedState ? glucose * (1 + 0.4 * severity) : glucose;
+      const diseasedInsulin = isDiseasedState ? insulin * (1 + 0.5 * severity) : insulin;
+      const homaIr = (diseasedGlucose * diseasedInsulin) / 405;
+      return {
+        normal: { glucose: 90, insulin: 10, result: 2.2, unit: '' },
+        current: { glucose: diseasedGlucose.toFixed(0), insulin: diseasedInsulin.toFixed(0), result: homaIr.toFixed(1), unit: '' },
+        formula: 'HOMA-IR = (Glucose × Insulin) / 405',
+        calculation: `HOMA-IR = (${diseasedGlucose.toFixed(0)} × ${diseasedInsulin.toFixed(0)}) / 405 = ${homaIr.toFixed(1)}`
+      };
+    }
+    
+    if (equation.id === 'homa_beta' || equation.name?.includes('HOMA-β')) {
+      const glucose = params.fasting_glucose || 90;
+      const insulin = params.fasting_insulin || 10;
+      const diseasedGlucose = isDiseasedState ? glucose * (1 + 0.4 * severity) : glucose;
+      const diseasedInsulin = isDiseasedState ? insulin * (1 - 0.3 * severity) : insulin;
+      const homaBeta = (360 * diseasedInsulin) / (diseasedGlucose - 63);
+      return {
+        normal: { glucose: 90, insulin: 10, result: 133, unit: '%' },
+        current: { glucose: diseasedGlucose.toFixed(0), insulin: diseasedInsulin.toFixed(0), result: homaBeta.toFixed(0), unit: '%' },
+        formula: 'HOMA-β = (360 × Insulin) / (Glucose - 63)',
+        calculation: `HOMA-β = (360 × ${diseasedInsulin.toFixed(0)}) / (${diseasedGlucose.toFixed(0)} - 63) = ${homaBeta.toFixed(0)}%`
+      };
+    }
+    
+    if (equation.id === 'gfr_starling' || equation.name?.includes('GFR')) {
+      const kf = 12.5;
+      const pGc = params.glomerular_cap_p || 60;
+      const pBc = params.bowman_p || 18;
+      const piGc = params.oncotic_p || 32;
+      const diseasedPgc = isDiseasedState ? pGc * (1 - 0.1 * severity) : pGc;
+      const nfp = diseasedPgc - pBc - piGc;
+      const gfr = kf * nfp;
+      return {
+        normal: { kf: 12.5, pgc: 60, pbc: 18, pi: 32, result: 125, unit: 'mL/min' },
+        current: { kf: 12.5, pgc: diseasedPgc.toFixed(0), pbc: 18, pi: 32, result: gfr.toFixed(0), unit: 'mL/min' },
+        formula: 'GFR = Kf × (PGC - PBC - πGC)',
+        calculation: `GFR = 12.5 × (${diseasedPgc.toFixed(0)} - 18 - 32) = ${gfr.toFixed(0)} mL/min`
+      };
+    }
+    
+    if (equation.id === 'wall_stress' || equation.name?.includes('Wall Stress')) {
+      const p = params.lv_sys_p || 120;
+      const r = 25; // radius in mm
+      const h = params.lv_wall_thickness || 10;
+      const diseasedP = isDiseasedState ? p * (1 + 0.3 * severity) : p;
+      const diseasedH = isDiseasedState ? h * (1 - 0.15 * severity) : h;
+      const stress = (diseasedP * r) / (2 * diseasedH);
+      return {
+        normal: { p: 120, r: 25, h: 10, result: 150, unit: 'kPa' },
+        current: { p: diseasedP.toFixed(0), r: 25, h: diseasedH.toFixed(1), result: stress.toFixed(0), unit: 'kPa' },
+        formula: 'σ = (P × r) / (2h)',
+        calculation: `σ = (${diseasedP.toFixed(0)} × 25) / (2 × ${diseasedH.toFixed(1)}) = ${stress.toFixed(0)} kPa`
+      };
+    }
+    
+    if (equation.id === 'beta_cell_function' || equation.name?.includes('β-Cell')) {
+      const mBeta = params.beta_cell_mass || 1.5;
+      const k = 100;
+      const fViability = isDiseasedState ? 1 - 0.4 * severity : 1;
+      const fExhaustion = isDiseasedState ? 1 - 0.3 * severity : 1;
+      const insMax = k * mBeta * fViability * fExhaustion;
+      return {
+        normal: { k: 100, mBeta: 1.5, fVia: 1, fExh: 1, result: 150, unit: 'µU/mL' },
+        current: { k: 100, mBeta: mBeta.toFixed(1), fVia: fViability.toFixed(2), fExh: fExhaustion.toFixed(2), result: insMax.toFixed(0), unit: 'µU/mL' },
+        formula: 'Ins_max = k × M_β × f_viability × f_exhaustion',
+        calculation: `Ins_max = 100 × ${mBeta.toFixed(1)} × ${fViability.toFixed(2)} × ${fExhaustion.toFixed(2)} = ${insMax.toFixed(0)} µU/mL`
+      };
+    }
+    
+    // Default calculation placeholder
+    return null;
+  };
+
+  const calculatedValues = getCalculatedValues();
   
   // Use equation's derivation if available, otherwise create informative defaults
   const derivationSteps = equation.derivation || [
