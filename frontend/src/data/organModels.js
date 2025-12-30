@@ -743,6 +743,9 @@ export const ORGAN_MODELS = {
     },
 
     physiology: {
+      title: "Physiology & Function",
+      parameters: [
+        { id: "hepatic_blood_flow", name: "Hepatic Blood Flow", value: 1500, unit: "mL/min", range: [1200, 1800], evidence: "established" },
         { id: "portal_flow", name: "Portal Vein Flow", value: 1000, unit: "mL/min", range: [800, 1200], evidence: "established" },
         { id: "hepatic_artery_flow", name: "Hepatic Artery Flow", value: 500, unit: "mL/min", range: [400, 600], evidence: "established" },
         { id: "bile_production", name: "Bile Production", value: 600, unit: "mL/day", range: [500, 1000], evidence: "established" },
