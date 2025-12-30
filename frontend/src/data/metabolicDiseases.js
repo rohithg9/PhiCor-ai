@@ -54,18 +54,36 @@ export const METABOLIC_DISEASES = {
       pancreas: {
         geometry: {
           pancreas_weight: { factor: 0.85, note: "Reduced β-cell mass" },
-          islet_volume: { factor: 0.6, note: "β-cell apoptosis and dedifferentiation" }
+          islet_count: { factor: 0.85, note: "Islet loss" },
+          beta_cell_mass: { factor: 0.6, note: "β-cell apoptosis and dedifferentiation" }
         },
         physiology: {
-          insulin_secretion: { factor: 0.5, note: "Impaired glucose-stimulated insulin secretion" },
-          glucagon_secretion: { factor: 1.4, note: "Paradoxical hyperglucagonemia" },
-          beta_cell_function: { factor: 0.4, note: "Progressive β-cell failure" }
+          fasting_glucose: { factor: 1.25, note: "Elevated >126 mg/dL" },
+          fasting_insulin: { factor: 1.25, note: "Initially elevated, then falls" },
+          hba1c: { factor: 1.2, note: "Elevated >6.5%" },
+          homa_ir: { factor: 2.0, note: "Insulin resistance" },
+          homa_b: { factor: 0.75, note: "β-cell dysfunction" },
+          insulin_secretion: { factor: 0.7, note: "Lost first phase" }
         }
       },
       kidneys: {
         physiology: {
-          gfr: { factor: 0.85, note: "Early hyperfiltration, later decline" },
-          albumin_excretion: { factor: 3.0, note: "Microalbuminuria risk" }
+          gfr: { factor: 0.85, note: "Early hyperfiltration, later decline" }
+        }
+      },
+      heart: {
+        physiology: {
+          cardiac_output: { factor: 1.1, note: "Hyperdynamic state" }
+        }
+      },
+      liver: {
+        physiology: {
+          alt: { factor: 1.3, note: "NAFLD common" }
+        }
+      },
+      brain: {
+        physiology: {
+          cerebral_blood_flow: { factor: 0.95, note: "Microvascular changes" }
         }
       }
     },
