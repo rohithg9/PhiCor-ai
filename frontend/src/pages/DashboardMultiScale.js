@@ -176,11 +176,17 @@ const ClinicalInsightsPanel = ({ disease, severity }) => {
     "Dizziness or lightheadedness"
   ];
   
-  // Safely get symptoms - handle both array and object formats
+  // Safely get symptoms - handle both array of strings and array of objects formats
   const getSymptoms = () => {
     const raw = disease?.clinicalPresentation?.symptoms;
-    if (Array.isArray(raw)) return raw;
-    if (typeof raw === 'object' && raw !== null) return Object.values(raw);
+    if (!raw) return defaultSymptoms;
+    if (Array.isArray(raw)) {
+      // Normalize: if array contains objects, extract the name property
+      return raw.map(s => typeof s === 'string' ? s : s?.name || 'Unknown symptom');
+    }
+    if (typeof raw === 'object' && raw !== null) {
+      return Object.values(raw).map(s => typeof s === 'string' ? s : s?.name || 'Unknown');
+    }
     return defaultSymptoms;
   };
 
