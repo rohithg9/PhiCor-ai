@@ -18,6 +18,7 @@ import { CARDIAC_DISEASES_PART4 } from './cardiacDiseasesPart4';
 import { CARDIAC_DISEASES_PART5 } from './cardiacDiseasesPart5';
 import { CARDIAC_DISEASES_PART6, NOVEL_EQUATIONS_PART6 as NOVEL_EQ_P6 } from './cardiacDiseasesPart6';
 import { CARDIAC_DISEASES_PART7 } from './cardiacDiseasesPart7';
+import { CARDIAC_DISEASES_PART8 } from './cardiacDiseasesPart8';
 
 // Merge all cardiac diseases into single object
 export const ALL_CARDIAC_DISEASES = {
@@ -27,7 +28,8 @@ export const ALL_CARDIAC_DISEASES = {
   ...CARDIAC_DISEASES_PART4,
   ...CARDIAC_DISEASES_PART5,
   ...CARDIAC_DISEASES_PART6,
-  ...CARDIAC_DISEASES_PART7
+  ...CARDIAC_DISEASES_PART7,
+  ...CARDIAC_DISEASES_PART8
 };
 
 // Aggregate all novel equations
