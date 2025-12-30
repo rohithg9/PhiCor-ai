@@ -1672,6 +1672,11 @@ const DashboardMultiScale = () => {
                   />
                 )}
 
+                {/* Evidence-Based Treatment Guidelines Panel */}
+                {currentDisease && selectedDisease && (
+                  <TreatmentGuidelinesPanel diseaseId={selectedDisease} />
+                )}
+
                 {/* Parameters Section */}
                 {currentScale.parameters && currentScale.parameters.length > 0 && (
                   <section>
