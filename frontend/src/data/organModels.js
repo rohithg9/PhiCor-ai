@@ -1085,6 +1085,9 @@ export const ORGAN_MODELS = {
     },
 
     physiology: {
+      title: "Physiology & Function",
+      parameters: [
+        { id: "fasting_glucose", name: "Fasting Glucose", value: 90, unit: "mg/dL", range: [70, 100], evidence: "established" },
         { id: "fasting_insulin", name: "Fasting Insulin", value: 10, unit: "μU/mL", range: [5, 20], evidence: "established" },
         { id: "hba1c", name: "HbA1c", value: 5.5, unit: "%", range: [4.5, 5.7], evidence: "established" },
         { id: "homa_ir", name: "HOMA-IR", value: 2.0, unit: "", range: [0.5, 2.5], evidence: "established" },
