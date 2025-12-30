@@ -1645,7 +1645,10 @@ const DashboardMultiScale = () => {
         <div className="flex-1 flex overflow-hidden">
           {/* Parameters & Equations Panel */}
           <div className="flex-1 p-3 md:p-6 overflow-auto">
-            {currentScale ? (
+            {/* Show Lung Cancer Module if selected */}
+            {selectedDisease === 'lung_cancer_module' ? (
+              <LungCancerModule />
+            ) : currentScale ? (
               <div className="space-y-6 max-w-5xl">
                 {/* Mobile Reset Button */}
                 {selectedDisease !== null && currentDisease && (
