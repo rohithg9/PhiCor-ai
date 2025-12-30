@@ -123,7 +123,7 @@ const LandingPage = () => {
               <Button
                 data-testid="watch-demo-btn"
                 variant="outline"
-                onClick={() => window.location.href = 'mailto:contact@phicor.ai'}
+                onClick={() => window.location.href = 'mailto:drrohithg@gmail.com'}
                 className="px-8 py-6 text-lg border-white/20 hover:bg-white/5"
               >
                 <Mail className="mr-2 w-5 h-5" />
@@ -477,7 +477,7 @@ const LandingPage = () => {
                 Dashboard
               </a>
               <a 
-                href="mailto:contact@phicor.ai" 
+                href="mailto:drrohithg@gmail.com" 
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 Contact
