@@ -332,6 +332,22 @@ export const HEPATIC_DISEASES = {
       fibroscan: ["Elevated CAP (>238 dB/m suggests steatosis)"],
       mri: ["MRI-PDFF for fat quantification"]
     },
+    modifications: {
+      liver: {
+        geometry: {
+          liver_weight: { factor: 1.1, note: "Mild hepatomegaly" },
+          liver_volume: { factor: 1.1, note: "Increased from fat" }
+        },
+        physiology: {
+          alt: { factor: 1.5, note: "Mildly elevated, ALT>AST" },
+          ast: { factor: 1.3, note: "Mildly elevated" },
+          hepatic_blood_flow: { factor: 0.95, note: "Slightly reduced" }
+        },
+        structure: {
+          hepatocyte_size: { factor: 1.2, note: "Enlarged with lipid droplets" }
+        }
+      }
+    },
     severity: {
       mild: { description: "Steatosis <33%, no fibrosis (F0)" },
       moderate: { description: "Steatosis with inflammation (NASH), F1-F2 fibrosis" },
