@@ -668,6 +668,56 @@ const EquationDerivation = ({ equation, expanded, onToggle, currentParams = {}, 
                 <BlockMath math={equation.latex} />
               </div>
 
+              {/* Calculated Values Section */}
+              {calculatedValues && (
+                <div className="bg-gradient-to-br from-primary/5 to-purple-500/5 rounded-lg p-3 md:p-4 border border-primary/20">
+                  <h5 className="text-xs font-semibold text-primary uppercase tracking-wider flex items-center gap-2 mb-3">
+                    <Calculator className="w-3 h-3" /> Live Calculation
+                  </h5>
+                  
+                  {/* Calculation with actual values */}
+                  <div className="bg-background/50 rounded-lg p-3 mb-3 font-mono text-sm overflow-x-auto">
+                    <div className="text-muted-foreground mb-1">{calculatedValues.formula}</div>
+                    <div className="text-foreground font-medium">{calculatedValues.calculation}</div>
+                  </div>
+                  
+                  {/* Results comparison */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-green-500/10 rounded-lg p-3 border border-green-500/20">
+                      <div className="text-[10px] text-green-400 uppercase tracking-wider mb-1">Normal</div>
+                      <div className="text-xl font-bold text-green-400">
+                        {calculatedValues.normal.result}
+                        <span className="text-sm ml-1">{calculatedValues.normal.unit}</span>
+                      </div>
+                    </div>
+                    <div className={`rounded-lg p-3 border ${
+                      isDiseasedState 
+                        ? 'bg-destructive/10 border-destructive/20' 
+                        : 'bg-blue-500/10 border-blue-500/20'
+                    }`}>
+                      <div className={`text-[10px] uppercase tracking-wider mb-1 ${
+                        isDiseasedState ? 'text-destructive' : 'text-blue-400'
+                      }`}>
+                        {isDiseasedState ? 'Current (Diseased)' : 'Current'}
+                      </div>
+                      <div className={`text-xl font-bold ${
+                        isDiseasedState ? 'text-destructive' : 'text-blue-400'
+                      }`}>
+                        {calculatedValues.current.result}
+                        <span className="text-sm ml-1">{calculatedValues.current.unit}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {isDiseasedState && (
+                    <div className="mt-2 text-[10px] text-muted-foreground flex items-center gap-1">
+                      <AlertTriangle className="w-3 h-3 text-amber-400" />
+                      Values adjusted for disease severity ({(diseaseSeverity * 100).toFixed(0)}%)
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Derivation Steps */}
               <div className="space-y-3">
                 <h5 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
