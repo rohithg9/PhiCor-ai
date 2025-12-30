@@ -1162,7 +1162,36 @@ const DiseasePanel = ({
       }
       // Metabolic
       else if (['metabolic', 'diabetes', 'hepatic'].includes(cat)) {
-        const subcat = groups.metabolic.subcategories[cat] || groups.metabolic.subcategories.other_metabolic;
+        // Smarter subcategorization for metabolic diseases
+        const name = disease.name?.toLowerCase() || '';
+        const icd10 = disease.icd10?.toUpperCase() || '';
+        let subcat;
+        
+        if (name.includes('diabetes') || name.includes('dka') || name.includes('ketoacidosis') ||
+            icd10.startsWith('E10') || icd10.startsWith('E11') || icd10.startsWith('E13')) {
+          subcat = groups.metabolic.subcategories.diabetes;
+        } else if (name.includes('thyroid') || name.includes('hyperthyroid') || name.includes('hypothyroid') ||
+                   name.includes('graves') || name.includes('hashimoto') ||
+                   icd10.startsWith('E03') || icd10.startsWith('E05') || icd10.startsWith('E06')) {
+          subcat = groups.metabolic.subcategories.thyroid;
+        } else if (name.includes('adrenal') || name.includes('cushing') || name.includes('addison') ||
+                   name.includes('pheochromocytoma') ||
+                   icd10.startsWith('E24') || icd10.startsWith('E27') || icd10.startsWith('D35')) {
+          subcat = groups.metabolic.subcategories.adrenal;
+        } else if (name.includes('cholesterol') || name.includes('hyperlipid') || name.includes('triglyceride') ||
+                   icd10.startsWith('E78')) {
+          subcat = groups.metabolic.subcategories.lipid;
+        } else if (name.includes('obesity') || name.includes('metabolic syndrome') ||
+                   icd10.startsWith('E66') || icd10.startsWith('E88')) {
+          subcat = groups.metabolic.subcategories.obesity;
+        } else if (name.includes('osteoporosis') || name.includes('gout') ||
+                   icd10.startsWith('M81') || icd10.startsWith('M10')) {
+          subcat = groups.metabolic.subcategories.bone;
+        } else if (cat === 'hepatic') {
+          subcat = groups.metabolic.subcategories.hepatic;
+        } else {
+          subcat = groups.metabolic.subcategories.other_metabolic;
+        }
         subcat.diseases.push([id, disease]);
       }
       // Other systems
