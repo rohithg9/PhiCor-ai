@@ -104,7 +104,9 @@ const transformRespiratoryDisease = (code, disease) => {
     laboratoryFindings: disease.laboratoryFindings || matchingDisease?.laboratoryFindings,
     imagingFindings: disease.imagingFindings || matchingDisease?.imagingFindings,
     pathophysiology: disease.pathophysiology,
-    modifications: matchingDisease?.modifications || disease.modifications || {},
+    // Use modifications from DISEASE_MODELS, or generate from templates
+    modifications: matchingDisease?.modifications || disease.modifications || 
+                   generateModifications({ ...disease, icd10: disease.icd10 || icd10Code, category: 'respiratory' }),
     novelEquations: matchingDisease?.novelEquations || disease.pathophysiology?.novelEquations || 
                    (disease.pathophysiology?.equations ? 
                      Object.values(disease.pathophysiology.equations).filter(eq => eq.isNovel) : []),
@@ -114,7 +116,7 @@ const transformRespiratoryDisease = (code, disease) => {
       severe: { description: "Advanced disease" }
     },
     isFromRespiratoryDB: true,
-    hasModifications: !!(matchingDisease?.modifications || disease.modifications)
+    hasModifications: true // Now always true with template fallback
   };
 };
 
