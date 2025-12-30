@@ -506,6 +506,18 @@ export const HEPATIC_DISEASES = {
       ultrasound: ["HCC surveillance every 6 months if cirrhotic or high-risk"],
       fibroscan: ["Fibrosis staging"]
     },
+    modifications: {
+      liver: {
+        physiology: {
+          alt: { factor: 2.5, note: "Variable, elevated in immune active phase" },
+          ast: { factor: 2.0, note: "Variable elevation" },
+          hepatic_blood_flow: { factor: 0.9, note: "Reduced with fibrosis" }
+        },
+        structure: {
+          collagen_content: { factor: 2.5, note: "Progressive fibrosis" }
+        }
+      }
+    },
     severity: {
       mild: { description: "Immune tolerant or inactive carrier, F0-F1" },
       moderate: { description: "Immune active phase, F2-F3" },
@@ -555,6 +567,33 @@ export const HEPATIC_DISEASES = {
     imagingFindings: {
       ctHead: ["Cerebral edema assessment"],
       ultrasound: ["Rule out vascular causes (Budd-Chiari)"]
+    },
+    modifications: {
+      liver: {
+        physiology: {
+          alt: { factor: 50, note: "Massively elevated (>1000 U/L)" },
+          ast: { factor: 50, note: "Massively elevated (>1000 U/L)" },
+          bilirubin: { factor: 15, note: "Severely elevated" },
+          albumin: { factor: 0.5, note: "Severely reduced" },
+          inr: { factor: 3.0, note: "Severe coagulopathy" },
+          albumin_synthesis: { factor: 0.2, note: "Near-complete failure" },
+          bile_production: { factor: 0.3, note: "Severely reduced" },
+          hepatic_blood_flow: { factor: 0.5, note: "Compromised" }
+        },
+        structure: {
+          hepatocyte_count: { factor: 0.3, note: "Massive necrosis" }
+        }
+      },
+      brain: {
+        physiology: {
+          cerebral_blood_flow: { factor: 1.3, note: "Increased (cerebral edema)" }
+        }
+      },
+      kidneys: {
+        physiology: {
+          gfr: { factor: 0.5, note: "Acute kidney injury" }
+        }
+      }
     },
     severity: {
       mild: { description: "Hyperacute: encephalopathy within 7 days (better prognosis with treatment)" },
