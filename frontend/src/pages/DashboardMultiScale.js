@@ -1025,87 +1025,357 @@ const DiseasePanel = ({
       {/* Category Tabs - Only show when not searching */}
       {!searchQuery && (
         <Tabs defaultValue="cardiac" className="flex-1 flex flex-col min-h-0">
-          <TabsList className="mx-3 mt-3 bg-accent/10 grid grid-cols-3 shrink-0">
+          <TabsList className="mx-3 mt-3 bg-accent/10 grid grid-cols-5 shrink-0">
             <TabsTrigger value="cardiac" className="text-xs">
               ❤️ Cardiac <span className="ml-1 opacity-60">({getCategoryCount(groupedDiseases.cardiac)})</span>
+            </TabsTrigger>
+            <TabsTrigger value="respiratory" className="text-xs">
+              🫁 Respiratory
             </TabsTrigger>
             <TabsTrigger value="metabolic" className="text-xs">
               🔬 Metabolic
             </TabsTrigger>
+            <TabsTrigger value="neuro" className="text-xs">
+              🧠 Neuro
+            </TabsTrigger>
             <TabsTrigger value="other" className="text-xs">
-              🫁 Other
+              🔄 Other
             </TabsTrigger>
           </TabsList>
 
           <div className="flex-1 overflow-y-auto p-3 min-h-0">
-            {Object.entries(groupedDiseases).map(([categoryKey, category]) => (
-              <TabsContent key={categoryKey} value={categoryKey} className="mt-0 data-[state=active]:block">
-                <div className="space-y-3 pb-4">
-                  {Object.entries(category.subcategories)
-                    .filter(([_, subcat]) => subcat.diseases.length > 0)
-                    .map(([subcatKey, subcat]) => (
-                      <div key={subcatKey} className="space-y-1">
-                        <button 
-                          onClick={() => setExpandedCategory(expandedCategory === subcatKey ? null : subcatKey)}
-                          className="w-full flex items-center justify-between px-2 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          <span>{subcat.label}</span>
-                          <span className="flex items-center gap-1">
-                            <Badge variant="secondary" className="text-[10px] px-1.5">
-                              {subcat.diseases.length}
-                            </Badge>
-                            {expandedCategory === subcatKey ? 
-                              <ChevronDown className="w-3 h-3" /> : 
-                              <ChevronRight className="w-3 h-3" />
-                            }
-                          </span>
-                        </button>
-                        
-                        <AnimatePresence>
-                          {(expandedCategory === subcatKey || subcat.diseases.length <= 3) && (
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: 'auto', opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              className="space-y-1.5 overflow-hidden"
-                            >
-                              {subcat.diseases.map(([id, disease]) => (
-                                <button
-                                  key={id}
-                                  onClick={() => onSelectDisease(selectedDisease === id ? null : id)}
-                                  className={`w-full text-left p-2.5 rounded-lg transition-all ${
-                                    selectedDisease === id
-                                      ? 'bg-destructive/20 text-destructive border border-destructive/30'
-                                      : 'bg-accent/5 hover:bg-accent/10 text-muted-foreground'
-                                  }`}
-                                  data-testid={`disease-${id}`}
-                                >
-                                  <div className="flex items-center justify-between gap-2">
-                                    <span className="font-medium text-sm truncate">{disease.name}</span>
-                                    {disease.icd10 && (
-                                      <Badge variant="outline" className="text-[9px] px-1 shrink-0">
-                                        {disease.icd10}
-                                      </Badge>
-                                    )}
-                                  </div>
-                                  <div className="flex items-center gap-2 mt-1 text-[10px] opacity-60">
-                                    <span>Affects: {disease.affectedOrgans?.length || 1} organ{disease.affectedOrgans?.length !== 1 ? 's' : ''}</span>
-                                    {disease.isFromCardiacDB && (
-                                      <Badge variant="secondary" className="text-[8px] px-1 bg-purple-500/10 text-purple-400">
-                                        ICD-10
-                                      </Badge>
-                                    )}
-                                  </div>
-                                </button>
-                              ))}
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    ))}
+            {/* Cardiac Tab Content */}
+            <TabsContent value="cardiac" className="mt-0 data-[state=active]:block">
+              <div className="space-y-3 pb-4">
+                {Object.entries(groupedDiseases.cardiac.subcategories)
+                  .filter(([_, subcat]) => subcat.diseases.length > 0)
+                  .map(([subcatKey, subcat]) => (
+                    <div key={subcatKey} className="space-y-1">
+                      <button 
+                        onClick={() => setExpandedCategory(expandedCategory === subcatKey ? null : subcatKey)}
+                        className="w-full flex items-center justify-between px-2 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        <span>{subcat.label}</span>
+                        <span className="flex items-center gap-1">
+                          <Badge variant="secondary" className="text-[10px] px-1.5">
+                            {subcat.diseases.length}
+                          </Badge>
+                          {expandedCategory === subcatKey ? 
+                            <ChevronDown className="w-3 h-3" /> : 
+                            <ChevronRight className="w-3 h-3" />
+                          }
+                        </span>
+                      </button>
+                      
+                      <AnimatePresence>
+                        {(expandedCategory === subcatKey || subcat.diseases.length <= 3) && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="space-y-1.5 overflow-hidden"
+                          >
+                            {subcat.diseases.map(([id, disease]) => (
+                              <button
+                                key={id}
+                                onClick={() => onSelectDisease(selectedDisease === id ? null : id)}
+                                className={`w-full text-left p-2.5 rounded-lg transition-all ${
+                                  selectedDisease === id
+                                    ? 'bg-destructive/20 text-destructive border border-destructive/30'
+                                    : 'bg-accent/5 hover:bg-accent/10 text-muted-foreground'
+                                }`}
+                                data-testid={`disease-${id}`}
+                              >
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="font-medium text-sm truncate">{disease.name}</span>
+                                  {disease.icd10 && (
+                                    <Badge variant="outline" className="text-[9px] px-1 shrink-0">
+                                      {disease.icd10}
+                                    </Badge>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2 mt-1 text-[10px] opacity-60">
+                                  <span>Affects: {disease.affectedOrgans?.length || 1} organ{disease.affectedOrgans?.length !== 1 ? 's' : ''}</span>
+                                  {disease.isFromCardiacDB && (
+                                    <Badge variant="secondary" className="text-[8px] px-1 bg-purple-500/10 text-purple-400">
+                                      ICD-10
+                                    </Badge>
+                                  )}
+                                </div>
+                              </button>
+                            ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  ))}
+              </div>
+            </TabsContent>
+
+            {/* Respiratory Tab Content with Lung Cancer Feature */}
+            <TabsContent value="respiratory" className="mt-0 data-[state=active]:block">
+              <div className="space-y-3 pb-4">
+                {/* Lung Cancer Special Section */}
+                <div className="p-3 rounded-lg bg-gradient-to-r from-red-500/10 to-orange-500/10 border border-red-500/30">
+                  <button 
+                    onClick={() => onSelectDisease('lung_cancer_module')}
+                    className={`w-full text-left ${selectedDisease === 'lung_cancer_module' ? 'opacity-100' : 'opacity-90'}`}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-xl">🎯</span>
+                      <span className="font-bold text-red-400">Lung Cancer Module</span>
+                      <Badge className="bg-red-500/20 text-red-300 text-[9px]">NEW</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      TNM 8th Edition • NCCN 2024-2025 • MDT Decision Support
+                    </p>
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      <Badge variant="outline" className="text-[9px]">Staging</Badge>
+                      <Badge variant="outline" className="text-[9px]">Immunotherapy</Badge>
+                      <Badge variant="outline" className="text-[9px]">Biomarkers</Badge>
+                      <Badge variant="outline" className="text-[9px]">Surgery</Badge>
+                    </div>
+                  </button>
                 </div>
-              </TabsContent>
-            ))}
+
+                {/* Other Respiratory Diseases */}
+                {Object.entries(groupedDiseases.other.subcategories)
+                  .filter(([key, subcat]) => key === 'respiratory' && subcat.diseases.length > 0)
+                  .map(([subcatKey, subcat]) => (
+                    <div key={subcatKey} className="space-y-1">
+                      <button 
+                        onClick={() => setExpandedCategory(expandedCategory === 'resp_other' ? null : 'resp_other')}
+                        className="w-full flex items-center justify-between px-2 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        <span>Other Respiratory Conditions</span>
+                        <span className="flex items-center gap-1">
+                          <Badge variant="secondary" className="text-[10px] px-1.5">
+                            {subcat.diseases.length}
+                          </Badge>
+                          {expandedCategory === 'resp_other' ? 
+                            <ChevronDown className="w-3 h-3" /> : 
+                            <ChevronRight className="w-3 h-3" />
+                          }
+                        </span>
+                      </button>
+                      
+                      <AnimatePresence>
+                        {expandedCategory === 'resp_other' && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="space-y-1.5 overflow-hidden"
+                          >
+                            {subcat.diseases.map(([id, disease]) => (
+                              <button
+                                key={id}
+                                onClick={() => onSelectDisease(selectedDisease === id ? null : id)}
+                                className={`w-full text-left p-2.5 rounded-lg transition-all ${
+                                  selectedDisease === id
+                                    ? 'bg-destructive/20 text-destructive border border-destructive/30'
+                                    : 'bg-accent/5 hover:bg-accent/10 text-muted-foreground'
+                                }`}
+                              >
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="font-medium text-sm truncate">{disease.name}</span>
+                                  {disease.icd10 && (
+                                    <Badge variant="outline" className="text-[9px] px-1 shrink-0">
+                                      {disease.icd10}
+                                    </Badge>
+                                  )}
+                                </div>
+                              </button>
+                            ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  ))}
+              </div>
+            </TabsContent>
+
+            {/* Metabolic Tab Content */}
+            <TabsContent value="metabolic" className="mt-0 data-[state=active]:block">
+              <div className="space-y-3 pb-4">
+                {Object.entries(groupedDiseases.metabolic.subcategories)
+                  .filter(([_, subcat]) => subcat.diseases.length > 0)
+                  .map(([subcatKey, subcat]) => (
+                    <div key={subcatKey} className="space-y-1">
+                      <button 
+                        onClick={() => setExpandedCategory(expandedCategory === subcatKey ? null : subcatKey)}
+                        className="w-full flex items-center justify-between px-2 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        <span>{subcat.label}</span>
+                        <span className="flex items-center gap-1">
+                          <Badge variant="secondary" className="text-[10px] px-1.5">
+                            {subcat.diseases.length}
+                          </Badge>
+                          {expandedCategory === subcatKey ? 
+                            <ChevronDown className="w-3 h-3" /> : 
+                            <ChevronRight className="w-3 h-3" />
+                          }
+                        </span>
+                      </button>
+                      
+                      <AnimatePresence>
+                        {(expandedCategory === subcatKey || subcat.diseases.length <= 3) && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="space-y-1.5 overflow-hidden"
+                          >
+                            {subcat.diseases.map(([id, disease]) => (
+                              <button
+                                key={id}
+                                onClick={() => onSelectDisease(selectedDisease === id ? null : id)}
+                                className={`w-full text-left p-2.5 rounded-lg transition-all ${
+                                  selectedDisease === id
+                                    ? 'bg-destructive/20 text-destructive border border-destructive/30'
+                                    : 'bg-accent/5 hover:bg-accent/10 text-muted-foreground'
+                                }`}
+                              >
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="font-medium text-sm truncate">{disease.name}</span>
+                                  {disease.icd10 && (
+                                    <Badge variant="outline" className="text-[9px] px-1 shrink-0">
+                                      {disease.icd10}
+                                    </Badge>
+                                  )}
+                                </div>
+                              </button>
+                            ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  ))}
+              </div>
+            </TabsContent>
+
+            {/* Neuro/Brain Tab Content */}
+            <TabsContent value="neuro" className="mt-0 data-[state=active]:block">
+              <div className="space-y-3 pb-4">
+                <div className="p-3 rounded-lg bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/30">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xl">🧠</span>
+                    <span className="font-bold text-purple-400">Neurological Conditions</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    Brain, nervous system, and cerebrovascular conditions
+                  </p>
+                </div>
+                {Object.entries(groupedDiseases.other.subcategories)
+                  .filter(([key, _]) => key === 'cerebrovascular')
+                  .map(([subcatKey, subcat]) => (
+                    <div key={subcatKey} className="space-y-1">
+                      <button 
+                        onClick={() => setExpandedCategory(expandedCategory === subcatKey ? null : subcatKey)}
+                        className="w-full flex items-center justify-between px-2 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        <span>{subcat.label}</span>
+                        <span className="flex items-center gap-1">
+                          <Badge variant="secondary" className="text-[10px] px-1.5">
+                            {subcat.diseases.length}
+                          </Badge>
+                        </span>
+                      </button>
+                      
+                      <AnimatePresence>
+                        {subcat.diseases.length > 0 && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="space-y-1.5 overflow-hidden"
+                          >
+                            {subcat.diseases.map(([id, disease]) => (
+                              <button
+                                key={id}
+                                onClick={() => onSelectDisease(selectedDisease === id ? null : id)}
+                                className={`w-full text-left p-2.5 rounded-lg transition-all ${
+                                  selectedDisease === id
+                                    ? 'bg-destructive/20 text-destructive border border-destructive/30'
+                                    : 'bg-accent/5 hover:bg-accent/10 text-muted-foreground'
+                                }`}
+                              >
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="font-medium text-sm truncate">{disease.name}</span>
+                                  {disease.icd10 && (
+                                    <Badge variant="outline" className="text-[9px] px-1 shrink-0">
+                                      {disease.icd10}
+                                    </Badge>
+                                  )}
+                                </div>
+                              </button>
+                            ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  ))}
+              </div>
+            </TabsContent>
+
+            {/* Other Systems Tab Content */}
+            <TabsContent value="other" className="mt-0 data-[state=active]:block">
+              <div className="space-y-3 pb-4">
+                {Object.entries(groupedDiseases.other.subcategories)
+                  .filter(([key, subcat]) => !['respiratory', 'cerebrovascular'].includes(key) && subcat.diseases.length > 0)
+                  .map(([subcatKey, subcat]) => (
+                    <div key={subcatKey} className="space-y-1">
+                      <button 
+                        onClick={() => setExpandedCategory(expandedCategory === subcatKey ? null : subcatKey)}
+                        className="w-full flex items-center justify-between px-2 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        <span>{subcat.label}</span>
+                        <span className="flex items-center gap-1">
+                          <Badge variant="secondary" className="text-[10px] px-1.5">
+                            {subcat.diseases.length}
+                          </Badge>
+                          {expandedCategory === subcatKey ? 
+                            <ChevronDown className="w-3 h-3" /> : 
+                            <ChevronRight className="w-3 h-3" />
+                          }
+                        </span>
+                      </button>
+                      
+                      <AnimatePresence>
+                        {(expandedCategory === subcatKey || subcat.diseases.length <= 3) && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="space-y-1.5 overflow-hidden"
+                          >
+                            {subcat.diseases.map(([id, disease]) => (
+                              <button
+                                key={id}
+                                onClick={() => onSelectDisease(selectedDisease === id ? null : id)}
+                                className={`w-full text-left p-2.5 rounded-lg transition-all ${
+                                  selectedDisease === id
+                                    ? 'bg-destructive/20 text-destructive border border-destructive/30'
+                                    : 'bg-accent/5 hover:bg-accent/10 text-muted-foreground'
+                                }`}
+                              >
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="font-medium text-sm truncate">{disease.name}</span>
+                                  {disease.icd10 && (
+                                    <Badge variant="outline" className="text-[9px] px-1 shrink-0">
+                                      {disease.icd10}
+                                    </Badge>
+                                  )}
+                                </div>
+                              </button>
+                            ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  ))}
+              </div>
+            </TabsContent>
           </div>
         </Tabs>
       )}
