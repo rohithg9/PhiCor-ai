@@ -176,9 +176,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Verify renal diseases display correctly with clinical data"
-    - "Verify neurological diseases display correctly with clinical data"
-    - "Test organ highlighting for brain and kidneys"
+    - "Verify hepatic diseases display correctly with clinical data"
+    - "Verify liver organ parameters and equations"
+    - "Test search functionality for hepatic diseases"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
