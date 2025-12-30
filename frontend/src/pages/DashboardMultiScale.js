@@ -1073,6 +1073,7 @@ const DiseasePanel = ({
           respiratory: { label: "Respiratory", diseases: [] },
           renal: { label: "Renal", diseases: [] },
           neurological: { label: "Neurological", diseases: [] },
+          hepatic: { label: "Hepatic/Liver", diseases: [] },
           vascular: { label: "Vascular", diseases: [] },
           cerebrovascular: { label: "Cerebrovascular", diseases: [] },
           acute: { label: "Acute/Critical", diseases: [] },
