@@ -753,9 +753,12 @@ const LungCancerModule = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="bg-gradient-to-r from-red-900/50 to-orange-900/50 rounded-xl p-6 border border-red-500/30">
-        <h2 className="text-2xl font-bold text-white mb-2">
-          Lung Cancer Management System
-        </h2>
+        <div className="flex items-center gap-3 mb-2">
+          <span className="text-3xl font-serif bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">Φ</span>
+          <h2 className="text-2xl font-bold text-white">
+            Lung Cancer Management System
+          </h2>
+        </div>
         <p className="text-gray-300">
           TNM 8th Edition Staging | NCCN 2024-2025 Guidelines | MDT Decision Support
         </p>
