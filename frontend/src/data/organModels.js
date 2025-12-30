@@ -887,7 +887,7 @@ export const ORGAN_MODELS = {
 
   pancreas: {
     name: "Pancreas",
-    icon: "🥢",
+    icon: "🟡",
     category: "metabolic",
     
     geometry: {
