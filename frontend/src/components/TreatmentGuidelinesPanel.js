@@ -630,11 +630,45 @@ const TreatmentGuidelinesPanel = ({ diseaseId }) => {
                 ))}
 
                 {!guidelines.physiologicalChanges && (
-                  <div className="text-center p-6">
-                    <FileText className="w-8 h-8 mx-auto text-gray-500 mb-2" />
-                    <p className="text-sm text-gray-400">
-                      Mathematical models being developed
-                    </p>
+                  <div className="space-y-4">
+                    {/* Default equations when not available */}
+                    <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/50">
+                      <h4 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
+                        <FileText className="text-indigo-400" size={16} />
+                        Core Mathematical Models
+                      </h4>
+                      <p className="text-xs text-gray-400 mb-3">
+                        Mathematical models for this condition are available in the main dashboard view.
+                        Select the affected organ and explore the Equations section for detailed formulas.
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div className="p-2 bg-indigo-900/20 rounded text-xs border border-indigo-500/30">
+                          <span className="text-indigo-400">Hemodynamic Models</span>
+                        </div>
+                        <div className="p-2 bg-indigo-900/20 rounded text-xs border border-indigo-500/30">
+                          <span className="text-indigo-400">Metabolic Equations</span>
+                        </div>
+                        <div className="p-2 bg-indigo-900/20 rounded text-xs border border-indigo-500/30">
+                          <span className="text-indigo-400">Structural Changes</span>
+                        </div>
+                        <div className="p-2 bg-indigo-900/20 rounded text-xs border border-indigo-500/30">
+                          <span className="text-indigo-400">Novel Derived Formulas</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-amber-900/20 rounded-lg p-3 border border-amber-500/30">
+                      <div className="flex items-start gap-2">
+                        <Lightbulb className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                        <div>
+                          <div className="text-sm font-medium text-amber-400">Novel Equations</div>
+                          <p className="text-xs text-gray-400 mt-1">
+                            PhiCore.ai includes novel mathematical models derived from first principles
+                            that extend beyond traditional clinical formulas.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
