@@ -1080,6 +1080,9 @@ const DiseasePanel = ({
       else if (cat === 'renal') {
         groups.other.subcategories.renal.diseases.push([id, disease]);
       }
+      else if (cat === 'neurological') {
+        groups.other.subcategories.neurological.diseases.push([id, disease]);
+      }
       else if (cat === 'vascular') {
         groups.other.subcategories.vascular.diseases.push([id, disease]);
       }
