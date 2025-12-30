@@ -462,7 +462,7 @@ export const ORGAN_MODELS = {
 
   kidneys: {
     name: "Kidneys",
-    icon: "🫘",
+    icon: "🫀",
     category: "renal",
     
     geometry: {
