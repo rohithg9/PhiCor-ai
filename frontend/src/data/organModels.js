@@ -681,10 +681,68 @@ export const ORGAN_MODELS = {
       ]
     },
 
-    physiology: {
-      title: "Physiology & Function",
+    pressures: {
+      title: "Pressures & Gradients",
       parameters: [
-        { id: "hepatic_blood_flow", name: "Hepatic Blood Flow", value: 1500, unit: "mL/min", range: [1200, 1800], evidence: "established" },
+        { id: "portal_pressure", name: "Portal Vein Pressure", value: 7, unit: "mmHg", range: [5, 10], evidence: "established" },
+        { id: "hepatic_venous_pressure", name: "Hepatic Venous Pressure", value: 5, unit: "mmHg", range: [3, 7], evidence: "established" },
+        { id: "hvpg", name: "Hepatic Venous Pressure Gradient", value: 3, unit: "mmHg", range: [1, 5], evidence: "established" },
+        { id: "sinusoidal_pressure", name: "Sinusoidal Pressure", value: 6, unit: "mmHg", range: [4, 8], evidence: "established" },
+        { id: "hepatic_artery_pressure", name: "Hepatic Artery Pressure", value: 90, unit: "mmHg", range: [80, 100], evidence: "established" },
+        { id: "bile_duct_pressure", name: "Bile Duct Pressure", value: 10, unit: "cmH₂O", range: [5, 15], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "hvpg_calc",
+          name: "HVPG Calculation",
+          latex: "HVPG = WHVP - FHVP",
+          description: "Wedged minus free hepatic venous pressure",
+          evidence: "established",
+          source: "Portal hypertension definition"
+        },
+        {
+          id: "portal_flow_resistance",
+          name: "Portal Flow Resistance",
+          latex: "R_{portal} = \\frac{\\Delta P}{Q} = \\frac{P_{portal} - P_{hepatic vein}}{Q_{portal}}",
+          description: "Hepatic vascular resistance",
+          evidence: "established",
+          source: "Ohm's law analog"
+        }
+      ]
+    },
+
+    structure: {
+      title: "Structure & Tissue",
+      parameters: [
+        { id: "hepatocyte_size", name: "Hepatocyte Diameter", value: 25, unit: "μm", range: [20, 30], evidence: "established" },
+        { id: "sinusoid_fenestration", name: "Sinusoidal Fenestration", value: 100, unit: "nm", range: [50, 150], evidence: "established" },
+        { id: "space_of_disse", name: "Space of Disse Width", value: 1, unit: "μm", range: [0.5, 1.5], evidence: "established" },
+        { id: "kupffer_cells", name: "Kupffer Cell Density", value: 15, unit: "% of liver cells", range: [10, 20], evidence: "established" },
+        { id: "stellate_cells", name: "Hepatic Stellate Cells", value: 5, unit: "% of liver cells", range: [3, 8], evidence: "established" },
+        { id: "bile_canaliculi", name: "Bile Canaliculi Width", value: 1.5, unit: "μm", range: [1, 2], evidence: "established" },
+        { id: "collagen_content", name: "Collagen Content (normal)", value: 3, unit: "% of dry weight", range: [2, 5], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "fibrosis_score",
+          name: "Fibrosis Progression Model",
+          latex: "F_{score} = \\frac{[Collagen]}{[Collagen]_0} \\times (1 + k_{inflammation} \\cdot I)",
+          description: "Fibrosis progression with inflammation",
+          evidence: "novel",
+          source: "Multi-hit fibrosis model"
+        },
+        {
+          id: "portal_hypertension",
+          name: "Portal Hypertension Development",
+          latex: "HVPG = HVPG_0 \\times (1 + \\alpha \\cdot F_{score}^2)",
+          description: "HVPG increases with fibrosis squared",
+          evidence: "novel",
+          source: "Cirrhosis progression model"
+        }
+      ]
+    },
+
+    physiology: {
         { id: "portal_flow", name: "Portal Vein Flow", value: 1000, unit: "mL/min", range: [800, 1200], evidence: "established" },
         { id: "hepatic_artery_flow", name: "Hepatic Artery Flow", value: 500, unit: "mL/min", range: [400, 600], evidence: "established" },
         { id: "bile_production", name: "Bile Production", value: 600, unit: "mL/day", range: [500, 1000], evidence: "established" },
