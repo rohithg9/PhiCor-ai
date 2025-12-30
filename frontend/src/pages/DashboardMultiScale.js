@@ -1105,6 +1105,11 @@ const DiseasePanel = ({
         icon: "🔬",
         subcategories: {
           diabetes: { label: "Diabetes", diseases: [] },
+          thyroid: { label: "Thyroid", diseases: [] },
+          adrenal: { label: "Adrenal", diseases: [] },
+          lipid: { label: "Lipid Disorders", diseases: [] },
+          obesity: { label: "Obesity & Metabolic Syndrome", diseases: [] },
+          bone: { label: "Bone Metabolism", diseases: [] },
           hepatic: { label: "Hepatic", diseases: [] },
           other_metabolic: { label: "Other", diseases: [] }
         }
