@@ -183,6 +183,18 @@ frontend:
         agent: "testing"
         comment: "TESTED: Metabolic diseases successfully integrated and functional. ✅ Disease count verified: 186 diseases (correct increase from 171). ✅ Type 2 Diabetes (E11.9) searchable and selectable with comprehensive clinical data. ✅ Pancreas organ view displays all required parameters: Pancreas Weight (100g), Pancreas Length (15cm), Islet Count (1000000), β-Cell Mass (1.5g), Islet Diameter (150μm), plus β-Cell Functional Capacity equation marked as Novel. ✅ Multi-organ effects working: pancreas highlighted as primary organ, affected organs properly indicated. ✅ Search functionality working for metabolic diseases. ⚠️ Minor: Metabolic tab navigation has UI issues but diseases are accessible via search. ⚠️ Minor: Some subcategory navigation elements not fully accessible but core functionality intact."
 
+  - task: "Disease Parameter Visualization UX Improvements"
+    implemented: false
+    working: false
+    file: "/app/frontend/src/pages/DashboardMultiScale.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "TESTED: UX improvements for disease parameter visualization. ✅ Type 2 Diabetes selection and auto-navigation to Pancreas working. ✅ Pancreas parameters display correctly with Novel equation. ✅ Basic organ navigation functional. ❌ MISSING FEATURES: 1) Affected Organs Summary Bar (desktop view) showing 'AFFECTED: Pancreas 10 | Heart 3 | Kidneys 3 | Liver 2 | Brain 2', 2) Organ sidebar count badges with red for primary organ and orange for affected organs, 3) Parameter highlighting with red gradient background for abnormal values, 4) Crossed out original values with new values in red/bold, 5) Percentage change indicators (↑25%, ↓30%), 6) Clinical notes explaining changes, 7) Orange dots on scale tabs with modifications. Core functionality works but specific UX improvements not implemented."
+
 metadata:
   created_by: "main_agent"
   version: "1.0"
