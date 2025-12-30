@@ -486,7 +486,7 @@ const LandingPage = () => {
 
             {/* Copyright */}
             <p className="text-xs text-muted-foreground">
-              © 2024 PhiCor.ai
+              © 2024 PhiCor.ai · Decoding the Equations of Life
             </p>
           </div>
         </div>
