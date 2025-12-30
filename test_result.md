@@ -188,9 +188,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Verify hepatic diseases display correctly with clinical data"
-    - "Verify liver organ parameters and equations"
-    - "Test search functionality for hepatic diseases"
+    - "Verify metabolic diseases display correctly with clinical data"
+    - "Verify disease count shows 186 diseases"
+    - "Test Metabolic tab categorization (Diabetes, Thyroid, Adrenal, Lipid, Obesity)"
+    - "Verify Type 2 Diabetes parameter modifications"
+    - "Verify Pancreas organ parameters display correctly"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
