@@ -200,6 +200,12 @@ const getDiseaseModelKeysByIcd10 = () => {
   Object.values(ALL_RESPIRATORY_DISEASES).forEach(d => {
     if (d.icd10) icd10Covered.add(d.icd10);
   });
+  Object.values(ALL_RENAL_DISEASES).forEach(d => {
+    if (d.icd10) icd10Covered.add(d.icd10);
+  });
+  Object.values(ALL_NEUROLOGICAL_DISEASES).forEach(d => {
+    if (d.icd10) icd10Covered.add(d.icd10);
+  });
   
   const excludeKeys = [];
   Object.entries(DISEASE_MODELS).forEach(([key, disease]) => {
@@ -217,7 +223,7 @@ const filteredDiseaseModels = Object.fromEntries(
   Object.entries(DISEASE_MODELS).filter(([key]) => !excludedDiseaseKeys.includes(key))
 );
 
-// Merge cardiac and respiratory diseases with existing disease models (deduplicated)
+// Merge all disease databases with existing disease models (deduplicated)
 const MERGED_DISEASE_MODELS = {
   ...filteredDiseaseModels,
   ...Object.fromEntries(
