@@ -146,6 +146,27 @@ frontend:
       - working: true
         agent: "main"
         comment: "Disease count now 158 (up from 124). New categories added: Renal (21 diseases), Neurological (15 diseases) under 'Other' tab. Brain organ now highlights for neurological diseases, Kidneys highlight for renal diseases."
+      - working: true
+        agent: "main"
+        comment: "Disease count updated to 171 (up from 158). Added 13 new hepatic/liver diseases under 'Other' tab. Liver organ now highlights for hepatic diseases."
+      - working: true
+        agent: "testing"
+        comment: "TESTED: Disease count verified at 171 diseases in FIND CONDITION panel. All categories working: Cardiac tab functional, Other tab shows Renal (21), Neurological (15), and Hepatic/Liver (13) categories. Liver organ view displays comprehensive parameters including Liver Weight, Liver Volume, Hepatocyte Count, Lobule Count, and 'Liver Volume from BSA' equation."
+
+  - task: "Hepatic/Liver Diseases Integration"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/data/hepaticDiseasesIndex.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Created hepaticDiseasesIndex.js with 13 diseases including: Alcoholic Fatty Liver (K70.0), Alcoholic Hepatitis (K70.1), Alcoholic Cirrhosis (K70.3), NAFLD (K76.0), NASH (K75.81), Chronic Viral Hepatitis C (B18.2), Chronic Viral Hepatitis B (B18.1), Acute/Chronic Hepatic Failure (K72.0/K72.1), Portal Hypertension (K76.6), Cholelithiasis with Acute Cholecystitis (K80.0), Cholangitis (K83.0), Hepatic Encephalopathy (K72.91). All diseases have comprehensive clinical presentations, laboratory findings, imaging findings, and pathophysiology."
+      - working: true
+        agent: "testing"
+        comment: "TESTED: Hepatic diseases successfully integrated and searchable. Search functionality verified for 'alcoholic', 'hepatitis', 'NAFLD', 'cholecystitis', 'cholangitis' - all return appropriate results. Alcoholic Cirrhosis (K70.3) successfully selected and displays clinical details. All 13 hepatic diseases properly categorized under 'Other' tab in Hepatic/Liver subcategory. Disease data structure verified with comprehensive clinical presentations, laboratory findings, imaging findings, and pathophysiology."
 
 metadata:
   created_by: "main_agent"
