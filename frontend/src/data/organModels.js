@@ -624,7 +624,7 @@ export const ORGAN_MODELS = {
 
   liver: {
     name: "Liver",
-    icon: "🫐",
+    icon: "🔴",
     category: "hepatic",
     
     geometry: {
