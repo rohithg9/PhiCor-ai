@@ -536,6 +536,37 @@ export const ORGAN_MODELS = {
       ]
     },
 
+    structure: {
+      title: "Structure & Tissue",
+      parameters: [
+        { id: "cortex_volume", name: "Cortex Volume", value: 70, unit: "%", range: [65, 75], evidence: "established" },
+        { id: "medulla_volume", name: "Medulla Volume", value: 30, unit: "%", range: [25, 35], evidence: "established" },
+        { id: "glomerular_basement", name: "Glomerular Basement Membrane", value: 300, unit: "nm", range: [250, 350], evidence: "established" },
+        { id: "podocyte_foot_process", name: "Podocyte Foot Process Width", value: 500, unit: "nm", range: [400, 600], evidence: "established" },
+        { id: "tubular_epithelium", name: "Tubular Epithelium Height", value: 20, unit: "μm", range: [15, 25], evidence: "established" },
+        { id: "interstitial_volume", name: "Interstitial Volume", value: 8, unit: "%", range: [5, 12], evidence: "established" },
+        { id: "vascular_density", name: "Peritubular Capillary Density", value: 0.3, unit: "per tubule", range: [0.2, 0.4], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "gbm_permeability",
+          name: "GBM Permeability",
+          latex: "P_{GBM} = P_0 \\times e^{-\\alpha \\cdot thickness} \\times (1 - \\sigma_{charge})",
+          description: "Filtration barrier permeability model",
+          evidence: "novel",
+          source: "Combined thickness and charge model"
+        },
+        {
+          id: "fibrosis_progression",
+          name: "Fibrosis Progression",
+          latex: "\\frac{dF}{dt} = k_{TGF\\beta} \\cdot [TGF\\beta] - k_{MMP} \\cdot [MMP] \\cdot F",
+          description: "Interstitial fibrosis dynamics",
+          evidence: "novel",
+          source: "TGF-β/MMP balance model"
+        }
+      ]
+    },
+
     physiology: {
       title: "Physiology & Function",
       parameters: [
