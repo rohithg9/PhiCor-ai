@@ -2107,45 +2107,78 @@ const DashboardMultiScale = () => {
                         const mod = getModifiedValue(selectedOrgan, selectedScale, param.id, param.value);
                         
                         return (
-                          <div
+                          <motion.div
                             key={param.id}
-                            className={`p-3 md:p-4 rounded-lg border transition-all ${
+                            initial={mod.modified ? { scale: 1 } : false}
+                            animate={mod.modified ? { 
+                              boxShadow: ['0 0 0 0 rgba(239, 68, 68, 0)', '0 0 20px 4px rgba(239, 68, 68, 0.3)', '0 0 0 0 rgba(239, 68, 68, 0)']
+                            } : {}}
+                            transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+                            className={`p-3 md:p-4 rounded-lg border transition-all relative overflow-hidden ${
                               mod.modified
-                                ? 'bg-destructive/5 border-destructive/20'
+                                ? 'bg-gradient-to-br from-destructive/10 to-orange-500/10 border-destructive/40 ring-1 ring-destructive/20'
                                 : 'bg-card/50 border-border/50'
                             }`}
                             data-testid={`param-${param.id}`}
                           >
+                            {/* Abnormal indicator stripe */}
+                            {mod.modified && (
+                              <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-destructive to-orange-500" />
+                            )}
+                            
                             <div className="flex items-start justify-between mb-2 gap-2">
-                              <span className="text-xs md:text-sm text-muted-foreground leading-tight">{param.name}</span>
-                              <Badge variant={param.evidence === 'novel' ? 'secondary' : 'outline'} className="text-[10px] shrink-0">
-                                {param.evidence === 'novel' ? (
-                                  <><Lightbulb className="w-2 h-2 mr-1" />Novel</>
-                                ) : (
-                                  <><BookOpen className="w-2 h-2 mr-1" />Est.</>
+                              <span className={`text-xs md:text-sm leading-tight ${mod.modified ? 'text-destructive font-medium' : 'text-muted-foreground'}`}>
+                                {param.name}
+                              </span>
+                              <div className="flex items-center gap-1">
+                                {mod.modified && (
+                                  <Badge variant="destructive" className="text-[10px] shrink-0">
+                                    <AlertTriangle className="w-2 h-2 mr-1" />
+                                    Abnormal
+                                  </Badge>
                                 )}
-                              </Badge>
+                                <Badge variant={param.evidence === 'novel' ? 'secondary' : 'outline'} className="text-[10px] shrink-0">
+                                  {param.evidence === 'novel' ? (
+                                    <><Lightbulb className="w-2 h-2 mr-1" />Novel</>
+                                  ) : (
+                                    <><BookOpen className="w-2 h-2 mr-1" />Est.</>
+                                  )}
+                                </Badge>
+                              </div>
                             </div>
                             
                             <div className="flex items-baseline gap-2 flex-wrap">
                               {mod.modified && (
-                                <span className="text-base md:text-lg font-mono text-muted-foreground line-through">
+                                <span className="text-base md:text-lg font-mono text-muted-foreground/60 line-through">
                                   {param.value}
                                 </span>
                               )}
-                              <span className={`text-xl md:text-2xl font-mono font-bold ${mod.modified ? 'text-destructive' : ''}`}>
+                              <motion.span 
+                                key={mod.value}
+                                initial={mod.modified ? { scale: 1.2, color: '#ef4444' } : false}
+                                animate={{ scale: 1 }}
+                                className={`text-xl md:text-2xl font-mono font-bold ${mod.modified ? 'text-destructive' : ''}`}
+                              >
                                 {mod.value.toFixed(param.value % 1 === 0 ? 0 : 1)}
-                              </span>
+                              </motion.span>
                               <span className="text-xs md:text-sm text-muted-foreground">{param.unit}</span>
                               {mod.modified && (
-                                <span className={`text-xs md:text-sm ${parseFloat(mod.delta) > 0 ? 'text-destructive' : 'text-green-500'}`}>
-                                  {parseFloat(mod.delta) > 0 ? '+' : ''}{mod.delta}%
-                                </span>
+                                <motion.span 
+                                  initial={{ scale: 1.3 }}
+                                  animate={{ scale: 1 }}
+                                  className={`text-xs md:text-sm font-bold px-1.5 py-0.5 rounded ${
+                                    parseFloat(mod.delta) > 0 
+                                      ? 'bg-destructive/20 text-destructive' 
+                                      : 'bg-green-500/20 text-green-500'
+                                  }`}
+                                >
+                                  {parseFloat(mod.delta) > 0 ? '↑' : '↓'}{Math.abs(parseFloat(mod.delta))}%
+                                </motion.span>
                               )}
                             </div>
                             
                             {mod.note && (
-                              <p className="text-[10px] md:text-xs text-destructive mt-2 flex items-center gap-1">
+                              <p className="text-[10px] md:text-xs text-destructive mt-2 flex items-center gap-1 bg-destructive/10 rounded px-2 py-1">
                                 <AlertTriangle className="w-3 h-3 shrink-0" />
                                 <span>{mod.note}</span>
                               </p>
@@ -2154,7 +2187,7 @@ const DashboardMultiScale = () => {
                             <div className="mt-2 text-[10px] text-muted-foreground">
                               Normal: {param.range[0]} - {param.range[1]} {param.unit}
                             </div>
-                          </div>
+                          </motion.div>
                         );
                       })}
                     </div>
