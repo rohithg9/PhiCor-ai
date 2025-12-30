@@ -453,9 +453,9 @@ const LandingPage = () => {
       </section>
 
       {/* ========== FOOTER ========== */}
-      <footer className="border-t border-white/5 py-12 px-6">
+      <footer className="border-t border-white/5 py-8 px-6">
         <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-3 gap-8 items-center">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             {/* Logo */}
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center border border-indigo-500/30">
@@ -468,7 +468,7 @@ const LandingPage = () => {
             </div>
 
             {/* Links */}
-            <div className="flex items-center justify-center gap-6">
+            <div className="flex items-center gap-6">
               <a 
                 href="/dashboard" 
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -483,31 +483,15 @@ const LandingPage = () => {
               </a>
               <a 
                 href="mailto:contact@phicor.ai" 
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
-                Contact <ExternalLink className="w-3 h-3" />
+                Contact
               </a>
             </div>
 
-            {/* Domain */}
-            <div className="text-right">
-              <a 
-                href="https://phicor.ai" 
-                className="text-sm font-medium text-indigo-400 hover:text-indigo-300 transition-colors"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                PhiCor.ai
-              </a>
-              <p className="text-xs text-muted-foreground mt-1">
-                The Mathematical Human
-              </p>
-            </div>
-          </div>
-          
-          <div className="border-t border-white/5 mt-8 pt-8 text-center">
+            {/* Copyright */}
             <p className="text-xs text-muted-foreground">
-              © 2024 PhiCor.ai — Solving for the Precision of Life
+              © 2024 PhiCor.ai
             </p>
           </div>
         </div>
