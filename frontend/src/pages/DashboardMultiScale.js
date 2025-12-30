@@ -22,6 +22,7 @@ import { BIOCHEMISTRY } from '../data/biochemistry';
 import { ALL_CARDIAC_DISEASES, CARDIAC_CATEGORIES, getNovelEquations } from '../data/cardiacDiseasesIndex';
 import { ALL_RESPIRATORY_DISEASES } from '../data/respiratoryDiseasesIndex';
 import LungCancerModule from '../components/LungCancerModule';
+import TreatmentGuidelinesPanel from '../components/TreatmentGuidelinesPanel';
 import 'katex/dist/katex.min.css';
 import { BlockMath, InlineMath } from 'react-katex';
 
