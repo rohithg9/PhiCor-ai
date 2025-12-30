@@ -477,12 +477,6 @@ const LandingPage = () => {
                 Dashboard
               </a>
               <a 
-                href="/auth" 
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Login
-              </a>
-              <a 
                 href="mailto:contact@phicor.ai" 
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
