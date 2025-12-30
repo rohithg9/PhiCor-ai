@@ -102,74 +102,104 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "PhiCore.ai digital physiology platform - Verify disease template system and React crash fix, then expand cardiac and respiratory diseases with ICD-10 codes"
+user_problem_statement: "Test the PhiCor.ai landing page at http://localhost:3000 - Verify all sections including Hero, Why Mathematics, PhiCor Meaning, How It Works, Advantage, CTA, Footer, and Mobile Responsiveness"
 
 frontend:
-  - task: "Disease Template System - Auto-populate clinical data for sparse diseases"
+  - task: "Hero Section - Main headline and CTA buttons"
     implemented: true
-    working: true
-    file: "/app/frontend/src/data/diseaseTemplates.js"
+    working: "NA"
+    file: "/app/frontend/src/pages/LandingPage.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
-      - working: true
-        agent: "main"
-        comment: "Verified via screenshots. Aortic Valve Stenosis (valvular disease) shows 4 symptoms, pathophysiology, and severity classification. Template system generating baseline data."
-  
-  - task: "React Rendering Crash Fix - Objects are not valid as a React child"
-    implemented: true
-    working: true
-    file: "/app/frontend/src/pages/DashboardMultiScale.js"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
-    status_history:
-      - working: true
-        agent: "main"
-        comment: "Verified via screenshots. Dilated Cardiomyopathy Clinical Findings panel expands without crash, shows 8 symptoms and 13 signs. The safeArray function correctly handles object-to-string conversion."
-  
-  - task: "Expanded Cardiac Diseases - Part 8"
-    implemented: true
-    working: true
-    file: "/app/frontend/src/data/cardiacDiseasesPart8.js"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
-    status_history:
-      - working: true
-        agent: "main"
-        comment: "Created cardiacDiseasesPart8.js with ~25 new diseases including: Heart Failure variants (I50.1, I50.4, I50.9), Arrhythmias (I44.0, I44.1, I45.0-2, I46.9, I47.0, I48.1-2, I49.0-4), Cardiomyopathies (I42.2, I42.5-9), Rheumatic diseases (I06.0-2, I07.0-1). Disease count increased from 82 to 124."
-      - working: true
+      - working: "NA"
         agent: "testing"
-        comment: "VERIFIED: Disease count shows '124 diseases' badge correctly. Cardiac diseases display properly with categories: Arrhythmias (18 diseases including I44.0 Atrioventricular Block), Heart Failure (4 diseases including I50.1 Left Ventricular Failure), Cardiomyopathies (8 diseases including I42.6 Alcoholic Cardiomyopathy). All categories expand and diseases load without errors. Clinical Findings Database expands successfully showing symptoms, signs, and lab tests tabs."
-
-  - task: "Expanded Respiratory Diseases - Part 3"
+        comment: "Need to verify main headline 'Solving for the Precision of Life.', sub-headline mentions 'aerospace-grade precision', 'View the Dashboard' button navigates to /dashboard, and 'Request a Demo' button opens email client."
+  
+  - task: "Why Mathematics Section - Content and stats display"
     implemented: true
-    working: true
-    file: "/app/frontend/src/data/respiratoryDiseasesPart3.js"
+    working: "NA"
+    file: "/app/frontend/src/pages/LandingPage.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
-      - working: true
-        agent: "main"
-        comment: "Created respiratoryDiseasesPart3.js with ~17 new diseases including: Pneumonias (J13, J14, J15.0-1, J15.9, J12.9), Bronchitis (J20.9, J41.0, J42), Pleural diseases (J90, J91.0, J93.0-1), and critical conditions (J96.0, J80, J69.0, J43.9, J47.9). Respiratory count increased from 8 to 31."
-      - working: true
+      - working: "NA"
         agent: "testing"
-        comment: "VERIFIED: Respiratory tab shows 'Lung Cancer Module' special feature and 'Other Respiratory Conditions' (31 diseases). Successfully tested J13 'Pneumonia due to Streptococcus pneumoniae' - disease loads correctly and Clinical Findings Database expands showing symptoms, lab tests, and imaging tabs. All respiratory diseases display properly without errors."
-
-  - task: "Disease Categories and Navigation"
+        comment: "Need to verify 'Why Mathematics?' heading, rocket icon and aerospace analogy content, 'Assumptions are slow. Math is instant.' callout, and stats: 124 Diseases, 6 Organ Systems, ∞ Equations."
+  
+  - task: "PhiCor Meaning Section - Phi and Cor cards"
     implemented: true
-    working: true
-    file: "/app/frontend/src/pages/DashboardMultiScale.js"
+    working: "NA"
+    file: "/app/frontend/src/pages/LandingPage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Need to verify Phi (Φ) card with 'The Golden Ratio' description and Cor card with 'Latin for Heart & Core' description."
+
+  - task: "How It Works Section - 4 steps display"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/LandingPage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Need to verify 4 steps: 01: Seamless Integration, 02: Physiological Mapping, 03: Dynamic Modeling, 04: Clinical Mission Control."
+
+  - task: "Advantage Section - AI comparison and features"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/LandingPage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Need to verify 'Beyond AI. Mechanistic Math.' heading, comparison visual (Standard AI vs PhiCor), Patient Trajectory Prediction chart, and three advantage cards: Predictive Trajectories, Environmental Intelligence, Precision Diagnosis."
+
+  - task: "CTA Section - Final call to action"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/LandingPage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Need to verify 'Ready to solve for the future of medicine?' heading and 'Explore the Dashboard' button navigates to /dashboard."
+
+  - task: "Footer - Logo, links and contact"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/LandingPage.js"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
-      - working: true
-        agent: "main"
-        comment: "124 diseases displayed. All categories navigable. New diseases appearing correctly in respective categories."
+      - working: "NA"
+        agent: "testing"
+        comment: "Need to verify PhiCor.ai logo and tagline, and test navigation links (Dashboard, Login, Contact)."
+
+  - task: "Mobile Responsiveness - Mobile viewport testing"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/LandingPage.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Need to test the page at mobile viewport (390px width) and verify all sections display correctly on mobile."
 
 metadata:
   created_by: "main_agent"
