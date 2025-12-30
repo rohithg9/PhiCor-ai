@@ -1988,6 +1988,47 @@ const DashboardMultiScale = () => {
           )}
         </header>
 
+        {/* Affected Organs Summary Bar - Shows when disease is selected */}
+        {currentDisease && affectedOrgansSummary.length > 0 && (
+          <div className="border-b border-border/50 px-3 lg:px-6 py-2 bg-gradient-to-r from-destructive/5 to-orange-500/5">
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+              <span className="text-[10px] text-muted-foreground uppercase tracking-wider shrink-0">Affected:</span>
+              {affectedOrgansSummary.map((organ) => (
+                <motion.button
+                  key={organ.id}
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  onClick={() => setSelectedOrgan(organ.id)}
+                  className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs whitespace-nowrap transition-all ${
+                    selectedOrgan === organ.id
+                      ? 'bg-primary/20 text-primary border border-primary/30'
+                      : organ.isPrimary
+                      ? 'bg-destructive/20 text-destructive border border-destructive/30 hover:bg-destructive/30'
+                      : 'bg-orange-500/10 text-orange-500 border border-orange-500/20 hover:bg-orange-500/20'
+                  }`}
+                >
+                  <span>{organ.icon}</span>
+                  <span className="hidden sm:inline">{organ.name}</span>
+                  {organ.count > 0 && (
+                    <motion.span
+                      key={organ.count}
+                      initial={{ scale: 1.5 }}
+                      animate={{ scale: 1 }}
+                      className={`min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center ${
+                        organ.isPrimary 
+                          ? 'bg-destructive text-destructive-foreground' 
+                          : 'bg-orange-500 text-white'
+                      }`}
+                    >
+                      {organ.count}
+                    </motion.span>
+                  )}
+                </motion.button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Scale Tabs */}
         <div className="border-b border-border/50 px-3 lg:px-6 bg-card/20">
           <div className="flex gap-1 py-2 overflow-x-auto scrollbar-hide">
