@@ -71,6 +71,43 @@ export const RESPIRATORY_DISEASES_EXPANDED = {
           heart_rate: { factor: 1.15, note: "Tachycardia during exacerbation" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "GINA Guidelines",
+      requirements: {
+        symptoms: "Variable respiratory symptoms (wheeze, SOB, chest tightness, cough)",
+        variability: "Variable expiratory airflow limitation",
+        confirmation: "Bronchodilator reversibility (≥12% AND ≥200mL FEV1 increase) OR positive methacholine challenge OR peak flow variability >10%"
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "COPD", distinguishing: "Smoking history, older age, less reversibility, progressive" },
+      { condition: "Vocal cord dysfunction", distinguishing: "Inspiratory stridor, flattened inspiratory loop" },
+      { condition: "Heart failure", distinguishing: "Orthopnea, edema, elevated BNP, CXR findings" },
+      { condition: "GERD", distinguishing: "Heartburn, nocturnal symptoms, response to PPI" }
+    ],
+    treatment: {
+      reliever: [
+        { name: "SABA (Short-acting beta-agonist)", examples: "Albuterol", indication: "Quick relief", evidence: "IA" },
+        { name: "ICS-formoterol PRN", indication: "Preferred reliever in GINA 2023", evidence: "IA" }
+      ],
+      controller: [
+        { name: "ICS (Inhaled corticosteroids)", examples: "Budesonide, Fluticasone", indication: "First-line controller", evidence: "IA" },
+        { name: "ICS-LABA", examples: "Budesonide-formoterol, Fluticasone-salmeterol", indication: "Step 3+", evidence: "IA" },
+        { name: "LAMA", examples: "Tiotropium", indication: "Add-on for uncontrolled", evidence: "IA" }
+      ],
+      severe: [
+        { name: "Biologics", examples: "Omalizumab (anti-IgE), Dupilumab (anti-IL4/13), Benralizumab (anti-IL5)", indication: "Severe eosinophilic/allergic", evidence: "IA" }
+      ],
+      exacerbation: [
+        { name: "Systemic corticosteroids", dose: "Prednisone 40-50mg × 5-7 days", evidence: "IA" },
+        { name: "Oxygen", indication: "SpO2 target 93-95%", evidence: "IA" }
+      ]
+    },
+    riskStratification: {
+      mortality: "Low with proper treatment; severe exacerbations life-threatening",
+      exacerbationRisk: "Previous severe exacerbation, poor control, high SABA use",
+      control: "ACQ or ACT scores guide treatment adjustment"
     }
   },
 
