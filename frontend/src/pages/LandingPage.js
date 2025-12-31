@@ -193,19 +193,16 @@ const LandingPage = () => {
                   <button
                     key={item.id}
                     onClick={() => scrollToSection(item.id)}
-                    className="w-full text-left px-4 py-3 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-white/5"
+                    className={`w-full text-left px-4 py-3 text-sm transition-colors rounded-lg hover:bg-white/5 flex items-center gap-2 ${
+                      item.isEmail 
+                        ? 'text-indigo-400 hover:text-indigo-300' 
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
                   >
+                    {item.isEmail && <Mail className="w-4 h-4" />}
                     {item.label}
                   </button>
                 ))}
-                <hr className="border-white/10 my-2" />
-                <button
-                  onClick={() => window.location.href = 'mailto:drrohithg@gmail.com'}
-                  className="w-full text-left px-4 py-3 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-white/5 flex items-center gap-2"
-                >
-                  <Mail className="w-4 h-4" />
-                  Request a Demo
-                </button>
               </div>
             </motion.div>
           )}
