@@ -7,7 +7,8 @@ import { ThemeProvider } from "./context/ThemeContext";
 import LandingPage from "./pages/LandingPage";
 import AuthPage from "./pages/AuthPage";
 import Dashboard from "./pages/DashboardMultiScale";
-import DiagnosisPage from "./pages/DiagnosisPage";
+import DifferentialPage from "./pages/DifferentialPage";
+import ScribePage from "./pages/ScribePage";
 
 // Protected route wrapper
 const ProtectedRoute = ({ children }) => {
@@ -40,10 +41,18 @@ function AppContent() {
           }
         />
         <Route
-          path="/diagnosis"
+          path="/differential"
           element={
             <ProtectedRoute>
-              <DiagnosisPage />
+              <DifferentialPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/scribe"
+          element={
+            <ProtectedRoute>
+              <ScribePage />
             </ProtectedRoute>
           }
         />
