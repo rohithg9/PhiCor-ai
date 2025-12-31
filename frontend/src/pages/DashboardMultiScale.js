@@ -2527,9 +2527,13 @@ const DashboardMultiScale = () => {
   }, []);
 
   return (
-    <div className={`min-h-screen flex bg-background text-foreground`}>
+    <div className={`min-h-screen flex flex-col bg-background text-foreground`}>
+      {/* Global Feature Navigation */}
+      <FeatureNav />
+      
+      <div className="flex-1 flex">
       {/* Mobile Header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 h-14 bg-background/95 backdrop-blur border-b border-border/50 flex items-center justify-between px-4">
+      <div className="lg:hidden fixed top-14 left-0 right-0 z-40 h-14 bg-background/95 backdrop-blur border-b border-border/50 flex items-center justify-between px-4">
         <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon">
