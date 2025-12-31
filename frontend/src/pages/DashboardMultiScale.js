@@ -1192,30 +1192,67 @@ const ClinicalFindingsPanel = ({ disease, isExpanded, onToggle }) => {
   const rawImagingFindings = disease.imagingFindings || {};
   const pathophysiology = disease.pathophysiology || {};
   
-  // Safely extract symptoms and signs - handle both array and object formats
-  // Also handles array of objects like {name: "Dyspnea", progression: "..."}
+  // Safely extract text from complex objects
+  const extractText = (item) => {
+    if (!item) return null;
+    if (typeof item === 'string') return item;
+    if (typeof item === 'object' && item !== null) {
+      // Extract meaningful text from object properties
+      const textParts = [];
+      
+      // Common properties to extract
+      const primaryKeys = ['name', 'description', 'character', 'quality', 'location', 'finding', 'value'];
+      const detailKeys = ['severity', 'timing', 'duration', 'progression', 'pattern', 'onset'];
+      
+      // Get primary description
+      for (const key of primaryKeys) {
+        if (item[key] && typeof item[key] === 'string') {
+          textParts.push(item[key]);
+          break;
+        }
+      }
+      
+      // Get additional details
+      for (const key of detailKeys) {
+        if (item[key] && typeof item[key] === 'string') {
+          textParts.push(`${key}: ${item[key]}`);
+        }
+      }
+      
+      if (textParts.length > 0) {
+        return textParts.join(' — ');
+      }
+      
+      // Fallback: extract any string values
+      const stringValues = Object.values(item).filter(v => typeof v === 'string' && v.length > 0);
+      if (stringValues.length > 0) {
+        return stringValues.join(' — ');
+      }
+    }
+    return null;
+  };
+  
+  // Safely extract array of strings from various data formats
   const safeArray = (data) => {
     if (!data) return [];
     if (Array.isArray(data)) {
-      // Map each item: if it's a string, keep it; if it's an object, extract name
-      return data.map(item => {
-        if (typeof item === 'string') return item;
-        if (typeof item === 'object' && item !== null) {
-          // Return name if available, otherwise stringify
-          return item.name || item.description || JSON.stringify(item);
-        }
-        return String(item);
-      });
+      return data.map(extractText).filter(Boolean);
     }
     if (typeof data === 'object' && data !== null) {
-      // For nested objects, flatten and extract names
-      return Object.values(data).flat().map(item => {
-        if (typeof item === 'string') return item;
-        if (typeof item === 'object' && item !== null) {
-          return item.name || item.description || JSON.stringify(item);
+      // For nested objects, flatten and extract text
+      const results = [];
+      Object.values(data).forEach(value => {
+        if (Array.isArray(value)) {
+          value.forEach(item => {
+            const text = extractText(item);
+            if (text) results.push(text);
+          });
+        } else {
+          const text = extractText(value);
+          if (text) results.push(text);
         }
-        return String(item);
       });
+      return results;
     }
     return [];
   };
@@ -1225,25 +1262,26 @@ const ClinicalFindingsPanel = ({ disease, isExpanded, onToggle }) => {
   
   // Get all imaging modalities - handle nested object structures
   const imagingModalities = Object.entries(rawImagingFindings).map(([modality, findings]) => {
-    // If findings is an array, use directly
-    // If findings is an object with nested arrays, flatten them
-    let flatFindings;
+    let flatFindings = [];
     if (Array.isArray(findings)) {
-      flatFindings = findings.map(f => typeof f === 'object' ? JSON.stringify(f) : String(f));
+      flatFindings = findings.map(extractText).filter(Boolean);
     } else if (typeof findings === 'object' && findings !== null) {
       // Flatten nested object (like {mca: [...], aca: [...], etc.})
-      flatFindings = Object.entries(findings).map(([key, value]) => {
+      Object.entries(findings).forEach(([key, value]) => {
+        const prefix = key.toUpperCase();
         if (Array.isArray(value)) {
-          return `${key.toUpperCase()}: ${value.map(v => typeof v === 'object' ? JSON.stringify(v) : String(v)).join(', ')}`;
-        } else if (typeof value === 'object' && value !== null) {
-          return `${key.toUpperCase()}: ${JSON.stringify(value)}`;
+          value.forEach(v => {
+            const text = extractText(v);
+            if (text) flatFindings.push(`${prefix}: ${text}`);
+          });
+        } else {
+          const text = extractText(value);
+          if (text) flatFindings.push(`${prefix}: ${text}`);
         }
-        return `${key}: ${String(value)}`;
       });
     } else if (findings) {
-      flatFindings = [String(findings)];
-    } else {
-      flatFindings = [];
+      const text = extractText(findings);
+      if (text) flatFindings.push(text);
     }
     return [modality, flatFindings];
   }).filter(([_, findings]) => findings.length > 0);
