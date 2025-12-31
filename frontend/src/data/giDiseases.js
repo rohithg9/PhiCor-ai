@@ -1148,6 +1148,39 @@ export const GI_DISEASES = {
           wbc_count: { factor: 1.5, note: "Leukocytosis" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "Tokyo Guidelines (TG18)",
+      requirements: {
+        localSigns: "Murphy sign, RUQ mass/pain/tenderness",
+        systemicSigns: "Fever, elevated CRP/WBC",
+        imaging: "US findings consistent with cholecystitis",
+        grading: "Grade I (mild), II (moderate), III (severe/organ dysfunction)"
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Biliary colic", distinguishing: "Pain <6 hours, no fever, no Murphy sign" },
+      { condition: "Cholangitis", distinguishing: "Charcot triad, dilated CBD, jaundice" },
+      { condition: "Peptic ulcer", distinguishing: "Epigastric, EGD diagnostic" },
+      { condition: "Hepatitis", distinguishing: "Marked transaminase elevation, viral markers" }
+    ],
+    treatment: {
+      medical: [
+        { name: "NPO + IV fluids", evidence: "IA" },
+        { name: "IV antibiotics", indication: "Empiric: piperacillin-tazobactam or ceftriaxone + metronidazole", evidence: "IA" },
+        { name: "Analgesia", indication: "NSAIDs or opioids", evidence: "IB" }
+      ],
+      surgical: [
+        { name: "Laparoscopic cholecystectomy", indication: "Within 72h if possible (early preferred)", evidence: "IA" }
+      ],
+      alternative: [
+        { name: "Percutaneous cholecystostomy", indication: "High-risk surgical candidates", evidence: "IB" }
+      ]
+    },
+    riskStratification: {
+      mortality: "Grade I: <1%; Grade III: 5-10%",
+      complications: "Gangrenous, emphysematous, perforation",
+      timing: "Early surgery (<72h) preferred if possible"
     }
   },
 
