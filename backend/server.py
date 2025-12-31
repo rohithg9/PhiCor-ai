@@ -1935,7 +1935,10 @@ async def seed_comprehensive_drug_database():
     Based on WHO Essential Medicines List and clinical guidelines.
     """
     
-    # Comprehensive drug data with international brand names
+    # Import comprehensive drug data
+    from .comprehensive_drugs import COMPREHENSIVE_DRUGS
+    
+    # Start with the existing ACE inhibitors and beta blockers
     comprehensive_drugs = [
         # ============== ACE INHIBITORS ==============
         {
@@ -2054,7 +2057,6 @@ async def seed_comprehensive_drug_database():
             "pregnancy_category": "D",
             "fda_approval_year": 1991
         },
-        # ============== BETA BLOCKERS ==============
         {
             "id": "bisoprolol",
             "name": "Bisoprolol",
@@ -2152,6 +2154,9 @@ async def seed_comprehensive_drug_database():
             "fda_approval_year": 1995
         }
     ]
+    
+    # Add the comprehensive drugs from the imported file
+    comprehensive_drugs.extend(COMPREHENSIVE_DRUGS)
     
     # Add timestamps and insert
     for drug in comprehensive_drugs:
