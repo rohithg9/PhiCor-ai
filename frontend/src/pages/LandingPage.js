@@ -1,8 +1,9 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { 
   ArrowRight,
+  ArrowDown,
   Play,
   Rocket,
   Target,
@@ -14,12 +15,43 @@ import {
   Zap,
   HeartPulse,
   Mail,
-  ExternalLink
+  ExternalLink,
+  Menu,
+  X,
+  ChevronDown
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Track scroll for sticky nav
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Smooth scroll to section
+  const scrollToSection = (sectionId) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    setMobileMenuOpen(false);
+  };
+
+  // Navigation items
+  const navItems = [
+    { id: 'features', label: 'Features' },
+    { id: 'how-it-works', label: 'How It Works' },
+    { id: 'science', label: 'The Science' },
+    { id: 'advantages', label: 'Advantages' },
+  ];
 
   // How it works steps
   const steps = [
