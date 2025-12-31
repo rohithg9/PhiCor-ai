@@ -307,6 +307,24 @@ export const RENAL_DISEASES = {
       mild: { description: "Stage 3a: eGFR 45-59" },
       moderate: { description: "Stage 3b: eGFR 30-44" },
       severe: { description: "Stage 3b with heavy proteinuria" }
+    },
+    modifications: {
+      kidneys: {
+        geometry: {
+          kidney_length: { factor: 0.9, note: "Moderate size reduction" },
+          cortex_thickness: { factor: 0.8, note: "Cortical thinning" }
+        },
+        physiology: {
+          gfr: { factor: 0.45, note: "Moderately reduced (30-59 mL/min)" },
+          creatinine_clearance: { factor: 0.45, note: "Significantly decreased" },
+          erythropoietin: { factor: 0.7, note: "Decreased production" }
+        }
+      },
+      heart: {
+        physiology: {
+          blood_pressure: { factor: 1.2, note: "Hypertension common" }
+        }
+      }
     }
   },
 
