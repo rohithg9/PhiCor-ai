@@ -1311,7 +1311,7 @@ async def get_drug_detail(drug_id: str):
         raise HTTPException(status_code=404, detail="Drug not found")
     return drug
 
-@api_router.post("/drugs/db")
+@api_router.post("/drugs-db")
 async def create_drug(drug: DrugCreate):
     """Create a new drug in the database."""
     drug_dict = drug.model_dump()
