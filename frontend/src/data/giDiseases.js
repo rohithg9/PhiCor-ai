@@ -616,6 +616,44 @@ export const GI_DISEASES = {
           wbc_count: { factor: 1.5, note: "Leukocytosis" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "Hinchey Classification + CT Criteria",
+      requirements: {
+        clinical: "LLQ pain, fever, change in bowel habits",
+        ct: "Wall thickening >4mm, pericolic fat stranding, diverticula",
+        hinchey: {
+          stage1: "Pericolic abscess",
+          stage2: "Pelvic abscess",
+          stage3: "Purulent peritonitis",
+          stage4: "Fecal peritonitis"
+        }
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Colorectal cancer", distinguishing: "Colonoscopy 6-8 weeks post-resolution required" },
+      { condition: "IBD", distinguishing: "Younger age, chronic symptoms, colonoscopy findings" },
+      { condition: "Appendicitis", distinguishing: "RLQ pain (or migrated), different CT findings" },
+      { condition: "Ovarian pathology", distinguishing: "Female, pelvic ultrasound, different location" }
+    ],
+    treatment: {
+      uncomplicated: [
+        { name: "Oral antibiotics", regimen: "Metronidazole + Ciprofloxacin or Augmentin × 7-10 days", evidence: "IA" },
+        { name: "Clear liquid diet", indication: "Advance as tolerated", evidence: "IB" }
+      ],
+      complicated: [
+        { name: "IV antibiotics", indication: "Hinchey II+", evidence: "IA" },
+        { name: "Percutaneous drainage", indication: "Abscess >3-4cm", evidence: "IA" },
+        { name: "Urgent surgery", indication: "Hinchey III-IV, peritonitis, failure of conservative", evidence: "IA" }
+      ],
+      elective: [
+        { name: "Sigmoid colectomy", indication: "Recurrent episodes, complicated disease", evidence: "IB" }
+      ]
+    },
+    riskStratification: {
+      recurrence: "30% recur after first episode",
+      complication: "15-20% complicated; immunocompromised at higher risk",
+      surgery: "~15-30% require surgery"
     }
   },
 
