@@ -240,6 +240,39 @@ export const GI_DISEASES = {
           hemoglobin: { factor: 0.75, note: "Chronic blood loss" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "Clinical + Endoscopic + H. pylori Testing",
+      requirements: {
+        clinical: "Epigastric pain, dyspepsia",
+        endoscopic: "Ulcer crater, stigmata of bleeding (Forrest classification)",
+        hpylori: "Test all patients: urea breath test, stool antigen, or biopsy"
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Gastric cancer", distinguishing: "Biopsy ulcer margins; weight loss, anemia" },
+      { condition: "GERD", distinguishing: "Heartburn, regurgitation predominant" },
+      { condition: "Functional dyspepsia", distinguishing: "Normal EGD, Rome IV criteria" },
+      { condition: "Zollinger-Ellison syndrome", distinguishing: "Multiple/refractory ulcers, elevated gastrin" }
+    ],
+    treatment: {
+      hpyloriPositive: [
+        { name: "Triple therapy", components: "PPI + Clarithromycin + Amoxicillin × 14 days", evidence: "IA" },
+        { name: "Bismuth quadruple", components: "PPI + Bismuth + Metronidazole + Tetracycline", indication: "First-line alternative", evidence: "IA" }
+      ],
+      hpyloriNegative: [
+        { name: "PPI", duration: "4-8 weeks", evidence: "IA" },
+        { name: "Discontinue NSAIDs", indication: "If NSAID-induced", evidence: "IA" }
+      ],
+      bleeding: [
+        { name: "Endoscopic hemostasis", indication: "Active bleeding, visible vessel", evidence: "IA" },
+        { name: "High-dose IV PPI", dose: "80mg bolus + 8mg/hr infusion × 72h", evidence: "IA" }
+      ]
+    },
+    riskStratification: {
+      bleedingRisk: "Forrest Ia/Ib: high rebleed risk; need endoscopic therapy",
+      perforationRisk: "Anterior duodenal ulcers higher risk",
+      malignancy: "Gastric ulcers: always biopsy to rule out cancer"
     }
   },
 
