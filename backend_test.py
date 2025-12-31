@@ -1221,6 +1221,43 @@ def run_all_tests():
     print("📊 COMPREHENSIVE TEST SUMMARY")
     print("=" * 80)
     
+    # NEW: Parameter ranges summary (from review request)
+    if 'parameter_ranges' in test_results:
+        print("\n🎯 COMPREHENSIVE PARAMETER RANGES (REVIEW REQUEST):")
+        found_params = 0
+        correct_ranges = 0
+        
+        for param in test_results['parameter_ranges']:
+            if param['found']:
+                found_params += 1
+                if param['range_correct']:
+                    correct_ranges += 1
+                    print(f"  ✅ {param['name']} ({param['organ']}): Found with correct range")
+                else:
+                    print(f"  ⚠️  {param['name']} ({param['organ']}): Found but range differs")
+            else:
+                print(f"  ❌ {param['name']} ({param['organ']}): Not found")
+        
+        print(f"\n📈 PARAMETERS FOUND: {found_params}/10")
+        print(f"📈 CORRECT RANGES: {correct_ranges}/10")
+    
+    # NEW: Differential diagnosis UI features summary
+    if 'dd_ui_features' in test_results:
+        print("\n🔍 DIFFERENTIAL DIAGNOSIS UI FEATURES:")
+        found_features = 0
+        total_features = len(test_results['dd_ui_features'])
+        
+        for feature in test_results['dd_ui_features']:
+            if feature['status'] == 'found':
+                found_features += 1
+                print(f"  ✅ {feature['feature']}: Found")
+            elif feature['status'] == 'partial':
+                print(f"  ⚠️  {feature['feature']}: Partially implemented")
+            else:
+                print(f"  ❌ {feature['feature']}: {feature['status']}")
+        
+        print(f"\n📈 UI FEATURES FOUND: {found_features}/{total_features}")
+    
     # Specific diseases summary
     if 'specific_diseases' in test_results:
         print("\n🎯 SPECIFIC DISEASES FROM REVIEW REQUEST:")
