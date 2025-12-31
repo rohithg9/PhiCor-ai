@@ -2,6 +2,7 @@
 // BIDIRECTIONAL PARAMETER-DISEASE MAPPING
 // Enables reverse lookup: parameter → conditions that affect it
 // For EMR integration and clinical decision support
+// Enhanced with probability scoring for differential diagnosis
 // ============================================================
 
 import ORGAN_MODELS from './organModels';
@@ -14,6 +15,9 @@ import { ALL_METABOLIC_DISEASES } from './metabolicDiseasesIndex';
 import { ALL_HEMATOLOGICAL_DISEASES } from './hematologicalDiseasesIndex';
 import { ALL_ONCOLOGY_DISEASES } from './oncologyDiseasesIndex';
 import { ALL_CONGENITAL_DISEASES } from './congenitalDiseasesIndex';
+import { ALL_AUTOIMMUNE_DISEASES } from './autoimmuneDiseasesIndex';
+import { ALL_INFECTIOUS_DISEASES } from './infectiousDiseasesIndex';
+import { ALL_GI_DISEASES } from './giDiseasesIndex';
 
 // Combine all disease databases
 const ALL_DISEASES = {
@@ -26,6 +30,55 @@ const ALL_DISEASES = {
   ...ALL_HEMATOLOGICAL_DISEASES,
   ...ALL_ONCOLOGY_DISEASES,
   ...ALL_CONGENITAL_DISEASES,
+  ...ALL_AUTOIMMUNE_DISEASES,
+  ...ALL_INFECTIOUS_DISEASES,
+  ...ALL_GI_DISEASES,
+};
+
+// Disease prevalence weights (per 100,000 population, approximate)
+// Higher prevalence = higher prior probability
+const DISEASE_PREVALENCE = {
+  // Common conditions
+  'E11_9': 10000,  // Type 2 Diabetes
+  'I10': 30000,    // Hypertension
+  'J45_9': 8000,   // Asthma
+  'K21_0': 20000,  // GERD
+  'K58_9': 10000,  // IBS
+  'M05_9': 1000,   // RA
+  // Moderate prevalence
+  'I25_1': 5000,   // CAD
+  'I50_9': 2000,   // Heart Failure
+  'N18_3': 3000,   // CKD Stage 3
+  'J44_9': 4000,   // COPD
+  'K50_9': 200,    // Crohn's
+  'K51_9': 200,    // UC
+  // Lower prevalence
+  'M32_9': 50,     // SLE
+  'G35': 100,      // MS
+  'C50_9': 150,    // Breast Cancer
+  'C34_9': 50,     // Lung Cancer
+  // Default for unlisted
+  'default': 100,
+};
+
+// Specificity weights for findings (how specific is this finding for any diagnosis)
+// Higher = more diagnostically valuable
+const FINDING_SPECIFICITY = {
+  // Highly specific findings
+  'anti_dsDNA': 0.95,
+  'anti_CCP': 0.95,
+  'HbA1c': 0.85,
+  'troponin': 0.90,
+  'BNP': 0.80,
+  // Moderately specific
+  'CRP': 0.40,
+  'ESR': 0.30,
+  'WBC': 0.35,
+  // Non-specific
+  'fatigue': 0.10,
+  'fever': 0.15,
+  'weight_loss': 0.20,
+  'default': 0.50,
 };
 
 /**
