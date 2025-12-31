@@ -516,7 +516,7 @@ const DiagnosisPage = () => {
                     <div className="flex flex-col items-center justify-center h-full text-gray-500">
                       <MessageSquare className="w-8 h-8 mb-2 opacity-50" />
                       <p className="text-sm">Transcript will appear here</p>
-                      <p className="text-xs mt-1">Click "Start Recording" to begin</p>
+                      <p className="text-xs mt-1">Click &quot;Start Recording&quot; to begin</p>
                     </div>
                   )}
                 </div>
