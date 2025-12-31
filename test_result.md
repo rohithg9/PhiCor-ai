@@ -98,12 +98,14 @@ test_plan:
   current_focus:
     - "Dashboard organ filter functionality"
     - "Dashboard Show All/Show Less toggle"
-    - "Drugs Database list view"
-    - "Drugs Database detail view"
-  stuck_tasks: []
+  stuck_tasks:
+    - "Dashboard organ filter functionality"
+    - "Dashboard Show All/Show Less toggle"
   test_all: false
   test_priority: "high_first"
 
 agent_communication:
   - agent: "testing"
     message: "Starting comprehensive testing of Dashboard interactivity and Drugs Database features. Will test both UI functionality and API integrations."
+  - agent: "testing"
+    message: "TESTING COMPLETE: Drugs Database is working well with successful list view, detail view, and category filtering. However, Dashboard has critical issues - organ filter buttons and Show All/Show Less toggle are missing or not properly implemented. Search functionality in drugs database needs fixing."
