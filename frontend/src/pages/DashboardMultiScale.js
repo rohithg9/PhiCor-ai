@@ -369,6 +369,108 @@ const transformCongenitalDisease = (code, disease) => {
   };
 };
 
+// Transform autoimmune diseases to match existing format
+const transformAutoimmuneDisease = (code, disease) => {
+  const icd10Code = code.replace('_', '.');
+  
+  return {
+    name: disease.name,
+    icd10: disease.icd10 || icd10Code,
+    category: disease.category || 'autoimmune',
+    description: disease.definition || disease.name,
+    definition: disease.definition,
+    primaryOrgan: disease.primaryOrgan || 'blood',
+    affectedOrgans: disease.affectedOrgans || ['blood', 'joints'],
+    progression: disease.progression || [
+      { stage: 1, name: "Mild", severity: 0.25 },
+      { stage: 2, name: "Moderate", severity: 0.5 },
+      { stage: 3, name: "Severe", severity: 0.75 },
+      { stage: 4, name: "Critical", severity: 1.0 }
+    ],
+    clinicalPresentation: disease.clinicalPresentation,
+    laboratoryFindings: disease.laboratoryFindings,
+    imagingFindings: disease.imagingFindings,
+    pathophysiology: disease.pathophysiology,
+    modifications: disease.modifications || 
+                   generateModifications({ ...disease, icd10: disease.icd10 || icd10Code, category: 'autoimmune' }),
+    severity: disease.severity || {
+      mild: { description: "Mild disease activity" },
+      moderate: { description: "Moderate flare" },
+      severe: { description: "Severe/organ-threatening" }
+    },
+    isFromAutoimmuneDB: true,
+    hasModifications: true
+  };
+};
+
+// Transform infectious diseases to match existing format
+const transformInfectiousDisease = (code, disease) => {
+  const icd10Code = code.replace('_', '.');
+  
+  return {
+    name: disease.name,
+    icd10: disease.icd10 || icd10Code,
+    category: disease.category || 'infectious',
+    description: disease.definition || disease.name,
+    definition: disease.definition,
+    primaryOrgan: disease.primaryOrgan || 'blood',
+    affectedOrgans: disease.affectedOrgans || ['blood', 'lungs'],
+    progression: disease.progression || [
+      { stage: 1, name: "Mild", severity: 0.25 },
+      { stage: 2, name: "Moderate", severity: 0.5 },
+      { stage: 3, name: "Severe", severity: 0.75 },
+      { stage: 4, name: "Critical", severity: 1.0 }
+    ],
+    clinicalPresentation: disease.clinicalPresentation,
+    laboratoryFindings: disease.laboratoryFindings,
+    imagingFindings: disease.imagingFindings,
+    pathophysiology: disease.pathophysiology,
+    modifications: disease.modifications || 
+                   generateModifications({ ...disease, icd10: disease.icd10 || icd10Code, category: 'infectious' }),
+    severity: disease.severity || {
+      mild: { description: "Mild infection" },
+      moderate: { description: "Moderate illness" },
+      severe: { description: "Severe/sepsis" }
+    },
+    isFromInfectiousDB: true,
+    hasModifications: true
+  };
+};
+
+// Transform GI diseases to match existing format
+const transformGIDisease = (code, disease) => {
+  const icd10Code = code.replace('_', '.');
+  
+  return {
+    name: disease.name,
+    icd10: disease.icd10 || icd10Code,
+    category: disease.category || 'gastrointestinal',
+    description: disease.definition || disease.name,
+    definition: disease.definition,
+    primaryOrgan: disease.primaryOrgan || 'gi_tract',
+    affectedOrgans: disease.affectedOrgans || ['gi_tract'],
+    progression: disease.progression || [
+      { stage: 1, name: "Mild", severity: 0.25 },
+      { stage: 2, name: "Moderate", severity: 0.5 },
+      { stage: 3, name: "Severe", severity: 0.75 },
+      { stage: 4, name: "Critical", severity: 1.0 }
+    ],
+    clinicalPresentation: disease.clinicalPresentation,
+    laboratoryFindings: disease.laboratoryFindings,
+    imagingFindings: disease.imagingFindings,
+    pathophysiology: disease.pathophysiology,
+    modifications: disease.modifications || 
+                   generateModifications({ ...disease, icd10: disease.icd10 || icd10Code, category: 'gastrointestinal' }),
+    severity: disease.severity || {
+      mild: { description: "Mild symptoms" },
+      moderate: { description: "Moderate disease" },
+      severe: { description: "Severe/complicated" }
+    },
+    isFromGIDB: true,
+    hasModifications: true
+  };
+};
+
 // Get keys to exclude from DISEASE_MODELS (already covered by ICD-10 diseases)
 const getDiseaseModelKeysByIcd10 = () => {
   const icd10Covered = new Set();
@@ -398,6 +500,15 @@ const getDiseaseModelKeysByIcd10 = () => {
     if (d.icd10) icd10Covered.add(d.icd10);
   });
   Object.values(ALL_CONGENITAL_DISEASES).forEach(d => {
+    if (d.icd10) icd10Covered.add(d.icd10);
+  });
+  Object.values(ALL_AUTOIMMUNE_DISEASES).forEach(d => {
+    if (d.icd10) icd10Covered.add(d.icd10);
+  });
+  Object.values(ALL_INFECTIOUS_DISEASES).forEach(d => {
+    if (d.icd10) icd10Covered.add(d.icd10);
+  });
+  Object.values(ALL_GI_DISEASES).forEach(d => {
     if (d.icd10) icd10Covered.add(d.icd10);
   });
   
