@@ -551,7 +551,7 @@ const LandingPage = () => {
       </section>
 
       {/* ========== CTA SECTION ========== */}
-      <section className="relative py-24 px-6 border-t border-white/5">
+      <section id="try-dashboard" className="relative py-24 px-6 border-t border-white/5">
         <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -559,29 +559,46 @@ const LandingPage = () => {
             viewport={{ once: true }}
             className="glass-panel rounded-3xl p-12 text-center border border-white/10 bg-gradient-to-br from-indigo-500/5 via-purple-500/5 to-pink-500/5"
           >
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 mb-6">
+              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+              <span className="text-xs text-green-400 font-medium uppercase tracking-wider">Live Demo Available</span>
+            </div>
+            
             <h2 className="font-manrope text-3xl sm:text-4xl font-bold mb-4">
-              Ready to <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">solve</span> for the future of medicine?
+              Ready to <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">explore</span> the equations of life?
             </h2>
             <p className="text-muted-foreground mb-8 max-w-lg mx-auto leading-relaxed">
-              Join us as we build the mathematical foundation for next-generation clinical care.
+              Experience our digital physiology platform. Browse 186+ diseases, explore mathematical models, and see how conditions affect organ parameters.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button
                 data-testid="cta-get-started-btn"
                 onClick={() => navigate('/dashboard')}
-                className="px-8 py-6 text-lg bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 shadow-lg shadow-indigo-500/25"
+                className="px-10 py-6 text-lg bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 shadow-lg shadow-indigo-500/25 hover:scale-105 transition-transform"
               >
-                Explore the Dashboard
+                Try the Dashboard
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
               <Button
                 variant="outline"
-                onClick={() => window.open('https://www.youtube.com/watch?v=demo', '_blank')}
+                onClick={() => window.location.href = 'mailto:drrohithg@gmail.com'}
                 className="px-8 py-6 text-lg border-white/20 hover:bg-white/5"
               >
-                <Play className="mr-2 w-5 h-5" />
-                Watch Demo
+                <Mail className="mr-2 w-5 h-5" />
+                Schedule a Demo
               </Button>
+            </div>
+            
+            {/* Trust indicators */}
+            <div className="mt-10 pt-8 border-t border-white/10">
+              <p className="text-xs text-muted-foreground mb-4">What you'll discover</p>
+              <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
+                <span className="flex items-center gap-1"><span className="text-indigo-400">✓</span> 186+ Diseases</span>
+                <span className="flex items-center gap-1"><span className="text-purple-400">✓</span> 6 Organ Systems</span>
+                <span className="flex items-center gap-1"><span className="text-pink-400">✓</span> Real-time Equations</span>
+                <span className="flex items-center gap-1"><span className="text-green-400">✓</span> No Login Required</span>
+              </div>
             </div>
           </motion.div>
         </div>
