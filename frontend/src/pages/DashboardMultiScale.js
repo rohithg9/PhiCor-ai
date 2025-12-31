@@ -2606,6 +2606,23 @@ const DashboardMultiScale = () => {
       {/* Global Feature Navigation */}
       <FeatureNav />
       
+      {/* Page Title Header - Like other pages */}
+      <div className="hidden lg:block container mx-auto px-4 py-4">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+            <span className="text-white font-serif text-3xl font-bold">Φ</span>
+          </div>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+              PhiCor Engine
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Multi-scale organ models & physiology database
+            </p>
+          </div>
+        </div>
+      </div>
+      
       <div className="flex-1 flex">
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-14 left-0 right-0 z-40 h-14 bg-background/95 backdrop-blur border-b border-border/50 flex items-center justify-between px-4">
