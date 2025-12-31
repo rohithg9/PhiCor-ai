@@ -54,6 +54,25 @@ export const RENAL_DISEASES = {
       mild: { description: "KDIGO Stage 1: Cr 1.5-1.9x baseline or ≥0.3 mg/dL increase" },
       moderate: { description: "KDIGO Stage 2: Cr 2.0-2.9x baseline" },
       severe: { description: "KDIGO Stage 3: Cr ≥3x baseline or ≥4.0 mg/dL or RRT initiation" }
+    },
+    modifications: {
+      kidneys: {
+        geometry: {
+          kidney_length: { factor: 1.1, note: "Mild swelling in acute phase" },
+          kidney_volume: { factor: 1.15, note: "Edematous kidneys" }
+        },
+        physiology: {
+          gfr: { factor: 0.3, note: "Severely reduced (<30 mL/min)" },
+          creatinine_clearance: { factor: 0.25, note: "Markedly decreased" },
+          urine_output: { factor: 0.3, note: "Oliguria/anuria" },
+          bun: { factor: 3.0, note: "Elevated due to decreased excretion" }
+        }
+      },
+      heart: {
+        physiology: {
+          blood_pressure: { factor: 1.15, note: "Fluid overload hypertension" }
+        }
+      }
     }
   },
 
