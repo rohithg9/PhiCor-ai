@@ -59,21 +59,16 @@ const FeatureNav = ({ showTitle = true, compact = false }) => {
       <div className="container mx-auto px-4">
         <div className={`flex items-center justify-between ${compact ? 'py-2' : 'py-3'}`}>
           
-          {/* Logo & Title */}
+          {/* Logo - PhiCor text only */}
           <div className="flex items-center gap-3">
             {showTitle && (
               <div 
-                className="flex items-center gap-2 cursor-pointer group"
+                className="cursor-pointer group"
                 onClick={() => navigate('/')}
               >
-                <div className={`w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/20 group-hover:shadow-purple-500/40 transition-shadow`}>
-                  <span className="text-white font-serif text-lg font-bold">Φ</span>
-                </div>
-                <div className="hidden sm:block">
-                  <h1 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                    PhiCore<span className="text-purple-500">.ai</span>
-                  </h1>
-                </div>
+                <h1 className={`text-xl sm:text-2xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-gray-900'} group-hover:text-purple-400 transition-colors`}>
+                  Phi<span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">Cor</span>
+                </h1>
               </div>
             )}
           </div>
