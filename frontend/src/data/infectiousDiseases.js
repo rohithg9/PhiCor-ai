@@ -537,6 +537,44 @@ export const INFECTIOUS_DISEASES = {
           cognitive_function: { factor: 0.7, note: "HIV-associated neurocognitive disorder" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "CDC/WHO HIV/AIDS Classification",
+      requirements: {
+        hivDiagnosis: "Positive 4th gen HIV test (Ab/Ag) + confirmatory test",
+        aidsDefinition: "CD4 <200 cells/μL OR AIDS-defining illness",
+        aidsDefiningConditions: [
+          "PCP", "Toxoplasmosis", "CMV retinitis", "MAC", "Cryptosporidiosis >1 month",
+          "Kaposi sarcoma", "Primary CNS lymphoma", "Cervical cancer (invasive)",
+          "HIV encephalopathy", "Wasting syndrome"
+        ]
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Primary immunodeficiency", distinguishing: "Childhood onset, no HIV test positive" },
+      { condition: "Leukemia/lymphoma", distinguishing: "Malignant cells on smear/biopsy, different immunophenotype" },
+      { condition: "Sarcoidosis", distinguishing: "Non-caseating granulomas, elevated ACE, HIV negative" },
+      { condition: "Drug-induced lymphopenia", distinguishing: "Medication history, recovers with discontinuation" }
+    ],
+    treatment: {
+      art: [
+        { name: "Bictegravir/TAF/FTC", indication: "First-line preferred regimen", evidence: "IA" },
+        { name: "Dolutegravir + TAF/FTC", indication: "First-line alternative", evidence: "IA" },
+        { name: "Long-acting cabotegravir/rilpivirine", indication: "Virologically suppressed, every 2 months", evidence: "IA" }
+      ],
+      oiProphylaxis: [
+        { name: "TMP-SMX", indication: "CD4 <200, PCP/toxo prophylaxis", evidence: "IA" },
+        { name: "Azithromycin", indication: "CD4 <50, MAC prophylaxis", evidence: "IA" }
+      ],
+      monitoring: [
+        { name: "CD4 count", frequency: "Every 3-6 months until stable" },
+        { name: "Viral load", frequency: "Every 3-6 months, goal undetectable" }
+      ]
+    },
+    riskStratification: {
+      progression: "Without ART: 10-year AIDS rate ~50%",
+      mortality: "With ART: near-normal life expectancy",
+      transmission: "Undetectable = Untransmittable (U=U)"
     }
   },
 
