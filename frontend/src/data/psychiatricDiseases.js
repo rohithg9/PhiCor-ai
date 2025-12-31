@@ -247,6 +247,27 @@ export const PSYCHIATRIC_DISEASES = {
     
     differentialDiagnosis: ["Panic disorder", "Social anxiety", "OCD", "PTSD", "Hyperthyroidism", "Caffeine/stimulant use"],
     
+    treatment: {
+      firstLine: [
+        { name: "SSRIs", examples: "Sertraline, Escitalopram, Paroxetine", indication: "First-line", evidence: "IA" },
+        { name: "SNRIs", examples: "Venlafaxine, Duloxetine", indication: "Alternative first-line", evidence: "IA" },
+        { name: "Buspirone", indication: "Alternative, no dependence risk", evidence: "IA" }
+      ],
+      psychotherapy: [
+        { name: "CBT", indication: "First-line, alone or combined", evidence: "IA" },
+        { name: "Applied Relaxation", indication: "Alternative", evidence: "IA" }
+      ],
+      adjunctive: [
+        { name: "Pregabalin", indication: "Alternative or adjunct", evidence: "IA" },
+        { name: "Benzodiazepines", indication: "Short-term only (2-4 weeks)", evidence: "IB", note: "Dependence risk" }
+      ]
+    },
+    riskStratification: {
+      chronicity: "Chronic course common; 50% achieve remission",
+      comorbidity: "Depression comorbid in 60%; substance use common",
+      functional: "Significant occupational/social impairment"
+    },
+    
     comorbidities: ["Depression (60%)", "Other anxiety disorders", "Substance use", "Chronic pain"]
   },
 
