@@ -855,6 +855,35 @@ export const INFECTIOUS_DISEASES = {
           csf_pressure: { factor: 1.3, note: "Elevated opening pressure" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "Clinical + CSF Analysis",
+      requirements: {
+        clinical: "Headache, fever, neck stiffness, photophobia",
+        csfFindings: "Pleocytosis (lymphocyte predominant), normal glucose, mildly elevated protein",
+        etiology: "PCR for specific viruses (enterovirus, HSV, VZV)"
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Bacterial meningitis", distinguishing: "More toxic, neutrophilic CSF, low glucose, positive Gram stain" },
+      { condition: "HSV encephalitis", distinguishing: "Focal neuro deficits, temporal lobe changes on MRI" },
+      { condition: "Tuberculous meningitis", distinguishing: "Subacute, low CSF glucose, basilar enhancement" },
+      { condition: "Fungal meningitis", distinguishing: "Immunocompromised, cryptococcal antigen positive" }
+    ],
+    treatment: {
+      supportive: [
+        { name: "Analgesics", indication: "Headache", evidence: "IIA" },
+        { name: "Antiemetics", indication: "Nausea", evidence: "IIA" },
+        { name: "IV fluids", indication: "Hydration", evidence: "IIA" }
+      ],
+      empiric: [
+        { name: "Acyclovir", dose: "10 mg/kg IV q8h", indication: "Until HSV ruled out", evidence: "IA" }
+      ]
+    },
+    riskStratification: {
+      prognosis: "Excellent for enteroviral; full recovery typical",
+      hsvRisk: "Must rule out HSV encephalitis urgently",
+      immunocompromised: "Consider more serious pathogens"
     }
   },
 
