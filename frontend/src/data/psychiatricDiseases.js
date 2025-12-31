@@ -116,6 +116,33 @@ export const PSYCHIATRIC_DISEASES = {
     
     differentialDiagnosis: ["Bipolar disorder", "Adjustment disorder", "Persistent depressive disorder", "Hypothyroidism", "Substance-induced", "Grief"],
     
+    treatment: {
+      firstLine: [
+        { name: "SSRIs", examples: "Sertraline, Escitalopram, Fluoxetine", indication: "First-line pharmacotherapy", evidence: "IA" },
+        { name: "SNRIs", examples: "Venlafaxine, Duloxetine", indication: "Alternative first-line", evidence: "IA" }
+      ],
+      psychotherapy: [
+        { name: "CBT", indication: "First-line, alone or with medication", evidence: "IA" },
+        { name: "IPT (Interpersonal Therapy)", indication: "Alternative", evidence: "IA" },
+        { name: "Behavioral Activation", indication: "Component of treatment", evidence: "IA" }
+      ],
+      augmentation: [
+        { name: "Atypical antipsychotics", examples: "Aripiprazole, Quetiapine", indication: "Partial response", evidence: "IA" },
+        { name: "Lithium", indication: "Augmentation", evidence: "IB" },
+        { name: "Thyroid hormone (T3)", indication: "Augmentation strategy", evidence: "IB" }
+      ],
+      severe: [
+        { name: "ECT", indication: "Treatment-resistant, severe, catatonia, psychotic features", evidence: "IA" },
+        { name: "TMS", indication: "Treatment-resistant", evidence: "IA" },
+        { name: "Ketamine/Esketamine", indication: "Treatment-resistant, acute suicidality", evidence: "IA" }
+      ]
+    },
+    riskStratification: {
+      suicide: "15% lifetime suicide attempt; 60% have suicidal ideation",
+      recurrence: "50% recurrence after first episode; 80% after third",
+      chronicity: "20% become chronic; early treatment improves outcomes"
+    },
+    
     complications: ["Suicide", "Substance abuse", "Cardiovascular disease", "Diabetes", "Functional impairment"],
     
     screeningTools: ["PHQ-9", "HAM-D", "BDI-II", "MADRS"]
