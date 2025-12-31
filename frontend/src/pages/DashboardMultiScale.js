@@ -2990,6 +2990,7 @@ const DashboardMultiScale = () => {
           </aside>
         </div>
       </main>
+      </div>
     </div>
   );
 };
