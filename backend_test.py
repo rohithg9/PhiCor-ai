@@ -290,30 +290,33 @@ def test_infectious_diseases():
     
     return results
 
-def test_congenital_diseases():
-    """Test specific congenital syndromes for parameter modifications"""
-    print("\n🧬 TESTING CONGENITAL SYNDROMES")
+def test_gi_diseases():
+    """Test specific GI diseases for parameter modifications"""
+    print("\n🫄 TESTING GI DISEASES")
     print("=" * 50)
     
     # Test diseases from the review request
     test_diseases = [
         {
-            "name": "Down Syndrome (Q90.9)",
-            "expected_affected": ["brain", "heart", "thyroid", "blood", "gi_tract"],
-            "key_modifications": ["brain_volume", "ivs_thickness", "tsh"],
-            "expected_factors": {"brain_volume": 0.85, "tsh": 2.0}
+            "name": "Acute Pancreatitis (K85.9)",
+            "search_terms": ["pancreatitis"],
+            "expected_affected": ["pancreas", "blood"],
+            "key_modifications": ["lipase", "amylase", "crp", "wbc_count"],
+            "icd_code": "K85.9"
         },
         {
-            "name": "Marfan Syndrome (Q87.4)",
-            "expected_affected": ["heart", "lungs", "brain"],
-            "key_modifications": ["aortic_root", "fev1"],
-            "expected_factors": {"aortic_root": 1.6}
+            "name": "Chronic Pancreatitis (K86.1)",
+            "search_terms": ["pancreatitis"],
+            "expected_affected": ["pancreas", "blood"],
+            "key_modifications": ["lipase", "amylase", "glucose", "hba1c"],
+            "icd_code": "K86.1"
         },
         {
-            "name": "Hemophilia A (D66)",
-            "expected_affected": ["blood", "bonemarrow"],
-            "key_modifications": ["ptt", "pt", "inr"],
-            "expected_factors": {"ptt": 2.5, "pt": 1.0, "inr": 1.0}
+            "name": "GERD (K21.0)",
+            "search_terms": ["gerd"],
+            "expected_affected": ["gi_tract"],
+            "key_modifications": ["ph", "pepsinogen"],
+            "icd_code": "K21.0"
         }
     ]
     
@@ -323,11 +326,11 @@ def test_congenital_diseases():
         print(f"\n📋 Testing: {disease['name']}")
         
         try:
-            with open('/app/frontend/src/data/congenitalDiseases.js', 'r') as f:
+            with open('/app/frontend/src/data/giDiseases.js', 'r') as f:
                 content = f.read()
                 
             # Look for the disease by ICD code
-            icd_code = disease['name'].split('(')[1].split(')')[0].replace('.', '_')
+            icd_code = disease['icd_code'].replace('.', '_')
             
             if icd_code in content:
                 print(f"  ✅ Disease {icd_code} found in data")
@@ -349,14 +352,6 @@ def test_congenital_diseases():
                             print(f"  ✅ {mod} parameter modification found")
                         else:
                             print(f"  ⚠️  {mod} parameter modification not found")
-                    
-                    # Check for specific factor values if provided
-                    if 'expected_factors' in disease:
-                        for param, expected_factor in disease['expected_factors'].items():
-                            if f'factor: {expected_factor}' in content:
-                                print(f"  ✅ {param} factor {expected_factor} verified")
-                            else:
-                                print(f"  ⚠️  {param} factor {expected_factor} not verified")
                             
                     results.append({"disease": disease['name'], "status": "found_with_modifications"})
                 else:
