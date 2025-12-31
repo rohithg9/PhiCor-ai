@@ -49,10 +49,10 @@ function AppContent() {
           }
         />
         <Route
-          path="/scribe"
+          path="/drugs"
           element={
             <ProtectedRoute>
-              <ScribePage />
+              <DrugsPage />
             </ProtectedRoute>
           }
         />
