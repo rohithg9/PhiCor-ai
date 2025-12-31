@@ -2722,7 +2722,6 @@ const DashboardMultiScale = () => {
                   <DifferentialDiagnosisPanel 
                     onSelectDisease={(diseaseCode) => {
                       setSelectedDisease(diseaseCode);
-                      setSearchQuery(MERGED_DISEASE_MODELS[diseaseCode]?.name || '');
                     }} 
                   />
                 )}
