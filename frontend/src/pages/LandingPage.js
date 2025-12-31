@@ -420,7 +420,7 @@ const LandingPage = () => {
       </section>
 
       {/* ========== HOW IT WORKS SECTION ========== */}
-      <section className="relative py-24 px-6 border-t border-white/5">
+      <section id="how-it-works" className="relative py-24 px-6 border-t border-white/5">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0 }}
