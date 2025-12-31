@@ -188,6 +188,42 @@ export const INFECTIOUS_DISEASES = {
           gfr: { factor: 0.75, note: "AKI risk" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "WHO/CDC Surveillance Definition",
+      requirements: {
+        confirmed: "Positive SARS-CoV-2 RT-PCR or rapid antigen test",
+        clinicalCriteria: "Fever, cough, dyspnea, anosmia/ageusia",
+        severity: "WHO classification: Mild, Moderate, Severe, Critical"
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Influenza", distinguishing: "More myalgias, shorter incubation, influenza PCR positive" },
+      { condition: "Bacterial pneumonia", distinguishing: "Lobar consolidation, productive cough, elevated procalcitonin" },
+      { condition: "PJP pneumonia", distinguishing: "Immunocompromised, bilateral ground-glass, elevated LDH" },
+      { condition: "Heart failure", distinguishing: "Elevated BNP, cardiomegaly, response to diuretics" }
+    ],
+    treatment: {
+      antiviral: [
+        { name: "Paxlovid (Nirmatrelvir/ritonavir)", dose: "300/100 mg BID × 5 days", indication: "High-risk within 5 days", evidence: "IA" },
+        { name: "Remdesivir", dose: "200 mg IV day 1, then 100 mg × 4 days", indication: "Hospitalized, on O2", evidence: "IA" }
+      ],
+      antiInflammatory: [
+        { name: "Dexamethasone", dose: "6 mg daily × 10 days", indication: "Hospitalized on O2/ventilator", evidence: "IA" },
+        { name: "Baricitinib", dose: "4 mg daily", indication: "Severe COVID with dexamethasone", evidence: "IA" },
+        { name: "Tocilizumab", dose: "8 mg/kg IV × 1", indication: "Rapid respiratory deterioration", evidence: "IA" }
+      ],
+      anticoagulation: [
+        { name: "Prophylactic anticoagulation", indication: "All hospitalized patients", evidence: "IA" }
+      ],
+      prevention: [
+        { name: "COVID-19 vaccination", indication: "All eligible individuals", evidence: "IA" }
+      ]
+    },
+    riskStratification: {
+      severeDisease: "Age >65, obesity, diabetes, CVD, immunocompromised",
+      longCovid: "10-30% develop persistent symptoms",
+      mortality: "~1% overall; higher in unvaccinated and elderly"
     }
   },
 
