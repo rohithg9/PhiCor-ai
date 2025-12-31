@@ -358,6 +358,35 @@ export const PSYCHIATRIC_DISEASES = {
     
     differentialDiagnosis: ["Schizoaffective disorder", "Substance-induced", "Hyperthyroidism", "ADHD", "Personality disorders"],
     
+    treatment: {
+      acuteMania: [
+        { name: "Lithium", indication: "First-line mood stabilizer", evidence: "IA", note: "Narrow therapeutic index" },
+        { name: "Valproate", indication: "First-line alternative", evidence: "IA" },
+        { name: "Atypical antipsychotics", examples: "Quetiapine, Olanzapine, Risperidone, Aripiprazole", indication: "First-line", evidence: "IA" }
+      ],
+      acuteDepression: [
+        { name: "Quetiapine", indication: "First-line for bipolar depression", evidence: "IA" },
+        { name: "Lurasidone", indication: "First-line", evidence: "IA" },
+        { name: "Lamotrigine", indication: "Maintenance and mild depression", evidence: "IA" },
+        { name: "Antidepressant + mood stabilizer", indication: "If monotherapy fails", evidence: "IB", note: "Switch risk" }
+      ],
+      maintenance: [
+        { name: "Lithium", indication: "Best evidence for suicide prevention", evidence: "IA" },
+        { name: "Valproate", indication: "Alternative", evidence: "IA" },
+        { name: "Lamotrigine", indication: "Depression predominant", evidence: "IA" },
+        { name: "Atypical antipsychotics", indication: "Adjunct or monotherapy", evidence: "IA" }
+      ],
+      psychotherapy: [
+        { name: "Psychoeducation", indication: "All patients", evidence: "IA" },
+        { name: "CBT for Bipolar", indication: "Adjunct", evidence: "IA" }
+      ]
+    },
+    riskStratification: {
+      suicide: "15-20% attempt; 10% complete suicide",
+      recurrence: ">90% have recurrent episodes",
+      rapidCycling: "≥4 episodes/year; harder to treat"
+    },
+    
     complications: ["Suicide (15-20% attempt)", "Substance abuse", "Relationship/occupational impairment", "Cardiovascular risk"]
   },
 
