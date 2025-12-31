@@ -2152,9 +2152,6 @@ async def seed_comprehensive_drug_database():
         }
     ]
     
-    # Add the comprehensive drugs from the imported file
-    comprehensive_drugs.extend(COMPREHENSIVE_DRUGS)
-    
     # Add timestamps and insert
     for drug in comprehensive_drugs:
         drug["created_at"] = datetime.now(timezone.utc).isoformat()
