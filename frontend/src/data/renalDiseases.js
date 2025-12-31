@@ -113,6 +113,19 @@ export const RENAL_DISEASES = {
       mild: { description: "Partial cortical necrosis" },
       moderate: { description: "Significant but incomplete necrosis" },
       severe: { description: "Complete bilateral cortical necrosis - requires permanent dialysis" }
+    },
+    modifications: {
+      kidneys: {
+        geometry: {
+          kidney_length: { factor: 0.85, note: "Cortical loss and atrophy" },
+          cortex_thickness: { factor: 0.3, note: "Severe cortical destruction" }
+        },
+        physiology: {
+          gfr: { factor: 0.1, note: "Near-complete loss of function" },
+          creatinine_clearance: { factor: 0.1, note: "Severely impaired" },
+          urine_output: { factor: 0.05, note: "Anuria" }
+        }
+      }
     }
   },
 
