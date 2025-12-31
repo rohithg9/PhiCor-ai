@@ -105,32 +105,60 @@ def load_disease_data():
         print(f"❌ Error loading disease data: {e}")
         return False
 
-def test_renal_disease_modifications():
-    """Test specific renal diseases for parameter modifications"""
-    print("\n🔍 TESTING RENAL DISEASE MODIFICATIONS")
+def test_new_organ_systems():
+    """Test that all new organ systems are present in organModels.js"""
+    print("\n🆕 TESTING NEW ORGAN SYSTEMS")
+    print("=" * 50)
+    
+    # Expected new organs from the review request
+    new_organs = [
+        "blood", "bonemarrow", "spleen", "lymphatic", 
+        "thyroid", "gi_tract", "breast", "prostate"
+    ]
+    
+    results = []
+    
+    try:
+        with open('/app/frontend/src/data/organModels.js', 'r') as f:
+            content = f.read()
+            
+        for organ in new_organs:
+            if f'{organ}:' in content:
+                print(f"  ✅ {organ.capitalize()} organ model found")
+                results.append({"organ": organ, "status": "found"})
+            else:
+                print(f"  ❌ {organ.capitalize()} organ model not found")
+                results.append({"organ": organ, "status": "not_found"})
+                
+        return results
+    except Exception as e:
+        print(f"❌ Error testing organ systems: {e}")
+        return []
+
+def test_hematological_diseases():
+    """Test specific hematological diseases for parameter modifications"""
+    print("\n🩸 TESTING HEMATOLOGICAL DISEASES")
     print("=" * 50)
     
     # Test diseases from the review request
     test_diseases = [
         {
-            "name": "CKD Stage 3 (N18.3)",
-            "expected_affected": ["kidneys", "heart"],
-            "key_modifications": ["gfr", "cortex_thickness", "blood_pressure"]
+            "name": "Iron Deficiency Anemia (D50.9)",
+            "expected_affected": ["blood", "bonemarrow", "heart"],
+            "key_modifications": ["hemoglobin", "ferritin", "mcv"],
+            "expected_factors": {"hemoglobin": 0.6, "ferritin": 0.1, "mcv": 0.75}
         },
         {
-            "name": "Acute Pyelonephritis (N10)", 
-            "expected_affected": ["kidneys"],
-            "key_modifications": ["kidney_volume", "kidney_length"]
+            "name": "Sickle Cell Disease (D57.1)",
+            "expected_affected": ["blood", "spleen", "bonemarrow"],
+            "key_modifications": ["hemoglobin", "reticulocyte_count", "spleen_volume"],
+            "expected_factors": {"hemoglobin": 0.55, "reticulocyte_count": 10.0, "spleen_volume": 0.3}
         },
         {
-            "name": "Nephrolithiasis (N20.0)",
-            "expected_affected": ["kidneys"],
-            "key_modifications": ["tubular_pressure", "kidney_volume"]
-        },
-        {
-            "name": "ADPKD (Q61.2)",
-            "expected_affected": ["kidneys", "liver", "brain"],
-            "key_modifications": ["kidney_length", "kidney_volume"]
+            "name": "Aplastic Anemia (D61.9)",
+            "expected_affected": ["bonemarrow", "blood"],
+            "key_modifications": ["marrow_cellularity", "platelet_count", "wbc_count"],
+            "expected_factors": {"marrow_cellularity": 0.2}
         }
     ]
     
@@ -139,9 +167,8 @@ def test_renal_disease_modifications():
     for disease in test_diseases:
         print(f"\n📋 Testing: {disease['name']}")
         
-        # Check if disease data exists in the file
         try:
-            with open('/app/frontend/src/data/renalDiseases.js', 'r') as f:
+            with open('/app/frontend/src/data/hematologicalDiseases.js', 'r') as f:
                 content = f.read()
                 
             # Look for the disease by ICD code
@@ -167,6 +194,14 @@ def test_renal_disease_modifications():
                             print(f"  ✅ {mod} parameter modification found")
                         else:
                             print(f"  ⚠️  {mod} parameter modification not found")
+                    
+                    # Check for specific factor values if provided
+                    if 'expected_factors' in disease:
+                        for param, expected_factor in disease['expected_factors'].items():
+                            if f'factor: {expected_factor}' in content:
+                                print(f"  ✅ {param} factor {expected_factor} verified")
+                            else:
+                                print(f"  ⚠️  {param} factor {expected_factor} not verified")
                             
                     results.append({"disease": disease['name'], "status": "found_with_modifications"})
                 else:
@@ -182,32 +217,30 @@ def test_renal_disease_modifications():
     
     return results
 
-def test_neurological_disease_modifications():
-    """Test specific neurological diseases for parameter modifications"""
-    print("\n🧠 TESTING NEUROLOGICAL DISEASE MODIFICATIONS")
+def test_oncology_diseases():
+    """Test specific oncology diseases for parameter modifications"""
+    print("\n🎗️ TESTING ONCOLOGY DISEASES")
     print("=" * 50)
     
     # Test diseases from the review request
     test_diseases = [
         {
-            "name": "Ischemic Stroke (I63.9)",
-            "expected_affected": ["brain", "heart"],
-            "key_modifications": ["cbf", "icp", "cpp"]
+            "name": "Acute Lymphoblastic Leukemia (C91.0)",
+            "expected_affected": ["bonemarrow", "blood", "lymphatic", "brain", "spleen", "liver"],
+            "key_modifications": ["blast_percentage", "wbc_count", "lymph_node_size"],
+            "expected_factors": {"blast_percentage": 20.0, "wbc_count": 5.0}
         },
         {
-            "name": "Parkinson's Disease (G20)",
-            "expected_affected": ["brain"],
-            "key_modifications": ["neuron_density", "cbf"]
+            "name": "Multiple Myeloma (C90.0)",
+            "expected_affected": ["bonemarrow", "blood", "kidneys"],
+            "key_modifications": ["plasma_cells", "hemoglobin", "gfr"],
+            "expected_factors": {"plasma_cells": 10.0, "hemoglobin": 0.6, "gfr": 0.5}
         },
         {
-            "name": "Multiple Sclerosis (G35)",
-            "expected_affected": ["brain"],
-            "key_modifications": ["white_matter", "myelin_volume"]
-        },
-        {
-            "name": "Bacterial Meningitis (G00.9)",
-            "expected_affected": ["brain"],
-            "key_modifications": ["icp", "csf_pressure"]
+            "name": "Breast Cancer (C50.9)",
+            "expected_affected": ["breast", "lymphatic"],
+            "key_modifications": ["lesion_size", "ca_15_3", "lymph_node_size"],
+            "expected_factors": {"lesion_size": 5.0, "ca_15_3": 3.0}
         }
     ]
     
@@ -216,9 +249,8 @@ def test_neurological_disease_modifications():
     for disease in test_diseases:
         print(f"\n📋 Testing: {disease['name']}")
         
-        # Check if disease data exists in the file
         try:
-            with open('/app/frontend/src/data/neurologicalDiseases.js', 'r') as f:
+            with open('/app/frontend/src/data/oncologyDiseases.js', 'r') as f:
                 content = f.read()
                 
             # Look for the disease by ICD code
@@ -244,6 +276,96 @@ def test_neurological_disease_modifications():
                             print(f"  ✅ {mod} parameter modification found")
                         else:
                             print(f"  ⚠️  {mod} parameter modification not found")
+                    
+                    # Check for specific factor values if provided
+                    if 'expected_factors' in disease:
+                        for param, expected_factor in disease['expected_factors'].items():
+                            if f'factor: {expected_factor}' in content:
+                                print(f"  ✅ {param} factor {expected_factor} verified")
+                            else:
+                                print(f"  ⚠️  {param} factor {expected_factor} not verified")
+                            
+                    results.append({"disease": disease['name'], "status": "found_with_modifications"})
+                else:
+                    print(f"  ❌ No modifications section found")
+                    results.append({"disease": disease['name'], "status": "found_no_modifications"})
+            else:
+                print(f"  ❌ Disease {icd_code} not found in data")
+                results.append({"disease": disease['name'], "status": "not_found"})
+                
+        except Exception as e:
+            print(f"  ❌ Error testing {disease['name']}: {e}")
+            results.append({"disease": disease['name'], "status": "error"})
+    
+    return results
+
+def test_congenital_diseases():
+    """Test specific congenital syndromes for parameter modifications"""
+    print("\n🧬 TESTING CONGENITAL SYNDROMES")
+    print("=" * 50)
+    
+    # Test diseases from the review request
+    test_diseases = [
+        {
+            "name": "Down Syndrome (Q90.9)",
+            "expected_affected": ["brain", "heart", "thyroid", "blood", "gi_tract"],
+            "key_modifications": ["brain_volume", "ivs_thickness", "tsh"],
+            "expected_factors": {"brain_volume": 0.85, "tsh": 2.0}
+        },
+        {
+            "name": "Marfan Syndrome (Q87.4)",
+            "expected_affected": ["heart", "lungs", "brain"],
+            "key_modifications": ["aortic_root", "fev1"],
+            "expected_factors": {"aortic_root": 1.6}
+        },
+        {
+            "name": "Hemophilia A (D66)",
+            "expected_affected": ["blood", "bonemarrow"],
+            "key_modifications": ["ptt", "pt", "inr"],
+            "expected_factors": {"ptt": 2.5, "pt": 1.0, "inr": 1.0}
+        }
+    ]
+    
+    results = []
+    
+    for disease in test_diseases:
+        print(f"\n📋 Testing: {disease['name']}")
+        
+        try:
+            with open('/app/frontend/src/data/congenitalDiseases.js', 'r') as f:
+                content = f.read()
+                
+            # Look for the disease by ICD code
+            icd_code = disease['name'].split('(')[1].split(')')[0].replace('.', '_')
+            
+            if icd_code in content:
+                print(f"  ✅ Disease {icd_code} found in data")
+                
+                # Check for modifications section
+                if 'modifications:' in content:
+                    print(f"  ✅ Modifications section found")
+                    
+                    # Check for affected organs
+                    for organ in disease['expected_affected']:
+                        if f'{organ}:' in content:
+                            print(f"  ✅ {organ.capitalize()} modifications found")
+                        else:
+                            print(f"  ⚠️  {organ.capitalize()} modifications not found")
+                    
+                    # Check for key modifications
+                    for mod in disease['key_modifications']:
+                        if mod in content:
+                            print(f"  ✅ {mod} parameter modification found")
+                        else:
+                            print(f"  ⚠️  {mod} parameter modification not found")
+                    
+                    # Check for specific factor values if provided
+                    if 'expected_factors' in disease:
+                        for param, expected_factor in disease['expected_factors'].items():
+                            if f'factor: {expected_factor}' in content:
+                                print(f"  ✅ {param} factor {expected_factor} verified")
+                            else:
+                                print(f"  ⚠️  {param} factor {expected_factor} not verified")
                             
                     results.append({"disease": disease['name'], "status": "found_with_modifications"})
                 else:
