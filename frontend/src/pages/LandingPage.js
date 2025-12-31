@@ -598,8 +598,20 @@ const LandingPage = () => {
       </section>
 
       {/* ========== FOOTER ========== */}
-      <footer className="border-t border-white/5 py-8 px-6">
+      <footer className="border-t border-white/5 py-12 px-6">
         <div className="max-w-6xl mx-auto">
+          {/* Quick Access Bar */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10 pb-10 border-b border-white/5">
+            <span className="text-sm text-muted-foreground">Ready to explore?</span>
+            <Button
+              onClick={() => navigate('/dashboard')}
+              className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600"
+            >
+              Launch PhiCor Engine
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </div>
+          
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             {/* Logo */}
             <div className="flex items-center gap-3">
@@ -616,7 +628,7 @@ const LandingPage = () => {
             <div className="flex items-center gap-6">
               <a 
                 href="/dashboard" 
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors font-medium"
               >
                 PhiCor Engine
               </a>
