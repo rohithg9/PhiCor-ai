@@ -106,35 +106,82 @@ def load_disease_data():
         print(f"❌ Error loading disease data: {e}")
         return False
 
-def test_new_organ_systems():
-    """Test that all new organ systems are present in organModels.js"""
-    print("\n🆕 TESTING NEW ORGAN SYSTEMS")
+def test_respiratory_diseases():
+    """Test expanded respiratory diseases for parameter modifications"""
+    print("\n🫁 TESTING EXPANDED RESPIRATORY DISEASES")
     print("=" * 50)
     
-    # Expected new organs from the review request
-    new_organs = [
-        "blood", "bonemarrow", "spleen", "lymphatic", 
-        "thyroid", "gi_tract", "breast", "prostate"
+    # Test diseases from the review request
+    test_diseases = [
+        {
+            "name": "Asthma (J45.9)",
+            "search_terms": ["asthma"],
+            "expected_affected": ["lungs", "blood"],
+            "key_modifications": ["fev1", "peak_flow", "eosinophils"],
+            "icd_code": "J45.9"
+        },
+        {
+            "name": "Community Acquired Pneumonia (J18.9)",
+            "search_terms": ["pneumonia"],
+            "expected_affected": ["lungs", "blood"],
+            "key_modifications": ["spo2", "wbc_count", "crp", "procalcitonin"],
+            "icd_code": "J18.9"
+        },
+        {
+            "name": "Pulmonary Embolism (I26.9)",
+            "search_terms": ["pulmonary embolism"],
+            "expected_affected": ["lungs", "heart", "blood"],
+            "key_modifications": ["d_dimer", "troponin", "bnp", "spo2"],
+            "icd_code": "I26.9"
+        }
     ]
     
     results = []
     
-    try:
-        with open('/app/frontend/src/data/organModels.js', 'r') as f:
-            content = f.read()
-            
-        for organ in new_organs:
-            if f'{organ}:' in content:
-                print(f"  ✅ {organ.capitalize()} organ model found")
-                results.append({"organ": organ, "status": "found"})
-            else:
-                print(f"  ❌ {organ.capitalize()} organ model not found")
-                results.append({"organ": organ, "status": "not_found"})
+    for disease in test_diseases:
+        print(f"\n📋 Testing: {disease['name']}")
+        
+        try:
+            with open('/app/frontend/src/data/respiratoryDiseasesExpanded.js', 'r') as f:
+                content = f.read()
                 
-        return results
-    except Exception as e:
-        print(f"❌ Error testing organ systems: {e}")
-        return []
+            # Look for the disease by ICD code
+            icd_code = disease['icd_code'].replace('.', '_')
+            
+            if icd_code in content:
+                print(f"  ✅ Disease {icd_code} found in data")
+                
+                # Check for modifications section
+                if 'modifications:' in content:
+                    print(f"  ✅ Modifications section found")
+                    
+                    # Check for affected organs
+                    for organ in disease['expected_affected']:
+                        if f'{organ}:' in content:
+                            print(f"  ✅ {organ.capitalize()} modifications found")
+                        else:
+                            print(f"  ⚠️  {organ.capitalize()} modifications not found")
+                    
+                    # Check for key modifications
+                    for mod in disease['key_modifications']:
+                        if mod in content:
+                            print(f"  ✅ {mod} parameter modification found")
+                        else:
+                            print(f"  ⚠️  {mod} parameter modification not found")
+                            
+                    results.append({"disease": disease['name'], "status": "found_with_modifications"})
+                else:
+                    print(f"  ❌ No modifications section found")
+                    results.append({"disease": disease['name'], "status": "found_no_modifications"})
+            else:
+                print(f"  ❌ Disease {icd_code} not found in data")
+                results.append({"disease": disease['name'], "status": "not_found"})
+                
+        except Exception as e:
+            print(f"  ❌ Error testing {disease['name']}: {e}")
+            results.append({"disease": disease['name'], "status": "error"})
+    
+    return results
 
 def test_autoimmune_diseases():
     """Test specific autoimmune diseases for parameter modifications"""
