@@ -576,6 +576,29 @@ export const RENAL_DISEASES = {
       mild: { description: "Mild hematuria, normal GFR" },
       moderate: { description: "Moderate proteinuria, decreased GFR" },
       severe: { description: "Rapidly progressive GN, requires urgent treatment" }
+    },
+    modifications: {
+      kidneys: {
+        geometry: {
+          kidney_length: { factor: 1.1, note: "Mild swelling from inflammation" },
+          kidney_volume: { factor: 1.15, note: "Edematous kidneys" }
+        },
+        physiology: {
+          gfr: { factor: 0.6, note: "Reduced from glomerular inflammation" },
+          rbf: { factor: 0.85, note: "Decreased renal blood flow" },
+          urine_output: { factor: 0.7, note: "Oliguria common" },
+          creatinine: { factor: 1.8, note: "Elevated serum creatinine" },
+          bun: { factor: 2.0, note: "Elevated BUN" }
+        },
+        pressures: {
+          glomerular_cap_p: { factor: 1.2, note: "Increased from inflammation" }
+        }
+      },
+      heart: {
+        physiology: {
+          blood_pressure: { factor: 1.2, note: "Hypertension from fluid retention" }
+        }
+      }
     }
   },
 
@@ -618,6 +641,33 @@ export const RENAL_DISEASES = {
       mild: { description: "Protein 3.5-5 g/day, albumin >2.5" },
       moderate: { description: "Protein 5-10 g/day, albumin 2.0-2.5" },
       severe: { description: "Protein >10 g/day, albumin <2.0, complications (thrombosis)" }
+    },
+    modifications: {
+      kidneys: {
+        geometry: {
+          kidney_length: { factor: 1.05, note: "May be normal or slightly enlarged" }
+        },
+        physiology: {
+          gfr: { factor: 0.8, note: "May be reduced depending on underlying cause" },
+          urine_output: { factor: 0.9, note: "Relatively preserved initially" },
+          creatinine: { factor: 1.3, note: "May be mildly elevated" }
+        },
+        structure: {
+          glomerular_basement: { factor: 1.5, note: "Thickened GBM in membranous" },
+          podocyte_foot_process: { factor: 2.5, note: "Foot process effacement" }
+        }
+      },
+      liver: {
+        physiology: {
+          albumin: { factor: 0.6, note: "Severe hypoalbuminemia (<3.0 g/dL)" },
+          albumin_synthesis: { factor: 1.5, note: "Compensatory increased synthesis" }
+        }
+      },
+      heart: {
+        physiology: {
+          blood_pressure: { factor: 0.9, note: "May be normal or low from hypoalbuminemia" }
+        }
+      }
     }
   },
 
@@ -655,6 +705,30 @@ export const RENAL_DISEASES = {
       mild: { description: "eGFR >60, mild proteinuria" },
       moderate: { description: "eGFR 30-59" },
       severe: { description: "eGFR <30, heavy proteinuria" }
+    },
+    modifications: {
+      kidneys: {
+        geometry: {
+          kidney_length: { factor: 0.85, note: "Chronically small kidneys" },
+          kidney_volume: { factor: 0.8, note: "Reduced kidney size" },
+          cortex_thickness: { factor: 0.7, note: "Cortical atrophy" }
+        },
+        physiology: {
+          gfr: { factor: 0.5, note: "Progressive decline over years" },
+          rbf: { factor: 0.7, note: "Reduced renal blood flow" },
+          urine_output: { factor: 0.8, note: "May have nocturia" },
+          creatinine: { factor: 2.0, note: "Elevated" },
+          bun: { factor: 2.5, note: "Elevated" }
+        },
+        structure: {
+          interstitial_volume: { factor: 2.0, note: "Interstitial fibrosis" }
+        }
+      },
+      heart: {
+        physiology: {
+          blood_pressure: { factor: 1.25, note: "Hypertension common" }
+        }
+      }
     }
   },
 
@@ -699,6 +773,39 @@ export const RENAL_DISEASES = {
       mild: { description: "Microalbuminuria (30-300 mg/g), normal GFR" },
       moderate: { description: "Macroalbuminuria (>300 mg/g), GFR declining" },
       severe: { description: "Nephrotic-range proteinuria, GFR <30" }
+    },
+    modifications: {
+      kidneys: {
+        geometry: {
+          kidney_length: { factor: 1.1, note: "Initially enlarged, then shrinks" },
+          kidney_volume: { factor: 1.15, note: "Hyperfiltration early" }
+        },
+        physiology: {
+          gfr: { factor: 0.6, note: "Progressive decline" },
+          filtration_fraction: { factor: 1.3, note: "Increased initially (hyperfiltration)" },
+          urine_output: { factor: 0.9, note: "Relatively preserved early" },
+          creatinine: { factor: 1.8, note: "Elevated" },
+          bun: { factor: 2.0, note: "Elevated" }
+        },
+        structure: {
+          glomerular_basement: { factor: 1.8, note: "GBM thickening characteristic" },
+          podocyte_foot_process: { factor: 2.0, note: "Podocyte injury" }
+        },
+        cellular: {
+          podocyte_count: { factor: 0.7, note: "Podocyte loss" }
+        }
+      },
+      pancreas: {
+        physiology: {
+          fasting_glucose: { factor: 1.4, note: "Poor glycemic control drives progression" },
+          hba1c: { factor: 1.5, note: "Elevated HbA1c" }
+        }
+      },
+      heart: {
+        physiology: {
+          blood_pressure: { factor: 1.2, note: "Hypertension common comorbidity" }
+        }
+      }
     }
   },
 
@@ -740,6 +847,36 @@ export const RENAL_DISEASES = {
       mild: { description: "CKD Stage 1-2" },
       moderate: { description: "CKD Stage 3" },
       severe: { description: "CKD Stage 4-5" }
+    },
+    modifications: {
+      kidneys: {
+        geometry: {
+          kidney_length: { factor: 0.85, note: "Bilaterally small kidneys" },
+          kidney_volume: { factor: 0.8, note: "Reduced volume" },
+          cortex_thickness: { factor: 0.7, note: "Cortical thinning" }
+        },
+        physiology: {
+          gfr: { factor: 0.5, note: "Gradually declining GFR" },
+          rbf: { factor: 0.7, note: "Reduced renal blood flow" },
+          creatinine: { factor: 2.0, note: "Elevated" },
+          bun: { factor: 2.2, note: "Elevated" }
+        },
+        pressures: {
+          renal_perfusion_p: { factor: 1.3, note: "Elevated renal perfusion pressure" }
+        },
+        structure: {
+          interstitial_volume: { factor: 1.8, note: "Nephrosclerosis and fibrosis" },
+          vascular_density: { factor: 0.7, note: "Arteriolar hyalinosis" }
+        }
+      },
+      heart: {
+        geometry: {
+          lv_mass: { factor: 1.2, note: "LVH from chronic hypertension" }
+        },
+        physiology: {
+          blood_pressure: { factor: 1.35, note: "Long-standing hypertension (cause)" }
+        }
+      }
     }
   },
 
@@ -789,6 +926,26 @@ export const RENAL_DISEASES = {
       mild: { description: "Uncomplicated, outpatient treatment possible" },
       moderate: { description: "Requires IV antibiotics, hospitalization" },
       severe: { description: "Sepsis, abscess, emphysematous pyelonephritis" }
+    },
+    modifications: {
+      kidneys: {
+        geometry: {
+          kidney_length: { factor: 1.15, note: "Swollen infected kidney" },
+          kidney_volume: { factor: 1.2, note: "Edema and inflammation" }
+        },
+        physiology: {
+          gfr: { factor: 0.8, note: "May be transiently reduced" },
+          rbf: { factor: 1.1, note: "Increased blood flow to infected area" },
+          urine_output: { factor: 0.9, note: "May be slightly reduced" },
+          creatinine: { factor: 1.2, note: "May be mildly elevated" }
+        }
+      },
+      heart: {
+        physiology: {
+          heart_rate: { factor: 1.2, note: "Tachycardia from fever/infection" },
+          blood_pressure: { factor: 0.9, note: "May be low if septic" }
+        }
+      }
     }
   },
 
@@ -830,6 +987,14 @@ export const RENAL_DISEASES = {
       mild: { description: "Uncomplicated, responds to short-course antibiotics" },
       moderate: { description: "Recurrent or complicated (diabetes, pregnancy)" },
       severe: { description: "Catheter-associated, multidrug-resistant organism" }
+    },
+    modifications: {
+      kidneys: {
+        physiology: {
+          gfr: { factor: 1.0, note: "Usually preserved in cystitis" },
+          urine_output: { factor: 1.2, note: "Frequency and urgency increase voiding" }
+        }
+      }
     }
   },
 
@@ -866,6 +1031,14 @@ export const RENAL_DISEASES = {
       mild: { description: "Uncomplicated" },
       moderate: { description: "Complicated" },
       severe: { description: "Septic" }
+    },
+    modifications: {
+      kidneys: {
+        physiology: {
+          gfr: { factor: 0.95, note: "Usually preserved" },
+          urine_output: { factor: 1.1, note: "Frequency" }
+        }
+      }
     }
   },
 
@@ -915,6 +1088,27 @@ export const RENAL_DISEASES = {
       mild: { description: "Small stone (<5mm), likely to pass spontaneously" },
       moderate: { description: "Medium stone (5-10mm), may need intervention" },
       severe: { description: "Large stone (>10mm), infected, or causing AKI" }
+    },
+    modifications: {
+      kidneys: {
+        geometry: {
+          kidney_length: { factor: 1.1, note: "Hydronephrosis if obstructed" },
+          kidney_volume: { factor: 1.15, note: "Swelling from obstruction" }
+        },
+        physiology: {
+          gfr: { factor: 0.85, note: "Reduced if obstructed" },
+          urine_output: { factor: 0.7, note: "Reduced on affected side" }
+        },
+        pressures: {
+          tubular_pressure: { factor: 2.0, note: "Elevated from obstruction" }
+        }
+      },
+      heart: {
+        physiology: {
+          heart_rate: { factor: 1.15, note: "Tachycardia from pain" },
+          blood_pressure: { factor: 1.1, note: "May be elevated from pain" }
+        }
+      }
     }
   },
 
@@ -954,6 +1148,27 @@ export const RENAL_DISEASES = {
       mild: { description: "Distal small stone, likely to pass" },
       moderate: { description: "Proximal or medium stone" },
       severe: { description: "Complete obstruction, infected (urologic emergency)" }
+    },
+    modifications: {
+      kidneys: {
+        geometry: {
+          kidney_length: { factor: 1.15, note: "Proximal hydronephrosis" },
+          kidney_volume: { factor: 1.2, note: "Swelling from obstruction" }
+        },
+        physiology: {
+          gfr: { factor: 0.8, note: "Reduced from obstruction" },
+          urine_output: { factor: 0.5, note: "Significantly reduced/obstructed" }
+        },
+        pressures: {
+          tubular_pressure: { factor: 2.5, note: "Markedly elevated" }
+        }
+      },
+      heart: {
+        physiology: {
+          heart_rate: { factor: 1.2, note: "Severe pain response" },
+          blood_pressure: { factor: 1.15, note: "Pain-induced hypertension" }
+        }
+      }
     }
   },
 
@@ -1000,6 +1215,40 @@ export const RENAL_DISEASES = {
       mild: { description: "Cysts present, normal GFR" },
       moderate: { description: "GFR declining, TKV >1500 mL" },
       severe: { description: "ESRD, requires RRT" }
+    },
+    modifications: {
+      kidneys: {
+        geometry: {
+          kidney_length: { factor: 1.8, note: "Massively enlarged kidneys" },
+          kidney_volume: { factor: 3.0, note: "TKV often >1500 mL" },
+          cortex_thickness: { factor: 0.6, note: "Cysts replace normal parenchyma" }
+        },
+        physiology: {
+          gfr: { factor: 0.5, note: "Progressive decline over decades" },
+          rbf: { factor: 0.8, note: "Reduced from cyst compression" },
+          urine_output: { factor: 1.1, note: "Concentrating ability impaired early" },
+          creatinine: { factor: 2.0, note: "Elevated in advanced disease" },
+          bun: { factor: 2.2, note: "Elevated" }
+        },
+        cellular: {
+          nephron_count: { factor: 0.5, note: "Nephron loss from cysts" }
+        }
+      },
+      liver: {
+        geometry: {
+          liver_volume: { factor: 1.3, note: "Hepatic cysts common" }
+        }
+      },
+      brain: {
+        pressures: {
+          icp: { factor: 1.1, note: "Risk of intracranial aneurysms" }
+        }
+      },
+      heart: {
+        physiology: {
+          blood_pressure: { factor: 1.25, note: "Early hypertension from RAAS activation" }
+        }
+      }
     }
   }
 };
