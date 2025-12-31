@@ -146,6 +146,40 @@ export const GI_DISEASES = {
           esophageal_diameter: { factor: 2.0, note: "Dilated esophagus" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "Chicago Classification v4.0",
+      requirements: {
+        manometry: "Impaired EGJ relaxation (IRP >15 mmHg) + absence of peristalsis",
+        types: {
+          type1: "No pressurization",
+          type2: "Panesophageal pressurization (best prognosis)",
+          type3: "Spastic/premature contractions"
+        }
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Pseudoachalasia", distinguishing: "Older age, weight loss, malignancy at GEJ" },
+      { condition: "Chagas disease", distinguishing: "Endemic area, megaesophagus + megacolon" },
+      { condition: "GERD", distinguishing: "Heartburn predominant, responds to PPI" },
+      { condition: "Esophageal stricture", distinguishing: "Dysphagia to solids only, dilation history" }
+    ],
+    treatment: {
+      endoscopic: [
+        { name: "Pneumatic dilation", indication: "First-line in many centers", evidence: "IA" },
+        { name: "POEM (Peroral Endoscopic Myotomy)", indication: "Preferred for type III", evidence: "IA" }
+      ],
+      surgical: [
+        { name: "Heller myotomy + partial fundoplication", indication: "Gold standard surgical", evidence: "IA" }
+      ],
+      medical: [
+        { name: "Botox injection", indication: "Poor surgical candidates", evidence: "IIB", note: "Temporary effect" }
+      ]
+    },
+    riskStratification: {
+      cancerRisk: "Squamous cell carcinoma risk 3% over 25 years",
+      aspirationRisk: "Chronic aspiration → pneumonia",
+      treatmentResponse: "Type II best response; Type III worst"
     }
   },
 
