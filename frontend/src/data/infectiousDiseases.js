@@ -299,6 +299,40 @@ export const INFECTIOUS_DISEASES = {
           lymph_node_size: { factor: 2.0, note: "Lymphadenopathy" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "WHO/CDC TB Diagnostic Criteria",
+      requirements: {
+        confirmed: "Positive culture or molecular test (GeneXpert/MTB RIF)",
+        presumptive: "AFB smear positive, or clinical/radiographic consistent with TB",
+        latent: "Positive TST (≥10mm) or IGRA without active disease"
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Lung cancer", distinguishing: "Mass lesion, no calcification, biopsy needed" },
+      { condition: "Sarcoidosis", distinguishing: "Bilateral hilar adenopathy, non-caseating granulomas" },
+      { condition: "NTM infection", distinguishing: "Similar presentation, culture identifies species" },
+      { condition: "Fungal infection", distinguishing: "Endemic area exposure, fungal markers positive" },
+      { condition: "Bacterial pneumonia", distinguishing: "Acute onset, responds to antibiotics" }
+    ],
+    treatment: {
+      drugSensitive: [
+        { name: "RIPE regimen", components: "Rifampin, Isoniazid, Pyrazinamide, Ethambutol", duration: "2 months intensive + 4 months continuation", evidence: "IA" },
+        { name: "Vitamin B6 (Pyridoxine)", dose: "25-50 mg daily", indication: "Prevent INH neuropathy" }
+      ],
+      mdrTB: [
+        { name: "Bedaquiline-based regimen", duration: "18-24 months or shorter course", evidence: "IA" },
+        { name: "Pretomanid/Bedaquiline/Linezolid", indication: "XDR-TB, BPaL regimen", evidence: "IA" }
+      ],
+      latent: [
+        { name: "3HP (INH/Rifapentine)", duration: "3 months weekly", indication: "Preferred for LTBI", evidence: "IA" },
+        { name: "Isoniazid", duration: "6-9 months daily", indication: "Alternative", evidence: "IA" }
+      ]
+    },
+    riskStratification: {
+      reactivationRisk: "HIV, immunosuppression, diabetes, recent infection",
+      mdrRisk: "Previous treatment, known MDR contact, endemic region",
+      mortality: "Low if drug-sensitive and treated; high if MDR/XDR"
     }
   },
 
