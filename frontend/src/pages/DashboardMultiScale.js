@@ -6,7 +6,7 @@ import {
   Activity, Moon, Sun, ChevronRight, ChevronDown, ChevronLeft,
   Layers, Atom, Heart, Zap, RotateCcw, BookOpen, Lightbulb,
   AlertTriangle, Check, Menu, X, Stethoscope, FlaskConical,
-  FileImage, Pill, Clock, TrendingUp, Info, Microscope,
+  FileImage, Pill, Clock, TrendingUp, TrendingDown, Info, Microscope,
   Brain, Sparkles, Loader2, Search, Thermometer, HeartPulse,
   TestTube, ScanLine, Syringe, ClipboardList, Calculator, Home
 } from 'lucide-react';
