@@ -2769,24 +2769,56 @@ const DashboardMultiScale = () => {
         {/* ALL AFFECTED PARAMETERS - Quick Summary Panel */}
         {currentDisease && allModifiedParameters.length > 0 && (
           <div className="border-b border-border/50 px-3 lg:px-6 py-3 bg-gradient-to-r from-destructive/5 via-orange-500/5 to-amber-500/5">
-            <div className="flex items-center gap-2 mb-2">
-              <AlertTriangle className="w-4 h-4 text-destructive" />
-              <span className="text-sm font-semibold text-foreground">All Affected Parameters</span>
-              <Badge variant="destructive" className="text-[10px]">{allModifiedParameters.length} changes</Badge>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-destructive" />
+                <span className="text-sm font-semibold text-foreground">
+                  {paramFilterOrgan 
+                    ? `${ORGAN_MODELS[paramFilterOrgan]?.name || paramFilterOrgan} Parameters` 
+                    : 'All Affected Parameters'}
+                </span>
+                <Badge variant="destructive" className="text-[10px]">
+                  {paramFilterOrgan 
+                    ? allModifiedParameters.filter(p => p.organId === paramFilterOrgan).length 
+                    : allModifiedParameters.length} changes
+                </Badge>
+              </div>
+              {/* Expand/Collapse button */}
+              {(paramFilterOrgan 
+                ? allModifiedParameters.filter(p => p.organId === paramFilterOrgan).length 
+                : allModifiedParameters.length) > 6 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowAllParams(!showAllParams)}
+                  className="text-xs h-7"
+                >
+                  {showAllParams ? (
+                    <>Show Less <ChevronUp className="w-3 h-3 ml-1" /></>
+                  ) : (
+                    <>Show All <ChevronDown className="w-3 h-3 ml-1" /></>
+                  )}
+                </Button>
+              )}
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2">
-              {allModifiedParameters.slice(0, 12).map((param, idx) => (
+              {(paramFilterOrgan 
+                ? allModifiedParameters.filter(p => p.organId === paramFilterOrgan) 
+                : allModifiedParameters
+              ).slice(0, showAllParams ? 100 : 12).map((param, idx) => (
                 <motion.button
                   key={`${param.organId}-${param.id}`}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.05 }}
+                  transition={{ delay: Math.min(idx * 0.03, 0.3) }}
                   onClick={() => {
                     setSelectedOrgan(param.organId);
                     setSelectedScale(param.scaleId);
                   }}
-                  className={`p-2 rounded-lg border text-left transition-all hover:scale-102 ${
-                    param.isPrimary 
+                  className={`p-2 rounded-lg border text-left transition-all hover:scale-[1.02] hover:shadow-md ${
+                    selectedOrgan === param.organId && selectedScale === param.scaleId
+                      ? 'ring-2 ring-primary bg-primary/10 border-primary/50'
+                      : param.isPrimary 
                       ? 'bg-destructive/10 border-destructive/30 hover:border-destructive/50' 
                       : 'bg-orange-500/10 border-orange-500/20 hover:border-orange-500/40'
                   }`}
@@ -2817,12 +2849,17 @@ const DashboardMultiScale = () => {
                 </motion.button>
               ))}
             </div>
-            {allModifiedParameters.length > 12 && (
-              <div className="text-center mt-2">
-                <span className="text-xs text-muted-foreground">
-                  +{allModifiedParameters.length - 12} more parameters affected
-                </span>
-              </div>
+            {!showAllParams && (paramFilterOrgan 
+              ? allModifiedParameters.filter(p => p.organId === paramFilterOrgan).length 
+              : allModifiedParameters.length) > 12 && (
+              <button 
+                onClick={() => setShowAllParams(true)}
+                className="w-full text-center mt-2 py-1 text-xs text-primary hover:text-primary/80 hover:underline cursor-pointer"
+              >
+                +{(paramFilterOrgan 
+                  ? allModifiedParameters.filter(p => p.organId === paramFilterOrgan).length 
+                  : allModifiedParameters.length) - 12} more parameters — Click to expand
+              </button>
             )}
           </div>
         )}
