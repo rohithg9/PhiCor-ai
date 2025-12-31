@@ -2877,16 +2877,15 @@ const DashboardMultiScale = () => {
                 </motion.button>
               ))}
             </div>
-            {!showAllParams && (paramFilterOrgan 
-              ? allModifiedParameters.filter(p => p.organId === paramFilterOrgan).length 
-              : allModifiedParameters.length) > 12 && (
+            {!showAllParams && filteredParameters.length > 12 && (
               <button 
-                onClick={() => setShowAllParams(true)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowAllParams(true);
+                }}
                 className="w-full text-center mt-2 py-1 text-xs text-primary hover:text-primary/80 hover:underline cursor-pointer"
               >
-                +{(paramFilterOrgan 
-                  ? allModifiedParameters.filter(p => p.organId === paramFilterOrgan).length 
-                  : allModifiedParameters.length) - 12} more parameters — Click to expand
+                +{filteredParameters.length - 12} more parameters — Click to expand
               </button>
             )}
           </div>
