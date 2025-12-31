@@ -213,30 +213,33 @@ def test_autoimmune_diseases():
     
     return results
 
-def test_oncology_diseases():
-    """Test specific oncology diseases for parameter modifications"""
-    print("\n🎗️ TESTING ONCOLOGY DISEASES")
+def test_infectious_diseases():
+    """Test specific infectious diseases for parameter modifications"""
+    print("\n🦠 TESTING INFECTIOUS DISEASES")
     print("=" * 50)
     
     # Test diseases from the review request
     test_diseases = [
         {
-            "name": "Acute Lymphoblastic Leukemia (C91.0)",
-            "expected_affected": ["bonemarrow", "blood", "lymphatic", "brain", "spleen", "liver"],
-            "key_modifications": ["blast_percentage", "wbc_count", "lymph_node_size"],
-            "expected_factors": {"blast_percentage": 20.0, "wbc_count": 5.0}
+            "name": "COVID-19 (U07.1)",
+            "search_terms": ["covid"],
+            "expected_affected": ["lungs", "heart", "blood", "kidneys"],
+            "key_modifications": ["spo2", "d_dimer", "ferritin", "crp"],
+            "icd_code": "U07.1"
         },
         {
-            "name": "Multiple Myeloma (C90.0)",
-            "expected_affected": ["bonemarrow", "blood", "kidneys"],
-            "key_modifications": ["plasma_cells", "hemoglobin", "gfr"],
-            "expected_factors": {"plasma_cells": 10.0, "hemoglobin": 0.6, "gfr": 0.5}
+            "name": "Sepsis (A41.9)",
+            "search_terms": ["sepsis"],
+            "expected_affected": ["blood", "heart", "kidneys", "lungs"],
+            "key_modifications": ["lactate", "procalcitonin", "wbc_count", "blood_pressure"],
+            "icd_code": "A41.9"
         },
         {
-            "name": "Breast Cancer (C50.9)",
-            "expected_affected": ["breast", "lymphatic"],
-            "key_modifications": ["lesion_size", "ca_15_3", "lymph_node_size"],
-            "expected_factors": {"lesion_size": 5.0, "ca_15_3": 3.0}
+            "name": "Pulmonary Tuberculosis (A15.0)",
+            "search_terms": ["tuberculosis"],
+            "expected_affected": ["lungs", "blood"],
+            "key_modifications": ["esr", "hemoglobin", "albumin"],
+            "icd_code": "A15.0"
         }
     ]
     
@@ -246,11 +249,11 @@ def test_oncology_diseases():
         print(f"\n📋 Testing: {disease['name']}")
         
         try:
-            with open('/app/frontend/src/data/oncologyDiseases.js', 'r') as f:
+            with open('/app/frontend/src/data/infectiousDiseases.js', 'r') as f:
                 content = f.read()
                 
             # Look for the disease by ICD code
-            icd_code = disease['name'].split('(')[1].split(')')[0].replace('.', '_')
+            icd_code = disease['icd_code'].replace('.', '_')
             
             if icd_code in content:
                 print(f"  ✅ Disease {icd_code} found in data")
@@ -272,14 +275,6 @@ def test_oncology_diseases():
                             print(f"  ✅ {mod} parameter modification found")
                         else:
                             print(f"  ⚠️  {mod} parameter modification not found")
-                    
-                    # Check for specific factor values if provided
-                    if 'expected_factors' in disease:
-                        for param, expected_factor in disease['expected_factors'].items():
-                            if f'factor: {expected_factor}' in content:
-                                print(f"  ✅ {param} factor {expected_factor} verified")
-                            else:
-                                print(f"  ⚠️  {param} factor {expected_factor} not verified")
                             
                     results.append({"disease": disease['name'], "status": "found_with_modifications"})
                 else:
