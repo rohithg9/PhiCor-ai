@@ -1303,7 +1303,7 @@ async def get_drugs_from_db(
         "offset": offset
     }
 
-@api_router.get("/drugs/db/{drug_id}")
+@api_router.get("/drugs-db/{drug_id}")
 async def get_drug_detail(drug_id: str):
     """Get complete drug details from MongoDB."""
     drug = await db.drugs.find_one({"id": drug_id}, {"_id": 0})
