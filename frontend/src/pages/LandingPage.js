@@ -169,6 +169,15 @@ const LandingPage = () => {
 
             {/* CTA Buttons */}
             <div className="flex items-center gap-2">
+              {/* Desktop Theme Toggle */}
+              <button
+                onClick={toggleTheme}
+                className="hidden md:flex p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
+                title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              >
+                {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
+              
               <Button
                 size="sm"
                 onClick={() => navigate('/dashboard')}
