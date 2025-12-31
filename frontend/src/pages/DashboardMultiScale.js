@@ -2555,6 +2555,16 @@ const DashboardMultiScale = () => {
                   <TreatmentGuidelinesPanel diseaseId={selectedDisease} />
                 )}
 
+                {/* Differential Diagnosis Panel */}
+                {!selectedDisease && (
+                  <DifferentialDiagnosisPanel 
+                    onSelectDisease={(diseaseCode) => {
+                      setSelectedDisease(diseaseCode);
+                      setSearchQuery(MERGED_DISEASE_MODELS[diseaseCode]?.name || '');
+                    }} 
+                  />
+                )}
+
                 {/* Parameters Section */}
                 {currentScale.parameters && currentScale.parameters.length > 0 && (
                   <section>
