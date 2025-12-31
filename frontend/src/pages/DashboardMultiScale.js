@@ -2751,10 +2751,12 @@ const DashboardMultiScale = () => {
                   key={organ.id}
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  onClick={() => {
-                    setSelectedOrgan(organ.id);
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
                     setParamFilterOrgan(organ.id);
                     setShowAllParams(false);
+                    // Don't change selectedOrgan - let filter work independently
                   }}
                   className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs whitespace-nowrap transition-all ${
                     paramFilterOrgan === organ.id
