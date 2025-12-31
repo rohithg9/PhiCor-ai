@@ -117,6 +117,31 @@ export const DERMATOLOGICAL_DISEASES = {
     
     differentialDiagnosis: ["Seborrheic dermatitis", "Eczema", "Pityriasis rosea", "Tinea corporis", "Lichen planus", "Secondary syphilis"],
     
+    treatment: {
+      topical: [
+        { name: "Corticosteroids", examples: "Betamethasone, Triamcinolone", indication: "First-line for localized", evidence: "IA" },
+        { name: "Vitamin D analogues", examples: "Calcipotriol", indication: "Steroid-sparing", evidence: "IA" },
+        { name: "Calcineurin inhibitors", examples: "Tacrolimus", indication: "Face, intertriginous", evidence: "IB" }
+      ],
+      phototherapy: [
+        { name: "NB-UVB", indication: "Moderate-severe, widespread", evidence: "IA" }
+      ],
+      systemic: [
+        { name: "Methotrexate", dose: "7.5-25 mg weekly", indication: "Moderate-severe", evidence: "IA" },
+        { name: "Cyclosporine", indication: "Rapid control", evidence: "IA" },
+        { name: "Acitretin", indication: "Pustular, palmoplantar", evidence: "IA" }
+      ],
+      biologics: [
+        { name: "IL-17 inhibitors", examples: "Secukinumab, Ixekizumab", indication: "Moderate-severe", evidence: "IA" },
+        { name: "IL-23 inhibitors", examples: "Guselkumab, Risankizumab", indication: "Moderate-severe", evidence: "IA" },
+        { name: "TNF inhibitors", examples: "Adalimumab", indication: "Alternative", evidence: "IA" }
+      ]
+    },
+    riskStratification: {
+      psaRisk: "30% develop psoriatic arthritis; screen regularly",
+      cardiovascularRisk: "2-3x increased CV events; treat as CV risk equivalent",
+      metabolicRisk: "Increased metabolic syndrome, diabetes"
+    },
     complications: ["Psoriatic arthritis (30%)", "Cardiovascular disease", "Metabolic syndrome", "Depression", "Erythrodermic psoriasis", "Pustular psoriasis"]
   },
 
