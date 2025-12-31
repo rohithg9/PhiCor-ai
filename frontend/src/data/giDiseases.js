@@ -837,6 +837,43 @@ export const GI_DISEASES = {
           hematocrit: { factor: 1.15, note: "Hemoconcentration" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "Revised Atlanta Classification",
+      requirements: {
+        diagnosis: "2 of 3: typical pain, lipase >3x ULN, imaging findings",
+        severity: {
+          mild: "No organ failure, no local complications",
+          moderatelySevere: "Transient organ failure <48h OR local complications",
+          severe: "Persistent organ failure >48h"
+        }
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Perforated viscus", distinguishing: "Free air on imaging, peritonitis" },
+      { condition: "Mesenteric ischemia", distinguishing: "Pain out of proportion, elevated lactate, vascular findings" },
+      { condition: "Biliary colic/cholecystitis", distinguishing: "RUQ pain, positive Murphy's, GB wall thickening" },
+      { condition: "MI", distinguishing: "ECG changes, troponin elevation" }
+    ],
+    treatment: {
+      supportive: [
+        { name: "Aggressive IV fluid resuscitation", indication: "5-10 mL/kg/hr LR initially", evidence: "IA" },
+        { name: "Pain control", indication: "Opioids as needed", evidence: "IA" },
+        { name: "NPO → early enteral feeding", indication: "Within 24-48h if tolerated", evidence: "IA" }
+      ],
+      biliary: [
+        { name: "ERCP", indication: "Cholangitis, persistent biliary obstruction", evidence: "IA" },
+        { name: "Cholecystectomy", indication: "Gallstone pancreatitis, same admission if mild", evidence: "IA" }
+      ],
+      complications: [
+        { name: "Necrosectomy", indication: "Infected necrosis, failure to improve", evidence: "IA", note: "Delay >4 weeks if possible" },
+        { name: "Step-up approach", note: "PCD → endoscopic → surgical", evidence: "IA" }
+      ]
+    },
+    riskStratification: {
+      mortality: "Mild: <1%; Severe: 30-50%",
+      predictors: "BISAP, Ranson criteria, APACHE II",
+      necrosis: "Infected necrosis: 30% mortality"
     }
   },
 
