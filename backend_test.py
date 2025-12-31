@@ -136,30 +136,33 @@ def test_new_organ_systems():
         print(f"❌ Error testing organ systems: {e}")
         return []
 
-def test_hematological_diseases():
-    """Test specific hematological diseases for parameter modifications"""
-    print("\n🩸 TESTING HEMATOLOGICAL DISEASES")
+def test_autoimmune_diseases():
+    """Test specific autoimmune diseases for parameter modifications"""
+    print("\n🦠 TESTING AUTOIMMUNE DISEASES")
     print("=" * 50)
     
     # Test diseases from the review request
     test_diseases = [
         {
-            "name": "Iron Deficiency Anemia (D50.9)",
-            "expected_affected": ["blood", "bonemarrow", "heart"],
-            "key_modifications": ["hemoglobin", "ferritin", "mcv"],
-            "expected_factors": {"hemoglobin": 0.6, "ferritin": 0.1, "mcv": 0.75}
+            "name": "Systemic Lupus Erythematosus (M32.9)",
+            "search_terms": ["lupus", "sle"],
+            "expected_affected": ["blood", "kidneys", "heart"],
+            "key_modifications": ["ana", "anti_dsdna", "complement_c3", "complement_c4"],
+            "icd_code": "M32.9"
         },
         {
-            "name": "Sickle Cell Disease (D57.1)",
-            "expected_affected": ["blood", "spleen", "bonemarrow"],
-            "key_modifications": ["hemoglobin", "reticulocyte_count", "spleen_volume"],
-            "expected_factors": {"hemoglobin": 0.55, "reticulocyte_count": 10.0, "spleen_volume": 0.3}
+            "name": "Rheumatoid Arthritis (M05.9)",
+            "search_terms": ["rheumatoid"],
+            "expected_affected": ["joints", "blood", "heart"],
+            "key_modifications": ["rf", "anti_ccp", "esr", "crp"],
+            "icd_code": "M05.9"
         },
         {
-            "name": "Aplastic Anemia (D61.9)",
-            "expected_affected": ["bonemarrow", "blood"],
-            "key_modifications": ["marrow_cellularity", "platelet_count", "wbc_count"],
-            "expected_factors": {"marrow_cellularity": 0.2}
+            "name": "Crohn's Disease (K50.9)",
+            "search_terms": ["crohn"],
+            "expected_affected": ["gi_tract", "blood"],
+            "key_modifications": ["crp", "esr", "albumin", "hemoglobin"],
+            "icd_code": "K50.9"
         }
     ]
     
@@ -169,11 +172,11 @@ def test_hematological_diseases():
         print(f"\n📋 Testing: {disease['name']}")
         
         try:
-            with open('/app/frontend/src/data/hematologicalDiseases.js', 'r') as f:
+            with open('/app/frontend/src/data/autoimmuneDiseases.js', 'r') as f:
                 content = f.read()
                 
             # Look for the disease by ICD code
-            icd_code = disease['name'].split('(')[1].split(')')[0].replace('.', '_')
+            icd_code = disease['icd_code'].replace('.', '_')
             
             if icd_code in content:
                 print(f"  ✅ Disease {icd_code} found in data")
@@ -195,14 +198,6 @@ def test_hematological_diseases():
                             print(f"  ✅ {mod} parameter modification found")
                         else:
                             print(f"  ⚠️  {mod} parameter modification not found")
-                    
-                    # Check for specific factor values if provided
-                    if 'expected_factors' in disease:
-                        for param, expected_factor in disease['expected_factors'].items():
-                            if f'factor: {expected_factor}' in content:
-                                print(f"  ✅ {param} factor {expected_factor} verified")
-                            else:
-                                print(f"  ⚠️  {param} factor {expected_factor} not verified")
                             
                     results.append({"disease": disease['name'], "status": "found_with_modifications"})
                 else:
