@@ -2731,7 +2731,9 @@ const DashboardMultiScale = () => {
               <motion.button
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
                   setParamFilterOrgan(null);
                   setShowAllParams(false);
                 }}
