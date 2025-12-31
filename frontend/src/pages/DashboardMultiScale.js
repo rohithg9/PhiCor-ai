@@ -3117,6 +3117,29 @@ const DashboardMultiScale = () => {
                     </div>
                   </section>
                 )}
+
+                {/* Clinical Evidence Section - Moved to bottom, expanded by default */}
+                {currentDisease && (
+                  <section className="mt-6 pt-6 border-t border-border/50">
+                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
+                      <Stethoscope className="w-4 h-4" />
+                      Clinical Evidence
+                    </h3>
+                    <ClinicalFindingsPanel
+                      disease={currentDisease}
+                      isExpanded={true}
+                      onToggle={handleToggleClinicalPanel}
+                      alwaysExpanded={true}
+                    />
+                  </section>
+                )}
+
+                {/* Evidence-Based Treatment Guidelines Panel */}
+                {currentDisease && selectedDisease && (
+                  <section className="mt-6">
+                    <TreatmentGuidelinesPanel diseaseId={selectedDisease} />
+                  </section>
+                )}
               </div>
             ) : (
               <div className="h-full flex items-center justify-center text-muted-foreground">
