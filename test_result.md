@@ -241,6 +241,18 @@ frontend:
         agent: "testing"
         comment: "TESTED: Neurological disease modifications successfully verified. ✅ Ischemic Stroke (I63.9): Found with brain modifications (cbf 0.4x, icp 1.3x, cpp 0.85x) and heart modifications. Shows 'AFFECTED: Brain 8 | Heart 2' as expected. ✅ Parkinson's Disease (G20): Found with brain modifications (neuron_density 0.7x, cbf 0.9x). ✅ Multiple Sclerosis (G35): Found with brain modifications (white_matter 0.85x, myelin_volume 0.7x). ✅ Bacterial Meningitis (G00.9): Found with brain modifications (icp 1.8x, csf_pressure 2.5x). All 4 tested neurological diseases have comprehensive parameter modifications with correct brain parameter targeting and clinically accurate factor values."
 
+  - task: "Clinical Guidelines and Bidirectional Mapping Implementation"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/data/diseaseGuidelines.js, /app/frontend/src/data/bidirectionalMapping.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "TESTED: Clinical Guidelines and Bidirectional Mapping Implementation fully functional. ✅ BIDIRECTIONAL MAPPING: All 3 required functions verified (getConditionsAffectingParameter, getDifferentialDiagnosis, buildParameterToDiseaseIndex). All 9 disease category imports confirmed. Reverse index builder working. ✅ CLINICAL GUIDELINES: All 4 target diseases verified - Breast Cancer (C50.9) with pathology criteria, staging, surgery options, treatment by subtype; Ischemic Stroke (I63.9) with NIHSS scoring, tPA 4.5h window, thrombectomy 24h window, secondary prevention; Multiple Sclerosis (G35) with McDonald 2017 criteria, IV Methylprednisolone, DMTs including Ocrelizumab/Natalizumab; CLL (C91.1) with watch/wait criteria, BTK inhibitors (Ibrutinib, Acalabrutinib), Venetoclax+Obinutuzumab. ✅ EVIDENCE LEVELS: Complete implementation with 11 levels (IA-IIIB) and strength descriptions. ✅ 27 diseases with comprehensive diagnostic criteria, treatments, evidence levels, and drug names. Disease count exceeds 214+ target (252 total). All clinical guidelines functionality working as expected."
+
   - task: "Major System Expansion - New Organs and Disease Categories"
     implemented: true
     working: true
