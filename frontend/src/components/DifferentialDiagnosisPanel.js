@@ -387,7 +387,7 @@ PMH: HTN, DM2"
                   key={finding.id}
                   className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 flex items-center gap-2 text-sm"
                 >
-                  <DirectionIcon direction={finding.direction} />
+                  {renderDirectionIcon(finding.direction)}
                   <span className="text-white">{finding.parameterId.replace(/_/g, ' ')}</span>
                   {finding.value && (
                     <span className="text-gray-400">({finding.value})</span>
