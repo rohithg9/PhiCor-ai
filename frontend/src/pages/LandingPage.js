@@ -38,9 +38,18 @@ const LandingPage = () => {
 
   // Smooth scroll to section
   const scrollToSection = (sectionId) => {
+    if (sectionId === 'contact') {
+      window.location.href = 'mailto:drrohithg@gmail.com';
+      return;
+    }
     const element = document.getElementById(sectionId);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const navHeight = 64; // Height of sticky nav
+      const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({
+        top: elementPosition - navHeight,
+        behavior: 'smooth'
+      });
     }
     setMobileMenuOpen(false);
   };
