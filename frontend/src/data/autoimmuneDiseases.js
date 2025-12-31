@@ -1448,6 +1448,52 @@ export const AUTOIMMUNE_DISEASES = {
           spinal_mobility: { factor: 0.75, note: "Axial involvement" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "CASPAR Criteria",
+      requirements: {
+        entryRequirement: "Inflammatory articular disease (joints, spine, or entheses)",
+        threshold: "≥3 points",
+        criteria: {
+          "Current psoriasis": 2,
+          "History of psoriasis": 1,
+          "Family history of psoriasis": 1,
+          "Psoriatic nail dystrophy": 1,
+          "Negative RF": 1,
+          "Current dactylitis": 1,
+          "History of dactylitis": 1,
+          "Juxtaarticular new bone formation on X-ray": 1
+        }
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Rheumatoid arthritis", distinguishing: "RF/anti-CCP positive, symmetric, no DIP, no psoriasis" },
+      { condition: "Ankylosing spondylitis", distinguishing: "Symmetric sacroiliitis, no psoriasis, no DIP" },
+      { condition: "Reactive arthritis", distinguishing: "Preceding infection, asymmetric, conjunctivitis" },
+      { condition: "Gout", distinguishing: "Monoarticular, crystals on aspiration, elevated uric acid" },
+      { condition: "Osteoarthritis", distinguishing: "Non-inflammatory, no psoriasis, osteophytes" }
+    ],
+    treatment: {
+      mildModerate: [
+        { name: "NSAIDs", indication: "First-line for mild disease", evidence: "IA" },
+        { name: "Local corticosteroid injection", indication: "Mono/oligoarthritis", evidence: "IB" },
+        { name: "Methotrexate", dose: "15-25 mg weekly", indication: "Skin + joint disease", evidence: "IB" }
+      ],
+      moderateSevere: [
+        { name: "TNF inhibitors", examples: "Adalimumab, Etanercept, Infliximab", indication: "First-line biologic", evidence: "IA" },
+        { name: "IL-17 inhibitors", examples: "Secukinumab, Ixekizumab", indication: "Alternative first-line, especially skin", evidence: "IA" },
+        { name: "IL-12/23 inhibitor", examples: "Ustekinumab", indication: "Alternative biologic", evidence: "IA" },
+        { name: "IL-23 inhibitors", examples: "Guselkumab, Risankizumab", indication: "Excellent skin response", evidence: "IA" },
+        { name: "JAK inhibitors", examples: "Tofacitinib, Upadacitinib", indication: "Oral option for severe disease", evidence: "IA" }
+      ],
+      axial: [
+        { name: "TNF inhibitors or IL-17 inhibitors", indication: "First-line for axial PsA", evidence: "IA" }
+      ]
+    },
+    riskStratification: {
+      progression: "20% develop mutilating arthritis; early aggressive treatment recommended",
+      cardiovascular: "Increased CV risk; treat as CV risk equivalent",
+      metabolicSyndrome: "High prevalence; screen and manage"
     }
   }
 };
