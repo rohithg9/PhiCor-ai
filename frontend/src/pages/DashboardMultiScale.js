@@ -29,6 +29,9 @@ import { ALL_METABOLIC_DISEASES, METABOLIC_CATEGORIES } from '../data/metabolicD
 import { ALL_HEMATOLOGICAL_DISEASES, HEMATOLOGICAL_CATEGORIES } from '../data/hematologicalDiseasesIndex';
 import { ALL_ONCOLOGY_DISEASES, ONCOLOGY_CATEGORIES } from '../data/oncologyDiseasesIndex';
 import { ALL_CONGENITAL_DISEASES, CONGENITAL_CATEGORIES } from '../data/congenitalDiseasesIndex';
+import { ALL_AUTOIMMUNE_DISEASES, AUTOIMMUNE_CATEGORIES } from '../data/autoimmuneDiseasesIndex';
+import { ALL_INFECTIOUS_DISEASES, INFECTIOUS_CATEGORIES } from '../data/infectiousDiseasesIndex';
+import { ALL_GI_DISEASES, GI_CATEGORIES } from '../data/giDiseasesIndex';
 import { enhanceDiseaseWithTemplates, generateModifications } from '../data/diseaseTemplates';
 import LungCancerModule from '../components/LungCancerModule';
 import TreatmentGuidelinesPanel from '../components/TreatmentGuidelinesPanel';
