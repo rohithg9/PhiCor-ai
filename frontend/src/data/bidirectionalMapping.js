@@ -18,6 +18,10 @@ import { ALL_CONGENITAL_DISEASES } from './congenitalDiseasesIndex';
 import { ALL_AUTOIMMUNE_DISEASES } from './autoimmuneDiseasesIndex';
 import { ALL_INFECTIOUS_DISEASES } from './infectiousDiseasesIndex';
 import { ALL_GI_DISEASES } from './giDiseasesIndex';
+import { ALL_DERMATOLOGICAL_DISEASES } from './dermatologicalDiseasesIndex';
+import { ALL_PSYCHIATRIC_DISEASES } from './psychiatricDiseasesIndex';
+import { ALL_PEDIATRIC_DISEASES } from './pediatricDiseasesIndex';
+import { ALL_OBGYN_DISEASES } from './obgynDiseasesIndex';
 
 // Combine all disease databases
 const ALL_DISEASES = {
@@ -33,6 +37,10 @@ const ALL_DISEASES = {
   ...ALL_AUTOIMMUNE_DISEASES,
   ...ALL_INFECTIOUS_DISEASES,
   ...ALL_GI_DISEASES,
+  ...ALL_DERMATOLOGICAL_DISEASES,
+  ...ALL_PSYCHIATRIC_DISEASES,
+  ...ALL_PEDIATRIC_DISEASES,
+  ...ALL_OBGYN_DISEASES,
 };
 
 // Disease prevalence weights (per 100,000 population, approximate)
