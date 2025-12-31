@@ -186,7 +186,7 @@ const LandingPage = () => {
                   <span className="text-white font-serif text-xl sm:text-2xl font-bold">Δ</span>
                 </button>
                 
-                {/* ρ - Drugs Database */}
+                {/* ρ - Drug Details */}
                 <button
                   onClick={() => navigate('/drugs')}
                   className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 flex items-center justify-center transition-all shadow-lg shadow-rose-500/20 hover:shadow-rose-500/40 hover:scale-105"
