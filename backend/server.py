@@ -1353,7 +1353,7 @@ async def get_drug_categories():
         "drug_classes": classes
     }
 
-@api_router.get("/drugs/db/by-disease/{disease_id}")
+@api_router.get("/drugs-db/by-disease/{disease_id}")
 async def get_drugs_for_disease(disease_id: str):
     """Get all drugs indicated for a specific disease."""
     drugs = await db.drugs.find(
