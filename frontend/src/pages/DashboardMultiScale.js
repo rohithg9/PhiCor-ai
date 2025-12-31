@@ -39,7 +39,7 @@ import { ALL_OBGYN_DISEASES, OBGYN_CATEGORIES } from '../data/obgynDiseasesIndex
 import { enhanceDiseaseWithTemplates, generateModifications } from '../data/diseaseTemplates';
 import LungCancerModule from '../components/LungCancerModule';
 import TreatmentGuidelinesPanel from '../components/TreatmentGuidelinesPanel';
-import DifferentialDiagnosisPanel from '../components/DifferentialDiagnosisPanel';
+import FeatureNav from '../components/FeatureNav';
 import 'katex/dist/katex.min.css';
 import { BlockMath, InlineMath } from 'react-katex';
 
