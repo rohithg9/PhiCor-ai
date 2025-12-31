@@ -890,6 +890,46 @@ export const AUTOIMMUNE_DISEASES = {
           albumin: { factor: 0.75, note: "Hypoalbuminemia" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "Clinical + Endoscopic + Histologic",
+      requirements: {
+        clinical: "Chronic diarrhea, abdominal pain, weight loss",
+        endoscopic: "Skip lesions, cobblestoning, aphthous/deep ulcers, strictures",
+        histologic: "Non-caseating granulomas (30-50%), transmural inflammation",
+        exclusions: "Rule out infections, malignancy, other IBD"
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Ulcerative colitis", distinguishing: "Continuous from rectum, bloody diarrhea, no granulomas" },
+      { condition: "Intestinal tuberculosis", distinguishing: "Ileocecal, caseating granulomas, TB exposure" },
+      { condition: "Celiac disease", distinguishing: "Anti-tTG positive, villous atrophy on biopsy" },
+      { condition: "NSAID enteropathy", distinguishing: "NSAID use, diaphragm strictures" },
+      { condition: "Behçet disease", distinguishing: "Oral/genital ulcers, uveitis, pathergy" }
+    ],
+    treatment: {
+      induction: [
+        { name: "Budesonide", dose: "9 mg daily", indication: "Mild-moderate ileocolonic", evidence: "IA" },
+        { name: "Prednisone", dose: "40-60 mg daily", indication: "Moderate-severe", evidence: "IA" },
+        { name: "Exclusive enteral nutrition", indication: "Pediatric induction", evidence: "IA" }
+      ],
+      maintenance: [
+        { name: "Azathioprine/6-MP", indication: "Steroid-dependent", evidence: "IA" },
+        { name: "Methotrexate", dose: "25 mg IM weekly", indication: "Azathioprine failure", evidence: "IB" }
+      ],
+      biologics: [
+        { name: "Anti-TNF", examples: "Infliximab, Adalimumab", indication: "Moderate-severe", evidence: "IA" },
+        { name: "Vedolizumab", mechanism: "Anti-α4β7 integrin", indication: "Gut-selective option", evidence: "IA" },
+        { name: "Ustekinumab", mechanism: "Anti-IL-12/23", indication: "Anti-TNF failure", evidence: "IA" }
+      ],
+      surgical: [
+        { note: "70-80% require surgery; ileocecal resection, strictureplasty, abscess drainage" }
+      ]
+    },
+    riskStratification: {
+      surgery: "70-80% lifetime risk; minimize resection length",
+      colorectalCancer: "Increased with colonic involvement; surveillance colonoscopy",
+      malnutrition: "Monitor weight, albumin, micronutrients"
     }
   },
 
