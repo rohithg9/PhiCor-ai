@@ -155,25 +155,32 @@ const DifferentialDiagnosisPanel = ({ onSelectDisease }) => {
   
   // Add a finding manually
   const addFinding = useCallback(() => {
-    if (!selectedParam) return;
+    if (!selectedParam || !valueAnalysis || valueAnalysis.isNormal) return;
     
     const existing = abnormalFindings.find(f => f.parameterId === selectedParam);
     if (existing) return;
     
+    const paramInfo = selectedOrgan && allParameters[selectedOrgan]?.parameters.find(p => p.id === selectedParam);
+    
     const newFinding = {
       id: `finding_${Date.now()}`,
       parameterId: selectedParam,
+      parameterName: paramInfo?.name || selectedParam,
       organ: selectedOrgan,
-      direction: paramDirection,
-      severity: paramSeverity,
-      normalRange: NORMAL_RANGES[selectedParam] ? 
-        `${NORMAL_RANGES[selectedParam].min}-${NORMAL_RANGES[selectedParam].max} ${NORMAL_RANGES[selectedParam].unit}` : 
+      direction: valueAnalysis.direction,
+      severity: valueAnalysis.severity,
+      actualValue: paramValue,
+      normalRange: selectedParamRange ? 
+        `${selectedParamRange.min}-${selectedParamRange.max} ${selectedParamRange.unit}` : 
         'N/A',
+      unit: selectedParamRange?.unit || '',
+      isCritical: valueAnalysis.isCritical,
     };
     
     setAbnormalFindings(prev => [...prev, newFinding]);
     setSelectedParam('');
-  }, [selectedParam, selectedOrgan, paramDirection, paramSeverity, abnormalFindings]);
+    setShowValueInput(false);
+  }, [selectedParam, selectedOrgan, valueAnalysis, paramValue, selectedParamRange, abnormalFindings, allParameters]);
   
   // Remove a finding
   const removeFinding = useCallback((id) => {
