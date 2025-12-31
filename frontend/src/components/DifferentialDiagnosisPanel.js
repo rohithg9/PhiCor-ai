@@ -506,7 +506,7 @@ PMH: HTN, DM2"
                           <div className="space-y-1">
                             {dx.matchedParams.map((param, idx) => (
                               <div key={idx} className="flex items-center gap-2 text-xs">
-                                <DirectionIcon direction={param.direction} />
+                                {renderDirectionIcon(param.direction)}
                                 <span className="text-white">{param.param.replace(/_/g, ' ')}</span>
                                 <span className="text-gray-500">({param.expectedChange})</span>
                               </div>
