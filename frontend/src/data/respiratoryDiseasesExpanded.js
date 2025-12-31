@@ -299,6 +299,41 @@ export const RESPIRATORY_DISEASES_EXPANDED = {
           d_dimer: { factor: 10.0, note: "Markedly elevated" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "PERC/Wells + CTPA",
+      requirements: {
+        perc: "If all PERC criteria negative and low clinical probability, no further testing needed",
+        wells: "Low (<2), Moderate (2-6), High (>6) probability",
+        diagnosis: "CT pulmonary angiography (gold standard); V/Q scan if CKD"
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Pneumonia", distinguishing: "Productive cough, fever, consolidation on CXR" },
+      { condition: "Heart failure", distinguishing: "Elevated BNP, cardiomegaly, peripheral edema" },
+      { condition: "Pneumothorax", distinguishing: "Sudden onset, absent breath sounds, CXR diagnostic" },
+      { condition: "Aortic dissection", distinguishing: "Tearing pain, blood pressure differential, CT angiography" }
+    ],
+    treatment: {
+      anticoagulation: [
+        { name: "LMWH", examples: "Enoxaparin", indication: "Initial anticoagulation", evidence: "IA" },
+        { name: "DOACs", examples: "Rivaroxaban, Apixaban", indication: "Preferred for most patients", evidence: "IA" },
+        { name: "Warfarin", indication: "Alternative, especially with APS", evidence: "IA" }
+      ],
+      massive: [
+        { name: "Thrombolysis", examples: "tPA 100mg over 2h", indication: "Massive PE with hemodynamic instability", evidence: "IA" },
+        { name: "Surgical embolectomy", indication: "Contraindication to lysis", evidence: "IB" },
+        { name: "Catheter-directed therapy", indication: "Intermediate-high risk", evidence: "IB" }
+      ],
+      supportive: [
+        { name: "Oxygen", indication: "Hypoxemia", evidence: "IA" },
+        { name: "Hemodynamic support", indication: "RV failure", evidence: "IA" }
+      ]
+    },
+    riskStratification: {
+      pesi: "sPESI or PESI score stratifies mortality risk",
+      mortality: "Low risk: 1%; Intermediate: 3-15%; High/massive: 15-65%",
+      duration: "3 months minimum; longer if unprovoked or recurrent"
     }
   },
 
