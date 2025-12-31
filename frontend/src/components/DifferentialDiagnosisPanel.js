@@ -307,69 +307,178 @@ const DifferentialDiagnosisPanel = ({ onSelectDisease }) => {
         {activeTab === 'parameters' && (
           <div className="space-y-4">
             {/* Parameter Selection */}
-            <div className="grid grid-cols-4 gap-2">
-              <select
-                value={selectedOrgan}
-                onChange={(e) => {
-                  setSelectedOrgan(e.target.value);
-                  setSelectedParam('');
-                }}
-                className="bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white"
-              >
-                <option value="">Select Organ</option>
-                {Object.entries(allParameters).map(([key, organ]) => (
-                  <option key={key} value={key}>{organ.icon} {organ.name}</option>
-                ))}
-              </select>
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-2">
+                <select
+                  value={selectedOrgan}
+                  onChange={(e) => {
+                    setSelectedOrgan(e.target.value);
+                    setSelectedParam('');
+                    setShowValueInput(false);
+                  }}
+                  className="bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white"
+                >
+                  <option value="">Select Organ/System</option>
+                  {Object.entries(allParameters).map(([key, organ]) => (
+                    <option key={key} value={key}>{organ.icon} {organ.name}</option>
+                  ))}
+                </select>
+                
+                <select
+                  value={selectedParam}
+                  onChange={(e) => setSelectedParam(e.target.value)}
+                  disabled={!selectedOrgan}
+                  className="bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white disabled:opacity-50"
+                >
+                  <option value="">Select Parameter</option>
+                  {selectedOrgan && allParameters[selectedOrgan]?.parameters.map(param => (
+                    <option key={param.id} value={param.id}>{param.name}</option>
+                  ))}
+                </select>
+              </div>
               
-              <select
-                value={selectedParam}
-                onChange={(e) => setSelectedParam(e.target.value)}
-                disabled={!selectedOrgan}
-                className="bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white disabled:opacity-50"
-              >
-                <option value="">Select Parameter</option>
-                {selectedOrgan && allParameters[selectedOrgan]?.parameters.map(param => (
-                  <option key={param.id} value={param.id}>{param.name}</option>
-                ))}
-              </select>
+              {/* Value Input Section - Shows when parameter is selected */}
+              {showValueInput && selectedParamRange && (
+                <div className="bg-gray-800/70 rounded-lg p-4 border border-gray-600 space-y-3">
+                  {/* Normal Range Display */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Gauge className="w-4 h-4 text-blue-400" />
+                      <span className="text-sm text-gray-300">
+                        Normal Range: <span className="text-green-400 font-medium">
+                          {selectedParamRange.min} - {selectedParamRange.max} {selectedParamRange.unit}
+                        </span>
+                      </span>
+                    </div>
+                    {valueAnalysis && (
+                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                        valueAnalysis.isNormal 
+                          ? 'bg-green-900/50 text-green-400' 
+                          : valueAnalysis.isCritical
+                            ? 'bg-red-900/50 text-red-400'
+                            : 'bg-yellow-900/50 text-yellow-400'
+                      }`}>
+                        {valueAnalysis.isNormal 
+                          ? '✓ Normal' 
+                          : valueAnalysis.isCritical
+                            ? '⚠ Critical'
+                            : valueAnalysis.isLow ? '↓ Low' : '↑ High'}
+                      </span>
+                    )}
+                  </div>
+                  
+                  {/* Current Value Display */}
+                  <div className="text-center">
+                    <div className={`text-3xl font-bold ${
+                      valueAnalysis?.isNormal 
+                        ? 'text-green-400' 
+                        : valueAnalysis?.isCritical
+                          ? 'text-red-400'
+                          : valueAnalysis?.isLow 
+                            ? 'text-blue-400' 
+                            : 'text-orange-400'
+                    }`}>
+                      {paramValue?.toFixed(selectedParamRange.unit === '%' || paramValue >= 10 ? 0 : 1)} 
+                      <span className="text-lg text-gray-400 ml-1">{selectedParamRange.unit}</span>
+                    </div>
+                    {valueAnalysis && !valueAnalysis.isNormal && (
+                      <div className="text-xs text-gray-400 mt-1">
+                        {valueAnalysis.percentFromNormal}% {valueAnalysis.isLow ? 'below' : 'above'} normal
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Value Slider */}
+                  <div className="px-2">
+                    <input
+                      type="range"
+                      min={selectedParamRange.criticalLow || selectedParamRange.min * 0.3}
+                      max={selectedParamRange.criticalHigh || selectedParamRange.max * 2}
+                      step={(selectedParamRange.max - selectedParamRange.min) / 100}
+                      value={paramValue || selectedParamRange.min}
+                      onChange={(e) => setParamValue(parseFloat(e.target.value))}
+                      className="w-full h-2 rounded-lg appearance-none cursor-pointer"
+                      style={{
+                        background: `linear-gradient(to right, 
+                          #ef4444 0%, 
+                          #ef4444 ${((selectedParamRange.criticalLow || selectedParamRange.min * 0.3) / (selectedParamRange.criticalHigh || selectedParamRange.max * 2)) * 100}%,
+                          #3b82f6 ${((selectedParamRange.criticalLow || selectedParamRange.min * 0.3) / (selectedParamRange.criticalHigh || selectedParamRange.max * 2)) * 100}%,
+                          #3b82f6 ${(selectedParamRange.min / (selectedParamRange.criticalHigh || selectedParamRange.max * 2)) * 100}%,
+                          #22c55e ${(selectedParamRange.min / (selectedParamRange.criticalHigh || selectedParamRange.max * 2)) * 100}%,
+                          #22c55e ${(selectedParamRange.max / (selectedParamRange.criticalHigh || selectedParamRange.max * 2)) * 100}%,
+                          #f97316 ${(selectedParamRange.max / (selectedParamRange.criticalHigh || selectedParamRange.max * 2)) * 100}%,
+                          #ef4444 100%
+                        )`
+                      }}
+                    />
+                    <div className="flex justify-between text-[10px] text-gray-500 mt-1">
+                      <span>↓ Critical Low</span>
+                      <span className="text-green-500">Normal Range</span>
+                      <span>↑ Critical High</span>
+                    </div>
+                  </div>
+                  
+                  {/* Quick Value Buttons */}
+                  <div className="flex gap-2 justify-center">
+                    <button
+                      onClick={() => setParamValue(selectedParamRange.criticalLow || selectedParamRange.min * 0.5)}
+                      className="px-3 py-1 text-xs bg-red-900/50 text-red-400 rounded hover:bg-red-900/70"
+                    >
+                      Critical Low
+                    </button>
+                    <button
+                      onClick={() => setParamValue(selectedParamRange.min * 0.9)}
+                      className="px-3 py-1 text-xs bg-blue-900/50 text-blue-400 rounded hover:bg-blue-900/70"
+                    >
+                      Low
+                    </button>
+                    <button
+                      onClick={() => setParamValue((selectedParamRange.min + selectedParamRange.max) / 2)}
+                      className="px-3 py-1 text-xs bg-green-900/50 text-green-400 rounded hover:bg-green-900/70"
+                    >
+                      Normal
+                    </button>
+                    <button
+                      onClick={() => setParamValue(selectedParamRange.max * 1.2)}
+                      className="px-3 py-1 text-xs bg-orange-900/50 text-orange-400 rounded hover:bg-orange-900/70"
+                    >
+                      High
+                    </button>
+                    <button
+                      onClick={() => setParamValue(selectedParamRange.criticalHigh || selectedParamRange.max * 2)}
+                      className="px-3 py-1 text-xs bg-red-900/50 text-red-400 rounded hover:bg-red-900/70"
+                    >
+                      Critical High
+                    </button>
+                  </div>
+                  
+                  {/* Direct Input */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-400">Or enter value:</span>
+                    <Input
+                      type="number"
+                      value={paramValue || ''}
+                      onChange={(e) => setParamValue(parseFloat(e.target.value) || 0)}
+                      className="w-24 bg-gray-900 border-gray-600 text-center text-sm"
+                      step={selectedParamRange.unit === '%' ? 1 : 0.1}
+                    />
+                    <span className="text-xs text-gray-400">{selectedParamRange.unit}</span>
+                  </div>
+                </div>
+              )}
               
-              <select
-                value={paramDirection}
-                onChange={(e) => setParamDirection(e.target.value)}
-                className="bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white"
-              >
-                <option value="increase">↑ Increased</option>
-                <option value="decrease">↓ Decreased</option>
-              </select>
-              
+              {/* Add Button */}
               <Button
                 onClick={addFinding}
-                disabled={!selectedParam}
-                className="bg-purple-600 hover:bg-purple-700"
+                disabled={!selectedParam || !valueAnalysis || valueAnalysis.isNormal}
+                className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-50"
               >
-                <Plus className="w-4 h-4 mr-1" /> Add
+                <Plus className="w-4 h-4 mr-2" /> 
+                {valueAnalysis?.isNormal 
+                  ? 'Value is Normal (Select Abnormal Value)' 
+                  : 'Add Abnormal Finding'}
               </Button>
             </div>
-            
-            {/* Severity Slider */}
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-400">Severity:</span>
-              <input
-                type="range"
-                min="0.5"
-                max="3"
-                step="0.5"
-                value={paramSeverity}
-                onChange={(e) => setParamSeverity(parseFloat(e.target.value))}
-                className="flex-1"
-              />
-              <span className="text-sm text-white w-16">
-                {paramSeverity <= 1 ? 'Mild' : paramSeverity <= 2 ? 'Moderate' : 'Severe'}
-              </span>
-            </div>
-          </div>
-        )}
         
         {/* Clinical Text Tab */}
         {activeTab === 'clinical' && (
