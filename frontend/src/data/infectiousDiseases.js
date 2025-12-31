@@ -1134,6 +1134,40 @@ export const INFECTIOUS_DISEASES = {
           gfr: { factor: 0.9, note: "HBV-associated nephropathy possible" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "Serology-Based Diagnosis",
+      requirements: {
+        acuteInfection: "HBsAg+, anti-HBc IgM+, HBV DNA+",
+        chronicInfection: "HBsAg+ >6 months, anti-HBc IgG+",
+        recovered: "HBsAg-, anti-HBs+, anti-HBc+",
+        vaccinated: "anti-HBs+ only"
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Hepatitis A/C", distinguishing: "Different serology pattern" },
+      { condition: "EBV hepatitis", distinguishing: "Heterophile antibodies, atypical lymphocytes" },
+      { condition: "Drug-induced hepatitis", distinguishing: "Medication history, negative viral markers" },
+      { condition: "Wilson disease", distinguishing: "Low ceruloplasmin, KF rings" }
+    ],
+    treatment: {
+      acute: [
+        { name: "Supportive care", indication: "Most cases (95% resolve)", evidence: "IA" },
+        { name: "Antiviral therapy", indication: "Only if severe/prolonged or fulminant", evidence: "IIA" }
+      ],
+      chronic: [
+        { name: "Tenofovir or Entecavir", indication: "First-line for chronic HBV", evidence: "IA" },
+        { name: "Pegylated interferon", indication: "Alternative (finite duration)", evidence: "IA" }
+      ],
+      prevention: [
+        { name: "HBV vaccination", indication: "All infants, at-risk adults", evidence: "IA" },
+        { name: "HBIG + vaccine", indication: "Post-exposure (needlestick, perinatal)", evidence: "IA" }
+      ]
+    },
+    riskStratification: {
+      chronicity: "Adults: <5% chronify; Neonates: 90% chronify",
+      cirrhosisRisk: "15-40% of chronic cases develop cirrhosis",
+      hccRisk: "Chronic HBV: 2-5% per year HCC risk"
     }
   },
 
