@@ -236,10 +236,10 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Complete Renal Disease Modifications"
-    - "Complete Neurological Disease Modifications"
-    - "Verify parameter modifications display correctly for renal diseases"
-    - "Verify parameter modifications display correctly for neurological diseases"
+    - "Verify new organ systems (Blood, Bone Marrow, Spleen, Lymphatic, Thyroid, GI Tract, Breast, Prostate)"
+    - "Verify hematological diseases (Iron Deficiency Anemia, B12 Deficiency, Sickle Cell, etc.)"
+    - "Verify oncology diseases (ALL, AML, CLL, CML, Lymphomas, Myeloma, Solid Tumors)"
+    - "Verify congenital syndromes (Down Syndrome, Turner, Marfan, Hemophilia, etc.)"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
