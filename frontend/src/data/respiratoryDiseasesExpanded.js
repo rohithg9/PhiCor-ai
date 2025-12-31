@@ -405,6 +405,42 @@ export const RESPIRATORY_DISEASES_EXPANDED = {
           gfr: { factor: 0.7, note: "AKI common in ARDS" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "Berlin Definition (2012)",
+      requirements: {
+        timing: "Within 1 week of known insult or new/worsening symptoms",
+        imaging: "Bilateral opacities not explained by effusion/collapse/nodules",
+        origin: "Not fully explained by heart failure/fluid overload",
+        oxygenation: "P/F ratio <300 with PEEP ≥5 cmH2O"
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Cardiogenic pulmonary edema", distinguishing: "Elevated BNP, cardiomegaly, responds to diuresis" },
+      { condition: "Diffuse alveolar hemorrhage", distinguishing: "Hemoptysis, falling Hgb, bronchoscopy diagnostic" },
+      { condition: "Acute eosinophilic pneumonia", distinguishing: "BAL eosinophilia >25%, responds to steroids" },
+      { condition: "TRALI", distinguishing: "Within 6h of transfusion, resolves quickly" }
+    ],
+    treatment: {
+      ventilation: [
+        { name: "Low tidal volume (6 mL/kg IBW)", indication: "Lung-protective ventilation", evidence: "IA" },
+        { name: "Plateau pressure <30 cmH2O", indication: "Prevent VILI", evidence: "IA" },
+        { name: "PEEP titration", indication: "Optimize oxygenation", evidence: "IA" }
+      ],
+      adjunctive: [
+        { name: "Prone positioning", indication: "P/F <150, 16+ hours/day", evidence: "IA" },
+        { name: "Conservative fluid strategy", indication: "After shock resolved", evidence: "IA" },
+        { name: "Neuromuscular blockade", indication: "Severe ARDS, early (48h)", evidence: "IB" }
+      ],
+      rescue: [
+        { name: "ECMO", indication: "Refractory hypoxemia despite optimal ventilation", evidence: "IB" },
+        { name: "Inhaled nitric oxide", indication: "Refractory hypoxemia", evidence: "IIB" }
+      ]
+    },
+    riskStratification: {
+      mortality: "Mild: 27%; Moderate: 32%; Severe: 45%",
+      longTerm: "Survivors may have persistent pulmonary dysfunction",
+      etiology: "Sepsis, aspiration, pneumonia most common triggers"
     }
   },
 
