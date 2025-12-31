@@ -2006,6 +2006,150 @@ async def seed_comprehensive_drug_database():
             "half_life": "11 hours (enalaprilat active metabolite)",
             "pregnancy_category": "D",
             "fda_approval_year": 1985
+        },
+        {
+            "id": "ramipril",
+            "name": "Ramipril",
+            "brand_names": ["Altace (USA)", "Tritace (UK)", "Cardace (India)", "Ramace"],
+            "drug_class": "ACE Inhibitor",
+            "category": "cardiovascular",
+            "mechanism_of_action": "Prodrug converted to ramiprilat, which inhibits ACE. Provides cardioprotection and nephroprotection beyond blood pressure lowering.",
+            "mechanism_short": "ACE inhibitor with proven cardiovascular mortality reduction",
+            "target_receptors": ["ACE"],
+            "dosages": [
+                {"route": "oral", "form": "capsule", "strength": "1.25mg, 2.5mg, 5mg, 10mg", "typical_dose": "2.5-10mg once daily", "max_daily_dose": "20mg", "frequency": "once daily", "special_instructions": "Can be opened and sprinkled on food"}
+            ],
+            "therapeutic_effects": [
+                {
+                    "effect_type": "therapeutic",
+                    "description": "HOPE trial demonstrated 22% reduction in cardiovascular death, MI, and stroke",
+                    "onset_hours": 1,
+                    "duration_hours": 24,
+                    "organs": [
+                        {"organ_id": "heart", "scales": [
+                            {"scale_id": "pressures", "parameters": [
+                                {"parameter_id": "aortic_systolic", "multiplier": 0.87, "note": "↓13% systolic BP"},
+                                {"parameter_id": "aortic_diastolic", "multiplier": 0.90, "note": "↓10% diastolic BP"}
+                            ]},
+                            {"scale_id": "physiology", "parameters": [
+                                {"parameter_id": "cardiac_output", "multiplier": 1.10, "note": "↑10% CO"},
+                                {"parameter_id": "ef", "multiplier": 1.05, "note": "↑5% EF (long-term in HFrEF)"}
+                            ]}
+                        ]}
+                    ]
+                }
+            ],
+            "indications": [
+                {"disease_id": "heart_failure", "disease_name": "Heart Failure", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"},
+                {"disease_id": "hypertension", "disease_name": "Hypertension", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"},
+                {"disease_id": "cv_risk_reduction", "disease_name": "Cardiovascular Risk Reduction", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}
+            ],
+            "contraindications": ["Pregnancy", "Angioedema history", "Bilateral renal artery stenosis"],
+            "warnings": ["First-dose hypotension possible", "Monitor renal function"],
+            "interactions": [
+                {"interacting_drug_id": "nsaids", "interacting_drug_name": "NSAIDs", "severity": "moderate", "effect": "Reduced efficacy", "clinical_note": "Monitor BP"},
+                {"interacting_drug_id": "aliskiren", "interacting_drug_name": "Aliskiren", "severity": "severe", "effect": "Dual RAAS blockade - increased adverse effects", "clinical_note": "Contraindicated in diabetes"}
+            ],
+            "half_life": "13-17 hours",
+            "pregnancy_category": "D",
+            "fda_approval_year": 1991
+        },
+        # ============== BETA BLOCKERS ==============
+        {
+            "id": "bisoprolol",
+            "name": "Bisoprolol",
+            "brand_names": ["Zebeta (USA)", "Cardicor (UK)", "Concor (India/Germany)", "Bisocard"],
+            "drug_class": "Beta Blocker (β1-selective)",
+            "category": "cardiovascular",
+            "mechanism_of_action": "Highly selective β1-adrenergic receptor antagonist. Reduces heart rate, contractility, and myocardial oxygen demand with minimal β2 effects on bronchi.",
+            "mechanism_short": "β1-selective blocker → ↓ HR, ↓ contractility, cardioprotection",
+            "target_receptors": ["β1-adrenergic"],
+            "dosages": [
+                {"route": "oral", "form": "tablet", "strength": "1.25mg, 2.5mg, 5mg, 10mg", "typical_dose": "2.5-10mg once daily", "max_daily_dose": "20mg", "frequency": "once daily", "special_instructions": "Start low in heart failure (1.25mg), titrate slowly"}
+            ],
+            "therapeutic_effects": [
+                {
+                    "effect_type": "therapeutic",
+                    "description": "CIBIS-II trial showed 34% reduction in mortality in heart failure",
+                    "onset_hours": 2,
+                    "duration_hours": 24,
+                    "organs": [
+                        {"organ_id": "heart", "scales": [
+                            {"scale_id": "physiology", "parameters": [
+                                {"parameter_id": "heart_rate", "multiplier": 0.72, "note": "↓28% heart rate"},
+                                {"parameter_id": "myocardial_o2", "multiplier": 0.68, "note": "↓32% O2 demand"},
+                                {"parameter_id": "ef", "multiplier": 1.12, "note": "↑12% EF (long-term in HFrEF)"}
+                            ]},
+                            {"scale_id": "pressures", "parameters": [
+                                {"parameter_id": "aortic_systolic", "multiplier": 0.88, "note": "↓12% systolic BP"},
+                                {"parameter_id": "aortic_diastolic", "multiplier": 0.90, "note": "↓10% diastolic BP"}
+                            ]}
+                        ]}
+                    ]
+                }
+            ],
+            "indications": [
+                {"disease_id": "heart_failure", "disease_name": "Heart Failure (HFrEF)", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"},
+                {"disease_id": "hypertension", "disease_name": "Hypertension", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"},
+                {"disease_id": "angina", "disease_name": "Stable Angina", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}
+            ],
+            "contraindications": ["Severe bradycardia (HR < 50)", "Cardiogenic shock", "Severe hypotension", "Sick sinus syndrome without pacemaker", "AV block (2nd/3rd degree)"],
+            "warnings": ["Do not stop abruptly", "May mask hypoglycemia symptoms", "Use caution in asthma/COPD"],
+            "interactions": [
+                {"interacting_drug_id": "verapamil", "interacting_drug_name": "Verapamil", "severity": "severe", "effect": "Severe bradycardia, AV block", "clinical_note": "Avoid IV verapamil with beta blockers"},
+                {"interacting_drug_id": "clonidine", "interacting_drug_name": "Clonidine", "severity": "moderate", "effect": "Rebound hypertension if clonidine stopped", "clinical_note": "Stop beta blocker first"}
+            ],
+            "half_life": "10-12 hours",
+            "pregnancy_category": "C",
+            "fda_approval_year": 1992
+        },
+        {
+            "id": "carvedilol",
+            "name": "Carvedilol",
+            "brand_names": ["Coreg (USA)", "Eucardic (UK)", "Carloc (India)", "Dilatrend"],
+            "drug_class": "Beta Blocker (non-selective with α1 blockade)",
+            "category": "cardiovascular",
+            "mechanism_of_action": "Non-selective β1/β2 blocker with α1 blocking activity. Provides vasodilation in addition to negative chronotropy. Has antioxidant properties.",
+            "mechanism_short": "β1/β2/α1 blocker → ↓ HR + vasodilation + antioxidant",
+            "target_receptors": ["β1-adrenergic", "β2-adrenergic", "α1-adrenergic"],
+            "dosages": [
+                {"route": "oral", "form": "tablet", "strength": "3.125mg, 6.25mg, 12.5mg, 25mg", "typical_dose": "3.125-25mg twice daily", "max_daily_dose": "50mg (HF) or 100mg (HTN)", "frequency": "twice daily", "special_instructions": "Take with food to slow absorption and reduce orthostatic hypotension"}
+            ],
+            "therapeutic_effects": [
+                {
+                    "effect_type": "therapeutic",
+                    "description": "COPERNICUS trial: 35% mortality reduction in severe heart failure",
+                    "onset_hours": 1,
+                    "duration_hours": 12,
+                    "organs": [
+                        {"organ_id": "heart", "scales": [
+                            {"scale_id": "physiology", "parameters": [
+                                {"parameter_id": "heart_rate", "multiplier": 0.78, "note": "↓22% heart rate"},
+                                {"parameter_id": "ef", "multiplier": 1.15, "note": "↑15% EF (long-term)"},
+                                {"parameter_id": "cardiac_output", "multiplier": 1.08, "note": "↑8% CO (due to vasodilation)"}
+                            ]},
+                            {"scale_id": "pressures", "parameters": [
+                                {"parameter_id": "aortic_systolic", "multiplier": 0.82, "note": "↓18% systolic BP"},
+                                {"parameter_id": "svr", "multiplier": 0.80, "note": "↓20% SVR (α1 blockade)"}
+                            ]}
+                        ]}
+                    ]
+                }
+            ],
+            "indications": [
+                {"disease_id": "heart_failure", "disease_name": "Heart Failure (HFrEF)", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"},
+                {"disease_id": "hypertension", "disease_name": "Hypertension", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"},
+                {"disease_id": "post_mi", "disease_name": "Post-MI with LV Dysfunction", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}
+            ],
+            "contraindications": ["Severe bradycardia", "Decompensated heart failure requiring IV inotropes", "Severe hepatic impairment", "Bronchial asthma", "AV block without pacemaker"],
+            "warnings": ["May worsen heart failure initially - titrate slowly", "Orthostatic hypotension risk"],
+            "interactions": [
+                {"interacting_drug_id": "digoxin", "interacting_drug_name": "Digoxin", "severity": "moderate", "effect": "↑15% digoxin levels", "clinical_note": "Monitor digoxin levels"},
+                {"interacting_drug_id": "insulin", "interacting_drug_name": "Insulin", "severity": "moderate", "effect": "May mask hypoglycemia symptoms", "clinical_note": "Monitor glucose closely"}
+            ],
+            "half_life": "7-10 hours",
+            "pregnancy_category": "C",
+            "fda_approval_year": 1995
         }
     ]
     
