@@ -510,6 +510,26 @@ export const RENAL_DISEASES = {
       mild: { description: "Well-controlled on dialysis" },
       moderate: { description: "Complications present" },
       severe: { description: "Multiple complications, transplant candidate evaluation" }
+    },
+    modifications: {
+      kidneys: {
+        geometry: {
+          kidney_length: { factor: 0.6, note: "Atrophic kidneys" },
+          cortex_thickness: { factor: 0.3, note: "Severe cortical loss" }
+        },
+        physiology: {
+          gfr: { factor: 0.05, note: "Essentially zero native function" },
+          urine_output: { factor: 0.1, note: "Minimal to none" }
+        }
+      },
+      heart: {
+        geometry: {
+          lv_mass: { factor: 1.4, note: "LV hypertrophy from volume/pressure" }
+        },
+        physiology: {
+          blood_pressure: { factor: 1.25, note: "Dialysis-related BP fluctuations" }
+        }
+      }
     }
   },
 
