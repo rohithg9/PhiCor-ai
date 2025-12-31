@@ -654,7 +654,7 @@ const LAB_PATTERNS = {
 /**
  * Normal ranges for common labs (for determining direction)
  */
-const NORMAL_RANGES = {
+export const NORMAL_RANGES = {
   hemoglobin: { min: 12, max: 17, unit: 'g/dL' },
   wbc: { min: 4, max: 11, unit: '×10³/μL' },
   platelets: { min: 150, max: 400, unit: '×10³/μL' },
