@@ -205,7 +205,8 @@ const LandingPage = () => {
                       e.stopPropagation();
                       scrollToSection(item.id);
                     }}
-                    className={`w-full text-left px-4 py-4 text-base font-medium transition-all rounded-xl active:scale-95 flex items-center gap-3 ${
+                    style={{ touchAction: 'manipulation' }}
+                    className={`w-full text-left px-4 py-4 text-base font-medium transition-all rounded-xl active:scale-95 cursor-pointer select-none flex items-center gap-3 ${
                       item.isEmail 
                         ? 'text-indigo-400 bg-indigo-500/10 border border-indigo-500/20' 
                         : 'text-foreground bg-white/5 hover:bg-white/10 active:bg-white/15'
