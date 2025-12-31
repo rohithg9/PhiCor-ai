@@ -1,11 +1,20 @@
 #!/usr/bin/env python3
 """
-Backend Testing for PhiCor.ai Digital Physiology Platform
-Testing disease expansion from 214 to 254 diseases:
-- Autoimmune diseases (SLE, Rheumatoid Arthritis, Crohn's, etc.)
-- Infectious diseases (COVID-19, Sepsis, Tuberculosis, etc.)
-- GI diseases (Pancreatitis, GERD, etc.)
-- Expanded respiratory diseases (Asthma, Pneumonia, PE, etc.)
+Backend Testing for PhiCore.ai Medical Simulation Platform
+Testing comprehensive medical simulation platform features:
+- Dashboard loads with 284+ diseases across all categories
+- Disease search functionality for different disease types
+- Disease data structure with required fields (diagnosticCriteria, differentialDiagnosis, treatment, riskStratification)
+- Parameters display with normal ranges
+- Mathematical equations and calculations
+- Differential Diagnosis Engine functionality
+
+Focus on testing specific diseases from review request:
+- Autoimmune: SLE (M32.9), Rheumatoid Arthritis (M05.9)
+- Infectious: COVID-19 (U07.1), Sepsis (A41.9)  
+- GI: GERD (K21.0), Acute Pancreatitis (K85.9)
+- Psychiatric: Major Depressive Disorder (F32.9), Schizophrenia (F20.9)
+- Respiratory: Asthma (J45.9), ARDS (J80)
 """
 
 import requests
