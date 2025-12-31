@@ -8,7 +8,7 @@ import LandingPage from "./pages/LandingPage";
 import AuthPage from "./pages/AuthPage";
 import Dashboard from "./pages/DashboardMultiScale";
 import DifferentialPage from "./pages/DifferentialPage";
-import ScribePage from "./pages/ScribePage";
+import DrugsPage from "./pages/DrugsPage";
 
 // Protected route wrapper
 const ProtectedRoute = ({ children }) => {
