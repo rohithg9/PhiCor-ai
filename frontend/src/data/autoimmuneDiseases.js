@@ -328,6 +328,42 @@ export const AUTOIMMUNE_DISEASES = {
           tubular_function: { factor: 0.85, note: "Tubulointerstitial nephritis" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "ACR/EULAR 2016 Sjögren's Classification Criteria",
+      requirements: {
+        threshold: "≥4 points required",
+        items: {
+          "Labial salivary gland biopsy (focus score ≥1)": 3,
+          "Anti-SSA/Ro positive": 3,
+          "Ocular staining score ≥5": 1,
+          "Schirmer's test ≤5 mm/5 min": 1,
+          "Unstimulated salivary flow ≤0.1 mL/min": 1
+        }
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "IgG4-related disease", distinguishing: "Elevated serum IgG4, storiform fibrosis on biopsy" },
+      { condition: "Sarcoidosis", distinguishing: "Bilateral hilar adenopathy, non-caseating granulomas" },
+      { condition: "Hepatitis C", distinguishing: "HCV serology positive, cryoglobulins" },
+      { condition: "HIV", distinguishing: "HIV positive, DILS syndrome" },
+      { condition: "Radiation-induced", distinguishing: "History of head/neck radiation" }
+    ],
+    treatment: {
+      sicca: [
+        { name: "Artificial tears", indication: "Dry eyes", note: "Preservative-free preferred" },
+        { name: "Pilocarpine", dose: "5 mg QID", mechanism: "Muscarinic agonist", indication: "Xerostomia" },
+        { name: "Cevimeline", dose: "30 mg TID", indication: "Dry mouth/eyes" }
+      ],
+      systemic: [
+        { name: "Hydroxychloroquine", dose: "200-400 mg/day", indication: "Arthralgias, fatigue", evidence: "IIB" },
+        { name: "Rituximab", mechanism: "Anti-CD20", indication: "Systemic disease, vasculitis", evidence: "IIB" }
+      ]
+    },
+    riskStratification: {
+      lymphomaRisk: "44x increased NHL risk (marginal zone lymphoma); monitor for parotid swelling",
+      nephritisRisk: "5-10% develop tubulointerstitial nephritis or RTA",
+      neuropathyRisk: "10-20% develop peripheral neuropathy"
     }
   },
 
