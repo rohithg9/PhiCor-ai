@@ -1254,7 +1254,7 @@ Format your response as JSON with these keys:
 
 # ============== DRUG DATABASE API (MongoDB-based) ==============
 
-@api_router.get("/drugs/db")
+@api_router.get("/drugs-db")
 async def get_drugs_from_db(
     category: Optional[str] = None,
     drug_class: Optional[str] = None,
