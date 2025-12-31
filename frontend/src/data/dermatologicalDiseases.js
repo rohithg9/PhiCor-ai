@@ -346,6 +346,25 @@ export const DERMATOLOGICAL_DISEASES = {
     
     differentialDiagnosis: ["Rosacea", "Folliculitis", "Perioral dermatitis", "Keratosis pilaris", "Drug-induced acneiform eruption"],
     
+    treatment: {
+      mild: [
+        { name: "Topical retinoids", examples: "Tretinoin, Adapalene", indication: "First-line", evidence: "IA" },
+        { name: "Benzoyl peroxide", indication: "Antimicrobial", evidence: "IA" },
+        { name: "Topical antibiotics", examples: "Clindamycin", indication: "Combined with BPO", evidence: "IA" }
+      ],
+      moderate: [
+        { name: "Oral antibiotics", examples: "Doxycycline, Minocycline", indication: "Inflammatory acne", evidence: "IA" },
+        { name: "Combined oral contraceptives", indication: "Females with hormonal component", evidence: "IA" }
+      ],
+      severe: [
+        { name: "Isotretinoin", dose: "0.5-1 mg/kg/day", indication: "Severe/recalcitrant", evidence: "IA", note: "iPLEDGE program required" }
+      ]
+    },
+    riskStratification: {
+      scarring: "Nodular/cystic: high risk; early aggressive treatment prevents scarring",
+      psychological: "Significant impact on self-esteem, depression common",
+      recurrence: "Maintenance therapy often needed"
+    },
     complications: ["Scarring (atrophic, hypertrophic, keloid)", "Post-inflammatory hyperpigmentation", "Psychological impact", "Depression"]
   },
 
