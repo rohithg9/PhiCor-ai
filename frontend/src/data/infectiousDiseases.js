@@ -661,6 +661,39 @@ export const INFECTIOUS_DISEASES = {
           bilirubin: { factor: 4.0, note: "Jaundice from hemolysis" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "WHO Malaria Case Definition",
+      requirements: {
+        confirmed: "Fever + positive blood smear or RDT",
+        severe: "Any of: cerebral malaria, severe anemia (<5 g/dL), ARDS, AKI, hypoglycemia, acidosis, parasitemia >10%",
+        species: "Identify P. falciparum (most dangerous), vivax, ovale, malariae, knowlesi"
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Typhoid fever", distinguishing: "Relative bradycardia, rose spots, positive blood culture" },
+      { condition: "Dengue", distinguishing: "Rash, thrombocytopenia, no parasites on smear" },
+      { condition: "Viral hemorrhagic fever", distinguishing: "Bleeding manifestations, specific serology" },
+      { condition: "Sepsis", distinguishing: "Bacterial source, procalcitonin elevated" }
+    ],
+    treatment: {
+      uncomplicated: [
+        { name: "Artemether-lumefantrine", indication: "First-line ACT", evidence: "IA" },
+        { name: "Artesunate-amodiaquine", indication: "Alternative ACT", evidence: "IA" }
+      ],
+      severe: [
+        { name: "IV Artesunate", dose: "2.4 mg/kg at 0, 12, 24h then daily", indication: "Severe malaria", evidence: "IA" },
+        { name: "Exchange transfusion", indication: "Parasitemia >10%, severe illness", evidence: "IIB" }
+      ],
+      prophylaxis: [
+        { name: "Atovaquone-proguanil", indication: "Travelers to endemic areas", evidence: "IA" },
+        { name: "Doxycycline", indication: "Alternative prophylaxis", evidence: "IA" }
+      ]
+    },
+    riskStratification: {
+      mortality: "Uncomplicated <1%; Severe falciparum 10-20%",
+      cerebralMalaria: "15-20% mortality even with treatment",
+      drugResistance: "Artemisinin resistance emerging in SE Asia"
     }
   },
 
@@ -731,6 +764,38 @@ export const INFECTIOUS_DISEASES = {
           blood_pressure: { factor: 0.8, note: "Hypotension from plasma leakage" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "WHO Dengue Case Classification",
+      requirements: {
+        probable: "Fever + 2 of: nausea, rash, aches/pains, leukopenia, positive tourniquet test",
+        confirmed: "Probable + positive NS1, IgM, or PCR",
+        warningSigns: "Abdominal pain, persistent vomiting, mucosal bleeding, lethargy, hepatomegaly >2cm, ↑HCT with ↓platelets"
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Malaria", distinguishing: "Parasites on smear, no rash" },
+      { condition: "Chikungunya", distinguishing: "Severe arthralgia, positive serology" },
+      { condition: "Zika", distinguishing: "Conjunctivitis, less severe, specific serology" },
+      { condition: "Leptospirosis", distinguishing: "Conjunctival suffusion, jaundice, AKI" }
+    ],
+    treatment: {
+      supportive: [
+        { name: "Oral/IV fluids", indication: "Maintain hydration, avoid overhydration", evidence: "IA" },
+        { name: "Acetaminophen", indication: "Fever, pain (avoid NSAIDs/aspirin)", evidence: "IA" }
+      ],
+      severe: [
+        { name: "Crystalloid resuscitation", indication: "Shock", evidence: "IA" },
+        { name: "Blood transfusion", indication: "Severe bleeding", evidence: "IA" }
+      ],
+      prevention: [
+        { name: "Dengue vaccine (Dengvaxia)", indication: "Seropositive individuals in endemic areas", evidence: "IB", note: "Risk if seronegative" }
+      ]
+    },
+    riskStratification: {
+      severeDisease: "Secondary infection with different serotype highest risk",
+      mortality: "<1% with proper management; 10-20% if severe untreated",
+      criticalPhase: "Defervescence (days 3-7) is danger period"
     }
   },
 
