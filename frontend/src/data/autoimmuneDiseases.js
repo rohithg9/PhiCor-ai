@@ -1338,6 +1338,46 @@ export const AUTOIMMUNE_DISEASES = {
           hemoglobin: { factor: 0.8, note: "Anemia" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "ACR/EULAR 2022 GPA/MPA Classification",
+      requirements: {
+        applicability: "Small/medium vessel vasculitis, exclude mimics",
+        scoring: "Weighted scoring system",
+        keyItems: [
+          "Nasal involvement (bloody discharge, crusting, ulcers)",
+          "Cartilage involvement (saddle nose, hearing loss)",
+          "c-ANCA/PR3-ANCA positivity",
+          "Lung nodules, cavities, or masses",
+          "Granulomatous inflammation on biopsy"
+        ]
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Microscopic polyangiitis", distinguishing: "MPO-ANCA, no granulomas, no ENT destruction" },
+      { condition: "Eosinophilic GPA (Churg-Strauss)", distinguishing: "Asthma, eosinophilia, cardiac involvement" },
+      { condition: "Goodpasture syndrome", distinguishing: "Anti-GBM antibodies, no granulomas" },
+      { condition: "Sarcoidosis", distinguishing: "Non-necrotizing granulomas, hilar adenopathy, elevated ACE" },
+      { condition: "Cocaine-induced midline destruction", distinguishing: "Cocaine use, similar nasal findings" }
+    ],
+    treatment: {
+      induction: [
+        { name: "Rituximab", dose: "375 mg/m² weekly × 4 or 1g × 2", indication: "First-line induction", evidence: "IA" },
+        { name: "Cyclophosphamide", dose: "2 mg/kg/day or IV pulses", indication: "Alternative to rituximab", evidence: "IA" },
+        { name: "Glucocorticoids", dose: "Prednisone 1 mg/kg + pulse methylpred", indication: "All patients", evidence: "IA" }
+      ],
+      maintenance: [
+        { name: "Rituximab", dose: "500 mg every 6 months", indication: "First-line maintenance", evidence: "IA" },
+        { name: "Azathioprine", dose: "2 mg/kg/day", indication: "Alternative maintenance", evidence: "IA" }
+      ],
+      refractory: [
+        { name: "Avacopan", mechanism: "C5a receptor inhibitor", indication: "Adjunct to standard therapy", evidence: "IA", note: "FDA approved 2021" }
+      ]
+    },
+    riskStratification: {
+      mortality: "5-year survival ~75%; worse with renal involvement",
+      esrd: "20-40% develop ESRD; monitor Cr closely",
+      relapse: "50% relapse; PR3-ANCA has higher relapse rate than MPO"
     }
   },
 
