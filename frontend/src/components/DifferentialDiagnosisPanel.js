@@ -605,26 +605,40 @@ PMH: HTN, DM2"
               {abnormalFindings.map(finding => (
                 <div
                   key={finding.id}
-                  className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 flex items-center gap-2 text-sm"
+                  className={`bg-gray-800 border rounded-lg px-3 py-2 text-sm ${
+                    finding.isCritical ? 'border-red-500/50' : 'border-gray-700'
+                  }`}
                 >
-                  {renderDirectionIcon(finding.direction)}
-                  <span className="text-white">{finding.parameterId.replace(/_/g, ' ')}</span>
-                  {finding.value && (
-                    <span className="text-gray-400">({finding.value})</span>
-                  )}
-                  <span className={`text-xs px-1.5 py-0.5 rounded ${
-                    finding.severity >= 2 ? 'bg-red-900/50 text-red-400' :
-                    finding.severity >= 1 ? 'bg-yellow-900/50 text-yellow-400' :
-                    'bg-gray-700 text-gray-400'
-                  }`}>
-                    {finding.severity >= 2 ? 'Severe' : finding.severity >= 1 ? 'Moderate' : 'Mild'}
-                  </span>
-                  <button
-                    onClick={() => removeFinding(finding.id)}
-                    className="text-gray-500 hover:text-red-400"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    {renderDirectionIcon(finding.direction)}
+                    <span className="text-white font-medium">
+                      {finding.parameterName || finding.parameterId.replace(/_/g, ' ')}
+                    </span>
+                    <button
+                      onClick={() => removeFinding(finding.id)}
+                      className="text-gray-500 hover:text-red-400 ml-1"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                  
+                  {/* Show actual value vs normal range */}
+                  <div className="mt-1 flex items-center gap-2 text-xs">
+                    <span className={`font-bold ${
+                      finding.isCritical ? 'text-red-400' :
+                      finding.direction === 'decrease' ? 'text-blue-400' : 'text-orange-400'
+                    }`}>
+                      {finding.actualValue?.toFixed(1)} {finding.unit}
+                    </span>
+                    <span className="text-gray-500">
+                      (Normal: <span className="text-green-400">{finding.normalRange}</span>)
+                    </span>
+                    {finding.isCritical && (
+                      <span className="text-red-400 flex items-center gap-1">
+                        <AlertTriangle className="w-3 h-3" /> Critical
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
