@@ -1335,7 +1335,7 @@ async def update_drug(drug_id: str, drug: DrugCreate):
     await db.drugs.update_one({"id": drug_id}, {"$set": drug_dict})
     return {"message": "Drug updated successfully"}
 
-@api_router.delete("/drugs/db/{drug_id}")
+@api_router.delete("/drugs-db/{drug_id}")
 async def delete_drug(drug_id: str):
     """Delete a drug from the database."""
     result = await db.drugs.delete_one({"id": drug_id})
