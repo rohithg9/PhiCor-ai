@@ -2935,20 +2935,6 @@ const DashboardMultiScale = () => {
                   </div>
                 )}
 
-                {/* Clinical Findings Panel - Comprehensive Disease Data */}
-                {currentDisease && (
-                  <ClinicalFindingsPanel
-                    disease={currentDisease}
-                    isExpanded={showClinicalPanel}
-                    onToggle={handleToggleClinicalPanel}
-                  />
-                )}
-
-                {/* Evidence-Based Treatment Guidelines Panel */}
-                {currentDisease && selectedDisease && (
-                  <TreatmentGuidelinesPanel diseaseId={selectedDisease} />
-                )}
-
                 {/* Parameters Section */}
                 {currentScale.parameters && currentScale.parameters.length > 0 && (
                   <section>
