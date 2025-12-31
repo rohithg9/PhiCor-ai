@@ -1049,6 +1049,42 @@ export const GI_DISEASES = {
           coagulation: { factor: 1.5, note: "Hypercoagulable state" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "NCCN Guidelines - TNM Staging",
+      requirements: {
+        tissue: "Biopsy via EUS-FNA required for nonsurgical candidates",
+        staging: "CT chest/abdomen/pelvis + PET for staging",
+        resectability: "NCCN criteria: no mets, no SMA/celiac involvement >180°"
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Chronic pancreatitis", distinguishing: "Calcifications, chronic history, different imaging pattern" },
+      { condition: "Autoimmune pancreatitis", distinguishing: "IgG4 elevated, responds to steroids, sausage-shaped" },
+      { condition: "Cholangiocarcinoma", distinguishing: "Different location, isolated biliary obstruction" }
+    ],
+    treatment: {
+      resectable: [
+        { name: "Whipple procedure (pancreaticoduodenectomy)", indication: "Head tumors", evidence: "IA" },
+        { name: "Distal pancreatectomy", indication: "Body/tail tumors", evidence: "IA" },
+        { name: "Adjuvant mFOLFIRINOX", indication: "After R0/R1 resection", evidence: "IA" }
+      ],
+      locallyAdvanced: [
+        { name: "FOLFIRINOX or Gem/nab-paclitaxel", indication: "Neoadjuvant or definitive", evidence: "IA" }
+      ],
+      metastatic: [
+        { name: "FOLFIRINOX", indication: "Good PS, first-line", evidence: "IA" },
+        { name: "Gemcitabine/nab-paclitaxel", indication: "Alternative first-line", evidence: "IA" }
+      ],
+      palliative: [
+        { name: "Biliary stent", indication: "Obstructive jaundice" },
+        { name: "Celiac plexus neurolysis", indication: "Pain management" }
+      ]
+    },
+    riskStratification: {
+      survival: "Overall 5-year: ~10%; Resected: 20-25%; Metastatic: <1 year",
+      recurrence: "80% recur after surgery",
+      prognosis: "One of worst cancer outcomes; early detection critical"
     }
   },
 
