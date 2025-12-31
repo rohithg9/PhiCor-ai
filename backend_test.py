@@ -446,7 +446,7 @@ def test_organ_models_compatibility():
         return False
 
 def test_disease_count():
-    """Test that the total disease count is 214 as expected"""
+    """Test that the total disease count is 254 as expected"""
     print("\n📊 TESTING DISEASE COUNT")
     print("=" * 50)
     
@@ -454,8 +454,12 @@ def test_disease_count():
     disease_breakdown = {}
     
     try:
-        # Count all disease files
+        # Count all disease files including new categories
         disease_files = [
+            ('/app/frontend/src/data/autoimmuneDiseases.js', 'Autoimmune'),
+            ('/app/frontend/src/data/infectiousDiseases.js', 'Infectious'),
+            ('/app/frontend/src/data/giDiseases.js', 'GI'),
+            ('/app/frontend/src/data/respiratoryDiseasesExpanded.js', 'Respiratory Expanded'),
             ('/app/frontend/src/data/hematologicalDiseases.js', 'Hematological'),
             ('/app/frontend/src/data/oncologyDiseases.js', 'Oncology'),
             ('/app/frontend/src/data/congenitalDiseases.js', 'Congenital'),
@@ -500,12 +504,12 @@ def test_disease_count():
         print(f"\n📈 TOTAL DISEASES: {total_diseases}")
         print(f"📋 BREAKDOWN: {disease_breakdown}")
         
-        # The expected count is 214 based on the review request
-        if total_diseases >= 214:
-            print(f"✅ Disease count ({total_diseases}) meets or exceeds expected 214")
+        # The expected count is 254 based on the review request
+        if total_diseases >= 254:
+            print(f"✅ Disease count ({total_diseases}) meets or exceeds expected 254")
             return True
         else:
-            print(f"❌ Disease count ({total_diseases}) is below expected 214")
+            print(f"❌ Disease count ({total_diseases}) is below expected 254")
             return False
             
     except Exception as e:
