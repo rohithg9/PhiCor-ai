@@ -524,7 +524,7 @@ def run_all_tests():
     """Run all tests and provide summary"""
     print("🧪 PHICOR.AI DIGITAL PHYSIOLOGY PLATFORM - BACKEND TESTING")
     print("=" * 70)
-    print("Testing renal and neurological disease parameter modifications")
+    print("Testing major system expansion with new organs and disease categories")
     print("=" * 70)
     
     test_results = {}
@@ -547,23 +547,25 @@ def run_all_tests():
     else:
         test_results['frontend_access'] = False
     
-    # Test 4: Disease data loading
-    print("\n4️⃣ DISEASE DATA LOADING")
-    test_results['disease_data'] = load_disease_data()
+    # Test 4: New organ systems
+    test_results['new_organs'] = test_new_organ_systems()
     
-    # Test 5: Renal disease modifications
-    test_results['renal_modifications'] = test_renal_disease_modifications()
+    # Test 5: Hematological diseases
+    test_results['hematological_diseases'] = test_hematological_diseases()
     
-    # Test 6: Neurological disease modifications  
-    test_results['neuro_modifications'] = test_neurological_disease_modifications()
+    # Test 6: Oncology diseases  
+    test_results['oncology_diseases'] = test_oncology_diseases()
     
-    # Test 7: Organ models compatibility
-    test_results['organ_models'] = test_organ_models_compatibility()
+    # Test 7: Congenital syndromes
+    test_results['congenital_diseases'] = test_congenital_diseases()
     
-    # Test 8: Disease count verification
+    # Test 8: Disease count verification (should be 214)
     test_results['disease_count'] = test_disease_count()
     
-    # Test 9: Affected organs format
+    # Test 9: Organ models compatibility
+    test_results['organ_models'] = test_organ_models_compatibility()
+    
+    # Test 10: Affected organs format
     test_results['affected_organs'] = test_affected_organs_format()
     
     # Summary
@@ -575,15 +577,15 @@ def run_all_tests():
     total = 0
     
     for test_name, result in test_results.items():
-        if test_name in ['renal_modifications', 'neuro_modifications']:
+        if test_name in ['new_organs', 'hematological_diseases', 'oncology_diseases', 'congenital_diseases']:
             # These return lists, check if any diseases were found
             if isinstance(result, list) and len(result) > 0:
-                found_diseases = len([r for r in result if r['status'] in ['found_with_modifications', 'found_no_modifications']])
-                print(f"✅ {test_name}: {found_diseases} diseases found")
+                found_diseases = len([r for r in result if r['status'] in ['found_with_modifications', 'found_no_modifications', 'found']])
+                print(f"✅ {test_name}: {found_diseases} items found")
                 if found_diseases > 0:
                     passed += 1
             else:
-                print(f"❌ {test_name}: No diseases found")
+                print(f"❌ {test_name}: No items found")
             total += 1
         else:
             if result:
