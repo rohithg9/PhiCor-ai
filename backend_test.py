@@ -115,7 +115,385 @@ def load_disease_data():
         print(f"❌ Error loading disease data: {e}")
         return False
 
-def test_respiratory_diseases():
+def test_specific_diseases_from_review():
+    """Test specific diseases mentioned in the review request"""
+    print("\n🎯 TESTING SPECIFIC DISEASES FROM REVIEW REQUEST")
+    print("=" * 60)
+    
+    # Diseases specifically mentioned in the review request
+    target_diseases = [
+        {
+            "name": "Systemic Lupus Erythematosus (SLE)",
+            "icd_code": "M32.9",
+            "category": "Autoimmune",
+            "file_path": "/app/frontend/src/data/autoimmuneDiseases.js",
+            "required_fields": ["diagnosticCriteria", "differentialDiagnosis", "treatment", "riskStratification"]
+        },
+        {
+            "name": "Rheumatoid Arthritis",
+            "icd_code": "M05.9", 
+            "category": "Autoimmune",
+            "file_path": "/app/frontend/src/data/autoimmuneDiseases.js",
+            "required_fields": ["diagnosticCriteria", "differentialDiagnosis", "treatment", "riskStratification"]
+        },
+        {
+            "name": "COVID-19",
+            "icd_code": "U07.1",
+            "category": "Infectious", 
+            "file_path": "/app/frontend/src/data/infectiousDiseases.js",
+            "required_fields": ["diagnosticCriteria", "differentialDiagnosis", "treatment", "riskStratification"]
+        },
+        {
+            "name": "Sepsis",
+            "icd_code": "A41.9",
+            "category": "Infectious",
+            "file_path": "/app/frontend/src/data/infectiousDiseases.js", 
+            "required_fields": ["diagnosticCriteria", "differentialDiagnosis", "treatment", "riskStratification"]
+        },
+        {
+            "name": "GERD",
+            "icd_code": "K21.0",
+            "category": "GI",
+            "file_path": "/app/frontend/src/data/giDiseases.js",
+            "required_fields": ["diagnosticCriteria", "differentialDiagnosis", "treatment", "riskStratification"]
+        },
+        {
+            "name": "Acute Pancreatitis", 
+            "icd_code": "K85.9",
+            "category": "GI",
+            "file_path": "/app/frontend/src/data/giDiseases.js",
+            "required_fields": ["diagnosticCriteria", "differentialDiagnosis", "treatment", "riskStratification"]
+        },
+        {
+            "name": "Major Depressive Disorder",
+            "icd_code": "F32.9",
+            "category": "Psychiatric",
+            "file_path": "/app/frontend/src/data/psychiatricDiseases.js",
+            "required_fields": ["diagnosticCriteria", "differentialDiagnosis", "treatment", "riskStratification"]
+        },
+        {
+            "name": "Schizophrenia", 
+            "icd_code": "F20.9",
+            "category": "Psychiatric",
+            "file_path": "/app/frontend/src/data/psychiatricDiseases.js",
+            "required_fields": ["diagnosticCriteria", "differentialDiagnosis", "treatment", "riskStratification"]
+        },
+        {
+            "name": "Asthma",
+            "icd_code": "J45.9", 
+            "category": "Respiratory",
+            "file_path": "/app/frontend/src/data/respiratoryDiseasesExpanded.js",
+            "required_fields": ["diagnosticCriteria", "differentialDiagnosis", "treatment", "riskStratification"]
+        },
+        {
+            "name": "ARDS",
+            "icd_code": "J80",
+            "category": "Respiratory",
+            "file_path": "/app/frontend/src/data/respiratoryDiseasesExpanded.js",
+            "required_fields": ["diagnosticCriteria", "differentialDiagnosis", "treatment", "riskStratification"]
+        }
+    ]
+    
+    results = []
+    
+    for disease in target_diseases:
+        print(f"\n📋 Testing: {disease['name']} ({disease['icd_code']})")
+        
+        try:
+            with open(disease['file_path'], 'r') as f:
+                content = f.read()
+                
+            # Look for the disease by ICD code
+            icd_code = disease['icd_code'].replace('.', '_')
+            
+            if icd_code in content:
+                print(f"  ✅ Disease {icd_code} found in {disease['category']} data")
+                
+                # Check for required fields
+                missing_fields = []
+                found_fields = []
+                
+                for field in disease['required_fields']:
+                    if field in content:
+                        found_fields.append(field)
+                        print(f"  ✅ {field} field found")
+                    else:
+                        missing_fields.append(field)
+                        print(f"  ❌ {field} field missing")
+                
+                # Check for parameter modifications
+                if 'modifications:' in content:
+                    print(f"  ✅ Parameter modifications found")
+                else:
+                    print(f"  ⚠️  Parameter modifications not found")
+                
+                # Check for clinical presentations
+                if 'clinicalPresentation:' in content:
+                    print(f"  ✅ Clinical presentation found")
+                else:
+                    print(f"  ⚠️  Clinical presentation not found")
+                
+                results.append({
+                    "disease": disease['name'],
+                    "icd_code": disease['icd_code'],
+                    "category": disease['category'],
+                    "status": "found",
+                    "found_fields": found_fields,
+                    "missing_fields": missing_fields,
+                    "completeness": len(found_fields) / len(disease['required_fields']) * 100
+                })
+            else:
+                print(f"  ❌ Disease {icd_code} not found in {disease['category']} data")
+                results.append({
+                    "disease": disease['name'],
+                    "icd_code": disease['icd_code'], 
+                    "category": disease['category'],
+                    "status": "not_found",
+                    "found_fields": [],
+                    "missing_fields": disease['required_fields'],
+                    "completeness": 0
+                })
+                
+        except Exception as e:
+            print(f"  ❌ Error testing {disease['name']}: {e}")
+            results.append({
+                "disease": disease['name'],
+                "icd_code": disease['icd_code'],
+                "category": disease['category'], 
+                "status": "error",
+                "found_fields": [],
+                "missing_fields": disease['required_fields'],
+                "completeness": 0
+            })
+    
+    return results
+
+def test_disease_data_structure():
+    """Test that diseases have the required data structure for PhiCore.ai platform"""
+    print("\n📊 TESTING DISEASE DATA STRUCTURE")
+    print("=" * 50)
+    
+    required_sections = [
+        "diagnosticCriteria",
+        "differentialDiagnosis", 
+        "treatment",
+        "riskStratification"
+    ]
+    
+    # Test a sample of disease files
+    test_files = [
+        ("/app/frontend/src/data/autoimmuneDiseases.js", "Autoimmune"),
+        ("/app/frontend/src/data/infectiousDiseases.js", "Infectious"),
+        ("/app/frontend/src/data/giDiseases.js", "GI"),
+        ("/app/frontend/src/data/psychiatricDiseases.js", "Psychiatric"),
+        ("/app/frontend/src/data/respiratoryDiseasesExpanded.js", "Respiratory")
+    ]
+    
+    results = {}
+    
+    for file_path, category in test_files:
+        print(f"\n📁 Testing {category} diseases data structure...")
+        
+        try:
+            with open(file_path, 'r') as f:
+                content = f.read()
+            
+            section_counts = {}
+            for section in required_sections:
+                count = content.count(section + ':')
+                section_counts[section] = count
+                if count > 0:
+                    print(f"  ✅ {section}: {count} instances found")
+                else:
+                    print(f"  ❌ {section}: not found")
+            
+            results[category] = section_counts
+            
+        except Exception as e:
+            print(f"  ❌ Error testing {category}: {e}")
+            results[category] = {section: 0 for section in required_sections}
+    
+    return results
+
+def test_mathematical_equations():
+    """Test mathematical equations and calculations functionality"""
+    print("\n🧮 TESTING MATHEMATICAL EQUATIONS")
+    print("=" * 50)
+    
+    try:
+        # Test backend equations endpoint
+        response = requests.get(f"{BACKEND_URL}/api/equations", timeout=10)
+        if response.status_code == 200:
+            equations_data = response.json()
+            print("  ✅ Equations API endpoint accessible")
+            
+            # Check for key equation categories
+            expected_categories = ['cardiovascular', 'glucose_insulin', 'renal', 'pharmacokinetics']
+            
+            for category in expected_categories:
+                if category in equations_data:
+                    print(f"  ✅ {category} equations found")
+                    
+                    # Check for specific equations in each category
+                    if category == 'cardiovascular':
+                        if 'windkessel' in equations_data[category]:
+                            print(f"    ✅ Windkessel model equation found")
+                        if 'frank_starling' in equations_data[category]:
+                            print(f"    ✅ Frank-Starling mechanism equation found")
+                    
+                    elif category == 'glucose_insulin':
+                        if 'bergman_model' in equations_data[category]:
+                            print(f"    ✅ Bergman minimal model equations found")
+                    
+                    elif category == 'renal':
+                        if 'gfr_autoregulation' in equations_data[category]:
+                            print(f"    ✅ GFR autoregulation equation found")
+                            
+                else:
+                    print(f"  ❌ {category} equations not found")
+            
+            return True
+        else:
+            print(f"  ❌ Equations API endpoint failed: {response.status_code}")
+            return False
+            
+    except Exception as e:
+        print(f"  ❌ Error testing equations: {e}")
+        return False
+
+def test_calculation_endpoints():
+    """Test physiological calculation endpoints"""
+    print("\n⚗️ TESTING CALCULATION ENDPOINTS")
+    print("=" * 50)
+    
+    test_endpoints = [
+        {
+            "name": "Cardiovascular Calculation",
+            "endpoint": "/api/calculate/cardiovascular",
+            "params": {
+                "cardiac_output": 5.0,
+                "tpr": 1.0,
+                "compliance": 1.5,
+                "initial_pressure": 100.0
+            }
+        },
+        {
+            "name": "Glucose-Insulin Calculation", 
+            "endpoint": "/api/calculate/glucose-insulin",
+            "params": {
+                "glucose_initial": 90.0,
+                "insulin_initial": 10.0,
+                "glucose_input": 50.0
+            }
+        },
+        {
+            "name": "GFR Calculation",
+            "endpoint": "/api/calculate/gfr", 
+            "params": {
+                "mean_arterial_pressure": 90.0,
+                "kidney_function": 1.0,
+                "age": 40,
+                "weight": 70
+            }
+        },
+        {
+            "name": "Frank-Starling Calculation",
+            "endpoint": "/api/calculate/frank-starling",
+            "params": {
+                "end_diastolic_volume": 120.0,
+                "contractility": 1.0,
+                "heart_rate": 70
+            }
+        }
+    ]
+    
+    results = []
+    
+    for test in test_endpoints:
+        print(f"\n🧪 Testing: {test['name']}")
+        
+        try:
+            response = requests.post(
+                f"{BACKEND_URL}{test['endpoint']}", 
+                json=test['params'],
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                print(f"  ✅ {test['name']} calculation successful")
+                
+                # Check for expected response fields
+                if 'equation' in data or 'equations' in data:
+                    print(f"  ✅ Equation information included")
+                if 'parameters' in data:
+                    print(f"  ✅ Parameters included in response")
+                if 'evidence' in data:
+                    print(f"  ✅ Evidence sources included")
+                
+                results.append({"endpoint": test['name'], "status": "success"})
+            else:
+                print(f"  ❌ {test['name']} failed: {response.status_code}")
+                results.append({"endpoint": test['name'], "status": "failed"})
+                
+        except Exception as e:
+            print(f"  ❌ Error testing {test['name']}: {e}")
+            results.append({"endpoint": test['name'], "status": "error"})
+    
+    return results
+
+def test_differential_diagnosis_data():
+    """Test differential diagnosis engine data availability"""
+    print("\n🔍 TESTING DIFFERENTIAL DIAGNOSIS DATA")
+    print("=" * 50)
+    
+    try:
+        # Check for bidirectional mapping file
+        bidirectional_path = "/app/frontend/src/data/bidirectionalMapping.js"
+        if os.path.exists(bidirectional_path):
+            print("  ✅ Bidirectional mapping file found")
+            
+            with open(bidirectional_path, 'r') as f:
+                content = f.read()
+            
+            # Check for key functions
+            key_functions = [
+                "getConditionsAffectingParameter",
+                "getDifferentialDiagnosis", 
+                "buildParameterToDiseaseIndex"
+            ]
+            
+            for func in key_functions:
+                if func in content:
+                    print(f"  ✅ {func} function found")
+                else:
+                    print(f"  ❌ {func} function not found")
+        else:
+            print("  ❌ Bidirectional mapping file not found")
+            
+        # Check for differential diagnosis panel component
+        dd_panel_path = "/app/frontend/src/components/DifferentialDiagnosisPanel.js"
+        if os.path.exists(dd_panel_path):
+            print("  ✅ Differential Diagnosis Panel component found")
+            
+            with open(dd_panel_path, 'r') as f:
+                content = f.read()
+            
+            # Check for required tabs
+            required_tabs = ["Add Parameters", "Clinical Text", "Test Patient"]
+            for tab in required_tabs:
+                if tab in content:
+                    print(f"  ✅ '{tab}' tab found")
+                else:
+                    print(f"  ❌ '{tab}' tab not found")
+        else:
+            print("  ❌ Differential Diagnosis Panel component not found")
+            
+        return True
+        
+    except Exception as e:
+        print(f"  ❌ Error testing differential diagnosis data: {e}")
+        return False
     """Test expanded respiratory diseases for parameter modifications"""
     print("\n🫁 TESTING EXPANDED RESPIRATORY DISEASES")
     print("=" * 50)
