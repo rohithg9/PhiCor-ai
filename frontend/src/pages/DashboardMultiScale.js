@@ -1182,8 +1182,9 @@ const EquationDerivation = ({ equation, expanded, onToggle, currentParams = {}, 
 // ===========================================
 // CLINICAL FINDINGS PANEL - Comprehensive disease data display
 // ===========================================
-const ClinicalFindingsPanel = ({ disease, isExpanded, onToggle }) => {
+const ClinicalFindingsPanel = ({ disease, isExpanded, onToggle, alwaysExpanded = false }) => {
   const [activeTab, setActiveTab] = React.useState('symptoms');
+  const expanded = alwaysExpanded || isExpanded;
   
   if (!disease) return null;
 
