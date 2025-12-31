@@ -220,6 +220,23 @@ const LandingPage = () => {
                     {item.label}
                   </button>
                 ))}
+                
+                {/* Theme Toggle */}
+                <div className="pt-2 mt-2 border-t border-white/10">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggleTheme();
+                    }}
+                    style={{ touchAction: 'manipulation' }}
+                    className="w-full text-left px-4 py-4 text-base font-medium transition-all rounded-xl active:scale-95 cursor-pointer select-none flex items-center gap-3 text-foreground bg-white/5 hover:bg-white/10 active:bg-white/15"
+                  >
+                    {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                    {isDark ? 'Light Mode' : 'Dark Mode'}
+                  </button>
+                </div>
               </div>
             </motion.div>
           )}
