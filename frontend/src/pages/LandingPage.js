@@ -407,9 +407,12 @@ const LandingPage = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="font-manrope text-3xl sm:text-4xl font-bold mb-4">
+            <h2 className="font-manrope text-3xl sm:text-4xl font-bold mb-2">
               The <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">Geometry</span> of Health
             </h2>
+            <p className="text-sm text-indigo-400 mb-4 font-medium">
+              PhiCor <span className="text-muted-foreground font-normal">(pronounced</span> "Fai-core"<span className="text-muted-foreground font-normal">)</span>
+            </p>
             <p className="text-muted-foreground mb-12 max-w-2xl mx-auto">
               The name PhiCor represents the fusion of the two most important elements in our work
             </p>
