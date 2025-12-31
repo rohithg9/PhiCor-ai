@@ -570,7 +570,7 @@ const LandingPage = () => {
                 onClick={() => navigate('/dashboard')}
                 className="px-10 py-6 text-lg bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 shadow-lg shadow-indigo-500/25 hover:scale-105 transition-transform"
               >
-                Try the Dashboard
+                Launch PhiCor Engine
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
               <Button
