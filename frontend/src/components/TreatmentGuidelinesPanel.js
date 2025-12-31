@@ -297,23 +297,81 @@ const TreatmentGuidelinesPanel = ({ diseaseId }) => {
     'D50': 'iron_deficiency_anemia',
     'D50_9': 'iron_deficiency_anemia',
     'D50.9': 'iron_deficiency_anemia',
+    // B12 Deficiency
+    'b12_deficiency': 'b12_deficiency',
+    'pernicious_anemia': 'b12_deficiency',
+    'D51': 'b12_deficiency',
+    'D51_0': 'b12_deficiency',
+    'D51.0': 'b12_deficiency',
     // Sickle Cell Disease
     'sickle_cell_disease': 'sickle_cell_disease',
     'D57': 'sickle_cell_disease',
     'D57_1': 'sickle_cell_disease',
     'D57.1': 'sickle_cell_disease',
+    // Thalassemia
+    'thalassemia_major': 'thalassemia_major',
+    'D56': 'thalassemia_major',
+    'D56_1': 'thalassemia_major',
+    'D56.1': 'thalassemia_major',
+    // Aplastic Anemia
+    'aplastic_anemia': 'aplastic_anemia',
+    'D61': 'aplastic_anemia',
+    'D61_9': 'aplastic_anemia',
+    'D61.9': 'aplastic_anemia',
     // Acute Lymphoblastic Leukemia
     'acute_lymphoblastic_leukemia': 'acute_lymphoblastic_leukemia',
     'C91_0': 'acute_lymphoblastic_leukemia',
     'C91.0': 'acute_lymphoblastic_leukemia',
+    // Acute Myeloid Leukemia
+    'acute_myeloid_leukemia': 'acute_myeloid_leukemia',
+    'C92_0': 'acute_myeloid_leukemia',
+    'C92.0': 'acute_myeloid_leukemia',
+    // Chronic Lymphocytic Leukemia
+    'chronic_lymphocytic_leukemia': 'chronic_lymphocytic_leukemia',
+    'C91_1': 'chronic_lymphocytic_leukemia',
+    'C91.1': 'chronic_lymphocytic_leukemia',
     // Multiple Myeloma
     'multiple_myeloma': 'multiple_myeloma',
     'C90_0': 'multiple_myeloma',
     'C90.0': 'multiple_myeloma',
+    // Stroke
+    'ischemic_stroke': 'ischemic_stroke',
+    'stroke': 'ischemic_stroke',
+    'I63': 'ischemic_stroke',
+    'I63_9': 'ischemic_stroke',
+    'I63.9': 'ischemic_stroke',
+    // Parkinson's Disease
+    'parkinsons_disease': 'parkinsons_disease',
+    'parkinson': 'parkinsons_disease',
+    'G20': 'parkinsons_disease',
+    // Multiple Sclerosis
+    'multiple_sclerosis': 'multiple_sclerosis',
+    'G35': 'multiple_sclerosis',
+    // Breast Cancer
+    'breast_cancer': 'breast_cancer',
+    'C50': 'breast_cancer',
+    'C50_9': 'breast_cancer',
+    'C50.9': 'breast_cancer',
+    // Colorectal Cancer
+    'colorectal_cancer': 'colorectal_cancer',
+    'colon_cancer': 'colorectal_cancer',
+    'C18': 'colorectal_cancer',
+    'C18_9': 'colorectal_cancer',
+    'C18.9': 'colorectal_cancer',
+    'C19': 'colorectal_cancer',
+    'C20': 'colorectal_cancer',
+    // Prostate Cancer
+    'prostate_cancer': 'prostate_cancer',
+    'C61': 'prostate_cancer',
     // Down Syndrome
     'down_syndrome': 'down_syndrome',
     'Q90_9': 'down_syndrome',
     'Q90.9': 'down_syndrome',
+    // Turner Syndrome
+    'turner_syndrome': 'turner_syndrome',
+    'Q96': 'turner_syndrome',
+    'Q96_9': 'turner_syndrome',
+    'Q96.9': 'turner_syndrome',
     // Marfan Syndrome
     'marfan_syndrome': 'marfan_syndrome',
     'Q87_4': 'marfan_syndrome',
@@ -321,6 +379,10 @@ const TreatmentGuidelinesPanel = ({ diseaseId }) => {
     // Hemophilia A
     'hemophilia_a': 'hemophilia_a',
     'D66': 'hemophilia_a',
+    // von Willebrand Disease
+    'von_willebrand_disease': 'von_willebrand_disease',
+    'D68_0': 'von_willebrand_disease',
+    'D68.0': 'von_willebrand_disease',
   };
 
   const guidelineKey = guidelineKeyMap[diseaseId] || diseaseId;
