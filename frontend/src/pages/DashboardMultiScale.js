@@ -1300,33 +1300,35 @@ const ClinicalFindingsPanel = ({ disease, isExpanded, onToggle, alwaysExpanded =
 
   return (
     <div className="border border-border/50 rounded-xl bg-card/30 overflow-hidden">
-      {/* Header */}
-      <button
-        onClick={onToggle}
-        className="w-full flex items-center justify-between p-4 hover:bg-accent/5 transition-colors"
-      >
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-blue-500/10">
-            <ClipboardList className="w-5 h-5 text-blue-400" />
+      {/* Header - hide toggle button if always expanded */}
+      {!alwaysExpanded && (
+        <button
+          onClick={onToggle}
+          className="w-full flex items-center justify-between p-4 hover:bg-accent/5 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-blue-500/10">
+              <ClipboardList className="w-5 h-5 text-blue-400" />
+            </div>
+            <div className="text-left">
+              <h3 className="font-semibold text-sm">Clinical Findings Database</h3>
+              <p className="text-xs text-muted-foreground">
+                {symptoms.length + signs.length} clinical features • {labFindings.length} lab tests • {imagingModalities.length} imaging modalities
+              </p>
+            </div>
           </div>
-          <div className="text-left">
-            <h3 className="font-semibold text-sm">Clinical Findings Database</h3>
-            <p className="text-xs text-muted-foreground">
-              {symptoms.length + signs.length} clinical features • {labFindings.length} lab tests • {imagingModalities.length} imaging modalities
-            </p>
-          </div>
-        </div>
-        {isExpanded ? <ChevronDown className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
-      </button>
+          {expanded ? <ChevronDown className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+        </button>
+      )}
 
       <AnimatePresence>
-        {isExpanded && (
+        {expanded && (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
+            initial={alwaysExpanded ? false : { height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="border-t border-border/50"
+            className={!alwaysExpanded ? "border-t border-border/50" : ""}
           >
             {/* Tab Navigation */}
             <div className="flex gap-1 p-2 overflow-x-auto border-b border-border/50 bg-accent/5">
