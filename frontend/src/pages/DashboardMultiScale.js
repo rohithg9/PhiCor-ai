@@ -2582,6 +2582,8 @@ const DashboardMultiScale = () => {
   // Handle disease selection with auto-navigation to primary organ
   const handleDiseaseSelect = useCallback((diseaseId) => {
     setSelectedDisease(diseaseId);
+    setParamFilterOrgan(null); // Reset filter when disease changes
+    setShowAllParams(false); // Collapse params when disease changes
     
     // Auto-navigate to primary affected organ
     if (diseaseId) {
