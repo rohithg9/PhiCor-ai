@@ -214,6 +214,14 @@ export const RENAL_DISEASES = {
       mild: { description: "A1 albuminuria (<30 mg/g)" },
       moderate: { description: "A2 albuminuria (30-300 mg/g)" },
       severe: { description: "A3 albuminuria (>300 mg/g)" }
+    },
+    modifications: {
+      kidneys: {
+        physiology: {
+          gfr: { factor: 1.0, note: "GFR preserved ≥90 mL/min" },
+          albumin_excretion: { factor: 2.0, note: "Increased albuminuria" }
+        }
+      }
     }
   },
 
