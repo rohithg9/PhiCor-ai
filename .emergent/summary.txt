@@ -1,99 +1,85 @@
 <analysis>**original_problem_statement:**
-The user's initial goal was to restore a Digital Physiology Platform from a GitHub repository, rebrand it to PhiCore.ai, and significantly enhance its content and functionality.
+The user's initial goal was to restore a Digital Physiology Platform, rebrand it to PhiCore.ai, and expand its disease database.
 
-The core requirements are:
-1.  **Restore and Rebrand:** Get the application running and update its name/logo to PhiCor.ai.
-2.  **Enhance Lung Cancer Module:** Integrate TNM 8th edition staging and the latest clinical guidelines.
-3.  **Scale Disease Data:** Massively expand the disease database to cover all 86+ initial diseases, starting with Cardiac and Respiratory systems, and then moving to other systems (Renal, Neurological, Hepatic, etc.), ensuring all have ICD codes.
-4.  **Auto-populate Data:** Implement a system to auto-generate baseline data for diseases that are not yet manually detailed.
-5.  **Fix Bugs:** Address numerous UI/UX bugs, including mobile responsiveness, crashes, and inactive tabs.
-6.  **EMR Integration Vision:** The user has a long-term vision to make every clinical term a mappable variable that can connect to Electronic Medical Records (EMRs), handle terminology variations (synonyms, local lingo), and feed into the system's mathematical models for real-time analysis.
+The core requirements evolved to:
+1.  **Complete Disease Data:** Ensure all existing diseases in the application have parameter  to make the simulation interactive.
+2.  **Massively Expand Content:**
+    *   Add new organ systems (Hematologic, Oncologic, etc.) and their corresponding parameters to the core data model.
+    *   Add several new disease categories, including congenital syndromes, cancers (oncology), and blood disorders (hematology), followed by Respiratory, GI/Hepatic, Autoimmune, and Infectious diseases.
+3.  **Populate Clinical Guidelines:** Fill in the empty Clinical Guidelines section for all diseases with reliable, evidence-based diagnostic and treatment information.
+4.  **Architect Bidirectional Mapping:** Implement a core architectural change where every parameter (lab result, symptom) is an independent variable, allowing the system to map abnormal values back to potential diseases, forming a foundational differential diagnosis engine. This is a key step toward the user's long-term EMR integration vision.
 
 **User's preferred language**: English
 
 **what currently exists?**
-A functional full-stack application (React/FastAPI) named PhiCor.ai. The frontend is feature-rich, but all data is hardcoded in JavaScript files.
+The PhiCor.ai application is a functional full-stack React/FastAPI app. All data remains hardcoded in frontend JavaScript files.
 
 Key achievements in this session:
-*   **Critical Bug Fix:** Resolved a React compile error that caused a blank white screen.
-*   **Disease Expansion:** Added 15 new Metabolic/Endocrine diseases, bringing the total count to **186**.
-*   **Major UX Overhaul (Dashboard):** Implemented user-requested improvements for clarity.
-    *   Abnormal parameters are now visually highlighted with a red background, strikethrough values, percentage change, and clinical notes.
-    *   An Affected Organs summary bar has been added.
-    *   The organ sidebar now displays a count of affected parameters for each organ.
-    *   The app auto-navigates to the primary affected organ when a disease is selected.
-*   **Live Equation Calculations:** The UI now displays not just the formula but also the live calculation with substituted values (from the simulation) and compares the Normal vs. Diseased result.
-*   **Landing Page Redesign:** Iteratively improved the landing page UX with a sticky navigation bar, smooth scrolling, strategic calls-to-action, and a fix for broken mobile menu navigation.
-*   **Branding & Theming:**
-    *   Rebranded Dashboard to PhiCor Engine.
-    *   Added a PhiCor Home button to the dashboard sidebar.
-    *   Implemented a Light/Dark mode theme toggle on both the landing page and the dashboard.
-    *   Updated the browser tab title, favicon (Φ), and meta tags for social link previews.
-    *   Added a pronunciation guide (Fai-core) to the landing page.
+*   **Core Data Completion:** Added parameter  to all remaining diseases in  and , making these categories fully interactive in the simulation.
+*   **Massive Data Model Expansion:**
+    *   Added several new organ systems to : Blood, Bone Marrow, Spleen, Lymphatic System, Thyroid, GI Tract, Breast, and Prostate, along with hundreds of new associated parameters.
+    *   Added and integrated three new disease categories: Hematology, Oncology, and Congenital Syndromes, increasing the total disease count to 214.
+*   **Clinical Guidelines Implemented:** Populated the previously empty Clinical Guidelines panel with comprehensive, evidence-based diagnostic, treatment, and monitoring information for nearly all diseases in the application, sourcing data from major clinical guidelines (e.g., NCCN, BSH).
+*   **UI Integration:** The frontend was successfully updated to dynamically display all new organs in the sidebar and integrate all new diseases into the search and simulation engine.
 
 **Last working item**:
-*   **Last item agent was working:** Fulfilling the user's request to make sure all the conditions we have in the app are fully complete. The agent identified that  and  lacked parameter , meaning they didn't alter the UI simulation. The agent began adding these modifications to .
+*   **Last item agent was working:** The agent was fulfilling the user's request to add the next set of diseases. It had just begun creating the necessary files for this expansion.
+    -   It successfully created .
+    -   It was about to create the file for GI/Hepatic diseases.
 *   **Status:** IN PROGRESS
 *   **Agent Testing Done:** N
-*   **Which testing method agent to use?** screenshot tool. After completing the data for both files, manually test by selecting a renal disease (e.g., CKD Stage 3) and a neurological disease (e.g., Ischemic Stroke) to verify that the parameter modification UX (highlighting, summary bar, etc.) works correctly.
+*   **Which testing method agent to use?** screenshot tool. After creating the new disease files and populating them with data, the agent needs to manually test by searching for and selecting one disease from each new category to verify that the parameter modifications and clinical guidelines are displayed correctly.
 *   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-*   **Issue 1 (P0): Incomplete Disease Data**: User reported that parameters do not change for many conditions. The root cause is missing  objects in data files.
-
-**Issues Detail:**
-*   **Issue 1: Incomplete Disease Data**
-    *   **Attempted fixes:** The agent started adding  objects to diseases in . This task is partially complete.
-    *   **Next debug checklist:**
-        1.  View  to see where the previous agent left off.
-        2.  Continue adding comprehensive  objects to all remaining diseases in that file.
-        3.  Add comprehensive  objects to all diseases in .
-        4.  **Crucially**, for every modification, ensure the parameter IDs (e.g., , , ) exactly match the IDs defined in . Mismatched IDs were a source of bugs in the past.
-    *   **Why fix this issue and what will be achieved with the fix?** This directly addresses the user's primary feedback and makes the simulation functional for two major organ systems, significantly improving the core value of the application.
-    *   **Status:** IN PROGRESS
-    *   **Is recurring issue?** Y (Incomplete data and mismatched parameter IDs are recurring problems due to the manual data entry process).
-    *   **Should Test frontend/backend/both after fix?** Frontend.
-    *   **Blocked on other issue:** None. This is the highest priority.
+There are no pending bugs or issues. The work is focused on feature expansion.
 
 **In progress Task List**:
-*   **Task 1: Systematically Complete All Disease Data (P0)**
-    *   **Where to resume:** Resume editing  to add parameter  to all diseases. After completing renal diseases, proceed to do the same for all diseases in .
-    *   **What will be achieved with this?** This will make the Renal and Neurological disease categories fully functional within the simulation, addressing the user's core request.
+*   **Task 1: Add Next Set of Diseases (P0)**
+    *   **Where to resume:** The agent needs to continue the process started at the end of the session.
+        1.  Create the data file for GI/Hepatic diseases.
+        2.  Create data files for Autoimmune and Infectious diseases.
+        3.  Populate all these new files with comprehensive disease data, including parameter  and clinical findings.
+        4.  Create corresponding index files (e.g., ).
+        5.  Update  to import, transform, and merge these new disease categories into the application.
+        6.  Add the corresponding clinical guidelines to  and update the mapping in .
+    *   **What will be achieved with this?** This will significantly expand the application's knowledge base, adding four more major disease categories as requested by the user.
     *   **Status:** IN PROGRESS
     *   **Should Test frontend/backend/both after fix?** Frontend
     *   **Blocked on something:** None.
 
 **Upcoming and Future Tasks**
 *   **Upcoming Tasks:**
-    *   (P1) **Create Watch Demo Feature:** Create a simulation or screen recording of the dashboard to demonstrate its features, and link it from the landing page.
+    *   (P0) **Implement Bidirectional Mapping:** This is the most critical upcoming feature, explicitly requested by the user. The goal is to create logic that can take an abnormal parameter (e.g., low hemoglobin) and suggest a list of potential diseases. The file  has been created as a placeholder for this logic.
 *   **Future Tasks:**
-    *   (P0) **Architect and Implement EMR Integration Engine:** This is the user-approved long-term strategic goal. Begin Phase 1 by defining the  in the codebase.
-    *   (P2) **Deepen All Disease Data:** Go back through all 186+ diseases and add evidence-based sources and references to ensure data richness is consistent.
-    *   (P3) **Backend Migration:** Refactor the application to move the hardcoded frontend data to the MongoDB database and serve it via FastAPI endpoints. This will mitigate the recurring data-entry errors.
+    *   (P1) **Create Watch Demo Feature:** Create a simulation or screen recording of the dashboard to demonstrate its features, and link it from the landing page.
+    *   (P2) **Deepen All Disease Data:** Go back through all diseases and add evidence-based sources and references to ensure data richness is consistent.
+    *   (P3) **Backend Migration:** Refactor the application to move the hardcoded frontend data to the MongoDB database and serve it via FastAPI endpoints. This will mitigate recurring data-entry errors and improve scalability.
+    *   (P3) **Architect and Implement EMR Integration Engine:** This is the user-approved long-term strategic goal, which the bidirectional mapping task is the first step toward.
 
 **Completed work in this session**
-*   **Bug Fix:** Fixed a critical blank screen/React compile error in .
-*   **Feature - Metabolic Diseases:** Added 15 new Metabolic/Endocrine diseases, increasing the total count to 186.
-*   **Feature - UX Overhaul for Parameter Display:** Implemented a new UI for displaying abnormal parameters, including an Affected Organs summary bar, sidebar counts, and visual highlighting on parameter cards.
-*   **Feature - Live Equation Calculation:** Implemented a UI to show the mathematical formula, the live calculation with substituted values, and a comparison of normal vs. diseased results.
-*   **Feature - Landing Page UX:** Added a sticky navigation bar with smooth scrolling, updated CTAs, and fixed mobile menu navigation.
-*   **Feature - Branding & Theming:** Renamed Dashboard to PhiCor Engine, added a Home button to the dashboard, implemented a light/dark mode theme toggle, updated the browser tab/meta tags, and added a pronunciation guide.
-*   **Fix:** Updated the demo request  link.
+- **Feature - Data Completion:** Added parameter  to all Renal and Neurological diseases, making them fully functional.
+- **Feature - Major Data Expansion:** Added new organ systems (Blood, Bone Marrow, GI, etc.) and new disease categories (Hematology, Oncology, Congenital Syndromes) with full parameter data.
+- **Feature - Clinical Guidelines:** Populated the previously empty Clinical Guidelines panel with detailed, evidence-based diagnostic and treatment information for almost all diseases.
+- **Refactor:** Updated  to dynamically load and integrate all new organ and disease data.
+- **Testing:** Manually verified via screenshots that all new data, UI elements, and clinical guidelines were correctly implemented and functional.
 
 **Earlier issues found/mentioned but not fixed**
 *   None.
 
 **Known issue recurrence from previous fork**
-*   The root cause of errors continues to be the fragile data architecture. The session started by fixing a syntax error in a large JS data file (), and a later bug was caused by mismatched parameter IDs between the new metabolic diseases and the organ models. This reinforces the need for the future backend migration task.
+*   The fragile data architecture (hardcoded JS objects) remains the biggest technical debt. While no bugs occurred this session, the complexity of modifying  to add new data types highlights the need for the future backend migration.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-*   **Frontend:** React, Tailwind CSS, Framer Motion for animations.
-*   **Data Model:** Large, nested JavaScript objects in  files define all application data (organ models, diseases, clinical findings, parameter modifications). This is the source of both functionality and fragility.
-*   **Backend:** FastAPI (currently unused for application data).
-*   **Database:** MongoDB (available but not integrated).
+*   **Frontend:** React, Tailwind CSS.
+*   **Data Model:** All application data is hardcoded in large, nested JavaScript objects. The agent has demonstrated proficiency in expanding this model by adding new files, index files, and modifying the main  component to integrate them.
+*   **Data Structure:**
+    *   : Defines organs, their sub-tabs, and all possible parameters.
+    *   : Defines individual diseases, their clinical findings, and  that link to parameters in .
+    *   : A central file containing detailed diagnostic and treatment guidelines, keyed by disease ID.
 
 **key DB schema**
 *   Not applicable. Data is stored in frontend JS files.
@@ -102,39 +88,38 @@ Key achievements in this session:
 *   None.
 
 **All files of reference**
-*   **/app/frontend/src/data/renalDiseases.js**: **(IN PROGRESS)** This file is being actively modified to add parameter modifications.
-*   **/app/frontend/src/data/neurologicalDiseases.js**: **(NEXT UP)** This file needs to have parameter modifications added after  is complete.
-*   **/app/frontend/src/data/organModels.js**: **(CRITICAL REFERENCE)** This file contains the correct parameter IDs that must be used in the  objects.
-*   **/app/frontend/src/pages/DashboardMultiScale.js**: The core component for the PhiCor Engine, which was heavily modified to add all new UX features.
-*   **/app/frontend/src/pages/LandingPage.js**: The landing page, which was heavily modified to add the sticky navigation and new branding.
-*   **/app/frontend/src/data/metabolicDiseases.js**: Example of a recently completed disease file with correct .
+*   **/app/frontend/src/pages/DashboardMultiScale.js**: **(HEAVILY MODIFIED)** Core component for the simulation. Contains all the logic for merging and displaying disease data. Any new disease category requires changes here.
+*   **/app/frontend/src/data/organModels.js**: **(HEAVILY MODIFIED)** The master file for all physiological parameters.
+*   **/app/frontend/src/data/diseaseGuidelines.js**: **(HEAVILY MODIFIED)** The central repository for all clinical guideline information.
+*   **/app/frontend/src/data/bidirectionalMapping.js**: **(NEW - CRITICAL FOR NEXT TASK)** Placeholder file for the upcoming bidirectional mapping feature.
 
 **Areas that need refactoring**:
-*   **Data Management:** The most critical architectural debt is the hardcoded data in JS files. Migrating this to a database served by the FastAPI backend would eliminate the recurring syntax and data-mismatch errors. The user has deferred this, but it remains a high-priority future task.
-*   ****: This file is now extremely large (>2500 lines). It should be broken down into smaller components and custom hooks (e.g., a  hook) to improve maintainability.
+*   ****: This component has grown extremely large and complex, handling all data ingestion, merging, and transformation. It should be broken down into smaller, more manageable components and custom hooks (e.g., , ).
+*   **Data Management:** The core architectural weakness remains the hardcoded JS data. The future backend migration is critical for long-term maintainability.
 
 **key api endpoints**
 *   None are actively used by the application logic.
 
 **Critical Info for New Agent**
-*   **TOP PRIORITY:** The user wants all diseases to be complete. Your immediate task is to finish adding parameter  to  and then do the same for .
-*   **AVOID BUGS:** When adding modifications, be extremely careful to use the exact parameter IDs from . Any mismatch will cause the parameter highlighting to fail silently.
-*   **USER IS VERY RESPONSIVE:** The user provides frequent, detailed feedback, often with annotated screenshots. Pay close attention to these as they guide the project's direction.
+*   **USER'S PRIORITIES:** The user has a clear sequence of requests: 1) Finish adding the next batch of diseases (Respiratory, GI, etc.). 2) Implement the **bidirectional mapping** feature. Do not start the bidirectional mapping until the new diseases are added and functional.
+*   **DATA INTEGRATION PATTERN:** You must follow the established pattern to add new diseases:
+    1.  Create a  file with disease data.
+    2.  Create a  file to export the data.
+    3.  Modify  to import and transform the new data.
+    4.  Add clinical guidelines to .
+    5.  Update the mapping in .
+*   **BIDIRECTIONAL MAPPING:** This is the next major architectural task. The user envisions a system where selecting an abnormal finding (like a lab result) can suggest possible diseases. The placeholder file  should be the starting point.
 
 **documents and test reports created in this job**
-*    was updated after adding and testing metabolic diseases.
+*    was updated several times to reflect the successful testing of new features.
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** Requested adding a pronunciation guide for PhiCor. **Status:** COMPLETED.
-2.  **User:** Requested a Light/Dark mode toggle and a Home button on the dashboard. **Status:** COMPLETED.
-3.  **User:** Reported mobile menu buttons were not working. **Status:** COMPLETED (Agent improved button styling and click handling).
-4.  **User:** Requested renaming Dashboard to PhiCor Engine. **Status:** COMPLETED.
-5.  **User:** Reported that the landing page navigation buttons weren't working and the main CTA button should scroll to a different section. **Status:** COMPLETED.
-6.  **User:** Provided feedback on the landing page layout, suggesting a sticky nav to guide users through the content. **Status:** COMPLETED.
-7.  **User:** Updated the Request a Demo email to their personal address. **Status:** COMPLETED.
-8.  **User:** Noticed the browser tab title and link previews were generic and requested updating them with the brand logo and tagline. **Status:** COMPLETED.
-9.  **User:** Pointed out that the mathematical equations were just formulas and requested to see live calculations with simulated data. **Status:** COMPLETED.
-10. **User:** Provided extensive feedback (with images) on the dashboard UX, noting that parameters didn't change and it was hard to see which organs were affected. This kicked off the major UX overhaul. **Status:** COMPLETED.
+1.  **User:** Instructed the agent to add the next set of diseases and their corresponding data. **Status:** IN PROGRESS.
+2.  **User:** Confirmed the next steps: add guidelines for existing diseases, then implement bidirectional mapping, then add more diseases. **Status:** COMPLETED (Guidelines were added).
+3.  **User:** Pointed out that the Clinical Guidelines panel was empty and requested it be filled with reliable information. **Status:** COMPLETED.
+4.  **User:** Provided a major architectural insight: every parameter should be an independent variable that can be mapped back to diseases (the bidirectional mapping concept). **Status:** ACKNOWLEDGED, planned as an upcoming task.
+5.  **User:** Requested the addition of new disease categories: congenital syndromes, cancers, and blood disorders. **Status:** COMPLETED.
+6.  **User:** Agreed with the agent's plan to complete Renal/Neurological modifications and then add new diseases. **Status:** COMPLETED.
 
 **Project Health Check:**
 *   **Broken:** None.
@@ -144,13 +129,13 @@ Key achievements in this session:
 *   None.
 
 **Testing status**
-*   **Testing agent used after significant changes:** YES (used for verifying the metabolic diseases feature).
+*   **Testing agent used after significant changes:** YES. The agent claimed to use the testing subagent after major feature additions, and the results were positive. Manual testing via screenshots was also performed extensively and successfully.
 *   **Troubleshoot agent used after agent stuck in loop:** NO
 *   **Test files created:** None.
-*   **Known regressions:** None currently active.
+*   **Known regressions:** None.
 
 **Credentials to test flow:**
-*   No authentication is required. The application is publicly accessible.
+*   No authentication is required.
 
 **What agent forgot to execute**
-*   The agent has not forgotten any tasks, but the user's highest priority task (completing all disease data) is large and still in progress.</analysis>
+*   The agent has correctly followed the user's prioritized sequence. The bidirectional mapping feature was intentionally deferred to complete the higher-priority task of adding clinical guidelines first. The task is captured and planned.</analysis>
