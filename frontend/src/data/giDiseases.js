@@ -1348,6 +1348,41 @@ export const GI_DISEASES = {
           albumin: { factor: 0.7, note: "Malnutrition" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "TNM Staging (AJCC 8th)",
+      requirements: {
+        diagnosis: "EGD with biopsy",
+        histology: "SCC (proximal, smoking/alcohol) vs Adenocarcinoma (distal, Barrett's/GERD)",
+        staging: "CT chest/abdomen/pelvis + PET + EUS"
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Benign stricture", distinguishing: "History of caustic injury, radiation, no mass on EGD" },
+      { condition: "Achalasia", distinguishing: "Dysphagia to liquids and solids equally, bird-beak appearance" },
+      { condition: "Extrinsic compression", distinguishing: "CT shows mediastinal mass compressing esophagus" }
+    ],
+    treatment: {
+      early: [
+        { name: "Endoscopic resection (EMR/ESD)", indication: "T1a, <2cm", evidence: "IA" }
+      ],
+      locallyAdvanced: [
+        { name: "Neoadjuvant chemoradiation", regimen: "CROSS protocol (carboplatin/paclitaxel + 41.4 Gy)", evidence: "IA" },
+        { name: "Esophagectomy", indication: "After neoadjuvant or upfront if early", evidence: "IA" }
+      ],
+      metastatic: [
+        { name: "Systemic chemotherapy", regimen: "5-FU + platinum ± trastuzumab if HER2+", evidence: "IA" },
+        { name: "Pembrolizumab", indication: "PD-L1+ or MSI-H", evidence: "IA" }
+      ],
+      palliative: [
+        { name: "Esophageal stent", indication: "Dysphagia palliation" },
+        { name: "Radiation", indication: "Local control, bleeding, pain" }
+      ]
+    },
+    riskStratification: {
+      survival: "5-year overall: ~20%; Stage IV: <5%",
+      histology: "SCC vs Adeno similar outcomes stage-for-stage",
+      location: "Proximal/cervical: technically challenging, worse outcomes"
     }
   }
 };
