@@ -446,6 +446,21 @@ const MERGED_DISEASE_MODELS = {
     Object.entries(ALL_METABOLIC_DISEASES).map(([code, disease]) => [
       code, transformMetabolicDisease(code, disease)
     ])
+  ),
+  ...Object.fromEntries(
+    Object.entries(ALL_HEMATOLOGICAL_DISEASES).map(([code, disease]) => [
+      code, transformHematologicalDisease(code, disease)
+    ])
+  ),
+  ...Object.fromEntries(
+    Object.entries(ALL_ONCOLOGY_DISEASES).map(([code, disease]) => [
+      code, transformOncologyDisease(code, disease)
+    ])
+  ),
+  ...Object.fromEntries(
+    Object.entries(ALL_CONGENITAL_DISEASES).map(([code, disease]) => [
+      code, transformCongenitalDisease(code, disease)
+    ])
   )
 };
 
