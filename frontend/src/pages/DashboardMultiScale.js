@@ -1637,28 +1637,6 @@ const OrganSidebar = ({
     </ScrollArea>
 
     <div className="p-3 border-t border-border/50 space-y-2">
-      {/* AI Clinical Assistant Button */}
-      <button
-        onClick={() => window.location.href = '/diagnosis'}
-        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-muted-foreground hover:bg-purple-500/10 hover:text-purple-400 transition-colors text-sm group"
-      >
-        <div className="w-6 h-6 rounded-md bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center border border-purple-500/30 group-hover:border-purple-500/50 transition-colors">
-          <Brain className="w-3.5 h-3.5 text-purple-400" />
-        </div>
-        <span>AI Clinical Assistant</span>
-      </button>
-      
-      {/* Home Button */}
-      <button
-        onClick={() => window.location.href = '/'}
-        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-muted-foreground hover:bg-indigo-500/10 hover:text-indigo-400 transition-colors text-sm group"
-      >
-        <div className="w-6 h-6 rounded-md bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center border border-indigo-500/30 group-hover:border-indigo-500/50 transition-colors">
-          <span className="text-sm font-serif text-indigo-400">Φ</span>
-        </div>
-        <span>PhiCor Home</span>
-      </button>
-      
       {/* Theme Toggle */}
       <button
         onClick={onToggleTheme}
