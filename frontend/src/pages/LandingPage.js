@@ -288,7 +288,7 @@ const LandingPage = () => {
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center border border-indigo-500/30">
                 <span className="text-3xl font-serif text-indigo-400">Φ</span>
               </div>
-              <span className="font-manrope font-bold text-2xl bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">PhiCor.ai</span>
+              <span className="font-manrope font-bold text-2xl bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">PhiCor</span>
             </div>
 
             {/* Main headline */}
@@ -304,7 +304,7 @@ const LandingPage = () => {
 
             {/* Subheading */}
             <p className="text-base sm:text-lg text-muted-foreground max-w-3xl mx-auto mb-10 font-light leading-relaxed">
-              Moving medicine from speculation to calculation. PhiCor.ai uses the mathematical constants of nature to decode human physiology and empower doctors with <span className="text-indigo-400 font-medium">aerospace-grade precision</span>.
+              Moving medicine from speculation to calculation. PhiCor uses the mathematical constants of nature to decode human physiology and empower doctors with <span className="text-indigo-400 font-medium">aerospace-grade precision</span>.
             </p>
 
             {/* CTA Buttons */}
@@ -683,7 +683,7 @@ const LandingPage = () => {
                 <span className="text-2xl font-serif text-indigo-400">Φ</span>
               </div>
               <div>
-                <span className="font-manrope font-bold text-lg bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">PhiCor.ai</span>
+                <span className="font-manrope font-bold text-lg bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">PhiCor</span>
                 <p className="text-xs text-muted-foreground">Digital Physiology Platform</p>
               </div>
             </div>
@@ -706,7 +706,7 @@ const LandingPage = () => {
 
             {/* Copyright */}
             <p className="text-xs text-muted-foreground">
-              © 2024 PhiCor.ai · Decoding the Equations of Life
+              © 2024 PhiCor · Decoding the Equations of Life
             </p>
           </div>
         </div>
