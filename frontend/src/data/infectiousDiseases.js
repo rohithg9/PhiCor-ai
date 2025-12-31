@@ -1038,6 +1038,35 @@ export const INFECTIOUS_DISEASES = {
           liver_volume: { factor: 1.2, note: "Hepatomegaly" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "Serology-Based",
+      requirements: {
+        acute: "HAV IgM positive",
+        pastInfection: "HAV IgG positive, IgM negative",
+        nonImmune: "Both negative"
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Hepatitis B/C", distinguishing: "Different serology markers" },
+      { condition: "Drug-induced liver injury", distinguishing: "Medication history, eosinophilia possible" },
+      { condition: "Autoimmune hepatitis", distinguishing: "Autoantibodies (ANA, SMA), chronic course" },
+      { condition: "Biliary obstruction", distinguishing: "Dilated ducts on imaging, direct hyperbilirubinemia" }
+    ],
+    treatment: {
+      supportive: [
+        { name: "Rest and hydration", indication: "All patients", evidence: "IIA" },
+        { name: "Avoid hepatotoxins", indication: "No alcohol, acetaminophen limitation", evidence: "IA" }
+      ],
+      prevention: [
+        { name: "HAV vaccination", indication: "All children, travelers, at-risk adults", evidence: "IA" },
+        { name: "Post-exposure prophylaxis", indication: "Vaccine within 2 weeks of exposure", evidence: "IA" }
+      ]
+    },
+    riskStratification: {
+      mortality: "<0.1% overall; higher in elderly",
+      fulminant: "Very rare (<1%); chronic HBV/HCV co-infection increases risk",
+      recovery: "99% complete recovery; no chronicity"
     }
   },
 
