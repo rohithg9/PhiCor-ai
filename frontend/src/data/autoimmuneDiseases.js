@@ -775,6 +775,49 @@ export const AUTOIMMUNE_DISEASES = {
           aortic_wall: { factor: 1.3, note: "Aortitis" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "ACR/EULAR 2022 GCA Classification",
+      requirements: {
+        ageRequirement: "≥50 years",
+        threshold: "≥6 points",
+        items: {
+          "Morning stiffness shoulder/neck": 2,
+          "Sudden visual loss": 3,
+          "Jaw/tongue claudication": 2,
+          "New temporal headache": 2,
+          "Scalp tenderness": 2,
+          "Abnormal temporal artery exam": 2,
+          "ESR ≥50 or CRP ≥10": 3,
+          "Positive temporal artery biopsy": 5,
+          "Halo sign on ultrasound": 5
+        }
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Primary headache", distinguishing: "Younger age, no systemic symptoms, normal ESR" },
+      { condition: "Takayasu arteritis", distinguishing: "Age <40, affects aorta/branches, absent pulses" },
+      { condition: "Polymyalgia rheumatica", distinguishing: "Overlaps 40-60%; no cranial symptoms; responds to low-dose steroids" },
+      { condition: "ANCA vasculitis", distinguishing: "Smaller vessel, ANCA positive, different organ involvement" }
+    ],
+    treatment: {
+      acute: [
+        { name: "Prednisone", dose: "1 mg/kg/day (max 60-80 mg)", indication: "All patients", evidence: "IA", note: "Higher dose if visual symptoms" },
+        { name: "IV methylprednisolone", dose: "1g daily x 3 days", indication: "Impending visual loss", evidence: "IIA" }
+      ],
+      steroidSparing: [
+        { name: "Tocilizumab", dose: "162 mg SQ weekly", mechanism: "Anti-IL-6R", indication: "Relapsing or high-risk", evidence: "IA" },
+        { name: "Methotrexate", dose: "15-25 mg weekly", indication: "Adjunctive", evidence: "IIA" }
+      ],
+      preventive: [
+        { name: "Low-dose aspirin", indication: "Reduce ischemic events", evidence: "IIB" },
+        { name: "Osteoporosis prevention", note: "Calcium/vitamin D, bisphosphonates if prolonged steroids" }
+      ]
+    },
+    riskStratification: {
+      visualLoss: "15-20% if untreated; usually permanent; treat immediately",
+      aorticDisease: "Aortic aneurysm 10-20%; monitor with CTA/MRA",
+      relapse: "40-60% relapse during taper; tocilizumab reduces risk"
     }
   },
 
