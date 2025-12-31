@@ -856,6 +856,28 @@ export const PSYCHIATRIC_DISEASES = {
     
     differentialDiagnosis: ["OC-related disorders (BDD, hoarding)", "Anxiety disorders", "Tic disorders", "Autism spectrum", "Psychotic disorders"],
     
+    treatment: {
+      firstLine: [
+        { name: "CBT with ERP", indication: "First-line (Exposure and Response Prevention)", evidence: "IA" },
+        { name: "SSRIs (high dose)", examples: "Fluoxetine 40-80mg, Fluvoxamine, Sertraline", indication: "First-line medication", evidence: "IA", note: "Higher doses than depression" }
+      ],
+      secondLine: [
+        { name: "Clomipramine", indication: "If SSRIs fail (SRI)", evidence: "IA", note: "Monitor ECG, anticholinergic effects" }
+      ],
+      augmentation: [
+        { name: "Atypical antipsychotics", examples: "Risperidone, Aripiprazole", indication: "Partial SSRI response", evidence: "IA" }
+      ],
+      refractory: [
+        { name: "Deep Brain Stimulation", indication: "Severe, treatment-refractory", evidence: "IIB" },
+        { name: "Transcranial Magnetic Stimulation", indication: "Adjunctive", evidence: "IB" }
+      ]
+    },
+    riskStratification: {
+      chronicity: "Chronic waxing-waning course; rarely spontaneous remission",
+      suicide: "Increased risk, especially with comorbid depression",
+      response: "50-60% respond to SSRIs; ERP adds significant benefit"
+    },
+    
     comorbidities: ["Depression (67%)", "Anxiety disorders (76%)", "Tic disorders", "ADHD", "Eating disorders"]
   }
 };
