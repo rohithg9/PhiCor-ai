@@ -2705,14 +2705,37 @@ const DashboardMultiScale = () => {
           <div className="border-b border-border/50 px-3 lg:px-6 py-2 bg-gradient-to-r from-destructive/5 to-orange-500/5">
             <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
               <span className="text-[10px] text-muted-foreground uppercase tracking-wider shrink-0">Affected:</span>
+              {/* "All" button to show all organs */}
+              <motion.button
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                onClick={() => {
+                  setParamFilterOrgan(null);
+                  setShowAllParams(false);
+                }}
+                className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs whitespace-nowrap transition-all ${
+                  paramFilterOrgan === null
+                    ? 'bg-primary/20 text-primary border border-primary/30'
+                    : 'bg-muted/30 text-muted-foreground border border-muted/30 hover:bg-muted/50'
+                }`}
+              >
+                <span>All</span>
+                <span className="min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center bg-primary/20">
+                  {allModifiedParameters.length}
+                </span>
+              </motion.button>
               {affectedOrgansSummary.map((organ) => (
                 <motion.button
                   key={organ.id}
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  onClick={() => setSelectedOrgan(organ.id)}
+                  onClick={() => {
+                    setSelectedOrgan(organ.id);
+                    setParamFilterOrgan(organ.id);
+                    setShowAllParams(false);
+                  }}
                   className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs whitespace-nowrap transition-all ${
-                    selectedOrgan === organ.id
+                    paramFilterOrgan === organ.id
                       ? 'bg-primary/20 text-primary border border-primary/30'
                       : organ.isPrimary
                       ? 'bg-destructive/20 text-destructive border border-destructive/30 hover:bg-destructive/30'
@@ -2727,7 +2750,9 @@ const DashboardMultiScale = () => {
                       initial={{ scale: 1.5 }}
                       animate={{ scale: 1 }}
                       className={`min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center ${
-                        organ.isPrimary 
+                        paramFilterOrgan === organ.id
+                          ? 'bg-primary text-primary-foreground'
+                          : organ.isPrimary 
                           ? 'bg-destructive text-destructive-foreground' 
                           : 'bg-orange-500 text-white'
                       }`}
