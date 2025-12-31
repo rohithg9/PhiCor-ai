@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """
 Backend Testing for PhiCor.ai Digital Physiology Platform
-Testing major system expansion: New organs and disease categories
-- Hematological diseases (Iron Deficiency Anemia, Sickle Cell, etc.)
-- Oncology diseases (ALL, AML, CLL, CML, Lymphomas, Myeloma, Solid Tumors)
-- Congenital syndromes (Down Syndrome, Turner, Marfan, Hemophilia, etc.)
+Testing disease expansion from 214 to 254 diseases:
+- Autoimmune diseases (SLE, Rheumatoid Arthritis, Crohn's, etc.)
+- Infectious diseases (COVID-19, Sepsis, Tuberculosis, etc.)
+- GI diseases (Pancreatitis, GERD, etc.)
+- Expanded respiratory diseases (Asthma, Pneumonia, PE, etc.)
 """
 
 import requests
