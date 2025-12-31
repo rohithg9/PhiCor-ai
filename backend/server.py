@@ -1322,7 +1322,7 @@ async def create_drug(drug: DrugCreate):
     await db.drugs.insert_one(drug_dict)
     return {"id": drug_dict["id"], "message": "Drug created successfully"}
 
-@api_router.put("/drugs/db/{drug_id}")
+@api_router.put("/drugs-db/{drug_id}")
 async def update_drug(drug_id: str, drug: DrugCreate):
     """Update an existing drug."""
     existing = await db.drugs.find_one({"id": drug_id})
