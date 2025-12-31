@@ -476,6 +476,132 @@ const transformGIDisease = (code, disease) => {
   };
 };
 
+// Transform dermatological diseases to match existing format
+const transformDermatologicalDisease = (code, disease) => {
+  const icd10Code = code.replace('_', '.');
+  
+  return {
+    name: disease.name,
+    icd10: disease.icd10 || icd10Code,
+    category: disease.category || 'dermatological',
+    description: disease.definition || disease.name,
+    definition: disease.definition,
+    primaryOrgan: disease.primaryOrgan || 'skin',
+    affectedOrgans: disease.affectedOrgans || ['skin'],
+    progression: disease.progression || [
+      { stage: 1, name: "Mild", severity: 0.25 },
+      { stage: 2, name: "Moderate", severity: 0.5 },
+      { stage: 3, name: "Severe", severity: 0.75 },
+      { stage: 4, name: "Critical", severity: 1.0 }
+    ],
+    clinicalPresentation: disease.clinicalPresentation,
+    laboratoryFindings: disease.laboratoryFindings,
+    imagingFindings: disease.imagingFindings,
+    pathophysiology: disease.pathophysiology,
+    histopathology: disease.histopathology,
+    modifications: disease.modifications || 
+                   generateModifications({ ...disease, icd10: disease.icd10 || icd10Code, category: 'dermatological' }),
+    severity: disease.severity,
+    isFromDermatologicalDB: true,
+    hasModifications: true
+  };
+};
+
+// Transform psychiatric diseases to match existing format
+const transformPsychiatricDisease = (code, disease) => {
+  const icd10Code = code.replace('_', '.');
+  
+  return {
+    name: disease.name,
+    icd10: disease.icd10 || icd10Code,
+    category: disease.category || 'psychiatric',
+    description: disease.definition || disease.name,
+    definition: disease.definition,
+    primaryOrgan: disease.primaryOrgan || 'brain',
+    affectedOrgans: disease.affectedOrgans || ['brain'],
+    progression: disease.progression || [
+      { stage: 1, name: "Mild", severity: 0.25 },
+      { stage: 2, name: "Moderate", severity: 0.5 },
+      { stage: 3, name: "Severe", severity: 0.75 },
+      { stage: 4, name: "Critical", severity: 1.0 }
+    ],
+    clinicalPresentation: disease.clinicalPresentation,
+    laboratoryFindings: disease.laboratoryFindings,
+    imagingFindings: disease.imagingFindings,
+    pathophysiology: disease.pathophysiology,
+    diagnosticCriteria: disease.diagnosticCriteria,
+    screeningTools: disease.screeningTools,
+    modifications: disease.modifications || 
+                   generateModifications({ ...disease, icd10: disease.icd10 || icd10Code, category: 'psychiatric' }),
+    severity: disease.severity,
+    isFromPsychiatricDB: true,
+    hasModifications: true
+  };
+};
+
+// Transform pediatric diseases to match existing format
+const transformPediatricDisease = (code, disease) => {
+  const icd10Code = code.replace('_', '.');
+  
+  return {
+    name: disease.name,
+    icd10: disease.icd10 || icd10Code,
+    category: disease.category || 'pediatric',
+    description: disease.definition || disease.name,
+    definition: disease.definition,
+    primaryOrgan: disease.primaryOrgan || 'blood',
+    affectedOrgans: disease.affectedOrgans || ['blood'],
+    ageGroup: disease.ageGroup,
+    progression: disease.progression || [
+      { stage: 1, name: "Mild", severity: 0.25 },
+      { stage: 2, name: "Moderate", severity: 0.5 },
+      { stage: 3, name: "Severe", severity: 0.75 },
+      { stage: 4, name: "Critical", severity: 1.0 }
+    ],
+    clinicalPresentation: disease.clinicalPresentation,
+    laboratoryFindings: disease.laboratoryFindings,
+    imagingFindings: disease.imagingFindings,
+    pathophysiology: disease.pathophysiology,
+    diagnosticCriteria: disease.diagnosticCriteria,
+    modifications: disease.modifications || 
+                   generateModifications({ ...disease, icd10: disease.icd10 || icd10Code, category: 'pediatric' }),
+    severity: disease.severity,
+    isFromPediatricDB: true,
+    hasModifications: true
+  };
+};
+
+// Transform OB/GYN diseases to match existing format
+const transformOBGYNDisease = (code, disease) => {
+  const icd10Code = code.replace('_', '.');
+  
+  return {
+    name: disease.name,
+    icd10: disease.icd10 || icd10Code,
+    category: disease.category || 'obgyn',
+    description: disease.definition || disease.name,
+    definition: disease.definition,
+    primaryOrgan: disease.primaryOrgan || 'uterus',
+    affectedOrgans: disease.affectedOrgans || ['uterus'],
+    progression: disease.progression || [
+      { stage: 1, name: "Mild", severity: 0.25 },
+      { stage: 2, name: "Moderate", severity: 0.5 },
+      { stage: 3, name: "Severe", severity: 0.75 },
+      { stage: 4, name: "Critical", severity: 1.0 }
+    ],
+    clinicalPresentation: disease.clinicalPresentation,
+    laboratoryFindings: disease.laboratoryFindings,
+    imagingFindings: disease.imagingFindings,
+    pathophysiology: disease.pathophysiology,
+    diagnosticCriteria: disease.diagnosticCriteria,
+    modifications: disease.modifications || 
+                   generateModifications({ ...disease, icd10: disease.icd10 || icd10Code, category: 'obgyn' }),
+    severity: disease.severity,
+    isFromOBGYNDB: true,
+    hasModifications: true
+  };
+};
+
 // Get keys to exclude from DISEASE_MODELS (already covered by ICD-10 diseases)
 const getDiseaseModelKeysByIcd10 = () => {
   const icd10Covered = new Set();
