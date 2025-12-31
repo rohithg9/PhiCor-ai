@@ -1174,6 +1174,568 @@ export const ORGAN_MODELS = {
         }
       ]
     }
+  },
+
+  blood: {
+    name: "Blood",
+    icon: "🩸",
+    category: "hematological",
+    
+    geometry: {
+      title: "Blood Volume & Composition",
+      parameters: [
+        { id: "total_blood_volume", name: "Total Blood Volume", value: 5000, unit: "mL", range: [4500, 5500], evidence: "established" },
+        { id: "plasma_volume", name: "Plasma Volume", value: 3000, unit: "mL", range: [2700, 3300], evidence: "established" },
+        { id: "rbc_volume", name: "RBC Volume", value: 2000, unit: "mL", range: [1800, 2200], evidence: "established" },
+        { id: "rbc_count", name: "RBC Count", value: 5.0, unit: "×10¹²/L", range: [4.5, 5.5], evidence: "established" },
+        { id: "wbc_count", name: "WBC Count", value: 7.0, unit: "×10⁹/L", range: [4.0, 11.0], evidence: "established" },
+        { id: "platelet_count", name: "Platelet Count", value: 250, unit: "×10⁹/L", range: [150, 400], evidence: "established" },
+        { id: "hematocrit", name: "Hematocrit", value: 45, unit: "%", range: [40, 50], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "blood_volume_estimation",
+          name: "Blood Volume Estimation",
+          latex: "BV = 70 \\times Weight_{kg} \\text{ (adult male)}",
+          description: "Approximate blood volume from body weight",
+          evidence: "established",
+          source: "Clinical estimation"
+        }
+      ]
+    },
+
+    physiology: {
+      title: "Hemoglobin & Oxygen",
+      parameters: [
+        { id: "hemoglobin", name: "Hemoglobin", value: 14.5, unit: "g/dL", range: [12.0, 17.0], evidence: "established" },
+        { id: "mcv", name: "MCV (Mean Corpuscular Volume)", value: 90, unit: "fL", range: [80, 100], evidence: "established" },
+        { id: "mch", name: "MCH (Mean Corpuscular Hgb)", value: 30, unit: "pg", range: [27, 33], evidence: "established" },
+        { id: "mchc", name: "MCHC", value: 34, unit: "g/dL", range: [32, 36], evidence: "established" },
+        { id: "rdw", name: "RDW (Red Cell Distribution Width)", value: 13, unit: "%", range: [11.5, 14.5], evidence: "established" },
+        { id: "reticulocyte_count", name: "Reticulocyte Count", value: 1.0, unit: "%", range: [0.5, 2.0], evidence: "established" },
+        { id: "esr", name: "ESR", value: 10, unit: "mm/hr", range: [0, 20], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "oxygen_content",
+          name: "Oxygen Content",
+          latex: "CaO_2 = (1.34 \\times Hgb \\times SaO_2) + (0.003 \\times PaO_2)",
+          description: "Total oxygen content of arterial blood",
+          evidence: "established",
+          source: "Fick principle"
+        },
+        {
+          id: "oxygen_delivery",
+          name: "Oxygen Delivery",
+          latex: "DO_2 = CO \\times CaO_2 \\times 10",
+          description: "Oxygen delivery to tissues",
+          evidence: "established",
+          source: "Fick equation"
+        },
+        {
+          id: "reticulocyte_production_index",
+          name: "Reticulocyte Production Index",
+          latex: "RPI = \\frac{Retic\\% \\times (Hct/45)}{Maturation_{factor}}",
+          description: "Corrected reticulocyte count for anemia",
+          evidence: "established",
+          source: "Hematology standard"
+        }
+      ]
+    },
+
+    structure: {
+      title: "Iron & Nutrients",
+      parameters: [
+        { id: "serum_iron", name: "Serum Iron", value: 100, unit: "μg/dL", range: [60, 170], evidence: "established" },
+        { id: "ferritin", name: "Ferritin", value: 100, unit: "ng/mL", range: [20, 300], evidence: "established" },
+        { id: "tibc", name: "TIBC", value: 300, unit: "μg/dL", range: [250, 400], evidence: "established" },
+        { id: "transferrin_sat", name: "Transferrin Saturation", value: 30, unit: "%", range: [20, 50], evidence: "established" },
+        { id: "vitamin_b12", name: "Vitamin B12", value: 400, unit: "pg/mL", range: [200, 900], evidence: "established" },
+        { id: "folate", name: "Folate", value: 10, unit: "ng/mL", range: [3, 17], evidence: "established" },
+        { id: "erythropoietin", name: "Erythropoietin", value: 10, unit: "mIU/mL", range: [4, 20], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "transferrin_saturation",
+          name: "Transferrin Saturation",
+          latex: "TSAT = \\frac{Serum\\ Iron}{TIBC} \\times 100",
+          description: "Percentage of transferrin bound to iron",
+          evidence: "established",
+          source: "Iron studies calculation"
+        }
+      ]
+    },
+
+    pressures: {
+      title: "Coagulation",
+      parameters: [
+        { id: "pt", name: "Prothrombin Time (PT)", value: 12, unit: "sec", range: [11, 14], evidence: "established" },
+        { id: "inr", name: "INR", value: 1.0, unit: "", range: [0.9, 1.1], evidence: "established" },
+        { id: "ptt", name: "PTT", value: 30, unit: "sec", range: [25, 35], evidence: "established" },
+        { id: "fibrinogen", name: "Fibrinogen", value: 300, unit: "mg/dL", range: [200, 400], evidence: "established" },
+        { id: "d_dimer", name: "D-Dimer", value: 0.3, unit: "μg/mL", range: [0, 0.5], evidence: "established" },
+        { id: "bleeding_time", name: "Bleeding Time", value: 5, unit: "min", range: [2, 9], evidence: "established" },
+        { id: "thrombin_time", name: "Thrombin Time", value: 15, unit: "sec", range: [14, 19], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "inr_calculation",
+          name: "INR Calculation",
+          latex: "INR = \\left(\\frac{PT_{patient}}{PT_{normal}}\\right)^{ISI}",
+          description: "International Normalized Ratio for warfarin monitoring",
+          evidence: "established",
+          source: "WHO standardization"
+        },
+        {
+          id: "coagulation_cascade",
+          name: "Coagulation Cascade Summary",
+          latex: "\\text{Intrinsic: XII} \\rightarrow \\text{XI} \\rightarrow \\text{IX} \\rightarrow \\text{X} \\rightarrow \\text{Thrombin}",
+          description: "Simplified intrinsic pathway",
+          evidence: "established",
+          source: "Coagulation physiology"
+        }
+      ]
+    },
+
+    cellular: {
+      title: "WBC Differential",
+      parameters: [
+        { id: "neutrophils", name: "Neutrophils", value: 60, unit: "%", range: [40, 70], evidence: "established" },
+        { id: "lymphocytes", name: "Lymphocytes", value: 30, unit: "%", range: [20, 40], evidence: "established" },
+        { id: "monocytes", name: "Monocytes", value: 6, unit: "%", range: [2, 8], evidence: "established" },
+        { id: "eosinophils", name: "Eosinophils", value: 3, unit: "%", range: [1, 4], evidence: "established" },
+        { id: "basophils", name: "Basophils", value: 1, unit: "%", range: [0, 2], evidence: "established" },
+        { id: "absolute_neutrophil", name: "ANC (Absolute Neutrophil)", value: 4200, unit: "/μL", range: [1500, 8000], evidence: "established" },
+        { id: "absolute_lymphocyte", name: "ALC (Absolute Lymphocyte)", value: 2100, unit: "/μL", range: [1000, 4800], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "anc_calculation",
+          name: "ANC Calculation",
+          latex: "ANC = WBC \\times (\\%Neutrophils + \\%Bands) / 100",
+          description: "Absolute neutrophil count",
+          evidence: "established",
+          source: "Clinical calculation"
+        }
+      ]
+    }
+  },
+
+  bonemarrow: {
+    name: "Bone Marrow",
+    icon: "🦴",
+    category: "hematological",
+    
+    geometry: {
+      title: "Marrow Composition",
+      parameters: [
+        { id: "marrow_cellularity", name: "Marrow Cellularity", value: 50, unit: "%", range: [30, 70], evidence: "established" },
+        { id: "me_ratio", name: "M:E Ratio", value: 3, unit: "", range: [2, 4], evidence: "established" },
+        { id: "blast_percentage", name: "Blast Percentage", value: 2, unit: "%", range: [0, 5], evidence: "established" },
+        { id: "megakaryocytes", name: "Megakaryocyte Count", value: 5, unit: "per HPF", range: [2, 10], evidence: "established" },
+        { id: "iron_stores", name: "Iron Stores (Grade)", value: 2, unit: "0-6", range: [1, 4], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "expected_cellularity",
+          name: "Expected Cellularity by Age",
+          latex: "Cellularity\\% \\approx 100 - Age",
+          description: "Rule of thumb for age-adjusted cellularity",
+          evidence: "established",
+          source: "Hematopathology"
+        }
+      ]
+    },
+
+    physiology: {
+      title: "Hematopoiesis",
+      parameters: [
+        { id: "erythroid_precursors", name: "Erythroid Precursors", value: 25, unit: "%", range: [15, 30], evidence: "established" },
+        { id: "myeloid_precursors", name: "Myeloid Precursors", value: 60, unit: "%", range: [50, 70], evidence: "established" },
+        { id: "lymphoid_precursors", name: "Lymphoid Precursors", value: 10, unit: "%", range: [5, 15], evidence: "established" },
+        { id: "plasma_cells", name: "Plasma Cells", value: 2, unit: "%", range: [0, 5], evidence: "established" },
+        { id: "stem_cell_frequency", name: "HSC Frequency", value: 0.01, unit: "%", range: [0.005, 0.02], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "hematopoietic_output",
+          name: "Daily Hematopoietic Output",
+          latex: "Output = 10^{11-12} \\text{ cells/day}",
+          description: "Total daily blood cell production",
+          evidence: "established",
+          source: "Hematology textbooks"
+        }
+      ]
+    },
+
+    cellular: {
+      title: "Maturation Stages",
+      parameters: [
+        { id: "promyelocytes", name: "Promyelocytes", value: 5, unit: "%", range: [2, 8], evidence: "established" },
+        { id: "myelocytes", name: "Myelocytes", value: 15, unit: "%", range: [10, 20], evidence: "established" },
+        { id: "metamyelocytes", name: "Metamyelocytes", value: 15, unit: "%", range: [10, 20], evidence: "established" },
+        { id: "bands", name: "Bands", value: 15, unit: "%", range: [10, 20], evidence: "established" },
+        { id: "proerythroblasts", name: "Proerythroblasts", value: 1, unit: "%", range: [0, 2], evidence: "established" },
+        { id: "ring_sideroblasts", name: "Ring Sideroblasts", value: 0, unit: "%", range: [0, 5], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "maturation_index",
+          name: "Maturation Index",
+          latex: "MI = \\frac{Mature\\ cells}{Immature\\ cells}",
+          description: "Assessment of orderly maturation",
+          evidence: "novel",
+          source: "Pathology assessment"
+        }
+      ]
+    }
+  },
+
+  spleen: {
+    name: "Spleen",
+    icon: "🟤",
+    category: "hematological",
+    
+    geometry: {
+      title: "Spleen Dimensions",
+      parameters: [
+        { id: "spleen_length", name: "Spleen Length", value: 11, unit: "cm", range: [9, 13], evidence: "established" },
+        { id: "spleen_width", name: "Spleen Width", value: 7, unit: "cm", range: [5, 9], evidence: "established" },
+        { id: "spleen_thickness", name: "Spleen Thickness", value: 4, unit: "cm", range: [3, 5], evidence: "established" },
+        { id: "spleen_volume", name: "Spleen Volume", value: 200, unit: "mL", range: [100, 300], evidence: "established" },
+        { id: "spleen_weight", name: "Spleen Weight", value: 150, unit: "g", range: [100, 200], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "splenic_index",
+          name: "Splenic Index",
+          latex: "SI = Length \\times Width \\times Thickness",
+          description: "Volumetric estimate of spleen size",
+          evidence: "established",
+          source: "Radiology"
+        }
+      ]
+    },
+
+    physiology: {
+      title: "Splenic Function",
+      parameters: [
+        { id: "splenic_blood_flow", name: "Splenic Blood Flow", value: 300, unit: "mL/min", range: [200, 400], evidence: "established" },
+        { id: "rbc_sequestration", name: "RBC Sequestration", value: 30, unit: "%", range: [20, 40], evidence: "established" },
+        { id: "platelet_sequestration", name: "Platelet Sequestration", value: 30, unit: "%", range: [20, 40], evidence: "established" },
+        { id: "filtration_rate", name: "Filtration Rate", value: 1, unit: "relative", range: [0.8, 1.2], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "hypersplenism_effect",
+          name: "Hypersplenism Effect",
+          latex: "Cytopenias \\propto Spleen\\ Size \\times Sequestration\\ Rate",
+          description: "Relationship between splenomegaly and blood counts",
+          evidence: "novel",
+          source: "Clinical observation"
+        }
+      ]
+    }
+  },
+
+  lymphatic: {
+    name: "Lymphatic System",
+    icon: "💚",
+    category: "hematological",
+    
+    geometry: {
+      title: "Lymph Node Dimensions",
+      parameters: [
+        { id: "lymph_node_size", name: "Normal Lymph Node Size", value: 1.0, unit: "cm", range: [0.5, 1.5], evidence: "established" },
+        { id: "lymph_node_count", name: "Total Lymph Nodes", value: 600, unit: "", range: [500, 700], evidence: "established" },
+        { id: "lymph_volume", name: "Daily Lymph Volume", value: 3, unit: "L", range: [2, 4], evidence: "established" },
+        { id: "thoracic_duct_flow", name: "Thoracic Duct Flow", value: 2, unit: "L/day", range: [1, 4], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "lymph_flow",
+          name: "Lymph Flow",
+          latex: "Q_{lymph} = K_f \\times (P_c - P_i) - \\sigma \\times \\Delta\\pi",
+          description: "Starling forces in lymph formation",
+          evidence: "established",
+          source: "Starling equation"
+        }
+      ]
+    },
+
+    physiology: {
+      title: "Immune Parameters",
+      parameters: [
+        { id: "cd4_count", name: "CD4+ T Cells", value: 1000, unit: "/μL", range: [500, 1500], evidence: "established" },
+        { id: "cd8_count", name: "CD8+ T Cells", value: 500, unit: "/μL", range: [200, 800], evidence: "established" },
+        { id: "cd4_cd8_ratio", name: "CD4/CD8 Ratio", value: 2.0, unit: "", range: [1.0, 3.0], evidence: "established" },
+        { id: "b_cells", name: "B Cells", value: 200, unit: "/μL", range: [100, 400], evidence: "established" },
+        { id: "nk_cells", name: "NK Cells", value: 200, unit: "/μL", range: [100, 400], evidence: "established" },
+        { id: "igg", name: "IgG", value: 1200, unit: "mg/dL", range: [700, 1600], evidence: "established" },
+        { id: "iga", name: "IgA", value: 200, unit: "mg/dL", range: [70, 400], evidence: "established" },
+        { id: "igm", name: "IgM", value: 100, unit: "mg/dL", range: [40, 230], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "immune_ratio",
+          name: "CD4/CD8 Ratio Significance",
+          latex: "\\text{Normal: } 1.0-3.0, \\text{ Low in HIV, High in autoimmune}",
+          description: "Clinical interpretation of T cell ratio",
+          evidence: "established",
+          source: "Immunology"
+        }
+      ]
+    }
+  },
+
+  thyroid: {
+    name: "Thyroid",
+    icon: "🦋",
+    category: "endocrine",
+    
+    geometry: {
+      title: "Thyroid Dimensions",
+      parameters: [
+        { id: "thyroid_volume", name: "Thyroid Volume", value: 15, unit: "mL", range: [10, 20], evidence: "established" },
+        { id: "thyroid_weight", name: "Thyroid Weight", value: 20, unit: "g", range: [15, 25], evidence: "established" },
+        { id: "isthmus_thickness", name: "Isthmus Thickness", value: 4, unit: "mm", range: [2, 6], evidence: "established" },
+        { id: "lobe_length", name: "Lobe Length", value: 5, unit: "cm", range: [4, 6], evidence: "established" },
+        { id: "lobe_width", name: "Lobe Width", value: 2, unit: "cm", range: [1.5, 2.5], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "thyroid_volume_calc",
+          name: "Thyroid Volume Calculation",
+          latex: "V = 0.479 \\times L \\times W \\times D \\text{ (per lobe)}",
+          description: "Ellipsoid volume estimation",
+          evidence: "established",
+          source: "Ultrasound guidelines"
+        }
+      ]
+    },
+
+    physiology: {
+      title: "Thyroid Function",
+      parameters: [
+        { id: "tsh", name: "TSH", value: 2.0, unit: "mIU/L", range: [0.4, 4.0], evidence: "established" },
+        { id: "free_t4", name: "Free T4", value: 1.2, unit: "ng/dL", range: [0.8, 1.8], evidence: "established" },
+        { id: "free_t3", name: "Free T3", value: 3.0, unit: "pg/mL", range: [2.3, 4.2], evidence: "established" },
+        { id: "total_t4", name: "Total T4", value: 8.0, unit: "μg/dL", range: [5.0, 12.0], evidence: "established" },
+        { id: "total_t3", name: "Total T3", value: 120, unit: "ng/dL", range: [80, 180], evidence: "established" },
+        { id: "thyroglobulin", name: "Thyroglobulin", value: 15, unit: "ng/mL", range: [3, 40], evidence: "established" },
+        { id: "tpo_antibody", name: "TPO Antibodies", value: 10, unit: "IU/mL", range: [0, 35], evidence: "established" },
+        { id: "trab", name: "TSH Receptor Antibodies", value: 0.5, unit: "IU/L", range: [0, 1.75], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "hpt_axis",
+          name: "HPT Axis Feedback",
+          latex: "TSH \\propto \\frac{1}{T4 + T3}",
+          description: "Negative feedback regulation",
+          evidence: "established",
+          source: "Endocrinology"
+        },
+        {
+          id: "t4_to_t3",
+          name: "T4 to T3 Conversion",
+          latex: "T3 = k_{deiodinase} \\times T4",
+          description: "Peripheral conversion by deiodinases",
+          evidence: "established",
+          source: "Thyroid physiology"
+        }
+      ]
+    },
+
+    cellular: {
+      title: "Iodine Metabolism",
+      parameters: [
+        { id: "iodine_uptake", name: "Radioiodine Uptake (24h)", value: 20, unit: "%", range: [10, 30], evidence: "established" },
+        { id: "iodine_clearance", name: "Thyroid Iodine Clearance", value: 15, unit: "mL/min", range: [10, 25], evidence: "established" },
+        { id: "colloid_volume", name: "Colloid Volume", value: 30, unit: "%", range: [20, 40], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "iodine_kinetics",
+          name: "Iodine Kinetics",
+          latex: "Uptake = \\frac{Thyroid\\ counts - Background}{Administered\\ dose} \\times 100",
+          description: "Radioiodine uptake calculation",
+          evidence: "established",
+          source: "Nuclear medicine"
+        }
+      ]
+    }
+  },
+
+  gi_tract: {
+    name: "GI Tract",
+    icon: "🫄",
+    category: "gastrointestinal",
+    
+    geometry: {
+      title: "GI Dimensions",
+      parameters: [
+        { id: "small_bowel_length", name: "Small Bowel Length", value: 600, unit: "cm", range: [500, 700], evidence: "established" },
+        { id: "colon_length", name: "Colon Length", value: 150, unit: "cm", range: [120, 180], evidence: "established" },
+        { id: "gastric_volume", name: "Gastric Volume (empty)", value: 50, unit: "mL", range: [25, 75], evidence: "established" },
+        { id: "gastric_capacity", name: "Gastric Capacity (max)", value: 1500, unit: "mL", range: [1000, 2000], evidence: "established" },
+        { id: "villous_surface", name: "Villous Surface Area", value: 200, unit: "m²", range: [150, 250], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "transit_time",
+          name: "Total GI Transit",
+          latex: "T_{total} = T_{gastric} + T_{small\\ bowel} + T_{colon}",
+          description: "Sum of segmental transit times",
+          evidence: "established",
+          source: "GI physiology"
+        }
+      ]
+    },
+
+    physiology: {
+      title: "GI Function",
+      parameters: [
+        { id: "gastric_acid_output", name: "Gastric Acid Output", value: 5, unit: "mEq/hr", range: [2, 10], evidence: "established" },
+        { id: "gastric_ph", name: "Gastric pH", value: 2.0, unit: "", range: [1.5, 3.5], evidence: "established" },
+        { id: "gastric_emptying", name: "Gastric Emptying (solids)", value: 90, unit: "min", range: [60, 120], evidence: "established" },
+        { id: "small_bowel_transit", name: "Small Bowel Transit", value: 4, unit: "hrs", range: [2, 6], evidence: "established" },
+        { id: "colonic_transit", name: "Colonic Transit", value: 36, unit: "hrs", range: [24, 72], evidence: "established" },
+        { id: "stool_frequency", name: "Stool Frequency", value: 1, unit: "/day", range: [0.5, 3], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "gastric_emptying_kinetics",
+          name: "Gastric Emptying Kinetics",
+          latex: "V(t) = V_0 \\times e^{-kt}",
+          description: "Exponential emptying for liquids",
+          evidence: "established",
+          source: "GI motility"
+        }
+      ]
+    },
+
+    structure: {
+      title: "Tumor Markers",
+      parameters: [
+        { id: "cea", name: "CEA", value: 2.0, unit: "ng/mL", range: [0, 5.0], evidence: "established" },
+        { id: "ca_19_9", name: "CA 19-9", value: 15, unit: "U/mL", range: [0, 37], evidence: "established" },
+        { id: "calprotectin", name: "Fecal Calprotectin", value: 30, unit: "μg/g", range: [0, 50], evidence: "established" },
+        { id: "occult_blood", name: "Fecal Occult Blood", value: 0, unit: "positive/negative", range: [0, 0], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "cea_doubling",
+          name: "CEA Doubling Time",
+          latex: "T_d = \\frac{t \\times \\ln(2)}{\\ln(CEA_2/CEA_1)}",
+          description: "Tumor marker kinetics",
+          evidence: "established",
+          source: "Oncology monitoring"
+        }
+      ]
+    }
+  },
+
+  breast: {
+    name: "Breast",
+    icon: "🎀",
+    category: "oncology",
+    
+    geometry: {
+      title: "Breast Imaging",
+      parameters: [
+        { id: "breast_density", name: "Breast Density (BI-RADS)", value: 2, unit: "A-D", range: [1, 4], evidence: "established" },
+        { id: "lesion_size", name: "Lesion Size", value: 0, unit: "cm", range: [0, 10], evidence: "established" },
+        { id: "tumor_volume", name: "Tumor Volume", value: 0, unit: "cm³", range: [0, 100], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "tumor_volume_calc",
+          name: "Tumor Volume",
+          latex: "V = \\frac{4}{3}\\pi r^3 \\approx 0.52 \\times L \\times W \\times H",
+          description: "Ellipsoid tumor volume estimation",
+          evidence: "established",
+          source: "Radiology"
+        }
+      ]
+    },
+
+    physiology: {
+      title: "Breast Cancer Markers",
+      parameters: [
+        { id: "ca_15_3", name: "CA 15-3", value: 15, unit: "U/mL", range: [0, 30], evidence: "established" },
+        { id: "ca_27_29", name: "CA 27.29", value: 20, unit: "U/mL", range: [0, 38], evidence: "established" },
+        { id: "er_status", name: "ER Status", value: 1, unit: "+/-", range: [0, 1], evidence: "established" },
+        { id: "pr_status", name: "PR Status", value: 1, unit: "+/-", range: [0, 1], evidence: "established" },
+        { id: "her2_status", name: "HER2 Status", value: 0, unit: "0-3+", range: [0, 3], evidence: "established" },
+        { id: "ki67", name: "Ki-67 Proliferation Index", value: 15, unit: "%", range: [0, 100], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "oncotype_dx",
+          name: "Recurrence Score Concept",
+          latex: "RS = f(ER, PR, HER2, Ki67, Grade)",
+          description: "Multi-gene recurrence score model",
+          evidence: "established",
+          source: "Oncotype DX"
+        }
+      ]
+    }
+  },
+
+  prostate: {
+    name: "Prostate",
+    icon: "🔵",
+    category: "oncology",
+    
+    geometry: {
+      title: "Prostate Dimensions",
+      parameters: [
+        { id: "prostate_volume", name: "Prostate Volume", value: 25, unit: "mL", range: [15, 35], evidence: "established" },
+        { id: "prostate_length", name: "Prostate Length", value: 4, unit: "cm", range: [3, 5], evidence: "established" },
+        { id: "prostate_width", name: "Prostate Width", value: 4, unit: "cm", range: [3, 5], evidence: "established" },
+        { id: "transition_zone_vol", name: "Transition Zone Volume", value: 10, unit: "mL", range: [5, 20], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "prostate_volume_calc",
+          name: "Prostate Volume",
+          latex: "V = 0.52 \\times H \\times W \\times L",
+          description: "Ellipsoid volume formula",
+          evidence: "established",
+          source: "Urology guidelines"
+        }
+      ]
+    },
+
+    physiology: {
+      title: "Prostate Markers",
+      parameters: [
+        { id: "psa", name: "PSA (Total)", value: 1.5, unit: "ng/mL", range: [0, 4.0], evidence: "established" },
+        { id: "free_psa", name: "Free PSA", value: 25, unit: "%", range: [15, 35], evidence: "established" },
+        { id: "psa_density", name: "PSA Density", value: 0.06, unit: "ng/mL/cm³", range: [0, 0.15], evidence: "established" },
+        { id: "psa_velocity", name: "PSA Velocity", value: 0.3, unit: "ng/mL/yr", range: [0, 0.75], evidence: "established" },
+        { id: "phi_score", name: "PHI Score", value: 30, unit: "", range: [0, 55], evidence: "established" },
+        { id: "gleason_score", name: "Gleason Score", value: 6, unit: "", range: [6, 10], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "psa_density_calc",
+          name: "PSA Density",
+          latex: "PSAD = \\frac{PSA}{Prostate\\ Volume}",
+          description: "PSA normalized to gland size",
+          evidence: "established",
+          source: "Urology"
+        },
+        {
+          id: "psa_doubling",
+          name: "PSA Doubling Time",
+          latex: "PSADT = \\frac{\\ln(2) \\times t}{\\ln(PSA_2/PSA_1)}",
+          description: "Rate of PSA rise",
+          evidence: "established",
+          source: "Oncology monitoring"
+        }
+      ]
+    }
   }
 };
 
