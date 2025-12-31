@@ -628,6 +628,31 @@ export const PSYCHIATRIC_DISEASES = {
     
     differentialDiagnosis: ["Acute stress disorder", "Adjustment disorder", "Depression", "Anxiety disorders", "TBI", "Substance use"],
     
+    treatment: {
+      firstLine: [
+        { name: "Trauma-focused CBT", indication: "First-line psychotherapy", evidence: "IA" },
+        { name: "EMDR (Eye Movement Desensitization)", indication: "First-line psychotherapy", evidence: "IA" },
+        { name: "Prolonged Exposure", indication: "First-line", evidence: "IA" },
+        { name: "Cognitive Processing Therapy", indication: "First-line", evidence: "IA" }
+      ],
+      pharmacotherapy: [
+        { name: "SSRIs", examples: "Sertraline, Paroxetine (FDA-approved)", indication: "First-line medication", evidence: "IA" },
+        { name: "SNRIs", examples: "Venlafaxine", indication: "Alternative", evidence: "IA" }
+      ],
+      adjunctive: [
+        { name: "Prazosin", indication: "Nightmares (alpha-1 blocker)", evidence: "IA" },
+        { name: "Atypical antipsychotics", indication: "Adjunct for residual symptoms", evidence: "IB" }
+      ],
+      notRecommended: [
+        { name: "Benzodiazepines", note: "May worsen PTSD outcomes; avoid", evidence: "IIIB" }
+      ]
+    },
+    riskStratification: {
+      chronicity: "~50% recover within 3 months; remainder chronic course",
+      suicide: "High risk; always assess",
+      comorbidity: "50% depression; 40% substance use"
+    },
+    
     comorbidities: ["Depression (50%)", "Substance use (40%)", "Anxiety disorders", "Chronic pain", "Suicidality"]
   },
 
