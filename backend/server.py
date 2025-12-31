@@ -1252,6 +1252,680 @@ Format your response as JSON with these keys:
         logger.error(f"Clinical analysis error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
 
+# ============== DRUG DATABASE API (MongoDB-based) ==============
+
+@api_router.get("/drugs/db")
+async def get_drugs_from_db(
+    category: Optional[str] = None,
+    drug_class: Optional[str] = None,
+    search: Optional[str] = None,
+    limit: int = 50,
+    offset: int = 0
+):
+    """
+    Get drugs from MongoDB database with filtering.
+    This is the new endpoint that uses MongoDB for comprehensive drug data.
+    """
+    query = {}
+    
+    if category:
+        query["category"] = category
+    if drug_class:
+        query["drug_class"] = {"$regex": drug_class, "$options": "i"}
+    if search:
+        query["$or"] = [
+            {"name": {"$regex": search, "$options": "i"}},
+            {"brand_names": {"$regex": search, "$options": "i"}},
+            {"mechanism_short": {"$regex": search, "$options": "i"}}
+        ]
+    
+    drugs = await db.drugs.find(query, {"_id": 0}).skip(offset).limit(limit).to_list(limit)
+    total = await db.drugs.count_documents(query)
+    
+    # Return summary format for list
+    summaries = []
+    for drug in drugs:
+        summaries.append({
+            "id": drug.get("id"),
+            "name": drug.get("name"),
+            "brand_names": drug.get("brand_names", []),
+            "drug_class": drug.get("drug_class"),
+            "category": drug.get("category"),
+            "mechanism_short": drug.get("mechanism_short", ""),
+            "indication_count": len(drug.get("indications", [])),
+            "interaction_count": len(drug.get("interactions", []))
+        })
+    
+    return {
+        "drugs": summaries,
+        "total": total,
+        "limit": limit,
+        "offset": offset
+    }
+
+@api_router.get("/drugs/db/{drug_id}")
+async def get_drug_detail(drug_id: str):
+    """Get complete drug details from MongoDB."""
+    drug = await db.drugs.find_one({"id": drug_id}, {"_id": 0})
+    if not drug:
+        raise HTTPException(status_code=404, detail="Drug not found")
+    return drug
+
+@api_router.post("/drugs/db")
+async def create_drug(drug: DrugCreate):
+    """Create a new drug in the database."""
+    drug_dict = drug.model_dump()
+    drug_dict["id"] = str(uuid.uuid4())
+    drug_dict["created_at"] = datetime.now(timezone.utc).isoformat()
+    drug_dict["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.drugs.insert_one(drug_dict)
+    return {"id": drug_dict["id"], "message": "Drug created successfully"}
+
+@api_router.put("/drugs/db/{drug_id}")
+async def update_drug(drug_id: str, drug: DrugCreate):
+    """Update an existing drug."""
+    existing = await db.drugs.find_one({"id": drug_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Drug not found")
+    
+    drug_dict = drug.model_dump()
+    drug_dict["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.drugs.update_one({"id": drug_id}, {"$set": drug_dict})
+    return {"message": "Drug updated successfully"}
+
+@api_router.delete("/drugs/db/{drug_id}")
+async def delete_drug(drug_id: str):
+    """Delete a drug from the database."""
+    result = await db.drugs.delete_one({"id": drug_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Drug not found")
+    return {"message": "Drug deleted successfully"}
+
+@api_router.get("/drugs/db/categories")
+async def get_drug_categories():
+    """Get all unique drug categories."""
+    categories = await db.drugs.distinct("category")
+    classes = await db.drugs.distinct("drug_class")
+    return {
+        "categories": categories,
+        "drug_classes": classes
+    }
+
+@api_router.get("/drugs/db/by-disease/{disease_id}")
+async def get_drugs_for_disease(disease_id: str):
+    """Get all drugs indicated for a specific disease."""
+    drugs = await db.drugs.find(
+        {"indications.disease_id": disease_id},
+        {"_id": 0}
+    ).to_list(100)
+    return {"drugs": drugs, "count": len(drugs)}
+
+@api_router.post("/drugs/db/seed")
+async def seed_drug_database():
+    """
+    Seed the drug database with initial cardiac-focused drugs.
+    This creates comprehensive drug entries that match the organ model parameters.
+    """
+    # Check if already seeded
+    count = await db.drugs.count_documents({})
+    if count > 0:
+        return {"message": f"Database already has {count} drugs. Use force=true to reseed."}
+    
+    # Comprehensive cardiac drug data
+    cardiac_drugs = [
+        {
+            "id": "lisinopril",
+            "name": "Lisinopril",
+            "brand_names": ["Prinivil", "Zestril"],
+            "drug_class": "ACE Inhibitor",
+            "category": "cardiovascular",
+            "mechanism_of_action": "Inhibits angiotensin-converting enzyme (ACE), preventing conversion of angiotensin I to angiotensin II. This leads to vasodilation, reduced aldosterone secretion, and decreased sympathetic activity.",
+            "mechanism_short": "ACE inhibitor → ↓ angiotensin II → vasodilation",
+            "target_receptors": ["ACE"],
+            "dosages": [
+                {
+                    "route": "oral",
+                    "form": "tablet",
+                    "strength": "2.5mg, 5mg, 10mg, 20mg, 40mg",
+                    "typical_dose": "10-40mg once daily",
+                    "max_daily_dose": "80mg",
+                    "frequency": "once daily",
+                    "special_instructions": "Can be taken with or without food"
+                }
+            ],
+            "therapeutic_effects": [
+                {
+                    "effect_type": "therapeutic",
+                    "description": "Reduces afterload and preload, improving cardiac output",
+                    "onset_hours": 1,
+                    "duration_hours": 24,
+                    "organs": [
+                        {
+                            "organ_id": "heart",
+                            "scales": [
+                                {
+                                    "scale_id": "pressures",
+                                    "parameters": [
+                                        {"parameter_id": "aortic_systolic", "multiplier": 0.85, "note": "↓15% systolic BP"},
+                                        {"parameter_id": "aortic_diastolic", "multiplier": 0.88, "note": "↓12% diastolic BP"},
+                                        {"parameter_id": "lv_edp", "multiplier": 0.80, "note": "↓20% preload"}
+                                    ]
+                                },
+                                {
+                                    "scale_id": "physiology",
+                                    "parameters": [
+                                        {"parameter_id": "cardiac_output", "multiplier": 1.15, "note": "↑15% CO from afterload reduction"},
+                                        {"parameter_id": "svr", "multiplier": 0.75, "note": "↓25% systemic vascular resistance"}
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "organ_id": "kidneys",
+                            "scales": [
+                                {
+                                    "scale_id": "physiology",
+                                    "parameters": [
+                                        {"parameter_id": "gfr", "multiplier": 0.95, "note": "Initial ↓ GFR, then stabilizes (nephroprotective long-term)"}
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "side_effects": [
+                {
+                    "effect_type": "side_effect",
+                    "description": "Common side effects include dry cough (10-15%), hyperkalemia",
+                    "organs": [
+                        {
+                            "organ_id": "kidneys",
+                            "scales": [
+                                {
+                                    "scale_id": "physiology",
+                                    "parameters": [
+                                        {"parameter_id": "potassium", "multiplier": 1.10, "note": "↑10% serum K+ (hyperkalemia risk)"}
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "overdose_effects": [
+                {
+                    "effect_type": "overdose",
+                    "description": "Severe hypotension, renal failure",
+                    "organs": [
+                        {
+                            "organ_id": "heart",
+                            "scales": [
+                                {
+                                    "scale_id": "pressures",
+                                    "parameters": [
+                                        {"parameter_id": "aortic_systolic", "multiplier": 0.50, "note": "Severe hypotension"},
+                                        {"parameter_id": "aortic_diastolic", "multiplier": 0.55, "note": "Severe hypotension"}
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "organ_id": "kidneys",
+                            "scales": [
+                                {
+                                    "scale_id": "physiology",
+                                    "parameters": [
+                                        {"parameter_id": "gfr", "multiplier": 0.30, "note": "Acute kidney injury"}
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "indications": [
+                {"disease_id": "heart_failure", "disease_name": "Heart Failure (HFrEF)", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"},
+                {"disease_id": "hypertension", "disease_name": "Essential Hypertension", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"},
+                {"disease_id": "diabetic_nephropathy", "disease_name": "Diabetic Nephropathy", "is_primary": False, "efficacy_level": "high", "evidence_grade": "A"}
+            ],
+            "contraindications": ["Pregnancy", "History of angioedema", "Bilateral renal artery stenosis"],
+            "warnings": ["Monitor renal function and potassium", "Risk of angioedema (higher in Black patients)"],
+            "interactions": [
+                {"interacting_drug_id": "spironolactone", "interacting_drug_name": "Spironolactone", "severity": "moderate", "effect": "Additive hyperkalemia risk", "clinical_note": "Monitor K+ closely"},
+                {"interacting_drug_id": "nsaids", "interacting_drug_name": "NSAIDs", "severity": "moderate", "effect": "Reduced antihypertensive effect, increased renal risk", "clinical_note": "Avoid combination if possible"}
+            ],
+            "absorption": "25% bioavailability, not affected by food",
+            "distribution": "Low protein binding, crosses blood-brain barrier minimally",
+            "metabolism": "Not metabolized (prodrug form doesn't require conversion)",
+            "elimination": "Renal excretion (unchanged)",
+            "half_life": "12 hours",
+            "fda_approval_year": 1987,
+            "pregnancy_category": "D",
+            "controlled_substance": False
+        },
+        {
+            "id": "metoprolol",
+            "name": "Metoprolol",
+            "brand_names": ["Lopressor", "Toprol-XL"],
+            "drug_class": "Beta Blocker (β1-selective)",
+            "category": "cardiovascular",
+            "mechanism_of_action": "Selectively blocks β1-adrenergic receptors in the heart, reducing heart rate, contractility, and myocardial oxygen demand. At higher doses, may also block β2 receptors.",
+            "mechanism_short": "β1 blocker → ↓ HR, ↓ contractility, ↓ O₂ demand",
+            "target_receptors": ["β1-adrenergic"],
+            "dosages": [
+                {
+                    "route": "oral",
+                    "form": "tablet (immediate-release)",
+                    "strength": "25mg, 50mg, 100mg",
+                    "typical_dose": "25-100mg twice daily",
+                    "max_daily_dose": "400mg",
+                    "frequency": "twice daily",
+                    "special_instructions": "Take with food"
+                },
+                {
+                    "route": "oral",
+                    "form": "tablet (extended-release)",
+                    "strength": "25mg, 50mg, 100mg, 200mg",
+                    "typical_dose": "25-200mg once daily",
+                    "max_daily_dose": "400mg",
+                    "frequency": "once daily",
+                    "special_instructions": "Do not crush or chew"
+                }
+            ],
+            "therapeutic_effects": [
+                {
+                    "effect_type": "therapeutic",
+                    "description": "Reduces heart rate and contractility, improving myocardial oxygen supply-demand balance",
+                    "onset_hours": 1,
+                    "duration_hours": 12,
+                    "organs": [
+                        {
+                            "organ_id": "heart",
+                            "scales": [
+                                {
+                                    "scale_id": "physiology",
+                                    "parameters": [
+                                        {"parameter_id": "heart_rate", "multiplier": 0.75, "note": "↓25% heart rate"},
+                                        {"parameter_id": "cardiac_output", "multiplier": 0.90, "note": "↓10% CO initially"},
+                                        {"parameter_id": "ef", "multiplier": 1.10, "note": "↑10% EF in HFrEF (long-term)"},
+                                        {"parameter_id": "myocardial_o2", "multiplier": 0.70, "note": "↓30% myocardial O₂ demand"}
+                                    ]
+                                },
+                                {
+                                    "scale_id": "pressures",
+                                    "parameters": [
+                                        {"parameter_id": "aortic_systolic", "multiplier": 0.90, "note": "↓10% systolic BP"},
+                                        {"parameter_id": "aortic_diastolic", "multiplier": 0.92, "note": "↓8% diastolic BP"}
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "side_effects": [
+                {
+                    "effect_type": "side_effect",
+                    "description": "Fatigue, bradycardia, cold extremities, bronchospasm (rare at β1-selective doses)",
+                    "organs": [
+                        {
+                            "organ_id": "heart",
+                            "scales": [
+                                {
+                                    "scale_id": "physiology",
+                                    "parameters": [
+                                        {"parameter_id": "heart_rate", "multiplier": 0.65, "note": "Excessive bradycardia possible"}
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "organ_id": "lungs",
+                            "scales": [
+                                {
+                                    "scale_id": "physiology",
+                                    "parameters": [
+                                        {"parameter_id": "fev1", "multiplier": 0.95, "note": "Mild bronchospasm risk"}
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "indications": [
+                {"disease_id": "heart_failure", "disease_name": "Heart Failure (HFrEF)", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"},
+                {"disease_id": "hypertension", "disease_name": "Essential Hypertension", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"},
+                {"disease_id": "atrial_fibrillation", "disease_name": "Atrial Fibrillation", "is_primary": False, "efficacy_level": "moderate", "evidence_grade": "B"},
+                {"disease_id": "angina", "disease_name": "Stable Angina", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}
+            ],
+            "contraindications": ["Severe bradycardia", "Heart block (2nd/3rd degree)", "Cardiogenic shock", "Decompensated heart failure"],
+            "warnings": ["Do not stop abruptly (rebound tachycardia)", "Mask hypoglycemia symptoms in diabetics"],
+            "interactions": [
+                {"interacting_drug_id": "verapamil", "interacting_drug_name": "Verapamil", "severity": "severe", "effect": "Additive AV nodal depression, severe bradycardia", "clinical_note": "Avoid combination"},
+                {"interacting_drug_id": "clonidine", "interacting_drug_name": "Clonidine", "severity": "moderate", "effect": "Rebound hypertension if clonidine stopped", "clinical_note": "Taper clonidine first"}
+            ],
+            "half_life": "3-7 hours (immediate-release), 3-7 hours effective (extended-release)",
+            "fda_approval_year": 1978,
+            "pregnancy_category": "C",
+            "controlled_substance": False
+        },
+        {
+            "id": "furosemide",
+            "name": "Furosemide",
+            "brand_names": ["Lasix"],
+            "drug_class": "Loop Diuretic",
+            "category": "cardiovascular",
+            "mechanism_of_action": "Inhibits Na-K-2Cl cotransporter (NKCC2) in the thick ascending limb of the loop of Henle, causing profound natriuresis and diuresis. Also increases venous capacitance.",
+            "mechanism_short": "Loop diuretic → ↓ preload, ↓ fluid overload",
+            "target_receptors": ["NKCC2"],
+            "dosages": [
+                {
+                    "route": "oral",
+                    "form": "tablet",
+                    "strength": "20mg, 40mg, 80mg",
+                    "typical_dose": "20-80mg once or twice daily",
+                    "max_daily_dose": "600mg",
+                    "frequency": "once or twice daily",
+                    "special_instructions": "Take in morning to avoid nocturia"
+                },
+                {
+                    "route": "iv",
+                    "form": "injection",
+                    "strength": "10mg/mL",
+                    "typical_dose": "20-80mg IV",
+                    "max_daily_dose": "600mg",
+                    "frequency": "as needed",
+                    "special_instructions": "Infuse over 1-2 minutes"
+                }
+            ],
+            "therapeutic_effects": [
+                {
+                    "effect_type": "therapeutic",
+                    "description": "Rapid diuresis reducing preload and pulmonary congestion",
+                    "onset_hours": 0.5,
+                    "duration_hours": 6,
+                    "organs": [
+                        {
+                            "organ_id": "heart",
+                            "scales": [
+                                {
+                                    "scale_id": "pressures",
+                                    "parameters": [
+                                        {"parameter_id": "pcwp", "multiplier": 0.60, "note": "↓40% pulmonary wedge pressure"},
+                                        {"parameter_id": "lv_edp", "multiplier": 0.70, "note": "↓30% preload"},
+                                        {"parameter_id": "ra_pressure", "multiplier": 0.65, "note": "↓35% RA pressure"}
+                                    ]
+                                },
+                                {
+                                    "scale_id": "geometry",
+                                    "parameters": [
+                                        {"parameter_id": "lv_edv", "multiplier": 0.85, "note": "↓15% LV volume"}
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "organ_id": "kidneys",
+                            "scales": [
+                                {
+                                    "scale_id": "physiology",
+                                    "parameters": [
+                                        {"parameter_id": "urine_output", "multiplier": 3.0, "note": "↑200% urine output"},
+                                        {"parameter_id": "sodium_excretion", "multiplier": 2.5, "note": "↑150% sodium excretion"}
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "side_effects": [
+                {
+                    "effect_type": "side_effect",
+                    "description": "Electrolyte depletion (hypokalemia, hyponatremia), ototoxicity at high doses",
+                    "organs": [
+                        {
+                            "organ_id": "kidneys",
+                            "scales": [
+                                {
+                                    "scale_id": "physiology",
+                                    "parameters": [
+                                        {"parameter_id": "potassium", "multiplier": 0.80, "note": "↓20% serum K+ (hypokalemia)"},
+                                        {"parameter_id": "magnesium", "multiplier": 0.85, "note": "↓15% serum Mg (hypomagnesemia)"}
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "indications": [
+                {"disease_id": "heart_failure", "disease_name": "Heart Failure (Acute/Chronic)", "is_primary": True, "efficacy_level": "high", "evidence_grade": "B"},
+                {"disease_id": "edema", "disease_name": "Peripheral Edema", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"},
+                {"disease_id": "pulmonary_edema", "disease_name": "Pulmonary Edema", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}
+            ],
+            "contraindications": ["Anuria", "Severe hypokalemia", "Sulfonamide allergy (cross-reactivity)"],
+            "warnings": ["Monitor electrolytes regularly", "Ototoxicity with rapid IV administration"],
+            "interactions": [
+                {"interacting_drug_id": "digoxin", "interacting_drug_name": "Digoxin", "severity": "moderate", "effect": "Hypokalemia increases digoxin toxicity risk", "clinical_note": "Monitor K+ and digoxin levels"},
+                {"interacting_drug_id": "aminoglycosides", "interacting_drug_name": "Aminoglycosides", "severity": "moderate", "effect": "Additive ototoxicity", "clinical_note": "Avoid combination if possible"}
+            ],
+            "half_life": "1-2 hours",
+            "fda_approval_year": 1966,
+            "pregnancy_category": "C",
+            "controlled_substance": False
+        },
+        {
+            "id": "digoxin",
+            "name": "Digoxin",
+            "brand_names": ["Lanoxin"],
+            "drug_class": "Cardiac Glycoside",
+            "category": "cardiovascular",
+            "mechanism_of_action": "Inhibits Na+/K+-ATPase in cardiac myocytes, leading to increased intracellular calcium and enhanced contractility. Also increases vagal tone, slowing AV conduction.",
+            "mechanism_short": "Na+/K+-ATPase inhibitor → ↑ contractility, ↓ AV conduction",
+            "target_receptors": ["Na+/K+-ATPase"],
+            "dosages": [
+                {
+                    "route": "oral",
+                    "form": "tablet",
+                    "strength": "0.125mg, 0.25mg",
+                    "typical_dose": "0.125-0.25mg once daily",
+                    "max_daily_dose": "0.5mg",
+                    "frequency": "once daily",
+                    "special_instructions": "Narrow therapeutic index - monitor levels"
+                }
+            ],
+            "therapeutic_effects": [
+                {
+                    "effect_type": "therapeutic",
+                    "description": "Positive inotrope and rate control in atrial fibrillation",
+                    "onset_hours": 2,
+                    "duration_hours": 36,
+                    "organs": [
+                        {
+                            "organ_id": "heart",
+                            "scales": [
+                                {
+                                    "scale_id": "physiology",
+                                    "parameters": [
+                                        {"parameter_id": "cardiac_output", "multiplier": 1.20, "note": "↑20% cardiac output"},
+                                        {"parameter_id": "ef", "multiplier": 1.10, "note": "↑10% ejection fraction"},
+                                        {"parameter_id": "heart_rate", "multiplier": 0.85, "note": "↓15% ventricular rate (in AFib)"}
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "side_effects": [
+                {
+                    "effect_type": "side_effect",
+                    "description": "GI disturbances, visual changes (yellow-green halos), arrhythmias",
+                    "organs": [
+                        {
+                            "organ_id": "heart",
+                            "scales": [
+                                {
+                                    "scale_id": "physiology",
+                                    "parameters": [
+                                        {"parameter_id": "heart_rate", "multiplier": 0.50, "note": "Bradycardia at toxic levels"}
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "overdose_effects": [
+                {
+                    "effect_type": "overdose",
+                    "description": "Life-threatening arrhythmias, severe bradycardia, cardiac arrest",
+                    "organs": [
+                        {
+                            "organ_id": "heart",
+                            "scales": [
+                                {
+                                    "scale_id": "physiology",
+                                    "parameters": [
+                                        {"parameter_id": "heart_rate", "multiplier": 0.30, "note": "Severe bradycardia/asystole"},
+                                        {"parameter_id": "cardiac_output", "multiplier": 0.40, "note": "Severe pump failure"}
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "indications": [
+                {"disease_id": "heart_failure", "disease_name": "Heart Failure (HFrEF)", "is_primary": False, "efficacy_level": "moderate", "evidence_grade": "B"},
+                {"disease_id": "atrial_fibrillation", "disease_name": "Atrial Fibrillation (rate control)", "is_primary": True, "efficacy_level": "moderate", "evidence_grade": "B"}
+            ],
+            "contraindications": ["Ventricular fibrillation", "Hypertrophic cardiomyopathy", "WPW syndrome"],
+            "warnings": ["Narrow therapeutic index (0.8-2.0 ng/mL)", "Toxicity increased by hypokalemia"],
+            "interactions": [
+                {"interacting_drug_id": "amiodarone", "interacting_drug_name": "Amiodarone", "severity": "severe", "effect": "↑50% digoxin levels", "clinical_note": "Reduce digoxin dose by 50%"},
+                {"interacting_drug_id": "verapamil", "interacting_drug_name": "Verapamil", "severity": "moderate", "effect": "↑50% digoxin levels, additive AV block", "clinical_note": "Reduce digoxin dose"}
+            ],
+            "half_life": "36-48 hours",
+            "fda_approval_year": 1954,
+            "pregnancy_category": "C",
+            "controlled_substance": False
+        },
+        {
+            "id": "spironolactone",
+            "name": "Spironolactone",
+            "brand_names": ["Aldactone"],
+            "drug_class": "Mineralocorticoid Receptor Antagonist (MRA)",
+            "category": "cardiovascular",
+            "mechanism_of_action": "Competitively blocks aldosterone at the mineralocorticoid receptor, reducing sodium retention and potassium excretion. Also blocks cardiac remodeling effects of aldosterone.",
+            "mechanism_short": "Aldosterone antagonist → ↓ Na retention, ↓ cardiac fibrosis",
+            "target_receptors": ["Mineralocorticoid receptor"],
+            "dosages": [
+                {
+                    "route": "oral",
+                    "form": "tablet",
+                    "strength": "25mg, 50mg, 100mg",
+                    "typical_dose": "12.5-50mg once daily",
+                    "max_daily_dose": "100mg (HF), 400mg (other)",
+                    "frequency": "once daily",
+                    "special_instructions": "Take with food to improve absorption"
+                }
+            ],
+            "therapeutic_effects": [
+                {
+                    "effect_type": "therapeutic",
+                    "description": "Reduces mortality in HFrEF by blocking aldosterone-mediated cardiac fibrosis and mild diuresis",
+                    "onset_hours": 24,
+                    "duration_hours": 48,
+                    "organs": [
+                        {
+                            "organ_id": "heart",
+                            "scales": [
+                                {
+                                    "scale_id": "pressures",
+                                    "parameters": [
+                                        {"parameter_id": "lv_edp", "multiplier": 0.90, "note": "↓10% preload"},
+                                        {"parameter_id": "pcwp", "multiplier": 0.90, "note": "↓10% wedge pressure"}
+                                    ]
+                                },
+                                {
+                                    "scale_id": "cellular",
+                                    "parameters": [
+                                        {"parameter_id": "fibrosis_rate", "multiplier": 0.50, "note": "↓50% cardiac fibrosis progression"}
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "organ_id": "kidneys",
+                            "scales": [
+                                {
+                                    "scale_id": "physiology",
+                                    "parameters": [
+                                        {"parameter_id": "potassium", "multiplier": 1.15, "note": "↑15% serum K+ (potassium-sparing)"},
+                                        {"parameter_id": "sodium_excretion", "multiplier": 1.20, "note": "↑20% sodium excretion"}
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "side_effects": [
+                {
+                    "effect_type": "side_effect",
+                    "description": "Hyperkalemia, gynecomastia (anti-androgen effect), menstrual irregularities",
+                    "organs": [
+                        {
+                            "organ_id": "kidneys",
+                            "scales": [
+                                {
+                                    "scale_id": "physiology",
+                                    "parameters": [
+                                        {"parameter_id": "potassium", "multiplier": 1.25, "note": "Significant hyperkalemia risk"}
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "indications": [
+                {"disease_id": "heart_failure", "disease_name": "Heart Failure (HFrEF)", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"},
+                {"disease_id": "hypertension", "disease_name": "Resistant Hypertension", "is_primary": False, "efficacy_level": "high", "evidence_grade": "A"},
+                {"disease_id": "cirrhosis_ascites", "disease_name": "Cirrhosis with Ascites", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}
+            ],
+            "contraindications": ["Hyperkalemia (K+ >5.5)", "Severe renal impairment (CrCl <30)", "Addison's disease"],
+            "warnings": ["Monitor potassium closely, especially with ACEi/ARB", "Avoid potassium supplements"],
+            "interactions": [
+                {"interacting_drug_id": "lisinopril", "interacting_drug_name": "Lisinopril", "severity": "moderate", "effect": "Additive hyperkalemia risk", "clinical_note": "Monitor K+ weekly initially"},
+                {"interacting_drug_id": "potassium_supplements", "interacting_drug_name": "Potassium Supplements", "severity": "severe", "effect": "Severe hyperkalemia", "clinical_note": "Avoid combination"}
+            ],
+            "half_life": "1.4 hours (active metabolites: 10-35 hours)",
+            "fda_approval_year": 1960,
+            "pregnancy_category": "C",
+            "controlled_substance": False
+        }
+    ]
+    
+    # Add timestamps
+    for drug in cardiac_drugs:
+        drug["created_at"] = datetime.now(timezone.utc).isoformat()
+        drug["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    # Insert into database
+    await db.drugs.insert_many(cardiac_drugs)
+    
+    return {
+        "message": f"Successfully seeded {len(cardiac_drugs)} cardiac drugs",
+        "drugs": [d["name"] for d in cardiac_drugs]
+    }
+
 # Include router
 app.include_router(api_router)
 
