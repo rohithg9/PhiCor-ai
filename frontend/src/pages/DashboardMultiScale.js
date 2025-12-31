@@ -2547,6 +2547,12 @@ const DashboardMultiScale = () => {
     });
   }, [currentDisease, diseaseSeverity]);
 
+  // Filtered parameters based on organ filter
+  const filteredParameters = useMemo(() => {
+    if (!paramFilterOrgan) return allModifiedParameters;
+    return allModifiedParameters.filter(p => p.organId === paramFilterOrgan);
+  }, [allModifiedParameters, paramFilterOrgan]);
+
   // Calculate modified parameters based on disease
   const getModifiedValue = useCallback((organId, scaleId, paramId, baseValue) => {
     if (!currentDisease) return { value: baseValue, modified: false };
