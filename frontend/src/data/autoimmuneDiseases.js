@@ -555,6 +555,46 @@ export const AUTOIMMUNE_DISEASES = {
           cardiac_output: { factor: 0.9, note: "Myocarditis risk" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "Bohan & Peter Criteria (1975)",
+      requirements: {
+        definite: "4 criteria (rash + 3 muscle criteria)",
+        probable: "3 criteria (rash + 2 muscle criteria)",
+        criteria: [
+          "Characteristic skin rash (heliotrope, Gottron's)",
+          "Proximal symmetric muscle weakness",
+          "Elevated muscle enzymes (CK, aldolase)",
+          "Myopathic EMG changes",
+          "Muscle biopsy showing inflammation"
+        ]
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Polymyositis", distinguishing: "No skin findings, perimysial inflammation on biopsy" },
+      { condition: "Inclusion body myositis", distinguishing: "Distal weakness, finger flexors, rimmed vacuoles" },
+      { condition: "Hypothyroid myopathy", distinguishing: "Elevated TSH, normal antibodies, responds to levothyroxine" },
+      { condition: "Drug-induced myopathy", distinguishing: "Statin exposure, normal antibodies" },
+      { condition: "Malignancy-associated myopathy", distinguishing: "Age >40, anti-TIF1-γ positive; requires cancer screening" }
+    ],
+    treatment: {
+      firstLine: [
+        { name: "Prednisone", dose: "1 mg/kg/day", taper: "Gradual over 6-12 months", evidence: "IA" }
+      ],
+      steroidSparing: [
+        { name: "Methotrexate", dose: "15-25 mg weekly", indication: "Steroid-sparing", evidence: "IIA" },
+        { name: "Azathioprine", dose: "2-3 mg/kg/day", indication: "MTX intolerance", evidence: "IIA" },
+        { name: "Mycophenolate", indication: "ILD component", evidence: "IIA" }
+      ],
+      refractory: [
+        { name: "IVIG", dose: "2 g/kg monthly", indication: "Refractory DM", evidence: "IB" },
+        { name: "Rituximab", indication: "Anti-MDA5+ with ILD", evidence: "IIB" }
+      ]
+    },
+    riskStratification: {
+      malignancy: "15-30% have occult malignancy; anti-TIF1-γ highest risk; screen for 3 years",
+      ild: "Anti-MDA5+ has rapidly progressive ILD with high mortality",
+      cardiac: "Myocarditis, arrhythmias rare but serious"
     }
   },
 
