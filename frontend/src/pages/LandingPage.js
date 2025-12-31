@@ -39,7 +39,7 @@ const LandingPage = () => {
   // Smooth scroll to section
   const scrollToSection = (sectionId) => {
     if (sectionId === 'contact') {
-      window.location.href = 'mailto:drrohithg@gmail.com';
+      window.open('mailto:drrohithg@gmail.com', '_self');
       return;
     }
     const element = document.getElementById(sectionId);
