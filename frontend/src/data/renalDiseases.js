@@ -370,6 +370,30 @@ export const RENAL_DISEASES = {
       mild: { description: "eGFR 25-29, stable" },
       moderate: { description: "eGFR 20-24, symptomatic" },
       severe: { description: "eGFR 15-19, preparing for RRT" }
+    },
+    modifications: {
+      kidneys: {
+        geometry: {
+          kidney_length: { factor: 0.8, note: "Significant size reduction" },
+          cortex_thickness: { factor: 0.6, note: "Severe cortical atrophy" }
+        },
+        physiology: {
+          gfr: { factor: 0.22, note: "Severely reduced (15-29 mL/min)" },
+          creatinine_clearance: { factor: 0.22, note: "Severely impaired" },
+          erythropoietin: { factor: 0.4, note: "Markedly decreased" },
+          urine_output: { factor: 0.5, note: "Reduced" }
+        }
+      },
+      heart: {
+        physiology: {
+          blood_pressure: { factor: 1.3, note: "Refractory hypertension" }
+        }
+      },
+      brain: {
+        physiology: {
+          cognitive_function: { factor: 0.85, note: "Uremic encephalopathy risk" }
+        }
+      }
     }
   },
 
