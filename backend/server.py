@@ -1927,6 +1927,527 @@ async def seed_drug_database():
         "drugs": [d["name"] for d in cardiac_drugs]
     }
 
+# ============== VIRTUAL PATIENT & DRUG SIMULATION ==============
+
+class VirtualPatient(BaseModel):
+    """Virtual patient profile for drug simulation"""
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    
+    # Demographics
+    age: int = 50
+    sex: str = "male"  # "male", "female"
+    weight: float = 70.0  # kg
+    height: float = 170.0  # cm
+    
+    # Calculated
+    bmi: Optional[float] = None
+    bsa: Optional[float] = None  # Body Surface Area
+    ideal_body_weight: Optional[float] = None
+    creatinine_clearance: Optional[float] = None
+    
+    # Clinical Parameters (baseline)
+    serum_creatinine: float = 1.0  # mg/dL
+    liver_function: str = "normal"  # "normal", "mild_impairment", "moderate_impairment", "severe_impairment"
+    
+    # Medical History
+    conditions: List[str] = []  # e.g., ["heart_failure", "hypertension", "diabetes"]
+    allergies: List[str] = []
+    current_medications: List[str] = []
+    
+    # Clinical Notes (free text)
+    clinical_notes: str = ""
+    
+    # Physiological State (from disease)
+    baseline_parameters: Dict[str, Any] = {}
+    
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+class DrugSimulationRequest(BaseModel):
+    """Request model for drug simulation"""
+    patient: VirtualPatient
+    drug_id: str
+    dosage_mg: float
+    frequency: str = "once_daily"  # "once_daily", "twice_daily", "three_times_daily", "every_6h"
+    duration_days: int = 1
+    route: str = "oral"
+
+class ParameterEffect(BaseModel):
+    """Effect of drug on a single parameter"""
+    parameter_id: str
+    parameter_name: str
+    organ_id: str
+    organ_name: str
+    baseline_value: float
+    modified_value: float
+    percent_change: float
+    effect_type: str  # "therapeutic", "side_effect", "overdose"
+    clinical_note: str = ""
+
+class DrugSimulationResponse(BaseModel):
+    """Response model for drug simulation"""
+    patient_id: str
+    drug_id: str
+    drug_name: str
+    
+    # Dosing
+    recommended_dose: str
+    actual_dose: float
+    dose_adjustment_reason: Optional[str] = None
+    
+    # Contraindication & Warnings
+    contraindications_found: List[str] = []
+    warnings: List[str] = []
+    interactions_found: List[Dict[str, str]] = []
+    
+    # Parameter Effects
+    therapeutic_effects: List[ParameterEffect] = []
+    side_effects: List[ParameterEffect] = []
+    
+    # PK Parameters (adjusted for patient)
+    peak_concentration: Optional[float] = None
+    time_to_peak: Optional[float] = None
+    half_life: Optional[float] = None
+    steady_state_time: Optional[float] = None
+    
+    # Efficacy Score
+    efficacy_score: float = 0.0  # 0-100
+    safety_score: float = 0.0  # 0-100
+    overall_recommendation: str = ""
+
+@api_router.post("/drugs-db/simulate")
+async def simulate_drug_on_patient(request: DrugSimulationRequest):
+    """
+    Simulate drug effects on a virtual patient.
+    Returns comprehensive PK/PD analysis with parameter modifications.
+    """
+    patient = request.patient
+    
+    # Calculate patient-specific parameters
+    if patient.bmi is None:
+        patient.bmi = patient.weight / ((patient.height / 100) ** 2)
+    
+    if patient.bsa is None:
+        # Mosteller formula
+        patient.bsa = np.sqrt((patient.height * patient.weight) / 3600)
+    
+    if patient.ideal_body_weight is None:
+        if patient.sex == "male":
+            patient.ideal_body_weight = 50 + 2.3 * ((patient.height / 2.54) - 60)
+        else:
+            patient.ideal_body_weight = 45.5 + 2.3 * ((patient.height / 2.54) - 60)
+    
+    # Cockcroft-Gault for CrCl
+    if patient.creatinine_clearance is None:
+        age_factor = (140 - patient.age) * patient.weight
+        patient.creatinine_clearance = age_factor / (72 * patient.serum_creatinine)
+        if patient.sex == "female":
+            patient.creatinine_clearance *= 0.85
+    
+    # Get drug from database
+    drug = await db.drugs.find_one({"id": request.drug_id}, {"_id": 0})
+    if not drug:
+        raise HTTPException(status_code=404, detail="Drug not found")
+    
+    # Check contraindications
+    contraindications_found = []
+    for contraindication in drug.get("contraindications", []):
+        ci_lower = contraindication.lower()
+        # Check patient conditions
+        for condition in patient.conditions:
+            if condition.lower() in ci_lower or ci_lower in condition.lower():
+                contraindications_found.append(f"{contraindication} (patient has {condition})")
+        # Check pregnancy
+        if "pregnancy" in ci_lower and patient.sex == "female" and patient.age < 50:
+            contraindications_found.append(f"{contraindication} (reproductive age female)")
+        # Check renal
+        if "renal" in ci_lower and patient.creatinine_clearance < 30:
+            contraindications_found.append(f"{contraindication} (CrCl: {patient.creatinine_clearance:.0f} mL/min)")
+    
+    # Check allergies
+    for allergy in patient.allergies:
+        allergy_lower = allergy.lower()
+        if allergy_lower in drug.get("name", "").lower() or allergy_lower in drug.get("drug_class", "").lower():
+            contraindications_found.append(f"Patient allergic to {allergy}")
+    
+    # Check drug interactions
+    interactions_found = []
+    for interaction in drug.get("interactions", []):
+        for med in patient.current_medications:
+            if med.lower() in interaction.get("interacting_drug_name", "").lower():
+                interactions_found.append({
+                    "drug": interaction["interacting_drug_name"],
+                    "severity": interaction["severity"],
+                    "effect": interaction["effect"],
+                    "note": interaction.get("clinical_note", "")
+                })
+    
+    # Generate warnings
+    warnings = list(drug.get("warnings", []))
+    
+    # Renal impairment warning
+    if patient.creatinine_clearance < 60:
+        warnings.append(f"Reduced renal function (CrCl: {patient.creatinine_clearance:.0f} mL/min) - may require dose adjustment")
+    
+    # Hepatic impairment warning
+    if patient.liver_function != "normal":
+        warnings.append(f"Hepatic impairment ({patient.liver_function}) - monitor closely")
+    
+    # Age-related warnings
+    if patient.age > 75:
+        warnings.append("Elderly patient (>75 years) - start with lower dose, titrate slowly")
+    
+    # Weight-based warnings
+    if patient.bmi > 30:
+        warnings.append(f"Obese patient (BMI: {patient.bmi:.1f}) - consider adjusted dosing")
+    elif patient.bmi < 18.5:
+        warnings.append(f"Underweight patient (BMI: {patient.bmi:.1f}) - consider dose reduction")
+    
+    # Calculate dose adjustment factor
+    dose_adjustment = 1.0
+    dose_adjustment_reasons = []
+    
+    # Renal adjustment
+    if patient.creatinine_clearance < 30:
+        dose_adjustment *= 0.5
+        dose_adjustment_reasons.append("50% reduction for severe renal impairment")
+    elif patient.creatinine_clearance < 60:
+        dose_adjustment *= 0.75
+        dose_adjustment_reasons.append("25% reduction for moderate renal impairment")
+    
+    # Hepatic adjustment
+    if patient.liver_function == "moderate_impairment":
+        dose_adjustment *= 0.75
+        dose_adjustment_reasons.append("25% reduction for hepatic impairment")
+    elif patient.liver_function == "severe_impairment":
+        dose_adjustment *= 0.5
+        dose_adjustment_reasons.append("50% reduction for severe hepatic impairment")
+    
+    # Age adjustment
+    if patient.age > 75:
+        dose_adjustment *= 0.75
+        dose_adjustment_reasons.append("25% reduction for elderly")
+    
+    # Calculate effective dose
+    adjusted_dose = request.dosage_mg * dose_adjustment
+    
+    # Get dosing info
+    recommended_dose = "See package insert"
+    for dosage in drug.get("dosages", []):
+        if dosage.get("route", "").lower() == request.route.lower():
+            recommended_dose = dosage.get("typical_dose", recommended_dose)
+            break
+    
+    # Calculate parameter effects
+    therapeutic_effects = []
+    side_effects = []
+    
+    # Dose-response factor (sigmoid Emax model)
+    # E = Emax * D^n / (ED50^n + D^n)
+    # Simplified: effect scales with dose ratio
+    dose_ratio = adjusted_dose / 40  # Assuming 40mg as reference for most cardiac drugs
+    effect_factor = min(dose_ratio, 1.5)  # Cap at 150% effect
+    
+    # Process therapeutic effects
+    for effect in drug.get("therapeutic_effects", []):
+        for organ in effect.get("organs", []):
+            organ_id = organ.get("organ_id", "")
+            for scale in organ.get("scales", []):
+                for param in scale.get("parameters", []):
+                    multiplier = param.get("multiplier", 1.0)
+                    # Adjust effect based on dose
+                    adjusted_multiplier = 1 + (multiplier - 1) * effect_factor
+                    
+                    baseline = 100  # Normalized baseline
+                    modified = baseline * adjusted_multiplier
+                    
+                    therapeutic_effects.append(ParameterEffect(
+                        parameter_id=param.get("parameter_id", ""),
+                        parameter_name=param.get("parameter_id", "").replace("_", " ").title(),
+                        organ_id=organ_id,
+                        organ_name=organ_id.title(),
+                        baseline_value=baseline,
+                        modified_value=round(modified, 1),
+                        percent_change=round((adjusted_multiplier - 1) * 100, 1),
+                        effect_type="therapeutic",
+                        clinical_note=param.get("note", "")
+                    ))
+    
+    # Process side effects (more prominent at higher doses)
+    side_effect_factor = effect_factor * 1.2  # Side effects increase faster with dose
+    for effect in drug.get("side_effects", []):
+        for organ in effect.get("organs", []):
+            organ_id = organ.get("organ_id", "")
+            for scale in organ.get("scales", []):
+                for param in scale.get("parameters", []):
+                    multiplier = param.get("multiplier", 1.0)
+                    adjusted_multiplier = 1 + (multiplier - 1) * side_effect_factor
+                    
+                    baseline = 100
+                    modified = baseline * adjusted_multiplier
+                    
+                    side_effects.append(ParameterEffect(
+                        parameter_id=param.get("parameter_id", ""),
+                        parameter_name=param.get("parameter_id", "").replace("_", " ").title(),
+                        organ_id=organ_id,
+                        organ_name=organ_id.title(),
+                        baseline_value=baseline,
+                        modified_value=round(modified, 1),
+                        percent_change=round((adjusted_multiplier - 1) * 100, 1),
+                        effect_type="side_effect",
+                        clinical_note=param.get("note", "")
+                    ))
+    
+    # Calculate PK parameters (adjusted for patient)
+    half_life_str = drug.get("half_life", "12 hours")
+    try:
+        half_life = float(half_life_str.split()[0].replace("-", " ").split()[0])
+    except:
+        half_life = 12.0
+    
+    # Adjust half-life for renal/hepatic function
+    if patient.creatinine_clearance < 30:
+        half_life *= 2.0
+    elif patient.creatinine_clearance < 60:
+        half_life *= 1.5
+    
+    if patient.liver_function == "severe_impairment":
+        half_life *= 1.5
+    
+    # Calculate scores
+    efficacy_score = min(100, len(therapeutic_effects) * 15 + (effect_factor * 30))
+    
+    safety_penalty = (len(contraindications_found) * 30 + 
+                      len([i for i in interactions_found if i["severity"] in ["severe", "contraindicated"]]) * 25 +
+                      len([i for i in interactions_found if i["severity"] == "moderate"]) * 10 +
+                      len(side_effects) * 5)
+    safety_score = max(0, 100 - safety_penalty)
+    
+    # Overall recommendation
+    if contraindications_found:
+        overall_recommendation = "⚠️ CONTRAINDICATED - Do not use. Consider alternative therapy."
+    elif safety_score < 30:
+        overall_recommendation = "🔴 HIGH RISK - Multiple safety concerns. Consider alternative."
+    elif safety_score < 60:
+        overall_recommendation = "🟡 CAUTION - Use with close monitoring. Dose adjustment recommended."
+    elif efficacy_score > 70 and safety_score > 70:
+        overall_recommendation = "🟢 FAVORABLE - Good efficacy with acceptable safety profile."
+    else:
+        overall_recommendation = "🟡 ACCEPTABLE - Monitor response and adjust as needed."
+    
+    return DrugSimulationResponse(
+        patient_id=patient.id,
+        drug_id=request.drug_id,
+        drug_name=drug.get("name", ""),
+        recommended_dose=recommended_dose,
+        actual_dose=adjusted_dose,
+        dose_adjustment_reason="; ".join(dose_adjustment_reasons) if dose_adjustment_reasons else None,
+        contraindications_found=contraindications_found,
+        warnings=warnings,
+        interactions_found=interactions_found,
+        therapeutic_effects=therapeutic_effects,
+        side_effects=side_effects,
+        peak_concentration=adjusted_dose / patient.bsa * 0.1,  # Simplified Cmax
+        time_to_peak=1.5,  # Hours
+        half_life=half_life,
+        steady_state_time=half_life * 5,
+        efficacy_score=round(efficacy_score, 1),
+        safety_score=round(safety_score, 1),
+        overall_recommendation=overall_recommendation
+    )
+
+@api_router.post("/drugs-db/generate")
+async def generate_drugs_with_ai(
+    category: str,
+    count: int = 10,
+    include_pk_pd: bool = True
+):
+    """
+    Generate comprehensive drug data using AI.
+    Creates detailed drug entries with PK/PD parameters and organ effects.
+    """
+    llm_key = os.environ.get('EMERGENT_LLM_KEY')
+    if not llm_key:
+        raise HTTPException(status_code=500, detail="LLM key not configured")
+    
+    try:
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        import json
+        
+        # Map categories to drug classes
+        category_prompts = {
+            "cardiovascular": "cardiac drugs including beta blockers, ACE inhibitors, ARBs, calcium channel blockers, diuretics, antiarrhythmics, vasodilators, anticoagulants, antiplatelets, and statins",
+            "respiratory": "respiratory drugs including bronchodilators (beta-2 agonists, anticholinergics), inhaled corticosteroids, leukotriene modifiers, and mucolytics",
+            "neurological": "neurological drugs including anticonvulsants, antidepressants (SSRIs, SNRIs, TCAs), anxiolytics, antipsychotics, and antiparkinsonian agents",
+            "renal": "renal drugs including diuretics (loop, thiazide, potassium-sparing), phosphate binders, and EPO stimulating agents",
+            "endocrine": "endocrine drugs including insulin types, oral hypoglycemics (metformin, sulfonylureas, SGLT2 inhibitors, GLP-1 agonists), and thyroid medications",
+            "gastrointestinal": "GI drugs including PPIs, H2 blockers, antiemetics, prokinetics, and hepatoprotective agents",
+            "antibiotics": "antibiotics including penicillins, cephalosporins, fluoroquinolones, macrolides, and aminoglycosides",
+            "analgesics": "analgesic drugs including NSAIDs, acetaminophen, opioids, and neuropathic pain agents"
+        }
+        
+        category_desc = category_prompts.get(category, f"{category} drugs")
+        
+        system_prompt = """You are a clinical pharmacology expert. Generate detailed drug data in JSON format.
+        
+For each drug, provide COMPLETE data including:
+1. Basic info: name, brand_names (array), drug_class, category, mechanism_of_action, mechanism_short
+2. target_receptors: array of receptor names
+3. dosages: array with {route, form, strength, typical_dose, max_daily_dose, frequency, special_instructions}
+4. therapeutic_effects: array with effect objects containing organs and parameter modifications
+5. side_effects: array with effect objects
+6. overdose_effects: array with effect objects  
+7. indications: array with {disease_id, disease_name, is_primary, efficacy_level, evidence_grade}
+8. contraindications: array of strings
+9. warnings: array of strings
+10. interactions: array with {interacting_drug_id, interacting_drug_name, severity, effect, clinical_note}
+11. PK data: absorption, distribution, metabolism, elimination, half_life
+12. pregnancy_category, fda_approval_year
+
+For parameter modifications in effects, use this structure:
+{
+  "effect_type": "therapeutic",
+  "description": "...",
+  "onset_hours": 1,
+  "duration_hours": 24,
+  "organs": [
+    {
+      "organ_id": "heart",  // Use: heart, lungs, kidneys, liver, brain, pancreas
+      "scales": [
+        {
+          "scale_id": "physiology",  // Use: physiology, pressures, geometry, cellular
+          "parameters": [
+            {
+              "parameter_id": "cardiac_output",  // Use actual physiological parameters
+              "multiplier": 1.15,  // 1.15 = 15% increase, 0.85 = 15% decrease
+              "note": "↑15% cardiac output"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+Common parameter_ids by organ:
+- heart: heart_rate, cardiac_output, ef (ejection fraction), stroke_volume, aortic_systolic, aortic_diastolic, lv_edp, pcwp, svr
+- lungs: fev1, fvc, dlco, respiratory_rate, oxygen_saturation, pao2, paco2
+- kidneys: gfr, creatinine, bun, potassium, sodium, urine_output
+- liver: alt, ast, albumin, bilirubin, inr
+- brain: cerebral_blood_flow, intracranial_pressure
+- pancreas: insulin_secretion, glucagon_secretion
+
+Return ONLY valid JSON array of drug objects. No markdown, no explanation."""
+
+        chat = LlmChat(
+            api_key=llm_key,
+            session_id=f"drug-gen-{datetime.now().timestamp()}",
+            system_message=system_prompt
+        ).with_model("openai", "gpt-4o")
+        
+        user_message = UserMessage(
+            text=f"""Generate {count} commonly prescribed {category_desc}.
+            
+Include a diverse mix of drug classes within this category.
+Each drug should have complete therapeutic_effects and side_effects with realistic parameter modifications.
+Focus on drugs used in hospital settings.
+
+Return as a JSON array of drug objects."""
+        )
+        
+        response = await chat.send_message(user_message)
+        
+        # Clean response
+        response_text = response.strip()
+        if response_text.startswith("```json"):
+            response_text = response_text[7:]
+        if response_text.startswith("```"):
+            response_text = response_text[3:]
+        if response_text.endswith("```"):
+            response_text = response_text[:-3]
+        
+        drugs = json.loads(response_text)
+        
+        # Add IDs and timestamps
+        for drug in drugs:
+            drug["id"] = drug.get("name", "").lower().replace(" ", "_").replace("-", "_")
+            drug["category"] = category
+            drug["created_at"] = datetime.now(timezone.utc).isoformat()
+            drug["updated_at"] = datetime.now(timezone.utc).isoformat()
+        
+        # Insert into database (upsert to avoid duplicates)
+        inserted_count = 0
+        for drug in drugs:
+            existing = await db.drugs.find_one({"id": drug["id"]})
+            if not existing:
+                await db.drugs.insert_one(drug)
+                inserted_count += 1
+            else:
+                await db.drugs.update_one({"id": drug["id"]}, {"$set": drug})
+        
+        return {
+            "message": f"Generated {len(drugs)} {category} drugs, inserted {inserted_count} new",
+            "drugs": [{"id": d["id"], "name": d.get("name", "")} for d in drugs],
+            "category": category
+        }
+        
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON parsing error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to parse AI response: {str(e)}")
+    except Exception as e:
+        logger.error(f"Drug generation error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Drug generation failed: {str(e)}")
+
+@api_router.post("/drugs-db/extract-from-text")
+async def extract_patient_from_clinical_text(text: str = Form(...)):
+    """
+    Extract patient information from clinical text using AI.
+    """
+    llm_key = os.environ.get('EMERGENT_LLM_KEY')
+    if not llm_key:
+        raise HTTPException(status_code=500, detail="LLM key not configured")
+    
+    try:
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        import json
+        
+        chat = LlmChat(
+            api_key=llm_key,
+            session_id=f"extract-{datetime.now().timestamp()}",
+            system_message="""Extract patient information from clinical text and return as JSON.
+
+Return this exact structure:
+{
+  "age": number or null,
+  "sex": "male" or "female" or null,
+  "weight": number in kg or null,
+  "height": number in cm or null,
+  "serum_creatinine": number in mg/dL or null,
+  "liver_function": "normal", "mild_impairment", "moderate_impairment", or "severe_impairment",
+  "conditions": ["condition1", "condition2"],
+  "allergies": ["allergy1", "allergy2"],
+  "current_medications": ["med1", "med2"],
+  "clinical_notes": "summary of other relevant findings"
+}
+
+Return ONLY valid JSON, no explanation."""
+        ).with_model("openai", "gpt-4o")
+        
+        response = await chat.send_message(UserMessage(text=f"Extract patient data from:\n\n{text}"))
+        
+        # Clean and parse
+        response_text = response.strip()
+        if response_text.startswith("```"):
+            response_text = response_text.split("```")[1]
+            if response_text.startswith("json"):
+                response_text = response_text[4:]
+        
+        patient_data = json.loads(response_text)
+        return patient_data
+        
+    except Exception as e:
+        logger.error(f"Extraction error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Extraction failed: {str(e)}")
+
 # Include router
 app.include_router(api_router)
 
