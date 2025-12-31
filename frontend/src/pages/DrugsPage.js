@@ -20,14 +20,14 @@ const API_URL = process.env.REACT_APP_BACKEND_URL;
 
 // Simple PK Curve Visualization Component
 const PKCurveVisualization = ({ simulation, dosage }) => {
-  if (!simulation || !simulation.half_life) return null;
-  
-  const halfLife = simulation.half_life;
-  const tMax = simulation.time_to_peak || 1.5;
-  const cMax = simulation.peak_concentration || (dosage / 20);
+  const halfLife = simulation?.half_life || 0;
+  const tMax = simulation?.time_to_peak || 1.5;
+  const cMax = simulation?.peak_concentration || (dosage / 20);
   
   // Generate curve points (simplified one-compartment model)
   const points = useMemo(() => {
+    if (!simulation || !simulation.half_life) return [];
+    
     const pts = [];
     const totalHours = halfLife * 5; // Show 5 half-lives
     
@@ -44,7 +44,9 @@ const PKCurveVisualization = ({ simulation, dosage }) => {
       pts.push({ t, c: Math.max(0, concentration) });
     }
     return pts;
-  }, [halfLife, tMax, cMax]);
+  }, [simulation, halfLife, tMax, cMax]);
+  
+  if (!simulation || !simulation.half_life) return null;
   
   const maxTime = halfLife * 5;
   const maxConc = cMax * 1.2;
