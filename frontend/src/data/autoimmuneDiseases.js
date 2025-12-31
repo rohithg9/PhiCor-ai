@@ -1112,6 +1112,45 @@ export const AUTOIMMUNE_DISEASES = {
           thymus_size: { factor: 2.0, note: "Hyperplasia or thymoma" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "Clinical + Serologic + Electrodiagnostic",
+      requirements: {
+        clinical: "Fatigable weakness (ocular and/or generalized)",
+        serologic: "Anti-AChR or anti-MuSK antibodies",
+        electrodiagnostic: "Decremental response on RNS or increased jitter on SFEMG",
+        pharmacologic: "Improvement with edrophonium or ice pack test"
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Lambert-Eaton syndrome", distinguishing: "Proximal weakness improves with activity, VGCC antibodies, small cell lung cancer" },
+      { condition: "Botulism", distinguishing: "Descending paralysis, dilated pupils, foodborne/wound source" },
+      { condition: "Thyroid ophthalmopathy", distinguishing: "Proptosis, lid lag, thyroid dysfunction" },
+      { condition: "Oculopharyngeal muscular dystrophy", distinguishing: "Older onset, progressive, no fluctuation" },
+      { condition: "ALS", distinguishing: "UMN and LMN signs, no sensory involvement, progressive" }
+    ],
+    treatment: {
+      symptomatic: [
+        { name: "Pyridostigmine", dose: "30-60 mg TID-QID", mechanism: "AChE inhibitor", indication: "First-line", evidence: "IA" }
+      ],
+      immunotherapy: [
+        { name: "Prednisone", dose: "Start low, titrate up", indication: "Generalized MG", evidence: "IA", note: "Watch for initial worsening" },
+        { name: "Azathioprine", dose: "2-3 mg/kg/day", indication: "Steroid-sparing", evidence: "IB" },
+        { name: "Mycophenolate", dose: "2-3 g/day", indication: "Steroid-sparing alternative", evidence: "IB" }
+      ],
+      severe: [
+        { name: "IVIG", dose: "2 g/kg over 2-5 days", indication: "Crisis or pre-surgery", evidence: "IA" },
+        { name: "Plasmapheresis", indication: "Crisis or pre-surgery", evidence: "IA" },
+        { name: "Rituximab", indication: "Refractory, especially MuSK+", evidence: "IIB" }
+      ],
+      surgical: [
+        { name: "Thymectomy", indication: "Thymoma or non-thymomatous MG <65 years", evidence: "IB", note: "MGTX trial supports benefit" }
+      ]
+    },
+    riskStratification: {
+      crisis: "Myasthenic crisis - respiratory failure requiring ICU; 15-20% lifetime risk",
+      thymoma: "10-15% have thymoma; chest CT mandatory",
+      prognosis: "Most achieve remission or minimal manifestations with treatment"
     }
   },
 
