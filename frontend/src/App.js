@@ -7,6 +7,7 @@ import { ThemeProvider } from "./context/ThemeContext";
 import LandingPage from "./pages/LandingPage";
 import AuthPage from "./pages/AuthPage";
 import Dashboard from "./pages/DashboardMultiScale";
+import DiagnosisPage from "./pages/DiagnosisPage";
 
 // Protected route wrapper
 const ProtectedRoute = ({ children }) => {
@@ -35,6 +36,14 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/diagnosis"
+          element={
+            <ProtectedRoute>
+              <DiagnosisPage />
             </ProtectedRoute>
           }
         />
