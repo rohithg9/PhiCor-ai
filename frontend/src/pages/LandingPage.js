@@ -295,7 +295,7 @@ const LandingPage = () => {
       </section>
 
       {/* ========== WHY MATHEMATICS SECTION ========== */}
-      <section className="relative py-24 px-6 border-t border-white/5">
+      <section id="science" className="relative py-24 px-6 border-t border-white/5">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0 }}
