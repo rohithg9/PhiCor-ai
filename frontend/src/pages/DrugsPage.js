@@ -6,7 +6,7 @@ import {
   Heart, AlertTriangle, TrendingUp, TrendingDown,
   Beaker, Shield, Clock, Info, Loader2, X, ArrowLeft,
   User, Scale, Activity, FileText, Upload, Sliders,
-  CheckCircle, XCircle, AlertCircle, Brain, Zap
+  CheckCircle, XCircle, AlertCircle, Brain, Zap, LineChart
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../components/ui/button';
@@ -17,6 +17,107 @@ import { Slider } from '../components/ui/slider';
 import { ORGAN_MODELS } from '../data/organModels';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
+
+// Simple PK Curve Visualization Component
+const PKCurveVisualization = ({ simulation, dosage }) => {
+  if (!simulation || !simulation.half_life) return null;
+  
+  const halfLife = simulation.half_life;
+  const tMax = simulation.time_to_peak || 1.5;
+  const cMax = simulation.peak_concentration || (dosage / 20);
+  
+  // Generate curve points (simplified one-compartment model)
+  const points = useMemo(() => {
+    const pts = [];
+    const totalHours = halfLife * 5; // Show 5 half-lives
+    
+    for (let t = 0; t <= totalHours; t += 0.5) {
+      let concentration;
+      if (t <= tMax) {
+        // Absorption phase (linear rise for simplicity)
+        concentration = (cMax * t) / tMax;
+      } else {
+        // Elimination phase (exponential decay)
+        const ke = 0.693 / halfLife; // elimination constant
+        concentration = cMax * Math.exp(-ke * (t - tMax));
+      }
+      pts.push({ t, c: Math.max(0, concentration) });
+    }
+    return pts;
+  }, [halfLife, tMax, cMax]);
+  
+  const maxTime = halfLife * 5;
+  const maxConc = cMax * 1.2;
+  
+  // Create SVG path
+  const pathD = points.map((p, i) => {
+    const x = (p.t / maxTime) * 280 + 30;
+    const y = 120 - (p.c / maxConc) * 100;
+    return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
+  }).join(' ');
+  
+  // Therapeutic range (simplified)
+  const therapeuticMin = cMax * 0.25;
+  const therapeuticMax = cMax * 0.75;
+  const yMin = 120 - (therapeuticMin / maxConc) * 100;
+  const yMax = 120 - (therapeuticMax / maxConc) * 100;
+  
+  return (
+    <div className="mt-4 p-4 rounded-lg border border-border/50 bg-card/30">
+      <div className="flex items-center gap-2 mb-3">
+        <LineChart className="w-4 h-4 text-primary" />
+        <span className="text-sm font-medium">Concentration-Time Curve</span>
+      </div>
+      
+      <svg viewBox="0 0 320 140" className="w-full h-32">
+        {/* Therapeutic range band */}
+        <rect 
+          x="30" 
+          y={yMax} 
+          width="280" 
+          height={yMin - yMax} 
+          fill="currentColor" 
+          className="text-emerald-500/10"
+        />
+        <line x1="30" y1={yMax} x2="310" y2={yMax} stroke="currentColor" className="text-emerald-500/30" strokeDasharray="4" />
+        <line x1="30" y1={yMin} x2="310" y2={yMin} stroke="currentColor" className="text-emerald-500/30" strokeDasharray="4" />
+        
+        {/* Axes */}
+        <line x1="30" y1="120" x2="310" y2="120" stroke="currentColor" className="text-muted-foreground/30" />
+        <line x1="30" y1="20" x2="30" y2="120" stroke="currentColor" className="text-muted-foreground/30" />
+        
+        {/* Concentration curve */}
+        <path d={pathD} fill="none" stroke="currentColor" className="text-primary" strokeWidth="2" />
+        
+        {/* Peak marker */}
+        <circle 
+          cx={(tMax / maxTime) * 280 + 30} 
+          cy={120 - (cMax / maxConc) * 100} 
+          r="4" 
+          fill="currentColor" 
+          className="text-primary"
+        />
+        
+        {/* Labels */}
+        <text x="160" y="135" textAnchor="middle" className="fill-muted-foreground text-[10px]">Time (hours)</text>
+        <text x="15" y="70" textAnchor="middle" className="fill-muted-foreground text-[10px]" transform="rotate(-90, 15, 70)">Conc.</text>
+        
+        {/* Time markers */}
+        <text x="30" y="132" textAnchor="middle" className="fill-muted-foreground text-[8px]">0</text>
+        <text x="100" y="132" textAnchor="middle" className="fill-muted-foreground text-[8px]">{(maxTime * 0.25).toFixed(0)}</text>
+        <text x="170" y="132" textAnchor="middle" className="fill-muted-foreground text-[8px]">{(maxTime * 0.5).toFixed(0)}</text>
+        <text x="240" y="132" textAnchor="middle" className="fill-muted-foreground text-[8px]">{(maxTime * 0.75).toFixed(0)}</text>
+        <text x="305" y="132" textAnchor="middle" className="fill-muted-foreground text-[8px]">{maxTime.toFixed(0)}h</text>
+      </svg>
+      
+      <div className="flex justify-between text-xs text-muted-foreground mt-2">
+        <span>T<sub>max</sub>: {tMax.toFixed(1)}h</span>
+        <span className="text-emerald-500">Therapeutic Range</span>
+        <span>t<sub>½</sub>: {halfLife.toFixed(1)}h</span>
+      </div>
+    </div>
+  );
+};
 
 // Drug Categories
 const DRUG_CATEGORIES = {
