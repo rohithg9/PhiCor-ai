@@ -423,6 +423,44 @@ export const INFECTIOUS_DISEASES = {
           oxygen_saturation: { factor: 0.88, note: "Respiratory failure" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "Sepsis-3 Criteria (2016)",
+      requirements: {
+        sepsis: "Suspected infection + SOFA score increase ≥2",
+        septicShock: "Sepsis + vasopressors to maintain MAP ≥65 + lactate >2 despite adequate fluids",
+        qSOFA: "≥2 of: RR ≥22, altered mentation, SBP ≤100 (screening tool)"
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Cardiogenic shock", distinguishing: "Elevated BNP, reduced EF, pulmonary edema" },
+      { condition: "Hypovolemic shock", distinguishing: "Fluid responsive, no infection source" },
+      { condition: "Anaphylaxis", distinguishing: "Allergen exposure, urticaria, angioedema" },
+      { condition: "Adrenal crisis", distinguishing: "Known adrenal insufficiency, responds to steroids" },
+      { condition: "Pancreatitis", distinguishing: "Elevated lipase, abdominal pain" }
+    ],
+    treatment: {
+      hourOne: [
+        { name: "Blood cultures", note: "Before antibiotics if possible" },
+        { name: "Broad-spectrum antibiotics", timing: "Within 1 hour", evidence: "IA" },
+        { name: "Crystalloid fluid", dose: "30 mL/kg within 3 hours", indication: "Hypotension or lactate ≥4", evidence: "IA" },
+        { name: "Lactate measurement", note: "Repeat if >2 to guide resuscitation" }
+      ],
+      vasopressors: [
+        { name: "Norepinephrine", indication: "First-line if MAP <65 despite fluids", evidence: "IA" },
+        { name: "Vasopressin", indication: "Second agent if NE insufficient", evidence: "IB" }
+      ],
+      sourceControl: [
+        { name: "Drainage/debridement", indication: "Abscess, empyema, infected necrosis", evidence: "IA" }
+      ],
+      adjuncts: [
+        { name: "Hydrocortisone", dose: "200 mg/day", indication: "Shock refractory to fluids + 2 vasopressors", evidence: "IIB" }
+      ]
+    },
+    riskStratification: {
+      mortality: "Sepsis 15-25%, Septic shock 30-50%",
+      prognostic: "qSOFA, SOFA score, lactate clearance",
+      earlyRecognition: "Each hour delay in antibiotics increases mortality 4-7%"
     }
   },
 
