@@ -26,6 +26,9 @@ import { ALL_RENAL_DISEASES, RENAL_CATEGORIES } from '../data/renalDiseasesIndex
 import { ALL_NEUROLOGICAL_DISEASES, NEUROLOGICAL_CATEGORIES } from '../data/neurologicalDiseasesIndex';
 import { ALL_HEPATIC_DISEASES, HEPATIC_CATEGORIES } from '../data/hepaticDiseasesIndex';
 import { ALL_METABOLIC_DISEASES, METABOLIC_CATEGORIES } from '../data/metabolicDiseasesIndex';
+import { ALL_HEMATOLOGICAL_DISEASES, HEMATOLOGICAL_CATEGORIES } from '../data/hematologicalDiseasesIndex';
+import { ALL_ONCOLOGY_DISEASES, ONCOLOGY_CATEGORIES } from '../data/oncologyDiseasesIndex';
+import { ALL_CONGENITAL_DISEASES, CONGENITAL_CATEGORIES } from '../data/congenitalDiseasesIndex';
 import { enhanceDiseaseWithTemplates, generateModifications } from '../data/diseaseTemplates';
 import LungCancerModule from '../components/LungCancerModule';
 import TreatmentGuidelinesPanel from '../components/TreatmentGuidelinesPanel';
