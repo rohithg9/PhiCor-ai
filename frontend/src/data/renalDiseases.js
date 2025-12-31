@@ -258,6 +258,14 @@ export const RENAL_DISEASES = {
       mild: { description: "eGFR 75-89, low albuminuria" },
       moderate: { description: "eGFR 60-74, moderate albuminuria" },
       severe: { description: "eGFR 60-89 with high albuminuria" }
+    },
+    modifications: {
+      kidneys: {
+        physiology: {
+          gfr: { factor: 0.8, note: "Mildly reduced (60-89 mL/min)" },
+          creatinine_clearance: { factor: 0.8, note: "Mildly decreased" }
+        }
+      }
     }
   },
 
