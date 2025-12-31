@@ -468,7 +468,7 @@ const LandingPage = () => {
       </section>
 
       {/* ========== ADVANTAGE SECTION ========== */}
-      <section className="relative py-24 px-6 bg-gradient-to-b from-transparent via-purple-950/20 to-transparent">
+      <section id="advantages" className="relative py-24 px-6 bg-gradient-to-b from-transparent via-purple-950/20 to-transparent">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0 }}
