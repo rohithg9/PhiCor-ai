@@ -661,6 +661,48 @@ export const AUTOIMMUNE_DISEASES = {
           aortic_root: { factor: 1.2, note: "Aortitis risk" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "ASAS 2009 Axial SpA Criteria",
+      requirements: {
+        ageOnset: "<45 years with back pain >3 months",
+        imagingArm: "Sacroiliitis on imaging + ≥1 SpA feature",
+        clinicalArm: "HLA-B27 + ≥2 SpA features",
+        spaFeatures: [
+          "Inflammatory back pain",
+          "Arthritis",
+          "Enthesitis (heel)",
+          "Uveitis",
+          "Dactylitis",
+          "Psoriasis",
+          "Crohn's/Colitis",
+          "Good response to NSAIDs",
+          "Family history of SpA",
+          "HLA-B27",
+          "Elevated CRP"
+        ]
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Mechanical low back pain", distinguishing: "Worse with activity, better with rest, no morning stiffness" },
+      { condition: "DISH", distinguishing: "Older age, flowing ossification, no sacroiliitis" },
+      { condition: "Psoriatic arthritis", distinguishing: "Psoriasis, asymmetric sacroiliitis possible" },
+      { condition: "Reactive arthritis", distinguishing: "Preceding GI/GU infection, asymmetric" }
+    ],
+    treatment: {
+      firstLine: [
+        { name: "NSAIDs", examples: "Celecoxib, Naproxen", indication: "First-line for active SpA", evidence: "IA", note: "Continuous > on-demand" }
+      ],
+      biologics: [
+        { name: "TNF inhibitors", examples: "Adalimumab, Secukinumab", indication: "NSAID failure or intolerance", evidence: "IA" },
+        { name: "IL-17 inhibitors", examples: "Secukinumab, Ixekizumab", indication: "Alternative to TNFi", evidence: "IA" },
+        { name: "JAK inhibitors", examples: "Upadacitinib", indication: "TNFi/IL-17i failure", evidence: "IA" }
+      ]
+    },
+    riskStratification: {
+      progression: "50% develop syndesmophytes by 10 years; smoking accelerates progression",
+      extraArticular: "Uveitis 25-40%; IBD 5-10%; psoriasis 10%",
+      cardiovascular: "Increased CV mortality; aortic regurgitation"
     }
   },
 
