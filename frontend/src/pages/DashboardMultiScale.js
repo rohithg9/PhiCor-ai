@@ -264,6 +264,108 @@ const transformMetabolicDisease = (code, disease) => {
   };
 };
 
+// Transform hematological diseases to match existing format
+const transformHematologicalDisease = (code, disease) => {
+  const icd10Code = code.replace('_', '.');
+  
+  return {
+    name: disease.name,
+    icd10: disease.icd10 || icd10Code,
+    category: disease.category || 'hematological',
+    description: disease.definition || disease.name,
+    definition: disease.definition,
+    primaryOrgan: disease.primaryOrgan || 'blood',
+    affectedOrgans: disease.affectedOrgans || ['blood', 'bonemarrow'],
+    progression: disease.progression || [
+      { stage: 1, name: "Mild", severity: 0.25 },
+      { stage: 2, name: "Moderate", severity: 0.5 },
+      { stage: 3, name: "Severe", severity: 0.75 },
+      { stage: 4, name: "Critical", severity: 1.0 }
+    ],
+    clinicalPresentation: disease.clinicalPresentation,
+    laboratoryFindings: disease.laboratoryFindings,
+    imagingFindings: disease.imagingFindings,
+    pathophysiology: disease.pathophysiology,
+    modifications: disease.modifications || 
+                   generateModifications({ ...disease, icd10: disease.icd10 || icd10Code, category: 'hematological' }),
+    severity: disease.severity || {
+      mild: { description: "Mild anemia/disorder" },
+      moderate: { description: "Moderate severity" },
+      severe: { description: "Severe/life-threatening" }
+    },
+    isFromHematologicalDB: true,
+    hasModifications: true
+  };
+};
+
+// Transform oncology diseases to match existing format
+const transformOncologyDisease = (code, disease) => {
+  const icd10Code = code.replace('_', '.');
+  
+  return {
+    name: disease.name,
+    icd10: disease.icd10 || icd10Code,
+    category: disease.category || 'oncology',
+    description: disease.definition || disease.name,
+    definition: disease.definition,
+    primaryOrgan: disease.primaryOrgan || 'blood',
+    affectedOrgans: disease.affectedOrgans || ['blood', 'bonemarrow', 'lymphatic'],
+    progression: disease.progression || [
+      { stage: 1, name: "Stage I", severity: 0.25 },
+      { stage: 2, name: "Stage II", severity: 0.5 },
+      { stage: 3, name: "Stage III", severity: 0.75 },
+      { stage: 4, name: "Stage IV", severity: 1.0 }
+    ],
+    clinicalPresentation: disease.clinicalPresentation,
+    laboratoryFindings: disease.laboratoryFindings,
+    imagingFindings: disease.imagingFindings,
+    pathophysiology: disease.pathophysiology,
+    modifications: disease.modifications || 
+                   generateModifications({ ...disease, icd10: disease.icd10 || icd10Code, category: 'oncology' }),
+    severity: disease.severity || {
+      mild: { description: "Early/localized" },
+      moderate: { description: "Locally advanced" },
+      severe: { description: "Metastatic/advanced" }
+    },
+    isFromOncologyDB: true,
+    hasModifications: true
+  };
+};
+
+// Transform congenital diseases to match existing format
+const transformCongenitalDisease = (code, disease) => {
+  const icd10Code = code.replace('_', '.');
+  
+  return {
+    name: disease.name,
+    icd10: disease.icd10 || icd10Code,
+    category: disease.category || 'congenital',
+    description: disease.definition || disease.name,
+    definition: disease.definition,
+    primaryOrgan: disease.primaryOrgan || 'brain',
+    affectedOrgans: disease.affectedOrgans || ['brain', 'heart'],
+    progression: disease.progression || [
+      { stage: 1, name: "Mild", severity: 0.25 },
+      { stage: 2, name: "Moderate", severity: 0.5 },
+      { stage: 3, name: "Severe", severity: 0.75 },
+      { stage: 4, name: "Critical", severity: 1.0 }
+    ],
+    clinicalPresentation: disease.clinicalPresentation,
+    laboratoryFindings: disease.laboratoryFindings,
+    imagingFindings: disease.imagingFindings,
+    pathophysiology: disease.pathophysiology,
+    modifications: disease.modifications || 
+                   generateModifications({ ...disease, icd10: disease.icd10 || icd10Code, category: 'congenital' }),
+    severity: disease.severity || {
+      mild: { description: "Mild phenotype" },
+      moderate: { description: "Moderate manifestations" },
+      severe: { description: "Severe/complex" }
+    },
+    isFromCongenitalDB: true,
+    hasModifications: true
+  };
+};
+
 // Get keys to exclude from DISEASE_MODELS (already covered by ICD-10 diseases)
 const getDiseaseModelKeysByIcd10 = () => {
   const icd10Covered = new Set();
