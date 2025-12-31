@@ -35,6 +35,7 @@ import { ALL_GI_DISEASES, GI_CATEGORIES } from '../data/giDiseasesIndex';
 import { enhanceDiseaseWithTemplates, generateModifications } from '../data/diseaseTemplates';
 import LungCancerModule from '../components/LungCancerModule';
 import TreatmentGuidelinesPanel from '../components/TreatmentGuidelinesPanel';
+import DifferentialDiagnosisPanel from '../components/DifferentialDiagnosisPanel';
 import 'katex/dist/katex.min.css';
 import { BlockMath, InlineMath } from 'react-katex';
 
