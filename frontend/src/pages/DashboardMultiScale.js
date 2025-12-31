@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
 import {
-  Activity, Moon, Sun, ChevronRight, ChevronDown, ChevronLeft,
+  Activity, Moon, Sun, ChevronRight, ChevronDown, ChevronUp, ChevronLeft,
   Layers, Atom, Heart, Zap, RotateCcw, BookOpen, Lightbulb,
   AlertTriangle, Check, Menu, X, Stethoscope, FlaskConical,
   FileImage, Pill, Clock, TrendingUp, TrendingDown, Info, Microscope,
