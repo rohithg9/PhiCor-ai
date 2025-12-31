@@ -741,6 +741,655 @@ export const DISEASE_TREATMENT_GUIDELINES = {
       },
     },
   },
+
+  // ==================== IRON DEFICIENCY ANEMIA ====================
+  'iron_deficiency_anemia': {
+    icd10: 'D50.9',
+    name: 'Iron Deficiency Anemia',
+    affectedOrgans: ['blood', 'bonemarrow', 'heart'],
+    
+    diagnosticCriteria: {
+      essential: [
+        { criterion: 'Hemoglobin < 12 g/dL (women) or < 13 g/dL (men)', method: 'CBC', source: 'WHO Criteria' },
+        { criterion: 'Ferritin < 30 ng/mL (or < 100 if CKD/inflammation)', method: 'Serum ferritin', source: 'BSH Guidelines 2021' },
+      ],
+      supportive: [
+        { criterion: 'MCV < 80 fL (microcytic)', method: 'CBC', source: 'Standard' },
+        { criterion: 'Transferrin saturation < 20%', method: 'Iron studies', source: 'Standard' },
+        { criterion: 'Elevated TIBC > 400 μg/dL', method: 'Iron studies', source: 'Standard' },
+        { criterion: 'Low reticulocyte hemoglobin content (CHr) < 28 pg', method: 'Advanced CBC', source: 'Novel marker' },
+      ]
+    },
+
+    targets: {
+      hemoglobin: { target: '12-14 g/dL', timeline: '4-8 weeks' },
+      ferritin: { target: '> 100 ng/mL', timeline: '3-6 months' },
+      transferrinSaturation: { target: '> 20%', timeline: '4-8 weeks' },
+    },
+
+    treatments: {
+      firstLine: [
+        {
+          name: 'Oral Iron',
+          drugs: ['Ferrous sulfate 325mg (65mg elemental)', 'Ferrous gluconate', 'Ferrous fumarate'],
+          target: '100-200mg elemental iron/day',
+          evidence: 'IA',
+          source: 'BSH Guidelines 2021',
+          mechanism: 'Replenishes iron stores for hemoglobin synthesis',
+          contraindications: ['GI intolerance', 'Malabsorption', 'IBD active'],
+          monitoring: ['Hemoglobin (4-8 weeks)', 'Ferritin (3 months)', 'Reticulocyte count (7-10 days)'],
+          equation: '\\Delta Hgb = 1-2\\ g/dL\\ per\\ month'
+        },
+        {
+          name: 'IV Iron',
+          drugs: ['Ferric carboxymaltose (Ferinject)', 'Iron sucrose (Venofer)', 'Ferric derisomaltose (Monoferric)'],
+          target: 'Calculate deficit: Weight × (Target Hgb - Actual Hgb) × 2.4 + 500mg',
+          evidence: 'IB',
+          source: 'BSH Guidelines, NICE CG114',
+          indication: 'Oral iron intolerance, malabsorption, CKD, IBD, rapid replacement needed',
+          mechanism: 'Bypasses GI absorption for rapid iron repletion',
+          contraindications: ['Iron overload', 'Active infection', 'First trimester pregnancy'],
+          monitoring: ['Ferritin/TSAT at 8 weeks', 'Hypersensitivity monitoring during infusion'],
+          equation: 'Dose\\ (mg) = Weight \\times (15 - Hgb) \\times 2.4 + 500'
+        },
+      ],
+      lifestyle: [
+        { intervention: 'Dietary iron (red meat, leafy greens, fortified cereals)', evidence: 'IIaC', effect: '+1-2 mg/day absorbed', source: 'Dietary guidelines' },
+        { intervention: 'Vitamin C with iron (enhances absorption)', evidence: 'IIaB', effect: '+30-50% absorption', source: 'Hallberg 1989' },
+        { intervention: 'Avoid tea/coffee with meals (inhibits absorption)', evidence: 'IIaC', effect: '-40-60% absorption if taken together', source: 'Nutrition studies' },
+      ],
+      investigations: [
+        {
+          name: 'GI Investigation',
+          indication: 'Men, postmenopausal women, or if no obvious source',
+          tests: ['Upper GI endoscopy', 'Colonoscopy', 'Celiac serology'],
+          evidence: 'IB',
+          source: 'BSH Guidelines - malignancy exclusion essential',
+        },
+      ],
+    },
+
+    monitoringProtocol: {
+      frequency: 'Hemoglobin at 2-4 weeks, then monthly until normal. Ferritin at 3 months.',
+      parameters: ['Hemoglobin', 'MCV', 'Ferritin', 'Transferrin saturation', 'Reticulocyte count'],
+      targets: {
+        'Hemoglobin': '12-16 g/dL',
+        'Ferritin': '> 100 ng/mL (continue iron 3 months after normal Hgb)',
+        'TSAT': '> 20%',
+      },
+      responseAssessment: 'Reticulocyte response by day 7-10, Hgb rise 1g/dL per 2-3 weeks',
+    },
+
+    physiologicalChanges: {
+      blood: {
+        parameters: {
+          'hemoglobin': { change: -4, direction: 'decrease', unit: 'g/dL', description: 'Reduced oxygen carrying capacity' },
+          'MCV': { change: -15, direction: 'decrease', unit: 'fL', description: 'Microcytosis' },
+          'ferritin': { change: -90, direction: 'decrease', unit: '%', description: 'Depleted iron stores' },
+        },
+        equations: [
+          { id: 'iron_deficit', latex: 'Iron\\ deficit\\ (mg) = Weight_{kg} \\times (Target\\ Hgb - Actual\\ Hgb) \\times 2.4 + 500', description: 'Ganzoni formula for IV iron dosing' },
+          { id: 'oxygen_delivery', latex: 'DO_2 = CO \\times 1.34 \\times Hgb \\times SaO_2', description: 'Oxygen delivery equation' },
+        ]
+      },
+    },
+  },
+
+  // ==================== SICKLE CELL DISEASE ====================
+  'sickle_cell_disease': {
+    icd10: 'D57.1',
+    name: 'Sickle Cell Disease (HbSS)',
+    affectedOrgans: ['blood', 'spleen', 'bonemarrow', 'kidneys', 'brain', 'lungs'],
+    
+    diagnosticCriteria: {
+      essential: [
+        { criterion: 'Hemoglobin electrophoresis showing HbS > 80%', method: 'Hemoglobin HPLC', source: 'NICE NG143' },
+        { criterion: 'Genetic confirmation (βS/βS)', method: 'Molecular genetics', source: 'NICE NG143' },
+      ],
+      supportive: [
+        { criterion: 'Chronic hemolytic anemia (Hgb 6-9 g/dL)', method: 'CBC', source: 'Standard' },
+        { criterion: 'Sickle cells on blood smear', method: 'Peripheral smear', source: 'Morphology' },
+        { criterion: 'Elevated reticulocyte count (10-20%)', method: 'CBC', source: 'Compensatory' },
+        { criterion: 'Low haptoglobin, elevated LDH/bilirubin', method: 'Hemolysis markers', source: 'Standard' },
+      ]
+    },
+
+    treatments: {
+      diseaseModifying: [
+        {
+          name: 'Hydroxyurea',
+          drugs: ['Hydroxyurea (Hydrea, Siklos)'],
+          target: 'Maximum tolerated dose (15-35 mg/kg/day)',
+          evidence: 'IA',
+          source: 'MSH Study, BABY HUG',
+          mechanism: 'Increases HbF production, reduces sickling',
+          contraindications: ['Pregnancy', 'Severe cytopenias'],
+          monitoring: ['CBC every 2-4 weeks during titration', 'HbF levels'],
+          equation: '\\Delta crisis\\ rate = -50\\%'
+        },
+        {
+          name: 'L-Glutamine',
+          drugs: ['L-Glutamine (Endari)'],
+          target: '5-15g BID based on weight',
+          evidence: 'IIaB',
+          source: 'FDA approved 2017',
+          mechanism: 'Reduces oxidative stress in sickle RBCs',
+        },
+        {
+          name: 'Voxelotor',
+          drugs: ['Voxelotor (Oxbryta)'],
+          target: '1500mg daily',
+          evidence: 'IIaB',
+          source: 'HOPE trial',
+          mechanism: 'Increases Hgb-oxygen affinity, reduces sickling',
+        },
+        {
+          name: 'Crizanlizumab',
+          drugs: ['Crizanlizumab (Adakveo)'],
+          target: '5mg/kg IV every 4 weeks',
+          evidence: 'IIaB',
+          source: 'SUSTAIN trial',
+          mechanism: 'Anti-P-selectin antibody, prevents vaso-occlusion',
+        },
+      ],
+      acuteManagement: [
+        {
+          name: 'Vaso-occlusive Crisis',
+          treatment: 'IV fluids, opioid analgesia (morphine/hydromorphone), NSAIDs, oxygen if hypoxic',
+          evidence: 'IC',
+          source: 'NICE NG143',
+        },
+        {
+          name: 'Acute Chest Syndrome',
+          treatment: 'Antibiotics (cover atypicals), exchange transfusion if severe, bronchodilators, incentive spirometry',
+          evidence: 'IC',
+          source: 'NICE NG143',
+          indication: 'New infiltrate + respiratory symptoms ± fever',
+        },
+        {
+          name: 'Stroke Prevention',
+          treatment: 'Chronic transfusion program (target HbS < 30%)',
+          evidence: 'IA',
+          source: 'STOP trial',
+          indication: 'Abnormal TCD (velocity > 200 cm/s)',
+        },
+      ],
+      curative: [
+        {
+          name: 'Allogeneic Stem Cell Transplant',
+          indication: 'Matched sibling donor available, severe disease',
+          evidence: 'IIaB',
+          source: 'Expert consensus',
+          notes: 'Only curative option currently',
+        },
+        {
+          name: 'Gene Therapy',
+          drugs: ['Exagamglogene autotemcel (Casgevy)', 'Lovotibeglogene autotemcel (Lyfgenia)'],
+          evidence: 'IIaB',
+          source: 'FDA approved 2023',
+          mechanism: 'Gene editing/addition to increase HbF or correct mutation',
+        },
+      ],
+    },
+
+    monitoringProtocol: {
+      frequency: 'Clinic every 3-6 months, annual comprehensive review',
+      parameters: ['CBC', 'Reticulocyte count', 'HbF level', 'LDH', 'Renal function', 'TCD (children)', 'Echocardiogram'],
+      screenings: {
+        'TCD': 'Annual age 2-16 for stroke risk',
+        'Eye exam': 'Annual for retinopathy',
+        'Renal': 'Annual for sickle nephropathy',
+        'Hip MRI': 'If symptoms for AVN',
+      },
+    },
+
+    physiologicalChanges: {
+      blood: {
+        parameters: {
+          'hemoglobin': { change: -6, direction: 'decrease', unit: 'g/dL', description: 'Chronic hemolysis' },
+          'reticulocytes': { change: 10, direction: 'increase', unit: 'x normal', description: 'Compensatory' },
+        },
+        equations: [
+          { id: 'hbs_polymerization', latex: 't_{delay} \\propto [HbS]^{-30}', description: 'Polymerization delay time depends on HbS concentration' },
+        ]
+      },
+    },
+  },
+
+  // ==================== ACUTE LYMPHOBLASTIC LEUKEMIA ====================
+  'acute_lymphoblastic_leukemia': {
+    icd10: 'C91.0',
+    name: 'Acute Lymphoblastic Leukemia (ALL)',
+    affectedOrgans: ['bonemarrow', 'blood', 'lymphatic', 'brain', 'spleen', 'liver'],
+    
+    diagnosticCriteria: {
+      essential: [
+        { criterion: 'Bone marrow blasts ≥ 20%', method: 'Bone marrow biopsy', source: 'WHO 2022' },
+        { criterion: 'Lymphoid lineage confirmed', method: 'Flow cytometry (CD19+, CD10+, TdT+)', source: 'WHO 2022' },
+      ],
+      riskStratification: [
+        { criterion: 'Standard risk: Age 1-9, WBC < 50K, favorable cytogenetics', source: 'NCI criteria' },
+        { criterion: 'High risk: Age < 1 or > 10, WBC ≥ 50K, CNS disease, t(9;22), MLL', source: 'NCI criteria' },
+      ]
+    },
+
+    treatments: {
+      induction: [
+        {
+          name: 'Induction Chemotherapy',
+          drugs: ['Vincristine', 'Prednisone/Dexamethasone', 'Asparaginase', 'Daunorubicin (high-risk)'],
+          duration: '4-6 weeks',
+          evidence: 'IA',
+          source: 'COG protocols, UKALL',
+          target: 'Complete remission with MRD negativity',
+          monitoring: ['CBC daily initially', 'Coagulation (asparaginase)', 'Tumor lysis labs'],
+        },
+      ],
+      consolidation: [
+        {
+          name: 'Consolidation/Intensification',
+          drugs: ['High-dose Methotrexate', 'Cytarabine', '6-Mercaptopurine'],
+          duration: '6-9 months',
+          evidence: 'IA',
+          source: 'COG protocols',
+        },
+        {
+          name: 'CNS Prophylaxis',
+          treatment: 'Intrathecal methotrexate ± cytarabine ± hydrocortisone',
+          evidence: 'IA',
+          source: 'Essential component - prevents CNS relapse',
+        },
+      ],
+      maintenance: [
+        {
+          name: 'Maintenance Therapy',
+          drugs: ['6-Mercaptopurine daily', 'Methotrexate weekly', 'Vincristine/steroid pulses monthly'],
+          duration: '2-3 years total therapy',
+          evidence: 'IA',
+          source: 'Standard of care',
+        },
+      ],
+      targeted: [
+        {
+          name: 'Ph+ ALL (BCR-ABL1+)',
+          drugs: ['Imatinib', 'Dasatinib', 'Ponatinib'],
+          evidence: 'IA',
+          source: 'Add TKI to chemotherapy - improves outcomes',
+        },
+        {
+          name: 'Relapsed/Refractory',
+          drugs: ['Blinatumomab (BiTE antibody)', 'Inotuzumab ozogamicin', 'CAR-T cell therapy (Tisagenlecleucel)'],
+          evidence: 'IB',
+          source: 'FDA approved for R/R B-ALL',
+        },
+      ],
+    },
+
+    monitoringProtocol: {
+      frequency: 'CBC 2-3x weekly during intensive therapy',
+      parameters: ['CBC with differential', 'Comprehensive metabolic panel', 'LDH', 'Uric acid', 'Coagulation'],
+      mrd: 'Minimal Residual Disease assessment at day 29, end of induction, and consolidation',
+    },
+  },
+
+  // ==================== MULTIPLE MYELOMA ====================
+  'multiple_myeloma': {
+    icd10: 'C90.0',
+    name: 'Multiple Myeloma',
+    affectedOrgans: ['bonemarrow', 'blood', 'kidneys'],
+    
+    diagnosticCriteria: {
+      essential: [
+        { criterion: 'Clonal bone marrow plasma cells ≥ 10%', method: 'Bone marrow biopsy', source: 'IMWG 2014' },
+        { criterion: 'CRAB criteria (any one):', description: 'Calcium > 11, Renal Cr > 2, Anemia Hgb < 10, Bone lesions ≥ 1', source: 'IMWG' },
+      ],
+      biomarkers: [
+        { criterion: 'Serum M-protein present', method: 'SPEP/IFE', source: 'Standard' },
+        { criterion: 'Abnormal free light chain ratio', method: 'Serum FLC', source: 'Standard' },
+        { criterion: 'Urine M-protein', method: 'UPEP/IFE', source: 'Standard' },
+      ],
+      staging: [
+        { stage: 'ISS I', criteria: 'β2M < 3.5, Albumin ≥ 3.5', source: 'International Staging System' },
+        { stage: 'ISS II', criteria: 'Not I or III', source: 'International Staging System' },
+        { stage: 'ISS III', criteria: 'β2M ≥ 5.5', source: 'International Staging System' },
+      ]
+    },
+
+    treatments: {
+      firstLine: [
+        {
+          name: 'VRd (Transplant eligible)',
+          drugs: ['Bortezomib (Velcade)', 'Lenalidomide (Revlimid)', 'Dexamethasone'],
+          duration: '3-4 cycles induction → ASCT → consolidation → maintenance',
+          evidence: 'IA',
+          source: 'SWOG S0777, IFM studies',
+        },
+        {
+          name: 'DaraVRd',
+          drugs: ['Daratumumab', 'Bortezomib', 'Lenalidomide', 'Dexamethasone'],
+          evidence: 'IA',
+          source: 'GRIFFIN, CASSIOPEIA trials',
+          notes: 'Increasingly first-line for fit patients',
+        },
+        {
+          name: 'VRd-lite (Transplant ineligible)',
+          drugs: ['Bortezomib', 'Lenalidomide', 'Dexamethasone'],
+          duration: 'Until progression',
+          evidence: 'IA',
+          source: 'SWOG S0777',
+        },
+      ],
+      maintenance: [
+        {
+          name: 'Lenalidomide maintenance',
+          target: '10-15mg days 1-21 of 28',
+          evidence: 'IA',
+          source: 'Meta-analysis shows OS benefit',
+        },
+      ],
+      relapsed: [
+        {
+          name: 'DPd',
+          drugs: ['Daratumumab', 'Pomalidomide', 'Dexamethasone'],
+          evidence: 'IA',
+          source: 'APOLLO trial',
+        },
+        {
+          name: 'CAR-T',
+          drugs: ['Idecabtagene vicleucel (Abecma)', 'Ciltacabtagene autoleucel (Carvykti)'],
+          indication: '≥ 4 prior lines including PI, IMiD, anti-CD38',
+          evidence: 'IB',
+          source: 'FDA approved',
+        },
+        {
+          name: 'Bispecifics',
+          drugs: ['Teclistamab', 'Elranatamab', 'Talquetamab'],
+          evidence: 'IB',
+          source: 'MajesTEC-1, MagnetisMM-3',
+        },
+      ],
+      supportive: [
+        {
+          name: 'Bone-targeted therapy',
+          drugs: ['Zoledronic acid monthly', 'Denosumab'],
+          evidence: 'IA',
+          source: 'MRC IX',
+        },
+      ],
+    },
+
+    monitoringProtocol: {
+      frequency: 'Every 1-3 months during treatment',
+      parameters: ['CBC', 'Creatinine', 'Calcium', 'SPEP', 'Serum FLC', 'β2-microglobulin'],
+      response: 'IMWG response criteria: sCR, CR, VGPR, PR, SD, PD',
+    },
+  },
+
+  // ==================== DOWN SYNDROME ====================
+  'down_syndrome': {
+    icd10: 'Q90.9',
+    name: 'Down Syndrome (Trisomy 21)',
+    affectedOrgans: ['brain', 'heart', 'thyroid', 'blood', 'gi_tract'],
+    
+    diagnosticCriteria: {
+      essential: [
+        { criterion: 'Karyotype confirming trisomy 21', method: 'Chromosomal analysis', source: 'Gold standard' },
+        { criterion: '47,XX+21 or 47,XY+21 (95%)', method: 'Standard karyotype', source: 'Most common' },
+      ],
+      prenatal: [
+        { criterion: 'First trimester combined screening (PAPP-A, hCG, NT)', method: 'Blood + Ultrasound', source: 'Detection rate ~90%' },
+        { criterion: 'Cell-free DNA screening (NIPT)', method: 'Maternal blood', source: 'Detection rate >99%' },
+        { criterion: 'Diagnostic: CVS (10-13 weeks) or Amniocentesis (15-20 weeks)', method: 'Invasive testing', source: 'Definitive' },
+      ]
+    },
+
+    treatments: {
+      cardiacScreening: [
+        {
+          name: 'Echocardiogram',
+          indication: 'All newborns with Down syndrome',
+          evidence: 'IA',
+          source: 'AAP Guidelines',
+          notes: '40-50% have congenital heart defects (AVSD, VSD, ASD)',
+        },
+        {
+          name: 'Surgical repair',
+          indication: 'AVSD repair typically at 3-6 months',
+          evidence: 'IA',
+          source: 'Standard surgical timing',
+        },
+      ],
+      thyroidScreening: [
+        {
+          name: 'TSH monitoring',
+          frequency: 'Newborn, 6 months, 12 months, then annually',
+          evidence: 'IA',
+          source: 'AAP Guidelines',
+          notes: '40% develop hypothyroidism',
+        },
+        {
+          name: 'Levothyroxine',
+          indication: 'If TSH elevated',
+          target: 'TSH in normal range',
+          evidence: 'IA',
+        },
+      ],
+      hematologic: [
+        {
+          name: 'TMD monitoring',
+          description: 'Transient myeloproliferative disorder in 10% of newborns',
+          management: 'Usually self-resolves; 20% progress to AMKL by age 3',
+          evidence: 'IIaB',
+        },
+        {
+          name: 'Leukemia surveillance',
+          description: '10-20x increased risk of ALL and AML',
+          evidence: 'IIaB',
+        },
+      ],
+      developmental: [
+        {
+          name: 'Early Intervention',
+          services: ['Physical therapy', 'Occupational therapy', 'Speech therapy'],
+          timing: 'Start within first months of life',
+          evidence: 'IA',
+          source: 'Improves developmental outcomes',
+        },
+      ],
+      otherScreening: [
+        { name: 'Vision', frequency: 'By 6 months, then annually', condition: 'Cataracts, refractive errors, strabismus' },
+        { name: 'Hearing', frequency: 'Newborn and every 6 months until age 3, then annually', condition: 'Conductive/sensorineural loss' },
+        { name: 'Celiac disease', frequency: 'Screen at age 2, repeat if symptomatic', condition: '5-15% prevalence' },
+        { name: 'Atlantoaxial instability', frequency: 'X-ray if symptomatic', condition: 'Risk during intubation/sports' },
+        { name: 'Sleep study', frequency: 'By age 4', condition: 'Obstructive sleep apnea in 50-75%' },
+      ],
+    },
+
+    monitoringProtocol: {
+      frequency: 'Follow AAP Health Supervision Guidelines for Down Syndrome',
+      parameters: ['TSH', 'CBC', 'Hearing', 'Vision', 'Growth (DS-specific charts)', 'Development'],
+    },
+  },
+
+  // ==================== MARFAN SYNDROME ====================
+  'marfan_syndrome': {
+    icd10: 'Q87.4',
+    name: 'Marfan Syndrome',
+    affectedOrgans: ['heart', 'lungs', 'brain'],
+    
+    diagnosticCriteria: {
+      ghentCriteria2010: [
+        { criterion: 'Aortic root Z-score ≥ 2 + ectopia lentis = Marfan', method: 'Echo + Slit lamp', source: 'Ghent 2010' },
+        { criterion: 'Aortic root Z-score ≥ 2 + FBN1 mutation = Marfan', method: 'Echo + Genetic', source: 'Ghent 2010' },
+        { criterion: 'Aortic root Z-score ≥ 2 + systemic score ≥ 7 = Marfan', method: 'Echo + Clinical', source: 'Ghent 2010' },
+        { criterion: 'Ectopia lentis + FBN1 with known aortic root dilation = Marfan', method: 'Eye + Genetic', source: 'Ghent 2010' },
+      ],
+      systemicScore: [
+        { feature: 'Wrist AND thumb sign', points: 3 },
+        { feature: 'Wrist OR thumb sign', points: 1 },
+        { feature: 'Pectus carinatum', points: 2 },
+        { feature: 'Pectus excavatum or chest asymmetry', points: 1 },
+        { feature: 'Hindfoot deformity', points: 2 },
+        { feature: 'Plain pes planus', points: 1 },
+        { feature: 'Dural ectasia', points: 2 },
+        { feature: 'Pneumothorax', points: 2 },
+        { feature: 'Protrusio acetabuli', points: 2 },
+        { feature: 'Reduced US/LS AND arm span/height AND no severe scoliosis', points: 1 },
+        { feature: 'Scoliosis or thoracolumbar kyphosis', points: 1 },
+        { feature: 'Reduced elbow extension', points: 1 },
+        { feature: 'Facial features (3 of 5)', points: 1 },
+        { feature: 'Skin striae', points: 1 },
+        { feature: 'Myopia > 3 diopters', points: 1 },
+        { feature: 'Mitral valve prolapse', points: 1 },
+      ]
+    },
+
+    treatments: {
+      aorticManagement: [
+        {
+          name: 'Beta-blocker therapy',
+          drugs: ['Atenolol', 'Metoprolol', 'Propranolol'],
+          target: 'HR < 60-70 bpm',
+          evidence: 'IB',
+          source: 'Shores et al. NEJM 1994',
+          mechanism: 'Reduces rate of aortic dilation',
+        },
+        {
+          name: 'ARB therapy',
+          drugs: ['Losartan'],
+          target: 'Max tolerated dose',
+          evidence: 'IIaB',
+          source: 'COMPARE trial (added benefit with β-blocker)',
+          mechanism: 'TGF-β antagonism may slow dilation',
+        },
+        {
+          name: 'Prophylactic aortic surgery',
+          indication: 'Aortic root ≥ 50mm (≥45mm if family history of dissection, rapid growth >3mm/yr, or severe AR)',
+          procedure: 'Valve-sparing root replacement (David) preferred',
+          evidence: 'IB',
+          source: 'ACC/AHA Aortic Guidelines 2022',
+        },
+      ],
+      restrictions: [
+        {
+          name: 'Activity restrictions',
+          avoid: ['Contact sports', 'Competitive athletics', 'Isometric exercise', 'Heavy lifting'],
+          allowed: 'Low-moderate intensity aerobic exercise',
+          evidence: 'IC',
+          source: 'Expert consensus',
+        },
+      ],
+      pregnancy: [
+        {
+          name: 'Pre-conception counseling',
+          recommendation: 'Aortic root < 40mm preferred before pregnancy',
+          evidence: 'IIaC',
+          monitoring: 'Monthly echo during pregnancy and 6 months postpartum',
+        },
+      ],
+    },
+
+    monitoringProtocol: {
+      frequency: 'Annual echo; more frequent if aortic root > 45mm or rapid growth',
+      parameters: ['Aortic root diameter (sinus of Valsalva)', 'Ascending aorta', 'MV assessment', 'LV function'],
+      imaging: 'Consider CT/MRA for entire aorta at diagnosis and periodically',
+    },
+  },
+
+  // ==================== HEMOPHILIA A ====================
+  'hemophilia_a': {
+    icd10: 'D66',
+    name: 'Hemophilia A (Factor VIII Deficiency)',
+    affectedOrgans: ['blood', 'bonemarrow'],
+    
+    diagnosticCriteria: {
+      essential: [
+        { criterion: 'Prolonged PTT with normal PT', method: 'Coagulation studies', source: 'Standard' },
+        { criterion: 'Factor VIII activity < 40%', method: 'Factor VIII assay', source: 'Diagnostic' },
+      ],
+      severity: [
+        { severity: 'Severe', criteria: 'Factor VIII < 1%', bleeding: 'Spontaneous bleeds, hemarthrosis' },
+        { severity: 'Moderate', criteria: 'Factor VIII 1-5%', bleeding: 'Prolonged bleeding, occasional spontaneous' },
+        { severity: 'Mild', criteria: 'Factor VIII 5-40%', bleeding: 'Bleeding with trauma/surgery only' },
+      ]
+    },
+
+    treatments: {
+      factorReplacement: [
+        {
+          name: 'Factor VIII concentrate',
+          products: ['Recombinant: Advate, Eloctate (extended half-life)', 'Plasma-derived: Hemofil-M'],
+          dosing: 'Each unit/kg raises FVIII ~2%. Dose = (Target% - Baseline%) × Weight/2',
+          evidence: 'IA',
+          source: 'WFH Guidelines 2020',
+        },
+        {
+          name: 'Extended half-life FVIII',
+          products: ['Efmoroctocog alfa (Eloctate)', 'Rurioctocog alfa pegol (Adynovate)'],
+          advantage: 'Less frequent dosing (2-3x/week vs 3-4x)',
+          evidence: 'IB',
+        },
+      ],
+      prophylaxis: [
+        {
+          name: 'Primary prophylaxis',
+          indication: 'Severe hemophilia - start before age 3 or after first joint bleed',
+          target: 'FVIII trough > 1-3%',
+          frequency: '3-4x weekly (standard) or 2x weekly (EHL)',
+          evidence: 'IA',
+          source: 'Joint Protection Study',
+        },
+      ],
+      novel: [
+        {
+          name: 'Emicizumab (Hemlibra)',
+          mechanism: 'Bispecific antibody mimicking FVIII function',
+          dosing: 'Weekly, every 2 weeks, or monthly SC',
+          indication: 'Prophylaxis with or without inhibitors',
+          evidence: 'IA',
+          source: 'HAVEN 1-4 trials',
+        },
+        {
+          name: 'Gene therapy',
+          products: ['Valoctocogene roxaparvovec (Roctavian)'],
+          evidence: 'IIaB',
+          source: 'FDA approved 2023',
+          notes: 'Single infusion, durable FVIII expression',
+        },
+      ],
+      bleedManagement: [
+        {
+          name: 'Acute bleed treatment',
+          dosing: 'Minor bleed: 20-30 IU/kg. Major bleed: 40-50 IU/kg. Life-threatening: 50+ IU/kg',
+          target: 'FVIII level based on bleed severity',
+        },
+        {
+          name: 'Desmopressin (DDAVP)',
+          indication: 'Mild hemophilia only (may raise FVIII 2-5x)',
+          dose: '0.3 mcg/kg IV/SC',
+          evidence: 'IIaB',
+        },
+      ],
+    },
+
+    monitoringProtocol: {
+      frequency: 'Every 3-6 months at Hemophilia Treatment Center',
+      parameters: ['Factor VIII levels', 'Inhibitor screen (Bethesda assay)', 'Joint health assessment'],
+      imaging: 'MRI for joint assessment in target joints',
+    },
+
+    physiologicalChanges: {
+      blood: {
+        parameters: {
+          'PTT': { change: 2.5, direction: 'increase', unit: 'x normal', description: 'Intrinsic pathway prolongation' },
+          'Factor VIII': { change: -95, direction: 'decrease', unit: '%', description: 'Factor deficiency' },
+        },
+        equations: [
+          { id: 'fviii_dosing', latex: 'Dose\\ (IU) = \\frac{Target\\% - Baseline\\%}{2} \\times Weight_{kg}', description: 'FVIII dosing calculation' },
+        ]
+      },
+    },
+  },
 };
 
 // Utility function to get all treatments for a disease with evidence filtering
