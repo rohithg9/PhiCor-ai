@@ -747,6 +747,30 @@ export const PSYCHIATRIC_DISEASES = {
     
     differentialDiagnosis: ["Anxiety", "Depression", "Learning disorders", "Autism spectrum", "Oppositional defiant disorder", "Sleep disorders"],
     
+    treatment: {
+      stimulants: [
+        { name: "Methylphenidate", examples: "Ritalin, Concerta", indication: "First-line", evidence: "IA" },
+        { name: "Amphetamines", examples: "Adderall, Vyvanse (lisdexamfetamine)", indication: "First-line", evidence: "IA" }
+      ],
+      nonStimulants: [
+        { name: "Atomoxetine", indication: "First-line non-stimulant (NRI)", evidence: "IA" },
+        { name: "Viloxazine", indication: "FDA-approved for ADHD", evidence: "IA" },
+        { name: "Guanfacine ER", indication: "Alpha-2 agonist, adjunct or monotherapy", evidence: "IA" },
+        { name: "Clonidine ER", indication: "Alpha-2 agonist", evidence: "IA" },
+        { name: "Bupropion", indication: "Off-label, especially with depression", evidence: "IIB" }
+      ],
+      behavioral: [
+        { name: "Behavioral Parent Training", indication: "Children (first-line for preschool)", evidence: "IA" },
+        { name: "CBT", indication: "Adjunct", evidence: "IB" },
+        { name: "Coaching/Organization skills training", indication: "Adults and adolescents", evidence: "IB" }
+      ]
+    },
+    riskStratification: {
+      persistence: "50-70% continue into adulthood",
+      substanceRisk: "2x risk without treatment; stimulants protective",
+      accidents: "Increased risk of accidents, injuries"
+    },
+    
     comorbidities: ["Learning disorders (30-50%)", "Oppositional defiant disorder (50%)", "Conduct disorder", "Anxiety (25%)", "Depression", "Substance use"]
   },
 
