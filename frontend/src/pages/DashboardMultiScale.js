@@ -2485,6 +2485,63 @@ const DashboardMultiScale = () => {
     });
   }, [currentDisease, affectedCounts]);
 
+  // Get ALL modified parameters across ALL organs - for quick summary view
+  const allModifiedParameters = useMemo(() => {
+    if (!currentDisease?.modifications) return [];
+    
+    const params = [];
+    Object.entries(currentDisease.modifications).forEach(([organId, organMods]) => {
+      const organ = ORGAN_MODELS[organId];
+      if (!organ) return;
+      
+      Object.entries(organMods).forEach(([scaleId, scaleMods]) => {
+        const scaleData = organ[scaleId];
+        if (!scaleData?.parameters) return;
+        
+        Object.entries(scaleMods).forEach(([paramId, mod]) => {
+          const paramDef = scaleData.parameters.find(p => p.id === paramId);
+          if (!paramDef) return;
+          
+          const baseValue = paramDef.value;
+          let newValue = baseValue;
+          const multiplier = mod.multiplier || mod.factor;
+          if (multiplier) {
+            const factor = 1 + (multiplier - 1) * diseaseSeverity;
+            newValue = baseValue * factor;
+          }
+          if (mod.absolute) {
+            newValue = mod.absolute;
+          }
+          
+          const delta = ((newValue - baseValue) / baseValue * 100);
+          
+          params.push({
+            id: paramId,
+            name: paramDef.name,
+            organId,
+            organName: organ.name,
+            organIcon: organ.icon,
+            scaleId,
+            baseValue,
+            newValue,
+            unit: paramDef.unit || '',
+            delta,
+            direction: delta > 0 ? 'increase' : 'decrease',
+            note: mod.note,
+            isPrimary: currentDisease.primaryOrgan === organId
+          });
+        });
+      });
+    });
+    
+    // Sort: primary organ first, then by absolute delta
+    return params.sort((a, b) => {
+      if (a.isPrimary && !b.isPrimary) return -1;
+      if (!a.isPrimary && b.isPrimary) return 1;
+      return Math.abs(b.delta) - Math.abs(a.delta);
+    });
+  }, [currentDisease, diseaseSeverity]);
+
   // Calculate modified parameters based on disease
   const getModifiedValue = useCallback((organId, scaleId, paramId, baseValue) => {
     if (!currentDisease) return { value: baseValue, modified: false };
