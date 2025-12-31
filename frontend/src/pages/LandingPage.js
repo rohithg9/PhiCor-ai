@@ -168,11 +168,11 @@ const LandingPage = () => {
             <div className="flex items-center gap-2">
               {/* Greek Symbol Navigation */}
               <div className="flex items-center gap-1">
-                {/* Φ - PhiCore Engine */}
+                {/* Φ - PhiCor Engine */}
                 <button
                   onClick={() => navigate('/dashboard')}
                   className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 flex items-center justify-center transition-all shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 hover:scale-105"
-                  title="PhiCore Engine"
+                  title="PhiCor Engine"
                 >
                   <span className="text-white font-serif text-xl sm:text-2xl font-bold">Φ</span>
                 </button>
