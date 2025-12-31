@@ -413,55 +413,66 @@ def test_organ_models_compatibility():
         return False
 
 def test_disease_count():
-    """Test that the total disease count is 186 as expected"""
+    """Test that the total disease count is 214 as expected"""
     print("\n📊 TESTING DISEASE COUNT")
     print("=" * 50)
     
     total_diseases = 0
+    disease_breakdown = {}
     
     try:
-        # Count renal diseases
-        with open('/app/frontend/src/data/renalDiseases.js', 'r') as f:
-            content = f.read()
-            renal_count = content.count('icd10:')
-            print(f"  ✅ Renal diseases: {renal_count}")
-            total_diseases += renal_count
-            
-        # Count neurological diseases
-        with open('/app/frontend/src/data/neurologicalDiseases.js', 'r') as f:
-            content = f.read()
-            neuro_count = content.count('icd10:')
-            print(f"  ✅ Neurological diseases: {neuro_count}")
-            total_diseases += neuro_count
-            
         # Count all disease files
-        import glob
-        disease_files = glob.glob('/app/frontend/src/data/*disease*.js') + glob.glob('/app/frontend/src/data/*Disease*.js')
+        disease_files = [
+            ('/app/frontend/src/data/hematologicalDiseases.js', 'Hematological'),
+            ('/app/frontend/src/data/oncologyDiseases.js', 'Oncology'),
+            ('/app/frontend/src/data/congenitalDiseases.js', 'Congenital'),
+            ('/app/frontend/src/data/renalDiseases.js', 'Renal'),
+            ('/app/frontend/src/data/neurologicalDiseases.js', 'Neurological'),
+            ('/app/frontend/src/data/hepaticDiseasesIndex.js', 'Hepatic'),
+            ('/app/frontend/src/data/metabolicDiseases.js', 'Metabolic')
+        ]
         
-        # Filter out index files and templates
-        disease_files = [f for f in disease_files if 'Index' not in f and 'Template' not in f and 'Guidelines' not in f and 'Models' not in f]
+        # Also check for any other disease files
+        import glob
+        all_disease_files = glob.glob('/app/frontend/src/data/*disease*.js') + glob.glob('/app/frontend/src/data/*Disease*.js')
         
         for file_path in disease_files:
+            try:
+                with open(file_path[0], 'r') as f:
+                    content = f.read()
+                    count = content.count('icd10:')
+                    if count > 0:
+                        disease_breakdown[file_path[1]] = count
+                        print(f"  ✅ {file_path[1]}: {count} diseases")
+                        total_diseases += count
+            except Exception as e:
+                print(f"  ⚠️  {file_path[1]}: error reading file - {e}")
+        
+        # Check for any additional disease files not in our main list
+        additional_files = [f for f in all_disease_files if not any(main_file[0] in f for main_file in disease_files)]
+        for file_path in additional_files:
             try:
                 with open(file_path, 'r') as f:
                     content = f.read()
                     count = content.count('icd10:')
-                    if count > 0:  # Only count files that actually have diseases
+                    if count > 0:
                         file_name = file_path.split('/')[-1].replace('.js', '')
-                        print(f"  ✅ {file_name}: {count}")
+                        disease_breakdown[file_name] = count
+                        print(f"  ✅ {file_name}: {count} diseases")
                         total_diseases += count
             except Exception as e:
                 file_name = file_path.split('/')[-1].replace('.js', '')
                 print(f"  ⚠️  {file_name}: error reading file")
                 
         print(f"\n📈 TOTAL DISEASES: {total_diseases}")
+        print(f"📋 BREAKDOWN: {disease_breakdown}")
         
-        # The disease count has grown beyond 186 - this is expected as more diseases are added
-        if total_diseases >= 186:
-            print(f"✅ Disease count ({total_diseases}) meets or exceeds expected minimum of 186")
+        # The expected count is 214 based on the review request
+        if total_diseases >= 214:
+            print(f"✅ Disease count ({total_diseases}) meets or exceeds expected 214")
             return True
         else:
-            print(f"❌ Disease count ({total_diseases}) is below expected minimum of 186")
+            print(f"❌ Disease count ({total_diseases}) is below expected 214")
             return False
             
     except Exception as e:
