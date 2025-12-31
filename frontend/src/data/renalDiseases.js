@@ -439,6 +439,39 @@ export const RENAL_DISEASES = {
       mild: { description: "N/A - Stage 5 is always severe" },
       moderate: { description: "N/A" },
       severe: { description: "Requires dialysis or transplant for survival" }
+    },
+    modifications: {
+      kidneys: {
+        geometry: {
+          kidney_length: { factor: 0.7, note: "Small, scarred kidneys" },
+          cortex_thickness: { factor: 0.4, note: "Severe cortical loss" }
+        },
+        physiology: {
+          gfr: { factor: 0.1, note: "End-stage (<15 mL/min)" },
+          creatinine_clearance: { factor: 0.1, note: "Near-complete failure" },
+          erythropoietin: { factor: 0.2, note: "Minimal production" },
+          urine_output: { factor: 0.2, note: "Oliguria/anuria common" }
+        }
+      },
+      heart: {
+        geometry: {
+          lv_mass: { factor: 1.3, note: "Uremic cardiomyopathy" }
+        },
+        physiology: {
+          blood_pressure: { factor: 1.3, note: "Severe hypertension" },
+          cardiac_output: { factor: 0.85, note: "May be reduced" }
+        }
+      },
+      brain: {
+        physiology: {
+          cognitive_function: { factor: 0.7, note: "Uremic encephalopathy" }
+        }
+      },
+      lungs: {
+        physiology: {
+          oxygen_saturation: { factor: 0.95, note: "Fluid overload risk" }
+        }
+      }
     }
   },
 
