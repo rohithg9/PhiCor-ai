@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../context/ThemeContext';
 import { 
   ArrowRight,
   ArrowDown,
@@ -18,12 +19,15 @@ import {
   ExternalLink,
   Menu,
   X,
-  ChevronDown
+  ChevronDown,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const { toggleTheme, isDark } = useTheme();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
