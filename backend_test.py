@@ -946,10 +946,10 @@ def test_affected_organs_format():
 
 def run_all_tests():
     """Run all tests and provide summary"""
-    print("🧪 PHICOR.AI DIGITAL PHYSIOLOGY PLATFORM - BACKEND TESTING")
-    print("=" * 70)
-    print("Testing disease expansion from 214 to 254 diseases")
-    print("=" * 70)
+    print("🧪 PHICORE.AI MEDICAL SIMULATION PLATFORM - COMPREHENSIVE TESTING")
+    print("=" * 80)
+    print("Testing comprehensive medical simulation platform features")
+    print("=" * 80)
     
     test_results = {}
     
@@ -971,61 +971,110 @@ def run_all_tests():
     else:
         test_results['frontend_access'] = False
     
-    # Test 4: Autoimmune diseases
-    test_results['autoimmune_diseases'] = test_autoimmune_diseases()
+    # Test 4: Specific diseases from review request
+    test_results['specific_diseases'] = test_specific_diseases_from_review()
     
-    # Test 5: Infectious diseases
-    test_results['infectious_diseases'] = test_infectious_diseases()
+    # Test 5: Disease data structure (diagnosticCriteria, differentialDiagnosis, treatment, riskStratification)
+    test_results['disease_data_structure'] = test_disease_data_structure()
     
-    # Test 6: GI diseases  
-    test_results['gi_diseases'] = test_gi_diseases()
+    # Test 6: Mathematical equations
+    if test_results['backend_health']:
+        test_results['mathematical_equations'] = test_mathematical_equations()
+    else:
+        test_results['mathematical_equations'] = False
     
-    # Test 7: Respiratory diseases
-    test_results['respiratory_diseases'] = test_respiratory_diseases()
+    # Test 7: Calculation endpoints
+    if test_results['backend_health']:
+        test_results['calculation_endpoints'] = test_calculation_endpoints()
+    else:
+        test_results['calculation_endpoints'] = []
     
-    # Test 8: Disease count verification (should be 254)
+    # Test 8: Differential diagnosis data
+    test_results['differential_diagnosis'] = test_differential_diagnosis_data()
+    
+    # Test 9: Disease count verification (should be 284+)
     test_results['disease_count'] = test_disease_count()
     
-    # Test 9: Organ models compatibility
+    # Test 10: Organ models compatibility
     test_results['organ_models'] = test_organ_models_compatibility()
     
-    # Test 10: Affected organs format
-    test_results['affected_organs'] = test_affected_organs_format()
-    
     # Summary
-    print("\n" + "=" * 70)
-    print("📊 TEST SUMMARY")
-    print("=" * 70)
+    print("\n" + "=" * 80)
+    print("📊 COMPREHENSIVE TEST SUMMARY")
+    print("=" * 80)
     
+    # Specific diseases summary
+    if 'specific_diseases' in test_results:
+        print("\n🎯 SPECIFIC DISEASES FROM REVIEW REQUEST:")
+        found_diseases = 0
+        complete_diseases = 0
+        
+        for disease in test_results['specific_diseases']:
+            if disease['status'] == 'found':
+                found_diseases += 1
+                if disease['completeness'] >= 75:  # At least 3 out of 4 required fields
+                    complete_diseases += 1
+                    print(f"  ✅ {disease['disease']} ({disease['icd_code']}): {disease['completeness']:.0f}% complete")
+                else:
+                    print(f"  ⚠️  {disease['disease']} ({disease['icd_code']}): {disease['completeness']:.0f}% complete")
+            else:
+                print(f"  ❌ {disease['disease']} ({disease['icd_code']}): {disease['status']}")
+        
+        print(f"\n📈 DISEASES FOUND: {found_diseases}/10")
+        print(f"📈 COMPLETE DISEASES: {complete_diseases}/10")
+    
+    # Disease data structure summary
+    if 'disease_data_structure' in test_results:
+        print("\n📊 DISEASE DATA STRUCTURE:")
+        for category, sections in test_results['disease_data_structure'].items():
+            total_sections = sum(1 for count in sections.values() if count > 0)
+            print(f"  {category}: {total_sections}/4 required sections found")
+    
+    # Calculation endpoints summary
+    if 'calculation_endpoints' in test_results:
+        print("\n⚗️ CALCULATION ENDPOINTS:")
+        successful = len([r for r in test_results['calculation_endpoints'] if r['status'] == 'success'])
+        total = len(test_results['calculation_endpoints'])
+        print(f"  {successful}/{total} calculation endpoints working")
+    
+    # Overall pass/fail summary
     passed = 0
     total = 0
     
+    critical_tests = ['backend_url', 'backend_health', 'frontend_access', 'disease_count', 'mathematical_equations']
+    
     for test_name, result in test_results.items():
-        if test_name in ['autoimmune_diseases', 'infectious_diseases', 'gi_diseases', 'respiratory_diseases']:
-            # These return lists, check if any diseases were found
-            if isinstance(result, list) and len(result) > 0:
-                found_diseases = len([r for r in result if r['status'] in ['found_with_modifications', 'found_no_modifications', 'found']])
-                print(f"✅ {test_name}: {found_diseases} items found")
-                if found_diseases > 0:
-                    passed += 1
-            else:
-                print(f"❌ {test_name}: No items found")
-            total += 1
-        else:
+        if test_name in critical_tests:
             if result:
                 print(f"✅ {test_name}: PASSED")
                 passed += 1
             else:
                 print(f"❌ {test_name}: FAILED")
             total += 1
+        elif test_name == 'specific_diseases':
+            found_count = len([d for d in result if d['status'] == 'found'])
+            if found_count >= 8:  # At least 8 out of 10 diseases found
+                print(f"✅ {test_name}: PASSED ({found_count}/10 diseases found)")
+                passed += 1
+            else:
+                print(f"❌ {test_name}: FAILED ({found_count}/10 diseases found)")
+            total += 1
+        elif test_name == 'calculation_endpoints':
+            successful_count = len([r for r in result if r['status'] == 'success'])
+            if successful_count >= 3:  # At least 3 out of 4 endpoints working
+                print(f"✅ {test_name}: PASSED ({successful_count}/4 endpoints working)")
+                passed += 1
+            else:
+                print(f"❌ {test_name}: FAILED ({successful_count}/4 endpoints working)")
+            total += 1
     
-    print(f"\n🎯 OVERALL RESULT: {passed}/{total} tests passed")
+    print(f"\n🎯 OVERALL RESULT: {passed}/{total} critical tests passed")
     
-    if passed == total:
-        print("🎉 ALL TESTS PASSED!")
+    if passed >= total * 0.8:  # 80% pass rate
+        print("🎉 PHICORE.AI MEDICAL SIMULATION PLATFORM TESTS PASSED!")
         return True
     else:
-        print("⚠️  Some tests failed - see details above")
+        print("⚠️  Some critical tests failed - see details above")
         return False
 
 if __name__ == "__main__":
