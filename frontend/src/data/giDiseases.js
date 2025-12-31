@@ -58,6 +58,38 @@ export const GI_DISEASES = {
           esophageal_mucosa: { factor: 0.8, note: "Mucosal damage" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "Montreal Definition & Lyon Consensus",
+      requirements: {
+        clinical: "Troublesome symptoms ≥2x/week",
+        endoscopic: "LA Classification for esophagitis severity",
+        phMetry: "Acid exposure time >6% (abnormal), 4-6% (borderline)"
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Eosinophilic esophagitis", distinguishing: "Dysphagia predominant, eosinophils on biopsy" },
+      { condition: "Cardiac chest pain", distinguishing: "Exertional, ECG changes, troponin" },
+      { condition: "Achalasia", distinguishing: "Dysphagia to solids and liquids, bird-beak on barium" },
+      { condition: "PUD", distinguishing: "Epigastric pain, H. pylori, ulcer on EGD" }
+    ],
+    treatment: {
+      lifestyle: [
+        { name: "Weight loss, elevate HOB, avoid triggers", indication: "All patients", evidence: "IB" }
+      ],
+      medical: [
+        { name: "PPI", examples: "Omeprazole 20-40mg daily", indication: "First-line", evidence: "IA" },
+        { name: "H2 blocker", indication: "Alternative or nocturnal add-on", evidence: "IB" }
+      ],
+      surgical: [
+        { name: "Nissen fundoplication", indication: "PPI-refractory, large hiatal hernia", evidence: "IA" },
+        { name: "LINX device", indication: "Alternative to fundoplication", evidence: "IB" }
+      ]
+    },
+    riskStratification: {
+      barrettsRisk: "10-15% of chronic GERD develop Barrett's",
+      adenocarcinomaRisk: "Barrett's: 0.5% per year progression to EAC",
+      surveillance: "Barrett's requires surveillance EGD every 3-5 years"
     }
   },
 
