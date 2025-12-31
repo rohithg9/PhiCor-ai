@@ -6,12 +6,14 @@
 import { RESPIRATORY_DISEASES } from './respiratoryDiseases';
 import { RESPIRATORY_DISEASES_PART2 } from './respiratoryDiseasesPart2';
 import { RESPIRATORY_DISEASES_PART3 } from './respiratoryDiseasesPart3';
+import { RESPIRATORY_DISEASES_EXPANDED } from './respiratoryDiseasesExpanded';
 
 // Merge all respiratory diseases into single object
 export const ALL_RESPIRATORY_DISEASES = {
   ...RESPIRATORY_DISEASES,
   ...RESPIRATORY_DISEASES_PART2,
-  ...RESPIRATORY_DISEASES_PART3
+  ...RESPIRATORY_DISEASES_PART3,
+  ...RESPIRATORY_DISEASES_EXPANDED
 };
 
 // Categories for respiratory diseases
