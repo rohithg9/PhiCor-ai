@@ -157,26 +157,118 @@ export const getConditionsAffectingParameter = (parameterId, direction = null) =
 };
 
 /**
- * Get differential diagnosis based on multiple abnormal parameters
- * @param {Array} abnormalParams - Array of {parameterId, direction} objects
- * @returns {Array} Ranked list of conditions that match the pattern
+ * Calculate probability score for a disease based on findings
+ * Uses Bayesian-like approach: P(Disease|Findings) ∝ P(Findings|Disease) × P(Disease)
+ * @param {Object} disease - Disease object with modifications
+ * @param {Array} findings - Array of {parameterId, value, direction, severity} objects
+ * @returns {number} Probability score (0-100)
  */
-export const getDifferentialDiagnosis = (abnormalParams) => {
-  if (!abnormalParams || abnormalParams.length === 0) return [];
+const calculateProbabilityScore = (diseaseCode, disease, findings) => {
+  if (!disease || !findings || findings.length === 0) return 0;
+  
+  // Prior probability based on prevalence
+  const prevalence = DISEASE_PREVALENCE[diseaseCode] || DISEASE_PREVALENCE['default'];
+  const priorWeight = Math.log10(prevalence + 1) / 5; // Normalize to ~0-1
+  
+  // Likelihood: How well do findings match disease modifications?
+  let likelihoodScore = 0;
+  let matchedCount = 0;
+  let totalFindings = findings.length;
+  
+  findings.forEach(finding => {
+    const { parameterId, direction, severity = 1, value } = finding;
+    
+    // Check if disease modifies this parameter
+    const diseaseMatch = findDiseaseParameterMatch(disease, parameterId);
+    
+    if (diseaseMatch) {
+      matchedCount++;
+      
+      // Direction match (increase vs decrease)
+      const diseaseDirection = diseaseMatch.factor > 1 ? 'increase' : 'decrease';
+      const directionMatch = diseaseDirection === direction ? 1 : 0;
+      
+      // Magnitude match - how close is the observed change to expected?
+      const expectedChange = Math.abs(diseaseMatch.factor - 1);
+      const magnitudeScore = expectedChange * severity;
+      
+      // Finding specificity
+      const specificity = FINDING_SPECIFICITY[parameterId] || FINDING_SPECIFICITY['default'];
+      
+      // Combined score for this finding
+      likelihoodScore += (directionMatch * magnitudeScore * specificity * 100);
+    }
+  });
+  
+  // Calculate final probability
+  const matchRatio = totalFindings > 0 ? matchedCount / totalFindings : 0;
+  const avgLikelihood = matchedCount > 0 ? likelihoodScore / matchedCount : 0;
+  
+  // Combine prior and likelihood
+  const rawScore = (priorWeight * 20) + (matchRatio * 30) + (avgLikelihood * 0.5);
+  
+  // Normalize to 0-100 with sigmoid-like function
+  const normalizedScore = Math.min(99, Math.max(1, rawScore));
+  
+  return Math.round(normalizedScore * 10) / 10;
+};
+
+/**
+ * Find if a disease modifies a specific parameter
+ */
+const findDiseaseParameterMatch = (disease, parameterId) => {
+  if (!disease.modifications) return null;
+  
+  for (const [organKey, organMods] of Object.entries(disease.modifications)) {
+    for (const [category, params] of Object.entries(organMods)) {
+      if (typeof params !== 'object') continue;
+      
+      for (const [paramId, modification] of Object.entries(params)) {
+        if (paramId === parameterId || `${organKey}.${paramId}` === parameterId) {
+          return modification;
+        }
+      }
+    }
+  }
+  return null;
+};
+
+/**
+ * ENHANCED: Get differential diagnosis with probability scores
+ * @param {Array} abnormalFindings - Array of {parameterId, direction, value?, severity?} objects
+ * @param {Object} options - {includeSymptoms: bool, ageGroup: string, gender: string}
+ * @returns {Array} Ranked list of conditions with probability scores
+ */
+export const getDifferentialDiagnosis = (abnormalFindings, options = {}) => {
+  if (!abnormalFindings || abnormalFindings.length === 0) return [];
+  
+  const { includeSymptoms = true, ageGroup = 'adult', gender = 'any' } = options;
   
   const conditionScores = {};
   
-  abnormalParams.forEach(({ parameterId, direction }) => {
+  // First pass: Match parameters to diseases
+  abnormalFindings.forEach(finding => {
+    const { parameterId, direction, value, severity = 1 } = finding;
     const matches = getConditionsAffectingParameter(parameterId, direction);
     
     matches.forEach(match => {
       const key = match.diseaseCode;
+      const disease = ALL_DISEASES[key];
+      
       if (!conditionScores[key]) {
         conditionScores[key] = {
-          ...match,
+          diseaseCode: key,
+          diseaseName: match.diseaseName || disease?.name,
+          icd10: match.icd10 || disease?.icd10,
+          category: match.category || disease?.category,
+          primaryOrgan: match.primaryOrgan || disease?.primaryOrgan,
           matchCount: 0,
           matchedParams: [],
-          totalScore: 0,
+          totalMagnitudeScore: 0,
+          probabilityScore: 0,
+          confidence: 'low',
+          supportingEvidence: [],
+          contradictingEvidence: [],
         };
       }
       
@@ -185,18 +277,69 @@ export const getDifferentialDiagnosis = (abnormalParams) => {
         param: parameterId,
         direction,
         factor: match.factor,
+        expectedChange: `${match.percentChange}%`,
+        note: match.note,
       });
-      // Score based on magnitude of change
-      conditionScores[key].totalScore += Math.abs(match.factor - 1);
+      conditionScores[key].totalMagnitudeScore += Math.abs(match.factor - 1) * severity;
+      
+      // Add to supporting evidence
+      conditionScores[key].supportingEvidence.push({
+        finding: parameterId,
+        direction,
+        explanation: match.note,
+      });
     });
   });
   
-  // Convert to array and sort by number of matches, then by total score
+  // Second pass: Calculate probability scores
+  Object.keys(conditionScores).forEach(key => {
+    const disease = ALL_DISEASES[key];
+    const probScore = calculateProbabilityScore(key, disease, abnormalFindings);
+    conditionScores[key].probabilityScore = probScore;
+    
+    // Determine confidence level
+    const matchRatio = conditionScores[key].matchCount / abnormalFindings.length;
+    if (probScore >= 70 && matchRatio >= 0.6) {
+      conditionScores[key].confidence = 'high';
+    } else if (probScore >= 40 && matchRatio >= 0.3) {
+      conditionScores[key].confidence = 'moderate';
+    } else {
+      conditionScores[key].confidence = 'low';
+    }
+    
+    // Add clinical presentation summary
+    if (disease) {
+      conditionScores[key].clinicalSummary = {
+        symptoms: disease.clinicalPresentation?.symptoms?.slice(0, 5) || [],
+        keyLabs: disease.laboratoryFindings?.slice(0, 3) || [],
+        primaryOrgan: disease.primaryOrgan,
+        affectedOrgans: disease.affectedOrgans || [],
+      };
+    }
+  });
+  
+  // Convert to array and sort by probability score
   const results = Object.values(conditionScores)
     .sort((a, b) => {
-      if (b.matchCount !== a.matchCount) return b.matchCount - a.matchCount;
-      return b.totalScore - a.totalScore;
-    });
+      // Primary sort: probability score
+      if (Math.abs(b.probabilityScore - a.probabilityScore) > 5) {
+        return b.probabilityScore - a.probabilityScore;
+      }
+      // Secondary sort: match count
+      if (b.matchCount !== a.matchCount) {
+        return b.matchCount - a.matchCount;
+      }
+      // Tertiary sort: magnitude score
+      return b.totalMagnitudeScore - a.totalMagnitudeScore;
+    })
+    .map((result, index) => ({
+      ...result,
+      rank: index + 1,
+      probabilityDisplay: `${result.probabilityScore}%`,
+    }));
+  
+  return results;
+};
   
   return results;
 };
