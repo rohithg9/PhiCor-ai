@@ -2710,59 +2710,6 @@ const DashboardMultiScale = () => {
                   <TreatmentGuidelinesPanel diseaseId={selectedDisease} />
                 )}
 
-                {/* Feature Navigation Cards */}
-                {!selectedDisease && (
-                  <div className="space-y-4">
-                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
-                      <Layers className="w-4 h-4" />
-                      Clinical Tools
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Differential Diagnosis Card */}
-                      <a 
-                        href="/differential"
-                        className="group p-5 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 hover:border-emerald-500/40 hover:shadow-lg hover:shadow-emerald-500/10 transition-all"
-                      >
-                        <div className="flex items-start gap-4">
-                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                            <span className="text-white font-serif text-2xl font-bold">Δ</span>
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-foreground group-hover:text-emerald-400 transition-colors">
-                              Differential Diagnosis
-                            </h4>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              AI-powered diagnostic reasoning with parameters, clinical text analysis, and evidence-based suggestions
-                            </p>
-                          </div>
-                          <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-emerald-400 group-hover:translate-x-1 transition-all" />
-                        </div>
-                      </a>
-                      
-                      {/* Medical Scribe Card */}
-                      <a 
-                        href="/scribe"
-                        className="group p-5 rounded-2xl bg-gradient-to-br from-rose-500/10 to-pink-500/10 border border-rose-500/20 hover:border-rose-500/40 hover:shadow-lg hover:shadow-rose-500/10 transition-all"
-                      >
-                        <div className="flex items-start gap-4">
-                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                            <span className="text-white font-serif text-2xl font-bold">Σ</span>
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-foreground group-hover:text-rose-400 transition-colors">
-                              Medical Scribe
-                            </h4>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              Voice-to-text transcription with auto-generated SOAP notes and real-time clinical suggestions
-                            </p>
-                          </div>
-                          <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-rose-400 group-hover:translate-x-1 transition-all" />
-                        </div>
-                      </a>
-                    </div>
-                  </div>
-                )}
-
                 {/* Parameters Section */}
                 {currentScale.parameters && currentScale.parameters.length > 0 && (
                   <section>
