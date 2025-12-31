@@ -54,6 +54,32 @@ export const NEUROLOGICAL_DISEASES = {
       mild: { description: "NIHSS 1-4, minor deficits" },
       moderate: { description: "NIHSS 5-15, significant but not severe" },
       severe: { description: "NIHSS 16-42, major stroke, high morbidity" }
+    },
+    modifications: {
+      brain: {
+        geometry: {
+          brain_volume: { factor: 0.97, note: "Cytotoxic edema then infarct volume loss" },
+          gray_matter: { factor: 0.95, note: "Gray matter loss in affected territory" }
+        },
+        pressures: {
+          icp: { factor: 1.3, note: "Elevated from cerebral edema" },
+          cpp: { factor: 0.85, note: "Reduced perfusion pressure" }
+        },
+        physiology: {
+          cbf: { factor: 0.4, note: "Severely reduced in ischemic core (<10 mL/100g/min)" },
+          cmro2: { factor: 0.5, note: "Reduced oxygen consumption" },
+          glucose_consumption: { factor: 0.4, note: "Reduced glucose metabolism" }
+        },
+        structure: {
+          neuron_density: { factor: 0.7, note: "Neuronal loss in infarct zone" }
+        }
+      },
+      heart: {
+        physiology: {
+          blood_pressure: { factor: 1.2, note: "Permissive hypertension initially" },
+          heart_rate: { factor: 1.1, note: "May have arrhythmias" }
+        }
+      }
     }
   },
 
@@ -97,6 +123,31 @@ export const NEUROLOGICAL_DISEASES = {
       mild: { description: "Small hematoma, alert, minimal deficits" },
       moderate: { description: "Moderate volume, significant deficits" },
       severe: { description: "Large volume (>30cc), decreased consciousness, high ICH score" }
+    },
+    modifications: {
+      brain: {
+        geometry: {
+          brain_volume: { factor: 1.02, note: "Hematoma adds volume, mass effect" },
+          ventricle_volume: { factor: 0.8, note: "Compressed ventricles" }
+        },
+        pressures: {
+          icp: { factor: 2.0, note: "Severely elevated from hematoma" },
+          cpp: { factor: 0.7, note: "Critically reduced" }
+        },
+        physiology: {
+          cbf: { factor: 0.6, note: "Reduced globally from elevated ICP" },
+          cmro2: { factor: 0.7, note: "Reduced metabolism" }
+        },
+        structure: {
+          neuron_density: { factor: 0.6, note: "Neuronal destruction in hematoma zone" }
+        }
+      },
+      heart: {
+        physiology: {
+          blood_pressure: { factor: 1.4, note: "Severe hypertension often causative" },
+          heart_rate: { factor: 0.9, note: "Bradycardia (Cushing response)" }
+        }
+      }
     }
   },
 
@@ -141,6 +192,32 @@ export const NEUROLOGICAL_DISEASES = {
       mild: { description: "Hunt-Hess Grade 1-2, alert, minimal symptoms" },
       moderate: { description: "Hunt-Hess Grade 3, confused, mild deficits" },
       severe: { description: "Hunt-Hess Grade 4-5, stuporous/comatose" }
+    },
+    modifications: {
+      brain: {
+        geometry: {
+          csf_volume: { factor: 1.3, note: "Blood in CSF spaces" },
+          ventricle_volume: { factor: 1.2, note: "May develop hydrocephalus" }
+        },
+        pressures: {
+          icp: { factor: 1.8, note: "Elevated from blood in subarachnoid space" },
+          cpp: { factor: 0.75, note: "Reduced perfusion" },
+          csf_pressure: { factor: 2.0, note: "Markedly elevated" }
+        },
+        physiology: {
+          cbf: { factor: 0.6, note: "Reduced from vasospasm (day 4-14)" },
+          cmro2: { factor: 0.75, note: "Reduced metabolism" }
+        },
+        structure: {
+          capillary_density: { factor: 0.8, note: "Vasospasm reduces effective perfusion" }
+        }
+      },
+      heart: {
+        physiology: {
+          blood_pressure: { factor: 1.15, note: "May be elevated" },
+          heart_rate: { factor: 1.1, note: "Tachycardia, may have arrhythmias" }
+        }
+      }
     }
   },
 
@@ -191,6 +268,23 @@ export const NEUROLOGICAL_DISEASES = {
       mild: { description: "Well-controlled on single medication" },
       moderate: { description: "Requires multiple medications, occasional breakthrough" },
       severe: { description: "Drug-resistant epilepsy (failed 2+ medications)" }
+    },
+    modifications: {
+      brain: {
+        physiology: {
+          cbf: { factor: 1.3, note: "Increased during ictal activity" },
+          cmro2: { factor: 1.4, note: "Increased O2 consumption during seizure" },
+          glucose_consumption: { factor: 1.5, note: "Markedly increased glucose demand" }
+        },
+        cellular: {
+          glutamate: { factor: 1.5, note: "Excessive glutamate release" },
+          gaba: { factor: 0.7, note: "Reduced inhibitory tone" },
+          resting_potential: { factor: 1.1, note: "Depolarized membrane potential" }
+        },
+        structure: {
+          neuron_density: { factor: 0.95, note: "May have hippocampal sclerosis" }
+        }
+      }
     }
   },
 
@@ -233,6 +327,34 @@ export const NEUROLOGICAL_DISEASES = {
       mild: { description: "Early status (5-30 min), responds to first-line treatment" },
       moderate: { description: "Established status (30-60 min)" },
       severe: { description: "Refractory status (>60 min, fails 2+ medications) - ICU" }
+    },
+    modifications: {
+      brain: {
+        pressures: {
+          icp: { factor: 1.4, note: "Elevated from cerebral edema" }
+        },
+        physiology: {
+          cbf: { factor: 1.5, note: "Markedly increased during seizure" },
+          cmro2: { factor: 1.8, note: "Extremely high O2 demand" },
+          glucose_consumption: { factor: 2.0, note: "Can deplete glucose stores" },
+          body_temp: { factor: 1.03, note: "Hyperthermia from muscle activity" }
+        },
+        cellular: {
+          glutamate: { factor: 2.0, note: "Excitotoxic levels" },
+          gaba: { factor: 0.5, note: "GABA receptor internalization" }
+        }
+      },
+      heart: {
+        physiology: {
+          heart_rate: { factor: 1.3, note: "Tachycardia" },
+          blood_pressure: { factor: 1.2, note: "Hypertension from autonomic surge" }
+        }
+      },
+      lungs: {
+        physiology: {
+          oxygen_saturation: { factor: 0.92, note: "Hypoxia risk" }
+        }
+      }
     }
   },
 
@@ -279,6 +401,19 @@ export const NEUROLOGICAL_DISEASES = {
       mild: { description: "<4 headache days/month, responds to acute treatment" },
       moderate: { description: "4-14 headache days/month" },
       severe: { description: ">15 headache days/month (chronic migraine)" }
+    },
+    modifications: {
+      brain: {
+        physiology: {
+          cbf: { factor: 1.2, note: "Increased during migraine attack" }
+        },
+        cellular: {
+          glutamate: { factor: 1.2, note: "Cortical spreading depression" }
+        },
+        structure: {
+          capillary_density: { factor: 1.1, note: "Neurogenic inflammation and vasodilation" }
+        }
+      }
     }
   },
 
@@ -316,6 +451,13 @@ export const NEUROLOGICAL_DISEASES = {
       mild: { description: "Episodic infrequent (<1 day/month)" },
       moderate: { description: "Episodic frequent (1-14 days/month)" },
       severe: { description: "Chronic (≥15 days/month for >3 months)" }
+    },
+    modifications: {
+      brain: {
+        physiology: {
+          cbf: { factor: 1.0, note: "Usually normal" }
+        }
+      }
     }
   },
 
@@ -365,6 +507,23 @@ export const NEUROLOGICAL_DISEASES = {
       mild: { description: "Hoehn & Yahr Stage 1-2, unilateral or bilateral, no balance impairment" },
       moderate: { description: "Hoehn & Yahr Stage 3, postural instability, physically independent" },
       severe: { description: "Hoehn & Yahr Stage 4-5, requires assistance, wheelchair/bed-bound" }
+    },
+    modifications: {
+      brain: {
+        geometry: {
+          brain_volume: { factor: 0.97, note: "Mild atrophy" }
+        },
+        physiology: {
+          cbf: { factor: 0.9, note: "Reduced in basal ganglia" },
+          glucose_consumption: { factor: 0.85, note: "Reduced in striatum" }
+        },
+        structure: {
+          neuron_density: { factor: 0.7, note: "Substantia nigra neuronal loss (>60%)" }
+        },
+        cellular: {
+          resting_potential: { factor: 0.95, note: "Altered neuronal excitability" }
+        }
+      }
     }
   },
 
@@ -407,6 +566,16 @@ export const NEUROLOGICAL_DISEASES = {
       mild: { description: "Minimal functional impairment" },
       moderate: { description: "Interferes with daily activities" },
       severe: { description: "Disabling, requires treatment" }
+    },
+    modifications: {
+      brain: {
+        physiology: {
+          cbf: { factor: 1.05, note: "May be slightly increased in cerebellum" }
+        },
+        cellular: {
+          gaba: { factor: 0.8, note: "GABAergic dysfunction in cerebellum" }
+        }
+      }
     }
   },
 
@@ -457,6 +626,25 @@ export const NEUROLOGICAL_DISEASES = {
       mild: { description: "EDSS 0-3.5, fully ambulatory, minimal disability" },
       moderate: { description: "EDSS 4-6, ambulatory with assistance, significant disability" },
       severe: { description: "EDSS 6.5-10, wheelchair-bound or bed-bound" }
+    },
+    modifications: {
+      brain: {
+        geometry: {
+          brain_volume: { factor: 0.95, note: "Brain atrophy over time" },
+          white_matter: { factor: 0.85, note: "White matter lesion burden" },
+          ventricle_volume: { factor: 1.2, note: "Ventricular enlargement" }
+        },
+        physiology: {
+          cbf: { factor: 0.9, note: "Reduced in lesional areas" }
+        },
+        structure: {
+          myelin_volume: { factor: 0.7, note: "Demyelination" },
+          neuron_density: { factor: 0.9, note: "Axonal loss in chronic disease" }
+        },
+        cellular: {
+          conduction_velocity_axon: { factor: 0.5, note: "Slowed conduction from demyelination" }
+        }
+      }
     }
   },
 
@@ -504,6 +692,26 @@ export const NEUROLOGICAL_DISEASES = {
       mild: { description: "MCI or mild dementia, independent in daily activities" },
       moderate: { description: "Moderate dementia, needs assistance with IADLs and some ADLs" },
       severe: { description: "Severe dementia, dependent for all ADLs" }
+    },
+    modifications: {
+      brain: {
+        geometry: {
+          brain_volume: { factor: 0.85, note: "Significant global atrophy" },
+          gray_matter: { factor: 0.75, note: "Cortical gray matter loss" },
+          white_matter: { factor: 0.9, note: "White matter changes" },
+          ventricle_volume: { factor: 1.5, note: "Ventricular enlargement" },
+          cortical_thickness: { factor: 0.75, note: "Cortical thinning" }
+        },
+        physiology: {
+          cbf: { factor: 0.8, note: "Reduced cerebral perfusion" },
+          cmro2: { factor: 0.8, note: "Reduced oxygen metabolism" },
+          glucose_consumption: { factor: 0.7, note: "Temporoparietal hypometabolism" }
+        },
+        structure: {
+          neuron_density: { factor: 0.6, note: "Severe neuronal loss" },
+          synapse_count: { factor: 0.5, note: "Synaptic loss" }
+        }
+      }
     }
   },
 
@@ -553,6 +761,14 @@ export const NEUROLOGICAL_DISEASES = {
       mild: { description: "Sensory symptoms only, no weakness" },
       moderate: { description: "Mild weakness, functional impairment" },
       severe: { description: "Significant weakness, disability" }
+    },
+    modifications: {
+      brain: {
+        cellular: {
+          conduction_velocity_axon: { factor: 0.6, note: "Slowed nerve conduction" },
+          resting_potential: { factor: 0.9, note: "Altered membrane function" }
+        }
+      }
     }
   },
 
@@ -595,6 +811,24 @@ export const NEUROLOGICAL_DISEASES = {
       mild: { description: "Ambulatory, no respiratory involvement" },
       moderate: { description: "Unable to walk, may need ICU monitoring" },
       severe: { description: "Respiratory failure requiring ventilation, autonomic crisis" }
+    },
+    modifications: {
+      brain: {
+        cellular: {
+          conduction_velocity_axon: { factor: 0.3, note: "Severely slowed - demyelinating pattern" }
+        }
+      },
+      lungs: {
+        physiology: {
+          oxygen_saturation: { factor: 0.9, note: "Respiratory compromise risk" }
+        }
+      },
+      heart: {
+        physiology: {
+          heart_rate: { factor: 1.2, note: "Autonomic instability - tachycardia" },
+          blood_pressure: { factor: 1.15, note: "Labile BP from autonomic dysfunction" }
+        }
+      }
     }
   },
 
@@ -646,6 +880,32 @@ export const NEUROLOGICAL_DISEASES = {
       mild: { description: "Alert, no focal deficits" },
       moderate: { description: "Altered consciousness, stable" },
       severe: { description: "Comatose, septic shock, focal deficits, high mortality" }
+    },
+    modifications: {
+      brain: {
+        geometry: {
+          csf_volume: { factor: 1.2, note: "Purulent CSF" },
+          ventricle_volume: { factor: 1.1, note: "May develop hydrocephalus" }
+        },
+        pressures: {
+          icp: { factor: 1.8, note: "Elevated from inflammation and edema" },
+          cpp: { factor: 0.8, note: "Reduced perfusion" },
+          csf_pressure: { factor: 2.5, note: "Markedly elevated" }
+        },
+        physiology: {
+          cbf: { factor: 0.85, note: "May be reduced" },
+          body_temp: { factor: 1.04, note: "Fever (39-40°C)" }
+        },
+        structure: {
+          bbb_thickness: { factor: 0.8, note: "BBB disruption" }
+        }
+      },
+      heart: {
+        physiology: {
+          heart_rate: { factor: 1.3, note: "Tachycardia from fever/sepsis" },
+          blood_pressure: { factor: 0.85, note: "May be hypotensive if septic" }
+        }
+      }
     }
   },
 
@@ -683,6 +943,22 @@ export const NEUROLOGICAL_DISEASES = {
       mild: { description: "Viral, self-limited" },
       moderate: { description: "Requires treatment" },
       severe: { description: "Complications, altered consciousness" }
+    },
+    modifications: {
+      brain: {
+        pressures: {
+          icp: { factor: 1.3, note: "May be elevated" },
+          csf_pressure: { factor: 1.5, note: "Elevated" }
+        },
+        physiology: {
+          body_temp: { factor: 1.02, note: "Fever" }
+        }
+      },
+      heart: {
+        physiology: {
+          heart_rate: { factor: 1.15, note: "Tachycardia from fever" }
+        }
+      }
     }
   }
 };
