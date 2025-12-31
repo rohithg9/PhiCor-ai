@@ -38,7 +38,7 @@ const features = [
   },
   {
     symbol: 'ρ',
-    name: 'Drugs Database',
+    name: 'Drug Details',
     description: 'Pharmacology & drug effects',
     path: '/drugs',
     color: 'from-rose-500 to-pink-500',
