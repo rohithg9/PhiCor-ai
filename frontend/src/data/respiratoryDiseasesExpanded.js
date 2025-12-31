@@ -511,6 +511,39 @@ export const RESPIRATORY_DISEASES_EXPANDED = {
           pulmonary_artery_pressure: { factor: 1.4, note: "Pulmonary hypertension" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "ATS/ERS Guidelines",
+      requirements: {
+        clinical: "Symptoms (dyspnea, cough) + bibasilar crackles + clubbing",
+        hrct: "Definite, probable, or possible UIP pattern",
+        exclusions: "Rule out CTD, hypersensitivity pneumonitis, drug-induced"
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Hypersensitivity pneumonitis", distinguishing: "Exposure history, upper lobe predominant, air trapping" },
+      { condition: "CTD-ILD", distinguishing: "Joint/skin/muscle findings, autoantibodies" },
+      { condition: "Asbestosis", distinguishing: "Occupational exposure, pleural plaques" },
+      { condition: "NSIP", distinguishing: "Ground-glass predominant, subpleural sparing, better prognosis" }
+    ],
+    treatment: {
+      antifibrotic: [
+        { name: "Nintedanib", indication: "Slows FVC decline", evidence: "IA" },
+        { name: "Pirfenidone", indication: "Slows FVC decline", evidence: "IA" }
+      ],
+      supportive: [
+        { name: "Pulmonary rehabilitation", indication: "All patients", evidence: "IA" },
+        { name: "Supplemental oxygen", indication: "Resting or exertional hypoxemia", evidence: "IA" },
+        { name: "Vaccinations", indication: "Influenza, pneumococcal", evidence: "IA" }
+      ],
+      definitive: [
+        { name: "Lung transplant", indication: "Progressive disease, age <70", evidence: "IA" }
+      ]
+    },
+    riskStratification: {
+      mortality: "Median survival 3-5 years from diagnosis",
+      gap: "GAP index predicts mortality (Gender, Age, Physiology)",
+      exacerbation: "Acute exacerbations carry 50% mortality"
     }
   },
 
