@@ -276,15 +276,15 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Clinical Guidelines and Bidirectional Mapping Implementation"
-    - "Major System Expansion - New Organs and Disease Categories"
+    - "New Disease Categories Integration - Autoimmune, Infectious, GI"
+    - "Respiratory Diseases Expanded Integration"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
 agent_communication:
   - agent: "main"
-    message: "Added 36 new diseases (21 renal, 15 neurological). Total disease count now 158. Need testing agent to verify: 1) Renal diseases (CKD stages, AKI, UTIs, Nephrolithiasis) display properly with labs and imaging, 2) Neurological diseases (Stroke, Parkinson's, MS, Epilepsy) display properly with clinical findings, 3) Organ highlighting works for brain and kidneys."
+    message: "MASSIVE DISEASE EXPANSION COMPLETED: Added 40 new diseases across 4 categories. Total disease count now 254 (up from 214). NEW CATEGORIES: 1) Autoimmune Diseases (13 diseases): SLE (M32.9), Rheumatoid Arthritis (M05.9), Sjögren's (M35.0), Systemic Sclerosis (M34.9), Dermatomyositis (M33.2), Ankylosing Spondylitis (M45.9), GCA (M31.5), Crohn's (K50.9), UC (K51.9), Myasthenia Gravis (G70.0), PAN (M30.0), GPA (M31.3), Psoriatic Arthritis (M07.3). 2) Infectious Diseases (12 diseases): Influenza (J10.1), COVID-19 (U07.1), TB (A15.0), Sepsis (A41.9), HIV (B20), Malaria (B50.9), Dengue (A90), Viral Meningitis (A87.9), HSV Encephalitis (B00.4), Hep A (B15.9), Hep B (B16.9), Salmonella (A02.1). 3) GI Diseases (15 diseases): GERD (K21.0), Achalasia (K22.0), PUD (K25.9), Gastritis (K29.7), Gastric Cancer (C16.9), SBO (K56.6), Diverticulitis (K57.3), IBS (K58.9), Acute Pancreatitis (K85.9), Chronic Pancreatitis (K86.1), Pancreatic Cancer (C25.9), Cholecystitis (K80.2), Cholangitis (K83.0), Esophageal Cancer (C15.9). 4) Respiratory Expanded (6 diseases): Asthma (J45.9), CAP (J18.9), PE (I26.9), ARDS (J80), IPF (J84.1), OSA (G47.33). All diseases have comprehensive parameter modifications with multi-organ effects. Screenshot testing confirmed SLE shows 'AFFECTED: Blood 5 | Kidneys 2 | Heart 1 | Lungs | Brain'. Need testing agent to verify all new disease categories."
   - agent: "main"
     message: "TESTING COMPLETE: PhiCor.ai landing page comprehensive testing successful. ✅ All 8 sections verified: Hero (headline, CTA buttons working), Why Mathematics (content, stats 124/6/∞), PhiCor Meaning (Phi/Cor cards), How It Works (4 steps), Advantage (AI comparison, trajectory chart, 3 cards), CTA (navigation working), Footer (links functional), Mobile Responsiveness (390px viewport - all sections responsive). ✅ Navigation tested: Dashboard buttons work, footer links functional. ✅ No critical issues found. Landing page fully functional across desktop and mobile."
   - agent: "testing"
