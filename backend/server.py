@@ -1362,7 +1362,7 @@ async def get_drugs_for_disease(disease_id: str):
     ).to_list(100)
     return {"drugs": drugs, "count": len(drugs)}
 
-@api_router.post("/drugs/db/seed")
+@api_router.post("/drugs-db/seed")
 async def seed_drug_database():
     """
     Seed the drug database with initial cardiac-focused drugs.
