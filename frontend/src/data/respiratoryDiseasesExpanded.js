@@ -186,6 +186,42 @@ export const RESPIRATORY_DISEASES_EXPANDED = {
           heart_rate: { factor: 1.25, note: "Tachycardia from fever/hypoxia" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "Clinical + Radiographic + Microbiologic",
+      requirements: {
+        clinical: "Cough, fever, dyspnea, pleuritic pain",
+        radiographic: "Infiltrate on CXR or CT",
+        severity: "CURB-65 or PSI for mortality risk"
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Heart failure", distinguishing: "BNP elevated, bilateral infiltrates, cardiomegaly" },
+      { condition: "PE", distinguishing: "Wedge-shaped infarct, elevated D-dimer, CT angiography" },
+      { condition: "Lung cancer", distinguishing: "Mass lesion, risk factors, biopsy" },
+      { condition: "TB", distinguishing: "Apical cavitation, AFB smear, endemic exposure" }
+    ],
+    treatment: {
+      cap: [
+        { name: "Amoxicillin + macrolide", indication: "Outpatient mild CAP", evidence: "IA" },
+        { name: "Respiratory fluoroquinolone", examples: "Levofloxacin, Moxifloxacin", indication: "Alternative or inpatient", evidence: "IA" },
+        { name: "Beta-lactam + macrolide", indication: "Inpatient non-ICU", evidence: "IA" }
+      ],
+      severeCap: [
+        { name: "Beta-lactam + macrolide + consider MRSA/Pseudomonas coverage", indication: "ICU", evidence: "IA" }
+      ],
+      hap_vap: [
+        { name: "Antipseudomonal beta-lactam + anti-MRSA agent", indication: "HAP/VAP", evidence: "IA" }
+      ],
+      supportive: [
+        { name: "Oxygen", indication: "SpO2 target ≥92%", evidence: "IA" },
+        { name: "IV fluids", indication: "Dehydration/sepsis", evidence: "IA" }
+      ]
+    },
+    riskStratification: {
+      curb65: "0-1: outpatient; 2: consider admission; 3+: ICU consideration",
+      mortality: "CAP: 5-10% overall; ICU: 30-50%",
+      prognosis: "Most improve in 48-72h; failure suggests resistant organism or complication"
     }
   },
 
