@@ -1390,6 +1390,1111 @@ export const DISEASE_TREATMENT_GUIDELINES = {
       },
     },
   },
+
+  // ==================== B12 DEFICIENCY ====================
+  'b12_deficiency': {
+    icd10: 'D51.0',
+    name: 'Vitamin B12 Deficiency / Pernicious Anemia',
+    affectedOrgans: ['blood', 'bonemarrow', 'brain'],
+    
+    diagnosticCriteria: {
+      essential: [
+        { criterion: 'Serum B12 < 200 pg/mL', method: 'Serum B12 level', source: 'Standard cutoff' },
+        { criterion: 'Elevated methylmalonic acid (MMA)', method: 'Serum MMA', source: 'Most specific for B12 (vs folate)' },
+      ],
+      supportive: [
+        { criterion: 'Macrocytic anemia (MCV > 100 fL)', method: 'CBC', source: 'Standard' },
+        { criterion: 'Hypersegmented neutrophils (>5 lobes)', method: 'Blood smear', source: 'Classic finding' },
+        { criterion: 'Elevated homocysteine', method: 'Serum homocysteine', source: 'Elevated in B12 AND folate deficiency' },
+        { criterion: 'Positive intrinsic factor antibodies', method: 'IF antibodies', source: '60% sensitive for pernicious anemia' },
+        { criterion: 'Positive parietal cell antibodies', method: 'PCA', source: 'Less specific' },
+      ]
+    },
+
+    treatments: {
+      replacement: [
+        {
+          name: 'Intramuscular B12',
+          drugs: ['Cyanocobalamin 1000 mcg IM', 'Hydroxocobalamin 1000 mcg IM'],
+          regimen: 'Daily x 1 week, then weekly x 4 weeks, then monthly for life (pernicious anemia)',
+          evidence: 'IA',
+          source: 'BSH Guidelines',
+          indication: 'Pernicious anemia, neurological symptoms, severe deficiency',
+        },
+        {
+          name: 'Oral B12',
+          drugs: ['Cyanocobalamin 1000-2000 mcg daily'],
+          evidence: 'IB',
+          source: 'Cochrane review shows equivalent efficacy for non-neurological cases',
+          indication: 'Dietary deficiency, mild-moderate without neurological symptoms',
+          notes: '1% absorbed passively even without intrinsic factor',
+        },
+      ],
+      monitoring: [
+        {
+          name: 'Response assessment',
+          parameters: ['Reticulocyte count (peaks day 7-10)', 'Hemoglobin (normalizes 6-8 weeks)', 'MMA (should normalize)'],
+          frequency: 'Recheck at 8 weeks',
+        },
+      ],
+      neurological: [
+        {
+          name: 'Subacute combined degeneration',
+          treatment: 'Urgent IM B12; neurological deficits may be irreversible if delayed',
+          evidence: 'IC',
+          source: 'Case series',
+        },
+      ],
+    },
+
+    monitoringProtocol: {
+      frequency: 'B12 level not useful for monitoring on replacement; follow clinical response',
+      parameters: ['CBC', 'Reticulocytes', 'MMA if uncertain response'],
+    },
+  },
+
+  // ==================== THALASSEMIA ====================
+  'thalassemia_major': {
+    icd10: 'D56.1',
+    name: 'Beta Thalassemia Major',
+    affectedOrgans: ['blood', 'bonemarrow', 'spleen', 'liver', 'heart'],
+    
+    diagnosticCriteria: {
+      essential: [
+        { criterion: 'Hemoglobin electrophoresis: HbF > 90%, HbA absent/minimal', method: 'HPLC/Electrophoresis', source: 'Diagnostic' },
+        { criterion: 'Severe microcytic anemia (Hgb < 7 g/dL untransfused)', method: 'CBC', source: 'Clinical presentation' },
+        { criterion: 'Genetic confirmation of β-globin mutations', method: 'Molecular genetics', source: 'Confirms diagnosis' },
+      ],
+      supportive: [
+        { criterion: 'Hepatosplenomegaly', method: 'Clinical/Imaging', source: 'Extramedullary hematopoiesis' },
+        { criterion: 'Skeletal changes on X-ray', method: 'Radiography', source: 'Hair-on-end appearance' },
+      ]
+    },
+
+    treatments: {
+      transfusion: [
+        {
+          name: 'Chronic transfusion program',
+          target: 'Pre-transfusion Hgb 9-10.5 g/dL',
+          frequency: 'Every 2-4 weeks',
+          evidence: 'IA',
+          source: 'TIF Guidelines 2021',
+          notes: 'Suppresses ineffective erythropoiesis, prevents skeletal changes',
+        },
+      ],
+      ironChelation: [
+        {
+          name: 'Deferasirox (Exjade, Jadenu)',
+          dose: '20-40 mg/kg/day oral',
+          evidence: 'IA',
+          source: 'EPIC trial',
+          monitoring: 'Serum ferritin, creatinine, LFTs monthly',
+        },
+        {
+          name: 'Deferoxamine (Desferal)',
+          dose: '25-50 mg/kg/day SC infusion over 8-12 hours, 5-7 days/week',
+          evidence: 'IA',
+          source: 'Gold standard, most experience',
+          notes: 'Required for cardiac iron overload',
+        },
+        {
+          name: 'Deferiprone (Ferriprox)',
+          dose: '75-100 mg/kg/day divided TID',
+          evidence: 'IB',
+          source: 'Best for cardiac iron removal',
+          contraindications: ['Agranulocytosis risk - weekly ANC monitoring'],
+        },
+      ],
+      curative: [
+        {
+          name: 'Allogeneic stem cell transplant',
+          indication: 'HLA-matched sibling donor, ideally before iron overload',
+          evidence: 'IA',
+          source: 'Pesaro classification, >90% cure rate Class 1-2',
+        },
+        {
+          name: 'Gene therapy',
+          drugs: ['Betibeglogene autotemcel (Zynteglo)'],
+          evidence: 'IIaB',
+          source: 'FDA approved, enables transfusion independence',
+        },
+      ],
+      supportive: [
+        { name: 'Folic acid supplementation', dose: '1 mg daily', evidence: 'IIaC' },
+        { name: 'Splenectomy', indication: 'Hypersplenism with increasing transfusion requirements', evidence: 'IIaB' },
+        { name: 'Vaccination', indication: 'Pneumococcal, meningococcal, Hib (especially post-splenectomy)', evidence: 'IA' },
+      ],
+    },
+
+    monitoringProtocol: {
+      frequency: 'Every 3-6 months comprehensive',
+      parameters: ['Serum ferritin', 'Liver iron (MRI R2/T2*)', 'Cardiac iron (MRI T2*)', 'LFTs', 'Endocrine panel'],
+      targets: {
+        'Ferritin': '< 1000 ng/mL',
+        'Liver iron': '< 7 mg/g dry weight',
+        'Cardiac T2*': '> 20 ms (no iron overload)',
+      },
+    },
+  },
+
+  // ==================== APLASTIC ANEMIA ====================
+  'aplastic_anemia': {
+    icd10: 'D61.9',
+    name: 'Aplastic Anemia',
+    affectedOrgans: ['bonemarrow', 'blood'],
+    
+    diagnosticCriteria: {
+      essential: [
+        { criterion: 'Pancytopenia', method: 'CBC', source: 'Definition' },
+        { criterion: 'Hypocellular bone marrow (<25% cellularity)', method: 'Bone marrow biopsy', source: 'Diagnostic' },
+        { criterion: 'Absence of abnormal infiltrate or fibrosis', method: 'Bone marrow biopsy', source: 'Excludes other causes' },
+      ],
+      severity: [
+        { severity: 'Severe (SAA)', criteria: 'Marrow <25% AND 2 of 3: ANC <500, Platelets <20K, Retics <1%', source: 'Camitta criteria' },
+        { severity: 'Very Severe (VSAA)', criteria: 'SAA criteria with ANC <200', source: 'Camitta criteria' },
+        { severity: 'Non-severe', criteria: 'Does not meet SAA criteria', source: 'Camitta criteria' },
+      ]
+    },
+
+    treatments: {
+      youngPatients: [
+        {
+          name: 'Matched sibling donor transplant',
+          indication: 'Age <40, HLA-matched sibling available',
+          evidence: 'IA',
+          source: 'First-line for eligible patients',
+          outcomes: '>90% long-term survival',
+        },
+      ],
+      immunosuppression: [
+        {
+          name: 'ATG + Cyclosporine',
+          drugs: ['Horse ATG (ATGAM) 40 mg/kg/day x 4 days', 'Cyclosporine 5 mg/kg/day (target trough 200-400)'],
+          evidence: 'IA',
+          source: 'NIH protocol',
+          outcomes: '60-70% response rate',
+          duration: 'CSA for minimum 12 months, slow taper',
+        },
+        {
+          name: 'ATG + Cyclosporine + Eltrombopag',
+          drugs: ['Horse ATG', 'Cyclosporine', 'Eltrombopag 150 mg daily'],
+          evidence: 'IB',
+          source: 'NIH study - improved response rates',
+          outcomes: '94% overall response at 6 months',
+        },
+      ],
+      supportive: [
+        {
+          name: 'Transfusion support',
+          products: 'Leukoreduced, irradiated (if transplant candidate) PRBCs and platelets',
+          threshold: 'Hgb <7-8, Platelets <10K (or <20K if febrile/bleeding)',
+          evidence: 'IC',
+        },
+        {
+          name: 'Infection prophylaxis',
+          drugs: ['Fluconazole', 'Acyclovir', 'Consider antibacterial if ANC <500'],
+          evidence: 'IIaC',
+        },
+      ],
+      relapsed: [
+        {
+          name: 'Second course IST or alternative donor transplant',
+          evidence: 'IIaB',
+          source: 'Consider MUD/haplo transplant',
+        },
+      ],
+    },
+
+    monitoringProtocol: {
+      frequency: 'Weekly CBC during treatment, then monthly',
+      parameters: ['CBC', 'Reticulocytes', 'Cyclosporine level', 'Renal function', 'PNH clone screening'],
+    },
+  },
+
+  // ==================== ISCHEMIC STROKE ====================
+  'ischemic_stroke': {
+    icd10: 'I63.9',
+    name: 'Ischemic Stroke / Cerebral Infarction',
+    affectedOrgans: ['brain', 'heart'],
+    
+    diagnosticCriteria: {
+      clinical: [
+        { criterion: 'Sudden focal neurological deficit', method: 'Clinical exam', source: 'Definition' },
+        { criterion: 'NIHSS score for severity', method: 'Standardized assessment', source: 'AHA/ASA' },
+      ],
+      imaging: [
+        { criterion: 'CT head - rule out hemorrhage', method: 'Non-contrast CT', source: 'First-line, within minutes' },
+        { criterion: 'MRI DWI - acute infarct', method: 'MRI with diffusion', source: 'Most sensitive' },
+        { criterion: 'CT/MR angiography - large vessel occlusion', method: 'CTA/MRA', source: 'For thrombectomy consideration' },
+      ]
+    },
+
+    treatments: {
+      hyperacute: [
+        {
+          name: 'IV Alteplase (tPA)',
+          dose: '0.9 mg/kg (max 90mg), 10% bolus, 90% over 1 hour',
+          window: 'Within 4.5 hours of symptom onset',
+          evidence: 'IA',
+          source: 'AHA/ASA Guidelines 2019',
+          contraindications: ['Recent surgery', 'Active bleeding', 'BP >185/110', 'INR >1.7', 'Platelets <100K'],
+        },
+        {
+          name: 'IV Tenecteplase',
+          dose: '0.25 mg/kg (max 25mg) single bolus',
+          window: 'Within 4.5 hours',
+          evidence: 'IIaB',
+          source: 'EXTEND-IA TNK - non-inferior, easier administration',
+        },
+        {
+          name: 'Mechanical Thrombectomy',
+          indication: 'Large vessel occlusion (ICA, M1, basilar), NIHSS ≥6',
+          window: 'Up to 24 hours with favorable imaging (DAWN/DEFUSE 3 criteria)',
+          evidence: 'IA',
+          source: 'MR CLEAN, SWIFT PRIME, DAWN trials',
+        },
+      ],
+      secondaryPrevention: [
+        {
+          name: 'Antiplatelet therapy',
+          drugs: ['Aspirin 81-325mg daily', 'Clopidogrel 75mg daily', 'Aspirin + Clopidogrel x 21-90 days for minor stroke/TIA'],
+          evidence: 'IA',
+          source: 'AHA/ASA, CHANCE, POINT trials',
+        },
+        {
+          name: 'Anticoagulation (if AFib)',
+          drugs: ['DOACs preferred: Apixaban, Rivaroxaban, Dabigatran', 'Warfarin if mechanical valve'],
+          evidence: 'IA',
+          source: 'AHA/ASA Guidelines',
+          timing: 'Start 4-14 days after stroke depending on size',
+        },
+        {
+          name: 'High-intensity statin',
+          drugs: ['Atorvastatin 80mg', 'Rosuvastatin 20-40mg'],
+          target: 'LDL < 70 mg/dL',
+          evidence: 'IA',
+          source: 'SPARCL trial',
+        },
+        {
+          name: 'Blood pressure management',
+          target: 'BP < 130/80 after acute phase',
+          evidence: 'IA',
+          source: 'SPRINT, AHA Guidelines',
+        },
+      ],
+      rehabilitation: [
+        {
+          name: 'Early mobilization and rehab',
+          timing: 'Within 24-48 hours if stable',
+          evidence: 'IA',
+          source: 'AHA/ASA',
+        },
+      ],
+    },
+
+    monitoringProtocol: {
+      acute: 'Neuro checks q15 min x 2h, q30 min x 6h, then hourly x 16h after tPA',
+      parameters: ['NIHSS', 'Blood pressure', 'Blood glucose'],
+    },
+  },
+
+  // ==================== PARKINSON DISEASE ====================
+  'parkinsons_disease': {
+    icd10: 'G20',
+    name: "Parkinson's Disease",
+    affectedOrgans: ['brain'],
+    
+    diagnosticCriteria: {
+      essential: [
+        { criterion: 'Bradykinesia + rest tremor OR rigidity', method: 'Clinical examination', source: 'MDS Clinical Diagnostic Criteria' },
+      ],
+      supportive: [
+        { criterion: 'Unilateral onset', method: 'History', source: 'MDS criteria' },
+        { criterion: 'Progressive course', method: 'History', source: 'MDS criteria' },
+        { criterion: 'Excellent response to levodopa', method: 'Clinical trial', source: 'MDS criteria' },
+        { criterion: 'Rest tremor', method: 'Examination', source: 'Classic feature' },
+        { criterion: 'Olfactory dysfunction (hyposmia)', method: 'Smell test', source: 'Prodromal feature' },
+      ],
+      exclusion: [
+        { criterion: 'Cerebellar signs', method: 'Exam', source: 'MSA-C' },
+        { criterion: 'Vertical gaze palsy', method: 'Exam', source: 'PSP' },
+        { criterion: 'Early severe autonomic failure', method: 'History', source: 'MSA' },
+      ]
+    },
+
+    treatments: {
+      dopaminergic: [
+        {
+          name: 'Levodopa/Carbidopa',
+          drugs: ['Sinemet IR', 'Sinemet CR', 'Rytary (extended release)', 'Duopa (intestinal gel)'],
+          indication: 'First-line for motor symptoms, especially if functional impairment',
+          evidence: 'IA',
+          source: 'AAN Guidelines',
+          notes: 'Most effective drug; risk of motor fluctuations with long-term use',
+        },
+        {
+          name: 'Dopamine agonists',
+          drugs: ['Pramipexole (Mirapex)', 'Ropinirole (Requip)', 'Rotigotine patch (Neupro)'],
+          indication: 'Younger patients, early disease, or adjunct to levodopa',
+          evidence: 'IB',
+          source: 'AAN Guidelines',
+          sideEffects: ['Impulse control disorders', 'Somnolence', 'Hallucinations'],
+        },
+        {
+          name: 'MAO-B inhibitors',
+          drugs: ['Rasagiline (Azilect) 1mg daily', 'Selegiline 5mg BID', 'Safinamide (Xadago)'],
+          indication: 'Monotherapy early disease or adjunct',
+          evidence: 'IB',
+          source: 'ADAGIO trial (rasagiline)',
+        },
+        {
+          name: 'COMT inhibitors',
+          drugs: ['Entacapone (Comtan)', 'Opicapone (Ongentys)', 'Tolcapone (Tasmar - rarely used)'],
+          indication: 'Adjunct to levodopa to reduce OFF time',
+          evidence: 'IB',
+          source: 'AAN Guidelines',
+        },
+      ],
+      advanced: [
+        {
+          name: 'Deep Brain Stimulation (DBS)',
+          targets: ['Subthalamic nucleus (STN)', 'Globus pallidus interna (GPi)'],
+          indication: 'Motor fluctuations/dyskinesia despite optimal meds, good levodopa response',
+          evidence: 'IA',
+          source: 'EARLYSTIM, VA DBS trials',
+        },
+        {
+          name: 'Duopa (Carbidopa-Levodopa intestinal gel)',
+          indication: 'Advanced PD with motor fluctuations',
+          evidence: 'IB',
+          source: 'Continuous intestinal infusion',
+        },
+      ],
+      nonMotor: [
+        {
+          name: 'Depression',
+          drugs: ['SSRIs', 'SNRIs (venlafaxine)', 'Pramipexole has antidepressant effect'],
+          evidence: 'IB',
+        },
+        {
+          name: 'Psychosis',
+          drugs: ['Pimavanserin (Nuplazid) 34mg daily', 'Quetiapine (low-dose)', 'Clozapine'],
+          evidence: 'IB',
+          source: 'Pimavanserin FDA approved for PD psychosis',
+          notes: 'Avoid typical antipsychotics - worsen parkinsonism',
+        },
+        {
+          name: 'Orthostatic hypotension',
+          drugs: ['Fludrocortisone', 'Midodrine', 'Droxidopa (Northera)'],
+          evidence: 'IIaB',
+        },
+      ],
+    },
+
+    monitoringProtocol: {
+      frequency: 'Every 3-6 months',
+      parameters: ['UPDRS motor score', 'ON/OFF diary', 'Cognitive assessment (MoCA)', 'Depression screening', 'Orthostatic BP'],
+    },
+  },
+
+  // ==================== MULTIPLE SCLEROSIS ====================
+  'multiple_sclerosis': {
+    icd10: 'G35',
+    name: 'Multiple Sclerosis',
+    affectedOrgans: ['brain'],
+    
+    diagnosticCriteria: {
+      mcdonald2017: [
+        { criterion: 'Dissemination in space (DIS): ≥1 T2 lesion in ≥2 MS-typical regions', method: 'MRI brain/spine', source: 'McDonald 2017' },
+        { criterion: 'Dissemination in time (DIT): Simultaneous Gd+ and non-enhancing lesions OR new T2/Gd+ on follow-up', method: 'MRI', source: 'McDonald 2017' },
+        { criterion: 'OR CSF oligoclonal bands can substitute for DIT', method: 'Lumbar puncture', source: 'McDonald 2017' },
+      ],
+      phenotypes: [
+        { type: 'Relapsing-remitting (RRMS)', description: 'Acute attacks with full/partial recovery, stable between' },
+        { type: 'Secondary progressive (SPMS)', description: 'Progressive accumulation after initial RRMS' },
+        { type: 'Primary progressive (PPMS)', description: 'Progressive from onset without relapses' },
+      ]
+    },
+
+    treatments: {
+      acuteRelapse: [
+        {
+          name: 'IV Methylprednisolone',
+          dose: '1g IV daily x 3-5 days',
+          evidence: 'IA',
+          source: 'ONTT trial',
+          notes: 'Speeds recovery but does not change long-term outcome',
+        },
+        {
+          name: 'Plasma exchange (PLEX)',
+          indication: 'Severe relapse not responding to steroids',
+          evidence: 'IIaB',
+          source: 'Rescue therapy',
+        },
+      ],
+      diseaseModifying: [
+        {
+          name: 'High-efficacy (first-line for active disease)',
+          drugs: ['Ocrelizumab (Ocrevus) - anti-CD20', 'Natalizumab (Tysabri) - anti-VLA4', 'Alemtuzumab (Lemtrada)'],
+          evidence: 'IA',
+          source: 'OPERA, AFFIRM trials',
+          notes: 'Consider early for highly active disease',
+        },
+        {
+          name: 'Moderate efficacy oral',
+          drugs: ['Dimethyl fumarate (Tecfidera)', 'Fingolimod (Gilenya)', 'Siponimod (Mayzent)', 'Ozanimod (Zeposia)'],
+          evidence: 'IA',
+          source: 'DEFINE, FREEDOMS trials',
+        },
+        {
+          name: 'Injectable platform therapies',
+          drugs: ['Interferon beta-1a (Avonex, Rebif)', 'Interferon beta-1b (Betaseron)', 'Glatiramer acetate (Copaxone)'],
+          evidence: 'IA',
+          source: 'Older but proven efficacy',
+          notes: 'Lower efficacy than newer agents',
+        },
+        {
+          name: 'PPMS',
+          drugs: ['Ocrelizumab (only FDA-approved for PPMS)'],
+          evidence: 'IB',
+          source: 'ORATORIO trial',
+        },
+      ],
+      symptomatic: [
+        { symptom: 'Spasticity', drugs: ['Baclofen', 'Tizanidine', 'Botox'], evidence: 'IB' },
+        { symptom: 'Fatigue', drugs: ['Amantadine', 'Modafinil'], evidence: 'IIaB' },
+        { symptom: 'Bladder dysfunction', drugs: ['Oxybutynin', 'Mirabegron', 'Intermittent catheterization'], evidence: 'IB' },
+        { symptom: 'Neuropathic pain', drugs: ['Gabapentin', 'Pregabalin', 'Duloxetine'], evidence: 'IB' },
+      ],
+    },
+
+    monitoringProtocol: {
+      frequency: 'MRI annually, clinic every 3-6 months',
+      parameters: ['EDSS', 'Relapse rate', 'MRI lesion burden', 'Brain atrophy', 'JC virus antibody (if on Tysabri)'],
+    },
+  },
+
+  // ==================== AML ====================
+  'acute_myeloid_leukemia': {
+    icd10: 'C92.0',
+    name: 'Acute Myeloid Leukemia (AML)',
+    affectedOrgans: ['bonemarrow', 'blood', 'spleen', 'liver'],
+    
+    diagnosticCriteria: {
+      essential: [
+        { criterion: 'Bone marrow blasts ≥ 20%', method: 'Bone marrow biopsy', source: 'WHO 2022' },
+        { criterion: 'Myeloid lineage (MPO+, CD13+, CD33+, CD117+)', method: 'Flow cytometry', source: 'WHO 2022' },
+      ],
+      cytogenetics: [
+        { risk: 'Favorable', abnormalities: 't(8;21), inv(16), t(15;17) APL, NPM1 mut without FLT3-ITD', source: 'ELN 2022' },
+        { risk: 'Intermediate', abnormalities: 'Normal karyotype, t(9;11)', source: 'ELN 2022' },
+        { risk: 'Adverse', abnormalities: 'Complex, -5, -7, 11q23 other than t(9;11), TP53 mut', source: 'ELN 2022' },
+      ]
+    },
+
+    treatments: {
+      inductionFit: [
+        {
+          name: '7+3 Induction',
+          drugs: ['Cytarabine 100-200 mg/m² CI days 1-7', 'Daunorubicin 60-90 mg/m² days 1-3 OR Idarubicin 12 mg/m² days 1-3'],
+          evidence: 'IA',
+          source: 'Standard of care',
+          target: 'Complete remission (CR)',
+        },
+        {
+          name: 'CPX-351 (Vyxeos)',
+          drugs: ['Liposomal daunorubicin + cytarabine'],
+          indication: 'Secondary AML, therapy-related AML',
+          evidence: 'IB',
+          source: 'FDA approved',
+        },
+      ],
+      inductionUnfit: [
+        {
+          name: 'Venetoclax + Azacitidine',
+          drugs: ['Venetoclax 400mg daily (after ramp-up)', 'Azacitidine 75 mg/m² days 1-7'],
+          evidence: 'IA',
+          source: 'VIALE-A trial - new standard for unfit',
+        },
+        {
+          name: 'Low-dose cytarabine + Venetoclax',
+          evidence: 'IB',
+          source: 'Alternative for unfit',
+        },
+      ],
+      targeted: [
+        {
+          name: 'FLT3 inhibitors (if FLT3 mutated)',
+          drugs: ['Midostaurin (with induction)', 'Gilteritinib (relapsed)', 'Quizartinib'],
+          evidence: 'IA',
+          source: 'RATIFY trial',
+        },
+        {
+          name: 'IDH inhibitors (if IDH1/2 mutated)',
+          drugs: ['Ivosidenib (IDH1)', 'Enasidenib (IDH2)', 'Olutasidenib'],
+          evidence: 'IB',
+          source: 'FDA approved',
+        },
+        {
+          name: 'APL (t(15;17))',
+          drugs: ['ATRA + Arsenic trioxide (ATO)', 'Add anthracycline if high-risk'],
+          evidence: 'IA',
+          source: 'APL0406 trial - >95% cure rate',
+        },
+      ],
+      consolidation: [
+        {
+          name: 'High-dose cytarabine (HiDAC)',
+          dose: '1.5-3 g/m² q12h days 1,3,5 x 3-4 cycles',
+          indication: 'Favorable risk, intermediate risk without transplant option',
+          evidence: 'IA',
+          source: 'CALGB',
+        },
+        {
+          name: 'Allogeneic transplant',
+          indication: 'Intermediate and adverse risk in CR1',
+          evidence: 'IA',
+          source: 'ELN Guidelines',
+        },
+      ],
+    },
+
+    monitoringProtocol: {
+      frequency: 'Bone marrow at day 14 (early), day 28-35 (remission assessment)',
+      parameters: ['CBC', 'Bone marrow morphology and flow', 'MRD assessment (flow or molecular)'],
+    },
+  },
+
+  // ==================== CLL ====================
+  'chronic_lymphocytic_leukemia': {
+    icd10: 'C91.1',
+    name: 'Chronic Lymphocytic Leukemia (CLL)',
+    affectedOrgans: ['blood', 'bonemarrow', 'lymphatic', 'spleen'],
+    
+    diagnosticCriteria: {
+      essential: [
+        { criterion: 'Absolute lymphocyte count ≥ 5 × 10⁹/L sustained', method: 'CBC', source: 'iwCLL 2018' },
+        { criterion: 'Clonal B-cells: CD5+, CD19+, CD23+, weak sIg, CD20 dim', method: 'Flow cytometry', source: 'iwCLL 2018' },
+      ],
+      staging: [
+        { stage: 'Rai 0 / Binet A', criteria: 'Lymphocytosis only', prognosis: 'Indolent, median survival >10 years' },
+        { stage: 'Rai I-II / Binet B', criteria: 'Adenopathy ± splenomegaly', prognosis: 'Intermediate' },
+        { stage: 'Rai III-IV / Binet C', criteria: 'Anemia or thrombocytopenia', prognosis: 'Requires treatment' },
+      ]
+    },
+
+    treatments: {
+      watchAndWait: [
+        {
+          name: 'Observation',
+          indication: 'Asymptomatic, early stage (Rai 0-II without symptoms)',
+          evidence: 'IA',
+          source: 'iwCLL Guidelines - no benefit to early treatment',
+        },
+      ],
+      treatmentIndications: [
+        { criterion: 'Progressive marrow failure (Hgb <10, Plt <100K)', source: 'iwCLL' },
+        { criterion: 'Massive splenomegaly or lymphadenopathy', source: 'iwCLL' },
+        { criterion: 'Lymphocyte doubling time < 6 months', source: 'iwCLL' },
+        { criterion: 'B symptoms', source: 'iwCLL' },
+        { criterion: 'Autoimmune cytopenias not responding to steroids', source: 'iwCLL' },
+      ],
+      firstLine: [
+        {
+          name: 'BTK inhibitor monotherapy',
+          drugs: ['Ibrutinib (Imbruvica)', 'Acalabrutinib (Calquence)', 'Zanubrutinib (Brukinsa)'],
+          evidence: 'IA',
+          source: 'RESONATE-2, ELEVATE-TN',
+          notes: 'Preferred for all patients, especially del(17p)/TP53 mutated',
+        },
+        {
+          name: 'Venetoclax + Obinutuzumab',
+          duration: 'Fixed duration 12 months',
+          evidence: 'IA',
+          source: 'CLL14 trial',
+          notes: 'Time-limited therapy option',
+        },
+        {
+          name: 'FCR (younger, fit, IGHV mutated)',
+          drugs: ['Fludarabine', 'Cyclophosphamide', 'Rituximab'],
+          evidence: 'IB',
+          source: 'CLL8 trial - can achieve long remissions in IGHV mutated',
+          contraindications: ['del(17p)', 'TP53 mutation', 'Age >65', 'Comorbidities'],
+        },
+      ],
+      relapsed: [
+        {
+          name: 'BTK inhibitor (if not prior)',
+          evidence: 'IA',
+        },
+        {
+          name: 'Venetoclax + Rituximab',
+          duration: '24 months',
+          evidence: 'IA',
+          source: 'MURANO trial',
+        },
+        {
+          name: 'PI3K inhibitors',
+          drugs: ['Idelalisib + Rituximab', 'Duvelisib'],
+          evidence: 'IB',
+          notes: 'Reserved for later lines due to toxicity',
+        },
+      ],
+    },
+
+    monitoringProtocol: {
+      frequency: 'Every 3-6 months if watch and wait; monthly during treatment',
+      parameters: ['CBC', 'LDH', 'β2-microglobulin', 'CT scans if symptomatic adenopathy'],
+    },
+  },
+
+  // ==================== BREAST CANCER ====================
+  'breast_cancer': {
+    icd10: 'C50.9',
+    name: 'Breast Cancer',
+    affectedOrgans: ['breast', 'lymphatic', 'bonemarrow', 'liver', 'lungs', 'brain'],
+    
+    diagnosticCriteria: {
+      pathology: [
+        { criterion: 'Core needle biopsy confirming invasive carcinoma', method: 'Histopathology', source: 'NCCN' },
+        { criterion: 'ER/PR receptor status', method: 'IHC', source: 'Essential for treatment planning' },
+        { criterion: 'HER2 status', method: 'IHC ± FISH', source: 'Essential for treatment planning' },
+        { criterion: 'Ki-67 proliferation index', method: 'IHC', source: 'Prognostic' },
+      ],
+      staging: [
+        { stage: 'Stage I', criteria: 'T1 (≤2cm), N0', treatment: 'Surgery ± radiation ± systemic' },
+        { stage: 'Stage II', criteria: 'T2-3 or N1', treatment: 'Multimodal' },
+        { stage: 'Stage III', criteria: 'T4 or N2-3', treatment: 'Neoadjuvant → surgery → adjuvant' },
+        { stage: 'Stage IV', criteria: 'Metastatic', treatment: 'Systemic, surgery for palliation' },
+      ]
+    },
+
+    treatments: {
+      surgery: [
+        {
+          name: 'Breast-conserving surgery (lumpectomy)',
+          indication: 'Early stage, favorable tumor:breast ratio',
+          evidence: 'IA',
+          source: 'NSABP B-06 - equivalent survival to mastectomy with radiation',
+        },
+        {
+          name: 'Mastectomy',
+          indication: 'Multicentric disease, BRCA carrier preference, large tumor',
+          evidence: 'IA',
+        },
+        {
+          name: 'Sentinel lymph node biopsy',
+          indication: 'Clinically node-negative',
+          evidence: 'IA',
+          source: 'Z0011 trial - ALND often not needed even if 1-2 positive SLN',
+        },
+      ],
+      adjuvant: [
+        {
+          name: 'Radiation (after BCS)',
+          evidence: 'IA',
+          source: 'EBCTCG meta-analysis - reduces recurrence and mortality',
+        },
+        {
+          name: 'Endocrine therapy (ER+)',
+          drugs: ['Tamoxifen (premenopausal)', 'Aromatase inhibitors (postmenopausal): Anastrozole, Letrozole, Exemestane'],
+          duration: '5-10 years',
+          evidence: 'IA',
+          source: 'ATAC, BIG 1-98 trials',
+        },
+        {
+          name: 'CDK4/6 inhibitor + endocrine (high-risk ER+)',
+          drugs: ['Abemaciclib (monarchE) or Ribociclib'],
+          evidence: 'IA',
+          source: 'monarchE - improved iDFS in high-risk',
+        },
+        {
+          name: 'Chemotherapy (high-risk)',
+          regimens: ['AC-T (doxorubicin, cyclophosphamide → paclitaxel)', 'TC (docetaxel, cyclophosphamide)'],
+          evidence: 'IA',
+          indication: 'High Oncotype DX score, triple-negative, HER2+, node-positive',
+        },
+        {
+          name: 'Trastuzumab (HER2+)',
+          duration: '1 year',
+          evidence: 'IA',
+          source: 'HERA trial',
+          add: 'Pertuzumab for node-positive (APHINITY)',
+        },
+        {
+          name: 'Pembrolizumab (triple-negative)',
+          evidence: 'IB',
+          source: 'KEYNOTE-522 - with neoadjuvant chemo',
+        },
+      ],
+      metastatic: [
+        {
+          name: 'ER+ metastatic',
+          drugs: ['CDK4/6 inhibitor + AI first-line', 'Fulvestrant', 'Everolimus', 'Alpelisib (PIK3CA mutated)'],
+          evidence: 'IA',
+          source: 'PALOMA, MONALEESA trials',
+        },
+        {
+          name: 'HER2+ metastatic',
+          drugs: ['THP (taxane, trastuzumab, pertuzumab) first-line', 'T-DM1', 'T-DXd (Enhertu)', 'Tucatinib (brain mets)'],
+          evidence: 'IA',
+          source: 'CLEOPATRA, DESTINY-Breast03',
+        },
+        {
+          name: 'Triple-negative metastatic',
+          drugs: ['Pembrolizumab + chemo (PD-L1+)', 'Sacituzumab govitecan (Trodelvy)', 'PARP inhibitors (BRCA mutated)'],
+          evidence: 'IA',
+          source: 'KEYNOTE-355, ASCENT trials',
+        },
+      ],
+    },
+
+    monitoringProtocol: {
+      surveillance: 'Mammogram annually, clinical exam every 3-6 months for 5 years',
+      metastatic: 'CT/bone scan every 2-3 months, tumor markers (CA 15-3) optional',
+    },
+  },
+
+  // ==================== COLORECTAL CANCER ====================
+  'colorectal_cancer': {
+    icd10: 'C18.9',
+    name: 'Colorectal Cancer',
+    affectedOrgans: ['gi_tract', 'liver', 'lungs', 'lymphatic'],
+    
+    diagnosticCriteria: {
+      pathology: [
+        { criterion: 'Colonoscopy with biopsy confirming adenocarcinoma', method: 'Endoscopy + histology', source: 'NCCN' },
+        { criterion: 'MSI/MMR status', method: 'IHC (MLH1, MSH2, MSH6, PMS2) or PCR', source: 'Essential for prognosis and immunotherapy' },
+        { criterion: 'RAS/BRAF mutation testing (metastatic)', method: 'Molecular', source: 'Predicts anti-EGFR response' },
+      ],
+      staging: [
+        { stage: 'Stage I', criteria: 'T1-2, N0', treatment: 'Surgery alone' },
+        { stage: 'Stage II', criteria: 'T3-4, N0', treatment: 'Surgery ± adjuvant chemo if high-risk' },
+        { stage: 'Stage III', criteria: 'Any T, N+', treatment: 'Surgery + adjuvant chemo' },
+        { stage: 'Stage IV', criteria: 'Metastatic', treatment: 'Systemic ± metastasectomy' },
+      ]
+    },
+
+    treatments: {
+      surgery: [
+        {
+          name: 'Colectomy with lymphadenectomy',
+          indication: 'Resectable disease',
+          target: '≥12 lymph nodes examined',
+          evidence: 'IA',
+        },
+        {
+          name: 'Liver metastasectomy',
+          indication: 'Resectable liver-only metastases',
+          evidence: 'IB',
+          source: '5-year survival 40-60% if complete resection',
+        },
+      ],
+      adjuvant: [
+        {
+          name: 'FOLFOX (Stage III)',
+          drugs: ['5-FU/Leucovorin + Oxaliplatin'],
+          duration: '3-6 months (IDEA: 3 months if low-risk T1-3N1)',
+          evidence: 'IA',
+          source: 'MOSAIC, IDEA trials',
+        },
+        {
+          name: 'CAPOX',
+          drugs: ['Capecitabine + Oxaliplatin'],
+          evidence: 'IA',
+          source: 'Alternative to FOLFOX',
+        },
+        {
+          name: 'Stage II high-risk',
+          indication: 'T4, LVI, perineural invasion, <12 nodes, perforation/obstruction',
+          treatment: '5-FU/LV or CAPOX',
+          evidence: 'IIaB',
+        },
+      ],
+      metastatic: [
+        {
+          name: 'FOLFOX/FOLFIRI + bevacizumab',
+          evidence: 'IA',
+          source: 'First-line for most patients',
+        },
+        {
+          name: 'FOLFOX/FOLFIRI + anti-EGFR (left-sided, RAS wild-type)',
+          drugs: ['Cetuximab', 'Panitumumab'],
+          evidence: 'IA',
+          source: 'CALGB 80405 - left-sided benefit',
+        },
+        {
+          name: 'MSI-H/dMMR',
+          drugs: ['Pembrolizumab or Nivolumab ± Ipilimumab first-line'],
+          evidence: 'IA',
+          source: 'KEYNOTE-177 - superior to chemo',
+        },
+        {
+          name: 'BRAF V600E mutated',
+          drugs: ['Encorafenib + Cetuximab (BEACON regimen)'],
+          evidence: 'IA',
+          source: 'BEACON trial',
+        },
+        {
+          name: 'Later lines',
+          drugs: ['Regorafenib', 'TAS-102 (Lonsurf)', 'Fruquintinib'],
+          evidence: 'IB',
+        },
+      ],
+    },
+
+    monitoringProtocol: {
+      surveillance: 'CEA every 3-6 months x 2 years, then every 6 months. CT chest/abd/pelvis annually x 5 years. Colonoscopy at 1 year.',
+    },
+  },
+
+  // ==================== PROSTATE CANCER ====================
+  'prostate_cancer': {
+    icd10: 'C61',
+    name: 'Prostate Cancer',
+    affectedOrgans: ['prostate', 'bonemarrow', 'lymphatic'],
+    
+    diagnosticCriteria: {
+      screening: [
+        { criterion: 'PSA ≥ 4 ng/mL (or age-specific threshold)', method: 'Serum PSA', source: 'Shared decision making recommended' },
+        { criterion: 'Abnormal DRE', method: 'Digital rectal exam', source: 'Nodule or induration' },
+      ],
+      diagnosis: [
+        { criterion: 'Transrectal or transperineal biopsy', method: 'MRI-fusion biopsy preferred', source: 'NCCN' },
+        { criterion: 'Gleason score / Grade Group', method: 'Histopathology', source: 'Prognostic' },
+      ],
+      riskGroups: [
+        { risk: 'Very low', criteria: 'T1c, GG1, PSA <10, <3 cores positive, <50% any core', source: 'NCCN' },
+        { risk: 'Low', criteria: 'T1-2a, GG1, PSA <10', source: 'NCCN' },
+        { risk: 'Intermediate', criteria: 'T2b-c, or GG2-3, or PSA 10-20', source: 'NCCN' },
+        { risk: 'High', criteria: 'T3a, or GG4-5, or PSA >20', source: 'NCCN' },
+        { risk: 'Very high', criteria: 'T3b-4, or primary Gleason 5, or >4 cores GG4-5', source: 'NCCN' },
+      ]
+    },
+
+    treatments: {
+      localized: [
+        {
+          name: 'Active Surveillance',
+          indication: 'Very low and low risk, select favorable intermediate',
+          protocol: 'PSA every 6 months, DRE annually, repeat biopsy at 1 year then q2-3 years',
+          evidence: 'IA',
+          source: 'ProtecT, PIVOT trials',
+        },
+        {
+          name: 'Radical Prostatectomy',
+          indication: 'Intermediate and high risk, life expectancy >10 years',
+          evidence: 'IA',
+          notes: 'Consider nerve-sparing if oncologically safe',
+        },
+        {
+          name: 'Radiation therapy (EBRT ± brachytherapy)',
+          indication: 'Alternative to surgery',
+          evidence: 'IA',
+          notes: 'Add ADT for intermediate/high risk',
+        },
+        {
+          name: 'ADT duration with radiation',
+          duration: 'Intermediate: 4-6 months. High/Very high: 18-36 months',
+          evidence: 'IA',
+          source: 'RTOG trials',
+        },
+      ],
+      metastatic: [
+        {
+          name: 'ADT backbone',
+          drugs: ['GnRH agonists (Leuprolide, Goserelin)', 'GnRH antagonist (Degarelix, Relugolix)'],
+          evidence: 'IA',
+          target: 'Testosterone <50 ng/dL',
+        },
+        {
+          name: 'ADT intensification (mCSPC)',
+          drugs: ['ADT + Docetaxel', 'ADT + Abiraterone', 'ADT + Enzalutamide', 'ADT + Apalutamide', 'ADT + Darolutamide'],
+          evidence: 'IA',
+          source: 'CHAARTED, LATITUDE, ENZAMET, TITAN, ARASENS',
+        },
+        {
+          name: 'mCRPC first-line',
+          drugs: ['Abiraterone', 'Enzalutamide', 'Docetaxel'],
+          evidence: 'IA',
+          source: 'COU-AA-302, PREVAIL',
+        },
+        {
+          name: 'mCRPC later lines',
+          drugs: ['Cabazitaxel', 'Radium-223 (bone mets)', 'Lu-177 PSMA (Pluvicto)'],
+          evidence: 'IA',
+          source: 'TROPIC, ALSYMPCA, VISION',
+        },
+        {
+          name: 'HRR-deficient (BRCA)',
+          drugs: ['Olaparib', 'Rucaparib', 'Talazoparib + Enzalutamide'],
+          evidence: 'IA',
+          source: 'PROfound, TALAPRO-2',
+        },
+      ],
+    },
+
+    monitoringProtocol: {
+      postTreatment: 'PSA every 3-6 months for 5 years, then annually',
+      biochemicalRecurrence: 'PSA ≥0.2 after surgery, PSA nadir +2 after radiation',
+    },
+  },
+
+  // ==================== VON WILLEBRAND DISEASE ====================
+  'von_willebrand_disease': {
+    icd10: 'D68.0',
+    name: 'von Willebrand Disease',
+    affectedOrgans: ['blood'],
+    
+    diagnosticCriteria: {
+      essential: [
+        { criterion: 'vWF antigen < 30% or vWF activity (RCo) < 30%', method: 'vWF panel', source: 'ASH ISTH Guidelines' },
+        { criterion: 'Personal bleeding history', method: 'ISTH BAT score', source: 'Structured assessment' },
+      ],
+      typing: [
+        { type: 'Type 1', criteria: 'Partial quantitative deficiency (vWF 30-50%), concordant Ag and activity', frequency: '70-80%' },
+        { type: 'Type 2A', criteria: 'Decreased high-molecular-weight multimers, RCo/Ag ratio <0.6', frequency: '~10%' },
+        { type: 'Type 2B', criteria: 'Enhanced binding to platelets, thrombocytopenia, RIPA increased', frequency: '~5%' },
+        { type: 'Type 2M', criteria: 'Decreased function, normal multimers, RCo/Ag <0.6', frequency: '<5%' },
+        { type: 'Type 2N', criteria: 'Decreased FVIII binding (mimics mild hemophilia A)', frequency: '<5%' },
+        { type: 'Type 3', criteria: 'Complete deficiency (<5%), severe bleeding', frequency: '1-5%' },
+      ]
+    },
+
+    treatments: {
+      desmopressin: [
+        {
+          name: 'DDAVP (Desmopressin)',
+          dose: '0.3 mcg/kg IV/SC, or intranasal 150-300 mcg',
+          indication: 'Type 1, some Type 2A - must do test dose first',
+          evidence: 'IA',
+          source: 'First-line for responsive patients',
+          contraindications: ['Type 2B (worsens thrombocytopenia)', 'Type 3 (no vWF to release)'],
+        },
+      ],
+      replacement: [
+        {
+          name: 'vWF/FVIII concentrate',
+          products: ['Humate-P', 'Alphanate', 'Wilate'],
+          indication: 'DDAVP non-responders, Type 2B, Type 3, major surgery/bleeding',
+          dosing: 'vWF:RCo 40-60 IU/kg loading, then maintain >50% for surgery',
+          evidence: 'IA',
+          source: 'WFH Guidelines',
+        },
+        {
+          name: 'Recombinant vWF (Vonvendi)',
+          indication: 'Adults with vWD',
+          evidence: 'IB',
+        },
+      ],
+      adjunctive: [
+        {
+          name: 'Tranexamic acid',
+          dose: '1g TID or 25 mg/kg TID',
+          indication: 'Mucosal bleeding, dental procedures, menorrhagia',
+          evidence: 'IB',
+        },
+        {
+          name: 'Hormonal therapy for menorrhagia',
+          drugs: ['Combined OCP', 'Levonorgestrel IUD'],
+          evidence: 'IIaB',
+        },
+      ],
+    },
+
+    monitoringProtocol: {
+      preOperative: 'Check vWF levels, FVIII level, DDAVP test if Type 1',
+      periOperative: 'Monitor vWF:RCo and FVIII levels, target >50% major surgery',
+    },
+  },
+
+  // ==================== TURNER SYNDROME ====================
+  'turner_syndrome': {
+    icd10: 'Q96.9',
+    name: 'Turner Syndrome (45,X)',
+    affectedOrgans: ['heart', 'kidneys', 'thyroid', 'blood'],
+    
+    diagnosticCriteria: {
+      essential: [
+        { criterion: 'Karyotype: 45,X or mosaic variants', method: 'Peripheral blood karyotype', source: 'Diagnostic' },
+      ],
+      clinical: [
+        { criterion: 'Short stature', method: 'Height <5th percentile', source: 'Present in 95%' },
+        { criterion: 'Gonadal dysgenesis/primary amenorrhea', method: 'Elevated FSH/LH', source: 'Streak gonads' },
+        { criterion: 'Characteristic features', method: 'Exam', source: 'Webbed neck, low hairline, shield chest, cubitus valgus' },
+      ]
+    },
+
+    treatments: {
+      growth: [
+        {
+          name: 'Growth hormone therapy',
+          dose: '0.045-0.05 mg/kg/day SC',
+          timing: 'Start when height falls below normal range (typically age 2-4)',
+          evidence: 'IA',
+          source: 'FDA approved - increases adult height by 5-8 cm',
+        },
+        {
+          name: 'Oxandrolone (adjunct)',
+          dose: '0.03-0.05 mg/kg/day',
+          evidence: 'IIaB',
+          source: 'May add 2-3 cm; use cautiously',
+        },
+      ],
+      puberty: [
+        {
+          name: 'Estrogen replacement',
+          timing: 'Start age 11-12 with low-dose estrogen',
+          drugs: ['Transdermal estradiol (preferred)', 'Oral estradiol'],
+          progression: 'Gradually increase over 2-3 years to adult dose',
+          evidence: 'IA',
+          source: 'International Turner Syndrome Guidelines',
+        },
+        {
+          name: 'Add progesterone',
+          timing: 'After 2 years of estrogen or when breakthrough bleeding',
+          drugs: ['Medroxyprogesterone', 'Micronized progesterone'],
+          evidence: 'IA',
+        },
+      ],
+      cardiovascular: [
+        {
+          name: 'Baseline cardiac evaluation',
+          tests: ['Echocardiogram', 'Cardiac MRI'],
+          evidence: 'IA',
+          source: 'Screen for bicuspid aortic valve, coarctation, aortic dilation',
+        },
+        {
+          name: 'Blood pressure management',
+          target: '<130/80 or <90th percentile for age',
+          evidence: 'IC',
+          source: 'Prevent aortic dilation/dissection',
+        },
+        {
+          name: 'Aortic surveillance',
+          frequency: 'Every 5 years if normal, annually if dilated',
+          modality: 'MRI preferred for aortic imaging',
+        },
+        {
+          name: 'Pregnancy counseling',
+          notes: 'Very high-risk; cardiac evaluation essential before assisted reproduction',
+          evidence: 'IC',
+        },
+      ],
+      other: [
+        { name: 'TSH monitoring', frequency: 'Annual', notes: 'High rate of autoimmune thyroiditis' },
+        { name: 'Hearing screening', frequency: 'Annual audiogram', notes: 'Sensorineural and conductive loss common' },
+        { name: 'Renal ultrasound', frequency: 'Once at diagnosis', notes: 'Horseshoe kidney in 10%' },
+        { name: 'Bone density', frequency: 'At transition to adult care, periodically', notes: 'Osteoporosis risk' },
+        { name: 'Celiac screening', frequency: 'Once, repeat if symptomatic', notes: 'Increased prevalence' },
+      ],
+    },
+
+    monitoringProtocol: {
+      frequency: 'Annual comprehensive evaluation',
+      parameters: ['Height/growth velocity', 'Pubertal staging', 'Cardiac imaging', 'TSH', 'Hearing', 'Glucose/lipids'],
+    },
+  },
 };
 
 // Utility function to get all treatments for a disease with evidence filtering
