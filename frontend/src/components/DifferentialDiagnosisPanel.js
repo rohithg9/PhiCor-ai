@@ -33,57 +33,183 @@ import {
   getAllParameters,
   NORMAL_RANGES,
 } from '../data/bidirectionalMapping';
+import { ORGAN_MODELS } from '../data/organModels';
 
-// Extended normal ranges for more parameters
-const EXTENDED_NORMAL_RANGES = {
-  ...NORMAL_RANGES,
-  // Cardiac
-  ejection_fraction: { min: 55, max: 70, unit: '%', criticalLow: 30, criticalHigh: 80 },
-  heart_rate: { min: 60, max: 100, unit: 'bpm', criticalLow: 40, criticalHigh: 150 },
-  systolic_bp: { min: 90, max: 120, unit: 'mmHg', criticalLow: 70, criticalHigh: 180 },
-  diastolic_bp: { min: 60, max: 80, unit: 'mmHg', criticalLow: 40, criticalHigh: 120 },
-  cardiac_output: { min: 4, max: 8, unit: 'L/min', criticalLow: 2, criticalHigh: 12 },
-  lv_edv: { min: 70, max: 160, unit: 'mL', criticalLow: 50, criticalHigh: 250 },
-  lv_esv: { min: 20, max: 70, unit: 'mL', criticalLow: 10, criticalHigh: 150 },
-  // Respiratory
-  fev1: { min: 80, max: 120, unit: '% predicted', criticalLow: 30, criticalHigh: 130 },
-  fvc: { min: 80, max: 120, unit: '% predicted', criticalLow: 40, criticalHigh: 130 },
-  oxygen_saturation: { min: 95, max: 100, unit: '%', criticalLow: 80, criticalHigh: 100 },
-  respiratory_rate: { min: 12, max: 20, unit: '/min', criticalLow: 8, criticalHigh: 40 },
-  pao2: { min: 80, max: 100, unit: 'mmHg', criticalLow: 50, criticalHigh: 120 },
-  paco2: { min: 35, max: 45, unit: 'mmHg', criticalLow: 20, criticalHigh: 80 },
-  // Renal
-  gfr: { min: 90, max: 120, unit: 'mL/min/1.73m²', criticalLow: 15, criticalHigh: 150 },
-  creatinine: { min: 0.7, max: 1.3, unit: 'mg/dL', criticalLow: 0.3, criticalHigh: 10 },
-  bun: { min: 7, max: 20, unit: 'mg/dL', criticalLow: 3, criticalHigh: 100 },
-  urine_output: { min: 0.5, max: 2, unit: 'mL/kg/hr', criticalLow: 0.1, criticalHigh: 5 },
-  // Hematology
-  hemoglobin: { min: 12, max: 17, unit: 'g/dL', criticalLow: 6, criticalHigh: 22 },
-  hematocrit: { min: 36, max: 50, unit: '%', criticalLow: 20, criticalHigh: 60 },
-  wbc: { min: 4, max: 11, unit: 'K/μL', criticalLow: 1, criticalHigh: 50 },
-  platelets: { min: 150, max: 400, unit: 'K/μL', criticalLow: 20, criticalHigh: 1000 },
-  // Metabolic
-  glucose: { min: 70, max: 100, unit: 'mg/dL', criticalLow: 40, criticalHigh: 500 },
-  hba1c: { min: 4, max: 5.6, unit: '%', criticalLow: 3.5, criticalHigh: 14 },
-  sodium: { min: 136, max: 145, unit: 'mEq/L', criticalLow: 120, criticalHigh: 160 },
-  potassium: { min: 3.5, max: 5, unit: 'mEq/L', criticalLow: 2.5, criticalHigh: 7 },
-  calcium: { min: 8.5, max: 10.5, unit: 'mg/dL', criticalLow: 6, criticalHigh: 14 },
-  // Liver
-  ast: { min: 10, max: 40, unit: 'U/L', criticalLow: 5, criticalHigh: 1000 },
-  alt: { min: 7, max: 56, unit: 'U/L', criticalLow: 3, criticalHigh: 1000 },
-  bilirubin: { min: 0.1, max: 1.2, unit: 'mg/dL', criticalLow: 0, criticalHigh: 30 },
-  albumin: { min: 3.5, max: 5, unit: 'g/dL', criticalLow: 1.5, criticalHigh: 6 },
-  inr: { min: 0.8, max: 1.2, unit: '', criticalLow: 0.5, criticalHigh: 10 },
-  // Inflammatory
-  crp: { min: 0, max: 1, unit: 'mg/dL', criticalLow: 0, criticalHigh: 30 },
-  esr: { min: 0, max: 20, unit: 'mm/hr', criticalLow: 0, criticalHigh: 120 },
-  procalcitonin: { min: 0, max: 0.05, unit: 'ng/mL', criticalLow: 0, criticalHigh: 100 },
-  // Cardiac markers
-  troponin: { min: 0, max: 0.04, unit: 'ng/mL', criticalLow: 0, criticalHigh: 50 },
-  bnp: { min: 0, max: 100, unit: 'pg/mL', criticalLow: 0, criticalHigh: 5000 },
-  d_dimer: { min: 0, max: 0.5, unit: 'μg/mL', criticalLow: 0, criticalHigh: 20 },
-  lactate: { min: 0.5, max: 2, unit: 'mmol/L', criticalLow: 0.2, criticalHigh: 20 },
+// Build comprehensive normal ranges from organ models + manual additions
+const buildAllNormalRanges = () => {
+  const ranges = { ...NORMAL_RANGES };
+  
+  // Extract ranges from all organ models
+  Object.values(ORGAN_MODELS).forEach(organ => {
+    const categories = ['geometry', 'physiology', 'structure', 'pressures', 'cellular'];
+    categories.forEach(cat => {
+      const categoryData = organ[cat];
+      if (!categoryData?.parameters) return;
+      
+      categoryData.parameters.forEach(param => {
+        if (param.range && Array.isArray(param.range) && param.range.length === 2) {
+          const [min, max] = param.range;
+          // Calculate critical values (typically 50% below min, 100% above max)
+          const criticalLow = min - (min * 0.5);
+          const criticalHigh = max + (max * 0.5);
+          
+          ranges[param.id] = {
+            min,
+            max,
+            unit: param.unit || '',
+            criticalLow: Math.max(0, criticalLow),
+            criticalHigh,
+          };
+        }
+      });
+    });
+  });
+  
+  // Add/override with clinical lab values and vital signs
+  const clinicalRanges = {
+    // Cardiac - Geometry
+    lv_edv: { min: 70, max: 160, unit: 'mL', criticalLow: 40, criticalHigh: 300 },
+    lv_esv: { min: 20, max: 70, unit: 'mL', criticalLow: 10, criticalHigh: 200 },
+    rv_edv: { min: 60, max: 150, unit: 'mL', criticalLow: 30, criticalHigh: 250 },
+    rv_esv: { min: 15, max: 60, unit: 'mL', criticalLow: 8, criticalHigh: 150 },
+    la_volume: { min: 18, max: 40, unit: 'mL', criticalLow: 10, criticalHigh: 80 },
+    lv_wall_thickness: { min: 6, max: 12, unit: 'mm', criticalLow: 4, criticalHigh: 20 },
+    lv_mass: { min: 100, max: 200, unit: 'g', criticalLow: 60, criticalHigh: 400 },
+    aortic_root: { min: 26, max: 38, unit: 'mm', criticalLow: 20, criticalHigh: 60 },
+    
+    // Cardiac - Function
+    ejection_fraction: { min: 55, max: 70, unit: '%', criticalLow: 25, criticalHigh: 85 },
+    stroke_volume: { min: 55, max: 100, unit: 'mL', criticalLow: 30, criticalHigh: 150 },
+    cardiac_output: { min: 4, max: 8, unit: 'L/min', criticalLow: 2, criticalHigh: 15 },
+    cardiac_index: { min: 2.5, max: 4.2, unit: 'L/min/m²', criticalLow: 1.5, criticalHigh: 6 },
+    heart_rate: { min: 60, max: 100, unit: 'bpm', criticalLow: 35, criticalHigh: 180 },
+    e_a_ratio: { min: 1, max: 2, unit: '', criticalLow: 0.5, criticalHigh: 4 },
+    
+    // Cardiac - Pressures
+    lv_sys_p: { min: 90, max: 140, unit: 'mmHg', criticalLow: 60, criticalHigh: 200 },
+    lv_edp: { min: 5, max: 16, unit: 'mmHg', criticalLow: 0, criticalHigh: 40 },
+    rv_sys_p: { min: 15, max: 30, unit: 'mmHg', criticalLow: 10, criticalHigh: 80 },
+    pa_sys: { min: 15, max: 30, unit: 'mmHg', criticalLow: 10, criticalHigh: 80 },
+    pcwp: { min: 6, max: 15, unit: 'mmHg', criticalLow: 2, criticalHigh: 35 },
+    
+    // Vital Signs
+    systolic_bp: { min: 90, max: 120, unit: 'mmHg', criticalLow: 70, criticalHigh: 200 },
+    diastolic_bp: { min: 60, max: 80, unit: 'mmHg', criticalLow: 40, criticalHigh: 120 },
+    map: { min: 70, max: 100, unit: 'mmHg', criticalLow: 55, criticalHigh: 130 },
+    respiratory_rate: { min: 12, max: 20, unit: '/min', criticalLow: 6, criticalHigh: 40 },
+    temperature: { min: 36.1, max: 37.2, unit: '°C', criticalLow: 34, criticalHigh: 41 },
+    oxygen_saturation: { min: 95, max: 100, unit: '%', criticalLow: 80, criticalHigh: 100 },
+    
+    // Respiratory - Volumes
+    total_lung_capacity: { min: 5000, max: 7000, unit: 'mL', criticalLow: 3000, criticalHigh: 9000 },
+    vital_capacity: { min: 4000, max: 5500, unit: 'mL', criticalLow: 2500, criticalHigh: 7000 },
+    frc: { min: 2000, max: 3000, unit: 'mL', criticalLow: 1200, criticalHigh: 4500 },
+    residual_volume: { min: 1000, max: 1500, unit: 'mL', criticalLow: 600, criticalHigh: 2500 },
+    tidal_volume: { min: 400, max: 600, unit: 'mL', criticalLow: 200, criticalHigh: 1000 },
+    
+    // Respiratory - Function
+    fev1: { min: 80, max: 120, unit: '% pred', criticalLow: 30, criticalHigh: 140 },
+    fvc: { min: 80, max: 120, unit: '% pred', criticalLow: 40, criticalHigh: 140 },
+    fev1_fvc: { min: 70, max: 85, unit: '%', criticalLow: 40, criticalHigh: 95 },
+    dlco: { min: 80, max: 120, unit: '% pred', criticalLow: 40, criticalHigh: 140 },
+    
+    // Blood Gases
+    pao2: { min: 80, max: 100, unit: 'mmHg', criticalLow: 50, criticalHigh: 150 },
+    paco2: { min: 35, max: 45, unit: 'mmHg', criticalLow: 15, criticalHigh: 80 },
+    ph: { min: 7.35, max: 7.45, unit: '', criticalLow: 7.1, criticalHigh: 7.6 },
+    hco3: { min: 22, max: 28, unit: 'mEq/L', criticalLow: 10, criticalHigh: 45 },
+    base_excess: { min: -2, max: 2, unit: 'mEq/L', criticalLow: -15, criticalHigh: 15 },
+    
+    // Renal
+    gfr: { min: 90, max: 120, unit: 'mL/min/1.73m²', criticalLow: 15, criticalHigh: 150 },
+    creatinine: { min: 0.7, max: 1.3, unit: 'mg/dL', criticalLow: 0.3, criticalHigh: 10 },
+    bun: { min: 7, max: 20, unit: 'mg/dL', criticalLow: 3, criticalHigh: 100 },
+    urine_output: { min: 0.5, max: 2, unit: 'mL/kg/hr', criticalLow: 0.1, criticalHigh: 5 },
+    urine_sodium: { min: 40, max: 220, unit: 'mEq/day', criticalLow: 10, criticalHigh: 400 },
+    urine_specific_gravity: { min: 1.005, max: 1.030, unit: '', criticalLow: 1.001, criticalHigh: 1.040 },
+    protein_creatinine_ratio: { min: 0, max: 0.2, unit: 'mg/mg', criticalLow: 0, criticalHigh: 5 },
+    
+    // Hematology - CBC
+    hemoglobin: { min: 12, max: 17, unit: 'g/dL', criticalLow: 6, criticalHigh: 22 },
+    hematocrit: { min: 36, max: 50, unit: '%', criticalLow: 20, criticalHigh: 65 },
+    wbc: { min: 4, max: 11, unit: 'K/μL', criticalLow: 1, criticalHigh: 50 },
+    platelets: { min: 150, max: 400, unit: 'K/μL', criticalLow: 20, criticalHigh: 1000 },
+    mcv: { min: 80, max: 100, unit: 'fL', criticalLow: 60, criticalHigh: 130 },
+    mch: { min: 27, max: 33, unit: 'pg', criticalLow: 20, criticalHigh: 40 },
+    mchc: { min: 32, max: 36, unit: 'g/dL', criticalLow: 28, criticalHigh: 40 },
+    rdw: { min: 11, max: 14, unit: '%', criticalLow: 10, criticalHigh: 25 },
+    reticulocytes: { min: 0.5, max: 2.5, unit: '%', criticalLow: 0.1, criticalHigh: 15 },
+    
+    // Coagulation
+    pt: { min: 11, max: 14, unit: 'sec', criticalLow: 8, criticalHigh: 50 },
+    inr: { min: 0.9, max: 1.1, unit: '', criticalLow: 0.5, criticalHigh: 10 },
+    ptt: { min: 25, max: 35, unit: 'sec', criticalLow: 15, criticalHigh: 100 },
+    fibrinogen: { min: 200, max: 400, unit: 'mg/dL', criticalLow: 100, criticalHigh: 700 },
+    d_dimer: { min: 0, max: 0.5, unit: 'μg/mL', criticalLow: 0, criticalHigh: 20 },
+    
+    // Metabolic - Basic
+    glucose: { min: 70, max: 100, unit: 'mg/dL', criticalLow: 40, criticalHigh: 500 },
+    hba1c: { min: 4, max: 5.6, unit: '%', criticalLow: 3.5, criticalHigh: 14 },
+    sodium: { min: 136, max: 145, unit: 'mEq/L', criticalLow: 120, criticalHigh: 160 },
+    potassium: { min: 3.5, max: 5, unit: 'mEq/L', criticalLow: 2.5, criticalHigh: 7 },
+    chloride: { min: 98, max: 106, unit: 'mEq/L', criticalLow: 85, criticalHigh: 120 },
+    calcium: { min: 8.5, max: 10.5, unit: 'mg/dL', criticalLow: 6, criticalHigh: 14 },
+    magnesium: { min: 1.7, max: 2.2, unit: 'mg/dL', criticalLow: 1, criticalHigh: 4 },
+    phosphorus: { min: 2.5, max: 4.5, unit: 'mg/dL', criticalLow: 1, criticalHigh: 8 },
+    
+    // Liver
+    ast: { min: 10, max: 40, unit: 'U/L', criticalLow: 5, criticalHigh: 1000 },
+    alt: { min: 7, max: 56, unit: 'U/L', criticalLow: 3, criticalHigh: 1000 },
+    alp: { min: 44, max: 147, unit: 'U/L', criticalLow: 20, criticalHigh: 500 },
+    ggt: { min: 9, max: 48, unit: 'U/L', criticalLow: 5, criticalHigh: 500 },
+    bilirubin: { min: 0.1, max: 1.2, unit: 'mg/dL', criticalLow: 0, criticalHigh: 30 },
+    bilirubin_direct: { min: 0, max: 0.3, unit: 'mg/dL', criticalLow: 0, criticalHigh: 20 },
+    albumin: { min: 3.5, max: 5, unit: 'g/dL', criticalLow: 1.5, criticalHigh: 6 },
+    total_protein: { min: 6, max: 8, unit: 'g/dL', criticalLow: 4, criticalHigh: 10 },
+    ammonia: { min: 15, max: 45, unit: 'μmol/L', criticalLow: 5, criticalHigh: 150 },
+    
+    // Cardiac Markers
+    troponin: { min: 0, max: 0.04, unit: 'ng/mL', criticalLow: 0, criticalHigh: 50 },
+    bnp: { min: 0, max: 100, unit: 'pg/mL', criticalLow: 0, criticalHigh: 5000 },
+    nt_probnp: { min: 0, max: 125, unit: 'pg/mL', criticalLow: 0, criticalHigh: 10000 },
+    ck: { min: 30, max: 200, unit: 'U/L', criticalLow: 10, criticalHigh: 5000 },
+    ck_mb: { min: 0, max: 5, unit: 'ng/mL', criticalLow: 0, criticalHigh: 100 },
+    
+    // Inflammatory
+    crp: { min: 0, max: 1, unit: 'mg/dL', criticalLow: 0, criticalHigh: 30 },
+    esr: { min: 0, max: 20, unit: 'mm/hr', criticalLow: 0, criticalHigh: 120 },
+    procalcitonin: { min: 0, max: 0.05, unit: 'ng/mL', criticalLow: 0, criticalHigh: 100 },
+    ferritin: { min: 12, max: 300, unit: 'ng/mL', criticalLow: 5, criticalHigh: 2000 },
+    lactate: { min: 0.5, max: 2, unit: 'mmol/L', criticalLow: 0.2, criticalHigh: 20 },
+    ldh: { min: 140, max: 280, unit: 'U/L', criticalLow: 100, criticalHigh: 1000 },
+    
+    // Thyroid
+    tsh: { min: 0.4, max: 4, unit: 'mIU/L', criticalLow: 0.01, criticalHigh: 100 },
+    free_t4: { min: 0.8, max: 1.8, unit: 'ng/dL', criticalLow: 0.3, criticalHigh: 5 },
+    free_t3: { min: 2.3, max: 4.2, unit: 'pg/mL', criticalLow: 1, criticalHigh: 8 },
+    
+    // Pancreatic
+    amylase: { min: 30, max: 110, unit: 'U/L', criticalLow: 10, criticalHigh: 1000 },
+    lipase: { min: 0, max: 160, unit: 'U/L', criticalLow: 0, criticalHigh: 1000 },
+    
+    // Lipids
+    total_cholesterol: { min: 0, max: 200, unit: 'mg/dL', criticalLow: 0, criticalHigh: 400 },
+    ldl: { min: 0, max: 100, unit: 'mg/dL', criticalLow: 0, criticalHigh: 250 },
+    hdl: { min: 40, max: 100, unit: 'mg/dL', criticalLow: 20, criticalHigh: 150 },
+    triglycerides: { min: 0, max: 150, unit: 'mg/dL', criticalLow: 0, criticalHigh: 1000 },
+    
+    // Neurological
+    icp: { min: 5, max: 15, unit: 'mmHg', criticalLow: 0, criticalHigh: 40 },
+    cpp: { min: 60, max: 100, unit: 'mmHg', criticalLow: 40, criticalHigh: 120 },
+    csf_glucose: { min: 50, max: 80, unit: 'mg/dL', criticalLow: 20, criticalHigh: 100 },
+    csf_protein: { min: 15, max: 45, unit: 'mg/dL', criticalLow: 5, criticalHigh: 200 },
+    csf_wbc: { min: 0, max: 5, unit: 'cells/μL', criticalLow: 0, criticalHigh: 500 },
+  };
+  
+  return { ...ranges, ...clinicalRanges };
 };
+
+const EXTENDED_NORMAL_RANGES = buildAllNormalRanges();
 
 const DifferentialDiagnosisPanel = ({ onSelectDisease }) => {
   const [activeTab, setActiveTab] = useState('parameters'); // 'parameters', 'clinical', 'patient'
