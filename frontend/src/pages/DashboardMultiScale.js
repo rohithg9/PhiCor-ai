@@ -32,6 +32,10 @@ import { ALL_CONGENITAL_DISEASES, CONGENITAL_CATEGORIES } from '../data/congenit
 import { ALL_AUTOIMMUNE_DISEASES, AUTOIMMUNE_CATEGORIES } from '../data/autoimmuneDiseasesIndex';
 import { ALL_INFECTIOUS_DISEASES, INFECTIOUS_CATEGORIES } from '../data/infectiousDiseasesIndex';
 import { ALL_GI_DISEASES, GI_CATEGORIES } from '../data/giDiseasesIndex';
+import { ALL_DERMATOLOGICAL_DISEASES, DERMATOLOGICAL_CATEGORIES } from '../data/dermatologicalDiseasesIndex';
+import { ALL_PSYCHIATRIC_DISEASES, PSYCHIATRIC_CATEGORIES } from '../data/psychiatricDiseasesIndex';
+import { ALL_PEDIATRIC_DISEASES, PEDIATRIC_CATEGORIES } from '../data/pediatricDiseasesIndex';
+import { ALL_OBGYN_DISEASES, OBGYN_CATEGORIES } from '../data/obgynDiseasesIndex';
 import { enhanceDiseaseWithTemplates, generateModifications } from '../data/diseaseTemplates';
 import LungCancerModule from '../components/LungCancerModule';
 import TreatmentGuidelinesPanel from '../components/TreatmentGuidelinesPanel';
