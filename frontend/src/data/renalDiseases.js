@@ -164,6 +164,15 @@ export const RENAL_DISEASES = {
       mild: { description: "KDIGO Stage 1" },
       moderate: { description: "KDIGO Stage 2" },
       severe: { description: "KDIGO Stage 3" }
+    },
+    modifications: {
+      kidneys: {
+        physiology: {
+          gfr: { factor: 0.5, note: "Reduced depending on stage" },
+          creatinine_clearance: { factor: 0.5, note: "Decreased" },
+          urine_output: { factor: 0.6, note: "May be reduced" }
+        }
+      }
     }
   },
 
