@@ -618,7 +618,7 @@ const LandingPage = () => {
                 href="/dashboard" 
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
-                Dashboard
+                PhiCor Engine
               </a>
               <a 
                 href="mailto:drrohithg@gmail.com" 
