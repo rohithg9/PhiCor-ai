@@ -706,7 +706,7 @@ const DrugsPage = () => {
               }`}
             >
               <Pill className="w-4 h-4 inline mr-2" />
-              Drug Database
+              Drug Details
             </button>
             <button
               onClick={() => setActiveTab('engine')}
