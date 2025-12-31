@@ -92,10 +92,25 @@ frontend:
         agent: "testing"
         comment: "✅ WORKING: Category filtering works correctly. Cardiovascular filter button is clickable and appears to filter the drug list appropriately."
 
+  - task: "PhiCor Drug Engine comprehensive testing"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/DrugsPage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "PhiCor Drug Engine implemented with comprehensive drug database, patient simulation, and PK/PD analysis - needs comprehensive testing"
+      - working: true
+        agent: "testing"
+        comment: "✅ COMPREHENSIVE TESTING COMPLETE: All major functionality working correctly. Fixed critical React hooks violation that was causing red screen error. Successfully tested: 1) Drug list with 51 drugs (exceeds 40+ requirement), 2) Category filters (Cardiovascular, Antibiotics, Respiratory), 3) Search functionality (metformin, lisinopril), 4) Drug detail view with all tabs (Overview, Effects, Dosing, Interactions), 5) Patient simulation with Virtual Patient panel (Age, Sex, Weight, Height, BMI), 6) Dosage slider, 7) Efficacy/Safety scores, 8) Therapeutic Effects and Side Effects display, 9) PK parameters (Half-life, Time to Peak, Steady State, Peak Conc.), 10) Patient profile testing (medical conditions, medications, allergies), 11) Contraindication warnings when allergy matches drug class, 12) Correct tab labels ('Drug Details' not 'Drug Database'), 13) Navigation with 'ρ' symbol. All requested features are functional and working as expected."
+
 metadata:
   created_by: "testing_agent"
-  version: "1.0"
-  test_sequence: 1
+  version: "1.1"
+  test_sequence: 2
 
 test_plan:
   current_focus:
@@ -112,3 +127,7 @@ agent_communication:
     message: "Starting comprehensive testing of Dashboard interactivity and Drugs Database features. Will test both UI functionality and API integrations."
   - agent: "testing"
     message: "TESTING COMPLETE: Drugs Database is working well with successful list view, detail view, and category filtering. However, Dashboard has critical issues - organ filter buttons and Show All/Show Less toggle are missing or not properly implemented. Search functionality in drugs database needs fixing."
+  - agent: "testing"
+    message: "CRITICAL REACT ERROR FIXED: Found and resolved React hooks violation in PKCurveVisualization component (useMemo called conditionally after early return). This was causing red screen compilation error preventing app from loading."
+  - agent: "testing"
+    message: "PHICOR DRUG ENGINE COMPREHENSIVE TESTING COMPLETE: All requested functionality working perfectly. Fixed React hooks issue, tested all 13 major features including drug list (51 drugs), search, filters, drug details, patient simulation, PK/PD parameters, contraindication warnings, and proper labeling. Application is fully functional and meets all requirements."
