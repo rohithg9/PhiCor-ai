@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { 
   Search, 
   Plus, 
@@ -19,9 +19,12 @@ import {
   FlaskConical,
   Heart,
   Stethoscope,
+  Gauge,
+  Info,
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
+import { Slider } from '../components/ui/slider';
 import { 
   getDifferentialDiagnosis, 
   parseClinicalText, 
@@ -30,6 +33,57 @@ import {
   getAllParameters,
   NORMAL_RANGES,
 } from '../data/bidirectionalMapping';
+
+// Extended normal ranges for more parameters
+const EXTENDED_NORMAL_RANGES = {
+  ...NORMAL_RANGES,
+  // Cardiac
+  ejection_fraction: { min: 55, max: 70, unit: '%', criticalLow: 30, criticalHigh: 80 },
+  heart_rate: { min: 60, max: 100, unit: 'bpm', criticalLow: 40, criticalHigh: 150 },
+  systolic_bp: { min: 90, max: 120, unit: 'mmHg', criticalLow: 70, criticalHigh: 180 },
+  diastolic_bp: { min: 60, max: 80, unit: 'mmHg', criticalLow: 40, criticalHigh: 120 },
+  cardiac_output: { min: 4, max: 8, unit: 'L/min', criticalLow: 2, criticalHigh: 12 },
+  lv_edv: { min: 70, max: 160, unit: 'mL', criticalLow: 50, criticalHigh: 250 },
+  lv_esv: { min: 20, max: 70, unit: 'mL', criticalLow: 10, criticalHigh: 150 },
+  // Respiratory
+  fev1: { min: 80, max: 120, unit: '% predicted', criticalLow: 30, criticalHigh: 130 },
+  fvc: { min: 80, max: 120, unit: '% predicted', criticalLow: 40, criticalHigh: 130 },
+  oxygen_saturation: { min: 95, max: 100, unit: '%', criticalLow: 80, criticalHigh: 100 },
+  respiratory_rate: { min: 12, max: 20, unit: '/min', criticalLow: 8, criticalHigh: 40 },
+  pao2: { min: 80, max: 100, unit: 'mmHg', criticalLow: 50, criticalHigh: 120 },
+  paco2: { min: 35, max: 45, unit: 'mmHg', criticalLow: 20, criticalHigh: 80 },
+  // Renal
+  gfr: { min: 90, max: 120, unit: 'mL/min/1.73m²', criticalLow: 15, criticalHigh: 150 },
+  creatinine: { min: 0.7, max: 1.3, unit: 'mg/dL', criticalLow: 0.3, criticalHigh: 10 },
+  bun: { min: 7, max: 20, unit: 'mg/dL', criticalLow: 3, criticalHigh: 100 },
+  urine_output: { min: 0.5, max: 2, unit: 'mL/kg/hr', criticalLow: 0.1, criticalHigh: 5 },
+  // Hematology
+  hemoglobin: { min: 12, max: 17, unit: 'g/dL', criticalLow: 6, criticalHigh: 22 },
+  hematocrit: { min: 36, max: 50, unit: '%', criticalLow: 20, criticalHigh: 60 },
+  wbc: { min: 4, max: 11, unit: 'K/μL', criticalLow: 1, criticalHigh: 50 },
+  platelets: { min: 150, max: 400, unit: 'K/μL', criticalLow: 20, criticalHigh: 1000 },
+  // Metabolic
+  glucose: { min: 70, max: 100, unit: 'mg/dL', criticalLow: 40, criticalHigh: 500 },
+  hba1c: { min: 4, max: 5.6, unit: '%', criticalLow: 3.5, criticalHigh: 14 },
+  sodium: { min: 136, max: 145, unit: 'mEq/L', criticalLow: 120, criticalHigh: 160 },
+  potassium: { min: 3.5, max: 5, unit: 'mEq/L', criticalLow: 2.5, criticalHigh: 7 },
+  calcium: { min: 8.5, max: 10.5, unit: 'mg/dL', criticalLow: 6, criticalHigh: 14 },
+  // Liver
+  ast: { min: 10, max: 40, unit: 'U/L', criticalLow: 5, criticalHigh: 1000 },
+  alt: { min: 7, max: 56, unit: 'U/L', criticalLow: 3, criticalHigh: 1000 },
+  bilirubin: { min: 0.1, max: 1.2, unit: 'mg/dL', criticalLow: 0, criticalHigh: 30 },
+  albumin: { min: 3.5, max: 5, unit: 'g/dL', criticalLow: 1.5, criticalHigh: 6 },
+  inr: { min: 0.8, max: 1.2, unit: '', criticalLow: 0.5, criticalHigh: 10 },
+  // Inflammatory
+  crp: { min: 0, max: 1, unit: 'mg/dL', criticalLow: 0, criticalHigh: 30 },
+  esr: { min: 0, max: 20, unit: 'mm/hr', criticalLow: 0, criticalHigh: 120 },
+  procalcitonin: { min: 0, max: 0.05, unit: 'ng/mL', criticalLow: 0, criticalHigh: 100 },
+  // Cardiac markers
+  troponin: { min: 0, max: 0.04, unit: 'ng/mL', criticalLow: 0, criticalHigh: 50 },
+  bnp: { min: 0, max: 100, unit: 'pg/mL', criticalLow: 0, criticalHigh: 5000 },
+  d_dimer: { min: 0, max: 0.5, unit: 'μg/mL', criticalLow: 0, criticalHigh: 20 },
+  lactate: { min: 0.5, max: 2, unit: 'mmol/L', criticalLow: 0.2, criticalHigh: 20 },
+};
 
 const DifferentialDiagnosisPanel = ({ onSelectDisease }) => {
   const [activeTab, setActiveTab] = useState('parameters'); // 'parameters', 'clinical', 'patient'
@@ -43,11 +97,61 @@ const DifferentialDiagnosisPanel = ({ onSelectDisease }) => {
   // Parameter selection state
   const [selectedOrgan, setSelectedOrgan] = useState('');
   const [selectedParam, setSelectedParam] = useState('');
-  const [paramDirection, setParamDirection] = useState('increase');
-  const [paramSeverity, setParamSeverity] = useState(1);
+  const [paramValue, setParamValue] = useState(null);
+  const [showValueInput, setShowValueInput] = useState(false);
   
   // Get all available parameters
   const allParameters = useMemo(() => getAllParameters(), []);
+  
+  // Get normal range for selected parameter
+  const selectedParamRange = useMemo(() => {
+    if (!selectedParam) return null;
+    return EXTENDED_NORMAL_RANGES[selectedParam] || NORMAL_RANGES[selectedParam] || null;
+  }, [selectedParam]);
+  
+  // Reset value when parameter changes
+  useEffect(() => {
+    if (selectedParamRange) {
+      const midPoint = (selectedParamRange.min + selectedParamRange.max) / 2;
+      setParamValue(midPoint);
+      setShowValueInput(true);
+    } else {
+      setShowValueInput(false);
+    }
+  }, [selectedParam, selectedParamRange]);
+  
+  // Determine if value is abnormal and direction
+  const valueAnalysis = useMemo(() => {
+    if (!selectedParamRange || paramValue === null) return null;
+    
+    const { min, max, criticalLow, criticalHigh } = selectedParamRange;
+    const isLow = paramValue < min;
+    const isHigh = paramValue > max;
+    const isCriticalLow = criticalLow !== undefined && paramValue < criticalLow;
+    const isCriticalHigh = criticalHigh !== undefined && paramValue > criticalHigh;
+    const isNormal = !isLow && !isHigh;
+    
+    let severity = 0;
+    if (isLow) {
+      severity = Math.min(((min - paramValue) / (min - (criticalLow || min * 0.5))) * 3, 3);
+    } else if (isHigh) {
+      severity = Math.min(((paramValue - max) / ((criticalHigh || max * 2) - max)) * 3, 3);
+    }
+    
+    return {
+      isNormal,
+      isLow,
+      isHigh,
+      isCritical: isCriticalLow || isCriticalHigh,
+      direction: isLow ? 'decrease' : isHigh ? 'increase' : 'normal',
+      severity: Math.max(0.5, severity),
+      percentFromNormal: isLow 
+        ? ((min - paramValue) / min * 100).toFixed(1) 
+        : isHigh 
+          ? ((paramValue - max) / max * 100).toFixed(1)
+          : 0
+    };
+  }, [selectedParamRange, paramValue]);
   
   // Add a finding manually
   const addFinding = useCallback(() => {
