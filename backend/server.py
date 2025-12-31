@@ -177,6 +177,146 @@ class ChatResponse(BaseModel):
     response: str
     suggestions: List[str] = []
 
+# ============== DRUG DATABASE MODELS ==============
+
+class ParameterModification(BaseModel):
+    """Defines how a drug modifies a physiological parameter"""
+    parameter_id: str  # e.g., "ef", "heart_rate", "gfr"
+    multiplier: Optional[float] = None  # Multiplicative factor (e.g., 1.2 = 20% increase)
+    absolute: Optional[float] = None  # Absolute value change
+    note: str = ""
+
+class ScaleModifications(BaseModel):
+    """Modifications to parameters within a scale (e.g., physiology, pressures)"""
+    scale_id: str  # e.g., "physiology", "pressures", "geometry"
+    parameters: List[ParameterModification] = []
+
+class OrganModifications(BaseModel):
+    """Modifications to an organ"""
+    organ_id: str  # e.g., "heart", "lungs", "kidneys"
+    scales: List[ScaleModifications] = []
+
+class DrugEffect(BaseModel):
+    """Complete effect profile for a drug effect type"""
+    effect_type: str  # "therapeutic", "side_effect", "overdose"
+    organs: List[OrganModifications] = []
+    description: str = ""
+    onset_hours: Optional[float] = None
+    duration_hours: Optional[float] = None
+
+class DrugInteraction(BaseModel):
+    """Drug-drug interaction information"""
+    interacting_drug_id: str
+    interacting_drug_name: str
+    severity: str  # "mild", "moderate", "severe", "contraindicated"
+    effect: str  # Description of the interaction
+    clinical_note: str = ""
+
+class DrugDosage(BaseModel):
+    """Dosage information"""
+    route: str  # "oral", "iv", "im", "sc", "topical", "inhaled"
+    form: str  # "tablet", "capsule", "injection", "solution"
+    strength: str  # e.g., "10mg", "25mg", "100mg"
+    typical_dose: str  # e.g., "10-20mg once daily"
+    max_daily_dose: str  # e.g., "40mg"
+    frequency: str  # e.g., "once daily", "twice daily", "every 6 hours"
+    special_instructions: str = ""
+
+class DrugIndication(BaseModel):
+    """Disease indication for a drug"""
+    disease_id: str  # Reference to disease model
+    disease_name: str
+    is_primary: bool = False
+    efficacy_level: str = "moderate"  # "low", "moderate", "high"
+    evidence_grade: str = "B"  # A, B, C, D
+    notes: str = ""
+
+class Drug(BaseModel):
+    """Complete drug model for the database"""
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    
+    # Basic identification
+    name: str  # Generic name
+    brand_names: List[str] = []
+    drug_class: str  # e.g., "ACE Inhibitor", "Beta Blocker", "Diuretic"
+    category: str  # e.g., "cardiovascular", "respiratory", "renal"
+    
+    # Mechanism
+    mechanism_of_action: str
+    mechanism_short: str = ""  # Brief description for UI
+    target_receptors: List[str] = []  # e.g., ["AT1", "beta-1", "ACE"]
+    
+    # Dosing
+    dosages: List[DrugDosage] = []
+    
+    # Effects on physiological parameters (THIS IS THE KEY FEATURE)
+    therapeutic_effects: List[DrugEffect] = []
+    side_effects: List[DrugEffect] = []
+    overdose_effects: List[DrugEffect] = []
+    
+    # Indications and contraindications
+    indications: List[DrugIndication] = []
+    contraindications: List[str] = []
+    warnings: List[str] = []
+    
+    # Interactions
+    interactions: List[DrugInteraction] = []
+    
+    # Pharmacokinetics
+    absorption: str = ""
+    distribution: str = ""
+    metabolism: str = ""
+    elimination: str = ""
+    half_life: str = ""
+    
+    # Metadata
+    fda_approval_year: Optional[int] = None
+    pregnancy_category: str = ""  # A, B, C, D, X
+    controlled_substance: bool = False
+    schedule: Optional[str] = None  # I, II, III, IV, V
+    
+    # System fields
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    updated_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+class DrugCreate(BaseModel):
+    """Model for creating a new drug"""
+    name: str
+    brand_names: List[str] = []
+    drug_class: str
+    category: str
+    mechanism_of_action: str
+    mechanism_short: str = ""
+    target_receptors: List[str] = []
+    dosages: List[DrugDosage] = []
+    therapeutic_effects: List[DrugEffect] = []
+    side_effects: List[DrugEffect] = []
+    overdose_effects: List[DrugEffect] = []
+    indications: List[DrugIndication] = []
+    contraindications: List[str] = []
+    warnings: List[str] = []
+    interactions: List[DrugInteraction] = []
+    absorption: str = ""
+    distribution: str = ""
+    metabolism: str = ""
+    elimination: str = ""
+    half_life: str = ""
+    fda_approval_year: Optional[int] = None
+    pregnancy_category: str = ""
+    controlled_substance: bool = False
+    schedule: Optional[str] = None
+
+class DrugSummary(BaseModel):
+    """Summary model for drug list views"""
+    id: str
+    name: str
+    brand_names: List[str]
+    drug_class: str
+    category: str
+    mechanism_short: str
+    indication_count: int
+    interaction_count: int
+
 # ============== AUTH HELPERS ==============
 
 def hash_password(password: str) -> str:
