@@ -714,6 +714,49 @@ export const GI_DISEASES = {
           gut_brain_axis: { factor: 0.7, note: "Dysregulation" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "Rome IV Criteria",
+      requirements: {
+        timing: "Recurrent abdominal pain ≥1 day/week for last 3 months, onset ≥6 months prior",
+        associated: "≥2 of: related to defecation, change in frequency, change in form",
+        subtypes: {
+          ibsC: "Constipation predominant (hard stools ≥25%)",
+          ibsD: "Diarrhea predominant (loose stools ≥25%)",
+          ibsM: "Mixed",
+          ibsU: "Unsubtyped"
+        }
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "IBD", distinguishing: "Elevated calprotectin/CRP, blood in stool, colonoscopy findings" },
+      { condition: "Celiac disease", distinguishing: "Positive tTG IgA, villous atrophy" },
+      { condition: "Microscopic colitis", distinguishing: "Chronic watery diarrhea, colonoscopy biopsy diagnostic" },
+      { condition: "Colorectal cancer", distinguishing: "Alarm features (weight loss, bleeding, anemia)" }
+    ],
+    treatment: {
+      dietary: [
+        { name: "Low FODMAP diet", indication: "First-line dietary", evidence: "IA" },
+        { name: "Fiber supplementation", indication: "IBS-C", evidence: "IB" }
+      ],
+      ibsC: [
+        { name: "Linaclotide", mechanism: "Guanylate cyclase-C agonist", evidence: "IA" },
+        { name: "Lubiprostone", mechanism: "Chloride channel activator", evidence: "IA" }
+      ],
+      ibsD: [
+        { name: "Loperamide", indication: "Symptom relief", evidence: "IB" },
+        { name: "Rifaximin", indication: "Non-constipated IBS", evidence: "IA" },
+        { name: "Eluxadoline", mechanism: "Mixed opioid agonist/antagonist", evidence: "IA" }
+      ],
+      central: [
+        { name: "TCAs (low-dose)", examples: "Amitriptyline 10-25mg", indication: "Pain-predominant", evidence: "IA" },
+        { name: "SSRIs", indication: "Comorbid anxiety/depression", evidence: "IB" }
+      ]
+    },
+    riskStratification: {
+      prognosis: "Chronic relapsing course; not progressive or life-shortening",
+      qualityOfLife: "Significantly impacts QOL; work productivity",
+      redFlags: "Age >50, rectal bleeding, weight loss, anemia → require colonoscopy"
     }
   },
 
