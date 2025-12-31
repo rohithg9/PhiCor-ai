@@ -480,6 +480,32 @@ export const PSYCHIATRIC_DISEASES = {
     
     differentialDiagnosis: ["Brief psychotic disorder", "Schizoaffective", "Delusional disorder", "Substance-induced psychosis", "Bipolar with psychosis", "Medical conditions"],
     
+    treatment: {
+      acutePhase: [
+        { name: "Second-generation antipsychotics", examples: "Risperidone, Olanzapine, Quetiapine, Aripiprazole", indication: "First-line", evidence: "IA" },
+        { name: "First-generation antipsychotics", examples: "Haloperidol", indication: "Alternative, acute agitation", evidence: "IA" },
+        { name: "Hospitalization", indication: "Danger to self/others, severe impairment", evidence: "IA" }
+      ],
+      maintenance: [
+        { name: "Antipsychotic continuation", indication: "At least 1-2 years after first episode", evidence: "IA" },
+        { name: "Long-acting injectables", examples: "Paliperidone palmitate, Aripiprazole LAI", indication: "Adherence issues", evidence: "IA" }
+      ],
+      treatmentResistant: [
+        { name: "Clozapine", indication: "Failed 2+ antipsychotics (treatment-resistant)", evidence: "IA", note: "REMS program, monitor ANC" }
+      ],
+      psychosocial: [
+        { name: "Cognitive Remediation", indication: "Cognitive symptoms", evidence: "IA" },
+        { name: "Social Skills Training", indication: "All patients", evidence: "IA" },
+        { name: "Supported Employment", indication: "Functional recovery", evidence: "IA" },
+        { name: "Family Psychoeducation", indication: "All patients with family", evidence: "IA" }
+      ]
+    },
+    riskStratification: {
+      suicide: "5-10% complete suicide; 20-40% attempt",
+      mortality: "20 years reduced life expectancy",
+      metabolicRisk: "High with antipsychotics; monitor weight, glucose, lipids"
+    },
+    
     prognosis: {
       rule_of_thirds: "1/3 good outcome, 1/3 intermediate, 1/3 chronic severe course",
       poor_prognostic_factors: ["Early onset", "Poor premorbid functioning", "Prominent negative symptoms", "No precipitant", "Family history"]
