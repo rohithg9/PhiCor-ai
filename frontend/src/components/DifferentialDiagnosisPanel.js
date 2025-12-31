@@ -131,8 +131,8 @@ const DifferentialDiagnosisPanel = ({ onSelectDisease }) => {
     return 'bg-red-500';
   };
   
-  // Render direction icon
-  const DirectionIcon = ({ direction }) => {
+  // Direction icon helper function
+  const renderDirectionIcon = (direction) => {
     if (direction === 'increase') return <TrendingUp className="w-4 h-4 text-red-500" />;
     if (direction === 'decrease') return <TrendingDown className="w-4 h-4 text-blue-500" />;
     return <Minus className="w-4 h-4 text-gray-400" />;
