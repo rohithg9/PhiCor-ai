@@ -308,25 +308,25 @@ def test_disease_count():
             print(f"  ✅ Neurological diseases: {neuro_count}")
             total_diseases += neuro_count
             
-        # Count other disease files
-        disease_files = [
-            '/app/frontend/src/data/cardiacDiseases.js',
-            '/app/frontend/src/data/hepaticDiseases.js', 
-            '/app/frontend/src/data/metabolicDiseases.js',
-            '/app/frontend/src/data/respiratoryDiseases.js'
-        ]
+        # Count all disease files
+        import glob
+        disease_files = glob.glob('/app/frontend/src/data/*disease*.js') + glob.glob('/app/frontend/src/data/*Disease*.js')
+        
+        # Filter out index files and templates
+        disease_files = [f for f in disease_files if 'Index' not in f and 'Template' not in f and 'Guidelines' not in f and 'Models' not in f]
         
         for file_path in disease_files:
             try:
                 with open(file_path, 'r') as f:
                     content = f.read()
                     count = content.count('icd10:')
-                    file_name = file_path.split('/')[-1].replace('.js', '')
-                    print(f"  ✅ {file_name}: {count}")
-                    total_diseases += count
-            except FileNotFoundError:
+                    if count > 0:  # Only count files that actually have diseases
+                        file_name = file_path.split('/')[-1].replace('.js', '')
+                        print(f"  ✅ {file_name}: {count}")
+                        total_diseases += count
+            except Exception as e:
                 file_name = file_path.split('/')[-1].replace('.js', '')
-                print(f"  ⚠️  {file_name}: file not found")
+                print(f"  ⚠️  {file_name}: error reading file")
                 
         print(f"\n📈 TOTAL DISEASES: {total_diseases}")
         
