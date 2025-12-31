@@ -106,19 +106,28 @@ const DifferentialDiagnosisPanel = ({ onSelectDisease }) => {
   // Get normal range for selected parameter
   const selectedParamRange = useMemo(() => {
     if (!selectedParam) return null;
-    return EXTENDED_NORMAL_RANGES[selectedParam] || NORMAL_RANGES[selectedParam] || null;
+    const range = EXTENDED_NORMAL_RANGES[selectedParam] || NORMAL_RANGES[selectedParam] || null;
+    return range;
   }, [selectedParam]);
   
-  // Reset value when parameter changes
-  useEffect(() => {
-    if (selectedParamRange) {
-      const midPoint = (selectedParamRange.min + selectedParamRange.max) / 2;
-      setParamValue(midPoint);
-      setShowValueInput(true);
-    } else {
-      setShowValueInput(false);
-    }
-  }, [selectedParam, selectedParamRange]);
+  // Initialize value when parameter changes
+  const initialParamValue = useMemo(() => {
+    if (!selectedParamRange) return null;
+    return (selectedParamRange.min + selectedParamRange.max) / 2;
+  }, [selectedParamRange]);
+  
+  // Track if we've initialized for this param
+  const [initializedParam, setInitializedParam] = useState('');
+  
+  // Set initial value when parameter changes (avoiding direct setState in effect)
+  if (selectedParam && selectedParam !== initializedParam && initialParamValue !== null) {
+    setParamValue(initialParamValue);
+    setShowValueInput(true);
+    setInitializedParam(selectedParam);
+  } else if (!selectedParam && showValueInput) {
+    setShowValueInput(false);
+    setInitializedParam('');
+  }
   
   // Determine if value is abnormal and direction
   const valueAnalysis = useMemo(() => {
