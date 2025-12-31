@@ -2739,6 +2739,67 @@ const DashboardMultiScale = () => {
           </div>
         )}
 
+        {/* ALL AFFECTED PARAMETERS - Quick Summary Panel */}
+        {currentDisease && allModifiedParameters.length > 0 && (
+          <div className="border-b border-border/50 px-3 lg:px-6 py-3 bg-gradient-to-r from-destructive/5 via-orange-500/5 to-amber-500/5">
+            <div className="flex items-center gap-2 mb-2">
+              <AlertTriangle className="w-4 h-4 text-destructive" />
+              <span className="text-sm font-semibold text-foreground">All Affected Parameters</span>
+              <Badge variant="destructive" className="text-[10px]">{allModifiedParameters.length} changes</Badge>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2">
+              {allModifiedParameters.slice(0, 12).map((param, idx) => (
+                <motion.button
+                  key={`${param.organId}-${param.id}`}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.05 }}
+                  onClick={() => {
+                    setSelectedOrgan(param.organId);
+                    setSelectedScale(param.scaleId);
+                  }}
+                  className={`p-2 rounded-lg border text-left transition-all hover:scale-102 ${
+                    param.isPrimary 
+                      ? 'bg-destructive/10 border-destructive/30 hover:border-destructive/50' 
+                      : 'bg-orange-500/10 border-orange-500/20 hover:border-orange-500/40'
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <span className="text-xs">{param.organIcon}</span>
+                    <span className={`text-[10px] truncate ${param.isPrimary ? 'text-destructive' : 'text-orange-500'}`}>
+                      {param.organName}
+                    </span>
+                  </div>
+                  <div className="text-xs font-medium text-foreground truncate" title={param.name}>
+                    {param.name}
+                  </div>
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-[10px] text-muted-foreground line-through">
+                      {typeof param.baseValue === 'number' ? param.baseValue.toFixed(1) : param.baseValue}
+                    </span>
+                    <div className={`flex items-center gap-0.5 text-[10px] font-bold ${
+                      param.direction === 'increase' ? 'text-red-500' : 'text-blue-500'
+                    }`}>
+                      {param.direction === 'increase' ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                      <span>{typeof param.newValue === 'number' ? param.newValue.toFixed(1) : param.newValue}</span>
+                    </div>
+                  </div>
+                  <div className={`text-[9px] mt-0.5 ${param.direction === 'increase' ? 'text-red-400' : 'text-blue-400'}`}>
+                    {param.delta > 0 ? '+' : ''}{param.delta.toFixed(0)}% {param.unit}
+                  </div>
+                </motion.button>
+              ))}
+            </div>
+            {allModifiedParameters.length > 12 && (
+              <div className="text-center mt-2">
+                <span className="text-xs text-muted-foreground">
+                  +{allModifiedParameters.length - 12} more parameters affected
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Scale Tabs */}
         <div className="border-b border-border/50 px-3 lg:px-6 bg-card/20">
           <div className="flex gap-1 py-2 overflow-x-auto scrollbar-hide">
