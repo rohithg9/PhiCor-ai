@@ -137,17 +137,14 @@ const LandingPage = () => {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16">
-            {/* Logo */}
+            {/* Logo - PhiCor text matching dashboard style */}
             <div 
-              className="flex items-center gap-2 cursor-pointer"
+              className="cursor-pointer group"
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             >
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center border border-indigo-500/30">
-                <span className="text-xl font-serif text-indigo-400">Φ</span>
-              </div>
-              <span className="font-manrope font-bold text-lg bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent hidden sm:block">
-                PhiCor.ai
-              </span>
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white group-hover:text-purple-400 transition-colors">
+                Phi<span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">Cor</span>
+              </h1>
             </div>
 
             {/* Desktop Navigation */}
