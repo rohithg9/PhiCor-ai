@@ -104,6 +104,19 @@
 
 user_problem_statement: "PhiCor.ai digital physiology platform - Expanded disease database with Renal and Neurological systems"
 
+backend:
+  - task: "Clinical Guidelines API Integration"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "TESTED: Backend API health check passed. Mathematical Human API v1.0.0 running successfully on https://digiphys-app.preview.emergentagent.com/api. All core endpoints functional: /health, /auth/register, /auth/login, /patients, /simulations, /calculate/cardiovascular, /calculate/glucose-insulin, /calculate/gfr, /drugs, /chat, /equations. Backend supports physiological calculations, drug simulations, patient management, and AI chat functionality. No critical issues found."
+
 frontend:
   - task: "Expanded Renal Diseases"
     implemented: true
