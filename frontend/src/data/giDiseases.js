@@ -940,6 +940,41 @@ export const GI_DISEASES = {
           fat_absorption: { factor: 0.4, note: "Steatorrhea" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "M-ANNHEIM or Cambridge Classification",
+      requirements: {
+        clinical: "Recurrent or persistent abdominal pain, exocrine/endocrine insufficiency",
+        imaging: "Calcifications, duct dilation, parenchymal changes on CT/MRCP/EUS",
+        functional: "Fecal elastase <200 μg/g (exocrine); diabetes (endocrine)"
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Pancreatic cancer", distinguishing: "Mass on imaging, CA 19-9 elevated, rapid weight loss" },
+      { condition: "Autoimmune pancreatitis", distinguishing: "IgG4 elevated, sausage-shaped pancreas, responds to steroids" },
+      { condition: "Recurrent acute pancreatitis", distinguishing: "Discrete episodes, no chronic changes" }
+    ],
+    treatment: {
+      pain: [
+        { name: "Analgesics", indication: "Step-up approach: NSAIDs → opioids", evidence: "IB" },
+        { name: "Celiac plexus block", indication: "Refractory pain", evidence: "IB" },
+        { name: "ERCP with stenting", indication: "Dominant stricture, stones", evidence: "IB" }
+      ],
+      exocrine: [
+        { name: "Pancreatic enzyme replacement (PERT)", dose: "40,000-50,000 lipase units/meal", evidence: "IA" }
+      ],
+      endocrine: [
+        { name: "Diabetes management", note: "Brittle diabetes common; avoid hypoglycemia", evidence: "IA" }
+      ],
+      surgical: [
+        { name: "Frey/Beger procedure", indication: "Inflammatory head mass", evidence: "IB" },
+        { name: "Total pancreatectomy + islet auto-transplant", indication: "Refractory pain, select patients", evidence: "IIB" }
+      ]
+    },
+    riskStratification: {
+      cancerRisk: "4% at 20 years; higher with hereditary pancreatitis",
+      mortality: "Reduced life expectancy; diabetes and malnutrition complications",
+      abstinence: "Alcohol cessation essential; smoking cessation"
     }
   },
 
