@@ -2422,6 +2422,8 @@ const DashboardMultiScale = () => {
   const [expandedEquations, setExpandedEquations] = useState({});
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showClinicalPanel, setShowClinicalPanel] = useState(false);
+  const [paramFilterOrgan, setParamFilterOrgan] = useState(null); // Filter affected params by organ
+  const [showAllParams, setShowAllParams] = useState(false); // Expand to show all params
 
   const organs = useMemo(() => Object.entries(ORGAN_MODELS), []);
   const diseases = useMemo(() => Object.entries(MERGED_DISEASE_MODELS), []);
