@@ -47,10 +47,11 @@ const LandingPage = () => {
 
   // Navigation items
   const navItems = [
+    { id: 'science', label: 'The Philosophy' },
     { id: 'features', label: 'Features' },
     { id: 'how-it-works', label: 'How It Works' },
-    { id: 'science', label: 'The Science' },
     { id: 'advantages', label: 'Advantages' },
+    { id: 'contact', label: 'Contact', isEmail: true },
   ];
 
   // How it works steps
