@@ -248,20 +248,11 @@ const LandingPage = () => {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button
                 data-testid="get-started-btn"
-                onClick={() => scrollToSection('how-it-works')}
+                onClick={() => scrollToSection('science')}
                 className="px-8 py-6 text-lg bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 hover:scale-105 transition-all shadow-lg shadow-indigo-500/25"
               >
                 See How It Works
                 <ArrowDown className="ml-2 w-5 h-5" />
-              </Button>
-              <Button
-                data-testid="watch-demo-btn"
-                variant="outline"
-                onClick={() => window.location.href = 'mailto:drrohithg@gmail.com'}
-                className="px-8 py-6 text-lg border-white/20 hover:bg-white/5"
-              >
-                <Mail className="mr-2 w-5 h-5" />
-                Request a Demo
               </Button>
             </div>
           </motion.div>
