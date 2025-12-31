@@ -205,6 +205,63 @@ export const AUTOIMMUNE_DISEASES = {
           interstitial_changes: { factor: 2.0, note: "RA-ILD risk" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "ACR/EULAR 2010 RA Classification Criteria",
+      requirements: {
+        threshold: "≥6 points required",
+        jointInvolvement: {
+          "1 large joint": 0,
+          "2-10 large joints": 1,
+          "1-3 small joints": 2,
+          "4-10 small joints": 3,
+          ">10 joints (≥1 small)": 5
+        },
+        serology: {
+          "RF- and anti-CCP-": 0,
+          "Low positive RF or anti-CCP": 2,
+          "High positive RF or anti-CCP": 3
+        },
+        acutePhaseReactants: {
+          "Normal CRP and ESR": 0,
+          "Abnormal CRP or ESR": 1
+        },
+        duration: {
+          "<6 weeks": 0,
+          "≥6 weeks": 1
+        }
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Osteoarthritis", distinguishing: "Non-inflammatory, DIP involvement, no morning stiffness, negative serology" },
+      { condition: "Psoriatic arthritis", distinguishing: "Skin/nail changes, DIP involvement, dactylitis, asymmetric" },
+      { condition: "Gout", distinguishing: "Monoarticular, crystals on aspiration, elevated uric acid" },
+      { condition: "SLE", distinguishing: "Non-erosive, multi-system, ANA/anti-dsDNA positive" },
+      { condition: "Viral arthritis", distinguishing: "Acute onset, self-limiting, often with rash" }
+    ],
+    treatment: {
+      firstLine: [
+        { name: "Methotrexate", dose: "7.5-25 mg weekly", evidence: "IA", note: "Anchor drug, folic acid supplementation" },
+        { name: "Sulfasalazine", dose: "2-3 g/day", indication: "MTX intolerance", evidence: "IA" },
+        { name: "Leflunomide", dose: "20 mg/day", indication: "MTX alternative", evidence: "IA" }
+      ],
+      biologics: [
+        { name: "TNF inhibitors", examples: "Adalimumab, Etanercept, Infliximab", indication: "Inadequate MTX response", evidence: "IA" },
+        { name: "Abatacept", mechanism: "CTLA4-Ig", indication: "Inadequate TNFi response", evidence: "IA" },
+        { name: "Tocilizumab", mechanism: "Anti-IL-6R", indication: "Inadequate TNFi response", evidence: "IA" },
+        { name: "Rituximab", mechanism: "Anti-CD20", indication: "RF+/anti-CCP+ with TNFi failure", evidence: "IA" }
+      ],
+      jakInhibitors: [
+        { name: "Tofacitinib", dose: "5 mg BID", evidence: "IA" },
+        { name: "Baricitinib", dose: "2-4 mg daily", evidence: "IA" },
+        { name: "Upadacitinib", dose: "15 mg daily", evidence: "IA" }
+      ]
+    },
+    riskStratification: {
+      erosiveDisease: "Anti-CCP+, RF+, early erosions predict aggressive course",
+      cardiovascularRisk: "2x increased CV mortality; treat as CV risk equivalent",
+      lungDisease: "RA-ILD in 10-30%; anti-CCP strongly associated",
+      functionalDecline: "DAS28 and HAQ scores guide therapy escalation"
     }
   },
 
