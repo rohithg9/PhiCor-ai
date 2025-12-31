@@ -340,9 +340,6 @@ export const getDifferentialDiagnosis = (abnormalFindings, options = {}) => {
   
   return results;
 };
-  
-  return results;
-};
 
 /**
  * Get normal ranges for a parameter
