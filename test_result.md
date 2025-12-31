@@ -268,10 +268,58 @@ frontend:
         agent: "testing"
         comment: "COMPREHENSIVE TESTING COMPLETE: ✅ All 8 new organ systems verified in organModels.js. ✅ Hematological diseases tested: Iron Deficiency Anemia (hemoglobin 0.6x, ferritin 0.1x, MCV 0.75x), Sickle Cell Disease (hemoglobin 0.55x, reticulocyte 10x, spleen 0.3x), Aplastic Anemia (marrow cellularity 0.2x). ✅ Oncology diseases tested: ALL (blast % 20x, WBC 5x), Multiple Myeloma (plasma cells 10x, hemoglobin 0.6x, GFR 0.5x), Breast Cancer (lesion size 5x, CA 15-3 3x). ✅ Congenital syndromes tested: Down Syndrome (brain volume 0.85x, TSH 2x), Marfan Syndrome (aortic root 1.6x), Hemophilia A (PTT 2.5x). ✅ Disease count: 232 (exceeds target 214). ✅ All parameter modifications verified with correct factor values. ✅ Multi-organ effects working correctly with primaryOrgan and affectedOrgans arrays. Major system expansion fully functional."
 
+  - task: "Autoimmune Diseases Integration"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/data/autoimmuneDiseases.js, /app/frontend/src/data/autoimmuneDiseasesIndex.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "ADDED: 13 autoimmune diseases with comprehensive parameter modifications: SLE (M32.9), RA (M05.9), Sjögren's (M35.0), Scleroderma (M34.9), Dermatomyositis (M33.2), AS (M45.9), GCA (M31.5), Crohn's (K50.9), UC (K51.9), MG (G70.0), PAN (M30.0), GPA (M31.3), PsA (M07.3). Screenshot verified: SLE shows multi-organ effects (Blood 5 | Kidneys 2 | Heart 1). All diseases integrated into DashboardMultiScale.js."
+
+  - task: "Infectious Diseases Integration"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/data/infectiousDiseases.js, /app/frontend/src/data/infectiousDiseasesIndex.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "ADDED: 12 infectious diseases with comprehensive parameter modifications: Influenza (J10.1), COVID-19 (U07.1), TB (A15.0), Sepsis (A41.9), HIV/AIDS (B20), Malaria (B50.9), Dengue (A90), Viral Meningitis (A87.9), HSV Encephalitis (B00.4), Hepatitis A (B15.9), Hepatitis B (B16.9), Salmonella (A02.1). Screenshot verified: COVID-19 search returns result with ICD-10 U07.1."
+
+  - task: "GI Diseases Integration"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/data/giDiseases.js, /app/frontend/src/data/giDiseasesIndex.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "ADDED: 15 GI diseases with comprehensive parameter modifications: GERD (K21.0), Achalasia (K22.0), PUD (K25.9), Gastritis (K29.7), Gastric Cancer (C16.9), SBO (K56.6), Diverticulitis (K57.3), IBS (K58.9), Acute Pancreatitis (K85.9), Chronic Pancreatitis (K86.1), Pancreatic Cancer (C25.9), Cholecystitis (K80.2), Cholangitis (K83.0), Esophageal Cancer (C15.9). Screenshot verified: Pancreatitis search returns 3 results."
+
+  - task: "Respiratory Diseases Expanded"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/data/respiratoryDiseasesExpanded.js, /app/frontend/src/data/respiratoryDiseasesIndex.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "ADDED: 6 expanded respiratory diseases with comprehensive parameter modifications: Asthma (J45.9), CAP (J18.9), PE (I26.9), ARDS (J80), IPF (J84.1), OSA (G47.33). Integrated into respiratoryDiseasesIndex.js. Total disease count now 254."
+
 metadata:
   created_by: "main_agent"
   version: "1.0"
-  test_sequence: 5
+  test_sequence: 6
   run_ui: true
 
 test_plan:
