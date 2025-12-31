@@ -1002,6 +1002,47 @@ export const AUTOIMMUNE_DISEASES = {
           biliary_changes: { factor: 1.3, note: "PSC association" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "Clinical + Endoscopic + Histologic",
+      requirements: {
+        clinical: "Bloody diarrhea, urgency, tenesmus",
+        endoscopic: "Continuous inflammation from rectum, no skip lesions, loss of vascular pattern, ulceration",
+        histologic: "Mucosal/submucosal inflammation, crypt abscesses, goblet cell depletion",
+        severity: "Truelove-Witts criteria for acute severe UC"
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Crohn's colitis", distinguishing: "Skip lesions, granulomas, perianal disease, ASCA+" },
+      { condition: "Infectious colitis", distinguishing: "Acute onset, positive stool cultures, self-limited" },
+      { condition: "Ischemic colitis", distinguishing: "Sudden onset, watershed areas, older patients" },
+      { condition: "Radiation proctitis", distinguishing: "History of pelvic radiation" },
+      { condition: "CMV colitis", distinguishing: "Immunocompromised, owl-eye inclusions" }
+    ],
+    treatment: {
+      mildModerate: [
+        { name: "5-ASA (Mesalamine)", dose: "Oral + rectal", indication: "First-line mild-moderate", evidence: "IA" },
+        { name: "Budesonide MMX", indication: "Mild-moderate left-sided", evidence: "IA" }
+      ],
+      moderateSevere: [
+        { name: "Prednisone", dose: "40-60 mg daily", indication: "Moderate-severe induction", evidence: "IA" },
+        { name: "Anti-TNF", examples: "Infliximab, Adalimumab, Golimumab", indication: "Steroid-dependent/refractory", evidence: "IA" },
+        { name: "Vedolizumab", mechanism: "Anti-α4β7", indication: "Gut-selective alternative", evidence: "IA" },
+        { name: "Tofacitinib", mechanism: "JAK inhibitor", indication: "Anti-TNF failure", evidence: "IA" }
+      ],
+      maintenance: [
+        { name: "5-ASA", indication: "All patients post-induction", evidence: "IA" },
+        { name: "Azathioprine/6-MP", indication: "Steroid-dependent", evidence: "IA" }
+      ],
+      surgical: [
+        { name: "Colectomy", indication: "Refractory, toxic megacolon, dysplasia; curative", note: "IPAA preferred" }
+      ]
+    },
+    riskStratification: {
+      colectomy: "15-20% require colectomy; higher in extensive disease",
+      colorectalCancer: "8-10x increased; surveillance colonoscopy after 8-10 years",
+      psc: "2-5% develop PSC; increases CRC risk further",
+      toxic: "Acute severe UC - IV steroids, monitor for toxic megacolon"
     }
   },
 
