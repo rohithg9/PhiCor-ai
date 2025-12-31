@@ -38,20 +38,26 @@ const LandingPage = () => {
 
   // Smooth scroll to section
   const scrollToSection = (sectionId) => {
+    // Close mobile menu first
+    setMobileMenuOpen(false);
+    
     if (sectionId === 'contact') {
       window.open('mailto:drrohithg@gmail.com', '_self');
       return;
     }
-    const element = document.getElementById(sectionId);
-    if (element) {
-      const navHeight = 64; // Height of sticky nav
-      const elementPosition = element.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo({
-        top: elementPosition - navHeight,
-        behavior: 'smooth'
-      });
-    }
-    setMobileMenuOpen(false);
+    
+    // Small delay to let menu close animation complete
+    setTimeout(() => {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        const navHeight = 64; // Height of sticky nav
+        const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+        window.scrollTo({
+          top: elementPosition - navHeight,
+          behavior: 'smooth'
+        });
+      }
+    }, 100);
   };
 
   // Navigation items
