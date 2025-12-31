@@ -109,23 +109,25 @@ const FeatureNav = ({ showTitle = true, compact = false }) => {
                   <div className={`absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full ${feature.activeColor}`} />
                 )}
                 
-                {/* Tooltip */}
-                <div className={`
-                  absolute top-full mt-2 left-1/2 -translate-x-1/2 
-                  px-3 py-2 rounded-lg shadow-xl
-                  ${isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'}
-                  opacity-0 group-hover:opacity-100 pointer-events-none
-                  transition-opacity duration-200 whitespace-nowrap z-50
-                `}>
-                  <div className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                    {feature.name}
+                {/* Tooltip - only show for non-active pages on hover */}
+                {!isActive(feature.path) && (
+                  <div className={`
+                    absolute top-full mt-2 left-1/2 -translate-x-1/2 
+                    px-3 py-2 rounded-lg shadow-xl
+                    ${isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'}
+                    opacity-0 group-hover:opacity-100 pointer-events-none
+                    transition-opacity duration-200 whitespace-nowrap z-50
+                  `}>
+                    <div className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                      {feature.name}
+                    </div>
+                    <div className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                      {feature.description}
+                    </div>
+                    {/* Tooltip arrow */}
+                    <div className={`absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 ${isDark ? 'bg-gray-800 border-l border-t border-gray-700' : 'bg-white border-l border-t border-gray-200'}`} />
                   </div>
-                  <div className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                    {feature.description}
-                  </div>
-                  {/* Tooltip arrow */}
-                  <div className={`absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 ${isDark ? 'bg-gray-800 border-l border-t border-gray-700' : 'bg-white border-l border-t border-gray-200'}`} />
-                </div>
+                )}
               </button>
             ))}
           </nav>
