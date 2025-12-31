@@ -333,6 +333,36 @@ export const GI_DISEASES = {
           mcv: { factor: 1.2, note: "Macrocytosis" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "Sydney Classification + Histology",
+      requirements: {
+        endoscopic: "Erythema, erosions, atrophy, nodularity",
+        histologic: "Inflammation type, H. pylori status, atrophy, metaplasia grading",
+        autoimmune: "Corpus-predominant atrophy + anti-parietal cell/IF antibodies"
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Peptic ulcer disease", distinguishing: "Discrete ulcer crater on EGD" },
+      { condition: "Functional dyspepsia", distinguishing: "Normal EGD and biopsy, Rome IV criteria" },
+      { condition: "Gastric cancer", distinguishing: "Mass lesion, weight loss, biopsy diagnostic" }
+    ],
+    treatment: {
+      hpylori: [
+        { name: "Eradication therapy", indication: "All H. pylori positive", evidence: "IA" }
+      ],
+      autoimmune: [
+        { name: "B12 supplementation", indication: "Lifelong if pernicious anemia", evidence: "IA" },
+        { name: "Surveillance EGD", indication: "Every 3 years (carcinoid risk)", evidence: "IIB" }
+      ],
+      symptomatic: [
+        { name: "PPI", indication: "Symptom relief", evidence: "IB" }
+      ]
+    },
+    riskStratification: {
+      cancerRisk: "Autoimmune gastritis: 3x gastric carcinoid risk; intestinal type adenocarcinoma risk",
+      b12Deficiency: "Autoimmune: monitor B12, neurological symptoms",
+      surveillance: "Autoimmune and severe atrophic: surveillance for dysplasia"
     }
   },
 
