@@ -115,7 +115,7 @@ backend:
     status_history:
       - working: true
         agent: "testing"
-        comment: "TESTED: Backend API health check passed. Mathematical Human API v1.0.0 running successfully on https://medical-sim-platform.preview.emergentagent.com/api. All core endpoints functional: /health, /auth/register, /auth/login, /patients, /simulations, /calculate/cardiovascular, /calculate/glucose-insulin, /calculate/gfr, /drugs, /chat, /equations. Backend supports physiological calculations, drug simulations, patient management, and AI chat functionality. No critical issues found."
+        comment: "TESTED: Backend API health check passed. Mathematical Human API v1.0.0 running successfully on https://medsimai.preview.emergentagent.com/api. All core endpoints functional: /health, /auth/register, /auth/login, /patients, /simulations, /calculate/cardiovascular, /calculate/glucose-insulin, /calculate/gfr, /drugs, /chat, /equations. Backend supports physiological calculations, drug simulations, patient management, and AI chat functionality. No critical issues found."
 
 frontend:
   - task: "Expanded Renal Diseases"
