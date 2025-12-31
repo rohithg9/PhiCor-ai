@@ -561,7 +561,7 @@ def run_all_tests():
     """Run all tests and provide summary"""
     print("🧪 PHICOR.AI DIGITAL PHYSIOLOGY PLATFORM - BACKEND TESTING")
     print("=" * 70)
-    print("Testing major system expansion with new organs and disease categories")
+    print("Testing disease expansion from 214 to 254 diseases")
     print("=" * 70)
     
     test_results = {}
@@ -584,19 +584,19 @@ def run_all_tests():
     else:
         test_results['frontend_access'] = False
     
-    # Test 4: New organ systems
-    test_results['new_organs'] = test_new_organ_systems()
+    # Test 4: Autoimmune diseases
+    test_results['autoimmune_diseases'] = test_autoimmune_diseases()
     
-    # Test 5: Hematological diseases
-    test_results['hematological_diseases'] = test_hematological_diseases()
+    # Test 5: Infectious diseases
+    test_results['infectious_diseases'] = test_infectious_diseases()
     
-    # Test 6: Oncology diseases  
-    test_results['oncology_diseases'] = test_oncology_diseases()
+    # Test 6: GI diseases  
+    test_results['gi_diseases'] = test_gi_diseases()
     
-    # Test 7: Congenital syndromes
-    test_results['congenital_diseases'] = test_congenital_diseases()
+    # Test 7: Respiratory diseases
+    test_results['respiratory_diseases'] = test_respiratory_diseases()
     
-    # Test 8: Disease count verification (should be 214)
+    # Test 8: Disease count verification (should be 254)
     test_results['disease_count'] = test_disease_count()
     
     # Test 9: Organ models compatibility
@@ -614,7 +614,7 @@ def run_all_tests():
     total = 0
     
     for test_name, result in test_results.items():
-        if test_name in ['new_organs', 'hematological_diseases', 'oncology_diseases', 'congenital_diseases']:
+        if test_name in ['autoimmune_diseases', 'infectious_diseases', 'gi_diseases', 'respiratory_diseases']:
             # These return lists, check if any diseases were found
             if isinstance(result, list) and len(result) > 0:
                 found_diseases = len([r for r in result if r['status'] in ['found_with_modifications', 'found_no_modifications', 'found']])
