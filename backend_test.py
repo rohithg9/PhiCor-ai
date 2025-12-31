@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """
 Backend Testing for PhiCor.ai Digital Physiology Platform
-Testing renal and neurological disease parameter modifications
+Testing major system expansion: New organs and disease categories
+- Hematological diseases (Iron Deficiency Anemia, Sickle Cell, etc.)
+- Oncology diseases (ALL, AML, CLL, CML, Lymphomas, Myeloma, Solid Tumors)
+- Congenital syndromes (Down Syndrome, Turner, Marfan, Hemophilia, etc.)
 """
 
 import requests
