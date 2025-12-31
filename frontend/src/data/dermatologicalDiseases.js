@@ -247,6 +247,26 @@ export const DERMATOLOGICAL_DISEASES = {
     
     differentialDiagnosis: ["Seborrheic dermatitis", "Contact dermatitis", "Scabies", "Psoriasis", "Tinea", "Cutaneous T-cell lymphoma"],
     
+    treatment: {
+      topical: [
+        { name: "Emollients", indication: "First-line, restore barrier", evidence: "IA" },
+        { name: "Topical corticosteroids", indication: "Flares, short-term", evidence: "IA" },
+        { name: "Calcineurin inhibitors", examples: "Tacrolimus, Pimecrolimus", indication: "Face, maintenance", evidence: "IA" }
+      ],
+      systemic: [
+        { name: "Dupilumab", mechanism: "Anti-IL-4/IL-13", indication: "Moderate-severe", evidence: "IA" },
+        { name: "JAK inhibitors", examples: "Abrocitinib, Upadacitinib", indication: "Moderate-severe", evidence: "IA" },
+        { name: "Cyclosporine", indication: "Short-term severe flares", evidence: "IA" }
+      ],
+      triggers: [
+        { name: "Avoid triggers", note: "Irritants, allergens, stress, temperature extremes" }
+      ]
+    },
+    riskStratification: {
+      atopicMarch: "50-70% develop allergic rhinitis/asthma",
+      infection: "S. aureus colonization 90%; eczema herpeticum risk with HSV exposure",
+      prognosis: "Many improve/resolve by adulthood; some lifelong"
+    },
     complications: ["Bacterial superinfection (S. aureus)", "Eczema herpeticum", "Allergic rhinitis", "Asthma", "Food allergies", "Psychosocial impact"]
   },
 
