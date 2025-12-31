@@ -276,6 +276,7 @@ metadata:
 
 test_plan:
   current_focus:
+    - "Clinical Guidelines and Bidirectional Mapping Implementation"
     - "Major System Expansion - New Organs and Disease Categories"
   stuck_tasks: []
   test_all: false
