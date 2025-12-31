@@ -229,12 +229,42 @@ const DifferentialDiagnosisPanel = ({ onSelectDisease }) => {
   // Get all available parameters
   const allParameters = useMemo(() => getAllParameters(), []);
   
-  // Get normal range for selected parameter
+  // Get normal range for selected parameter - check multiple sources
   const selectedParamRange = useMemo(() => {
     if (!selectedParam) return null;
-    const range = EXTENDED_NORMAL_RANGES[selectedParam] || NORMAL_RANGES[selectedParam] || null;
-    return range;
-  }, [selectedParam]);
+    
+    // First check extended ranges
+    if (EXTENDED_NORMAL_RANGES[selectedParam]) {
+      return EXTENDED_NORMAL_RANGES[selectedParam];
+    }
+    
+    // Check NORMAL_RANGES
+    if (NORMAL_RANGES[selectedParam]) {
+      const range = NORMAL_RANGES[selectedParam];
+      return {
+        ...range,
+        criticalLow: range.criticalLow || range.min * 0.5,
+        criticalHigh: range.criticalHigh || range.max * 1.5,
+      };
+    }
+    
+    // Try to get from organ model
+    if (selectedOrgan && allParameters[selectedOrgan]) {
+      const param = allParameters[selectedOrgan].parameters.find(p => p.id === selectedParam);
+      if (param?.range && Array.isArray(param.range)) {
+        const [min, max] = param.range;
+        return {
+          min,
+          max,
+          unit: param.unit || '',
+          criticalLow: min * 0.5,
+          criticalHigh: max * 1.5,
+        };
+      }
+    }
+    
+    return null;
+  }, [selectedParam, selectedOrgan, allParameters]);
   
   // Initialize value when parameter changes
   const initialParamValue = useMemo(() => {
