@@ -292,6 +292,35 @@ const TreatmentGuidelinesPanel = ({ diseaseId }) => {
     'hypertrophic_cardiomyopathy': 'hypertension', // Often treated similarly
     'I42_1': 'hypertension',
     'I42_2': 'hypertension',
+    // Hematological - Iron Deficiency Anemia
+    'iron_deficiency_anemia': 'iron_deficiency_anemia',
+    'D50': 'iron_deficiency_anemia',
+    'D50_9': 'iron_deficiency_anemia',
+    'D50.9': 'iron_deficiency_anemia',
+    // Sickle Cell Disease
+    'sickle_cell_disease': 'sickle_cell_disease',
+    'D57': 'sickle_cell_disease',
+    'D57_1': 'sickle_cell_disease',
+    'D57.1': 'sickle_cell_disease',
+    // Acute Lymphoblastic Leukemia
+    'acute_lymphoblastic_leukemia': 'acute_lymphoblastic_leukemia',
+    'C91_0': 'acute_lymphoblastic_leukemia',
+    'C91.0': 'acute_lymphoblastic_leukemia',
+    // Multiple Myeloma
+    'multiple_myeloma': 'multiple_myeloma',
+    'C90_0': 'multiple_myeloma',
+    'C90.0': 'multiple_myeloma',
+    // Down Syndrome
+    'down_syndrome': 'down_syndrome',
+    'Q90_9': 'down_syndrome',
+    'Q90.9': 'down_syndrome',
+    // Marfan Syndrome
+    'marfan_syndrome': 'marfan_syndrome',
+    'Q87_4': 'marfan_syndrome',
+    'Q87.4': 'marfan_syndrome',
+    // Hemophilia A
+    'hemophilia_a': 'hemophilia_a',
+    'D66': 'hemophilia_a',
   };
 
   const guidelineKey = guidelineKeyMap[diseaseId] || diseaseId;
