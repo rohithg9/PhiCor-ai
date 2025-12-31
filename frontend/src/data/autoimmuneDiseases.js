@@ -83,6 +83,54 @@ export const AUTOIMMUNE_DISEASES = {
           pericardial_effusion: { factor: 3.0, note: "Serositis" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "ACR/EULAR 2019 SLE Classification Criteria",
+      requirements: {
+        entryRequirement: "ANA ≥1:80 on HEp-2 cells",
+        threshold: "≥10 points with at least one clinical criterion",
+        domains: {
+          constitutional: { fever: 2 },
+          hematologic: { leukopenia: 3, thrombocytopenia: 4, autoimmune_hemolysis: 4 },
+          neuropsychiatric: { delirium: 2, psychosis: 3, seizure: 5 },
+          mucocutaneous: { alopecia: 2, oral_ulcers: 2, subacute_cutaneous: 4, acute_cutaneous: 6, discoid: 4 },
+          serosal: { pleural_pericardial: 5, acute_pericarditis: 6 },
+          musculoskeletal: { joint_involvement: 6 },
+          renal: { proteinuria_500: 4, class_II_V_nephritis: 8, class_III_IV_nephritis: 10 },
+          immunology: { antiDsDNA_or_antiSm: 6, low_complement: 3, positive_coombs: 4, antiphospholipid: 2 }
+        }
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Drug-induced lupus", distinguishing: "Antihistone Ab+, anti-dsDNA negative, resolves with drug cessation" },
+      { condition: "Mixed connective tissue disease", distinguishing: "Anti-U1 RNP positive, less renal/CNS involvement" },
+      { condition: "Rheumatoid arthritis", distinguishing: "Erosive arthritis, RF/anti-CCP positive, no typical SLE serology" },
+      { condition: "Dermatomyositis", distinguishing: "Muscle weakness, elevated CK, heliotrope rash" },
+      { condition: "Antiphospholipid syndrome", distinguishing: "Thrombosis/pregnancy loss, can overlap with SLE" }
+    ],
+    treatment: {
+      firstLine: [
+        { name: "Hydroxychloroquine", dose: "200-400 mg daily", evidence: "IA", note: "All SLE patients unless contraindicated" },
+        { name: "NSAIDs", indication: "Mild arthritis, serositis", note: "Avoid if nephritis" },
+        { name: "Low-dose corticosteroids", dose: "≤7.5 mg prednisone", indication: "Flares" }
+      ],
+      immunosuppressive: [
+        { name: "Mycophenolate mofetil", dose: "2-3 g/day", indication: "Lupus nephritis (induction/maintenance)", evidence: "IA" },
+        { name: "Azathioprine", dose: "2-3 mg/kg/day", indication: "Maintenance, steroid-sparing", evidence: "IB" },
+        { name: "Cyclophosphamide", indication: "Severe nephritis, CNS lupus", evidence: "IA", note: "Euro-Lupus or NIH protocol" }
+      ],
+      biologics: [
+        { name: "Belimumab", mechanism: "Anti-BLyS", indication: "Active disease despite standard therapy", evidence: "IA" },
+        { name: "Anifrolumab", mechanism: "Anti-IFNAR1", indication: "Moderate-severe SLE", evidence: "IA", note: "FDA approved 2021" },
+        { name: "Rituximab", mechanism: "Anti-CD20", indication: "Refractory disease", evidence: "IIB", note: "Off-label" }
+      ]
+    },
+    riskStratification: {
+      mortality: "2-5x general population; leading causes: infection, CVD, nephritis",
+      nephritisRisk: "40-60% lifetime risk; worse with anti-dsDNA+, low complement",
+      cardiovascularRisk: "Accelerated atherosclerosis; 50x MI risk in young women",
+      pregnancyRisk: "Increased flares, preeclampsia; neonatal lupus with anti-SSA",
+      lymphomaRisk: "3-4x increased risk"
     }
   },
 
