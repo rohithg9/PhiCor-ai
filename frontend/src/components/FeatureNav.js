@@ -20,7 +20,7 @@ import { Moon, Sun, Settings } from 'lucide-react';
 const features = [
   {
     symbol: 'Φ',
-    name: 'PhiCore Engine',
+    name: 'PhiCor Engine',
     description: 'Organ models & physiology database',
     path: '/dashboard',
     color: 'from-indigo-500 to-purple-500',
