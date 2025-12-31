@@ -146,7 +146,11 @@ const LandingPage = () => {
                 <button
                   key={item.id}
                   onClick={() => scrollToSection(item.id)}
-                  className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-white/5"
+                  className={`px-4 py-2 text-sm transition-colors rounded-lg hover:bg-white/5 ${
+                    item.isEmail 
+                      ? 'text-indigo-400 hover:text-indigo-300' 
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
                 >
                   {item.label}
                 </button>
@@ -155,15 +159,6 @@ const LandingPage = () => {
 
             {/* CTA Buttons */}
             <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => window.location.href = 'mailto:drrohithg@gmail.com'}
-                className="hidden sm:flex text-muted-foreground hover:text-foreground"
-              >
-                <Mail className="w-4 h-4 mr-1" />
-                Contact
-              </Button>
               <Button
                 size="sm"
                 onClick={() => navigate('/dashboard')}
