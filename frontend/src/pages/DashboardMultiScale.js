@@ -2600,7 +2600,7 @@ const DashboardMultiScale = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col overflow-hidden pt-14 lg:pt-0">
+      <main className="flex-1 flex flex-col overflow-hidden pt-28 lg:pt-0">
         {/* Desktop Header */}
         <header className="hidden lg:flex h-14 border-b border-border/50 px-6 items-center justify-between bg-card/30">
           <div>
