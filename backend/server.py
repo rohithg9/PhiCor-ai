@@ -1935,10 +1935,7 @@ async def seed_comprehensive_drug_database():
     Based on WHO Essential Medicines List and clinical guidelines.
     """
     
-    # Import comprehensive drug data
-    from .comprehensive_drugs import COMPREHENSIVE_DRUGS
-    
-    # Start with the existing ACE inhibitors and beta blockers
+    # Comprehensive drug data with international brand names
     comprehensive_drugs = [
         # ============== ACE INHIBITORS ==============
         {
