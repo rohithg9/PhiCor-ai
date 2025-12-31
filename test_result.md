@@ -352,8 +352,8 @@ metadata:
 
 test_plan:
   current_focus:
-    - "New Disease Categories Integration - Autoimmune, Infectious, GI"
-    - "Respiratory Diseases Expanded Integration"
+    - "Comprehensive Parameter Ranges for Differential Diagnosis Panel - COMPLETE"
+    - "Disease Data Enhancement - COMPLETE"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
