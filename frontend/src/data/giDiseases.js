@@ -1248,6 +1248,40 @@ export const GI_DISEASES = {
           blood_pressure: { factor: 0.7, note: "Septic shock" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "Tokyo Guidelines (TG18)",
+      requirements: {
+        systemicInflammation: "Fever >38°C and/or WBC abnormal and/or CRP ≥1",
+        cholestasis: "Jaundice (bilirubin ≥2) and/or LFT abnormal",
+        biliary: "Dilated bile duct on imaging and/or etiology on imaging",
+        diagnosis: "Suspected: 1 systemic + 1 cholestasis; Definite: + biliary imaging"
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Acute cholecystitis", distinguishing: "No jaundice, GB wall thickening, Murphy sign" },
+      { condition: "Hepatitis", distinguishing: "Marked ALT/AST elevation, viral markers, no biliary dilation" },
+      { condition: "Pancreatitis", distinguishing: "Elevated lipase, pancreatic inflammation on imaging" },
+      { condition: "Liver abscess", distinguishing: "Discrete collection on imaging" }
+    ],
+    treatment: {
+      acute: [
+        { name: "IV antibiotics", indication: "Empiric: piperacillin-tazobactam", evidence: "IA", note: "Cover gram-negative, anaerobes" },
+        { name: "IV fluid resuscitation", indication: "All patients", evidence: "IA" }
+      ],
+      biliary_drainage: [
+        { name: "ERCP", indication: "First-line for biliary decompression", evidence: "IA", timing: "Within 24h if severe, 24-48h if moderate" },
+        { name: "PTBD", indication: "Failed ERCP, altered anatomy", evidence: "IA" }
+      ],
+      definitive: [
+        { name: "Stone extraction", indication: "After stabilization if choledocholithiasis" },
+        { name: "Stenting", indication: "Malignant obstruction" }
+      ]
+    },
+    riskStratification: {
+      mortality: "Grade I: <1%; Grade III: 20-30%",
+      urgency: "Severe: emergency drainage <24h; Moderate: <48h",
+      prognosis: "Early biliary drainage is key determinant"
     }
   },
 
