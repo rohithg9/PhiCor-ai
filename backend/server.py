@@ -1927,6 +1927,108 @@ async def seed_drug_database():
         "drugs": [d["name"] for d in cardiac_drugs]
     }
 
+@api_router.post("/drugs-db/seed-comprehensive")
+async def seed_comprehensive_drug_database():
+    """
+    Seed the database with a comprehensive, evidence-based drug formulary.
+    Includes brand names for UK, USA, and India.
+    Based on WHO Essential Medicines List and clinical guidelines.
+    """
+    
+    # Comprehensive drug data with international brand names
+    comprehensive_drugs = [
+        # ============== ACE INHIBITORS ==============
+        {
+            "id": "enalapril",
+            "name": "Enalapril",
+            "brand_names": ["Vasotec (USA)", "Innovace (UK)", "Enam (India)", "Epaned"],
+            "drug_class": "ACE Inhibitor",
+            "category": "cardiovascular",
+            "mechanism_of_action": "Inhibits angiotensin-converting enzyme (ACE), preventing conversion of angiotensin I to angiotensin II. Reduces aldosterone secretion, decreases peripheral vascular resistance, and promotes natriuresis.",
+            "mechanism_short": "ACE inhibitor → ↓ angiotensin II → vasodilation, ↓ aldosterone",
+            "target_receptors": ["ACE"],
+            "dosages": [
+                {"route": "oral", "form": "tablet", "strength": "2.5mg, 5mg, 10mg, 20mg", "typical_dose": "5-20mg once or twice daily", "max_daily_dose": "40mg", "frequency": "once or twice daily", "special_instructions": "May be taken with or without food"}
+            ],
+            "therapeutic_effects": [
+                {
+                    "effect_type": "therapeutic",
+                    "description": "Reduces afterload and preload through vasodilation and reduced sodium retention",
+                    "onset_hours": 1,
+                    "duration_hours": 24,
+                    "organs": [
+                        {"organ_id": "heart", "scales": [
+                            {"scale_id": "pressures", "parameters": [
+                                {"parameter_id": "aortic_systolic", "multiplier": 0.85, "note": "↓15% systolic BP"},
+                                {"parameter_id": "aortic_diastolic", "multiplier": 0.88, "note": "↓12% diastolic BP"},
+                                {"parameter_id": "pcwp", "multiplier": 0.82, "note": "↓18% pulmonary wedge pressure"}
+                            ]},
+                            {"scale_id": "physiology", "parameters": [
+                                {"parameter_id": "cardiac_output", "multiplier": 1.12, "note": "↑12% CO"},
+                                {"parameter_id": "svr", "multiplier": 0.78, "note": "↓22% SVR"}
+                            ]}
+                        ]},
+                        {"organ_id": "kidneys", "scales": [
+                            {"scale_id": "physiology", "parameters": [
+                                {"parameter_id": "gfr", "multiplier": 0.97, "note": "Initial ↓3% GFR (nephroprotective long-term)"},
+                                {"parameter_id": "proteinuria", "multiplier": 0.70, "note": "↓30% protein excretion"}
+                            ]}
+                        ]}
+                    ]
+                }
+            ],
+            "side_effects": [
+                {
+                    "effect_type": "side_effect",
+                    "description": "Dry cough (5-10%), hyperkalemia, hypotension",
+                    "organs": [
+                        {"organ_id": "kidneys", "scales": [
+                            {"scale_id": "physiology", "parameters": [
+                                {"parameter_id": "potassium", "multiplier": 1.08, "note": "↑8% serum K+"}
+                            ]}
+                        ]}
+                    ]
+                }
+            ],
+            "indications": [
+                {"disease_id": "heart_failure", "disease_name": "Heart Failure (HFrEF)", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"},
+                {"disease_id": "hypertension", "disease_name": "Essential Hypertension", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"},
+                {"disease_id": "diabetic_nephropathy", "disease_name": "Diabetic Nephropathy", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"},
+                {"disease_id": "post_mi", "disease_name": "Post-Myocardial Infarction", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}
+            ],
+            "contraindications": ["Pregnancy", "History of angioedema with ACE inhibitor", "Bilateral renal artery stenosis", "Hyperkalemia (K+ > 5.5)"],
+            "warnings": ["Monitor potassium and renal function", "Risk of angioedema (higher in Black patients)", "Avoid in pregnancy"],
+            "interactions": [
+                {"interacting_drug_id": "potassium_supplements", "interacting_drug_name": "Potassium supplements", "severity": "moderate", "effect": "Additive hyperkalemia", "clinical_note": "Monitor K+ levels"},
+                {"interacting_drug_id": "nsaids", "interacting_drug_name": "NSAIDs", "severity": "moderate", "effect": "Reduced antihypertensive effect, increased renal risk", "clinical_note": "Avoid if possible"},
+                {"interacting_drug_id": "lithium", "interacting_drug_name": "Lithium", "severity": "moderate", "effect": "Increased lithium levels", "clinical_note": "Monitor lithium levels closely"}
+            ],
+            "half_life": "11 hours (enalaprilat active metabolite)",
+            "pregnancy_category": "D",
+            "fda_approval_year": 1985
+        }
+    ]
+    
+    # Add timestamps and insert
+    for drug in comprehensive_drugs:
+        drug["created_at"] = datetime.now(timezone.utc).isoformat()
+        drug["updated_at"] = datetime.now(timezone.utc).isoformat()
+        
+        # Upsert
+        existing = await db.drugs.find_one({"id": drug["id"]})
+        if existing:
+            await db.drugs.update_one({"id": drug["id"]}, {"$set": drug})
+        else:
+            await db.drugs.insert_one(drug)
+    
+    total_count = await db.drugs.count_documents({})
+    
+    return {
+        "message": f"Seeded {len(comprehensive_drugs)} evidence-based drugs. Total in database: {total_count}",
+        "drugs_added": [d["name"] for d in comprehensive_drugs],
+        "categories_covered": list(set(d["category"] for d in comprehensive_drugs))
+    }
+
 # ============== VIRTUAL PATIENT & DRUG SIMULATION ==============
 
 class VirtualPatient(BaseModel):
