@@ -9,6 +9,7 @@ import {
   CheckCircle,
   ChevronDown,
   ChevronUp,
+  ChevronRight,
   Activity,
   User,
   Clipboard,
