@@ -167,8 +167,38 @@ const LandingPage = () => {
               ))}
             </div>
 
-            {/* CTA Buttons */}
+            {/* CTA Buttons - Greek Symbol Navigation */}
             <div className="flex items-center gap-2">
+              {/* Greek Symbol Navigation */}
+              <div className="flex items-center gap-1">
+                {/* Φ - PhiCore Engine */}
+                <button
+                  onClick={() => navigate('/dashboard')}
+                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 flex items-center justify-center transition-all shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 hover:scale-105"
+                  title="PhiCore Engine"
+                >
+                  <span className="text-white font-serif text-xl sm:text-2xl font-bold">Φ</span>
+                </button>
+                
+                {/* Δ - Differential Diagnosis */}
+                <button
+                  onClick={() => navigate('/differential')}
+                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 flex items-center justify-center transition-all shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 hover:scale-105"
+                  title="Differential Diagnosis"
+                >
+                  <span className="text-white font-serif text-xl sm:text-2xl font-bold">Δ</span>
+                </button>
+                
+                {/* Σ - Medical Scribe */}
+                <button
+                  onClick={() => navigate('/scribe')}
+                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 flex items-center justify-center transition-all shadow-lg shadow-rose-500/20 hover:shadow-rose-500/40 hover:scale-105"
+                  title="Medical Scribe"
+                >
+                  <span className="text-white font-serif text-xl sm:text-2xl font-bold">Σ</span>
+                </button>
+              </div>
+              
               {/* Desktop Theme Toggle */}
               <button
                 onClick={toggleTheme}
@@ -177,15 +207,6 @@ const LandingPage = () => {
               >
                 {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
-              
-              <Button
-                size="sm"
-                onClick={() => navigate('/dashboard')}
-                className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600"
-              >
-                PhiCor Engine
-                <ArrowRight className="w-4 h-4 ml-1" />
-              </Button>
               
               {/* Mobile menu button */}
               <button
