@@ -529,6 +529,34 @@ export const GI_DISEASES = {
           lactate: { factor: 3.0, note: "If ischemia" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "Clinical + Radiological",
+      requirements: {
+        clinical: "Colicky abdominal pain, vomiting, distension, obstipation",
+        radiological: "Dilated small bowel >3cm, air-fluid levels, transition point on CT"
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Large bowel obstruction", distinguishing: "Competent ileocecal valve, colonic dilation" },
+      { condition: "Ileus", distinguishing: "Diffuse dilation, no transition point, recent surgery" },
+      { condition: "Volvulus", distinguishing: "Sigmoid: coffee bean sign; Cecal: comma sign" }
+    ],
+    treatment: {
+      conservative: [
+        { name: "NPO + NGT decompression", indication: "Partial SBO, no peritonitis", evidence: "IA" },
+        { name: "IV fluids + electrolyte correction", evidence: "IA" },
+        { name: "Water-soluble contrast (Gastrografin)", indication: "Diagnostic and therapeutic", evidence: "IA" }
+      ],
+      surgical: [
+        { name: "Exploratory laparotomy", indication: "Complete SBO, peritonitis, strangulation, failure of conservative (3-5 days)", evidence: "IA" },
+        { name: "Adhesiolysis", indication: "Adhesive SBO", evidence: "IA" }
+      ]
+    },
+    riskStratification: {
+      strangulation: "Signs: fever, tachycardia, localized tenderness, elevated lactate - surgical emergency",
+      mortality: "Non-strangulated: <5%; Strangulated: 8-25%",
+      recurrence: "Adhesive SBO: 10-30% recurrence"
     }
   },
 
