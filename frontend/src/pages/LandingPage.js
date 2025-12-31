@@ -183,23 +183,29 @@ const LandingPage = () => {
         <AnimatePresence>
           {mobileMenuOpen && (
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="md:hidden bg-background/95 backdrop-blur-xl border-b border-white/10"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="md:hidden bg-background/98 backdrop-blur-xl border-b border-white/10 absolute top-full left-0 right-0 z-50"
             >
-              <div className="px-4 py-4 space-y-1">
+              <div className="px-4 py-4 space-y-2">
                 {navItems.map((item) => (
                   <button
                     key={item.id}
-                    onClick={() => scrollToSection(item.id)}
-                    className={`w-full text-left px-4 py-3 text-sm transition-colors rounded-lg hover:bg-white/5 flex items-center gap-2 ${
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      scrollToSection(item.id);
+                    }}
+                    className={`w-full text-left px-4 py-4 text-base font-medium transition-all rounded-xl active:scale-95 flex items-center gap-3 ${
                       item.isEmail 
-                        ? 'text-indigo-400 hover:text-indigo-300' 
-                        : 'text-muted-foreground hover:text-foreground'
+                        ? 'text-indigo-400 bg-indigo-500/10 border border-indigo-500/20' 
+                        : 'text-foreground bg-white/5 hover:bg-white/10 active:bg-white/15'
                     }`}
                   >
-                    {item.isEmail && <Mail className="w-4 h-4" />}
+                    {item.isEmail && <Mail className="w-5 h-5" />}
                     {item.label}
                   </button>
                 ))}
