@@ -516,6 +516,18 @@ const getDiseaseModelKeysByIcd10 = () => {
   Object.values(ALL_GI_DISEASES).forEach(d => {
     if (d.icd10) icd10Covered.add(d.icd10);
   });
+  Object.values(ALL_DERMATOLOGICAL_DISEASES).forEach(d => {
+    if (d.icd10) icd10Covered.add(d.icd10);
+  });
+  Object.values(ALL_PSYCHIATRIC_DISEASES).forEach(d => {
+    if (d.icd10) icd10Covered.add(d.icd10);
+  });
+  Object.values(ALL_PEDIATRIC_DISEASES).forEach(d => {
+    if (d.icd10) icd10Covered.add(d.icd10);
+  });
+  Object.values(ALL_OBGYN_DISEASES).forEach(d => {
+    if (d.icd10) icd10Covered.add(d.icd10);
+  });
   
   const excludeKeys = [];
   Object.entries(DISEASE_MODELS).forEach(([key, disease]) => {
