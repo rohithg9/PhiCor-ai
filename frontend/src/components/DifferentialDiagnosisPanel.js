@@ -479,6 +479,8 @@ const DifferentialDiagnosisPanel = ({ onSelectDisease }) => {
                   : 'Add Abnormal Finding'}
               </Button>
             </div>
+          </div>
+        )}
         
         {/* Clinical Text Tab */}
         {activeTab === 'clinical' && (
