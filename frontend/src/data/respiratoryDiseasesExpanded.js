@@ -613,6 +613,40 @@ export const RESPIRATORY_DISEASES_EXPANDED = {
           glucose_consumption: { factor: 0.9, note: "Cognitive effects from hypoxia" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "AASM Guidelines",
+      requirements: {
+        symptoms: "Daytime sleepiness, witnessed apneas, snoring, OR comorbidities (HTN, mood, cognitive, CAD, stroke, CHF, A-fib, DM2)",
+        psg: "AHI ≥5 events/hour with symptoms OR AHI ≥15 regardless of symptoms"
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Central sleep apnea", distinguishing: "No obstructive effort, heart failure/opioids common" },
+      { condition: "Narcolepsy", distinguishing: "Cataplexy, sleep-onset REM, MSLT diagnostic" },
+      { condition: "Obesity hypoventilation syndrome", distinguishing: "Daytime hypercapnia, BMI >30" },
+      { condition: "Primary snoring", distinguishing: "AHI <5, no symptoms" }
+    ],
+    treatment: {
+      firstLine: [
+        { name: "CPAP", indication: "First-line for moderate-severe OSA", evidence: "IA" },
+        { name: "AutoPAP", indication: "Alternative to fixed CPAP", evidence: "IA" }
+      ],
+      alternatives: [
+        { name: "Oral appliance (MAD)", indication: "Mild-moderate OSA or CPAP intolerant", evidence: "IA" },
+        { name: "Weight loss", indication: "All obese patients", evidence: "IA" },
+        { name: "Positional therapy", indication: "Position-dependent OSA", evidence: "IB" }
+      ],
+      surgical: [
+        { name: "UPPP", indication: "Specific anatomy, CPAP failure", evidence: "IIB" },
+        { name: "Hypoglossal nerve stimulation (Inspire)", indication: "Moderate-severe OSA, CPAP intolerant, BMI <32", evidence: "IA" },
+        { name: "MMA", indication: "Craniofacial abnormalities", evidence: "IB" }
+      ]
+    },
+    riskStratification: {
+      cardiovascular: "2-3x increased risk of HTN, stroke, AF, CHF, MI",
+      accidents: "2-7x increased MVA risk; must counsel patients",
+      mortality: "Untreated severe OSA increases all-cause mortality"
     }
   }
 };
