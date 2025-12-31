@@ -416,6 +416,30 @@ const DifferentialDiagnosisPanel = ({ onSelectDisease }) => {
 
   return (
     <div className="bg-gray-900/50 rounded-xl border border-gray-700 overflow-hidden">
+      {/* AI Clinical Assistant Banner */}
+      <a 
+        href="/diagnosis"
+        className="block p-3 bg-gradient-to-r from-red-900/40 via-purple-900/40 to-blue-900/40 border-b border-purple-500/30 hover:from-red-900/60 hover:via-purple-900/60 hover:to-blue-900/60 transition-all group"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-purple-500 flex items-center justify-center animate-pulse">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+              </svg>
+            </div>
+            <div>
+              <div className="text-white font-semibold flex items-center gap-2">
+                🎙️ AI Medical Scribe
+                <span className="px-2 py-0.5 text-[10px] bg-red-500 text-white rounded-full font-bold">NEW</span>
+              </div>
+              <div className="text-xs text-gray-300">Voice-to-text transcription with real-time diagnosis</div>
+            </div>
+          </div>
+          <ChevronRight className="w-5 h-5 text-purple-400 group-hover:translate-x-1 transition-transform" />
+        </div>
+      </a>
+      
       {/* Header */}
       <div className="p-4 border-b border-gray-700 bg-gradient-to-r from-purple-900/30 to-blue-900/30">
         <div className="flex items-center justify-between">
