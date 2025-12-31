@@ -434,6 +434,38 @@ export const GI_DISEASES = {
           metastases: { factor: 3.0, note: "Hepatic metastases" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "TNM Staging (AJCC 8th)",
+      requirements: {
+        diagnosis: "EGD with biopsy",
+        staging: "CT chest/abdomen/pelvis + EUS for local staging",
+        molecular: "HER2, PD-L1, MSI testing for treatment selection"
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Peptic ulcer", distinguishing: "Benign ulcer heals; always biopsy gastric ulcers" },
+      { condition: "GIST", distinguishing: "Submucosal mass, c-KIT positive" },
+      { condition: "Gastric lymphoma", distinguishing: "MALT lymphoma, H. pylori associated, different histology" }
+    ],
+    treatment: {
+      earlyStage: [
+        { name: "Endoscopic resection (EMR/ESD)", indication: "T1a, <2cm, well-differentiated", evidence: "IA" },
+        { name: "Gastrectomy + D2 lymphadenectomy", indication: "Standard surgical approach", evidence: "IA" }
+      ],
+      locallyAdvanced: [
+        { name: "Perioperative chemotherapy", regimen: "FLOT (5-FU, leucovorin, oxaliplatin, docetaxel)", evidence: "IA" }
+      ],
+      metastatic: [
+        { name: "Systemic chemotherapy", regimen: "5-FU + platinum-based", evidence: "IA" },
+        { name: "Trastuzumab", indication: "HER2+ tumors", evidence: "IA" },
+        { name: "Pembrolizumab", indication: "PD-L1+ or MSI-H", evidence: "IA" }
+      ]
+    },
+    riskStratification: {
+      survival: "5-year: Stage I 70%; Stage IV <5%",
+      location: "Proximal/GEJ worse prognosis than distal",
+      histology: "Diffuse/signet ring worse than intestinal type"
     }
   },
 
