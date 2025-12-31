@@ -1222,6 +1222,48 @@ export const AUTOIMMUNE_DISEASES = {
           nerve_conduction: { factor: 0.6, note: "Mononeuritis multiplex" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "ACR 1990 PAN Classification",
+      requirements: {
+        threshold: "≥3 of 10 criteria",
+        criteria: [
+          "Weight loss >4 kg",
+          "Livedo reticularis",
+          "Testicular pain/tenderness",
+          "Myalgias, weakness, or leg tenderness",
+          "Mononeuropathy or polyneuropathy",
+          "Diastolic BP >90 mmHg",
+          "Elevated BUN or creatinine",
+          "Hepatitis B positivity",
+          "Arteriographic abnormalities",
+          "Biopsy of small/medium artery showing neutrophils"
+        ]
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "ANCA-associated vasculitis", distinguishing: "ANCA positive, pulmonary involvement, glomerulonephritis" },
+      { condition: "Fibromuscular dysplasia", distinguishing: "String of beads appearance, no systemic inflammation" },
+      { condition: "Atherosclerosis", distinguishing: "Older age, CV risk factors, plaques not aneurysms" },
+      { condition: "Segmental arterial mediolysis", distinguishing: "Acute presentation, no inflammation" }
+    ],
+    treatment: {
+      firstLine: [
+        { name: "Prednisone", dose: "1 mg/kg/day", indication: "All patients", evidence: "IA" },
+        { name: "HBV treatment", indication: "If HBV-associated", note: "Entecavir/tenofovir + short-course steroids" }
+      ],
+      severe: [
+        { name: "Cyclophosphamide", dose: "2 mg/kg/day or IV pulses", indication: "Five-Factor Score ≥1", evidence: "IA" },
+        { name: "Rituximab", indication: "Cyclophosphamide intolerance/contraindication", evidence: "IIB" }
+      ],
+      maintenance: [
+        { name: "Azathioprine", dose: "2 mg/kg/day", indication: "After remission induction", evidence: "IB" }
+      ]
+    },
+    riskStratification: {
+      fiveFactorScore: "Proteinuria >1g, Cr >1.58, Cardiomyopathy, GI involvement, CNS involvement",
+      mortality: "5-year survival 75-80%; worse with higher FFS",
+      relapse: "Lower than ANCA vasculitis; 10-20%"
     }
   },
 
