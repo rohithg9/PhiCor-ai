@@ -1237,6 +1237,37 @@ export const INFECTIOUS_DISEASES = {
           liver_volume: { factor: 1.2, note: "Hepatomegaly" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "Culture-Based Diagnosis",
+      requirements: {
+        confirmed: "Positive blood culture for Salmonella species",
+        typhoid: "S. typhi or S. paratyphi; stepladder fever, rose spots",
+        nonTyphoidal: "S. enteritidis, S. typhimurium; usually self-limited GI, but bacteremia in immunocompromised"
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Other gram-negative bacteremia", distinguishing: "Blood culture identifies organism" },
+      { condition: "Malaria", distinguishing: "Travel history, parasites on smear" },
+      { condition: "Brucellosis", distinguishing: "Chronic, undulant fever, serology positive" },
+      { condition: "Infective endocarditis", distinguishing: "Cardiac murmur, vegetations on echo" }
+    ],
+    treatment: {
+      antibiotics: [
+        { name: "Fluoroquinolones", examples: "Ciprofloxacin 500 mg BID", indication: "First-line for non-typhoidal", evidence: "IA" },
+        { name: "Ceftriaxone", dose: "2g IV daily", indication: "Severe cases, typhoid fever", evidence: "IA" },
+        { name: "Azithromycin", indication: "Alternative for fluoroquinolone resistance", evidence: "IA" }
+      ],
+      duration: [
+        { name: "Uncomplicated bacteremia", duration: "7-14 days" },
+        { name: "Endovascular infection", duration: "6+ weeks + surgery" },
+        { name: "Typhoid carrier", duration: "4 weeks, cholecystectomy if persistent" }
+      ]
+    },
+    riskStratification: {
+      endovascular: "Age >50, atherosclerosis increases mycotic aneurysm risk",
+      relapse: "Can relapse; repeat cultures post-treatment",
+      carrier: "1-4% become chronic carriers (Typhoid Mary)"
     }
   }
 };
