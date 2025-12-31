@@ -439,6 +439,51 @@ export const AUTOIMMUNE_DISEASES = {
           blood_pressure: { factor: 1.4, note: "Hypertension in renal crisis" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "ACR/EULAR 2013 Systemic Sclerosis Criteria",
+      requirements: {
+        threshold: "≥9 points required",
+        items: {
+          "Skin thickening proximal to fingers": 9,
+          "Puffy fingers": 2,
+          "Sclerodactyly": 4,
+          "Digital tip ulcers": 2,
+          "Pitting scars": 3,
+          "Telangiectasia": 2,
+          "Abnormal nailfold capillaries": 2,
+          "PAH and/or ILD": 2,
+          "Raynaud's phenomenon": 3,
+          "SSc-related autoantibodies": 3
+        }
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Eosinophilic fasciitis", distinguishing: "Peripheral eosinophilia, groove sign, no Raynaud's" },
+      { condition: "Mixed connective tissue disease", distinguishing: "Anti-U1 RNP+, overlap features" },
+      { condition: "Morphea", distinguishing: "Localized skin only, no systemic involvement" },
+      { condition: "Nephrogenic systemic fibrosis", distinguishing: "Gadolinium exposure, renal failure" }
+    ],
+    treatment: {
+      vascular: [
+        { name: "Calcium channel blockers", examples: "Nifedipine, Amlodipine", indication: "Raynaud's phenomenon", evidence: "IA" },
+        { name: "PDE5 inhibitors", examples: "Sildenafil", indication: "Severe Raynaud's, digital ulcers", evidence: "IA" },
+        { name: "Iloprost", indication: "Severe digital ischemia", evidence: "IB" }
+      ],
+      pulmonary: [
+        { name: "Mycophenolate", indication: "SSc-ILD", evidence: "IB" },
+        { name: "Nintedanib", indication: "Progressive SSc-ILD", evidence: "IB" },
+        { name: "PAH therapy", examples: "Endothelin antagonists, PDE5i, prostanoids", indication: "SSc-PAH" }
+      ],
+      renalCrisis: [
+        { name: "ACE inhibitors", note: "Essential in renal crisis; do NOT use CCBs", evidence: "IA" }
+      ]
+    },
+    riskStratification: {
+      mortality: "5-year survival 75-80%; worse with PAH, ILD, renal crisis",
+      pahRisk: "10-15%; anti-centromere associated; screen annually with echo",
+      ildRisk: "Up to 80% on HRCT; anti-Scl-70 associated",
+      renalCrisis: "5-10%; anti-RNA pol III associated; rapid hypertension"
     }
   },
 
