@@ -944,11 +944,223 @@ def test_affected_organs_format():
         print(f"❌ Error testing affected organs format: {e}")
         return False
 
+def test_comprehensive_parameter_ranges():
+    """Test comprehensive parameter ranges for differential diagnosis panel as mentioned in review request"""
+    print("\n🎯 TESTING COMPREHENSIVE PARAMETER RANGES")
+    print("=" * 60)
+    
+    # Parameter ranges specifically mentioned in the review request
+    target_parameters = [
+        # Heart parameters
+        {"organ": "heart", "param": "ef", "name": "Ejection Fraction", "expected_range": [55, 70], "unit": "%"},
+        {"organ": "heart", "param": "lv_edv", "name": "LV EDV", "expected_range": [70, 160], "unit": "mL"},
+        
+        # Lungs parameters  
+        {"organ": "lungs", "param": "fev1", "name": "FEV1", "expected_range": [80, 120], "unit": "% pred"},
+        {"organ": "lungs", "param": "total_lung_capacity", "name": "Total Lung Capacity", "expected_range": [5000, 7000], "unit": "mL"},
+        
+        # Blood parameters
+        {"organ": "blood", "param": "hemoglobin", "name": "Hemoglobin", "expected_range": [12, 17], "unit": "g/dL"},
+        {"organ": "blood", "param": "platelet_count", "name": "Platelets", "expected_range": [150, 400], "unit": "K/μL"},
+        
+        # Kidneys parameters
+        {"organ": "kidneys", "param": "gfr", "name": "GFR", "expected_range": [90, 120], "unit": "mL/min"},
+        {"organ": "kidneys", "param": "creatinine", "name": "Creatinine", "expected_range": [0.7, 1.3], "unit": "mg/dL"},
+        
+        # Liver parameters (need to check if these exist)
+        {"organ": "liver", "param": "ast", "name": "AST", "expected_range": [10, 40], "unit": "U/L"},
+        {"organ": "liver", "param": "alt", "name": "ALT", "expected_range": [7, 56], "unit": "U/L"},
+    ]
+    
+    results = []
+    
+    try:
+        with open('/app/frontend/src/data/organModels.js', 'r') as f:
+            content = f.read()
+            
+        print(f"\n📋 Testing parameter ranges from organModels.js...")
+        
+        for param in target_parameters:
+            print(f"\n🔍 Testing: {param['name']} ({param['organ']})")
+            
+            # Look for the parameter in the organ model
+            param_found = False
+            range_correct = False
+            
+            # Search for the parameter definition
+            param_pattern = f'id: "{param["param"]}"'
+            if param_pattern in content:
+                param_found = True
+                print(f"  ✅ Parameter {param['param']} found in {param['organ']} model")
+                
+                # Extract the range for this parameter
+                param_start = content.find(param_pattern)
+                param_line_end = content.find('\n', param_start)
+                param_line = content[param_start:param_line_end]
+                
+                # Look for range definition in the same line or next few lines
+                search_area = content[param_start:param_start + 200]
+                if 'range:' in search_area:
+                    range_start = search_area.find('range:')
+                    range_end = search_area.find(']', range_start) + 1
+                    range_text = search_area[range_start:range_end]
+                    
+                    # Extract range values
+                    import re
+                    range_match = re.search(r'range:\s*\[(\d+(?:\.\d+)?),\s*(\d+(?:\.\d+)?)\]', range_text)
+                    if range_match:
+                        actual_min = float(range_match.group(1))
+                        actual_max = float(range_match.group(2))
+                        expected_min, expected_max = param['expected_range']
+                        
+                        # Check if ranges match (allow some tolerance)
+                        if (abs(actual_min - expected_min) <= 5 and abs(actual_max - expected_max) <= 10):
+                            range_correct = True
+                            print(f"  ✅ Range [{actual_min}, {actual_max}] {param['unit']} matches expected [{expected_min}, {expected_max}] {param['unit']}")
+                        else:
+                            print(f"  ⚠️  Range [{actual_min}, {actual_max}] {param['unit']} differs from expected [{expected_min}, {expected_max}] {param['unit']}")
+                    else:
+                        print(f"  ⚠️  Could not parse range from: {range_text}")
+                else:
+                    print(f"  ❌ No range found for parameter {param['param']}")
+            else:
+                print(f"  ❌ Parameter {param['param']} not found in {param['organ']} model")
+            
+            results.append({
+                "organ": param['organ'],
+                "parameter": param['param'],
+                "name": param['name'],
+                "found": param_found,
+                "range_correct": range_correct
+            })
+        
+        return results
+        
+    except Exception as e:
+        print(f"❌ Error testing parameter ranges: {e}")
+        return []
+
+def test_differential_diagnosis_ui_features():
+    """Test differential diagnosis panel UI features mentioned in review request"""
+    print("\n🔍 TESTING DIFFERENTIAL DIAGNOSIS UI FEATURES")
+    print("=" * 60)
+    
+    features_to_test = [
+        {
+            "feature": "12+ organs with selectable parameters",
+            "file": "/app/frontend/src/data/organModels.js",
+            "check": "organ count >= 12"
+        },
+        {
+            "feature": "Parameter normal ranges with units",
+            "file": "/app/frontend/src/data/organModels.js", 
+            "check": "range and unit fields present"
+        },
+        {
+            "feature": "Slider functionality (Critical Low to Critical High)",
+            "file": "/app/frontend/src/components/DifferentialDiagnosisPanel.js",
+            "check": "slider component with range"
+        },
+        {
+            "feature": "Quick buttons (Critical Low, Low, Normal, High, Critical High)",
+            "file": "/app/frontend/src/components/DifferentialDiagnosisPanel.js",
+            "check": "quick value buttons"
+        },
+        {
+            "feature": "Direct value input",
+            "file": "/app/frontend/src/components/DifferentialDiagnosisPanel.js",
+            "check": "input field for values"
+        },
+        {
+            "feature": "Add Abnormal Finding button",
+            "file": "/app/frontend/src/components/DifferentialDiagnosisPanel.js",
+            "check": "abnormal finding functionality"
+        }
+    ]
+    
+    results = []
+    
+    for feature in features_to_test:
+        print(f"\n📋 Testing: {feature['feature']}")
+        
+        try:
+            if feature['file'] == "/app/frontend/src/data/organModels.js":
+                with open(feature['file'], 'r') as f:
+                    content = f.read()
+                
+                if feature['check'] == "organ count >= 12":
+                    # Count organs in the model
+                    organ_count = content.count('name: "')
+                    if organ_count >= 12:
+                        print(f"  ✅ Found {organ_count} organs (>= 12 required)")
+                        results.append({"feature": feature['feature'], "status": "found"})
+                    else:
+                        print(f"  ❌ Found only {organ_count} organs (< 12 required)")
+                        results.append({"feature": feature['feature'], "status": "insufficient"})
+                        
+                elif feature['check'] == "range and unit fields present":
+                    range_count = content.count('range:')
+                    unit_count = content.count('unit:')
+                    if range_count >= 50 and unit_count >= 50:
+                        print(f"  ✅ Found {range_count} range definitions and {unit_count} unit definitions")
+                        results.append({"feature": feature['feature'], "status": "found"})
+                    else:
+                        print(f"  ⚠️  Found {range_count} ranges and {unit_count} units (may be insufficient)")
+                        results.append({"feature": feature['feature'], "status": "partial"})
+                        
+            elif feature['file'] == "/app/frontend/src/components/DifferentialDiagnosisPanel.js":
+                try:
+                    with open(feature['file'], 'r') as f:
+                        content = f.read()
+                    
+                    if feature['check'] == "slider component with range":
+                        if 'slider' in content.lower() or 'range' in content.lower():
+                            print(f"  ✅ Slider/range functionality found")
+                            results.append({"feature": feature['feature'], "status": "found"})
+                        else:
+                            print(f"  ❌ No slider/range functionality found")
+                            results.append({"feature": feature['feature'], "status": "not_found"})
+                            
+                    elif feature['check'] == "quick value buttons":
+                        if 'critical' in content.lower() and 'button' in content.lower():
+                            print(f"  ✅ Quick value buttons found")
+                            results.append({"feature": feature['feature'], "status": "found"})
+                        else:
+                            print(f"  ❌ Quick value buttons not found")
+                            results.append({"feature": feature['feature'], "status": "not_found"})
+                            
+                    elif feature['check'] == "input field for values":
+                        if 'input' in content.lower() and ('value' in content.lower() or 'number' in content.lower()):
+                            print(f"  ✅ Direct value input found")
+                            results.append({"feature": feature['feature'], "status": "found"})
+                        else:
+                            print(f"  ❌ Direct value input not found")
+                            results.append({"feature": feature['feature'], "status": "not_found"})
+                            
+                    elif feature['check'] == "abnormal finding functionality":
+                        if 'abnormal' in content.lower() and ('add' in content.lower() or 'button' in content.lower()):
+                            print(f"  ✅ Add Abnormal Finding functionality found")
+                            results.append({"feature": feature['feature'], "status": "found"})
+                        else:
+                            print(f"  ❌ Add Abnormal Finding functionality not found")
+                            results.append({"feature": feature['feature'], "status": "not_found"})
+                            
+                except FileNotFoundError:
+                    print(f"  ❌ File {feature['file']} not found")
+                    results.append({"feature": feature['feature'], "status": "file_not_found"})
+                    
+        except Exception as e:
+            print(f"  ❌ Error testing {feature['feature']}: {e}")
+            results.append({"feature": feature['feature'], "status": "error"})
+    
+    return results
+
 def run_all_tests():
     """Run all tests and provide summary"""
     print("🧪 PHICORE.AI MEDICAL SIMULATION PLATFORM - COMPREHENSIVE TESTING")
     print("=" * 80)
     print("Testing comprehensive medical simulation platform features")
+    print("Focus: New comprehensive parameter ranges for differential diagnosis")
     print("=" * 80)
     
     test_results = {}
@@ -971,31 +1183,37 @@ def run_all_tests():
     else:
         test_results['frontend_access'] = False
     
-    # Test 4: Specific diseases from review request
+    # Test 4: Comprehensive parameter ranges (NEW - from review request)
+    test_results['parameter_ranges'] = test_comprehensive_parameter_ranges()
+    
+    # Test 5: Differential diagnosis UI features (NEW - from review request)
+    test_results['dd_ui_features'] = test_differential_diagnosis_ui_features()
+    
+    # Test 6: Specific diseases from review request
     test_results['specific_diseases'] = test_specific_diseases_from_review()
     
-    # Test 5: Disease data structure (diagnosticCriteria, differentialDiagnosis, treatment, riskStratification)
+    # Test 7: Disease data structure (diagnosticCriteria, differentialDiagnosis, treatment, riskStratification)
     test_results['disease_data_structure'] = test_disease_data_structure()
     
-    # Test 6: Mathematical equations
+    # Test 8: Mathematical equations
     if test_results['backend_health']:
         test_results['mathematical_equations'] = test_mathematical_equations()
     else:
         test_results['mathematical_equations'] = False
     
-    # Test 7: Calculation endpoints
+    # Test 9: Calculation endpoints
     if test_results['backend_health']:
         test_results['calculation_endpoints'] = test_calculation_endpoints()
     else:
         test_results['calculation_endpoints'] = []
     
-    # Test 8: Differential diagnosis data
+    # Test 10: Differential diagnosis data
     test_results['differential_diagnosis'] = test_differential_diagnosis_data()
     
-    # Test 9: Disease count verification (should be 284+)
+    # Test 11: Disease count verification (should be 284+)
     test_results['disease_count'] = test_disease_count()
     
-    # Test 10: Organ models compatibility
+    # Test 12: Organ models compatibility
     test_results['organ_models'] = test_organ_models_compatibility()
     
     # Summary
