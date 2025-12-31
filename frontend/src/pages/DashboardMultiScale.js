@@ -2810,19 +2810,18 @@ const DashboardMultiScale = () => {
                     : 'All Affected Parameters'}
                 </span>
                 <Badge variant="destructive" className="text-[10px]">
-                  {paramFilterOrgan 
-                    ? allModifiedParameters.filter(p => p.organId === paramFilterOrgan).length 
-                    : allModifiedParameters.length} changes
+                  {filteredParameters.length} changes
                 </Badge>
               </div>
               {/* Expand/Collapse button */}
-              {(paramFilterOrgan 
-                ? allModifiedParameters.filter(p => p.organId === paramFilterOrgan).length 
-                : allModifiedParameters.length) > 6 && (
+              {filteredParameters.length > 6 && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setShowAllParams(!showAllParams)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowAllParams(!showAllParams);
+                  }}
                   className="text-xs h-7"
                 >
                   {showAllParams ? (
@@ -2834,10 +2833,7 @@ const DashboardMultiScale = () => {
               )}
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2">
-              {(paramFilterOrgan 
-                ? allModifiedParameters.filter(p => p.organId === paramFilterOrgan) 
-                : allModifiedParameters
-              ).slice(0, showAllParams ? 100 : 12).map((param, idx) => (
+              {filteredParameters.slice(0, showAllParams ? 100 : 12).map((param, idx) => (
                 <motion.button
                   key={`${param.organId}-${param.id}`}
                   initial={{ opacity: 0, y: 10 }}
