@@ -948,6 +948,35 @@ export const INFECTIOUS_DISEASES = {
           hemorrhage: { factor: 3.0, note: "Hemorrhagic necrosis" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "Clinical + MRI + CSF PCR",
+      requirements: {
+        clinical: "Encephalopathy + fever, focal deficits, behavioral changes, seizures",
+        imaging: "MRI: temporal lobe hyperintensity on T2/FLAIR",
+        labConfirmation: "CSF HSV PCR positive"
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "Autoimmune encephalitis", distinguishing: "Autoantibodies (NMDAR, LGI1), less acute" },
+      { condition: "Bacterial brain abscess", distinguishing: "Ring-enhancing lesion, fever, focal deficits" },
+      { condition: "Stroke", distinguishing: "Acute onset, vascular territory, no fever" },
+      { condition: "Status epilepticus", distinguishing: "Seizures predominant, may overlap" }
+    ],
+    treatment: {
+      empiric: [
+        { name: "Acyclovir", dose: "10 mg/kg IV q8h × 14-21 days", indication: "Start immediately if suspected", evidence: "IA", note: "Do not wait for PCR" }
+      ],
+      supportive: [
+        { name: "ICU monitoring", indication: "All patients", evidence: "IA" },
+        { name: "Antiepileptics", indication: "Seizures", evidence: "IA" },
+        { name: "ICP management", indication: "Cerebral edema", evidence: "IA" }
+      ]
+    },
+    riskStratification: {
+      mortality: "Untreated: 70%; With acyclovir: 10-20%",
+      sequelae: "50-60% have persistent cognitive/behavioral deficits",
+      timing: "Every hour of delay worsens outcome"
     }
   },
 
