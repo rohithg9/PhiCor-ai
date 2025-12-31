@@ -70,6 +70,39 @@ export const INFECTIOUS_DISEASES = {
           muscle_enzymes: { factor: 1.3, note: "Myalgias" }
         }
       }
+    },
+    diagnosticCriteria: {
+      name: "CDC Clinical Case Definition",
+      requirements: {
+        clinicalCriteria: "Fever + cough/sore throat during influenza season",
+        labConfirmation: "Positive RT-PCR, viral culture, or rapid antigen",
+        timing: "Symptom onset within 7 days of exposure"
+      }
+    },
+    differentialDiagnosis: [
+      { condition: "COVID-19", distinguishing: "Anosmia, longer incubation, SARS-CoV-2 PCR positive" },
+      { condition: "RSV", distinguishing: "More bronchiolitis in children, RSV PCR positive" },
+      { condition: "Bacterial pneumonia", distinguishing: "Productive cough, lobar infiltrate, elevated procalcitonin" },
+      { condition: "Mycoplasma", distinguishing: "Walking pneumonia, gradual onset, younger patients" }
+    ],
+    treatment: {
+      antivirals: [
+        { name: "Oseltamivir", dose: "75 mg BID × 5 days", indication: "Within 48h of symptoms", evidence: "IA" },
+        { name: "Baloxavir", dose: "40-80 mg single dose", indication: "Alternative, within 48h", evidence: "IA" },
+        { name: "Peramivir", dose: "600 mg IV single dose", indication: "Hospitalized patients", evidence: "IB" }
+      ],
+      supportive: [
+        { name: "Acetaminophen/NSAIDs", indication: "Fever, myalgias" },
+        { name: "Hydration", indication: "All patients" }
+      ],
+      prevention: [
+        { name: "Annual influenza vaccination", indication: "All ≥6 months", evidence: "IA" }
+      ]
+    },
+    riskStratification: {
+      highRisk: "Age >65, pregnancy, immunocompromised, chronic disease",
+      complications: "Secondary bacterial pneumonia, ARDS, myocarditis",
+      mortality: "0.1% overall; higher in elderly and high-risk groups"
     }
   },
 
