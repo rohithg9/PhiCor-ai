@@ -1215,7 +1215,19 @@ const OrganSidebar = ({
       })}
     </ScrollArea>
 
-    <div className="p-3 border-t border-border/50">
+    <div className="p-3 border-t border-border/50 space-y-2">
+      {/* Home Button */}
+      <button
+        onClick={() => window.location.href = '/'}
+        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-muted-foreground hover:bg-indigo-500/10 hover:text-indigo-400 transition-colors text-sm group"
+      >
+        <div className="w-6 h-6 rounded-md bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center border border-indigo-500/30 group-hover:border-indigo-500/50 transition-colors">
+          <span className="text-sm font-serif text-indigo-400">Φ</span>
+        </div>
+        <span>PhiCor Home</span>
+      </button>
+      
+      {/* Theme Toggle */}
       <button
         onClick={onToggleTheme}
         className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-muted-foreground hover:bg-accent/10 hover:text-foreground transition-colors text-sm"
