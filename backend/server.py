@@ -1276,7 +1276,8 @@ async def get_drugs_from_db(
         query["$or"] = [
             {"name": {"$regex": search, "$options": "i"}},
             {"brand_names": {"$regex": search, "$options": "i"}},
-            {"mechanism_short": {"$regex": search, "$options": "i"}}
+            {"mechanism_short": {"$regex": search, "$options": "i"}},
+            {"drug_class": {"$regex": search, "$options": "i"}}
         ]
     
     drugs = await db.drugs.find(query, {"_id": 0}).skip(offset).limit(limit).to_list(limit)
