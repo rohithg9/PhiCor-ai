@@ -652,24 +652,29 @@ const DrugSimulationPanel = ({ drug, patient, dosage, setDosage, simulation, isS
 
             {/* PK Parameters */}
             {simulation.half_life && (
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                <div className="p-3 rounded-lg bg-card/50 border border-border/50 text-center">
-                  <div className="text-xs text-muted-foreground">Half-life</div>
-                  <div className="font-semibold">{simulation.half_life.toFixed(1)}h</div>
+              <>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  <div className="p-3 rounded-lg bg-card/50 border border-border/50 text-center">
+                    <div className="text-xs text-muted-foreground">Half-life</div>
+                    <div className="font-semibold">{simulation.half_life.toFixed(1)}h</div>
+                  </div>
+                  <div className="p-3 rounded-lg bg-card/50 border border-border/50 text-center">
+                    <div className="text-xs text-muted-foreground">Time to Peak</div>
+                    <div className="font-semibold">{simulation.time_to_peak}h</div>
+                  </div>
+                  <div className="p-3 rounded-lg bg-card/50 border border-border/50 text-center">
+                    <div className="text-xs text-muted-foreground">Steady State</div>
+                    <div className="font-semibold">{simulation.steady_state_time.toFixed(0)}h</div>
+                  </div>
+                  <div className="p-3 rounded-lg bg-card/50 border border-border/50 text-center">
+                    <div className="text-xs text-muted-foreground">Peak Conc.</div>
+                    <div className="font-semibold">{simulation.peak_concentration?.toFixed(2)}</div>
+                  </div>
                 </div>
-                <div className="p-3 rounded-lg bg-card/50 border border-border/50 text-center">
-                  <div className="text-xs text-muted-foreground">Time to Peak</div>
-                  <div className="font-semibold">{simulation.time_to_peak}h</div>
-                </div>
-                <div className="p-3 rounded-lg bg-card/50 border border-border/50 text-center">
-                  <div className="text-xs text-muted-foreground">Steady State</div>
-                  <div className="font-semibold">{simulation.steady_state_time.toFixed(0)}h</div>
-                </div>
-                <div className="p-3 rounded-lg bg-card/50 border border-border/50 text-center">
-                  <div className="text-xs text-muted-foreground">Peak Conc.</div>
-                  <div className="font-semibold">{simulation.peak_concentration?.toFixed(2)}</div>
-                </div>
-              </div>
+                
+                {/* PK Curve Visualization */}
+                <PKCurveVisualization simulation={simulation} dosage={dosage} />
+              </>
             )}
           </div>
         ) : (
