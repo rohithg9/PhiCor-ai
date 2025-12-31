@@ -364,7 +364,7 @@ const LandingPage = () => {
       </section>
 
       {/* ========== WHAT DOES PHICOR MEAN SECTION ========== */}
-      <section className="relative py-24 px-6 bg-gradient-to-b from-transparent via-indigo-950/20 to-transparent">
+      <section id="features" className="relative py-24 px-6 bg-gradient-to-b from-transparent via-indigo-950/20 to-transparent">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
