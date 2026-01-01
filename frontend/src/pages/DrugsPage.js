@@ -485,14 +485,135 @@ const PatientProfilePanel = ({ patient, setPatient, onExtractFromText }) => {
   );
 };
 
-// Drug Simulation Panel
+// Drug Simulation Panel - Redesigned with clear flow and dose recommendations
 const DrugSimulationPanel = ({ drug, patient, dosage, setDosage, simulation, isSimulating }) => {
+  // Calculate GFR for renal dosing adjustments
+  const calculateGFR = () => {
+    // Cockcroft-Gault equation
+    const age = patient.age || 50;
+    const weight = patient.weight || 70;
+    const creatinine = patient.serum_creatinine || 1.0;
+    const sexFactor = patient.sex === 'female' ? 0.85 : 1;
+    return Math.round(((140 - age) * weight * sexFactor) / (72 * creatinine));
+  };
+
+  // Get intelligent dose recommendation based on patient factors
+  const getDoseRecommendation = () => {
+    if (!drug) return null;
+    
+    const gfr = calculateGFR();
+    const age = patient.age || 50;
+    const weight = patient.weight || 70;
+    const liverFunction = patient.liver_function || 'normal';
+    
+    // Find standard dose from drug data
+    const standardDose = drug.dosages?.[0]?.typical_dose || '50mg';
+    const standardDoseMg = parseInt(standardDose) || 50;
+    
+    let recommendedDose = standardDoseMg;
+    let adjustments = [];
+    let riskLevel = 'low';
+    
+    // Renal adjustment based on GFR
+    if (gfr < 30) {
+      recommendedDose = Math.round(standardDoseMg * 0.25);
+      adjustments.push({ factor: 'Severe renal impairment (GFR <30)', action: '75% dose reduction', severity: 'critical' });
+      riskLevel = 'high';
+    } else if (gfr < 60) {
+      recommendedDose = Math.round(standardDoseMg * 0.5);
+      adjustments.push({ factor: 'Moderate renal impairment (GFR 30-60)', action: '50% dose reduction', severity: 'moderate' });
+      riskLevel = 'moderate';
+    } else if (gfr < 90) {
+      recommendedDose = Math.round(standardDoseMg * 0.75);
+      adjustments.push({ factor: 'Mild renal impairment (GFR 60-90)', action: '25% dose reduction', severity: 'low' });
+    }
+    
+    // Hepatic adjustment
+    if (liverFunction === 'severe_impairment') {
+      recommendedDose = Math.round(recommendedDose * 0.25);
+      adjustments.push({ factor: 'Severe hepatic impairment', action: '75% dose reduction', severity: 'critical' });
+      riskLevel = 'high';
+    } else if (liverFunction === 'moderate_impairment') {
+      recommendedDose = Math.round(recommendedDose * 0.5);
+      adjustments.push({ factor: 'Moderate hepatic impairment', action: '50% dose reduction', severity: 'moderate' });
+      if (riskLevel !== 'high') riskLevel = 'moderate';
+    } else if (liverFunction === 'mild_impairment') {
+      recommendedDose = Math.round(recommendedDose * 0.75);
+      adjustments.push({ factor: 'Mild hepatic impairment', action: '25% dose reduction', severity: 'low' });
+    }
+    
+    // Age adjustment for elderly
+    if (age >= 75) {
+      recommendedDose = Math.round(recommendedDose * 0.5);
+      adjustments.push({ factor: 'Elderly patient (≥75 years)', action: 'Start with 50% dose', severity: 'moderate' });
+      if (riskLevel !== 'high') riskLevel = 'moderate';
+    } else if (age >= 65) {
+      recommendedDose = Math.round(recommendedDose * 0.75);
+      adjustments.push({ factor: 'Geriatric patient (65-74 years)', action: 'Consider 25% dose reduction', severity: 'low' });
+    }
+    
+    // Weight-based adjustment for extremes
+    if (weight < 50) {
+      recommendedDose = Math.round(recommendedDose * 0.75);
+      adjustments.push({ factor: 'Low body weight (<50kg)', action: '25% dose reduction', severity: 'low' });
+    } else if (weight > 100) {
+      recommendedDose = Math.round(recommendedDose * 1.25);
+      adjustments.push({ factor: 'High body weight (>100kg)', action: 'Consider 25% dose increase', severity: 'low' });
+    }
+    
+    // Check for contraindicated conditions
+    const contraindicated = [];
+    if (drug.contraindications) {
+      patient.conditions?.forEach(condition => {
+        const match = drug.contraindications.find(ci => 
+          ci.toLowerCase().includes(condition.toLowerCase()) ||
+          condition.toLowerCase().includes(ci.toLowerCase())
+        );
+        if (match) {
+          contraindicated.push(condition);
+          riskLevel = 'high';
+        }
+      });
+    }
+    
+    // Ensure minimum effective dose
+    recommendedDose = Math.max(recommendedDose, 5);
+    
+    return {
+      standardDose: standardDoseMg,
+      recommendedDose,
+      adjustments,
+      gfr,
+      riskLevel,
+      contraindicated
+    };
+  };
+
+  const recommendation = drug ? getDoseRecommendation() : null;
+
   if (!drug) {
     return (
       <div className="flex-1 flex items-center justify-center p-8 text-center">
-        <div>
-          <Pill className="w-16 h-16 mx-auto mb-4 text-muted-foreground/30" />
-          <p className="text-muted-foreground">Select a drug to simulate effects</p>
+        <div className="max-w-md">
+          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-primary/20 to-purple-500/20 flex items-center justify-center">
+            <Pill className="w-10 h-10 text-muted-foreground/50" />
+          </div>
+          <h3 className="text-xl font-semibold mb-2">Patient-Specific Drug Simulation</h3>
+          <p className="text-muted-foreground mb-6">
+            Select a drug from the list to see personalized dosing recommendations based on your patient's characteristics.
+          </p>
+          <div className="text-left p-4 rounded-lg bg-card/50 border border-border/50">
+            <h4 className="font-medium mb-3 flex items-center gap-2">
+              <Info className="w-4 h-4 text-primary" />
+              How it works:
+            </h4>
+            <ol className="space-y-2 text-sm text-muted-foreground">
+              <li className="flex gap-2"><span className="font-bold text-primary">1.</span> Configure your patient's profile (age, weight, renal/liver function)</li>
+              <li className="flex gap-2"><span className="font-bold text-primary">2.</span> Select a drug from the list</li>
+              <li className="flex gap-2"><span className="font-bold text-primary">3.</span> Get personalized dose recommendations with safety alerts</li>
+              <li className="flex gap-2"><span className="font-bold text-primary">4.</span> Adjust dosage and see real-time PK/PD simulation</li>
+            </ol>
+          </div>
         </div>
       </div>
     );
@@ -500,26 +621,128 @@ const DrugSimulationPanel = ({ drug, patient, dosage, setDosage, simulation, isS
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      {/* Drug Header */}
+      {/* Drug Header with Recommendation */}
       <div className="p-4 border-b border-border/50 bg-gradient-to-r from-primary/5 via-purple-500/5 to-indigo-500/5">
-        <div className="flex items-center gap-3 mb-3">
+        <div className="flex items-center gap-3 mb-4">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center">
             <Pill className="w-6 h-6 text-white" />
           </div>
-          <div>
+          <div className="flex-1">
             <h2 className="text-lg font-bold">{drug.name}</h2>
             <p className="text-sm text-muted-foreground">{drug.drug_class}</p>
           </div>
+          {/* Risk Badge */}
+          <Badge className={`${
+            recommendation?.riskLevel === 'high' ? 'bg-red-500/20 text-red-500 border-red-500/30' :
+            recommendation?.riskLevel === 'moderate' ? 'bg-amber-500/20 text-amber-500 border-amber-500/30' :
+            'bg-emerald-500/20 text-emerald-500 border-emerald-500/30'
+          }`}>
+            {recommendation?.riskLevel === 'high' ? '⚠️ High Risk' :
+             recommendation?.riskLevel === 'moderate' ? '⚡ Moderate Risk' :
+             '✓ Low Risk'}
+          </Badge>
         </div>
+
+        {/* Intelligent Dose Recommendation */}
+        {recommendation && (
+          <div className={`p-4 rounded-lg border mb-4 ${
+            recommendation.riskLevel === 'high' ? 'bg-red-500/10 border-red-500/30' :
+            recommendation.riskLevel === 'moderate' ? 'bg-amber-500/10 border-amber-500/30' :
+            'bg-emerald-500/10 border-emerald-500/30'
+          }`}>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold flex items-center gap-2">
+                <Target className="w-4 h-4" />
+                Personalized Dose Recommendation
+              </h3>
+              <div className="text-xs text-muted-foreground">
+                GFR: {recommendation.gfr} mL/min
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 mb-3">
+              <div className="p-3 rounded-lg bg-card/50">
+                <div className="text-xs text-muted-foreground">Standard Dose</div>
+                <div className="text-lg font-bold">{recommendation.standardDose} mg</div>
+              </div>
+              <div className={`p-3 rounded-lg ${
+                recommendation.recommendedDose < recommendation.standardDose 
+                  ? 'bg-amber-500/10' 
+                  : recommendation.recommendedDose > recommendation.standardDose
+                  ? 'bg-blue-500/10'
+                  : 'bg-emerald-500/10'
+              }`}>
+                <div className="text-xs text-muted-foreground">Recommended for Patient</div>
+                <div className="text-lg font-bold flex items-center gap-2">
+                  {recommendation.recommendedDose} mg
+                  {recommendation.recommendedDose < recommendation.standardDose && (
+                    <TrendingDown className="w-4 h-4 text-amber-500" />
+                  )}
+                  {recommendation.recommendedDose > recommendation.standardDose && (
+                    <TrendingUp className="w-4 h-4 text-blue-500" />
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Adjustment Reasons */}
+            {recommendation.adjustments.length > 0 && (
+              <div className="space-y-2">
+                <div className="text-xs font-medium text-muted-foreground">Dose Adjustments Applied:</div>
+                {recommendation.adjustments.map((adj, idx) => (
+                  <div key={idx} className={`flex items-center justify-between p-2 rounded-lg text-sm ${
+                    adj.severity === 'critical' ? 'bg-red-500/10' :
+                    adj.severity === 'moderate' ? 'bg-amber-500/10' :
+                    'bg-blue-500/10'
+                  }`}>
+                    <span>{adj.factor}</span>
+                    <Badge variant="outline" className="text-xs">{adj.action}</Badge>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Contraindications Warning */}
+            {recommendation.contraindicated?.length > 0 && (
+              <div className="mt-3 p-3 rounded-lg bg-red-500/20 border border-red-500/50">
+                <div className="flex items-center gap-2 text-red-500 font-semibold">
+                  <XCircle className="w-4 h-4" />
+                  CONTRAINDICATION WARNING
+                </div>
+                <p className="text-sm mt-1">
+                  Patient has: {recommendation.contraindicated.join(', ')}
+                </p>
+              </div>
+            )}
+
+            {/* Apply Recommendation Button */}
+            <Button 
+              size="sm" 
+              className="mt-3 w-full"
+              onClick={() => setDosage(recommendation.recommendedDose)}
+              variant={dosage === recommendation.recommendedDose ? "secondary" : "default"}
+            >
+              {dosage === recommendation.recommendedDose ? (
+                <><Check className="w-4 h-4 mr-2" /> Recommended Dose Applied</>
+              ) : (
+                <><Target className="w-4 h-4 mr-2" /> Apply Recommended Dose ({recommendation.recommendedDose}mg)</>
+              )}
+            </Button>
+          </div>
+        )}
         
         {/* Dosage Slider */}
         <div className="bg-card/50 rounded-lg p-4 border border-border/50">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium flex items-center gap-2">
               <Sliders className="w-4 h-4" />
-              Dosage
+              Current Dosage
             </span>
-            <span className="text-lg font-bold text-primary">{dosage} mg</span>
+            <span className={`text-lg font-bold ${
+              recommendation && dosage > recommendation.recommendedDose * 1.5 ? 'text-red-500' :
+              recommendation && dosage < recommendation.recommendedDose * 0.5 ? 'text-amber-500' :
+              'text-primary'
+            }`}>{dosage} mg</span>
           </div>
           <Slider
             value={[dosage]}
@@ -531,7 +754,11 @@ const DrugSimulationPanel = ({ drug, patient, dosage, setDosage, simulation, isS
           />
           <div className="flex justify-between text-xs text-muted-foreground">
             <span>Low (5mg)</span>
-            <span>Standard</span>
+            {recommendation && (
+              <span className="text-primary font-medium">
+                ↑ Recommended: {recommendation.recommendedDose}mg
+              </span>
+            )}
             <span>High (200mg)</span>
           </div>
         </div>
@@ -542,7 +769,7 @@ const DrugSimulationPanel = ({ drug, patient, dosage, setDosage, simulation, isS
         {isSimulating ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            <span className="ml-2">Simulating...</span>
+            <span className="ml-2">Simulating pharmacokinetics...</span>
           </div>
         ) : simulation ? (
           <div className="space-y-4">
@@ -550,30 +777,30 @@ const DrugSimulationPanel = ({ drug, patient, dosage, setDosage, simulation, isS
             <div className="grid grid-cols-2 gap-3">
               <div className={`p-4 rounded-lg border ${simulation.efficacy_score >= 70 ? 'bg-emerald-500/10 border-emerald-500/30' : simulation.efficacy_score >= 40 ? 'bg-amber-500/10 border-amber-500/30' : 'bg-red-500/10 border-red-500/30'}`}>
                 <div className="text-xs text-muted-foreground mb-1">Efficacy Score</div>
-                <div className="text-2xl font-bold">{simulation.efficacy_score}</div>
+                <div className="text-2xl font-bold">{simulation.efficacy_score}%</div>
               </div>
               <div className={`p-4 rounded-lg border ${simulation.safety_score >= 70 ? 'bg-emerald-500/10 border-emerald-500/30' : simulation.safety_score >= 40 ? 'bg-amber-500/10 border-amber-500/30' : 'bg-red-500/10 border-red-500/30'}`}>
                 <div className="text-xs text-muted-foreground mb-1">Safety Score</div>
-                <div className="text-2xl font-bold">{simulation.safety_score}</div>
+                <div className="text-2xl font-bold">{simulation.safety_score}%</div>
               </div>
             </div>
 
-            {/* Recommendation */}
+            {/* Overall Recommendation */}
             <div className={`p-4 rounded-lg border ${
-              simulation.overall_recommendation.includes('CONTRAINDICATED') ? 'bg-red-500/10 border-red-500/30' :
-              simulation.overall_recommendation.includes('HIGH RISK') ? 'bg-red-500/10 border-red-500/30' :
-              simulation.overall_recommendation.includes('CAUTION') ? 'bg-amber-500/10 border-amber-500/30' :
+              simulation.overall_recommendation?.includes('CONTRAINDICATED') ? 'bg-red-500/10 border-red-500/30' :
+              simulation.overall_recommendation?.includes('HIGH RISK') ? 'bg-red-500/10 border-red-500/30' :
+              simulation.overall_recommendation?.includes('CAUTION') ? 'bg-amber-500/10 border-amber-500/30' :
               'bg-emerald-500/10 border-emerald-500/30'
             }`}>
               <div className="text-sm font-medium">{simulation.overall_recommendation}</div>
             </div>
 
-            {/* Dose Adjustment */}
+            {/* Server-side Dose Adjustment (if different from client-side) */}
             {simulation.dose_adjustment_reason && (
               <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
                 <div className="flex items-center gap-2 text-sm">
                   <Info className="w-4 h-4 text-blue-500" />
-                  <span>Adjusted dose: <strong>{simulation.actual_dose} mg</strong></span>
+                  <span>Server calculation: <strong>{simulation.actual_dose} mg</strong></span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">{simulation.dose_adjustment_reason}</p>
               </div>
