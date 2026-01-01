@@ -229,9 +229,23 @@ agent_communication:
   - agent: "main"
     message: "COMPREHENSIVE MEDICAL KNOWLEDGE BASE SYSTEM IMPLEMENTED: Created AI-powered disease generation using GPT-4o. System includes enhanced disease schema with sensitivity/specificity for symptoms, comprehensive treatment protocols with dosages, and integration with ICD-10/SNOMED codes. Successfully generated and stored 6 comprehensive disease profiles. API endpoints available for single (/api/diseases-db/generate) and batch (/api/diseases-db/generate-batch) generation. Priority list of 202 diseases available for expansion."
   - agent: "main"
-    message: "LANDING PAGE PLATFORM FEATURES SECTION IMPLEMENTED: Added new 'Three Pillars of Clinical Excellence' section to landing page showcasing the 3 core features using Greek symbol icons (Φ, Δ, ρ). Features focus on clinical value and end-user benefits - NO AI mentions (credits PhiCor). Each card includes: feature description, clinical value bullet points, and CTA button. Also added stats bar with 130+ Disease Profiles, 115+ Drug Monographs, 6 Organ Systems, ∞ Mathematical Models. Navigation updated with 'Clinical Tools' link."
+    message: "LANDING PAGE PLATFORM FEATURES SECTION IMPLEMENTED: Added new 'Three Pillars of Clinical Excellence' section to landing page showcasing the 3 core features using Greek symbol icons (Φ, Δ, ρ). Features focus on clinical value and end-user benefits - NO AI mentions (credits PhiCor). Each card includes: feature description, clinical value bullet points, and CTA button. Also added stats bar with 186+ Disease Profiles, 115+ Drug Monographs, 6 Organ Systems, ∞ Mathematical Models. Navigation updated with 'Clinical Tools' link."
   - agent: "main"
     message: "FEATURE TUTORIAL/EXPLAINER SYSTEM IMPLEMENTED: Created FeatureTutorial component with step-by-step guided tours for all 3 feature pages. Each page now has 'How to Use' button in header. Tutorial includes: dark overlay backdrop, spotlight highlighting of UI elements, step-by-step navigation with Back/Next buttons, keyboard support (arrow keys, Escape). Tutorials cover: Dashboard (6 steps - search, organs, scales, equations, clinical), Differential (7 steps - input methods, parameters, clinical text, synthesis), Drugs (6 steps - search, filters, details, simulation)."
+  - agent: "main"
+    message: "MOBILE UI FIXES AND NEW FEATURES IMPLEMENTED: 1) Fixed 'How to Use' button visibility on Dashboard mobile view. 2) Fully implemented Case Library with 14 clinical cases across 4 specialties (Cardiology, Pulmonology, Neurology, Emergency Medicine) - each case now has full clinical text, learning points, and can be loaded into analyzer. 3) Implemented Simulator with 'Start Simulation' button that generates random cases. 4) Added 'Upload Document' feature to extract clinical text from PDF, Word, and TXT files via new /api/diagnosis/extract-document endpoint."
+
+  - task: "Mobile UI Fixes and Case Library/Simulator/Upload Implementation"
+    implemented: true
+    working: "needs_testing"
+    file: "/app/frontend/src/components/TestPatientPanel.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "1) Fixed Dashboard 'How to Use' button for mobile. 2) Fully implemented Case Library with 14 cases. 3) Implemented Simulator with Start Simulation button. 4) Added Upload Document feature with PDF/Word/TXT extraction via backend API."
   - agent: "testing"
     message: "PLATFORM FEATURES SECTION COMPREHENSIVE TESTING COMPLETE: Successfully verified ALL 6 requirements from review request. ✅ ALL TESTS PASSED! 1) Section Visibility & Placement: Section appears after 'How It Works' and before 'Advantages' with correct heading 'Three Pillars of Clinical Excellence'. 2) Three Feature Cards: All 3 cards present with correct Greek symbols (Φ Purple/Indigo PhiCor Engine - Physiological Modeling, Δ Emerald/Teal PhiCor Synthesis - Differential Diagnosis, ρ Rose/Pink Drug Engine - Pharmacological Intelligence), each with 'CLINICAL VALUE' sections containing 3 bullet points, NO AI mentions (properly credits PhiCor). 3) Navigation Buttons: All working correctly ('Explore Engine' → /dashboard, 'Try Synthesis' → /differential, 'Browse Drugs' → /drugs). 4) Stats Bar: All stats visible with gradient colors (130+ Disease Profiles, 115+ Drug Monographs, 6 Organ Systems, ∞ Mathematical Models). 5) Navigation Menu: 'Clinical Tools' link appears in navigation and scrolls to platform-features section. 6) Mobile Responsiveness: Cards stack vertically on mobile (390px width), text remains readable, navigation buttons functional. Landing page Platform Features section is fully functional and meets all requirements perfectly."
   - agent: "testing"
