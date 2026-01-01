@@ -660,7 +660,7 @@ PMH: Hypertension, Type 2 Diabetes"
                       ) : (
                         <>
                           <Sparkles className="w-3 h-3 mr-1" />
-                          AI Synthesis
+                          Φ Synthesis
                         </>
                       )}
                     </Button>
@@ -717,7 +717,7 @@ PMH: Hypertension, Type 2 Diabetes"
                     ) : (
                       <>
                         <Sparkles className="w-3 h-3 mr-1" />
-                        Run AI Synthesis
+                        Run Φ Synthesis
                       </>
                     )}
                   </Button>
