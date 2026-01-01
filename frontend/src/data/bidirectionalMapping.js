@@ -773,6 +773,45 @@ const SYMPTOM_KEYWORDS = [
   'anxiety', 'depression', 'insomnia',
 ];
 
+// Mapping of common ICD codes to disease names (for imaging findings fallback)
+const ICD_CODE_NAMES = {
+  'I50': 'Heart Failure',
+  'I50_2': 'Heart Failure with Reduced EF (HFrEF)',
+  'I27': 'Pulmonary Heart Disease',
+  'I26': 'Pulmonary Embolism',
+  'I42': 'Cardiomyopathy',
+  'I51': 'Complications of Heart Disease',
+  'I30': 'Acute Pericarditis',
+  'I31': 'Other Pericardial Diseases',
+  'I11': 'Hypertensive Heart Disease',
+  'I21': 'Acute Myocardial Infarction',
+  'I25': 'Chronic Ischemic Heart Disease',
+  'I34': 'Mitral Valve Disorders',
+  'I35': 'Aortic Valve Disorders',
+  'I36': 'Tricuspid Valve Disorders',
+  'J81': 'Pulmonary Edema',
+  'J90': 'Pleural Effusion',
+  'C78': 'Secondary Malignant Neoplasm',
+  'J18': 'Pneumonia',
+  'J15': 'Bacterial Pneumonia',
+  'J13': 'Pneumococcal Pneumonia',
+  'J93': 'Pneumothorax',
+  'J43': 'Emphysema',
+  'J44': 'COPD',
+  'K76': 'Other Liver Diseases',
+  'K70': 'Alcoholic Liver Disease',
+  'K74': 'Liver Fibrosis and Cirrhosis',
+  'D73': 'Diseases of Spleen',
+  'N13': 'Obstructive Uropathy',
+  'Q61': 'Cystic Kidney Disease',
+  'N28': 'Other Kidney Disorders',
+  'G93': 'Other Brain Disorders',
+  'I63': 'Cerebral Infarction',
+  'I64': 'Stroke',
+  'I61': 'Intracerebral Hemorrhage',
+  'I62': 'Other Intracranial Hemorrhage',
+};
+
 // Clinical/Imaging findings that map to disease patterns
 const CLINICAL_FINDING_PATTERNS = {
   // Cardiac findings
