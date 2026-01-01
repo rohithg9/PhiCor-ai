@@ -102,22 +102,27 @@ const LandingPage = () => {
     }
   ];
 
-  // Advantages
+  // Advantages - Real PhiCor Features
   const advantages = [
     {
-      icon: <LineChart className="w-6 h-6" />,
-      title: "Predictive Trajectories",
-      description: "See where your patient will be in 24 hours based on current mathematical drift."
+      icon: <Activity className="w-6 h-6" />,
+      title: "Mathematical Disease Modeling",
+      description: "Simulate how diseases affect 16+ organ systems using validated mathematical equations - see real-time parameter changes."
     },
     {
-      icon: <Globe className="w-6 h-6" />,
-      title: "Environmental Intelligence",
-      description: "We account for external variables like altitude and pollution to see the \"Reactionary Math\" of the body."
+      icon: <Brain className="w-6 h-6" />,
+      title: "AI Differential Diagnosis",
+      description: "Input clinical findings or free text and get ranked differential diagnoses with evidence-based guidelines and ICD-10 codes."
     },
     {
-      icon: <Zap className="w-6 h-6" />,
-      title: "Precision Diagnosis",
-      description: "Shorten the time to treatment by removing the need for \"observation periods.\" If the math shows a decline, you act immediately."
+      icon: <Calculator className="w-6 h-6" />,
+      title: "Clinical Calculators",
+      description: "40+ validated scoring systems (CHA₂DS₂-VASc, MELD, SOFA, GCS) linked to diseases for instant risk stratification."
+    },
+    {
+      icon: <Pill className="w-6 h-6" />,
+      title: "PK/PD Drug Simulation",
+      description: "Explore 100+ drugs with real pharmacokinetic modeling, mechanism of action, and clinical effect predictions."
     }
   ];
 
