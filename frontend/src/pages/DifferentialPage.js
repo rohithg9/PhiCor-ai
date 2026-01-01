@@ -2,6 +2,7 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import FeatureNav from '../components/FeatureNav';
 import TestPatientPanel from '../components/TestPatientPanel';
+import { FeatureTutorial, TutorialButton, useTutorial } from '../components/FeatureTutorial';
 import { 
   Search, Plus, Trash2, FileText, Upload, AlertTriangle,
   CheckCircle, ChevronDown, ChevronUp, Activity, User, Clipboard,
