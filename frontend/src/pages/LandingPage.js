@@ -150,7 +150,7 @@ const LandingPage = () => {
     {
       icon: <Pill className="w-6 h-6" />,
       title: "PK/PD Drug Simulation",
-      description: "Explore 100+ drugs with real pharmacokinetic modeling, mechanism of action, and clinical effect predictions."
+      description: "Explore 300+ drugs with real pharmacokinetic modeling, mechanism of action, and clinical effect predictions."
     }
   ];
 
