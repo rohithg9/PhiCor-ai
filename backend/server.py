@@ -2140,6 +2140,63 @@ async def get_disease_detail(disease_id: str):
     return disease
 
 
+# ============== AI-POWERED CLINICAL SYNTHESIS ==============
+
+class ClinicalFinding(BaseModel):
+    """Model for a clinical finding"""
+    parameterId: Optional[str] = None
+    name: Optional[str] = None
+    value: Optional[float] = None
+    unit: Optional[str] = ""
+    direction: Optional[str] = None
+    normalRange: Optional[str] = ""
+    severity: Optional[str] = "moderate"
+
+class ClinicalSynthesisRequest(BaseModel):
+    """Request model for clinical synthesis"""
+    clinical_text: str = ""
+    lab_findings: List[ClinicalFinding] = []
+    imaging_findings: List[ClinicalFinding] = []
+    symptoms: List[ClinicalFinding] = []
+    patient_info: Optional[Dict[str, Any]] = None
+
+@api_router.post("/diagnosis/synthesize")
+async def synthesize_clinical_case(request: ClinicalSynthesisRequest):
+    """
+    Perform AI-powered clinical synthesis.
+    Analyzes the ENTIRE clinical picture like an experienced physician.
+    Connects patterns, calculates probabilities, and explains reasoning.
+    """
+    try:
+        from services.clinical_synthesis import get_synthesis_engine
+        
+        engine = get_synthesis_engine()
+        
+        # Convert Pydantic models to dicts
+        lab_findings = [f.model_dump() for f in request.lab_findings]
+        imaging_findings = [f.model_dump() for f in request.imaging_findings]
+        symptoms = [f.model_dump() for f in request.symptoms]
+        
+        synthesis = await engine.synthesize_clinical_case(
+            clinical_text=request.clinical_text,
+            lab_findings=lab_findings,
+            imaging_findings=imaging_findings,
+            symptoms=symptoms,
+            patient_info=request.patient_info
+        )
+        
+        return {
+            "success": True,
+            "synthesis": synthesis
+        }
+        
+    except ImportError as e:
+        raise HTTPException(status_code=500, detail=f"Synthesis engine not available: {str(e)}")
+    except Exception as e:
+        logger.error(f"Error in clinical synthesis: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # ============== AI-POWERED MEDICAL KNOWLEDGE GENERATION ==============
 
 class DiseaseGenerationRequest(BaseModel):
