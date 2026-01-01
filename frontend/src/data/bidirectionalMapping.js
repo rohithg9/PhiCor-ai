@@ -172,11 +172,28 @@ export const getConditionsAffectingParameter = (parameterId, direction = null) =
  * @returns {number} Probability score (0-100)
  */
 const calculateProbabilityScore = (diseaseCode, disease, findings) => {
-  if (!disease || !findings || findings.length === 0) return 0;
+  if (!findings || findings.length === 0) return 0;
   
   // Prior probability based on prevalence
   const prevalence = DISEASE_PREVALENCE[diseaseCode] || DISEASE_PREVALENCE['default'];
   const priorWeight = Math.log10(prevalence + 1) / 5; // Normalize to ~0-1
+  
+  // If no disease definition, use a simpler scoring based on match count
+  if (!disease) {
+    // Count how many findings suggest this disease
+    const matchingFindings = findings.filter(f => f.diseases && f.diseases.includes(diseaseCode));
+    const baseScore = (matchingFindings.length / findings.length) * 60;
+    
+    // Add severity bonus
+    let severityBonus = 0;
+    matchingFindings.forEach(f => {
+      if (f.severity === 'severe') severityBonus += 15;
+      else if (f.severity === 'moderate') severityBonus += 10;
+      else severityBonus += 5;
+    });
+    
+    return Math.min(100, baseScore + severityBonus + (priorWeight * 10));
+  }
   
   // Likelihood: How well do findings match disease modifications?
   let likelihoodScore = 0;
