@@ -1,4 +1,16 @@
 backend:
+  - task: "Clinical Calculators Integration"
+    implemented: true
+    working: "needs_testing"
+    file: "/app/frontend/src/data/clinicalCalculators.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented comprehensive Clinical Calculators module with 40+ medical scoring systems (CHADS-VASc, MELD, SOFA, GCS, etc.), integrated into Differential Diagnosis page as new tab, and Dashboard disease-linked calculator panel"
+
   - task: "Comprehensive Drug Database Expansion API Testing"
     implemented: true
     working: true
