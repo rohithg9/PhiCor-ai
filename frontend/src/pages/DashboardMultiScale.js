@@ -2680,30 +2680,31 @@ const DashboardMultiScale = () => {
           )}
         </div>
         
-        {/* Mobile Tutorial Button */}
-        <TutorialButton onClick={tutorial.open} className="h-8 text-xs px-2" />
-        </div>
+        {/* Mobile Tutorial Button and Disease Sheet */}
+        <div className="flex items-center gap-2">
+          <TutorialButton onClick={tutorial.open} className="h-8 text-xs px-2" />
 
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <Stethoscope className="w-5 h-5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="right" className="w-80 p-0 flex flex-col">
-            <DiseasePanel 
-              diseases={diseases}
-              selectedDisease={selectedDisease}
-              onSelectDisease={handleDiseaseSelect}
-              currentDisease={currentDisease}
-              diseaseSeverity={diseaseSeverity}
-              onChangeSeverity={setDiseaseSeverity}
-              showClinicalPanel={showClinicalPanel}
-              onToggleClinicalPanel={handleToggleClinicalPanel}
-              isMobile
-            />
-          </SheetContent>
-        </Sheet>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Stethoscope className="w-5 h-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-80 p-0 flex flex-col">
+              <DiseasePanel 
+                diseases={diseases}
+                selectedDisease={selectedDisease}
+                onSelectDisease={handleDiseaseSelect}
+                currentDisease={currentDisease}
+                diseaseSeverity={diseaseSeverity}
+                onChangeSeverity={setDiseaseSeverity}
+                showClinicalPanel={showClinicalPanel}
+                onToggleClinicalPanel={handleToggleClinicalPanel}
+                isMobile
+              />
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
 
       {/* Desktop Left Sidebar */}
