@@ -249,3 +249,15 @@ agent_communication:
       - working: true
         agent: "testing"
         comment: "✅ PLATFORM FEATURES SECTION COMPREHENSIVE TESTING COMPLETE: Successfully verified ALL 6 requirements from review request. 1) Section Visibility & Placement: Section appears after 'How It Works' and before 'Advantages' with correct heading 'Three Pillars of Clinical Excellence'. 2) Three Feature Cards: All 3 cards present with correct Greek symbols (Φ Purple/Indigo PhiCor Engine - Physiological Modeling, Δ Emerald/Teal PhiCor Synthesis - Differential Diagnosis, ρ Rose/Pink Drug Engine - Pharmacological Intelligence), each with 'CLINICAL VALUE' sections containing 3 bullet points, NO AI mentions (properly credits PhiCor). 3) Navigation Buttons: All working correctly ('Explore Engine' → /dashboard, 'Try Synthesis' → /differential, 'Browse Drugs' → /drugs). 4) Stats Bar: All stats visible with gradient colors (130+ Disease Profiles, 115+ Drug Monographs, 6 Organ Systems, ∞ Mathematical Models). 5) Navigation Menu: 'Clinical Tools' link appears in navigation and scrolls to platform-features section. 6) Mobile Responsiveness: Cards stack vertically on mobile (390px width), text remains readable, navigation buttons functional. All requirements successfully verified and working perfectly."
+
+  - task: "Feature Tutorial/Explainer System"
+    implemented: true
+    working: "needs_testing"
+    file: "/app/frontend/src/components/FeatureTutorial.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented interactive tutorial system for all 3 feature pages (Φ, Δ, ρ). Each page has 'How to Use' button. Tutorial shows step-by-step walkthrough with spotlight highlighting, Back/Next navigation, keyboard support."
