@@ -726,30 +726,30 @@ const DrugsPage = () => {
         params.append('limit', '100');
         
         const url = `${API_URL}/api/drugs-db?${params.toString()}`;
-        console.log('Fetching drugs from:', url);
+        setDebugInfo(`Fetching: ${url}`);
         
         const response = await fetch(url);
-        console.log('Response status:', response.status);
+        setDebugInfo(`Status: ${response.status}`);
         
         if (response.ok) {
           const data = await response.json();
-          console.log('Drugs received:', data.drugs?.length || 0, 'Total:', data.total);
+          setDebugInfo(`Got ${data.drugs?.length || 0} drugs`);
           if (data.drugs && Array.isArray(data.drugs)) {
             setDrugs(data.drugs);
           } else {
-            console.error('Invalid data format:', data);
             setDrugs([]);
-            setError('Invalid data format received');
+            setError('Invalid data format');
+            setDebugInfo('Invalid format');
           }
         } else {
-          console.error('Error response:', response.status, response.statusText);
           setDrugs([]);
           setError(`API Error: ${response.status}`);
+          setDebugInfo(`Error: ${response.status}`);
         }
       } catch (err) {
-        console.error('Error fetching drugs:', err);
         setDrugs([]);
         setError(err.message);
+        setDebugInfo(`Catch: ${err.message}`);
       } finally {
         setLoading(false);
       }
