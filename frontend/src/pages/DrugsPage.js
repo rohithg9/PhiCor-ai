@@ -1084,8 +1084,15 @@ const DrugSimulationPanel = ({ drug, patient, dosage, setDosage, simulation, isS
       {/* Drug Header with Recommendation */}
       <div className="p-4 border-b border-border/50 bg-gradient-to-r from-primary/5 via-purple-500/5 to-indigo-500/5">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center">
-            <Pill className="w-6 h-6 text-white" />
+          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+            recommendation?.isContraindicated 
+              ? 'bg-gradient-to-br from-red-600 to-red-800' 
+              : 'bg-gradient-to-br from-primary to-purple-500'
+          }`}>
+            {recommendation?.isContraindicated 
+              ? <XCircle className="w-6 h-6 text-white" />
+              : <Pill className="w-6 h-6 text-white" />
+            }
           </div>
           <div className="flex-1">
             <h2 className="text-lg font-bold">{drug.name}</h2>
@@ -1093,18 +1100,66 @@ const DrugSimulationPanel = ({ drug, patient, dosage, setDosage, simulation, isS
           </div>
           {/* Risk Badge */}
           <Badge className={`${
+            recommendation?.isContraindicated ? 'bg-red-600 text-white border-red-600 animate-pulse' :
             recommendation?.riskLevel === 'high' ? 'bg-red-500/20 text-red-500 border-red-500/30' :
             recommendation?.riskLevel === 'moderate' ? 'bg-amber-500/20 text-amber-500 border-amber-500/30' :
             'bg-emerald-500/20 text-emerald-500 border-emerald-500/30'
           }`}>
-            {recommendation?.riskLevel === 'high' ? '⚠️ High Risk' :
+            {recommendation?.isContraindicated ? '🚫 CONTRAINDICATED' :
+             recommendation?.riskLevel === 'high' ? '⚠️ High Risk' :
              recommendation?.riskLevel === 'moderate' ? '⚡ Moderate Risk' :
              '✓ Low Risk'}
           </Badge>
         </div>
 
-        {/* Intelligent Dose Recommendation */}
-        {recommendation && (
+        {/* CRITICAL: Contraindication Warning - Shows FIRST if allergy/contraindication found */}
+        {recommendation?.isContraindicated && recommendation?.contraindications?.length > 0 && (
+          <div className="mb-4 p-4 rounded-lg bg-red-600/20 border-2 border-red-600 animate-pulse">
+            <div className="flex items-center gap-2 text-red-500 font-bold text-lg mb-2">
+              <AlertTriangle className="w-6 h-6" />
+              ⛔ DO NOT ADMINISTER - CONTRAINDICATED
+            </div>
+            <div className="space-y-2">
+              {recommendation.contraindications.map((ci, idx) => (
+                <div key={idx} className="flex items-start gap-2 text-red-400">
+                  <XCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm">{ci}</span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-3 p-2 rounded bg-red-900/50 text-red-200 text-xs">
+              <strong>Clinical Note:</strong> This drug is contraindicated for this patient. Consider alternative medications.
+            </div>
+          </div>
+        )}
+
+        {/* Drug Interaction Warnings */}
+        {recommendation?.interactionWarnings?.length > 0 && (
+          <div className="mb-4 p-4 rounded-lg bg-amber-500/10 border border-amber-500/50">
+            <div className="flex items-center gap-2 text-amber-500 font-semibold mb-2">
+              <AlertTriangle className="w-5 h-5" />
+              Drug-Drug Interactions Detected
+            </div>
+            <div className="space-y-2">
+              {recommendation.interactionWarnings.map((int, idx) => (
+                <div key={idx} className={`p-2 rounded text-sm ${
+                  int.type === 'SEVERE' ? 'bg-red-500/10 border-l-4 border-red-500' : 'bg-amber-500/10 border-l-4 border-amber-500'
+                }`}>
+                  <div className="flex items-center gap-2">
+                    <Badge className={int.type === 'SEVERE' ? 'bg-red-500 text-white' : 'bg-amber-500 text-white'}>
+                      {int.type}
+                    </Badge>
+                    <span className="font-medium">{int.drug1} + {int.drug2}</span>
+                  </div>
+                  <p className="text-muted-foreground text-xs mt-1">→ {int.effect}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Intelligent Dose Recommendation - Only show if NOT contraindicated */}
+        {recommendation && !recommendation.isContraindicated && (
           <div className={`p-4 rounded-lg border mb-4 ${
             recommendation.riskLevel === 'high' ? 'bg-red-500/10 border-red-500/30' :
             recommendation.riskLevel === 'moderate' ? 'bg-amber-500/10 border-amber-500/30' :
