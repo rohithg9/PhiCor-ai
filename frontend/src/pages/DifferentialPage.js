@@ -375,7 +375,8 @@ const DifferentialPage = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       console.log('Synthesis check:', { findingsCount: abnormalFindings.length, hasText: !!clinicalText.trim() });
-      if (abnormalFindings.length >= 2 || (clinicalText.trim() && abnormalFindings.length > 0)) {
+      // Trigger synthesis if we have 2+ findings OR if we have clinical text with 1+ findings OR just clinical text
+      if (abnormalFindings.length >= 2 || (clinicalText.trim() && abnormalFindings.length > 0) || (clinicalText.trim().length > 50 && differentialResults.length > 0)) {
         console.log('Triggering clinical synthesis...');
         runClinicalSynthesis();
       } else {
@@ -383,7 +384,7 @@ const DifferentialPage = () => {
       }
     }, 1500);
     return () => clearTimeout(timer);
-  }, [abnormalFindings, clinicalText, runClinicalSynthesis]);
+  }, [abnormalFindings, clinicalText, differentialResults, runClinicalSynthesis]);
   
   // Get probability color
   const getProbabilityColor = (score) => {
