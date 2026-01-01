@@ -294,6 +294,77 @@ const DifferentialPage = () => {
     }
   };
   
+  // NEW: Run AI-powered clinical synthesis
+  const runClinicalSynthesis = useCallback(async () => {
+    // Need some findings to synthesize
+    if (abnormalFindings.length === 0 && !clinicalText.trim()) {
+      setClinicalSynthesis(null);
+      return;
+    }
+    
+    setIsSynthesizing(true);
+    
+    try {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
+      
+      // Separate findings by type
+      const labFindings = abnormalFindings.filter(f => f.source !== 'clinical-text' || !f.diseases?.length);
+      const imagingFindings = abnormalFindings.filter(f => f.diseases?.length > 0);
+      const symptoms = abnormalFindings.filter(f => f.source === 'clinical-text' && f.type === 'symptom');
+      
+      const response = await fetch(`${backendUrl}/api/diagnosis/synthesize`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clinical_text: clinicalText,
+          lab_findings: labFindings.map(f => ({
+            parameterId: f.parameterId,
+            name: f.parameterName || f.parameterId,
+            value: f.value,
+            unit: f.unit,
+            direction: f.direction,
+            normalRange: f.normalRange,
+            severity: f.severity
+          })),
+          imaging_findings: imagingFindings.map(f => ({
+            parameterId: f.parameterId,
+            name: f.parameterName || f.parameterId,
+            direction: f.direction,
+            severity: f.severity
+          })),
+          symptoms: symptoms.map(f => ({
+            parameterId: f.parameterId,
+            name: f.parameterName || f.parameterId
+          })),
+          patient_info: null
+        })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.synthesis) {
+          setClinicalSynthesis(data.synthesis);
+        }
+      }
+    } catch (error) {
+      console.error('Clinical synthesis error:', error);
+    } finally {
+      setIsSynthesizing(false);
+    }
+  }, [abnormalFindings, clinicalText]);
+  
+  // Auto-run synthesis when findings change (with debounce)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (abnormalFindings.length >= 2 || (clinicalText.trim() && abnormalFindings.length > 0)) {
+        runClinicalSynthesis();
+      } else {
+        setClinicalSynthesis(null);
+      }
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [abnormalFindings, clinicalText, runClinicalSynthesis]);
+  
   // Get probability color
   const getProbabilityColor = (score) => {
     if (score >= 70) return 'from-green-500 to-emerald-500';
