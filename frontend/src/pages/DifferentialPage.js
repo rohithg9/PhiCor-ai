@@ -296,12 +296,15 @@ const DifferentialPage = () => {
   
   // NEW: Run AI-powered clinical synthesis
   const runClinicalSynthesis = useCallback(async () => {
-    // Need some findings to synthesize
+    // Need either findings or substantial clinical text to synthesize
     console.log('runClinicalSynthesis called:', { 
       findingsCount: abnormalFindings.length, 
-      hasText: !!clinicalText.trim() 
+      hasText: !!clinicalText.trim(),
+      resultsCount: differentialResults.length
     });
     
+    // Synthesis is useful if we have clinical text (even without extracted findings)
+    // OR if we have 2+ findings
     if (abnormalFindings.length === 0 && !clinicalText.trim()) {
       setClinicalSynthesis(null);
       return;
@@ -319,8 +322,11 @@ const DifferentialPage = () => {
       const imagingFindings = abnormalFindings.filter(f => f.diseases?.length > 0);
       const symptoms = abnormalFindings.filter(f => f.source === 'clinical-text' && f.type === 'symptom');
       
+      // Include info from differential results if no explicit findings
+      const topDifferentials = differentialResults.slice(0, 5).map(d => d.diseaseName).join(', ');
+      
       const requestBody = {
-        clinical_text: clinicalText,
+        clinical_text: clinicalText || `Top differential diagnoses being considered: ${topDifferentials}`,
         lab_findings: labFindings.map(f => ({
           parameterId: f.parameterId,
           name: f.parameterName || f.parameterId,
