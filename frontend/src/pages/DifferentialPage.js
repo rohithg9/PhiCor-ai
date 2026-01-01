@@ -832,6 +832,75 @@ PMH: Hypertension, Type 2 Diabetes"
                                 </div>
                               </div>
                             )}
+                            
+                            {/* Guideline Source */}
+                            {(clinicalSynthesis.primary_diagnosis.guideline_source || clinicalSynthesis.primary_diagnosis.database_match) && (
+                              <div className={`mt-3 text-xs ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>
+                                {clinicalSynthesis.primary_diagnosis.database_match && (
+                                  <span className="mr-3">📚 PhiCor DB: {clinicalSynthesis.primary_diagnosis.database_match}</span>
+                                )}
+                                {clinicalSynthesis.primary_diagnosis.guideline_source && (
+                                  <span>📋 {clinicalSynthesis.primary_diagnosis.guideline_source}</span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        
+                        {/* Recommended Treatment from Drug Database */}
+                        {clinicalSynthesis.recommended_treatment?.pharmacological?.length > 0 && (
+                          <div className={`p-4 rounded-lg border ${isDark ? 'bg-cyan-900/20 border-cyan-500/30' : 'bg-cyan-50 border-cyan-200'}`}>
+                            <h4 className={`text-sm font-semibold mb-3 flex items-center gap-2 ${isDark ? 'text-cyan-300' : 'text-cyan-700'}`}>
+                              <Pill className="w-4 h-4" /> Treatment Recommendations
+                            </h4>
+                            <div className="space-y-2">
+                              {clinicalSynthesis.recommended_treatment.pharmacological.map((drug, i) => (
+                                <div key={i} className={`p-2 rounded ${isDark ? 'bg-cyan-900/30' : 'bg-cyan-100'}`}>
+                                  <div className="flex items-center justify-between">
+                                    <span className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                      {drug.drug}
+                                    </span>
+                                    {drug.evidence_level && (
+                                      <Badge className="bg-cyan-500/20 text-cyan-400 text-xs">
+                                        Level {drug.evidence_level}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  {drug.dose && (
+                                    <p className={`text-xs ${isDark ? 'text-cyan-300' : 'text-cyan-600'}`}>
+                                      Dose: {drug.dose}
+                                    </p>
+                                  )}
+                                  {drug.rationale && (
+                                    <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                      {drug.rationale}
+                                    </p>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                            {clinicalSynthesis.recommended_treatment.guideline_source && (
+                              <p className={`text-xs mt-2 ${isDark ? 'text-cyan-400' : 'text-cyan-600'}`}>
+                                Source: {clinicalSynthesis.recommended_treatment.guideline_source}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                        
+                        {/* Knowledge Base References */}
+                        {clinicalSynthesis.knowledge_base && (
+                          <div className={`p-3 rounded-lg ${isDark ? 'bg-gray-800/30' : 'bg-gray-50'} flex items-center justify-between`}>
+                            <div className="flex items-center gap-4 text-xs">
+                              <span className={`${isDark ? 'text-purple-400' : 'text-purple-600'}`}>
+                                📊 {clinicalSynthesis.knowledge_base.diseases_referenced} diseases referenced
+                              </span>
+                              <span className={`${isDark ? 'text-cyan-400' : 'text-cyan-600'}`}>
+                                💊 {clinicalSynthesis.knowledge_base.drugs_referenced} drugs matched
+                              </span>
+                            </div>
+                            <Badge className={`text-xs ${isDark ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-100 text-emerald-700'}`}>
+                              PhiCor Integrated
+                            </Badge>
                           </div>
                         )}
                         
