@@ -2057,6 +2057,76 @@ async def get_diseases(
     }
 
 
+# Note: Specific routes MUST come BEFORE parameterized routes like {disease_id}
+
+@api_router.get("/diseases-db/priority-list")
+async def get_priority_disease_list():
+    """
+    Get the list of priority diseases for generation.
+    Returns 200+ high-priority diseases across all specialties.
+    """
+    try:
+        from services.medical_knowledge_generator import get_priority_diseases, get_disease_categories
+        
+        priority_diseases = get_priority_diseases()
+        categories = get_disease_categories()
+        
+        # Group by category
+        by_category = {}
+        for disease in priority_diseases:
+            cat = disease["category"]
+            if cat not in by_category:
+                by_category[cat] = {
+                    "category_name": categories.get(cat, {}).get("name", cat),
+                    "icon": categories.get(cat, {}).get("icon", "📋"),
+                    "diseases": []
+                }
+            by_category[cat]["diseases"].append(disease["name"])
+        
+        return {
+            "total_diseases": len(priority_diseases),
+            "categories": len(by_category),
+            "by_category": by_category,
+            "all_diseases": priority_diseases
+        }
+        
+    except ImportError as e:
+        raise HTTPException(status_code=500, detail=f"Generator not available: {str(e)}")
+
+@api_router.get("/diseases-db/stats")
+async def get_disease_database_stats():
+    """
+    Get statistics about the current disease database.
+    """
+    total_diseases = await db.diseases.count_documents({})
+    
+    # Get category counts
+    pipeline = [
+        {"$group": {"_id": "$category", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}}
+    ]
+    category_counts = await db.diseases.aggregate(pipeline).to_list(100)
+    
+    # Get AI-generated vs manually added
+    ai_generated = await db.diseases.count_documents({"generation_model": {"$exists": True}})
+    manual = total_diseases - ai_generated
+    
+    # Get diseases with comprehensive data
+    comprehensive = await db.diseases.count_documents({
+        "clinical_presentation.symptoms": {"$exists": True, "$ne": []},
+        "treatment.pharmacological": {"$exists": True}
+    })
+    
+    return {
+        "total_diseases": total_diseases,
+        "ai_generated": ai_generated,
+        "manually_curated": manual,
+        "comprehensive_entries": comprehensive,
+        "by_category": {item["_id"]: item["count"] for item in category_counts},
+        "coverage_percentage": round((comprehensive / max(total_diseases, 1)) * 100, 1)
+    }
+
+
 @api_router.get("/diseases-db/{disease_id}")
 async def get_disease_detail(disease_id: str):
     """
