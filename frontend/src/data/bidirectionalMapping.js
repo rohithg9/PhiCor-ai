@@ -215,7 +215,10 @@ const calculateProbabilityScore = (diseaseCode, disease, findings) => {
   let totalFindings = findings.length;
   
   findings.forEach(finding => {
-    const { parameterId, direction, severity = 1, value } = finding;
+    const { parameterId, direction, severity = 'moderate', value } = finding;
+    
+    // Convert severity to numeric multiplier
+    const severityMultiplier = severity === 'critical' ? 2 : severity === 'moderate' ? 1.5 : 1;
     
     // Check if disease modifies this parameter
     const diseaseMatch = findDiseaseParameterMatch(disease, parameterId);
@@ -224,12 +227,14 @@ const calculateProbabilityScore = (diseaseCode, disease, findings) => {
       matchedCount++;
       
       // Direction match (increase vs decrease)
-      const diseaseDirection = diseaseMatch.factor > 1 ? 'increase' : 'decrease';
+      // Support both 'factor' and 'multiplier' keys
+      const factor = diseaseMatch.factor || diseaseMatch.multiplier || 1;
+      const diseaseDirection = factor > 1 ? 'increase' : 'decrease';
       const directionMatch = diseaseDirection === direction ? 1 : 0;
       
       // Magnitude match - how close is the observed change to expected?
-      const expectedChange = Math.abs(diseaseMatch.factor - 1);
-      const magnitudeScore = expectedChange * severity;
+      const expectedChange = Math.abs(factor - 1);
+      const magnitudeScore = expectedChange * severityMultiplier;
       
       // Finding specificity
       const specificity = FINDING_SPECIFICITY[parameterId] || FINDING_SPECIFICITY['default'];
