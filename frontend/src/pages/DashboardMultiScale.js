@@ -2622,20 +2622,30 @@ const DashboardMultiScale = () => {
       
       {/* Page Title Header - Like other pages */}
       <div className="hidden lg:block container mx-auto px-4 py-4">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-            <span className="text-white font-serif text-3xl font-bold">Φ</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+              <span className="text-white font-serif text-3xl font-bold">Φ</span>
+            </div>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+                PhiCor Engine
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                Multi-scale organ models & physiology database
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-              PhiCor Engine
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Multi-scale organ models & physiology database
-            </p>
-          </div>
+          <TutorialButton onClick={tutorial.open} />
         </div>
       </div>
+      
+      {/* Tutorial Overlay */}
+      <FeatureTutorial 
+        feature="dashboard" 
+        isOpen={tutorial.isOpen} 
+        onClose={tutorial.close} 
+      />
       
       <div className="flex-1 flex">
       {/* Mobile Header */}
