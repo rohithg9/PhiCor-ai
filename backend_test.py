@@ -984,6 +984,43 @@ def run_all_tests():
     else:
         test_results['drug_simulation'] = False
     
+    # MEDICAL KNOWLEDGE BASE API TESTS
+    if test_results['backend_health']:
+        print("\n1️⃣4️⃣ DRUG GENERATION STATUS API")
+        test_results['drug_generation_status'] = test_drug_generation_status()
+    else:
+        test_results['drug_generation_status'] = False
+    
+    if test_results['backend_health']:
+        print("\n1️⃣5️⃣ DRUG CHUNK GENERATION API")
+        test_results['drug_chunk_generation'] = test_drug_chunk_generation()
+    else:
+        test_results['drug_chunk_generation'] = False
+    
+    if test_results['backend_health']:
+        print("\n1️⃣6️⃣ ICD-10 STATUS API")
+        test_results['icd10_status'] = test_icd10_status()
+    else:
+        test_results['icd10_status'] = False
+    
+    if test_results['backend_health']:
+        print("\n1️⃣7️⃣ GENERATED DRUGS LIST API")
+        test_results['generated_drugs_list'] = test_generated_drugs_list()
+    else:
+        test_results['generated_drugs_list'] = False
+    
+    if test_results['backend_health']:
+        print("\n1️⃣8️⃣ DISEASE DATABASE STATS API")
+        test_results['disease_database_stats'] = test_disease_database_stats()
+    else:
+        test_results['disease_database_stats'] = False
+    
+    if test_results['backend_health']:
+        print("\n1️⃣9️⃣ DRUG DATA QUALITY VERIFICATION")
+        test_results['drug_data_quality'] = test_drug_data_quality()
+    else:
+        test_results['drug_data_quality'] = False
+    
     # Summary
     print("\n" + "=" * 80)
     print("🏁 PHICOR PK/PD SIMULATION ENGINE TEST SUMMARY")
