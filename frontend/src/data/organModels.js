@@ -1736,6 +1736,306 @@ export const ORGAN_MODELS = {
         }
       ]
     }
+  },
+
+  // ============== ADRENAL GLANDS ==============
+  adrenals: {
+    name: "Adrenal Glands",
+    icon: "⚡",
+    category: "endocrine",
+    
+    geometry: {
+      title: "Adrenal Dimensions",
+      parameters: [
+        { id: "adrenal_length", name: "Adrenal Length", value: 4.5, unit: "cm", range: [3, 6], evidence: "established" },
+        { id: "adrenal_width", name: "Adrenal Width", value: 3, unit: "cm", range: [2, 4], evidence: "established" },
+        { id: "adrenal_thickness", name: "Adrenal Thickness", value: 1, unit: "cm", range: [0.5, 1.5], evidence: "established" },
+        { id: "cortex_thickness", name: "Cortex Thickness", value: 2, unit: "mm", range: [1, 3], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "adrenal_ratio",
+          name: "Adrenal-to-Kidney Ratio",
+          latex: "R_{AK} = \\frac{L_{adrenal}}{L_{kidney}}",
+          description: "Normal <0.3, elevated in hyperplasia",
+          evidence: "established",
+          source: "Radiology guidelines"
+        }
+      ]
+    },
+
+    physiology: {
+      title: "Hormonal Parameters",
+      parameters: [
+        { id: "cortisol_am", name: "Cortisol (8 AM)", value: 15, unit: "μg/dL", range: [6, 23], evidence: "established" },
+        { id: "cortisol_pm", name: "Cortisol (4 PM)", value: 8, unit: "μg/dL", range: [3, 16], evidence: "established" },
+        { id: "acth", name: "ACTH", value: 25, unit: "pg/mL", range: [10, 60], evidence: "established" },
+        { id: "aldosterone", name: "Aldosterone", value: 8, unit: "ng/dL", range: [2, 16], evidence: "established" },
+        { id: "renin", name: "Plasma Renin Activity", value: 1.5, unit: "ng/mL/hr", range: [0.5, 3.5], evidence: "established" },
+        { id: "dhea_s", name: "DHEA-S", value: 200, unit: "μg/dL", range: [80, 560], evidence: "established" },
+        { id: "epinephrine", name: "Epinephrine (plasma)", value: 50, unit: "pg/mL", range: [10, 100], evidence: "established" },
+        { id: "norepinephrine", name: "Norepinephrine (plasma)", value: 200, unit: "pg/mL", range: [80, 520], evidence: "established" },
+        { id: "metanephrines", name: "Plasma Metanephrines", value: 50, unit: "pg/mL", range: [12, 100], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "aldo_renin_ratio",
+          name: "Aldosterone:Renin Ratio",
+          latex: "ARR = \\frac{Aldosterone\\ (ng/dL)}{PRA\\ (ng/mL/hr)}",
+          description: "Primary hyperaldosteronism screen: >30 suspicious",
+          evidence: "established",
+          source: "Endocrine Society"
+        },
+        {
+          id: "cortisol_circadian",
+          name: "Circadian Cortisol Index",
+          latex: "CCI = \\frac{Cortisol_{PM}}{Cortisol_{AM}} \\times 100",
+          description: "Normal <50%, loss of rhythm in Cushing's",
+          evidence: "established",
+          source: "Endocrinology"
+        },
+        {
+          id: "pheochromocytoma_index",
+          name: "Pheochromocytoma Index (PhiCor)",
+          latex: "PI = \\log_{10}\\left(\\frac{Metanephrines}{ULN}\\right) \\times \\frac{Tumor\\ Size}{1cm}",
+          description: "Risk stratification for pheochromocytoma",
+          evidence: "novel",
+          source: "PhiCor derived"
+        }
+      ]
+    },
+
+    cellular: {
+      title: "Cellular Markers",
+      parameters: [
+        { id: "chromogranin_a", name: "Chromogranin A", value: 50, unit: "ng/mL", range: [25, 140], evidence: "established" },
+        { id: "synaptophysin", name: "Synaptophysin Expression", value: 1, unit: "", range: [0, 1], evidence: "established" },
+      ],
+      equations: []
+    }
+  },
+
+  // ============== GASTROINTESTINAL TRACT ==============
+  gi_tract: {
+    name: "GI Tract",
+    icon: "🔄",
+    category: "gastrointestinal",
+    
+    geometry: {
+      title: "GI Dimensions",
+      parameters: [
+        { id: "esophagus_length", name: "Esophagus Length", value: 25, unit: "cm", range: [20, 30], evidence: "established" },
+        { id: "stomach_volume", name: "Stomach Volume (fasting)", value: 50, unit: "mL", range: [25, 75], evidence: "established" },
+        { id: "small_bowel_length", name: "Small Bowel Length", value: 600, unit: "cm", range: [450, 750], evidence: "established" },
+        { id: "colon_length", name: "Colon Length", value: 150, unit: "cm", range: [120, 180], evidence: "established" },
+        { id: "cecal_diameter", name: "Cecal Diameter", value: 6, unit: "cm", range: [4, 9], evidence: "established" },
+        { id: "appendix_diameter", name: "Appendix Diameter", value: 6, unit: "mm", range: [3, 9], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "bowel_obstruction_index",
+          name: "Bowel Obstruction Index",
+          latex: "BOI = \\frac{D_{proximal}}{D_{distal}}",
+          description: "Ratio >1.5 suggests obstruction",
+          evidence: "established",
+          source: "Radiology"
+        }
+      ]
+    },
+
+    physiology: {
+      title: "GI Function",
+      parameters: [
+        { id: "gastric_ph", name: "Gastric pH", value: 1.5, unit: "", range: [1, 3], evidence: "established" },
+        { id: "gastric_emptying", name: "Gastric Emptying T½", value: 90, unit: "min", range: [60, 120], evidence: "established" },
+        { id: "small_bowel_transit", name: "Small Bowel Transit", value: 240, unit: "min", range: [180, 300], evidence: "established" },
+        { id: "colonic_transit", name: "Colonic Transit", value: 36, unit: "hours", range: [24, 48], evidence: "established" },
+        { id: "fecal_calprotectin", name: "Fecal Calprotectin", value: 30, unit: "μg/g", range: [0, 50], evidence: "established" },
+        { id: "lactoferrin", name: "Fecal Lactoferrin", value: 3, unit: "μg/g", range: [0, 7.25], evidence: "established" },
+        { id: "helicobacter_ubt", name: "H. pylori Breath Test", value: 0, unit: "delta", range: [0, 3.5], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "ibd_activity",
+          name: "IBD Activity Score (PhiCor)",
+          latex: "IAS = \\log_{10}(Calprotectin) + 0.5 \\times CRP + \\frac{Stool\\ Frequency}{3}",
+          description: "Composite IBD activity index",
+          evidence: "novel",
+          source: "PhiCor derived"
+        },
+        {
+          id: "malabsorption_index",
+          name: "Malabsorption Index",
+          latex: "MI = \\frac{Fecal\\ Fat}{Fat\\ Intake} \\times 100",
+          description: ">7% suggests malabsorption",
+          evidence: "established",
+          source: "Gastroenterology"
+        }
+      ]
+    },
+
+    structure: {
+      title: "Mucosal Integrity",
+      parameters: [
+        { id: "villous_height", name: "Villous Height", value: 400, unit: "μm", range: [300, 500], evidence: "established" },
+        { id: "crypt_depth", name: "Crypt Depth", value: 100, unit: "μm", range: [75, 150], evidence: "established" },
+        { id: "iel_count", name: "Intraepithelial Lymphocytes", value: 15, unit: "/100 enterocytes", range: [0, 25], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "vh_cd_ratio",
+          name: "Villous:Crypt Ratio",
+          latex: "VCR = \\frac{Villous\\ Height}{Crypt\\ Depth}",
+          description: "Normal 3-5:1, reduced in celiac disease",
+          evidence: "established",
+          source: "Pathology"
+        }
+      ]
+    }
+  },
+
+  // ============== MUSCULOSKELETAL SYSTEM ==============
+  musculoskeletal: {
+    name: "Musculoskeletal",
+    icon: "🦴",
+    category: "rheumatological",
+    
+    geometry: {
+      title: "Bone Measurements",
+      parameters: [
+        { id: "bmd_spine", name: "BMD L1-L4 Spine", value: 1.0, unit: "g/cm²", range: [0.8, 1.2], evidence: "established" },
+        { id: "bmd_hip", name: "BMD Total Hip", value: 0.9, unit: "g/cm²", range: [0.7, 1.1], evidence: "established" },
+        { id: "t_score", name: "T-Score (Spine)", value: 0, unit: "SD", range: [-4, 2], evidence: "established" },
+        { id: "trabecular_score", name: "Trabecular Bone Score", value: 1.35, unit: "", range: [1.0, 1.5], evidence: "established" },
+        { id: "cortical_thickness", name: "Cortical Thickness", value: 4, unit: "mm", range: [2, 6], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "frax_hip",
+          name: "FRAX 10-Year Hip Fracture Risk",
+          latex: "FRAX_{hip} = f(age, BMI, BMD, risk\\ factors)",
+          description: "WHO fracture risk assessment",
+          evidence: "established",
+          source: "FRAX Tool"
+        },
+        {
+          id: "bone_remodeling",
+          name: "Bone Remodeling Balance (PhiCor)",
+          latex: "BRB = \\frac{P1NP}{CTX} \\times \\frac{BMD_{current}}{BMD_{reference}}",
+          description: "Formation:resorption ratio",
+          evidence: "novel",
+          source: "PhiCor derived"
+        }
+      ]
+    },
+
+    physiology: {
+      title: "Bone Turnover Markers",
+      parameters: [
+        { id: "ctx", name: "CTX (C-telopeptide)", value: 0.3, unit: "ng/mL", range: [0.1, 0.6], evidence: "established" },
+        { id: "p1np", name: "P1NP", value: 40, unit: "ng/mL", range: [15, 80], evidence: "established" },
+        { id: "osteocalcin", name: "Osteocalcin", value: 15, unit: "ng/mL", range: [8, 32], evidence: "established" },
+        { id: "alkaline_phos", name: "Bone-Specific ALP", value: 12, unit: "μg/L", range: [6, 20], evidence: "established" },
+        { id: "vitamin_d", name: "25-OH Vitamin D", value: 40, unit: "ng/mL", range: [30, 100], evidence: "established" },
+        { id: "pth", name: "Parathyroid Hormone", value: 40, unit: "pg/mL", range: [15, 65], evidence: "established" },
+        { id: "calcium", name: "Serum Calcium", value: 9.5, unit: "mg/dL", range: [8.5, 10.5], evidence: "established" },
+        { id: "phosphorus", name: "Serum Phosphorus", value: 3.5, unit: "mg/dL", range: [2.5, 4.5], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "corrected_calcium",
+          name: "Corrected Calcium",
+          latex: "Ca_{corr} = Ca_{measured} + 0.8 \\times (4.0 - Albumin)",
+          description: "Albumin-corrected calcium",
+          evidence: "established",
+          source: "Endocrinology"
+        },
+        {
+          id: "ca_phos_product",
+          name: "Calcium-Phosphorus Product",
+          latex: "CaP = Ca \\times P",
+          description: ">55 mg²/dL² associated with vascular calcification",
+          evidence: "established",
+          source: "Nephrology"
+        }
+      ]
+    },
+
+    structure: {
+      title: "Joint Assessment",
+      parameters: [
+        { id: "das28", name: "DAS28-CRP", value: 2.5, unit: "", range: [0, 10], evidence: "established" },
+        { id: "cdai", name: "CDAI Score", value: 5, unit: "", range: [0, 76], evidence: "established" },
+        { id: "sharp_score", name: "Modified Sharp Score", value: 0, unit: "", range: [0, 448], evidence: "established" },
+        { id: "joint_space_width", name: "Joint Space Width", value: 4, unit: "mm", range: [2, 6], evidence: "established" },
+        { id: "synovial_thickness", name: "Synovial Thickness", value: 2, unit: "mm", range: [1, 4], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "das28_formula",
+          name: "DAS28-CRP Formula",
+          latex: "DAS28 = 0.56\\sqrt{TJC28} + 0.28\\sqrt{SJC28} + 0.36\\ln(CRP+1) + 0.014\\times VAS",
+          description: "Disease activity score for RA",
+          evidence: "established",
+          source: "EULAR"
+        },
+        {
+          id: "erosion_progression",
+          name: "Erosion Progression Rate (PhiCor)",
+          latex: "EPR = \\frac{\\Delta Sharp}{\\Delta time} \\times \\frac{DAS28}{2.6}",
+          description: "Adjusted erosion progression",
+          evidence: "novel",
+          source: "PhiCor derived"
+        }
+      ]
+    }
+  },
+
+  // ============== SKIN ==============
+  skin: {
+    name: "Skin",
+    icon: "🧴",
+    category: "dermatological",
+    
+    geometry: {
+      title: "Skin Measurements",
+      parameters: [
+        { id: "epidermis_thickness", name: "Epidermis Thickness", value: 0.1, unit: "mm", range: [0.05, 0.2], evidence: "established" },
+        { id: "dermis_thickness", name: "Dermis Thickness", value: 2, unit: "mm", range: [1, 4], evidence: "established" },
+        { id: "bsa_affected", name: "BSA Affected", value: 0, unit: "%", range: [0, 100], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "bsa_formula",
+          name: "Body Surface Area",
+          latex: "BSA = \\sqrt{\\frac{Height\\ (cm) \\times Weight\\ (kg)}{3600}}",
+          description: "Mosteller formula",
+          evidence: "established",
+          source: "Dermatology"
+        }
+      ]
+    },
+
+    physiology: {
+      title: "Skin Function",
+      parameters: [
+        { id: "pasi_score", name: "PASI Score", value: 0, unit: "", range: [0, 72], evidence: "established" },
+        { id: "dlqi", name: "DLQI Score", value: 0, unit: "", range: [0, 30], evidence: "established" },
+        { id: "scorad", name: "SCORAD Index", value: 0, unit: "", range: [0, 103], evidence: "established" },
+        { id: "easi", name: "EASI Score", value: 0, unit: "", range: [0, 72], evidence: "established" },
+        { id: "tewl", name: "Trans-Epidermal Water Loss", value: 10, unit: "g/m²/hr", range: [5, 15], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "pasi_formula",
+          name: "PASI Calculation",
+          latex: "PASI = 0.1(E_h + I_h + D_h)A_h + 0.2(E_t + I_t + D_t)A_t + 0.3(E_u + I_u + D_u)A_u + 0.4(E_l + I_l + D_l)A_l",
+          description: "Psoriasis severity index",
+          evidence: "established",
+          source: "Dermatology"
+        }
+      ]
+    }
   }
 };
 
