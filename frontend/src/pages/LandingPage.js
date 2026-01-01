@@ -67,8 +67,9 @@ const LandingPage = () => {
   // Navigation items
   const navItems = [
     { id: 'science', label: 'The Philosophy' },
-    { id: 'features', label: 'Features' },
+    { id: 'features', label: 'About PhiCor' },
     { id: 'how-it-works', label: 'How It Works' },
+    { id: 'platform-features', label: 'Clinical Tools' },
     { id: 'advantages', label: 'Advantages' },
     { id: 'contact', label: 'Contact', isEmail: true },
   ];
