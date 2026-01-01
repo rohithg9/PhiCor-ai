@@ -999,7 +999,7 @@ PMH: Hypertension, Type 2 Diabetes"
                               </p>
                               {clinicalSynthesis.urgency_assessment.can_miss_diagnosis && (
                                 <p className={`text-xs ${isDark ? 'text-red-400' : 'text-red-600'}`}>
-                                  ⚠️ Don't miss: {clinicalSynthesis.urgency_assessment.can_miss_diagnosis}
+                                  ⚠️ Do not miss: {clinicalSynthesis.urgency_assessment.can_miss_diagnosis}
                                 </p>
                               )}
                             </div>
