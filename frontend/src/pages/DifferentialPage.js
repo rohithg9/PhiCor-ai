@@ -5,7 +5,7 @@ import {
   Search, Plus, Trash2, FileText, Upload, AlertTriangle,
   CheckCircle, ChevronDown, ChevronUp, Activity, User, Clipboard,
   TrendingUp, TrendingDown, Minus, Brain, FlaskConical, Heart,
-  Stethoscope, Gauge, Info, Sparkles, Target, Zap, Shield
+  Stethoscope, Gauge, Info, Sparkles, Target, Zap, Shield, Pill
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
