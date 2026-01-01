@@ -12,6 +12,7 @@ import { Input } from '../components/ui/input';
 import { Slider } from '../components/ui/slider';
 import { Badge } from '../components/ui/badge';
 import { ScrollArea } from '../components/ui/scroll-area';
+import DiseaseDetailPanel from '../components/DiseaseDetailPanel';
 import { 
   getDifferentialDiagnosis, 
   parseClinicalText, 
