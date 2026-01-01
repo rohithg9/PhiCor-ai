@@ -208,6 +208,8 @@ const DifferentialPage = () => {
       let results = [];
       const findings = overrideFindings || abnormalFindings;
       
+      console.log('runDiagnosis: findings count:', findings.length);
+      
       if (findings.length > 0) {
         const findingsForAnalysis = findings.map(f => ({
           parameterId: f.parameterId,
@@ -216,7 +218,9 @@ const DifferentialPage = () => {
           value: f.value,
           diseases: f.diseases || [],
         }));
+        console.log('runDiagnosis: findingsForAnalysis:', findingsForAnalysis);
         results = getDifferentialDiagnosis(findingsForAnalysis);
+        console.log('runDiagnosis: getDifferentialDiagnosis returned:', results.length, 'results');
         
         // Also add disease suggestions from imaging findings
         const imagingDiseases = new Set();
