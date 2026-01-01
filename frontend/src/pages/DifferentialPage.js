@@ -453,7 +453,7 @@ const DifferentialPage = () => {
           <div className="space-y-6">
             {/* Tabs */}
             <div className={`rounded-2xl border ${isDark ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'} overflow-hidden`}>
-              <div className="flex border-b border-gray-800">
+              <div className="flex border-b border-gray-800" data-tutorial="input-tabs">
                 {[
                   { id: 'parameters', icon: FlaskConical, label: 'Parameters' },
                   { id: 'clinical', icon: FileText, label: 'Clinical Text' },
