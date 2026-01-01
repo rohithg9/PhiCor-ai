@@ -352,7 +352,15 @@ Always base your response on the CURATED DATA provided, supplemented by your med
             
             # Guideline sources
             if disease.get('guideline_sources'):
-                parts.append(f"Guidelines: {', '.join(disease['guideline_sources'][:3])}")
+                sources = disease['guideline_sources'][:3]
+                source_strings = []
+                for src in sources:
+                    if isinstance(src, dict):
+                        source_strings.append(src.get('name', str(src)))
+                    else:
+                        source_strings.append(str(src))
+                if source_strings:
+                    parts.append(f"Guidelines: {', '.join(source_strings)}")
             
             context_parts.append('\n'.join(parts))
         
