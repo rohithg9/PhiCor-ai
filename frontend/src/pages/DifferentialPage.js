@@ -460,6 +460,7 @@ const DifferentialPage = () => {
                   { id: 'parameters', icon: FlaskConical, label: 'Parameters' },
                   { id: 'clinical', icon: FileText, label: 'Clinical Text' },
                   { id: 'patient', icon: User, label: 'Test Patient' },
+                  { id: 'calculators', icon: Calculator, label: 'Calculators' },
                 ].map(tab => (
                   <button
                     key={tab.id}
