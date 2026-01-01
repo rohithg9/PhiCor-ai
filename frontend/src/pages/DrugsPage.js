@@ -702,6 +702,7 @@ const DrugsPage = () => {
   const [drugs, setDrugs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [debugInfo, setDebugInfo] = useState('Initializing...');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedDrug, setSelectedDrug] = useState(null);
