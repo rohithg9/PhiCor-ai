@@ -2070,6 +2070,177 @@ async def get_disease_detail(disease_id: str):
     return disease
 
 
+# ============== AI-POWERED MEDICAL KNOWLEDGE GENERATION ==============
+
+class DiseaseGenerationRequest(BaseModel):
+    """Request model for AI disease generation"""
+    disease_name: str
+    category: str
+    additional_context: Optional[str] = ""
+
+class BatchDiseaseGenerationRequest(BaseModel):
+    """Request model for batch disease generation"""
+    diseases: List[DiseaseGenerationRequest]
+    batch_size: int = 3
+
+@api_router.post("/diseases-db/generate")
+async def generate_disease_ai(request: DiseaseGenerationRequest):
+    """
+    Generate comprehensive disease data using AI (GPT-4o).
+    Creates evidence-based medical knowledge for clinical decision support.
+    """
+    try:
+        from services.medical_knowledge_generator import MedicalKnowledgeGenerator
+        
+        generator = MedicalKnowledgeGenerator()
+        disease_data = await generator.generate_disease_data(
+            request.disease_name,
+            request.category,
+            request.additional_context
+        )
+        
+        if not disease_data:
+            raise HTTPException(
+                status_code=500, 
+                detail="Failed to generate disease data. Check LLM key balance."
+            )
+        
+        # Save to database
+        await db.diseases.update_one(
+            {"id": disease_data["id"]},
+            {"$set": disease_data},
+            upsert=True
+        )
+        
+        return {
+            "success": True,
+            "message": f"Generated and saved disease: {disease_data['name']}",
+            "disease_id": disease_data["id"],
+            "disease": disease_data
+        }
+        
+    except ImportError as e:
+        raise HTTPException(status_code=500, detail=f"Generator not available: {str(e)}")
+    except Exception as e:
+        logger.error(f"Error generating disease: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/diseases-db/generate-batch")
+async def generate_diseases_batch(request: BatchDiseaseGenerationRequest):
+    """
+    Generate multiple diseases using AI in batches.
+    Useful for expanding the knowledge base efficiently.
+    """
+    try:
+        from services.medical_knowledge_generator import MedicalKnowledgeGenerator
+        
+        generator = MedicalKnowledgeGenerator()
+        diseases_to_generate = [
+            {
+                "name": d.disease_name,
+                "category": d.category,
+                "context": d.additional_context or ""
+            }
+            for d in request.diseases
+        ]
+        
+        generated = await generator.generate_diseases_batch(
+            diseases_to_generate,
+            batch_size=request.batch_size
+        )
+        
+        # Save all to database
+        saved_count = 0
+        for disease_data in generated:
+            await db.diseases.update_one(
+                {"id": disease_data["id"]},
+                {"$set": disease_data},
+                upsert=True
+            )
+            saved_count += 1
+        
+        return {
+            "success": True,
+            "message": f"Generated {saved_count} diseases",
+            "generated_count": saved_count,
+            "requested_count": len(request.diseases),
+            "diseases": [{"id": d["id"], "name": d["name"]} for d in generated]
+        }
+        
+    except ImportError as e:
+        raise HTTPException(status_code=500, detail=f"Generator not available: {str(e)}")
+    except Exception as e:
+        logger.error(f"Error generating batch: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/diseases-db/priority-list")
+async def get_priority_disease_list():
+    """
+    Get the list of priority diseases for generation.
+    Returns 200+ high-priority diseases across all specialties.
+    """
+    try:
+        from services.medical_knowledge_generator import get_priority_diseases, get_disease_categories
+        
+        priority_diseases = get_priority_diseases()
+        categories = get_disease_categories()
+        
+        # Group by category
+        by_category = {}
+        for disease in priority_diseases:
+            cat = disease["category"]
+            if cat not in by_category:
+                by_category[cat] = {
+                    "category_name": categories.get(cat, {}).get("name", cat),
+                    "icon": categories.get(cat, {}).get("icon", "📋"),
+                    "diseases": []
+                }
+            by_category[cat]["diseases"].append(disease["name"])
+        
+        return {
+            "total_diseases": len(priority_diseases),
+            "categories": len(by_category),
+            "by_category": by_category,
+            "all_diseases": priority_diseases
+        }
+        
+    except ImportError as e:
+        raise HTTPException(status_code=500, detail=f"Generator not available: {str(e)}")
+
+@api_router.get("/diseases-db/stats")
+async def get_disease_database_stats():
+    """
+    Get statistics about the current disease database.
+    """
+    total_diseases = await db.diseases.count_documents({})
+    
+    # Get category counts
+    pipeline = [
+        {"$group": {"_id": "$category", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}}
+    ]
+    category_counts = await db.diseases.aggregate(pipeline).to_list(100)
+    
+    # Get AI-generated vs manually added
+    ai_generated = await db.diseases.count_documents({"generation_model": {"$exists": True}})
+    manual = total_diseases - ai_generated
+    
+    # Get diseases with comprehensive data
+    comprehensive = await db.diseases.count_documents({
+        "clinical_presentation.symptoms": {"$exists": True, "$ne": []},
+        "treatment.pharmacological": {"$exists": True}
+    })
+    
+    return {
+        "total_diseases": total_diseases,
+        "ai_generated": ai_generated,
+        "manually_curated": manual,
+        "comprehensive_entries": comprehensive,
+        "by_category": {item["_id"]: item["count"] for item in category_counts},
+        "coverage_percentage": round((comprehensive / max(total_diseases, 1)) * 100, 1)
+    }
+
+
 # ============== VIRTUAL PATIENT & DRUG SIMULATION ==============
 
 class VirtualPatient(BaseModel):
