@@ -328,23 +328,31 @@ const DifferentialPage = () => {
       const requestBody = {
         clinical_text: clinicalText || `Top differential diagnoses being considered: ${topDifferentials}`,
         lab_findings: labFindings.map(f => ({
-          parameterId: f.parameterId,
-          name: f.parameterName || f.parameterId,
-          value: f.value,
-          unit: f.unit,
-          direction: f.direction,
-          normalRange: f.normalRange,
-          severity: f.severity
+          parameterId: f.parameterId || '',
+          name: f.parameterName || f.parameterId || '',
+          value: typeof f.value === 'number' ? f.value : null,
+          unit: f.unit || '',
+          direction: f.direction || '',
+          normalRange: f.normalRange || '',
+          severity: f.severity || 'moderate'
         })),
         imaging_findings: imagingFindings.map(f => ({
-          parameterId: f.parameterId,
-          name: f.parameterName || f.parameterId,
-          direction: f.direction,
-          severity: f.severity
+          parameterId: f.parameterId || '',
+          name: f.parameterName || f.parameterId || '',
+          value: null,
+          unit: '',
+          direction: f.direction || '',
+          normalRange: '',
+          severity: f.severity || 'moderate'
         })),
         symptoms: symptoms.map(f => ({
-          parameterId: f.parameterId,
-          name: f.parameterName || f.parameterId
+          parameterId: f.parameterId || '',
+          name: f.parameterName || f.parameterId || '',
+          value: null,
+          unit: '',
+          direction: 'present',
+          normalRange: '',
+          severity: 'moderate'
         })),
         patient_info: null
       };
