@@ -1411,6 +1411,76 @@ async def get_generated_drugs_list(
         "skip": skip
     }
 
+
+@api_router.get("/drugs-db/categories")
+async def get_drug_categories_list():
+    """Get all unique drug categories."""
+    categories = await db.drugs.distinct("category")
+    classes = await db.drugs.distinct("drug_class")
+    return {
+        "categories": categories,
+        "drug_classes": classes
+    }
+
+
+# Hospital Priority Drug Categories - ordered by clinical importance
+HOSPITAL_PRIORITY_ORDER_EARLY = [
+    "cardiovascular",      # Most critical in hospital settings
+    "antibiotics",         # Essential for infections
+    "cns_neurological",    # Pain management, sedation, neuro emergencies  
+    "analgesics",          # Pain management is ubiquitous
+    "respiratory",         # Respiratory care
+    "gastrointestinal",    # GI issues common in hospital
+    "endocrine",           # Diabetes, thyroid management
+    "antivirals",          # Viral infections
+    "antifungals",         # Fungal infections
+    "immunosuppressants",  # Transplant, autoimmune
+]
+
+
+@api_router.get("/drugs-db/generation-status")
+async def get_generation_status_early():
+    """
+    Get the current status of drug knowledge base generation.
+    Shows progress and what's been generated.
+    """
+    from services.medical_knowledge_generator import get_priority_drugs
+    
+    priority_drugs = get_priority_drugs()
+    total_priority = len(priority_drugs)
+    
+    # Get all generated drugs
+    generated_drugs = await db.drugs_generated.find({}, {"_id": 0, "name": 1, "category": 1, "generated_at": 1}).to_list(1000)
+    generated_names = {d["name"].lower() for d in generated_drugs}
+    total_generated = len(generated_drugs)
+    
+    # Count by category
+    by_category = {}
+    for cat in HOSPITAL_PRIORITY_ORDER_EARLY:
+        cat_drugs = [d for d in priority_drugs if d.get("category") == cat]
+        cat_generated = [d for d in cat_drugs if d["name"].lower() in generated_names]
+        by_category[cat] = {
+            "total": len(cat_drugs),
+            "generated": len(cat_generated),
+            "remaining": len(cat_drugs) - len(cat_generated)
+        }
+    
+    # Get last 10 generated
+    last_generated = sorted(generated_drugs, key=lambda x: x.get("generated_at", ""), reverse=True)[:10]
+    last_names = [d.get("name", "Unknown") for d in last_generated]
+    
+    return {
+        "total_priority_drugs": total_priority,
+        "total_generated": total_generated,
+        "remaining": total_priority - total_generated,
+        "completion_percentage": round((total_generated / total_priority) * 100, 1) if total_priority > 0 else 0,
+        "by_category": by_category,
+        "last_generated": last_names,
+        "priority_order": HOSPITAL_PRIORITY_ORDER_EARLY
+    }
+
+
+# Dynamic route MUST come after all static routes
 @api_router.get("/drugs-db/{drug_id}")
 async def get_drug_detail(drug_id: str):
     """Get complete drug details from MongoDB."""
