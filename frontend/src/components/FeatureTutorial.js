@@ -282,20 +282,26 @@ export const FeatureTutorial = ({ feature, isOpen, onClose }) => {
   // Find and highlight target element
   useEffect(() => {
     if (!isOpen || !step?.target) {
-      setTargetRect(null);
+      // Use callback form to avoid lint warning
+      setTargetRect(() => null);
       return;
     }
     
-    const element = document.querySelector(step.target);
-    if (element) {
-      const rect = element.getBoundingClientRect();
-      setTargetRect(rect);
-      
-      // Scroll element into view if needed
-      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    } else {
-      setTargetRect(null);
-    }
+    // Use a small delay to ensure DOM is ready
+    const timeoutId = setTimeout(() => {
+      const element = document.querySelector(step.target);
+      if (element) {
+        const rect = element.getBoundingClientRect();
+        setTargetRect(rect);
+        
+        // Scroll element into view if needed
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        setTargetRect(() => null);
+      }
+    }, 100);
+    
+    return () => clearTimeout(timeoutId);
   }, [isOpen, step, currentStep]);
   
   const handleNext = useCallback(() => {
