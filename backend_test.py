@@ -1,27 +1,24 @@
 #!/usr/bin/env python3
 """
-Backend Testing for Comprehensive Disease Database
-Testing comprehensive disease database with 28 diseases across 9 categories:
-- Cardiovascular diseases (5 diseases)
-- Respiratory diseases (2 diseases) 
-- Endocrine diseases (2 diseases)
-- Renal diseases (1 disease)
-- Neurological diseases (2 diseases)
-- Hematological diseases (6 diseases)
-- Oncological diseases (3 diseases)
-- Genetic diseases (3 diseases)
-- Hematological malignancy diseases (4 diseases)
+Backend Testing for PhiCor PK/PD Simulation Engine
+Testing comprehensive drug and disease databases with simulation capabilities:
 
-Focus on testing specific endpoints from review request:
-- POST /api/diseases-db/seed-comprehensive - Seeds the database
-- GET /api/diseases-db - Should return 28 diseases total
-- GET /api/diseases-db?category=cardiovascular - Should return 5 cardiovascular diseases
-- GET /api/diseases-db?category=hematological - Should return 6 hematological diseases
-- GET /api/diseases-db?search=diabetes - Should find Type 2 Diabetes
-- GET /api/diseases-db?search=I50 - Should find diseases with ICD-10 code containing I50
-- GET /api/diseases-db/heart_failure_hfref - Should return full HFrEF details
-- GET /api/diseases-db/sickle_cell_disease - Should return full SCD details
-- GET /api/diseases-db/nonexistent - Should return 404 error
+DRUG DATABASE TESTING (115 drugs):
+- GET /api/drugs-db?limit=200 - Should return ~115 drugs
+- GET /api/drugs-db?category=cns - Should return CNS drugs including quetiapine, risperidone, aripiprazole, lithium, methylphenidate
+- GET /api/drugs-db?category=dermatological - Should return isotretinoin, finasteride
+- GET /api/drugs-db?category=immunosuppressant - Should return methotrexate, cyclosporine, tacrolimus, mycophenolate
+- GET /api/drugs-db?category=urological - Should return tamsulosin, sildenafil, oxybutynin
+- GET /api/drugs-db?category=ophthalmic - Should return latanoprost, timolol_ophthalmic
+
+DISEASE DATABASE TESTING (28 diseases):
+- GET /api/diseases-db - Should return 28 diseases
+- GET /api/diseases-db?category=cardiovascular - Should return heart_failure_hfref, acute_coronary_syndrome, atrial_fibrillation, hypertension, ischemic_stroke
+- GET /api/diseases-db/type2_diabetes - Should return full diabetes details with treatment guidelines
+- GET /api/diseases-db?search=leukemia - Should return ALL, AML, CLL
+
+DRUG SIMULATION TESTING:
+- POST /api/drug-engine/simulate with a drug and virtual patient should return efficacy/safety scores
 """
 
 import requests
