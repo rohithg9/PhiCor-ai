@@ -218,11 +218,10 @@ Always base your response on the CURATED DATA provided, supplemented by your med
         
         # Query drugs
         if drug_categories:
-            cursor = self.db.drugs.find(
+            relevant_drugs = await self.db.drugs.find(
                 {"category": {"$in": list(drug_categories)}},
                 {"_id": 0}
-            ).limit(25)
-            relevant_drugs = await cursor.to_list(25)
+            ).to_list(25)
         
         return relevant_drugs
 
