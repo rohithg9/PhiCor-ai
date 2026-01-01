@@ -1931,12 +1931,51 @@ async def seed_drug_database():
 async def seed_comprehensive_drug_database():
     """
     Seed the database with a comprehensive, evidence-based drug formulary.
+    Uses data from /app/backend/data/comprehensive_drugs.py
     Includes brand names for UK, USA, and India.
     Based on WHO Essential Medicines List and clinical guidelines.
     """
+    from data.comprehensive_drugs import get_all_comprehensive_drugs
     
-    # Comprehensive drug data with international brand names
-    comprehensive_drugs = [
+    # Get all drugs from the comprehensive data file
+    comprehensive_drugs = get_all_comprehensive_drugs()
+    
+    # Add timestamps and insert
+    for drug in comprehensive_drugs:
+        drug["created_at"] = datetime.now(timezone.utc).isoformat()
+        drug["updated_at"] = datetime.now(timezone.utc).isoformat()
+        
+        # Upsert - update if exists, insert if not
+        existing = await db.drugs.find_one({"id": drug["id"]})
+        if existing:
+            await db.drugs.update_one({"id": drug["id"]}, {"$set": drug})
+        else:
+            await db.drugs.insert_one(drug)
+    
+    total_count = await db.drugs.count_documents({})
+    
+    # Get category summary
+    categories = {}
+    for drug in comprehensive_drugs:
+        cat = drug.get("category", "unknown")
+        categories[cat] = categories.get(cat, 0) + 1
+    
+    return {
+        "message": f"Seeded {len(comprehensive_drugs)} evidence-based drugs. Total in database: {total_count}",
+        "drugs_added": len(comprehensive_drugs),
+        "categories_summary": categories,
+        "drugs_list": [{"id": d["id"], "name": d["name"], "class": d.get("drug_class", "")} for d in comprehensive_drugs]
+    }
+
+# Legacy inline seed endpoint - kept for backwards compatibility but uses same data source
+@api_router.post("/drugs-db/seed-comprehensive-legacy")
+async def seed_comprehensive_drug_database_legacy():
+    """
+    Legacy seed endpoint - redirects to main comprehensive seed.
+    Kept for backwards compatibility.
+    """
+    # Just a placeholder - this was the old inline data that's now in comprehensive_drugs.py
+    legacy_drugs = [
         # ============== ACE INHIBITORS ==============
         {
             "id": "enalapril",
