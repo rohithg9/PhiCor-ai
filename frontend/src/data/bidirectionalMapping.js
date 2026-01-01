@@ -821,15 +821,59 @@ export const parseClinicalText = (clinicalText) => {
     /negative\s+for\s+(\w+)/gi,
   ];
   
+  // Extract imaging/clinical findings
+  const extractedFindings = [];
+  Object.entries(CLINICAL_FINDING_PATTERNS).forEach(([findingId, finding]) => {
+    const found = finding.patterns.some(pattern => textLower.includes(pattern));
+    if (found) {
+      extractedFindings.push({
+        parameterId: findingId,
+        name: findingId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        organ: finding.organ,
+        direction: finding.direction,
+        severity: finding.severity,
+        diseases: finding.diseases,
+        isAbnormal: true,
+        type: 'imaging',
+      });
+      
+      rawFindings.push({
+        type: 'imaging',
+        name: findingId,
+        direction: finding.direction,
+        diseases: finding.diseases,
+      });
+    }
+  });
+  
+  // Combine all findings for the return value
+  const allFindings = [
+    ...extractedLabs.map(l => ({ ...l, type: 'lab' })),
+    ...extractedFindings,
+    ...extractedSymptoms.map(s => ({ 
+      parameterId: s.name.replace(/\s+/g, '_'),
+      name: s.name,
+      direction: 'present',
+      severity: 'moderate',
+      isAbnormal: true,
+      type: 'symptom',
+    })),
+  ];
+  
   return {
     labs: extractedLabs,
     symptoms: extractedSymptoms,
-    vitals: [], // TODO: Add vital signs extraction
+    findings: extractedFindings,
+    vitals: [],
     rawFindings,
+    // Provide findings in the format expected by handleAnalyzeText
+    findings: allFindings,
     summary: {
       labCount: extractedLabs.length,
       symptomCount: extractedSymptoms.length,
+      findingCount: extractedFindings.length,
       abnormalLabs: extractedLabs.filter(l => l.isAbnormal).length,
+      totalFindings: allFindings.length,
     },
   };
 };
