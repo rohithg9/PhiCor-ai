@@ -706,10 +706,44 @@ const SYMPTOM_KEYWORDS = [
   'anxiety', 'depression', 'insomnia',
 ];
 
+// Clinical/Imaging findings that map to disease patterns
+const CLINICAL_FINDING_PATTERNS = {
+  // Cardiac findings
+  'dilated_rv': { patterns: ['dilated right ventricle', 'rv dilation', 'rv dilated', 'right ventricle dilated'], organ: 'heart', direction: 'increase', severity: 'moderate', diseases: ['I50', 'I27', 'I26'] },
+  'dilated_lv': { patterns: ['dilated left ventricle', 'lv dilation', 'lv dilated', 'left ventricle dilated'], organ: 'heart', direction: 'increase', severity: 'moderate', diseases: ['I50', 'I42'] },
+  'reduced_ef': { patterns: ['reduced ejection fraction', 'reduced systolic function', 'ef reduced', 'low ef', 'depressed ef', 'moderately reduced systolic', 'severely reduced systolic'], organ: 'heart', direction: 'decrease', severity: 'severe', diseases: ['I50_2', 'I42'] },
+  'cardiomegaly': { patterns: ['cardiomegaly', 'enlarged heart', 'cardiac enlargement'], organ: 'heart', direction: 'increase', severity: 'moderate', diseases: ['I50', 'I42', 'I51'] },
+  'pericardial_effusion': { patterns: ['pericardial effusion', 'fluid around heart'], organ: 'heart', direction: 'increase', severity: 'moderate', diseases: ['I30', 'I31'] },
+  'lvh': { patterns: ['left ventricular hypertrophy', 'lvh', 'lv hypertrophy', 'thickened lv'], organ: 'heart', direction: 'increase', severity: 'moderate', diseases: ['I11', 'I42'] },
+  'wall_motion': { patterns: ['wall motion abnormality', 'hypokinesis', 'akinesis', 'dyskinesis'], organ: 'heart', direction: 'decrease', severity: 'moderate', diseases: ['I21', 'I25'] },
+  'valvular': { patterns: ['mitral regurgitation', 'aortic stenosis', 'tricuspid regurgitation', 'valve disease'], organ: 'heart', direction: 'increase', severity: 'moderate', diseases: ['I34', 'I35', 'I36'] },
+  
+  // Pulmonary findings
+  'pulmonary_congestion': { patterns: ['pulmonary congestion', 'pulmonary vascular congestion', 'pulmonary edema', 'vascular congestion'], organ: 'lungs', direction: 'increase', severity: 'moderate', diseases: ['I50', 'J81'] },
+  'pleural_effusion': { patterns: ['pleural effusion', 'pleural fluid', 'fluid in pleural'], organ: 'lungs', direction: 'increase', severity: 'moderate', diseases: ['J90', 'I50', 'C78'] },
+  'consolidation': { patterns: ['consolidation', 'infiltrate', 'opacity'], organ: 'lungs', direction: 'increase', severity: 'moderate', diseases: ['J18', 'J15', 'J13'] },
+  'pneumothorax': { patterns: ['pneumothorax', 'collapsed lung'], organ: 'lungs', direction: 'increase', severity: 'severe', diseases: ['J93'] },
+  'emphysema': { patterns: ['emphysema', 'hyperinflation', 'bullae'], organ: 'lungs', direction: 'increase', severity: 'moderate', diseases: ['J43', 'J44'] },
+  
+  // Abdominal findings
+  'hepatomegaly': { patterns: ['hepatomegaly', 'enlarged liver', 'liver enlargement'], organ: 'liver', direction: 'increase', severity: 'moderate', diseases: ['K76', 'K70', 'I50'] },
+  'splenomegaly': { patterns: ['splenomegaly', 'enlarged spleen'], organ: 'spleen', direction: 'increase', severity: 'moderate', diseases: ['D73', 'K76'] },
+  'ascites': { patterns: ['ascites', 'abdominal fluid', 'peritoneal fluid'], organ: 'liver', direction: 'increase', severity: 'moderate', diseases: ['K70', 'K74', 'C78'] },
+  
+  // Renal findings
+  'hydronephrosis': { patterns: ['hydronephrosis', 'dilated collecting system'], organ: 'kidneys', direction: 'increase', severity: 'moderate', diseases: ['N13'] },
+  'renal_cyst': { patterns: ['renal cyst', 'kidney cyst'], organ: 'kidneys', direction: 'increase', severity: 'mild', diseases: ['Q61', 'N28'] },
+  
+  // Neurological findings
+  'cerebral_edema': { patterns: ['cerebral edema', 'brain swelling'], organ: 'brain', direction: 'increase', severity: 'severe', diseases: ['G93'] },
+  'infarct': { patterns: ['infarct', 'stroke', 'ischemic changes', 'acute infarction'], organ: 'brain', direction: 'increase', severity: 'severe', diseases: ['I63', 'I64'] },
+  'hemorrhage': { patterns: ['hemorrhage', 'bleeding', 'hematoma'], organ: 'brain', direction: 'increase', severity: 'severe', diseases: ['I61', 'I62'] },
+};
+
 /**
  * Parse clinical text and extract findings
  * @param {string} clinicalText - Free text clinical notes
- * @returns {Object} Extracted findings {labs, symptoms, vitals}
+ * @returns {Object} Extracted findings {labs, symptoms, vitals, findings}
  */
 export const parseClinicalText = (clinicalText) => {
   if (!clinicalText || typeof clinicalText !== 'string') {
