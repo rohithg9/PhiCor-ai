@@ -34,6 +34,30 @@ const LandingPage = () => {
   const { toggleTheme, isDark } = useTheme();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [platformStats, setPlatformStats] = useState({
+    drugs: "300+",
+    diseases: "200+",
+    calculators: "42+",
+    organ_systems: "6",
+    models: "∞"
+  });
+
+  // Fetch platform stats
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const API_URL = process.env.REACT_APP_BACKEND_URL || '';
+        const response = await fetch(`${API_URL}/api/platform/stats`);
+        if (response.ok) {
+          const data = await response.json();
+          setPlatformStats(data.display_stats);
+        }
+      } catch (error) {
+        console.log('Using default stats');
+      }
+    };
+    fetchStats();
+  }, []);
 
   // Track scroll for sticky nav
   useEffect(() => {
