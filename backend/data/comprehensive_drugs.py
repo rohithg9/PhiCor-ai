@@ -1339,6 +1339,356 @@ HEMATOLOGICAL_DRUGS = [
     }
 ]
 
+# ============== PSYCHIATRIC / ADDITIONAL CNS DRUGS ==============
+PSYCHIATRIC_DRUGS = [
+    # Antipsychotics
+    {
+        "id": "quetiapine",
+        "name": "Quetiapine",
+        "brand_names": ["Seroquel (USA/UK)", "Seroquin (India)"],
+        "drug_class": "Atypical Antipsychotic",
+        "category": "cns",
+        "mechanism_of_action": "Antagonist at D2, 5-HT2A, H1, and alpha-1 receptors. Used for schizophrenia, bipolar, and as adjunct for depression.",
+        "mechanism_short": "D2/5-HT2A antagonist → antipsychotic + mood stabilizer",
+        "target_receptors": ["D2", "5-HT2A", "H1", "α1"],
+        "dosages": [{"route": "oral", "form": "tablet", "strength": "25mg, 50mg, 100mg, 200mg, 300mg, 400mg", "typical_dose": "300-800mg daily (schizophrenia)", "max_daily_dose": "800mg", "frequency": "once or twice daily", "special_instructions": "Start 50mg, titrate slowly; XR formulation available"}],
+        "therapeutic_effects": [{"effect_type": "therapeutic", "description": "Effective for positive/negative symptoms, mood stabilization", "onset_hours": 24, "duration_hours": 24, "organs": [{"organ_id": "brain", "scales": [{"scale_id": "physiology", "parameters": [{"parameter_id": "psychosis_score", "multiplier": 0.45, "note": "↓55% psychotic symptoms"}]}]}]}],
+        "indications": [{"disease_id": "schizophrenia", "disease_name": "Schizophrenia", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}, {"disease_id": "bipolar", "disease_name": "Bipolar Disorder", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}, {"disease_id": "mdd_adjunct", "disease_name": "MDD (adjunct)", "is_primary": True, "efficacy_level": "moderate", "evidence_grade": "A"}],
+        "contraindications": ["Hypersensitivity"],
+        "warnings": ["Metabolic syndrome", "QT prolongation", "Sedation", "Orthostatic hypotension"],
+        "half_life": "6-7 hours",
+        "pregnancy_category": "C",
+        "fda_approval_year": 1997
+    },
+    {
+        "id": "risperidone",
+        "name": "Risperidone",
+        "brand_names": ["Risperdal (USA/UK)", "Respidon (India)"],
+        "drug_class": "Atypical Antipsychotic",
+        "category": "cns",
+        "mechanism_of_action": "Potent D2 and 5-HT2A antagonist. More D2 blockade than other atypicals - higher EPS risk.",
+        "mechanism_short": "D2/5-HT2A antagonist → potent antipsychotic",
+        "target_receptors": ["D2", "5-HT2A"],
+        "dosages": [{"route": "oral", "form": "tablet", "strength": "0.25mg, 0.5mg, 1mg, 2mg, 3mg, 4mg", "typical_dose": "2-6mg daily", "max_daily_dose": "16mg", "frequency": "once or twice daily", "special_instructions": "Long-acting injectable available (Risperdal Consta)"}],
+        "therapeutic_effects": [{"effect_type": "therapeutic", "description": "Effective antipsychotic with higher EPS than other atypicals", "onset_hours": 24, "duration_hours": 24, "organs": [{"organ_id": "brain", "scales": [{"scale_id": "physiology", "parameters": [{"parameter_id": "psychosis_score", "multiplier": 0.40, "note": "↓60% psychotic symptoms"}]}]}]}],
+        "indications": [{"disease_id": "schizophrenia", "disease_name": "Schizophrenia", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}, {"disease_id": "bipolar_mania", "disease_name": "Bipolar Mania", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}, {"disease_id": "autism_irritability", "disease_name": "Autism-associated Irritability", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}],
+        "contraindications": ["Hypersensitivity"],
+        "warnings": ["EPS risk (dose-related)", "Hyperprolactinemia", "Metabolic effects"],
+        "half_life": "20 hours (active metabolite)",
+        "pregnancy_category": "C",
+        "fda_approval_year": 1993
+    },
+    {
+        "id": "aripiprazole",
+        "name": "Aripiprazole",
+        "brand_names": ["Abilify (USA/UK)", "Arip MT (India)"],
+        "drug_class": "Atypical Antipsychotic (Third Generation)",
+        "category": "cns",
+        "mechanism_of_action": "Partial D2 agonist and 5-HT1A partial agonist. Dopamine system stabilizer - lower metabolic and prolactin effects.",
+        "mechanism_short": "D2 partial agonist → antipsychotic with lower side effects",
+        "target_receptors": ["D2 (partial agonist)", "5-HT1A (partial agonist)", "5-HT2A (antagonist)"],
+        "dosages": [{"route": "oral", "form": "tablet", "strength": "2mg, 5mg, 10mg, 15mg, 20mg, 30mg", "typical_dose": "10-30mg once daily", "max_daily_dose": "30mg", "frequency": "once daily", "special_instructions": "Long-acting injectable (Abilify Maintena) available"}],
+        "therapeutic_effects": [{"effect_type": "therapeutic", "description": "Effective with favorable metabolic profile", "onset_hours": 24, "duration_hours": 24, "organs": [{"organ_id": "brain", "scales": [{"scale_id": "physiology", "parameters": [{"parameter_id": "psychosis_score", "multiplier": 0.50, "note": "↓50% psychotic symptoms"}]}]}]}],
+        "indications": [{"disease_id": "schizophrenia", "disease_name": "Schizophrenia", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}, {"disease_id": "bipolar", "disease_name": "Bipolar I Disorder", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}, {"disease_id": "mdd_adjunct", "disease_name": "MDD (adjunct)", "is_primary": True, "efficacy_level": "moderate", "evidence_grade": "A"}, {"disease_id": "tourette", "disease_name": "Tourette's Disorder", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}],
+        "contraindications": ["Hypersensitivity"],
+        "warnings": ["Akathisia common", "Compulsive behaviors reported", "Lower metabolic effects than other atypicals"],
+        "half_life": "75 hours",
+        "pregnancy_category": "C",
+        "fda_approval_year": 2002
+    },
+    # Mood Stabilizers
+    {
+        "id": "lithium",
+        "name": "Lithium Carbonate",
+        "brand_names": ["Eskalith (USA)", "Priadel (UK)", "Licab (India)"],
+        "drug_class": "Mood Stabilizer",
+        "category": "cns",
+        "mechanism_of_action": "Multiple mechanisms: inhibits inositol monophosphatase, modulates GSK-3β, affects neurotransmitter release. Gold standard for bipolar disorder.",
+        "mechanism_short": "Multiple mechanisms → mood stabilization",
+        "target_receptors": ["Inositol monophosphatase", "GSK-3β"],
+        "dosages": [{"route": "oral", "form": "tablet/capsule", "strength": "300mg, 450mg ER", "typical_dose": "900-1800mg daily in divided doses", "max_daily_dose": "2400mg", "frequency": "2-3 times daily", "special_instructions": "Narrow therapeutic index; monitor levels (0.6-1.2 mEq/L)"}],
+        "therapeutic_effects": [{"effect_type": "therapeutic", "description": "Most effective mood stabilizer with anti-suicidal properties", "onset_hours": 168, "duration_hours": 24, "organs": [{"organ_id": "brain", "scales": [{"scale_id": "physiology", "parameters": [{"parameter_id": "mood_stability", "multiplier": 1.60, "note": "↑60% mood stability"}]}]}]}],
+        "indications": [{"disease_id": "bipolar", "disease_name": "Bipolar Disorder", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}, {"disease_id": "mdd_augment", "disease_name": "Treatment-resistant Depression (augmentation)", "is_primary": True, "efficacy_level": "moderate", "evidence_grade": "A"}],
+        "contraindications": ["Severe renal impairment", "Severe cardiovascular disease", "Dehydration"],
+        "warnings": ["Narrow therapeutic index", "Thyroid dysfunction", "Nephrogenic DI", "Teratogenic (Ebstein's anomaly)"],
+        "interactions": [{"interacting_drug_id": "nsaids", "interacting_drug_name": "NSAIDs", "severity": "severe", "effect": "↑ lithium levels", "clinical_note": "Avoid or monitor closely"}, {"interacting_drug_id": "diuretics", "interacting_drug_name": "Thiazide diuretics", "severity": "severe", "effect": "↑ lithium levels", "clinical_note": "Reduce lithium dose by 50%"}],
+        "half_life": "18-36 hours",
+        "pregnancy_category": "D",
+        "fda_approval_year": 1970
+    },
+    {
+        "id": "valproic_acid",
+        "name": "Valproic Acid/Divalproex",
+        "brand_names": ["Depakote (USA)", "Epilim (UK)", "Valparin (India)"],
+        "drug_class": "Anticonvulsant/Mood Stabilizer",
+        "category": "cns",
+        "mechanism_of_action": "Multiple: enhances GABA, inhibits voltage-gated sodium channels, modulates HDAC. Used for seizures, bipolar, and migraine prophylaxis.",
+        "mechanism_short": "↑ GABA, Na+ channel block → anticonvulsant + mood stabilizer",
+        "target_receptors": ["GABA system", "Voltage-gated Na+ channels", "HDAC"],
+        "dosages": [{"route": "oral", "form": "tablet/sprinkles", "strength": "125mg, 250mg, 500mg", "typical_dose": "750-2000mg daily", "max_daily_dose": "60mg/kg/day", "frequency": "twice daily", "special_instructions": "Target level 50-125 mcg/mL"}],
+        "therapeutic_effects": [{"effect_type": "therapeutic", "description": "Broad-spectrum anticonvulsant and mood stabilizer", "onset_hours": 24, "duration_hours": 24, "organs": [{"organ_id": "brain", "scales": [{"scale_id": "physiology", "parameters": [{"parameter_id": "seizure_threshold", "multiplier": 1.50, "note": "↑50% seizure threshold"}, {"parameter_id": "mood_stability", "multiplier": 1.40, "note": "↑40% mood stability"}]}]}]}],
+        "indications": [{"disease_id": "seizures", "disease_name": "Seizure Disorders", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}, {"disease_id": "bipolar_mania", "disease_name": "Bipolar Mania", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}, {"disease_id": "migraine_prophylaxis", "disease_name": "Migraine Prophylaxis", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}],
+        "contraindications": ["Hepatic disease", "Urea cycle disorders", "Pregnancy (teratogenic)"],
+        "warnings": ["Hepatotoxicity (especially <2 years)", "Pancreatitis", "Thrombocytopenia", "Neural tube defects (pregnancy)"],
+        "half_life": "9-16 hours",
+        "pregnancy_category": "D (X for migraine)",
+        "fda_approval_year": 1978
+    },
+    # ADHD Medications
+    {
+        "id": "methylphenidate",
+        "name": "Methylphenidate",
+        "brand_names": ["Ritalin, Concerta (USA)", "Ritalin (UK)", "Addwize (India)"],
+        "drug_class": "CNS Stimulant",
+        "category": "cns",
+        "mechanism_of_action": "Blocks dopamine and norepinephrine reuptake. First-line treatment for ADHD.",
+        "mechanism_short": "DA/NE reuptake inhibitor → improved attention",
+        "target_receptors": ["DAT", "NET"],
+        "dosages": [{"route": "oral", "form": "tablet", "strength": "5mg, 10mg, 20mg (IR); 18mg, 27mg, 36mg, 54mg (ER)", "typical_dose": "20-60mg daily", "max_daily_dose": "72mg (ER)", "frequency": "2-3 times daily (IR) or once daily (ER)", "special_instructions": "Schedule II; start low and titrate"}],
+        "therapeutic_effects": [{"effect_type": "therapeutic", "description": "Improves attention, reduces hyperactivity/impulsivity", "onset_hours": 0.5, "duration_hours": 4, "organs": [{"organ_id": "brain", "scales": [{"scale_id": "physiology", "parameters": [{"parameter_id": "attention_score", "multiplier": 1.60, "note": "↑60% attention"}, {"parameter_id": "hyperactivity", "multiplier": 0.50, "note": "↓50% hyperactivity"}]}]}]}],
+        "indications": [{"disease_id": "adhd", "disease_name": "ADHD", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}, {"disease_id": "narcolepsy", "disease_name": "Narcolepsy", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}],
+        "contraindications": ["Glaucoma", "MAOIs", "Severe anxiety", "Motor tics/Tourette's (relative)"],
+        "warnings": ["Appetite suppression", "Growth suppression in children", "CV effects (monitor HR/BP)", "Abuse potential"],
+        "half_life": "2-4 hours (IR)",
+        "pregnancy_category": "C",
+        "fda_approval_year": 1955
+    },
+    {
+        "id": "amphetamine_mixed",
+        "name": "Mixed Amphetamine Salts",
+        "brand_names": ["Adderall (USA)", "Not available (UK)", "Not approved (India)"],
+        "drug_class": "CNS Stimulant",
+        "category": "cns",
+        "mechanism_of_action": "Releases dopamine and norepinephrine, blocks reuptake. More potent than methylphenidate.",
+        "mechanism_short": "DA/NE release + reuptake block → enhanced attention",
+        "target_receptors": ["DAT", "NET", "VMAT2"],
+        "dosages": [{"route": "oral", "form": "tablet", "strength": "5mg, 7.5mg, 10mg, 12.5mg, 15mg, 20mg, 30mg", "typical_dose": "10-30mg daily", "max_daily_dose": "40mg", "frequency": "once or twice daily", "special_instructions": "Schedule II; XR formulation available"}],
+        "therapeutic_effects": [{"effect_type": "therapeutic", "description": "Potent improvement in ADHD symptoms", "onset_hours": 0.5, "duration_hours": 4, "organs": [{"organ_id": "brain", "scales": [{"scale_id": "physiology", "parameters": [{"parameter_id": "attention_score", "multiplier": 1.70, "note": "↑70% attention"}]}]}]}],
+        "indications": [{"disease_id": "adhd", "disease_name": "ADHD", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}, {"disease_id": "narcolepsy", "disease_name": "Narcolepsy", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}],
+        "contraindications": ["MAOIs", "Advanced arteriosclerosis", "Symptomatic CV disease", "Hyperthyroidism", "Glaucoma"],
+        "warnings": ["High abuse potential", "Sudden cardiac death (structural heart disease)", "Psychiatric symptoms"],
+        "half_life": "10-13 hours",
+        "pregnancy_category": "C",
+        "fda_approval_year": 1996
+    }
+]
+
+# ============== DERMATOLOGICAL DRUGS ==============
+DERMATOLOGICAL_DRUGS = [
+    {
+        "id": "isotretinoin",
+        "name": "Isotretinoin",
+        "brand_names": ["Accutane (USA)", "Roaccutane (UK)", "Isotroin (India)"],
+        "drug_class": "Retinoid",
+        "category": "dermatological",
+        "mechanism_of_action": "Vitamin A derivative. Reduces sebum production, normalizes keratinization, has anti-inflammatory and anti-bacterial effects.",
+        "mechanism_short": "Retinoid → ↓ sebum, normalizes skin",
+        "target_receptors": ["RAR", "RXR"],
+        "dosages": [{"route": "oral", "form": "capsule", "strength": "10mg, 20mg, 40mg", "typical_dose": "0.5-1mg/kg/day", "max_daily_dose": "2mg/kg/day", "frequency": "twice daily with food", "special_instructions": "iPLEDGE program required; total cumulative dose 120-150mg/kg"}],
+        "therapeutic_effects": [{"effect_type": "therapeutic", "description": "Only drug that can induce long-term remission of severe acne", "onset_hours": 168, "duration_hours": 24, "organs": [{"organ_id": "skin", "scales": [{"scale_id": "physiology", "parameters": [{"parameter_id": "sebum_production", "multiplier": 0.20, "note": "↓80% sebum production"}, {"parameter_id": "acne_severity", "multiplier": 0.15, "note": "↓85% acne lesions"}]}]}]}],
+        "indications": [{"disease_id": "severe_acne", "disease_name": "Severe Nodular Acne", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}],
+        "contraindications": ["Pregnancy (absolute)", "Breastfeeding", "Hypervitaminosis A"],
+        "warnings": ["Teratogenic (iPLEDGE program)", "Depression/suicidal ideation (controversial)", "Dry skin/lips", "Elevated triglycerides", "Photosensitivity"],
+        "half_life": "21 hours",
+        "pregnancy_category": "X",
+        "fda_approval_year": 1982
+    },
+    {
+        "id": "finasteride",
+        "name": "Finasteride",
+        "brand_names": ["Propecia, Proscar (USA)", "Propecia (UK)", "Finax (India)"],
+        "drug_class": "5-alpha Reductase Inhibitor",
+        "category": "dermatological",
+        "mechanism_of_action": "Inhibits type II 5-alpha reductase, reducing DHT. Used for male pattern baldness and BPH.",
+        "mechanism_short": "5α-reductase inhibitor → ↓ DHT → hair regrowth",
+        "target_receptors": ["5-alpha reductase type II"],
+        "dosages": [{"route": "oral", "form": "tablet", "strength": "1mg (hair), 5mg (BPH)", "typical_dose": "1mg daily (hair loss)", "max_daily_dose": "5mg", "frequency": "once daily", "special_instructions": "Takes 3-6 months to see effect; must continue for maintenance"}],
+        "therapeutic_effects": [{"effect_type": "therapeutic", "description": "Prevents hair loss and promotes regrowth in androgenetic alopecia", "onset_hours": 720, "duration_hours": 24, "organs": [{"organ_id": "skin", "scales": [{"scale_id": "physiology", "parameters": [{"parameter_id": "dht_levels", "multiplier": 0.30, "note": "↓70% scalp DHT"}, {"parameter_id": "hair_count", "multiplier": 1.15, "note": "↑15% hair count"}]}]}]}],
+        "indications": [{"disease_id": "androgenetic_alopecia", "disease_name": "Male Pattern Baldness", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}, {"disease_id": "bph", "disease_name": "Benign Prostatic Hyperplasia", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}],
+        "contraindications": ["Women (especially pregnant)", "Children"],
+        "warnings": ["Sexual dysfunction (2-4%)", "Persistent side effects reported", "↓ PSA by 50% (adjust screening)", "Depression (rare)"],
+        "half_life": "6-8 hours",
+        "pregnancy_category": "X",
+        "fda_approval_year": 1992
+    }
+]
+
+# ============== IMMUNOSUPPRESSANTS ==============
+IMMUNOSUPPRESSANT_DRUGS = [
+    {
+        "id": "methotrexate",
+        "name": "Methotrexate",
+        "brand_names": ["Trexall (USA)", "Maxtrex (UK)", "Folitrax (India)"],
+        "drug_class": "DMARD / Antimetabolite",
+        "category": "immunosuppressant",
+        "mechanism_of_action": "Dihydrofolate reductase inhibitor. At low doses, has anti-inflammatory and immunomodulatory effects. First-line DMARD for RA.",
+        "mechanism_short": "Folate antagonist → anti-inflammatory + immunosuppression",
+        "target_receptors": ["Dihydrofolate reductase", "AICAR transformylase"],
+        "dosages": [{"route": "oral", "form": "tablet", "strength": "2.5mg, 5mg, 7.5mg, 10mg, 15mg", "typical_dose": "7.5-25mg once weekly", "max_daily_dose": "25mg/week", "frequency": "once weekly", "special_instructions": "WEEKLY dosing only; folic acid supplementation required"}],
+        "therapeutic_effects": [{"effect_type": "therapeutic", "description": "Reduces inflammation and slows joint damage in RA", "onset_hours": 336, "duration_hours": 168, "organs": [{"organ_id": "joints", "scales": [{"scale_id": "physiology", "parameters": [{"parameter_id": "inflammation", "multiplier": 0.50, "note": "↓50% joint inflammation"}, {"parameter_id": "joint_damage", "multiplier": 0.60, "note": "↓40% radiographic progression"}]}]}]}],
+        "indications": [{"disease_id": "rheumatoid_arthritis", "disease_name": "Rheumatoid Arthritis", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}, {"disease_id": "psoriasis", "disease_name": "Psoriasis", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}, {"disease_id": "psoriatic_arthritis", "disease_name": "Psoriatic Arthritis", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}],
+        "contraindications": ["Pregnancy", "Breastfeeding", "Severe hepatic/renal impairment", "Immunodeficiency", "Alcohol abuse"],
+        "warnings": ["Hepatotoxicity", "Myelosuppression", "Pulmonary toxicity", "Teratogenic", "Weekly dosing - NOT daily"],
+        "half_life": "3-10 hours",
+        "pregnancy_category": "X",
+        "fda_approval_year": 1953
+    },
+    {
+        "id": "cyclosporine",
+        "name": "Cyclosporine",
+        "brand_names": ["Neoral, Sandimmune (USA)", "Neoral (UK)", "Sandimmun (India)"],
+        "drug_class": "Calcineurin Inhibitor",
+        "category": "immunosuppressant",
+        "mechanism_of_action": "Binds cyclophilin, inhibiting calcineurin and IL-2 transcription. Prevents T-cell activation.",
+        "mechanism_short": "Calcineurin inhibitor → blocks T-cell activation",
+        "target_receptors": ["Calcineurin (via cyclophilin)"],
+        "dosages": [{"route": "oral", "form": "capsule/solution", "strength": "25mg, 50mg, 100mg", "typical_dose": "2-5mg/kg/day (varies by indication)", "max_daily_dose": "10mg/kg/day", "frequency": "twice daily", "special_instructions": "Neoral (microemulsion) not interchangeable with Sandimmune; monitor levels"}],
+        "therapeutic_effects": [{"effect_type": "therapeutic", "description": "Potent immunosuppression for transplant and autoimmune diseases", "onset_hours": 24, "duration_hours": 12, "organs": [{"organ_id": "immune_system", "scales": [{"scale_id": "physiology", "parameters": [{"parameter_id": "t_cell_activity", "multiplier": 0.30, "note": "↓70% T-cell activation"}]}]}]}],
+        "indications": [{"disease_id": "transplant", "disease_name": "Organ Transplant Rejection Prevention", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}, {"disease_id": "psoriasis", "disease_name": "Psoriasis", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}, {"disease_id": "ra", "disease_name": "Rheumatoid Arthritis", "is_primary": False, "efficacy_level": "moderate", "evidence_grade": "A"}],
+        "contraindications": ["Uncontrolled hypertension", "Malignancy", "Uncontrolled infection"],
+        "warnings": ["Nephrotoxicity", "Hypertension", "Hyperkalemia", "Gingival hyperplasia", "Many drug interactions"],
+        "interactions": [{"interacting_drug_id": "nsaids", "interacting_drug_name": "NSAIDs", "severity": "severe", "effect": "↑ nephrotoxicity", "clinical_note": "Avoid combination"}],
+        "half_life": "8-24 hours",
+        "pregnancy_category": "C",
+        "fda_approval_year": 1983
+    },
+    {
+        "id": "tacrolimus",
+        "name": "Tacrolimus",
+        "brand_names": ["Prograf (USA/UK)", "Pangraf (India)"],
+        "drug_class": "Calcineurin Inhibitor",
+        "category": "immunosuppressant",
+        "mechanism_of_action": "Binds FKBP12, inhibiting calcineurin. 100x more potent than cyclosporine. Mainstay of transplant immunosuppression.",
+        "mechanism_short": "Calcineurin inhibitor (more potent than cyclosporine)",
+        "target_receptors": ["Calcineurin (via FKBP12)"],
+        "dosages": [{"route": "oral", "form": "capsule", "strength": "0.5mg, 1mg, 5mg", "typical_dose": "0.1-0.2mg/kg/day", "max_daily_dose": "0.3mg/kg/day", "frequency": "twice daily", "special_instructions": "Narrow therapeutic index; monitor trough levels"}],
+        "therapeutic_effects": [{"effect_type": "therapeutic", "description": "Most effective calcineurin inhibitor for transplant", "onset_hours": 24, "duration_hours": 12, "organs": [{"organ_id": "immune_system", "scales": [{"scale_id": "physiology", "parameters": [{"parameter_id": "rejection_risk", "multiplier": 0.25, "note": "↓75% acute rejection"}]}]}]}],
+        "indications": [{"disease_id": "transplant", "disease_name": "Organ Transplant", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}, {"disease_id": "atopic_dermatitis", "disease_name": "Atopic Dermatitis (topical)", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}],
+        "contraindications": ["Hypersensitivity"],
+        "warnings": ["Nephrotoxicity", "Neurotoxicity", "New-onset diabetes", "Hypertension", "Hyperkalemia"],
+        "half_life": "12 hours",
+        "pregnancy_category": "C",
+        "fda_approval_year": 1994
+    },
+    {
+        "id": "mycophenolate",
+        "name": "Mycophenolate Mofetil",
+        "brand_names": ["CellCept (USA/UK)", "Cellcept (India)"],
+        "drug_class": "IMPDH Inhibitor",
+        "category": "immunosuppressant",
+        "mechanism_of_action": "Inhibits inosine monophosphate dehydrogenase (IMPDH), blocking de novo purine synthesis in lymphocytes.",
+        "mechanism_short": "IMPDH inhibitor → blocks lymphocyte proliferation",
+        "target_receptors": ["IMPDH"],
+        "dosages": [{"route": "oral", "form": "capsule/tablet", "strength": "250mg, 500mg", "typical_dose": "1-1.5g twice daily", "max_daily_dose": "3g", "frequency": "twice daily", "special_instructions": "Take on empty stomach"}],
+        "therapeutic_effects": [{"effect_type": "therapeutic", "description": "Effective immunosuppression with less nephrotoxicity than CNIs", "onset_hours": 24, "duration_hours": 12, "organs": [{"organ_id": "immune_system", "scales": [{"scale_id": "physiology", "parameters": [{"parameter_id": "lymphocyte_proliferation", "multiplier": 0.40, "note": "↓60% lymphocyte proliferation"}]}]}]}],
+        "indications": [{"disease_id": "transplant", "disease_name": "Organ Transplant", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}, {"disease_id": "lupus_nephritis", "disease_name": "Lupus Nephritis", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}],
+        "contraindications": ["Pregnancy", "Hypersensitivity"],
+        "warnings": ["GI side effects", "Myelosuppression", "Increased infection risk", "Teratogenic"],
+        "half_life": "17 hours (MPA)",
+        "pregnancy_category": "D",
+        "fda_approval_year": 1995
+    }
+]
+
+# ============== UROLOGICAL DRUGS ==============
+UROLOGICAL_DRUGS = [
+    {
+        "id": "tamsulosin",
+        "name": "Tamsulosin",
+        "brand_names": ["Flomax (USA)", "Flomax (UK)", "Urimax (India)"],
+        "drug_class": "Alpha-1A Blocker",
+        "category": "urological",
+        "mechanism_of_action": "Selective alpha-1A adrenergic blocker. Relaxes prostatic smooth muscle without significant BP effects.",
+        "mechanism_short": "α1A blocker → relaxes prostate → ↑ urine flow",
+        "target_receptors": ["α1A-adrenergic"],
+        "dosages": [{"route": "oral", "form": "capsule", "strength": "0.4mg", "typical_dose": "0.4mg once daily", "max_daily_dose": "0.8mg", "frequency": "once daily", "special_instructions": "Take 30 min after same meal each day"}],
+        "therapeutic_effects": [{"effect_type": "therapeutic", "description": "Improves urinary flow and BPH symptoms within days", "onset_hours": 24, "duration_hours": 24, "organs": [{"organ_id": "prostate", "scales": [{"scale_id": "physiology", "parameters": [{"parameter_id": "urinary_flow", "multiplier": 1.35, "note": "↑35% peak urinary flow"}, {"parameter_id": "ipss_score", "multiplier": 0.65, "note": "↓35% IPSS score"}]}]}]}],
+        "indications": [{"disease_id": "bph", "disease_name": "Benign Prostatic Hyperplasia", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}, {"disease_id": "urinary_retention", "disease_name": "Urinary Retention (adjunct)", "is_primary": False, "efficacy_level": "moderate", "evidence_grade": "B"}],
+        "contraindications": ["Hypersensitivity", "Concurrent use with strong CYP3A4 inhibitors"],
+        "warnings": ["Intraoperative floppy iris syndrome (IFIS) - stop before cataract surgery", "Orthostatic hypotension (less than non-selective)", "Ejaculatory dysfunction"],
+        "half_life": "14 hours",
+        "pregnancy_category": "B (not indicated in women)",
+        "fda_approval_year": 1997
+    },
+    {
+        "id": "sildenafil",
+        "name": "Sildenafil",
+        "brand_names": ["Viagra, Revatio (USA)", "Viagra (UK)", "Penegra (India)"],
+        "drug_class": "PDE5 Inhibitor",
+        "category": "urological",
+        "mechanism_of_action": "Inhibits phosphodiesterase-5, increasing cGMP in corpus cavernosum. Also used for pulmonary arterial hypertension.",
+        "mechanism_short": "PDE5 inhibitor → ↑ cGMP → smooth muscle relaxation → erection",
+        "target_receptors": ["PDE5"],
+        "dosages": [{"route": "oral", "form": "tablet", "strength": "25mg, 50mg, 100mg (ED); 20mg (PAH)", "typical_dose": "50mg PRN (1 hour before)", "max_daily_dose": "100mg", "frequency": "as needed", "special_instructions": "Not more than once daily; high-fat meal delays absorption"}],
+        "therapeutic_effects": [{"effect_type": "therapeutic", "description": "Effective for erectile dysfunction in 70% of men", "onset_hours": 0.5, "duration_hours": 4, "organs": [{"organ_id": "genitourinary", "scales": [{"scale_id": "physiology", "parameters": [{"parameter_id": "erection_quality", "multiplier": 1.70, "note": "↑70% erectile function"}]}]}]}],
+        "indications": [{"disease_id": "ed", "disease_name": "Erectile Dysfunction", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}, {"disease_id": "pah", "disease_name": "Pulmonary Arterial Hypertension", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}],
+        "contraindications": ["Nitrates (absolute)", "Severe hepatic impairment", "Hypotension", "Recent stroke/MI"],
+        "warnings": ["Do not use with nitrates - severe hypotension", "Priapism", "NAION (rare)", "Hearing loss (rare)"],
+        "interactions": [{"interacting_drug_id": "nitrates", "interacting_drug_name": "Nitrates", "severity": "severe", "effect": "Severe hypotension", "clinical_note": "ABSOLUTELY contraindicated"}],
+        "half_life": "4 hours",
+        "pregnancy_category": "B",
+        "fda_approval_year": 1998
+    },
+    {
+        "id": "oxybutynin",
+        "name": "Oxybutynin",
+        "brand_names": ["Ditropan (USA)", "Ditropan (UK)", "Cystran (India)"],
+        "drug_class": "Anticholinergic/Antispasmodic",
+        "category": "urological",
+        "mechanism_of_action": "Muscarinic antagonist with antispasmodic effects on bladder smooth muscle. Reduces urgency, frequency, and incontinence.",
+        "mechanism_short": "Anticholinergic → ↓ bladder contractions",
+        "target_receptors": ["M3 muscarinic"],
+        "dosages": [{"route": "oral", "form": "tablet", "strength": "5mg", "typical_dose": "5mg 2-3 times daily", "max_daily_dose": "20mg", "frequency": "2-3 times daily", "special_instructions": "ER and transdermal formulations have fewer side effects"}],
+        "therapeutic_effects": [{"effect_type": "therapeutic", "description": "Reduces overactive bladder symptoms", "onset_hours": 1, "duration_hours": 8, "organs": [{"organ_id": "bladder", "scales": [{"scale_id": "physiology", "parameters": [{"parameter_id": "urgency_episodes", "multiplier": 0.50, "note": "↓50% urgency episodes"}, {"parameter_id": "incontinence_episodes", "multiplier": 0.55, "note": "↓45% incontinence"}]}]}]}],
+        "indications": [{"disease_id": "oab", "disease_name": "Overactive Bladder", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}, {"disease_id": "neurogenic_bladder", "disease_name": "Neurogenic Bladder", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}],
+        "contraindications": ["Urinary retention", "Gastric retention", "Uncontrolled narrow-angle glaucoma"],
+        "warnings": ["Anticholinergic effects (dry mouth, constipation, confusion in elderly)", "Heat intolerance", "Cognitive impairment in elderly"],
+        "half_life": "2-3 hours",
+        "pregnancy_category": "B",
+        "fda_approval_year": 1975
+    }
+]
+
+# ============== OPHTHALMIC DRUGS ==============
+OPHTHALMIC_DRUGS = [
+    {
+        "id": "latanoprost",
+        "name": "Latanoprost",
+        "brand_names": ["Xalatan (USA/UK)", "Xalatan (India)"],
+        "drug_class": "Prostaglandin Analog",
+        "category": "ophthalmic",
+        "mechanism_of_action": "Prostaglandin F2α analog. Increases uveoscleral outflow of aqueous humor, reducing intraocular pressure.",
+        "mechanism_short": "PGF2α analog → ↑ aqueous outflow → ↓ IOP",
+        "target_receptors": ["FP prostanoid receptor"],
+        "dosages": [{"route": "ophthalmic", "form": "drops", "strength": "0.005%", "typical_dose": "1 drop in affected eye(s) once daily", "max_daily_dose": "1 drop daily", "frequency": "once daily in evening", "special_instructions": "Once daily dosing (more is not better); may darken iris color"}],
+        "therapeutic_effects": [{"effect_type": "therapeutic", "description": "Most effective IOP-lowering agent; 25-35% reduction", "onset_hours": 3, "duration_hours": 24, "organs": [{"organ_id": "eye", "scales": [{"scale_id": "physiology", "parameters": [{"parameter_id": "iop", "multiplier": 0.70, "note": "↓30% intraocular pressure"}]}]}]}],
+        "indications": [{"disease_id": "glaucoma", "disease_name": "Open-Angle Glaucoma", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}, {"disease_id": "ocular_htn", "disease_name": "Ocular Hypertension", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}],
+        "contraindications": ["Hypersensitivity"],
+        "warnings": ["Iris pigmentation (permanent)", "Eyelash changes", "Periorbital skin darkening", "Reactivation of HSV keratitis"],
+        "half_life": "17 minutes (active acid)",
+        "pregnancy_category": "C",
+        "fda_approval_year": 1996
+    },
+    {
+        "id": "timolol_ophthalmic",
+        "name": "Timolol (Ophthalmic)",
+        "brand_names": ["Timoptic (USA)", "Timoptol (UK)", "Iotim (India)"],
+        "drug_class": "Non-selective Beta Blocker (Ophthalmic)",
+        "category": "ophthalmic",
+        "mechanism_of_action": "Beta-blocker that reduces aqueous humor production in ciliary body.",
+        "mechanism_short": "Beta blocker → ↓ aqueous production → ↓ IOP",
+        "target_receptors": ["β1/β2-adrenergic"],
+        "dosages": [{"route": "ophthalmic", "form": "drops", "strength": "0.25%, 0.5%", "typical_dose": "1 drop twice daily", "max_daily_dose": "1 drop twice daily", "frequency": "twice daily", "special_instructions": "Punctal occlusion reduces systemic absorption"}],
+        "therapeutic_effects": [{"effect_type": "therapeutic", "description": "20-25% IOP reduction; less effective than PGAs", "onset_hours": 0.5, "duration_hours": 12, "organs": [{"organ_id": "eye", "scales": [{"scale_id": "physiology", "parameters": [{"parameter_id": "iop", "multiplier": 0.75, "note": "↓25% intraocular pressure"}]}]}]}],
+        "indications": [{"disease_id": "glaucoma", "disease_name": "Open-Angle Glaucoma", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}, {"disease_id": "ocular_htn", "disease_name": "Ocular Hypertension", "is_primary": True, "efficacy_level": "high", "evidence_grade": "A"}],
+        "contraindications": ["Asthma/COPD", "Bradycardia", "Heart block", "Decompensated HF"],
+        "warnings": ["Systemic absorption can cause bronchospasm, bradycardia", "Mask hypoglycemia symptoms"],
+        "half_life": "4 hours",
+        "pregnancy_category": "C",
+        "fda_approval_year": 1978
+    }
+]
+
 # Get all comprehensive drugs
 def get_all_comprehensive_drugs():
     """Return all comprehensive drug data with timestamps"""
@@ -1351,6 +1701,11 @@ def get_all_comprehensive_drugs():
     all_drugs.extend(ANTIINFECTIVE_DRUGS)
     all_drugs.extend(ENDOCRINE_DRUGS)
     all_drugs.extend(HEMATOLOGICAL_DRUGS)
+    all_drugs.extend(PSYCHIATRIC_DRUGS)
+    all_drugs.extend(DERMATOLOGICAL_DRUGS)
+    all_drugs.extend(IMMUNOSUPPRESSANT_DRUGS)
+    all_drugs.extend(UROLOGICAL_DRUGS)
+    all_drugs.extend(OPHTHALMIC_DRUGS)
     
     # Add timestamps
     timestamp = get_timestamp()
