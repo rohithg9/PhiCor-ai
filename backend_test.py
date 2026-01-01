@@ -1,20 +1,25 @@
 #!/usr/bin/env python3
 """
-Backend Testing for PhiCore.ai Medical Simulation Platform
-Testing comprehensive medical simulation platform features:
-- Dashboard loads with 284+ diseases across all categories
-- Disease search functionality for different disease types
-- Disease data structure with required fields (diagnosticCriteria, differentialDiagnosis, treatment, riskStratification)
-- Parameters display with normal ranges
-- Mathematical equations and calculations
-- Differential Diagnosis Engine functionality
+Backend Testing for PhiCor Drug Engine Comprehensive Drug Database Expansion
+Testing comprehensive drug database expansion from ~51 drugs to 99 drugs:
+- New drug categories: CNS/cns (SSRIs, SNRIs, benzodiazepines, anticonvulsants)
+- Gastrointestinal (PPIs, antiemetics)
+- Analgesic (NSAIDs, acetaminophen, tramadol)
+- Antiinfective (antibiotics)
+- Endocrine (diabetes meds, thyroid, corticosteroids)
+- Hematological (antiplatelet, anticoagulants)
+- Updated seed endpoint using external data file /app/backend/data/comprehensive_drugs.py
 
-Focus on testing specific diseases from review request:
-- Autoimmune: SLE (M32.9), Rheumatoid Arthritis (M05.9)
-- Infectious: COVID-19 (U07.1), Sepsis (A41.9)  
-- GI: GERD (K21.0), Acute Pancreatitis (K85.9)
-- Psychiatric: Major Depressive Disorder (F32.9), Schizophrenia (F20.9)
-- Respiratory: Asthma (J45.9), ARDS (J80)
+Focus on testing specific endpoints from review request:
+- GET /api/drugs-db - Should return ~99 drugs total
+- GET /api/drugs-db?category=cns - Should return 10 CNS drugs
+- GET /api/drugs-db?category=gastrointestinal - Should return GI drugs
+- GET /api/drugs-db?category=analgesic - Should return pain drugs
+- GET /api/drugs-db?category=antiinfective - Should return antibiotics
+- GET /api/drugs-db?category=endocrine - Should return endocrine drugs
+- GET /api/drugs-db?category=hematological - Should return blood drugs
+- GET /api/drugs-db/sertraline - Should return full drug details
+- POST /api/drugs-db/simulate - Test simulation with CNS drug
 """
 
 import requests
