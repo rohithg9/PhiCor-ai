@@ -134,11 +134,10 @@ Always base your response on the CURATED DATA provided, supplemented by your med
         
         if search_queries:
             # Find diseases matching any of the keywords
-            cursor = self.db.diseases.find(
+            matching_diseases = await self.db.diseases.find(
                 {"$or": search_queries},
                 {"_id": 0}
-            ).limit(20)
-            matching_diseases = await cursor.to_list(20)
+            ).to_list(20)
         
         # If no matches, get diseases by category based on primary organ affected
         if not matching_diseases:
@@ -151,11 +150,10 @@ Always base your response on the CURATED DATA provided, supplemented by your med
                 categories.append('renal')
             
             if categories:
-                cursor = self.db.diseases.find(
+                matching_diseases = await self.db.diseases.find(
                     {"category": {"$in": categories}},
                     {"_id": 0}
-                ).limit(15)
-                matching_diseases = await cursor.to_list(15)
+                ).to_list(15)
         
         return matching_diseases
 
