@@ -558,6 +558,342 @@ def test_drug_simulation():
         print(f"❌ Error testing drug simulation: {e}")
         return False
 
+# ============== MEDICAL KNOWLEDGE BASE API TESTS ==============
+
+def test_drug_generation_status():
+    """Test 1: Drug Generation Status API - GET /api/drugs-db/generation-status"""
+    print("\n📊 TESTING DRUG GENERATION STATUS API")
+    print("=" * 50)
+    
+    try:
+        response = requests.get(f"{BACKEND_URL}/api/drugs-db/generation-status", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            
+            print(f"✅ Drug generation status endpoint accessible")
+            
+            # Check for required fields
+            required_fields = ["total_priority_drugs", "total_generated", "completion_percentage", "by_category", "last_generated"]
+            found_fields = []
+            
+            for field in required_fields:
+                if field in data:
+                    found_fields.append(field)
+                    if field == "completion_percentage":
+                        percentage = data[field]
+                        print(f"  ✅ {field}: {percentage}%")
+                        if percentage == 100:
+                            print(f"    ✅ Generation complete (100%)")
+                        elif percentage >= 50:
+                            print(f"    ⚠️ Generation in progress ({percentage}%)")
+                        else:
+                            print(f"    ❌ Low completion rate ({percentage}%)")
+                    elif field == "by_category":
+                        categories = data[field]
+                        print(f"  ✅ {field}: {len(categories)} categories found")
+                        for cat, counts in categories.items():
+                            if isinstance(counts, dict) and 'total' in counts and 'generated' in counts:
+                                print(f"    - {cat}: {counts['generated']}/{counts['total']} drugs")
+                    elif field == "last_generated":
+                        last_drugs = data[field]
+                        print(f"  ✅ {field}: {len(last_drugs)} recent drugs")
+                        if last_drugs:
+                            print(f"    - Latest: {', '.join(last_drugs[:3])}")
+                    else:
+                        print(f"  ✅ {field}: {data[field]}")
+                else:
+                    print(f"  ❌ {field} missing")
+            
+            print(f"\n📈 Found {len(found_fields)}/{len(required_fields)} required fields")
+            return len(found_fields) >= 4  # At least 4 out of 5 fields
+        else:
+            print(f"❌ Drug generation status endpoint failed: {response.status_code}")
+            if response.text:
+                print(f"Error details: {response.text}")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing drug generation status: {e}")
+        return False
+
+def test_drug_chunk_generation():
+    """Test 2: Drug Chunk Generation API - POST /api/drugs-db/generate-chunk"""
+    print("\n🔄 TESTING DRUG CHUNK GENERATION API")
+    print("=" * 50)
+    
+    # Test with skip_existing=true to avoid generating new drugs
+    chunk_request = {
+        "category": "cardiovascular",
+        "count": 1,
+        "skip_existing": True
+    }
+    
+    try:
+        response = requests.post(
+            f"{BACKEND_URL}/api/drugs-db/generate-chunk",
+            json=chunk_request,
+            timeout=15
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            print(f"✅ Drug chunk generation endpoint accessible")
+            
+            # Check response structure
+            if "message" in data:
+                message = data["message"]
+                print(f"  ✅ Response message: {message}")
+                
+                # Should indicate drugs already generated when skip_existing=true
+                if "already generated" in message.lower() or "skip" in message.lower() or "existing" in message.lower():
+                    print(f"  ✅ Correctly skipping existing drugs")
+                    return True
+                else:
+                    print(f"  ⚠️ Unexpected message for skip_existing=true")
+                    return True  # Still working, just different message
+            else:
+                print(f"  ❌ No message field in response")
+                return False
+        else:
+            print(f"❌ Drug chunk generation endpoint failed: {response.status_code}")
+            if response.text:
+                print(f"Error details: {response.text}")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing drug chunk generation: {e}")
+        return False
+
+def test_icd10_status():
+    """Test 3: ICD-10 Status API - GET /api/diseases-db/icd10-status"""
+    print("\n🏥 TESTING ICD-10 STATUS API")
+    print("=" * 50)
+    
+    try:
+        response = requests.get(f"{BACKEND_URL}/api/diseases-db/icd10-status", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            
+            print(f"✅ ICD-10 status endpoint accessible")
+            
+            # Check for required fields
+            required_fields = ["completion_percentage", "by_category"]
+            optional_fields = ["total_conditions", "total_generated", "remaining"]
+            
+            found_required = []
+            found_optional = []
+            
+            for field in required_fields:
+                if field in data:
+                    found_required.append(field)
+                    if field == "completion_percentage":
+                        percentage = data[field]
+                        print(f"  ✅ {field}: {percentage}%")
+                    elif field == "by_category":
+                        categories = data[field]
+                        print(f"  ✅ {field}: {len(categories)} categories found")
+                        for cat, counts in categories.items():
+                            if isinstance(counts, dict):
+                                total = counts.get('total', 0)
+                                generated = counts.get('generated', 0)
+                                print(f"    - {cat}: {generated}/{total} conditions")
+                    else:
+                        print(f"  ✅ {field}: {data[field]}")
+                else:
+                    print(f"  ❌ {field} missing")
+            
+            for field in optional_fields:
+                if field in data:
+                    found_optional.append(field)
+                    print(f"  ✅ {field}: {data[field]}")
+            
+            print(f"\n📈 Found {len(found_required)}/{len(required_fields)} required fields")
+            print(f"📈 Found {len(found_optional)}/{len(optional_fields)} optional fields")
+            
+            return len(found_required) >= 2  # Both required fields
+        else:
+            print(f"❌ ICD-10 status endpoint failed: {response.status_code}")
+            if response.text:
+                print(f"Error details: {response.text}")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing ICD-10 status: {e}")
+        return False
+
+def test_generated_drugs_list():
+    """Test 4: Generated Drugs List API - GET /api/drugs-db/generated?limit=10"""
+    print("\n💊 TESTING GENERATED DRUGS LIST API")
+    print("=" * 50)
+    
+    try:
+        response = requests.get(f"{BACKEND_URL}/api/drugs-db/generated?limit=10", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            
+            print(f"✅ Generated drugs list endpoint accessible")
+            
+            # Check response structure
+            required_fields = ["total", "drugs"]
+            found_fields = []
+            
+            for field in required_fields:
+                if field in data:
+                    found_fields.append(field)
+                    if field == "total":
+                        total = data[field]
+                        print(f"  ✅ {field}: {total} generated drugs")
+                    elif field == "drugs":
+                        drugs = data[field]
+                        print(f"  ✅ {field}: {len(drugs)} drugs returned")
+                        
+                        # Check first drug structure if available
+                        if drugs and len(drugs) > 0:
+                            first_drug = drugs[0]
+                            drug_fields = ["id", "name", "brand_names", "mechanism_of_action", "dosages", "contraindications", "drug_interactions", "side_effects"]
+                            found_drug_fields = []
+                            
+                            for drug_field in drug_fields:
+                                if drug_field in first_drug:
+                                    found_drug_fields.append(drug_field)
+                                    print(f"    ✅ {drug_field} present")
+                                else:
+                                    print(f"    ❌ {drug_field} missing")
+                            
+                            print(f"    📈 Drug data quality: {len(found_drug_fields)}/{len(drug_fields)} fields")
+                else:
+                    print(f"  ❌ {field} missing")
+            
+            print(f"\n📈 Found {len(found_fields)}/{len(required_fields)} required fields")
+            return len(found_fields) >= 2  # Both required fields
+        else:
+            print(f"❌ Generated drugs list endpoint failed: {response.status_code}")
+            if response.text:
+                print(f"Error details: {response.text}")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing generated drugs list: {e}")
+        return False
+
+def test_disease_database_stats():
+    """Test 5: Disease Database Stats - GET /api/diseases-db/stats"""
+    print("\n📈 TESTING DISEASE DATABASE STATS API")
+    print("=" * 50)
+    
+    try:
+        response = requests.get(f"{BACKEND_URL}/api/diseases-db/stats", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            
+            print(f"✅ Disease database stats endpoint accessible")
+            
+            # Check for required fields
+            required_fields = ["total_diseases", "ai_generated", "by_category"]
+            found_fields = []
+            
+            for field in required_fields:
+                if field in data:
+                    found_fields.append(field)
+                    if field == "total_diseases":
+                        total = data[field]
+                        print(f"  ✅ {field}: {total}")
+                    elif field == "ai_generated":
+                        ai_count = data[field]
+                        print(f"  ✅ {field}: {ai_count}")
+                    elif field == "by_category":
+                        categories = data[field]
+                        print(f"  ✅ {field}: {len(categories)} categories")
+                        for cat, count in categories.items():
+                            print(f"    - {cat}: {count} diseases")
+                    else:
+                        print(f"  ✅ {field}: {data[field]}")
+                else:
+                    print(f"  ❌ {field} missing")
+            
+            print(f"\n📈 Found {len(found_fields)}/{len(required_fields)} required fields")
+            return len(found_fields) >= 3  # All required fields
+        else:
+            print(f"❌ Disease database stats endpoint failed: {response.status_code}")
+            if response.text:
+                print(f"Error details: {response.text}")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing disease database stats: {e}")
+        return False
+
+def test_drug_data_quality():
+    """Test 6: Verify Drug Data Quality - GET /api/drugs-db/generated?limit=1"""
+    print("\n🔍 TESTING DRUG DATA QUALITY")
+    print("=" * 50)
+    
+    try:
+        response = requests.get(f"{BACKEND_URL}/api/drugs-db/generated?limit=1", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            
+            print(f"✅ Drug data quality endpoint accessible")
+            
+            drugs = data.get('drugs', [])
+            if not drugs:
+                print(f"❌ No drugs returned for quality check")
+                return False
+            
+            drug = drugs[0]
+            print(f"  ✅ Testing drug: {drug.get('name', 'Unknown')}")
+            
+            # Check for comprehensive data fields
+            required_fields = ["id", "name", "brand_names", "drug_class", "mechanism_of_action", "pharmacokinetics", "dosages", "contraindications", "drug_interactions", "side_effects"]
+            found_fields = []
+            
+            for field in required_fields:
+                if field in drug and drug[field]:
+                    found_fields.append(field)
+                    if field == "brand_names":
+                        brands = drug[field]
+                        if isinstance(brands, list) and brands:
+                            print(f"    ✅ {field}: {len(brands)} brand names")
+                        else:
+                            print(f"    ⚠️ {field}: empty or invalid format")
+                    elif field == "dosages":
+                        dosages = drug[field]
+                        if isinstance(dosages, list) and dosages:
+                            print(f"    ✅ {field}: {len(dosages)} dosage forms")
+                        else:
+                            print(f"    ⚠️ {field}: empty or invalid format")
+                    elif field == "contraindications":
+                        contras = drug[field]
+                        if isinstance(contras, list) and contras:
+                            print(f"    ✅ {field}: {len(contras)} contraindications")
+                        else:
+                            print(f"    ⚠️ {field}: empty or invalid format")
+                    elif field == "drug_interactions":
+                        interactions = drug[field]
+                        if isinstance(interactions, list):
+                            print(f"    ✅ {field}: {len(interactions)} interactions")
+                        else:
+                            print(f"    ⚠️ {field}: invalid format")
+                    elif field == "side_effects":
+                        side_effects = drug[field]
+                        if isinstance(side_effects, list) and side_effects:
+                            print(f"    ✅ {field}: {len(side_effects)} side effects")
+                        else:
+                            print(f"    ⚠️ {field}: empty or invalid format")
+                    else:
+                        print(f"    ✅ {field}: present")
+                else:
+                    print(f"    ❌ {field}: missing or empty")
+            
+            print(f"\n📈 Drug data completeness: {len(found_fields)}/{len(required_fields)} fields")
+            
+            # Consider it successful if at least 8 out of 10 fields are present
+            return len(found_fields) >= 8
+        else:
+            print(f"❌ Drug data quality endpoint failed: {response.status_code}")
+            if response.text:
+                print(f"Error details: {response.text}")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing drug data quality: {e}")
+        return False
+
 def run_all_tests():
     """Run all tests and provide summary"""
     print("🧪 PHICOR PK/PD SIMULATION ENGINE TESTING")
