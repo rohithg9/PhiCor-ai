@@ -441,7 +441,9 @@ def test_leukemia_search():
     print("\n🔍 TESTING DISEASE SEARCH - LEUKEMIA")
     print("=" * 50)
     
-    expected_leukemia_types = ["ALL", "AML", "CLL"]
+    expected_leukemia_names = [
+        "acute_lymphoblastic_leukemia", "acute_myeloid_leukemia", "chronic_lymphocytic_leukemia"
+    ]
     
     try:
         response = requests.get(f"{BACKEND_URL}/api/diseases-db?search=leukemia", timeout=10)
@@ -454,21 +456,20 @@ def test_leukemia_search():
             
             found_leukemias = []
             for disease in diseases:
-                disease_name = disease.get('name', '').upper()
-                disease_id = disease.get('id', '').upper()
+                disease_id = disease.get('id', '')
+                disease_name = disease.get('name', '')
                 
-                for leukemia_type in expected_leukemia_types:
-                    if leukemia_type in disease_name or leukemia_type in disease_id:
-                        if leukemia_type not in found_leukemias:
-                            found_leukemias.append(leukemia_type)
-                            print(f"  ✅ Found {leukemia_type}: {disease.get('name', '')} (ID: {disease.get('id', '')})")
+                if disease_id in expected_leukemia_names:
+                    found_leukemias.append(disease_id)
+                    print(f"  ✅ Found: {disease_name} (ID: {disease_id})")
+                    print(f"      ICD-10: {disease.get('icd10_code', '')}")
             
-            print(f"\n📈 Found {len(found_leukemias)}/{len(expected_leukemia_types)} expected leukemia types")
+            print(f"\n📈 Found {len(found_leukemias)}/{len(expected_leukemia_names)} expected leukemia types")
             
-            if len(found_leukemias) >= 2:  # At least 2 out of 3
+            if len(found_leukemias) >= 3:  # All 3 leukemia types
                 return True
             else:
-                print(f"❌ Too few leukemia types found: {len(found_leukemias)}/{len(expected_leukemia_types)}")
+                print(f"❌ Expected 3 leukemia types, found: {len(found_leukemias)}")
                 return False
         else:
             print(f"❌ Disease search endpoint failed: {response.status_code}")
