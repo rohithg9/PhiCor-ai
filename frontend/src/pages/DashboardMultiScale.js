@@ -17,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { Badge } from '../components/ui/badge';
 import { Sheet, SheetContent, SheetTrigger } from '../components/ui/sheet';
 import { Input } from '../components/ui/input';
+import { FeatureTutorial, TutorialButton, useTutorial } from '../components/FeatureTutorial';
 import { ORGAN_MODELS } from '../data/organModels';
 import { DISEASE_MODELS } from '../data/diseaseModels';
 import { BIOCHEMISTRY } from '../data/biochemistry';
