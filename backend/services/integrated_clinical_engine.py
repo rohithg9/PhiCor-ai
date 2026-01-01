@@ -568,10 +568,10 @@ Return ONLY valid JSON."""
                 "icd10": primary.get('icd10_code', 'R69'),
                 "probability": 60,
                 "confidence": "moderate",
-                "reasoning": f"Matched from PhiCor database based on clinical findings. {primary.get('description', '')[:200]}",
+                "reasoning": f"Matched from PhiCor database based on clinical findings. {(primary.get('description', '') or '')[:200]}",
                 "database_match": primary.get('name', ''),
                 "key_supporting_findings": [],
-                "guideline_source": ', '.join(primary.get('guideline_sources', [])[:2]) if primary.get('guideline_sources') else "See database"
+                "guideline_source": self._format_guideline_sources(primary.get('guideline_sources', []))
             },
             "differential_diagnoses": [
                 {
