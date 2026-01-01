@@ -423,20 +423,30 @@ const DifferentialPage = () => {
       <main className="container mx-auto px-4 py-6">
         {/* Page Header */}
         <div className="mb-8">
-          <div className="flex items-center gap-4 mb-2">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-              <span className="text-white font-serif text-3xl font-bold">Δ</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                <span className="text-white font-serif text-3xl font-bold">Δ</span>
+              </div>
+              <div>
+                <h1 className={`text-2xl sm:text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  Differential Diagnosis
+                </h1>
+                <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                  AI-powered diagnostic reasoning engine
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className={`text-2xl sm:text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                Differential Diagnosis
-              </h1>
-              <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                AI-powered diagnostic reasoning engine
-              </p>
-            </div>
+            <TutorialButton onClick={tutorial.open} />
           </div>
         </div>
+        
+        {/* Tutorial Overlay */}
+        <FeatureTutorial 
+          feature="differential" 
+          isOpen={tutorial.isOpen} 
+          onClose={tutorial.close} 
+        />
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left: Input Panel */}
