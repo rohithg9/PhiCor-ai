@@ -659,8 +659,8 @@ PMH: Hypertension, Type 2 Diabetes"
                         </>
                       ) : (
                         <>
-                          <Sparkles className="w-3 h-3 mr-1" />
-                          Φ Synthesis
+                          <span className="font-serif font-bold mr-1">Φ</span>
+                          Synthesis
                         </>
                       )}
                     </Button>
