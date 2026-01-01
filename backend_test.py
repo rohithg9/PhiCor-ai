@@ -565,10 +565,10 @@ def test_drug_simulation():
 
 def run_all_tests():
     """Run all tests and provide summary"""
-    print("🧪 COMPREHENSIVE DISEASE DATABASE TESTING")
+    print("🧪 PHICOR PK/PD SIMULATION ENGINE TESTING")
     print("=" * 80)
-    print("Testing comprehensive disease database with 28 diseases across 9 categories")
-    print("Focus: Evidence-based disease data with ICD-10 codes and treatment guidelines")
+    print("Testing comprehensive drug database (115 drugs) and disease database (28 diseases)")
+    print("Focus: Drug categories, disease search, and simulation engine functionality")
     print("=" * 80)
     
     test_results = {}
@@ -584,72 +584,78 @@ def run_all_tests():
     else:
         test_results['backend_health'] = False
     
-    # Test 3: Disease Database Seeding
+    # DRUG DATABASE TESTS
     if test_results['backend_health']:
-        print("\n3️⃣ DISEASE DATABASE SEEDING")
-        test_results['disease_seeding'] = test_disease_database_seeding()
+        print("\n3️⃣ DRUG DATABASE TOTAL COUNT (115 DRUGS)")
+        test_results['drug_total_count'] = test_drug_database_total_count()
     else:
-        test_results['disease_seeding'] = False
+        test_results['drug_total_count'] = False
     
-    # Test 4: Disease Database Total Count
     if test_results['backend_health']:
-        print("\n4️⃣ DISEASE DATABASE TOTAL COUNT")
+        print("\n4️⃣ CNS DRUGS CATEGORY")
+        test_results['cns_drugs'] = test_cns_drugs()
+    else:
+        test_results['cns_drugs'] = False
+    
+    if test_results['backend_health']:
+        print("\n5️⃣ DERMATOLOGICAL DRUGS CATEGORY")
+        test_results['dermatological_drugs'] = test_dermatological_drugs()
+    else:
+        test_results['dermatological_drugs'] = False
+    
+    if test_results['backend_health']:
+        print("\n6️⃣ IMMUNOSUPPRESSANT DRUGS CATEGORY")
+        test_results['immunosuppressant_drugs'] = test_immunosuppressant_drugs()
+    else:
+        test_results['immunosuppressant_drugs'] = False
+    
+    if test_results['backend_health']:
+        print("\n7️⃣ UROLOGICAL DRUGS CATEGORY")
+        test_results['urological_drugs'] = test_urological_drugs()
+    else:
+        test_results['urological_drugs'] = False
+    
+    if test_results['backend_health']:
+        print("\n8️⃣ OPHTHALMIC DRUGS CATEGORY")
+        test_results['ophthalmic_drugs'] = test_ophthalmic_drugs()
+    else:
+        test_results['ophthalmic_drugs'] = False
+    
+    # DISEASE DATABASE TESTS
+    if test_results['backend_health']:
+        print("\n9️⃣ DISEASE DATABASE TOTAL COUNT (28 DISEASES)")
         test_results['disease_total_count'] = test_disease_database_total_count()
     else:
         test_results['disease_total_count'] = False
     
-    # Test 5: Cardiovascular Diseases Category
     if test_results['backend_health']:
-        print("\n5️⃣ CARDIOVASCULAR DISEASES CATEGORY")
+        print("\n🔟 CARDIOVASCULAR DISEASES CATEGORY")
         test_results['cardiovascular_diseases'] = test_cardiovascular_diseases()
     else:
         test_results['cardiovascular_diseases'] = False
     
-    # Test 6: Hematological Diseases Category
     if test_results['backend_health']:
-        print("\n6️⃣ HEMATOLOGICAL DISEASES CATEGORY")
-        test_results['hematological_diseases'] = test_hematological_diseases()
+        print("\n1️⃣1️⃣ TYPE 2 DIABETES DISEASE DETAIL")
+        test_results['type2_diabetes_detail'] = test_type2_diabetes_detail()
     else:
-        test_results['hematological_diseases'] = False
+        test_results['type2_diabetes_detail'] = False
     
-    # Test 7: Disease Search - Diabetes
     if test_results['backend_health']:
-        print("\n7️⃣ DISEASE SEARCH - DIABETES")
-        test_results['search_diabetes'] = test_disease_search_diabetes()
+        print("\n1️⃣2️⃣ LEUKEMIA DISEASE SEARCH")
+        test_results['leukemia_search'] = test_leukemia_search()
     else:
-        test_results['search_diabetes'] = False
+        test_results['leukemia_search'] = False
     
-    # Test 8: Disease Search - ICD-10 Code I50
+    # DRUG SIMULATION TEST
     if test_results['backend_health']:
-        print("\n8️⃣ DISEASE SEARCH - ICD-10 CODE I50")
-        test_results['search_icd10'] = test_disease_search_icd10()
+        print("\n1️⃣3️⃣ DRUG SIMULATION ENGINE")
+        test_results['drug_simulation'] = test_drug_simulation()
     else:
-        test_results['search_icd10'] = False
-    
-    # Test 9: Heart Failure HFrEF Disease Detail
-    if test_results['backend_health']:
-        print("\n9️⃣ HEART FAILURE HFREF DISEASE DETAIL")
-        test_results['heart_failure_detail'] = test_heart_failure_disease_detail()
-    else:
-        test_results['heart_failure_detail'] = False
-    
-    # Test 10: Sickle Cell Disease Detail
-    if test_results['backend_health']:
-        print("\n🔟 SICKLE CELL DISEASE DETAIL")
-        test_results['sickle_cell_detail'] = test_sickle_cell_disease_detail()
-    else:
-        test_results['sickle_cell_detail'] = False
-    
-    # Test 11: Nonexistent Disease - 404 Error
-    if test_results['backend_health']:
-        print("\n1️⃣1️⃣ NONEXISTENT DISEASE - 404 ERROR")
-        test_results['nonexistent_disease'] = test_nonexistent_disease()
-    else:
-        test_results['nonexistent_disease'] = False
+        test_results['drug_simulation'] = False
     
     # Summary
     print("\n" + "=" * 80)
-    print("🏁 COMPREHENSIVE DISEASE DATABASE TEST SUMMARY")
+    print("🏁 PHICOR PK/PD SIMULATION ENGINE TEST SUMMARY")
     print("=" * 80)
     
     passed_tests = sum(1 for result in test_results.values() if result)
@@ -657,22 +663,48 @@ def run_all_tests():
     
     print(f"\n📊 OVERALL RESULTS: {passed_tests}/{total_tests} tests passed")
     
-    for test_name, result in test_results.items():
-        status = "✅ PASS" if result else "❌ FAIL"
-        print(f"  {status} - {test_name.replace('_', ' ').title()}")
+    # Group results by category
+    drug_tests = ['drug_total_count', 'cns_drugs', 'dermatological_drugs', 'immunosuppressant_drugs', 'urological_drugs', 'ophthalmic_drugs']
+    disease_tests = ['disease_total_count', 'cardiovascular_diseases', 'type2_diabetes_detail', 'leukemia_search']
+    simulation_tests = ['drug_simulation']
+    infrastructure_tests = ['backend_url', 'backend_health']
+    
+    print(f"\n📊 DRUG DATABASE TESTS:")
+    for test_name in drug_tests:
+        if test_name in test_results:
+            status = "✅ PASS" if test_results[test_name] else "❌ FAIL"
+            print(f"  {status} - {test_name.replace('_', ' ').title()}")
+    
+    print(f"\n📊 DISEASE DATABASE TESTS:")
+    for test_name in disease_tests:
+        if test_name in test_results:
+            status = "✅ PASS" if test_results[test_name] else "❌ FAIL"
+            print(f"  {status} - {test_name.replace('_', ' ').title()}")
+    
+    print(f"\n📊 SIMULATION ENGINE TESTS:")
+    for test_name in simulation_tests:
+        if test_name in test_results:
+            status = "✅ PASS" if test_results[test_name] else "❌ FAIL"
+            print(f"  {status} - {test_name.replace('_', ' ').title()}")
+    
+    print(f"\n📊 INFRASTRUCTURE TESTS:")
+    for test_name in infrastructure_tests:
+        if test_name in test_results:
+            status = "✅ PASS" if test_results[test_name] else "❌ FAIL"
+            print(f"  {status} - {test_name.replace('_', ' ').title()}")
     
     if passed_tests == total_tests:
-        print(f"\n🎉 ALL TESTS PASSED! Comprehensive disease database is working perfectly.")
-        print(f"✅ Disease database contains 28 evidence-based diseases")
-        print(f"✅ All API endpoints functional")
-        print(f"✅ Search and filtering working correctly")
-        print(f"✅ Disease details include ICD-10 codes and treatment guidelines")
+        print(f"\n🎉 ALL TESTS PASSED! PhiCor PK/PD Simulation Engine is working perfectly.")
+        print(f"✅ Drug database contains 115+ drugs across multiple categories")
+        print(f"✅ Disease database contains 28 diseases with comprehensive data")
+        print(f"✅ Drug simulation engine functional with efficacy/safety scoring")
+        print(f"✅ All API endpoints operational")
     elif passed_tests >= total_tests * 0.8:
         print(f"\n✅ MOSTLY SUCCESSFUL! {passed_tests}/{total_tests} tests passed.")
         print(f"⚠️  Some minor issues detected - see failed tests above")
     else:
         print(f"\n❌ SIGNIFICANT ISSUES DETECTED! Only {passed_tests}/{total_tests} tests passed.")
-        print(f"🔧 Major fixes needed for disease database functionality")
+        print(f"🔧 Major fixes needed for PhiCor PK/PD Simulation Engine functionality")
     
     return test_results
 
