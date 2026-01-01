@@ -1493,4 +1493,150 @@ export const searchCalculators = (query) => {
   return results;
 };
 
+// Disease to Calculator Mapping - Maps diseases/conditions to relevant calculators
+export const DISEASE_CALCULATOR_MAP = {
+  // Cardiovascular
+  'atrial_fibrillation': ['cha2ds2_vasc', 'has_bled'],
+  'I48': ['cha2ds2_vasc', 'has_bled'],
+  'I48.0': ['cha2ds2_vasc', 'has_bled'],
+  'I48.1': ['cha2ds2_vasc', 'has_bled'],
+  'I48.2': ['cha2ds2_vasc', 'has_bled'],
+  'heart_failure': ['nyha_class', 'framingham_risk'],
+  'I50': ['nyha_class', 'framingham_risk'],
+  'I50.2': ['nyha_class', 'framingham_risk'],
+  'I50.9': ['nyha_class', 'framingham_risk'],
+  'chest_pain': ['heart_score', 'timi_stemi', 'wells_pe'],
+  'acute_coronary_syndrome': ['heart_score', 'timi_stemi'],
+  'I21': ['heart_score', 'timi_stemi'],
+  'I20': ['heart_score'],
+  'myocardial_infarction': ['timi_stemi', 'heart_score'],
+  'dvt': ['wells_dvt', 'padua'],
+  'I80': ['wells_dvt', 'padua'],
+  'pulmonary_embolism': ['wells_pe', 'perc'],
+  'I26': ['wells_pe'],
+  
+  // Pulmonary
+  'pneumonia': ['curb65', 'psi_port'],
+  'J18': ['curb65', 'psi_port'],
+  'J13': ['curb65', 'psi_port'],
+  'J15': ['curb65', 'psi_port'],
+  'copd': ['gold_copd', 'bode_index'],
+  'J44': ['gold_copd', 'bode_index'],
+  'respiratory_failure': ['aa_gradient'],
+  'J96': ['aa_gradient'],
+  
+  // Neurological
+  'stroke': ['nihss', 'hunt_hess', 'fisher_grade'],
+  'I63': ['nihss'],
+  'I64': ['nihss'],
+  'I60': ['hunt_hess', 'fisher_grade'],
+  'I61': ['gcs'],
+  'traumatic_brain_injury': ['gcs'],
+  'S06': ['gcs'],
+  'subarachnoid_hemorrhage': ['hunt_hess', 'fisher_grade'],
+  
+  // Renal
+  'chronic_kidney_disease': ['ckd_epi', 'creatinine_clearance'],
+  'N18': ['ckd_epi', 'creatinine_clearance'],
+  'acute_kidney_injury': ['fena', 'urine_anion_gap'],
+  'N17': ['fena', 'urine_anion_gap'],
+  
+  // Hepatology
+  'cirrhosis': ['child_pugh', 'meld'],
+  'K74': ['child_pugh', 'meld'],
+  'K70': ['child_pugh', 'meld', 'maddrey'],
+  'alcoholic_hepatitis': ['maddrey', 'lille_model'],
+  'K70.1': ['maddrey', 'lille_model'],
+  'liver_failure': ['meld', 'child_pugh'],
+  'K72': ['meld', 'child_pugh'],
+  
+  // Critical Care / Emergency
+  'sepsis': ['sofa', 'qsofa', 'sirs'],
+  'A41': ['sofa', 'qsofa', 'sirs'],
+  'R65': ['sofa', 'qsofa'],
+  'metabolic_acidosis': ['anion_gap', 'delta_delta'],
+  'E87': ['anion_gap', 'delta_delta'],
+  
+  // Hematology
+  'dic': ['dic_score'],
+  'D65': ['dic_score'],
+  'hit': ['hit_4t'],
+  'D75.8': ['hit_4t'],
+  'vte_prophylaxis': ['padua'],
+  
+  // Endocrine
+  'diabetes': ['homa_ir'],
+  'E11': ['homa_ir'],
+  'E10': ['homa_ir'],
+  'hypercalcemia': ['corrected_calcium'],
+  'E83.5': ['corrected_calcium'],
+  'thyroid': ['thyroid_index'],
+  'E03': ['thyroid_index'],
+  'E05': ['thyroid_index'],
+  
+  // Rheumatology
+  'rheumatoid_arthritis': ['das28'],
+  'M05': ['das28'],
+  'M06': ['das28'],
+  'sle': ['sledai'],
+  'M32': ['sledai'],
+  'lupus': ['sledai'],
+};
+
+// Get calculator by ID
+export const getCalculatorById = (calculatorId) => {
+  for (const category of Object.values(CLINICAL_CALCULATORS)) {
+    const calc = category.calculators.find(c => c.id === calculatorId);
+    if (calc) return { ...calc, categoryName: category.name };
+  }
+  return null;
+};
+
+// Get relevant calculators for a disease
+export const getCalculatorsForDisease = (diseaseId) => {
+  // Normalize the disease ID
+  const normalizedId = diseaseId?.toLowerCase().replace(/[._]/g, '');
+  
+  // Direct match
+  if (DISEASE_CALCULATOR_MAP[diseaseId]) {
+    return DISEASE_CALCULATOR_MAP[diseaseId].map(id => getCalculatorById(id)).filter(Boolean);
+  }
+  
+  // Try with ICD code variations
+  const icdBase = diseaseId?.split('.')[0] || diseaseId?.split('_')[0];
+  if (DISEASE_CALCULATOR_MAP[icdBase]) {
+    return DISEASE_CALCULATOR_MAP[icdBase].map(id => getCalculatorById(id)).filter(Boolean);
+  }
+  
+  // Search for partial matches in the map
+  for (const [key, calcIds] of Object.entries(DISEASE_CALCULATOR_MAP)) {
+    if (normalizedId?.includes(key.replace(/[._]/g, '')) || 
+        key.replace(/[._]/g, '').includes(normalizedId)) {
+      return calcIds.map(id => getCalculatorById(id)).filter(Boolean);
+    }
+  }
+  
+  return [];
+};
+
+// Get calculators for an organ system
+export const getCalculatorsForOrgan = (organId) => {
+  const organCategoryMap = {
+    'heart': 'cardiovascular',
+    'lungs': 'respiratory',
+    'brain': 'neurological',
+    'kidneys': 'renal',
+    'liver': 'hepatology',
+    'blood': 'hematology',
+    'pancreas': 'endocrine',
+  };
+  
+  const categoryKey = organCategoryMap[organId?.toLowerCase()];
+  if (categoryKey && CLINICAL_CALCULATORS[categoryKey]) {
+    return CLINICAL_CALCULATORS[categoryKey].calculators;
+  }
+  
+  return [];
+};
+
 export default CLINICAL_CALCULATORS;
