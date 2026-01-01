@@ -80,6 +80,8 @@ def test_backend_health():
     except Exception as e:
         print(f"❌ Backend not accessible: {e}")
         return False
+
+def test_platform_stats_api():
     """Test 1: Platform Stats API - GET /api/platform/stats"""
     print("\n📊 TEST 1: PLATFORM STATS API")
     print("=" * 50)
