@@ -751,23 +751,14 @@ Return ONLY valid JSON, no additional text."""
                 system_message="You are a pharmaceutical expert. Generate accurate drug information based on BNF, FDA, and international pharmacological sources. Return only valid JSON."
             ).with_model(self.model_provider, self.model_name)
             
-            response = await chat.send_async(
-                UserMessage(prompt),
-                temperature=0.3
-            )
+            user_message = UserMessage(text=prompt)
+            response = await chat.send_message(user_message)
             
-            # Parse the response
-            response_text = response.content.strip()
-            
-            # Clean up JSON
-            if response_text.startswith("```json"):
-                response_text = response_text[7:]
-            if response_text.startswith("```"):
-                response_text = response_text[3:]
-            if response_text.endswith("```"):
-                response_text = response_text[:-3]
-            
-            drug_data = json.loads(response_text.strip())
+            # Parse the response - extract JSON
+            import re
+            json_match = re.search(r'\{[\s\S]*\}', response)
+            if json_match:
+                drug_data = json.loads(json_match.group())
             
             # Add metadata
             drug_data["generated_at"] = datetime.now(timezone.utc).isoformat()
