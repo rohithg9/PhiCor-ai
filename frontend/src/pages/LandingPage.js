@@ -666,7 +666,7 @@ const LandingPage = () => {
                     </li>
                     <li className="flex items-start gap-2 text-sm text-muted-foreground">
                       <span className="text-emerald-400 mt-0.5">→</span>
-                      Evidence citations from 186+ disease profiles
+                      Evidence citations from 200+ disease profiles
                     </li>
                   </ul>
                 </div>
