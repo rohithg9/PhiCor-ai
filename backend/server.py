@@ -1967,6 +1967,109 @@ async def seed_comprehensive_drug_database():
         "drugs_list": [{"id": d["id"], "name": d["name"], "class": d.get("drug_class", "")} for d in comprehensive_drugs]
     }
 
+
+# ============== DISEASE DATABASE ENDPOINTS ==============
+
+@api_router.post("/diseases-db/seed-comprehensive")
+async def seed_comprehensive_disease_database():
+    """
+    Seed the database with a comprehensive, evidence-based disease database.
+    Uses data from /app/backend/data/comprehensive_diseases.py
+    Includes ICD-10 codes, diagnostic criteria, treatment guidelines.
+    Based on WHO ICD-10, clinical guidelines (ESC, AHA, NICE), and UpToDate.
+    """
+    from data.comprehensive_diseases import get_all_comprehensive_diseases
+    
+    # Get all diseases from the comprehensive data file
+    comprehensive_diseases = get_all_comprehensive_diseases()
+    
+    # Add timestamps and insert
+    for disease in comprehensive_diseases:
+        disease["created_at"] = datetime.now(timezone.utc).isoformat()
+        disease["updated_at"] = datetime.now(timezone.utc).isoformat()
+        
+        # Upsert - update if exists, insert if not
+        existing = await db.diseases.find_one({"id": disease["id"]})
+        if existing:
+            await db.diseases.update_one({"id": disease["id"]}, {"$set": disease})
+        else:
+            await db.diseases.insert_one(disease)
+    
+    total_count = await db.diseases.count_documents({})
+    
+    # Get category summary
+    categories = {}
+    for disease in comprehensive_diseases:
+        cat = disease.get("category", "unknown")
+        categories[cat] = categories.get(cat, 0) + 1
+    
+    return {
+        "message": f"Seeded {len(comprehensive_diseases)} evidence-based diseases. Total in database: {total_count}",
+        "diseases_added": len(comprehensive_diseases),
+        "categories_summary": categories,
+        "diseases_list": [{"id": d["id"], "name": d["name"], "icd10": d.get("icd10_code", "")} for d in comprehensive_diseases]
+    }
+
+
+@api_router.get("/diseases-db")
+async def get_diseases(
+    search: Optional[str] = None,
+    category: Optional[str] = None,
+    limit: int = 100,
+    skip: int = 0
+):
+    """
+    Get diseases from database with optional search and category filter.
+    """
+    query = {}
+    
+    if search:
+        query["$or"] = [
+            {"name": {"$regex": search, "$options": "i"}},
+            {"id": {"$regex": search, "$options": "i"}},
+            {"icd10_code": {"$regex": search, "$options": "i"}},
+            {"synonyms": {"$elemMatch": {"$regex": search, "$options": "i"}}}
+        ]
+    
+    if category:
+        query["category"] = category
+    
+    diseases = await db.diseases.find(query, {"_id": 0}).skip(skip).limit(limit).to_list(limit)
+    total = await db.diseases.count_documents(query)
+    
+    # Return simplified list for overview
+    simplified = []
+    for d in diseases:
+        simplified.append({
+            "id": d["id"],
+            "name": d["name"],
+            "icd10_code": d.get("icd10_code", ""),
+            "category": d.get("category", ""),
+            "description": d.get("description", "")[:200] + "..." if len(d.get("description", "")) > 200 else d.get("description", ""),
+            "affected_organs": d.get("affected_organs", [])
+        })
+    
+    return {
+        "diseases": simplified,
+        "total": total,
+        "limit": limit,
+        "skip": skip
+    }
+
+
+@api_router.get("/diseases-db/{disease_id}")
+async def get_disease_detail(disease_id: str):
+    """
+    Get full disease details by ID.
+    """
+    disease = await db.diseases.find_one({"id": disease_id}, {"_id": 0})
+    
+    if not disease:
+        raise HTTPException(status_code=404, detail=f"Disease {disease_id} not found")
+    
+    return disease
+
+
 # ============== VIRTUAL PATIENT & DRUG SIMULATION ==============
 
 class VirtualPatient(BaseModel):
