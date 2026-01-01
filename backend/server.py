@@ -1156,16 +1156,19 @@ def _convert_to_mechanisms(gen_drug: dict) -> list:
 
 def _extract_max_dose(gen_drug: dict) -> float:
     """Extract maximum daily dose from AI-generated drug data."""
-    dosages = gen_drug.get("dosages", [])
-    if dosages:
-        for dosage in dosages:
-            max_dose_str = dosage.get("max_daily_dose", "")
-            # Try to extract numeric value
-            import re
-            numbers = re.findall(r'[\d.]+', str(max_dose_str))
-            if numbers:
-                return float(numbers[0])
-    return 1000.0  # Default max dose
+    try:
+        dosages = gen_drug.get("dosages", [])
+        if dosages:
+            for dosage in dosages:
+                max_dose_str = dosage.get("max_daily_dose", "")
+                # Try to extract numeric value
+                import re
+                numbers = re.findall(r'(\d+(?:\.\d+)?)', str(max_dose_str))
+                if numbers:
+                    return float(numbers[0])
+        return 1000.0  # Default max dose
+    except Exception:
+        return 1000.0
 
 
 def _build_therapeutic_effects(gen_drug: dict) -> list:
