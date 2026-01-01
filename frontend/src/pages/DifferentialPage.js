@@ -601,7 +601,7 @@ PMH: Hypertension, Type 2 Diabetes"
                             <div className="flex items-center gap-2">
                               <div className="text-right">
                                 <div className={`text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                                  {diagnosis.probabilityScore}%
+                                  {Math.round(diagnosis.probabilityScore * 10) / 10}%
                                 </div>
                               </div>
                               {expandedDisease === idx ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
