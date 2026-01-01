@@ -625,6 +625,12 @@ PMH: Hypertension, Type 2 Diabetes"
                                 ))}
                               </div>
                             )}
+                            
+                            {/* Evidence-Based Guidelines from Backend */}
+                            <DiseaseDetailPanel 
+                              diseaseId={diagnosis.icd10?.replace('.', '_')} 
+                              diseaseName={diagnosis.diseaseName} 
+                            />
                           </div>
                         )}
                       </div>
