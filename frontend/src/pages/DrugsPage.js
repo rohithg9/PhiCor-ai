@@ -126,11 +126,15 @@ const DRUG_CATEGORIES = {
   cardiovascular: { name: 'Cardiovascular', icon: '🫀', color: 'from-red-500 to-rose-500' },
   respiratory: { name: 'Respiratory', icon: '🫁', color: 'from-blue-500 to-cyan-500' },
   neurological: { name: 'Neurological', icon: '🧠', color: 'from-purple-500 to-violet-500' },
+  cns: { name: 'CNS', icon: '🧠', color: 'from-purple-500 to-indigo-500' },
   renal: { name: 'Renal', icon: '💜', color: 'from-teal-500 to-cyan-500' },
   gastrointestinal: { name: 'GI', icon: '🔬', color: 'from-orange-500 to-red-500' },
   endocrine: { name: 'Endocrine', icon: '⚡', color: 'from-yellow-500 to-amber-500' },
   antibiotics: { name: 'Antibiotics', icon: '🦠', color: 'from-green-500 to-emerald-500' },
+  antiinfective: { name: 'Anti-infective', icon: '🦠', color: 'from-green-500 to-teal-500' },
   analgesics: { name: 'Analgesics', icon: '💊', color: 'from-pink-500 to-rose-500' },
+  analgesic: { name: 'Pain', icon: '💊', color: 'from-pink-500 to-fuchsia-500' },
+  hematological: { name: 'Blood', icon: '🩸', color: 'from-red-600 to-rose-600' },
 };
 
 // Default Virtual Patient
