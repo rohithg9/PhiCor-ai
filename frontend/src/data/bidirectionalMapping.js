@@ -376,11 +376,19 @@ export const getDifferentialDiagnosis = (abnormalFindings, options = {}) => {
     
     // Add clinical presentation summary
     if (disease) {
+      // Safely get symptoms - ensure it's an array before slicing
+      const symptoms = disease.clinicalPresentation?.symptoms;
+      const symptomsArray = Array.isArray(symptoms) ? symptoms.slice(0, 5) : [];
+      
+      // Safely get laboratory findings - ensure it's an array before slicing
+      const labFindings = disease.laboratoryFindings;
+      const labsArray = Array.isArray(labFindings) ? labFindings.slice(0, 3) : [];
+      
       conditionScores[key].clinicalSummary = {
-        symptoms: disease.clinicalPresentation?.symptoms?.slice(0, 5) || [],
-        keyLabs: disease.laboratoryFindings?.slice(0, 3) || [],
-        primaryOrgan: disease.primaryOrgan,
-        affectedOrgans: disease.affectedOrgans || [],
+        symptoms: symptomsArray,
+        keyLabs: labsArray,
+        primaryOrgan: disease.primaryOrgan || '',
+        affectedOrgans: Array.isArray(disease.affectedOrgans) ? disease.affectedOrgans : [],
       };
     }
   });
