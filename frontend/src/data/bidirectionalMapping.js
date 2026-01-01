@@ -113,16 +113,19 @@ export const buildParameterToDiseaseIndex = () => {
             index[fullParamId] = [];
           }
           
+          // Support both 'factor' and 'multiplier' keys
+          const factor = modification.factor || modification.multiplier || 1;
+          
           index[fullParamId].push({
             diseaseCode,
             diseaseName: disease.name,
             icd10: disease.icd10,
             category: disease.category,
             primaryOrgan: disease.primaryOrgan,
-            factor: modification.factor,
+            factor: factor,
             note: modification.note,
-            direction: modification.factor > 1 ? 'increase' : modification.factor < 1 ? 'decrease' : 'unchanged',
-            percentChange: ((modification.factor - 1) * 100).toFixed(0),
+            direction: factor > 1 ? 'increase' : factor < 1 ? 'decrease' : 'unchanged',
+            percentChange: ((factor - 1) * 100).toFixed(0),
           });
         });
       });
