@@ -702,7 +702,7 @@ PMH: Hypertension, Type 2 Diabetes"
                     {differentialResults.length} conditions
                   </Badge>
                 )}
-                {/* AI Synthesis Button in header */}
+                {/* PhiCor Synthesis Button in header */}
                 {(clinicalText.trim() || differentialResults.length > 0) && !clinicalSynthesis && (
                   <Button
                     onClick={runClinicalSynthesis}
@@ -716,8 +716,8 @@ PMH: Hypertension, Type 2 Diabetes"
                       </>
                     ) : (
                       <>
-                        <Sparkles className="w-3 h-3 mr-1" />
-                        Run Φ Synthesis
+                        <span className="font-serif font-bold mr-1">Φ</span>
+                        Run Synthesis
                       </>
                     )}
                   </Button>
