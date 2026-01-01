@@ -722,13 +722,23 @@ const DrugsPage = () => {
         if (searchQuery) params.append('search', searchQuery);
         params.append('limit', '100');
         
-        const response = await fetch(`${API_URL}/api/drugs-db?${params.toString()}`);
+        const url = `${API_URL}/api/drugs-db?${params.toString()}`;
+        console.log('Fetching drugs from:', url);
+        
+        const response = await fetch(url);
+        console.log('Response status:', response.status);
+        
         if (response.ok) {
           const data = await response.json();
-          setDrugs(data.drugs);
+          console.log('Drugs received:', data.drugs?.length || 0, 'Total:', data.total);
+          setDrugs(data.drugs || []);
+        } else {
+          console.error('Error response:', response.status, response.statusText);
+          setDrugs([]);
         }
       } catch (err) {
         console.error('Error fetching drugs:', err);
+        setDrugs([]);
       } finally {
         setLoading(false);
       }
