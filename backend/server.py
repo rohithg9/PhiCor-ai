@@ -2294,6 +2294,80 @@ async def get_disease_database_stats():
     }
 
 
+# ICD-10 Category Priority Order (MUST be before dynamic disease route)
+ICD10_CATEGORY_ORDER_STATIC = [
+    "cardiovascular",
+    "respiratory", 
+    "endocrine",
+    "gastrointestinal",
+    "renal",
+    "neurological",
+    "infectious",
+    "hematological",
+    "musculoskeletal",
+    "psychiatric",
+    "oncology",
+    "dermatology",
+    "ophthalmology",
+    "obgyn",
+    "ent"
+]
+
+
+@api_router.get("/diseases-db/icd10-status")
+async def get_icd10_generation_status_static():
+    """
+    Get the current status of ICD-10 condition knowledge base generation.
+    """
+    from services.knowledge_bank_builder import get_top_500_conditions
+    
+    icd10_conditions = get_top_500_conditions()
+    total_icd10 = len(icd10_conditions)
+    
+    # Get all diseases from database
+    diseases = await db.diseases.find({}, {"_id": 0, "name": 1, "icd10_code": 1, "category": 1}).to_list(1000)
+    
+    # Map by ICD-10 code and name
+    generated_icd10 = {d.get("icd10_code", "").upper() for d in diseases if d.get("icd10_code")}
+    generated_names = {d.get("name", "").lower() for d in diseases}
+    total_generated = len(diseases)
+    
+    # Count by category
+    by_category = {}
+    for cat in ICD10_CATEGORY_ORDER_STATIC:
+        cat_conditions = [c for c in icd10_conditions if c.get("category") == cat]
+        cat_generated = []
+        for c in cat_conditions:
+            icd = c.get("icd10", "").upper()
+            name = c.get("name", "").lower()
+            if icd in generated_icd10 or name in generated_names:
+                cat_generated.append(c)
+        
+        by_category[cat] = {
+            "total": len(cat_conditions),
+            "generated": len(cat_generated),
+            "remaining": len(cat_conditions) - len(cat_generated)
+        }
+    
+    # Get last 10 generated
+    recent = await db.diseases.find(
+        {"ai_generated": True},
+        {"_id": 0, "name": 1, "icd10_code": 1, "generated_at": 1}
+    ).sort("generated_at", -1).limit(10).to_list(10)
+    
+    last_generated = [f"{d.get('name', 'Unknown')} ({d.get('icd10_code', 'N/A')})" for d in recent]
+    
+    return {
+        "total_icd10_conditions": total_icd10,
+        "total_diseases_in_db": total_generated,
+        "completion_percentage": round((sum(c["generated"] for c in by_category.values()) / total_icd10) * 100, 1) if total_icd10 > 0 else 0,
+        "by_category": by_category,
+        "last_generated": last_generated,
+        "category_order": ICD10_CATEGORY_ORDER_STATIC
+    }
+
+
+# Dynamic route MUST come after all static routes
 @api_router.get("/diseases-db/{disease_id}")
 async def get_disease_detail(disease_id: str):
     """
