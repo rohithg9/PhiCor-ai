@@ -1183,6 +1183,117 @@ const EquationDerivation = ({ equation, expanded, onToggle, currentParams = {}, 
 };
 
 // ===========================================
+// RELEVANT CALCULATORS PANEL - Disease-linked calculators
+// ===========================================
+const RelevantCalculatorsPanel = ({ diseaseId, diseaseName, organId, isExpanded, onToggle }) => {
+  const navigate = useNavigate();
+  const [expanded, setExpanded] = React.useState(isExpanded || false);
+  
+  // Get calculators for the disease or organ
+  const relevantCalcs = React.useMemo(() => {
+    const diseaseCalcs = diseaseId ? getCalculatorsForDisease(diseaseId) : [];
+    const organCalcs = organId ? getCalculatorsForOrgan(organId) : [];
+    
+    // Combine and deduplicate
+    const allCalcs = [...diseaseCalcs];
+    organCalcs.forEach(calc => {
+      if (!allCalcs.find(c => c.id === calc.id)) {
+        allCalcs.push(calc);
+      }
+    });
+    
+    return allCalcs;
+  }, [diseaseId, organId]);
+  
+  if (relevantCalcs.length === 0) return null;
+  
+  const handleExpand = () => {
+    if (onToggle) onToggle();
+    else setExpanded(!expanded);
+  };
+  
+  const isOpen = onToggle ? isExpanded : expanded;
+  
+  return (
+    <div className="border border-border/50 rounded-xl bg-card/30 overflow-hidden">
+      <button
+        onClick={handleExpand}
+        className="w-full flex items-center justify-between p-4 hover:bg-accent/5 transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-amber-500/10">
+            <Calculator className="w-5 h-5 text-amber-400" />
+          </div>
+          <div className="text-left">
+            <h3 className="font-semibold text-sm">Clinical Calculators</h3>
+            <p className="text-xs text-muted-foreground">
+              {relevantCalcs.length} scoring {relevantCalcs.length === 1 ? 'system' : 'systems'} relevant to {diseaseName || 'this condition'}
+            </p>
+          </div>
+        </div>
+        {isOpen ? <ChevronDown className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+      </button>
+      
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="border-t border-border/50"
+          >
+            <div className="p-4 space-y-3">
+              {relevantCalcs.map((calc, i) => (
+                <div 
+                  key={calc.id || i}
+                  className="p-3 rounded-lg bg-amber-500/5 border border-amber-500/20 hover:bg-amber-500/10 transition-colors"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-medium text-sm">{calc.name}</span>
+                        <Badge className="text-[10px] bg-amber-500/20 text-amber-400 border-amber-500/30">
+                          {calc.category}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        {calc.description}
+                      </p>
+                      <p className="text-[10px] text-amber-400/70">
+                        {calc.usage}
+                      </p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => navigate('/differential?tab=calculators')}
+                      className="ml-3 text-xs border-amber-500/30 hover:bg-amber-500/20 text-amber-400"
+                    >
+                      <Calculator className="w-3 h-3 mr-1" />
+                      Use
+                    </Button>
+                  </div>
+                </div>
+              ))}
+              
+              <Button
+                variant="outline"
+                className="w-full text-amber-400 border-amber-500/30 hover:bg-amber-500/10"
+                onClick={() => navigate('/differential?tab=calculators')}
+              >
+                <Calculator className="w-4 h-4 mr-2" />
+                View All Calculators
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+// ===========================================
 // CLINICAL FINDINGS PANEL - Comprehensive disease data display
 // ===========================================
 const ClinicalFindingsPanel = ({ disease, isExpanded, onToggle, alwaysExpanded = false }) => {
