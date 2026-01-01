@@ -1435,20 +1435,20 @@ def test_sertraline_drug_detail():
         return False
 
 def test_drug_simulation():
-    """Test drug simulation endpoint with sertraline"""
+    """Test drug simulation endpoint with metformin (from old database)"""
     print("\n🧪 TESTING DRUG SIMULATION")
     print("=" * 50)
     
     try:
         simulation_data = {
-            "drug_name": "sertraline",
-            "dosage": 50,
+            "drug_name": "metformin",
+            "dosage": 500,
             "frequency": "once",
             "duration_hours": 24,
             "route": "oral"
         }
         
-        response = requests.post(f"{BACKEND_URL}/api/drugs-db/simulate", json=simulation_data, timeout=10)
+        response = requests.post(f"{BACKEND_URL}/api/drugs/simulate", json=simulation_data, timeout=10)
         if response.status_code == 200:
             result = response.json()
             
@@ -1473,6 +1473,9 @@ def test_drug_simulation():
             
             if "modified_state" in result and isinstance(result["modified_state"], dict):
                 print(f"  ✅ Modified state parameters: {len(result['modified_state'])}")
+            
+            if "attributions" in result and isinstance(result["attributions"], list):
+                print(f"  ✅ Drug attributions: {len(result['attributions'])} mechanisms")
             
             print(f"\n📈 Found {len(found_fields)}/{len(expected_fields)} expected fields")
             return len(found_fields) >= 2  # At least 2 out of 3 fields
