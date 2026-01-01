@@ -21,7 +21,11 @@ import {
   X,
   ChevronDown,
   Sun,
-  Moon
+  Moon,
+  Activity,
+  Brain,
+  Calculator,
+  Pill
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 
