@@ -2182,6 +2182,8 @@ async def synthesize_clinical_case(request: ClinicalSynthesisRequest):
         imaging_findings = [f.model_dump() for f in request.imaging_findings]
         symptoms = [f.model_dump() for f in request.symptoms]
         
+        logger.info(f"Starting integrated synthesis with {len(lab_findings)} labs, {len(imaging_findings)} imaging, {len(symptoms)} symptoms")
+        
         synthesis = await engine.synthesize_with_knowledge_base(
             clinical_text=request.clinical_text,
             lab_findings=lab_findings,
@@ -2189,6 +2191,8 @@ async def synthesize_clinical_case(request: ClinicalSynthesisRequest):
             symptoms=symptoms,
             patient_info=request.patient_info
         )
+        
+        logger.info("Integrated synthesis completed successfully")
         
         return {
             "success": True,
@@ -2202,6 +2206,7 @@ async def synthesize_clinical_case(request: ClinicalSynthesisRequest):
         }
         
     except ImportError as e:
+        logger.warning(f"Integrated engine import failed: {e}, falling back to basic engine")
         # Fallback to original synthesis engine if integrated not available
         try:
             from services.clinical_synthesis import get_synthesis_engine
