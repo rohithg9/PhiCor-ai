@@ -1957,6 +1957,529 @@ export const ORGAN_MODELS = {
         }
       ]
     }
+  },
+
+  // ============== CELLULAR & MOLECULAR LEVEL ==============
+  cellular: {
+    name: "Cellular & Molecular",
+    icon: "🧬",
+    category: "molecular",
+    
+    // DNA & GENETICS
+    dna: {
+      title: "DNA & Genetic Parameters",
+      parameters: [
+        { id: "telomere_length", name: "Telomere Length", value: 7000, unit: "bp", range: [4000, 15000], evidence: "established" },
+        { id: "dna_methylation_global", name: "Global DNA Methylation", value: 4.5, unit: "%", range: [3, 6], evidence: "established" },
+        { id: "mitochondrial_dna_copy", name: "mtDNA Copy Number", value: 500, unit: "copies/cell", range: [100, 1000], evidence: "established" },
+        { id: "mutation_burden", name: "Somatic Mutation Burden", value: 1.5, unit: "mut/Mb", range: [0.5, 10], evidence: "established" },
+        { id: "microsatellite_instability", name: "Microsatellite Instability", value: 0, unit: "score", range: [0, 3], evidence: "established" },
+        { id: "chromosomal_instability", name: "Chromosomal Instability Index", value: 0.1, unit: "fraction", range: [0, 1], evidence: "novel" },
+        { id: "dna_damage_markers", name: "γH2AX Foci", value: 5, unit: "foci/cell", range: [0, 20], evidence: "established" },
+        { id: "8ohdg", name: "8-OHdG (Oxidative DNA Damage)", value: 5, unit: "ng/mL", range: [2, 15], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "biological_age_dna",
+          name: "DNA Methylation Age (Horvath Clock)",
+          latex: "Age_{DNA} = \\sum_{i=1}^{353} w_i \\cdot \\beta_i + intercept",
+          description: "Epigenetic clock predicting biological age from CpG methylation",
+          evidence: "established",
+          source: "Horvath 2013"
+        },
+        {
+          id: "telomere_attrition",
+          name: "Telomere Attrition Rate",
+          latex: "\\frac{dL}{dt} = -k_{loss} + k_{telomerase} \\cdot [TERT]",
+          description: "Rate of telomere shortening with age",
+          evidence: "established",
+          source: "Blackburn et al."
+        },
+        {
+          id: "mutation_accumulation",
+          name: "Somatic Mutation Accumulation",
+          latex: "M(t) = M_0 + \\mu \\cdot N_{divisions} \\cdot t",
+          description: "Linear accumulation of somatic mutations with age",
+          evidence: "established",
+          source: "Welch et al. 2012"
+        }
+      ]
+    },
+
+    // GENE EXPRESSION
+    gene_expression: {
+      title: "Gene Expression & Transcriptomics",
+      parameters: [
+        { id: "p53_expression", name: "p53 Expression Level", value: 1.0, unit: "fold", range: [0.5, 5], evidence: "established" },
+        { id: "bcl2_expression", name: "BCL-2 Expression", value: 1.0, unit: "fold", range: [0.2, 3], evidence: "established" },
+        { id: "vegf_expression", name: "VEGF Expression", value: 1.0, unit: "fold", range: [0.5, 10], evidence: "established" },
+        { id: "hif1a_expression", name: "HIF-1α Expression", value: 1.0, unit: "fold", range: [0.5, 5], evidence: "established" },
+        { id: "nfkb_activity", name: "NF-κB Activity", value: 1.0, unit: "fold", range: [0.5, 10], evidence: "established" },
+        { id: "mtor_activity", name: "mTOR Pathway Activity", value: 1.0, unit: "fold", range: [0.3, 3], evidence: "established" },
+        { id: "ampk_activity", name: "AMPK Activity", value: 1.0, unit: "fold", range: [0.5, 3], evidence: "established" },
+        { id: "sirt1_expression", name: "SIRT1 Expression", value: 1.0, unit: "fold", range: [0.3, 2], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "gene_regulation",
+          name: "Hill Equation (Gene Regulation)",
+          latex: "\\frac{d[mRNA]}{dt} = \\frac{V_{max} \\cdot [TF]^n}{K_d^n + [TF]^n} - k_{deg} \\cdot [mRNA]",
+          description: "Transcription factor-mediated gene regulation",
+          evidence: "established",
+          source: "Systems Biology"
+        },
+        {
+          id: "protein_synthesis",
+          name: "Protein Synthesis Rate",
+          latex: "\\frac{d[P]}{dt} = k_{trans} \\cdot [mRNA] - k_{deg} \\cdot [P]",
+          description: "mRNA to protein translation kinetics",
+          evidence: "established",
+          source: "Molecular Biology"
+        }
+      ]
+    },
+
+    // CELLULAR METABOLISM
+    metabolism: {
+      title: "Cellular Metabolism",
+      parameters: [
+        { id: "atp_production", name: "ATP Production Rate", value: 100, unit: "μmol/min/g", range: [50, 200], evidence: "established" },
+        { id: "nad_ratio", name: "NAD+/NADH Ratio", value: 3, unit: "ratio", range: [1, 10], evidence: "established" },
+        { id: "ros_level", name: "ROS Level", value: 1.0, unit: "fold", range: [0.5, 5], evidence: "established" },
+        { id: "glutathione_ratio", name: "GSH/GSSG Ratio", value: 100, unit: "ratio", range: [30, 300], evidence: "established" },
+        { id: "lactate_pyruvate", name: "Lactate/Pyruvate Ratio", value: 10, unit: "ratio", range: [5, 25], evidence: "established" },
+        { id: "oxygen_consumption", name: "O₂ Consumption Rate", value: 250, unit: "mL/min", range: [150, 400], evidence: "established" },
+        { id: "mitochondrial_membrane_potential", name: "ΔΨm (Mitochondrial)", value: -180, unit: "mV", range: [-200, -140], evidence: "established" },
+        { id: "autophagy_flux", name: "Autophagy Flux", value: 1.0, unit: "fold", range: [0.5, 3], evidence: "novel" },
+      ],
+      equations: [
+        {
+          id: "michaelis_menten",
+          name: "Michaelis-Menten Kinetics",
+          latex: "v = \\frac{V_{max} \\cdot [S]}{K_m + [S]}",
+          description: "Enzyme reaction velocity",
+          evidence: "established",
+          source: "Biochemistry"
+        },
+        {
+          id: "warburg_effect",
+          name: "Warburg Effect Index",
+          latex: "WEI = \\frac{Glycolysis_{rate}}{OXPHOS_{rate}} \\times \\frac{[Lactate]}{[Pyruvate]}",
+          description: "Metabolic shift toward aerobic glycolysis",
+          evidence: "established",
+          source: "Cancer metabolism"
+        }
+      ]
+    },
+
+    // CELL CYCLE & PROLIFERATION
+    cell_cycle: {
+      title: "Cell Cycle & Proliferation",
+      parameters: [
+        { id: "ki67_index", name: "Ki-67 Proliferation Index", value: 5, unit: "%", range: [1, 90], evidence: "established" },
+        { id: "mitotic_index", name: "Mitotic Index", value: 2, unit: "%", range: [0, 10], evidence: "established" },
+        { id: "apoptotic_index", name: "Apoptotic Index", value: 1, unit: "%", range: [0, 10], evidence: "established" },
+        { id: "cell_cycle_time", name: "Cell Cycle Time", value: 24, unit: "hours", range: [12, 72], evidence: "established" },
+        { id: "s_phase_fraction", name: "S-Phase Fraction", value: 10, unit: "%", range: [5, 30], evidence: "established" },
+        { id: "ploidy", name: "DNA Ploidy (DI)", value: 1.0, unit: "index", range: [0.9, 2.5], evidence: "established" },
+        { id: "senescence_markers", name: "Senescent Cell Fraction", value: 5, unit: "%", range: [1, 30], evidence: "novel" },
+      ],
+      equations: [
+        {
+          id: "doubling_time",
+          name: "Population Doubling Time",
+          latex: "T_d = \\frac{\\ln(2)}{\\mu} = \\frac{t \\cdot \\ln(2)}{\\ln(N/N_0)}",
+          description: "Time for cell population to double",
+          evidence: "established",
+          source: "Cell biology"
+        }
+      ]
+    }
+  },
+
+  // ============== URINALYSIS ==============
+  urinalysis: {
+    name: "Urinalysis",
+    icon: "🧪",
+    category: "laboratory",
+    
+    physical: {
+      title: "Physical Properties",
+      parameters: [
+        { id: "urine_volume_24h", name: "24-Hour Urine Volume", value: 1500, unit: "mL/day", range: [800, 2500], evidence: "established" },
+        { id: "urine_specific_gravity", name: "Specific Gravity", value: 1.020, unit: "", range: [1.003, 1.030], evidence: "established" },
+        { id: "urine_osmolality", name: "Urine Osmolality", value: 600, unit: "mOsm/kg", range: [300, 1200], evidence: "established" },
+        { id: "urine_ph", name: "Urine pH", value: 6.0, unit: "", range: [4.5, 8.0], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "free_water_clearance",
+          name: "Free Water Clearance",
+          latex: "C_{H_2O} = V(1 - \\frac{U_{osm}}{P_{osm}})",
+          description: "Electrolyte-free water excretion",
+          evidence: "established",
+          source: "Renal physiology"
+        }
+      ]
+    },
+
+    chemical: {
+      title: "Chemical Analysis",
+      parameters: [
+        { id: "urine_protein", name: "Urine Protein", value: 0, unit: "mg/dL", range: [0, 30], evidence: "established" },
+        { id: "urine_albumin", name: "Urine Albumin", value: 10, unit: "mg/L", range: [0, 30], evidence: "established" },
+        { id: "urine_glucose", name: "Urine Glucose", value: 0, unit: "mg/dL", range: [0, 15], evidence: "established" },
+        { id: "urine_ketones", name: "Urine Ketones", value: 0, unit: "mg/dL", range: [0, 5], evidence: "established" },
+        { id: "urine_bilirubin", name: "Urine Bilirubin", value: 0, unit: "scale", range: [0, 3], evidence: "established" },
+        { id: "urine_blood", name: "Urine Blood", value: 0, unit: "scale", range: [0, 3], evidence: "established" },
+        { id: "urine_nitrite", name: "Nitrite", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "urine_leukocyte_esterase", name: "Leukocyte Esterase", value: 0, unit: "scale", range: [0, 3], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "albumin_creatinine_ratio",
+          name: "Albumin-Creatinine Ratio",
+          latex: "ACR = \\frac{U_{albumin}}{U_{creatinine}}",
+          description: "Microalbuminuria screening (mg/g)",
+          evidence: "established",
+          source: "Diabetes guidelines"
+        }
+      ]
+    },
+
+    microscopy: {
+      title: "Urine Microscopy",
+      parameters: [
+        { id: "urine_rbc", name: "Red Blood Cells", value: 2, unit: "/HPF", range: [0, 5], evidence: "established" },
+        { id: "urine_wbc", name: "White Blood Cells", value: 3, unit: "/HPF", range: [0, 5], evidence: "established" },
+        { id: "urine_epithelial", name: "Epithelial Cells", value: 2, unit: "/HPF", range: [0, 15], evidence: "established" },
+        { id: "urine_bacteria", name: "Bacteria", value: 0, unit: "scale", range: [0, 4], evidence: "established" },
+        { id: "urine_casts_hyaline", name: "Hyaline Casts", value: 0, unit: "/LPF", range: [0, 2], evidence: "established" },
+        { id: "urine_casts_granular", name: "Granular Casts", value: 0, unit: "/LPF", range: [0, 0], evidence: "established" },
+        { id: "urine_casts_rbc", name: "RBC Casts", value: 0, unit: "/LPF", range: [0, 0], evidence: "established" },
+        { id: "urine_crystals", name: "Crystals", value: 0, unit: "scale", range: [0, 3], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "fena_calc",
+          name: "Fractional Excretion of Sodium",
+          latex: "FE_{Na} = \\frac{U_{Na} \\times P_{Cr}}{P_{Na} \\times U_{Cr}} \\times 100",
+          description: "Prerenal (<1%) vs intrinsic renal (>2%) AKI",
+          evidence: "established",
+          source: "Nephrology"
+        }
+      ]
+    }
+  },
+
+  // ============== IMAGING PARAMETERS ==============
+  imaging: {
+    name: "Imaging Parameters",
+    icon: "📷",
+    category: "radiology",
+    
+    ct: {
+      title: "CT Imaging (Hounsfield Units)",
+      parameters: [
+        { id: "hu_air", name: "Air Density", value: -1000, unit: "HU", range: [-1000, -900], evidence: "established" },
+        { id: "hu_fat", name: "Fat Density", value: -100, unit: "HU", range: [-150, -50], evidence: "established" },
+        { id: "hu_water", name: "Water Density", value: 0, unit: "HU", range: [-10, 10], evidence: "established" },
+        { id: "hu_muscle", name: "Muscle Density", value: 40, unit: "HU", range: [30, 60], evidence: "established" },
+        { id: "hu_liver", name: "Liver Parenchyma", value: 60, unit: "HU", range: [50, 70], evidence: "established" },
+        { id: "hu_blood", name: "Blood Density", value: 55, unit: "HU", range: [40, 70], evidence: "established" },
+        { id: "hu_acute_hemorrhage", name: "Acute Hemorrhage", value: 75, unit: "HU", range: [60, 90], evidence: "established" },
+        { id: "hu_calcium", name: "Calcium/Bone", value: 700, unit: "HU", range: [300, 3000], evidence: "established" },
+        { id: "coronary_calcium_score", name: "Coronary Calcium Score", value: 0, unit: "Agatston", range: [0, 400], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "hu_attenuation",
+          name: "Hounsfield Unit Definition",
+          latex: "HU = 1000 \\times \\frac{\\mu_{tissue} - \\mu_{water}}{\\mu_{water} - \\mu_{air}}",
+          description: "Linear attenuation coefficient standardization",
+          evidence: "established",
+          source: "Radiology physics"
+        }
+      ]
+    },
+
+    mri: {
+      title: "MRI Signal Characteristics",
+      parameters: [
+        { id: "t1_relaxation", name: "T1 Relaxation Time", value: 800, unit: "ms", range: [300, 1500], evidence: "established" },
+        { id: "t2_relaxation", name: "T2 Relaxation Time", value: 80, unit: "ms", range: [20, 200], evidence: "established" },
+        { id: "adc_value", name: "ADC (Diffusion)", value: 1.0, unit: "×10⁻³mm²/s", range: [0.5, 2.0], evidence: "established" },
+        { id: "mri_fat_fraction", name: "MRI-PDFF (Liver Fat)", value: 5, unit: "%", range: [0, 30], evidence: "established" },
+        { id: "cardiac_t1_native", name: "Native T1 (Myocardium)", value: 1000, unit: "ms", range: [900, 1100], evidence: "established" },
+        { id: "cardiac_ecv", name: "ECV (Extracellular Volume)", value: 25, unit: "%", range: [20, 30], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "adc_calculation",
+          name: "ADC Calculation",
+          latex: "ADC = -\\frac{\\ln(S_1/S_0)}{b_1 - b_0}",
+          description: "Apparent diffusion coefficient from DWI",
+          evidence: "established",
+          source: "MRI physics"
+        }
+      ]
+    },
+
+    ultrasound: {
+      title: "Ultrasound Parameters",
+      parameters: [
+        { id: "us_liver_echogenicity", name: "Liver Echogenicity", value: 2, unit: "grade", range: [1, 4], evidence: "established" },
+        { id: "us_carotid_imt", name: "Carotid IMT", value: 0.7, unit: "mm", range: [0.4, 1.2], evidence: "established" },
+        { id: "us_ejection_fraction", name: "Echo EF (Simpson)", value: 60, unit: "%", range: [55, 70], evidence: "established" },
+        { id: "us_e_e_prime", name: "E/e' Ratio", value: 8, unit: "ratio", range: [6, 14], evidence: "established" },
+        { id: "us_liver_stiffness", name: "Liver Stiffness (TE)", value: 5, unit: "kPa", range: [2.5, 7], evidence: "established" },
+        { id: "us_resistive_index", name: "Renal Resistive Index", value: 0.60, unit: "index", range: [0.50, 0.70], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "resistive_index",
+          name: "Resistive Index",
+          latex: "RI = \\frac{V_{systolic} - V_{diastolic}}{V_{systolic}}",
+          description: "Vascular resistance assessment",
+          evidence: "established",
+          source: "Vascular ultrasound"
+        }
+      ]
+    },
+
+    nuclear: {
+      title: "Nuclear Medicine",
+      parameters: [
+        { id: "gfr_dtpa", name: "GFR (DTPA)", value: 100, unit: "mL/min", range: [80, 120], evidence: "established" },
+        { id: "thyroid_uptake_24h", name: "Thyroid Uptake (24h)", value: 20, unit: "%", range: [10, 30], evidence: "established" },
+        { id: "lvef_muga", name: "LVEF (MUGA)", value: 60, unit: "%", range: [55, 70], evidence: "established" },
+        { id: "pet_suv_max", name: "PET SUVmax", value: 3.0, unit: "SUV", range: [2.0, 5.0], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "suv_calculation",
+          name: "Standardized Uptake Value",
+          latex: "SUV = \\frac{Activity_{tissue}}{Dose / Weight}",
+          description: "Normalized FDG uptake in PET imaging",
+          evidence: "established",
+          source: "Nuclear medicine"
+        }
+      ]
+    }
+  },
+
+  // ============== EYES/VISUAL SYSTEM ==============
+  eyes: {
+    name: "Visual System",
+    icon: "👁️",
+    category: "sensory",
+    
+    anatomy: {
+      title: "Ocular Anatomy",
+      parameters: [
+        { id: "axial_length", name: "Axial Length", value: 24, unit: "mm", range: [22, 26], evidence: "established" },
+        { id: "corneal_thickness", name: "Central Corneal Thickness", value: 540, unit: "μm", range: [500, 600], evidence: "established" },
+        { id: "anterior_chamber_depth", name: "Anterior Chamber Depth", value: 3.2, unit: "mm", range: [2.5, 4.0], evidence: "established" },
+        { id: "cup_disc_ratio", name: "Cup/Disc Ratio", value: 0.3, unit: "ratio", range: [0.1, 0.5], evidence: "established" },
+        { id: "rnfl_thickness", name: "RNFL Thickness", value: 100, unit: "μm", range: [80, 120], evidence: "established" },
+        { id: "macular_thickness", name: "Central Macular Thickness", value: 250, unit: "μm", range: [220, 280], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "iol_power",
+          name: "IOL Power (SRK/T)",
+          latex: "P = A - 2.5L - 0.9K",
+          description: "Intraocular lens power calculation",
+          evidence: "established",
+          source: "Ophthalmology"
+        }
+      ]
+    },
+
+    function: {
+      title: "Visual Function",
+      parameters: [
+        { id: "visual_acuity", name: "Visual Acuity", value: 0, unit: "logMAR", range: [-0.3, 1.0], evidence: "established" },
+        { id: "intraocular_pressure", name: "Intraocular Pressure", value: 15, unit: "mmHg", range: [10, 21], evidence: "established" },
+        { id: "visual_field_md", name: "Visual Field MD", value: 0, unit: "dB", range: [-30, 2], evidence: "established" },
+        { id: "contrast_sensitivity", name: "Contrast Sensitivity", value: 1.8, unit: "log units", range: [1.5, 2.1], evidence: "established" },
+        { id: "tear_breakup_time", name: "Tear Breakup Time", value: 12, unit: "seconds", range: [10, 30], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "goldmann_iop",
+          name: "Goldmann IOP Correction",
+          latex: "IOP_{corr} = IOP + \\frac{545 - CCT}{50} \\times 2.5",
+          description: "IOP correction for corneal thickness",
+          evidence: "established",
+          source: "Glaucoma guidelines"
+        }
+      ]
+    }
+  },
+
+  // ============== INFLAMMATORY MARKERS ==============
+  inflammatory: {
+    name: "Inflammatory Markers",
+    icon: "🔥",
+    category: "immunology",
+    
+    acute_phase: {
+      title: "Acute Phase Reactants",
+      parameters: [
+        { id: "crp", name: "C-Reactive Protein", value: 1.0, unit: "mg/L", range: [0, 3], evidence: "established" },
+        { id: "hs_crp", name: "High-Sensitivity CRP", value: 0.8, unit: "mg/L", range: [0, 1], evidence: "established" },
+        { id: "esr", name: "Erythrocyte Sed Rate", value: 10, unit: "mm/hr", range: [0, 20], evidence: "established" },
+        { id: "procalcitonin", name: "Procalcitonin", value: 0.05, unit: "ng/mL", range: [0, 0.1], evidence: "established" },
+        { id: "ferritin", name: "Ferritin", value: 100, unit: "ng/mL", range: [20, 300], evidence: "established" },
+        { id: "d_dimer", name: "D-Dimer", value: 200, unit: "ng/mL", range: [0, 500], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "sirs_criteria",
+          name: "SIRS Criteria",
+          latex: "SIRS \\geq 2: T>38°C, HR>90, RR>20, WBC>12k",
+          description: "Systemic inflammatory response syndrome",
+          evidence: "established",
+          source: "Critical care"
+        }
+      ]
+    },
+
+    cytokines: {
+      title: "Cytokines & Mediators",
+      parameters: [
+        { id: "il_6", name: "IL-6", value: 2, unit: "pg/mL", range: [0, 7], evidence: "established" },
+        { id: "il_10", name: "IL-10", value: 5, unit: "pg/mL", range: [0, 10], evidence: "established" },
+        { id: "tnf_alpha", name: "TNF-α", value: 5, unit: "pg/mL", range: [0, 10], evidence: "established" },
+        { id: "ifn_gamma", name: "IFN-γ", value: 10, unit: "pg/mL", range: [0, 20], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "cytokine_storm",
+          name: "Cytokine Storm Index",
+          latex: "CSI = \\frac{IL6 + TNF\\alpha}{2 \\times ULN}",
+          description: "Hyperinflammation assessment",
+          evidence: "novel",
+          source: "Immunology"
+        }
+      ]
+    },
+
+    complement: {
+      title: "Complement System",
+      parameters: [
+        { id: "c3", name: "Complement C3", value: 120, unit: "mg/dL", range: [90, 180], evidence: "established" },
+        { id: "c4", name: "Complement C4", value: 25, unit: "mg/dL", range: [10, 40], evidence: "established" },
+        { id: "ch50", name: "CH50 (Total Complement)", value: 40, unit: "U/mL", range: [30, 75], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "complement_activation",
+          name: "Complement Consumption",
+          latex: "Consumption = 1 - \\frac{C3 \\times C4}{Normal_{C3} \\times Normal_{C4}}",
+          description: "Degree of complement pathway activation",
+          evidence: "established",
+          source: "Immunology"
+        }
+      ]
+    }
+  },
+
+  // ============== TUMOR MARKERS ==============
+  tumor_markers: {
+    name: "Tumor Markers",
+    icon: "🎯",
+    category: "oncology",
+    
+    markers: {
+      title: "Serum Tumor Markers",
+      parameters: [
+        { id: "psa", name: "PSA (Prostate)", value: 1.0, unit: "ng/mL", range: [0, 4], evidence: "established" },
+        { id: "cea", name: "CEA (Colon/GI)", value: 2.5, unit: "ng/mL", range: [0, 5], evidence: "established" },
+        { id: "ca_125", name: "CA-125 (Ovarian)", value: 15, unit: "U/mL", range: [0, 35], evidence: "established" },
+        { id: "ca_19_9", name: "CA 19-9 (Pancreas)", value: 15, unit: "U/mL", range: [0, 37], evidence: "established" },
+        { id: "afp", name: "AFP (Liver/Germ Cell)", value: 5, unit: "ng/mL", range: [0, 10], evidence: "established" },
+        { id: "beta_hcg", name: "β-hCG (Germ Cell)", value: 0, unit: "mIU/mL", range: [0, 5], evidence: "established" },
+        { id: "nse", name: "NSE (SCLC/Neuro)", value: 10, unit: "ng/mL", range: [0, 16.3], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "psa_density",
+          name: "PSA Density",
+          latex: "PSAD = \\frac{PSA}{Prostate\\ Volume}",
+          description: "PSA normalized to prostate size",
+          evidence: "established",
+          source: "Urology"
+        }
+      ]
+    }
+  },
+
+  // ============== GASTROINTESTINAL (EXPANDED) ==============
+  gastrointestinal: {
+    name: "Gastrointestinal System",
+    icon: "🫁",
+    category: "digestive",
+    
+    upper_gi: {
+      title: "Upper GI Tract",
+      parameters: [
+        { id: "les_pressure", name: "LES Pressure", value: 20, unit: "mmHg", range: [10, 35], evidence: "established" },
+        { id: "gastric_ph", name: "Gastric pH", value: 2.0, unit: "", range: [1.5, 3.5], evidence: "established" },
+        { id: "gastric_emptying_t50", name: "Gastric Emptying T½", value: 90, unit: "min", range: [60, 120], evidence: "established" },
+        { id: "pepsinogen_ratio", name: "PG I/II Ratio", value: 5, unit: "ratio", range: [3, 10], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "demeester_calc",
+          name: "DeMeester Composite Score",
+          latex: "DeMeester > 14.7 = abnormal",
+          description: "Composite 24h pH score",
+          evidence: "established",
+          source: "Gastroenterology"
+        }
+      ]
+    },
+
+    small_bowel: {
+      title: "Small Intestine",
+      parameters: [
+        { id: "small_bowel_transit", name: "Small Bowel Transit Time", value: 240, unit: "min", range: [180, 300], evidence: "established" },
+        { id: "fecal_calprotectin", name: "Fecal Calprotectin", value: 30, unit: "μg/g", range: [0, 50], evidence: "established" },
+        { id: "fecal_elastase", name: "Fecal Elastase-1", value: 400, unit: "μg/g", range: [200, 500], evidence: "established" },
+        { id: "ttg_iga", name: "tTG IgA (Celiac)", value: 5, unit: "U/mL", range: [0, 10], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "sibo_diagnosis",
+          name: "SIBO Breath Test Criteria",
+          latex: "SIBO^+ = H_2 \\uparrow > 20ppm\\ in\\ 90min",
+          description: "Small intestinal bacterial overgrowth diagnosis",
+          evidence: "established",
+          source: "Gastroenterology"
+        }
+      ]
+    },
+
+    colon: {
+      title: "Colon & Rectum",
+      parameters: [
+        { id: "colonic_transit_time", name: "Colonic Transit Time", value: 36, unit: "hours", range: [24, 72], evidence: "established" },
+        { id: "fit_hemoglobin", name: "FIT Hemoglobin", value: 5, unit: "μg/g", range: [0, 10], evidence: "established" },
+        { id: "anal_sphincter_pressure", name: "Anal Sphincter Pressure", value: 60, unit: "mmHg", range: [40, 80], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "bristol_scale",
+          name: "Bristol Stool Scale",
+          latex: "Type\\ 1-2: Constipation, 3-4: Normal, 5-7: Diarrhea",
+          description: "Stool form classification",
+          evidence: "established",
+          source: "Gastroenterology"
+        }
+      ]
+    }
   }
 };
 
