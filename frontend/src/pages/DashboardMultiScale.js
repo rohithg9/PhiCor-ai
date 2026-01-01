@@ -3272,6 +3272,18 @@ const DashboardMultiScale = () => {
                   </section>
                 )}
 
+                {/* Relevant Clinical Calculators Panel */}
+                {currentDisease && selectedDisease && (
+                  <section className="mt-6">
+                    <RelevantCalculatorsPanel
+                      diseaseId={selectedDisease}
+                      diseaseName={currentDisease?.name}
+                      organId={selectedOrgan}
+                      isExpanded={false}
+                    />
+                  </section>
+                )}
+
                 {/* Evidence-Based Treatment Guidelines Panel */}
                 {currentDisease && selectedDisease && (
                   <section className="mt-6">
