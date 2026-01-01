@@ -916,19 +916,58 @@ async def calculate_frank_starling(params: Dict[str, float]):
 
 # Drug Routes
 @api_router.get("/drugs")
-async def get_available_drugs():
-    """Get list of available drugs in the database."""
-    return {
-        "drugs": [
-            {
-                "id": key,
-                "name": drug["name"],
-                "mechanisms_count": len(drug["mechanisms"]),
-                "max_daily_dose_mg": drug["max_daily_dose"]
-            }
-            for key, drug in DRUG_DATABASE.items()
-        ]
-    }
+async def get_available_drugs(
+    category: Optional[str] = None,
+    search: Optional[str] = None,
+    limit: int = 200
+):
+    """Get list of available drugs from comprehensive database."""
+    try:
+        from data.comprehensive_drugs import get_all_comprehensive_drugs
+        all_drugs = get_all_comprehensive_drugs()
+        
+        # Filter by category if provided
+        if category:
+            all_drugs = [d for d in all_drugs if d.get("category", "").lower() == category.lower()]
+        
+        # Filter by search if provided
+        if search:
+            search_lower = search.lower()
+            all_drugs = [d for d in all_drugs if 
+                search_lower in d.get("name", "").lower() or 
+                search_lower in d.get("id", "").lower() or
+                search_lower in d.get("drug_class", "").lower()]
+        
+        # Apply limit
+        all_drugs = all_drugs[:limit]
+        
+        return {
+            "drugs": [
+                {
+                    "id": drug.get("id"),
+                    "name": drug.get("name"),
+                    "category": drug.get("category"),
+                    "drug_class": drug.get("drug_class"),
+                    "mechanisms_count": len(drug.get("mechanisms", [])),
+                    "max_daily_dose_mg": drug.get("max_daily_dose_mg", 0)
+                }
+                for drug in all_drugs
+            ]
+        }
+    except Exception as e:
+        logger.error(f"Error getting drugs: {e}")
+        # Fallback to basic DRUG_DATABASE
+        return {
+            "drugs": [
+                {
+                    "id": key,
+                    "name": drug["name"],
+                    "mechanisms_count": len(drug["mechanisms"]),
+                    "max_daily_dose_mg": drug["max_daily_dose"]
+                }
+                for key, drug in DRUG_DATABASE.items()
+            ]
+        }
 
 @api_router.get("/drugs/{drug_id}")
 async def get_drug_info(drug_id: str):
