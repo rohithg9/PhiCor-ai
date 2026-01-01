@@ -547,6 +547,18 @@ Return ONLY valid JSON."""
             print(f"AI synthesis error: {e}")
             return self._fallback_synthesis()
 
+    def _format_guideline_sources(self, sources) -> str:
+        """Format guideline sources, handling both dict and string formats."""
+        if not sources:
+            return "See database"
+        source_strings = []
+        for src in sources[:2]:
+            if isinstance(src, dict):
+                source_strings.append(src.get('name', str(src)))
+            else:
+                source_strings.append(str(src))
+        return ', '.join(source_strings) if source_strings else "See database"
+
     def _local_synthesis(
         self,
         diseases: List[Dict],
