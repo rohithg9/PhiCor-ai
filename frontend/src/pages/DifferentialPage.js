@@ -52,6 +52,7 @@ const EXTENDED_NORMAL_RANGES = buildAllNormalRanges();
 
 const DifferentialPage = () => {
   const { isDark } = useTheme();
+  const tutorial = useTutorial('differential');
   
   // State management
   const [activeTab, setActiveTab] = useState('parameters');
