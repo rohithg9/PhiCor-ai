@@ -657,6 +657,13 @@ PMH: Hypertension, Type 2 Diabetes"
                     }}
                   />
                 )}
+                
+                {/* Calculators Tab */}
+                {activeTab === 'calculators' && (
+                  <div className="h-[500px]">
+                    <ClinicalCalculatorPanel isDark={isDark} />
+                  </div>
+                )}
               </div>
             </div>
             
