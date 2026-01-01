@@ -17,7 +17,8 @@ import { ScrollArea } from '../components/ui/scroll-area';
 import { Slider } from '../components/ui/slider';
 import { ORGAN_MODELS } from '../data/organModels';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL;
+// Use relative URL if REACT_APP_BACKEND_URL is not set (for production)
+const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 
 // Simple PK Curve Visualization Component
 const PKCurveVisualization = ({ simulation, dosage }) => {
