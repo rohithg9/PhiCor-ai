@@ -175,10 +175,13 @@ const DifferentialPage = () => {
       ? ((parameterValue - currentNormalRange.max) / currentNormalRange.max * 100).toFixed(0)
       : ((currentNormalRange.min - parameterValue) / currentNormalRange.min * 100).toFixed(0);
     
+    // Create full parameter ID with organ prefix for disease mapping
+    const fullParameterId = `${selectedOrgan}.${selectedParameter}`;
+    
     const newFinding = {
       id: `${selectedOrgan}-${selectedParameter}-${Date.now()}`,
       organ: selectedOrgan,
-      parameterId: selectedParameter,
+      parameterId: fullParameterId,  // Use full parameter ID for disease mapping
       parameterName: currentNormalRange.name || selectedParameter,
       value: parameterValue,
       unit: currentNormalRange.unit,
