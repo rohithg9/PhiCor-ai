@@ -2726,6 +2726,303 @@ async def generate_drugs_batch(request: BatchDrugGenerationRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# Hospital Priority Drug Categories - ordered by clinical importance
+HOSPITAL_PRIORITY_ORDER = [
+    "cardiovascular",      # Most critical in hospital settings
+    "antibiotics",         # Essential for infections
+    "cns_neurological",    # Pain management, sedation, neuro emergencies  
+    "analgesics",          # Pain management is ubiquitous
+    "respiratory",         # Respiratory care
+    "gastrointestinal",    # GI issues common in hospital
+    "endocrine",           # Diabetes, thyroid management
+    "antivirals",          # Viral infections
+    "antifungals",         # Fungal infections
+    "immunosuppressants",  # Transplant, autoimmune
+]
+
+
+class ChunkedGenerationRequest(BaseModel):
+    """Request for chunked drug generation"""
+    category: Optional[str] = None  # If None, use priority order
+    start_index: int = 0  # Where to start in the list
+    count: int = 10  # How many drugs to generate this chunk
+    skip_existing: bool = True  # Skip drugs already generated
+
+
+class GenerationStatus(BaseModel):
+    """Current generation status"""
+    total_priority_drugs: int
+    total_generated: int
+    remaining: int
+    by_category: Dict[str, Dict[str, int]]
+    last_generated: List[str]
+
+
+@api_router.get("/drugs-db/generation-status")
+async def get_generation_status():
+    """
+    Get the current status of drug knowledge base generation.
+    Shows progress and what's been generated.
+    """
+    from services.medical_knowledge_generator import get_priority_drugs
+    
+    priority_drugs = get_priority_drugs()
+    total_priority = len(priority_drugs)
+    
+    # Get all generated drugs
+    generated_drugs = await db.drugs_generated.find({}, {"_id": 0, "name": 1, "category": 1, "generated_at": 1}).to_list(1000)
+    generated_names = {d["name"].lower() for d in generated_drugs}
+    total_generated = len(generated_drugs)
+    
+    # Count by category
+    by_category = {}
+    for cat in HOSPITAL_PRIORITY_ORDER:
+        cat_drugs = [d for d in priority_drugs if d.get("category") == cat]
+        cat_generated = [d for d in cat_drugs if d["name"].lower() in generated_names]
+        by_category[cat] = {
+            "total": len(cat_drugs),
+            "generated": len(cat_generated),
+            "remaining": len(cat_drugs) - len(cat_generated)
+        }
+    
+    # Get last 10 generated
+    last_generated = sorted(generated_drugs, key=lambda x: x.get("generated_at", ""), reverse=True)[:10]
+    last_names = [d.get("name", "Unknown") for d in last_generated]
+    
+    return {
+        "total_priority_drugs": total_priority,
+        "total_generated": total_generated,
+        "remaining": total_priority - total_generated,
+        "completion_percentage": round((total_generated / total_priority) * 100, 1) if total_priority > 0 else 0,
+        "by_category": by_category,
+        "last_generated": last_names,
+        "priority_order": HOSPITAL_PRIORITY_ORDER
+    }
+
+
+@api_router.post("/drugs-db/generate-chunk")
+async def generate_drug_chunk(request: ChunkedGenerationRequest):
+    """
+    Generate a chunk of drugs from the priority list.
+    Designed for stable, controlled generation with progress tracking.
+    
+    - If category is specified, generates from that category
+    - If not, follows hospital priority order
+    - Skips already generated drugs by default
+    - Returns detailed progress info
+    """
+    import asyncio
+    from services.medical_knowledge_generator import DrugKnowledgeGenerator, get_priority_drugs
+    
+    try:
+        generator = DrugKnowledgeGenerator()
+        priority_drugs = get_priority_drugs()
+        
+        # Get already generated drugs
+        if request.skip_existing:
+            generated_cursor = db.drugs_generated.find({}, {"_id": 0, "name": 1})
+            generated_list = await generated_cursor.to_list(1000)
+            generated_names = {d["name"].lower() for d in generated_list}
+        else:
+            generated_names = set()
+        
+        # Filter by category if specified
+        if request.category:
+            drugs_pool = [d for d in priority_drugs if d.get("category") == request.category]
+        else:
+            # Use hospital priority order
+            drugs_pool = []
+            for cat in HOSPITAL_PRIORITY_ORDER:
+                cat_drugs = [d for d in priority_drugs if d.get("category") == cat]
+                drugs_pool.extend(cat_drugs)
+        
+        # Filter out already generated
+        drugs_to_generate = [
+            d for d in drugs_pool 
+            if d["name"].lower() not in generated_names
+        ]
+        
+        # Apply pagination
+        chunk = drugs_to_generate[request.start_index:request.start_index + request.count]
+        
+        if not chunk:
+            return {
+                "success": True,
+                "message": "No more drugs to generate in this category/range",
+                "generated_count": 0,
+                "remaining_in_pool": len(drugs_to_generate) - request.start_index,
+                "drugs": []
+            }
+        
+        # Generate drugs one by one with error handling
+        results = []
+        errors = []
+        
+        for drug_info in chunk:
+            try:
+                logger.info(f"Generating drug: {drug_info['name']}")
+                drug_data = await generator.generate_drug(
+                    drug_info["name"],
+                    drug_info.get("category"),
+                    drug_info.get("region", "international")
+                )
+                
+                # Save to database immediately (for persistence)
+                await db.drugs_generated.update_one(
+                    {"id": drug_data["id"]},
+                    {"$set": drug_data},
+                    upsert=True
+                )
+                
+                results.append({
+                    "id": drug_data["id"],
+                    "name": drug_data["name"],
+                    "category": drug_data.get("category", drug_info.get("category")),
+                    "success": True
+                })
+                logger.info(f"Successfully generated and saved: {drug_info['name']}")
+                
+                # Small delay to avoid rate limiting
+                await asyncio.sleep(0.5)
+                
+            except Exception as e:
+                logger.error(f"Failed to generate {drug_info['name']}: {str(e)}")
+                errors.append({
+                    "name": drug_info["name"],
+                    "error": str(e)
+                })
+        
+        # Calculate remaining
+        remaining_after = len(drugs_to_generate) - request.start_index - len(chunk)
+        
+        return {
+            "success": True,
+            "message": f"Generated {len(results)} drugs, {len(errors)} errors",
+            "generated_count": len(results),
+            "error_count": len(errors),
+            "remaining_in_pool": max(0, remaining_after),
+            "next_start_index": request.start_index + request.count,
+            "drugs": results,
+            "errors": errors if errors else None
+        }
+        
+    except ImportError as e:
+        raise HTTPException(status_code=500, detail=f"Generator not available: {str(e)}")
+    except Exception as e:
+        logger.error(f"Error in chunk generation: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.post("/drugs-db/generate-all-priority")
+async def generate_all_priority_drugs(
+    batch_size: int = 5,
+    max_drugs: Optional[int] = None,
+    category: Optional[str] = None
+):
+    """
+    Generate all priority drugs that haven't been generated yet.
+    
+    WARNING: This is a long-running operation!
+    - batch_size: Number of drugs to generate in parallel (default: 5)
+    - max_drugs: Maximum number of drugs to generate (for testing)
+    - category: Specific category to generate (optional)
+    
+    For production, call generate-chunk multiple times instead.
+    """
+    import asyncio
+    from services.medical_knowledge_generator import DrugKnowledgeGenerator, get_priority_drugs
+    
+    try:
+        generator = DrugKnowledgeGenerator()
+        priority_drugs = get_priority_drugs()
+        
+        # Get already generated
+        generated_cursor = db.drugs_generated.find({}, {"_id": 0, "name": 1})
+        generated_list = await generated_cursor.to_list(1000)
+        generated_names = {d["name"].lower() for d in generated_list}
+        
+        # Filter drugs to generate
+        if category:
+            drugs_pool = [d for d in priority_drugs if d.get("category") == category]
+        else:
+            drugs_pool = priority_drugs
+        
+        drugs_to_generate = [
+            d for d in drugs_pool 
+            if d["name"].lower() not in generated_names
+        ]
+        
+        # Apply max limit
+        if max_drugs:
+            drugs_to_generate = drugs_to_generate[:max_drugs]
+        
+        if not drugs_to_generate:
+            return {
+                "success": True,
+                "message": "All priority drugs have already been generated",
+                "generated_count": 0,
+                "total_in_database": len(generated_names)
+            }
+        
+        # Generate in batches
+        all_results = []
+        all_errors = []
+        
+        for i in range(0, len(drugs_to_generate), batch_size):
+            batch = drugs_to_generate[i:i + batch_size]
+            
+            # Generate batch in parallel
+            tasks = [
+                generator.generate_drug(
+                    d["name"],
+                    d.get("category"),
+                    d.get("region", "international")
+                )
+                for d in batch
+            ]
+            
+            batch_results = await asyncio.gather(*tasks, return_exceptions=True)
+            
+            # Process results
+            for drug_info, result in zip(batch, batch_results):
+                if isinstance(result, Exception):
+                    all_errors.append({
+                        "name": drug_info["name"],
+                        "error": str(result)
+                    })
+                else:
+                    # Save to database
+                    await db.drugs_generated.update_one(
+                        {"id": result["id"]},
+                        {"$set": result},
+                        upsert=True
+                    )
+                    all_results.append({
+                        "id": result["id"],
+                        "name": result["name"],
+                        "category": result.get("category")
+                    })
+            
+            # Delay between batches
+            if i + batch_size < len(drugs_to_generate):
+                await asyncio.sleep(2)
+        
+        return {
+            "success": True,
+            "message": f"Generated {len(all_results)} drugs with {len(all_errors)} errors",
+            "generated_count": len(all_results),
+            "error_count": len(all_errors),
+            "drugs": all_results,
+            "errors": all_errors if all_errors else None
+        }
+        
+    except ImportError as e:
+        raise HTTPException(status_code=500, detail=f"Generator not available: {str(e)}")
+    except Exception as e:
+        logger.error(f"Error in priority generation: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # ============== VIRTUAL PATIENT & DRUG SIMULATION ==============
 
 class VirtualPatient(BaseModel):
