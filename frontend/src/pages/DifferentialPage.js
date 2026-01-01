@@ -629,11 +629,17 @@ PMH: Hypertension, Type 2 Diabetes"
                 
                 {/* Test Patient Tab */}
                 {activeTab === 'patient' && (
-                  <div className={`text-center py-8 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                    <User className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                    <p>Test Patient feature coming soon</p>
-                    <p className="text-sm mt-1">Create virtual patient cases for testing</p>
-                  </div>
+                  <TestPatientPanel 
+                    isDark={isDark}
+                    onLoadCase={(caseData) => {
+                      setClinicalText(caseData.clinicalText);
+                      setActiveTab('clinical');
+                      // Auto-trigger analysis after a short delay
+                      setTimeout(() => {
+                        handleAnalyzeText();
+                      }, 500);
+                    }}
+                  />
                 )}
               </div>
             </div>
