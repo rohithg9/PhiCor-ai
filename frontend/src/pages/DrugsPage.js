@@ -899,9 +899,13 @@ const DrugsPage = () => {
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="w-6 h-6 animate-spin text-primary" />
               </div>
+            ) : error ? (
+              <div className="p-4 text-center text-red-500 text-sm">
+                Error: {error}
+              </div>
             ) : drugs.length === 0 ? (
               <div className="p-4 text-center text-muted-foreground text-sm">
-                No drugs found
+                No drugs found. API: {API_URL ? 'configured' : 'NOT configured'}
               </div>
             ) : (
               <div className="p-2 space-y-1">
