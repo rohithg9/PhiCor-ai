@@ -2068,6 +2068,10 @@ def get_all_comprehensive_drugs():
     all_drugs.extend(IMMUNOSUPPRESSANT_DRUGS)
     all_drugs.extend(UROLOGICAL_DRUGS)
     all_drugs.extend(OPHTHALMIC_DRUGS)
+    all_drugs.extend(RENAL_DRUGS)
+    all_drugs.extend(ONCOLOGY_DRUGS)
+    all_drugs.extend(ANTIVIRAL_DRUGS)
+    all_drugs.extend(ANTIFUNGAL_DRUGS)
     
     # Add timestamps
     timestamp = get_timestamp()
