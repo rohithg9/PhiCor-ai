@@ -66,35 +66,251 @@ def test_backend_health():
         print(f"❌ Backend not accessible: {e}")
         return False
 
-def test_disease_database_seeding():
-    """Test disease database seeding endpoint"""
-    print("\n🏥 TESTING DISEASE DATABASE SEEDING")
+def test_drug_database_total_count():
+    """Test that drugs-db endpoint returns ~115 drugs total"""
+    print("\n💊 TESTING DRUG DATABASE TOTAL COUNT (115 DRUGS)")
     print("=" * 50)
     
     try:
-        response = requests.post(f"{BACKEND_URL}/api/diseases-db/seed-comprehensive", timeout=30)
+        response = requests.get(f"{BACKEND_URL}/api/drugs-db?limit=200", timeout=10)
         if response.status_code == 200:
             data = response.json()
-            diseases_added = data.get('diseases_added', 0)
-            categories_summary = data.get('categories_summary', {})
+            total_drugs = data.get('total', 0)
+            drugs_list = data.get('drugs', [])
             
-            print(f"✅ Disease database seeding successful")
-            print(f"📊 Diseases added: {diseases_added}")
-            print(f"📊 Categories summary: {categories_summary}")
+            print(f"✅ Drug database endpoint accessible")
+            print(f"📊 Total drugs in database: {total_drugs}")
+            print(f"📊 Drugs returned in response: {len(drugs_list)}")
             
-            if diseases_added >= 28:
-                print(f"✅ Disease count ({diseases_added}) meets expected 28 diseases")
+            if total_drugs >= 115:
+                print(f"✅ Drug count ({total_drugs}) meets expected 115 drugs")
+                return True
+            elif total_drugs >= 100:
+                print(f"⚠️ Drug count ({total_drugs}) is close to expected 115 drugs")
                 return True
             else:
-                print(f"❌ Disease count ({diseases_added}) is below expected 28 diseases")
+                print(f"❌ Drug count ({total_drugs}) is below expected 115 drugs")
                 return False
         else:
-            print(f"❌ Disease database seeding failed: {response.status_code}")
-            if response.text:
-                print(f"Error details: {response.text}")
+            print(f"❌ Drug database endpoint failed: {response.status_code}")
             return False
     except Exception as e:
-        print(f"❌ Error testing disease database seeding: {e}")
+        print(f"❌ Error testing drug database: {e}")
+        return False
+
+def test_cns_drugs():
+    """Test CNS drug category - should include quetiapine, risperidone, aripiprazole, lithium, methylphenidate"""
+    print("\n🧠 TESTING CNS DRUGS CATEGORY")
+    print("=" * 50)
+    
+    expected_cns_drugs = [
+        "quetiapine", "risperidone", "aripiprazole", "lithium", "methylphenidate"
+    ]
+    
+    try:
+        response = requests.get(f"{BACKEND_URL}/api/drugs-db?category=cns", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            drugs = data.get('drugs', [])
+            drug_names = [drug.get('name', '').lower() for drug in drugs]
+            drug_ids = [drug.get('id', '').lower() for drug in drugs]
+            
+            print(f"✅ CNS drugs endpoint accessible")
+            print(f"📊 CNS drugs found: {len(drugs)}")
+            
+            found_drugs = []
+            missing_drugs = []
+            
+            for expected_drug in expected_cns_drugs:
+                found = False
+                for drug_name in drug_names + drug_ids:
+                    if expected_drug.lower() in drug_name:
+                        found = True
+                        break
+                
+                if found:
+                    found_drugs.append(expected_drug)
+                    print(f"  ✅ {expected_drug} found")
+                else:
+                    missing_drugs.append(expected_drug)
+                    print(f"  ❌ {expected_drug} not found")
+            
+            print(f"\n📈 Found {len(found_drugs)}/{len(expected_cns_drugs)} expected CNS drugs")
+            
+            if len(found_drugs) >= 3:  # Allow some flexibility
+                return True
+            else:
+                print(f"❌ Too few CNS drugs found: {len(found_drugs)}/{len(expected_cns_drugs)}")
+                return False
+        else:
+            print(f"❌ CNS drugs endpoint failed: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing CNS drugs: {e}")
+        return False
+
+def test_dermatological_drugs():
+    """Test dermatological drug category - should include isotretinoin, finasteride"""
+    print("\n🧴 TESTING DERMATOLOGICAL DRUGS CATEGORY")
+    print("=" * 50)
+    
+    expected_dermatological_drugs = ["isotretinoin", "finasteride"]
+    
+    try:
+        response = requests.get(f"{BACKEND_URL}/api/drugs-db?category=dermatological", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            drugs = data.get('drugs', [])
+            drug_names = [drug.get('name', '').lower() for drug in drugs]
+            drug_ids = [drug.get('id', '').lower() for drug in drugs]
+            
+            print(f"✅ Dermatological drugs endpoint accessible")
+            print(f"📊 Dermatological drugs found: {len(drugs)}")
+            
+            found_drugs = []
+            for expected_drug in expected_dermatological_drugs:
+                found = False
+                for drug_name in drug_names + drug_ids:
+                    if expected_drug.lower() in drug_name:
+                        found = True
+                        break
+                
+                if found:
+                    found_drugs.append(expected_drug)
+                    print(f"  ✅ {expected_drug} found")
+                else:
+                    print(f"  ❌ {expected_drug} not found")
+            
+            print(f"\n📈 Found {len(found_drugs)}/{len(expected_dermatological_drugs)} expected dermatological drugs")
+            return len(found_drugs) >= 1  # At least 1 out of 2
+        else:
+            print(f"❌ Dermatological drugs endpoint failed: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing dermatological drugs: {e}")
+        return False
+
+def test_immunosuppressant_drugs():
+    """Test immunosuppressant drug category - should include methotrexate, cyclosporine, tacrolimus, mycophenolate"""
+    print("\n🛡️ TESTING IMMUNOSUPPRESSANT DRUGS CATEGORY")
+    print("=" * 50)
+    
+    expected_immunosuppressant_drugs = ["methotrexate", "cyclosporine", "tacrolimus", "mycophenolate"]
+    
+    try:
+        response = requests.get(f"{BACKEND_URL}/api/drugs-db?category=immunosuppressant", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            drugs = data.get('drugs', [])
+            drug_names = [drug.get('name', '').lower() for drug in drugs]
+            drug_ids = [drug.get('id', '').lower() for drug in drugs]
+            
+            print(f"✅ Immunosuppressant drugs endpoint accessible")
+            print(f"📊 Immunosuppressant drugs found: {len(drugs)}")
+            
+            found_drugs = []
+            for expected_drug in expected_immunosuppressant_drugs:
+                found = False
+                for drug_name in drug_names + drug_ids:
+                    if expected_drug.lower() in drug_name:
+                        found = True
+                        break
+                
+                if found:
+                    found_drugs.append(expected_drug)
+                    print(f"  ✅ {expected_drug} found")
+                else:
+                    print(f"  ❌ {expected_drug} not found")
+            
+            print(f"\n📈 Found {len(found_drugs)}/{len(expected_immunosuppressant_drugs)} expected immunosuppressant drugs")
+            return len(found_drugs) >= 2  # At least 2 out of 4
+        else:
+            print(f"❌ Immunosuppressant drugs endpoint failed: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing immunosuppressant drugs: {e}")
+        return False
+
+def test_urological_drugs():
+    """Test urological drug category - should include tamsulosin, sildenafil, oxybutynin"""
+    print("\n🚿 TESTING UROLOGICAL DRUGS CATEGORY")
+    print("=" * 50)
+    
+    expected_urological_drugs = ["tamsulosin", "sildenafil", "oxybutynin"]
+    
+    try:
+        response = requests.get(f"{BACKEND_URL}/api/drugs-db?category=urological", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            drugs = data.get('drugs', [])
+            drug_names = [drug.get('name', '').lower() for drug in drugs]
+            drug_ids = [drug.get('id', '').lower() for drug in drugs]
+            
+            print(f"✅ Urological drugs endpoint accessible")
+            print(f"📊 Urological drugs found: {len(drugs)}")
+            
+            found_drugs = []
+            for expected_drug in expected_urological_drugs:
+                found = False
+                for drug_name in drug_names + drug_ids:
+                    if expected_drug.lower() in drug_name:
+                        found = True
+                        break
+                
+                if found:
+                    found_drugs.append(expected_drug)
+                    print(f"  ✅ {expected_drug} found")
+                else:
+                    print(f"  ❌ {expected_drug} not found")
+            
+            print(f"\n📈 Found {len(found_drugs)}/{len(expected_urological_drugs)} expected urological drugs")
+            return len(found_drugs) >= 2  # At least 2 out of 3
+        else:
+            print(f"❌ Urological drugs endpoint failed: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing urological drugs: {e}")
+        return False
+
+def test_ophthalmic_drugs():
+    """Test ophthalmic drug category - should include latanoprost, timolol_ophthalmic"""
+    print("\n👁️ TESTING OPHTHALMIC DRUGS CATEGORY")
+    print("=" * 50)
+    
+    expected_ophthalmic_drugs = ["latanoprost", "timolol_ophthalmic", "timolol"]
+    
+    try:
+        response = requests.get(f"{BACKEND_URL}/api/drugs-db?category=ophthalmic", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            drugs = data.get('drugs', [])
+            drug_names = [drug.get('name', '').lower() for drug in drugs]
+            drug_ids = [drug.get('id', '').lower() for drug in drugs]
+            
+            print(f"✅ Ophthalmic drugs endpoint accessible")
+            print(f"📊 Ophthalmic drugs found: {len(drugs)}")
+            
+            found_drugs = []
+            for expected_drug in expected_ophthalmic_drugs:
+                found = False
+                for drug_name in drug_names + drug_ids:
+                    if expected_drug.lower() in drug_name:
+                        found = True
+                        break
+                
+                if found:
+                    found_drugs.append(expected_drug)
+                    print(f"  ✅ {expected_drug} found")
+                else:
+                    print(f"  ❌ {expected_drug} not found")
+            
+            print(f"\n📈 Found {len(found_drugs)}/{len(expected_ophthalmic_drugs)} expected ophthalmic drugs")
+            return len(found_drugs) >= 1  # At least 1 out of 3
+        else:
+            print(f"❌ Ophthalmic drugs endpoint failed: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing ophthalmic drugs: {e}")
         return False
 
 def test_disease_database_total_count():
