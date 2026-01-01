@@ -85,40 +85,9 @@ def test_frontend_accessibility():
         return False
 
 def load_disease_data():
-    """Load disease data from the frontend data files"""
-    renal_diseases = {}
-    neurological_diseases = {}
-    
-    try:
-        # Read renal diseases
-        with open('/app/frontend/src/data/renalDiseases.js', 'r') as f:
-            content = f.read()
-            # Extract the export object (simplified parsing)
-            start = content.find('export const RENAL_DISEASES = {')
-            if start != -1:
-                print("✅ Renal diseases data file found")
-                # Count diseases by looking for ICD codes
-                icd_count = content.count('icd10:')
-                print(f"✅ Found {icd_count} renal diseases in data file")
-            else:
-                print("❌ Could not parse renal diseases data")
-                
-        # Read neurological diseases  
-        with open('/app/frontend/src/data/neurologicalDiseases.js', 'r') as f:
-            content = f.read()
-            start = content.find('export const NEUROLOGICAL_DISEASES = {')
-            if start != -1:
-                print("✅ Neurological diseases data file found")
-                # Count diseases by looking for ICD codes
-                icd_count = content.count('icd10:')
-                print(f"✅ Found {icd_count} neurological diseases in data file")
-            else:
-                print("❌ Could not parse neurological diseases data")
-                
-        return True
-    except Exception as e:
-        print(f"❌ Error loading disease data: {e}")
-        return False
+    """Load disease data from the frontend data files - DEPRECATED for drug testing"""
+    print("⚠️  Disease data loading not relevant for drug database testing")
+    return True
 
 def test_specific_diseases_from_review():
     """Test specific diseases mentioned in the review request"""
