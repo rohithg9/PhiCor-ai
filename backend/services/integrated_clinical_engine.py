@@ -423,7 +423,9 @@ Always base your response on the CURATED DATA provided, supplemented by your med
             sex = patient_info.get('sex', 'Unknown')
             parts.append(f"Patient: {age} year old {sex}")
             if patient_info.get('pmh'):
-                parts.append(f"PMH: {', '.join(patient_info['pmh'])}")
+                pmh_list = patient_info['pmh']
+                pmh_strings = [str(p) if not isinstance(p, dict) else p.get('name', str(p)) for p in pmh_list]
+                parts.append(f"PMH: {', '.join(pmh_strings)}")
         
         if clinical_text.strip():
             parts.append(f"\nClinical Presentation:\n{clinical_text}")
