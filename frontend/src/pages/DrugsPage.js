@@ -1217,19 +1217,6 @@ const DrugSimulationPanel = ({ drug, patient, dosage, setDosage, simulation, isS
               </div>
             )}
 
-            {/* Contraindications Warning */}
-            {recommendation.contraindicated?.length > 0 && (
-              <div className="mt-3 p-3 rounded-lg bg-red-500/20 border border-red-500/50">
-                <div className="flex items-center gap-2 text-red-500 font-semibold">
-                  <XCircle className="w-4 h-4" />
-                  CONTRAINDICATION WARNING
-                </div>
-                <p className="text-sm mt-1">
-                  Patient has: {recommendation.contraindicated.join(', ')}
-                </p>
-              </div>
-            )}
-
             {/* Apply Recommendation Button */}
             <Button 
               size="sm" 
@@ -1246,8 +1233,9 @@ const DrugSimulationPanel = ({ drug, patient, dosage, setDosage, simulation, isS
           </div>
         )}
         
-        {/* Dosage Slider */}
-        <div className="bg-card/50 rounded-lg p-4 border border-border/50">
+        {/* Dosage Slider - Only show if NOT contraindicated */}
+        {recommendation && !recommendation.isContraindicated && (
+          <div className="bg-card/50 rounded-lg p-4 border border-border/50">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium flex items-center gap-2">
               <Sliders className="w-4 h-4" />
