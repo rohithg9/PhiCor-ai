@@ -10,6 +10,108 @@ import {
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
+// Map frontend ICD codes to backend disease IDs
+const ICD_TO_BACKEND_MAP = {
+  'I50_2': 'heart_failure_hfref',
+  'I50.2': 'heart_failure_hfref',
+  'I21': 'acute_coronary_syndrome',
+  'I21_0': 'acute_coronary_syndrome',
+  'I21_4': 'acute_coronary_syndrome',
+  'I48': 'atrial_fibrillation',
+  'I48_0': 'atrial_fibrillation',
+  'I48_1': 'atrial_fibrillation',
+  'I10': 'hypertension',
+  'I63': 'ischemic_stroke',
+  'J44': 'copd',
+  'J44_0': 'copd',
+  'J44_1': 'copd',
+  'J45': 'asthma',
+  'E11': 'type2_diabetes',
+  'E03': 'hypothyroidism',
+  'N18': 'chronic_kidney_disease',
+  'G35': 'multiple_sclerosis',
+  'G20': 'parkinsons_disease',
+  'D50': 'iron_deficiency_anemia',
+  'D57': 'sickle_cell_disease',
+  'D66': 'hemophilia_a',
+  'D68_0': 'von_willebrand_disease',
+  'D56_1': 'thalassemia_major',
+  'D61': 'aplastic_anemia',
+  'C50': 'breast_cancer',
+  'C18': 'colorectal_cancer',
+  'C61': 'prostate_cancer',
+  'Q90': 'down_syndrome',
+  'Q96': 'turner_syndrome',
+  'Q87_4': 'marfan_syndrome',
+  'C91_0': 'acute_lymphoblastic_leukemia',
+  'C92_0': 'acute_myeloid_leukemia',
+  'C91_1': 'chronic_lymphocytic_leukemia',
+  'C90_0': 'multiple_myeloma',
+};
+
+// Also map by name patterns
+const NAME_TO_BACKEND_MAP = {
+  'heart failure': 'heart_failure_hfref',
+  'hfref': 'heart_failure_hfref',
+  'systolic heart failure': 'heart_failure_hfref',
+  'congestive heart failure': 'heart_failure_hfref',
+  'acute coronary': 'acute_coronary_syndrome',
+  'myocardial infarction': 'acute_coronary_syndrome',
+  'atrial fibrillation': 'atrial_fibrillation',
+  'afib': 'atrial_fibrillation',
+  'hypertension': 'hypertension',
+  'stroke': 'ischemic_stroke',
+  'copd': 'copd',
+  'asthma': 'asthma',
+  'diabetes': 'type2_diabetes',
+  'hypothyroid': 'hypothyroidism',
+  'chronic kidney': 'chronic_kidney_disease',
+  'ckd': 'chronic_kidney_disease',
+  'multiple sclerosis': 'multiple_sclerosis',
+  'parkinson': 'parkinsons_disease',
+  'iron deficiency': 'iron_deficiency_anemia',
+  'sickle cell': 'sickle_cell_disease',
+  'hemophilia': 'hemophilia_a',
+  'von willebrand': 'von_willebrand_disease',
+  'thalassemia': 'thalassemia_major',
+  'aplastic': 'aplastic_anemia',
+  'breast cancer': 'breast_cancer',
+  'colorectal': 'colorectal_cancer',
+  'colon cancer': 'colorectal_cancer',
+  'prostate cancer': 'prostate_cancer',
+  'down syndrome': 'down_syndrome',
+  'turner syndrome': 'turner_syndrome',
+  'marfan': 'marfan_syndrome',
+  'all': 'acute_lymphoblastic_leukemia',
+  'aml': 'acute_myeloid_leukemia',
+  'cll': 'chronic_lymphocytic_leukemia',
+  'myeloma': 'multiple_myeloma',
+};
+
+const getBackendDiseaseId = (diseaseId, diseaseName) => {
+  // First try direct ICD code mapping
+  if (diseaseId && ICD_TO_BACKEND_MAP[diseaseId]) {
+    return ICD_TO_BACKEND_MAP[diseaseId];
+  }
+  
+  // Try with underscore replaced by dot
+  const dotVersion = diseaseId?.replace('_', '.');
+  if (dotVersion && ICD_TO_BACKEND_MAP[dotVersion]) {
+    return ICD_TO_BACKEND_MAP[dotVersion];
+  }
+  
+  // Try name-based matching
+  const lowerName = (diseaseName || '').toLowerCase();
+  for (const [pattern, backendId] of Object.entries(NAME_TO_BACKEND_MAP)) {
+    if (lowerName.includes(pattern)) {
+      return backendId;
+    }
+  }
+  
+  // Fallback to disease ID as-is
+  return diseaseId;
+};
+
 const DiseaseDetailPanel = ({ diseaseId, diseaseName }) => {
   const [disease, setDisease] = useState(null);
   const [loading, setLoading] = useState(false);
