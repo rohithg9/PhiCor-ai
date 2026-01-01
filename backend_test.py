@@ -1,9 +1,29 @@
 #!/usr/bin/env python3
 """
-Backend Testing for PhiCor PK/PD Simulation Engine
-Testing comprehensive drug and disease databases with simulation capabilities:
+Backend Testing for PhiCor Medical Knowledge Base API
+Testing newly implemented Medical Knowledge Base API endpoints:
 
-DRUG DATABASE TESTING (115 drugs):
+MEDICAL KNOWLEDGE BASE API TESTING:
+1. Drug Generation Status API - GET /api/drugs-db/generation-status
+   - Should return completion percentage (100%), categories with counts, last generated drugs
+
+2. Drug Chunk Generation API - POST /api/drugs-db/generate-chunk  
+   - Body: {"category": "cardiovascular", "count": 1, "skip_existing": true}
+   - Should return message indicating drugs already generated (skip_existing=true)
+
+3. ICD-10 Status API - GET /api/diseases-db/icd10-status
+   - Should return completion percentage, by_category breakdown showing generated vs total counts
+
+4. Generated Drugs List API - GET /api/drugs-db/generated?limit=10
+   - Should return list of AI-generated drugs with comprehensive data
+
+5. Disease Database Stats - GET /api/diseases-db/stats
+   - Should return total_diseases, ai_generated count, by_category breakdown
+
+6. Drug Data Quality Verification - GET /api/drugs-db/generated?limit=1
+   - Check returned drug has: id, name, brand_names, mechanism_of_action, dosages, contraindications, drug_interactions, side_effects
+
+LEGACY DRUG DATABASE TESTING (115 drugs):
 - GET /api/drugs-db?limit=200 - Should return ~115 drugs
 - GET /api/drugs-db?category=cns - Should return CNS drugs including quetiapine, risperidone, aripiprazole, lithium, methylphenidate
 - GET /api/drugs-db?category=dermatological - Should return isotretinoin, finasteride
