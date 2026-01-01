@@ -67,7 +67,19 @@ def get_backend_url():
         print(f"❌ Error reading frontend/.env: {e}")
         return False
 
-def test_platform_stats_api():
+def test_backend_health():
+    """Test if backend is accessible"""
+    try:
+        response = requests.get(f"{BACKEND_URL}/api/health", timeout=10)
+        if response.status_code == 200:
+            print("✅ Backend health check passed")
+            return True
+        else:
+            print(f"❌ Backend health check failed: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"❌ Backend not accessible: {e}")
+        return False
     """Test 1: Platform Stats API - GET /api/platform/stats"""
     print("\n📊 TEST 1: PLATFORM STATS API")
     print("=" * 50)
