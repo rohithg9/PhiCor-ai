@@ -3149,6 +3149,16 @@ const DashboardMultiScale = () => {
                     <TreatmentGuidelinesPanel diseaseId={selectedDisease} />
                   </section>
                 )}
+
+                {/* Backend Disease Database - Clinical Evidence Panel */}
+                {currentDisease && selectedDisease && (
+                  <section className="mt-4">
+                    <DiseaseDetailPanel 
+                      diseaseId={selectedDisease} 
+                      diseaseName={currentDisease?.name} 
+                    />
+                  </section>
+                )}
               </div>
             ) : (
               <div className="h-full flex items-center justify-center text-muted-foreground">
