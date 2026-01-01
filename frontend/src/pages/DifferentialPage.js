@@ -646,6 +646,200 @@ PMH: Hypertension, Type 2 Diabetes"
             
             <ScrollArea className="h-[600px]">
               <div className="p-4">
+                {/* AI Clinical Synthesis Section - FIRST */}
+                {(isSynthesizing || clinicalSynthesis) && (
+                  <div className={`mb-6 rounded-xl border-2 ${isDark ? 'bg-gradient-to-br from-purple-900/30 to-indigo-900/30 border-purple-500/50' : 'bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-300'} overflow-hidden`}>
+                    <div 
+                      className={`p-4 cursor-pointer flex items-center justify-between ${isDark ? 'bg-purple-900/20' : 'bg-purple-100/50'}`}
+                      onClick={() => setSynthesisExpanded(!synthesisExpanded)}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center shadow-lg">
+                          <Sparkles className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <h3 className={`font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                            AI Clinical Synthesis
+                          </h3>
+                          <p className={`text-xs ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>
+                            Holistic analysis connecting all findings
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {isSynthesizing && (
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-500" />
+                        )}
+                        {synthesisExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                      </div>
+                    </div>
+                    
+                    {synthesisExpanded && clinicalSynthesis && (
+                      <div className="p-4 space-y-4">
+                        {/* Clinical Synthesis Summary */}
+                        {clinicalSynthesis.clinical_synthesis && (
+                          <div className={`p-4 rounded-lg ${isDark ? 'bg-purple-900/30' : 'bg-purple-100'}`}>
+                            <h4 className={`text-sm font-semibold mb-2 flex items-center gap-2 ${isDark ? 'text-purple-300' : 'text-purple-700'}`}>
+                              <Target className="w-4 h-4" /> Clinical Pattern Recognition
+                            </h4>
+                            <p className={`text-sm mb-3 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                              {clinicalSynthesis.clinical_synthesis.summary}
+                            </p>
+                            {clinicalSynthesis.clinical_synthesis.key_pattern && (
+                              <div className={`text-xs p-2 rounded ${isDark ? 'bg-purple-800/50' : 'bg-purple-200'}`}>
+                                <strong>Key Pattern:</strong> {clinicalSynthesis.clinical_synthesis.key_pattern}
+                              </div>
+                            )}
+                            {clinicalSynthesis.clinical_synthesis.clinical_pearl && (
+                              <div className={`mt-2 text-xs p-2 rounded ${isDark ? 'bg-indigo-800/50' : 'bg-indigo-200'}`}>
+                                <strong>💡 Clinical Pearl:</strong> {clinicalSynthesis.clinical_synthesis.clinical_pearl}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        
+                        {/* Primary Diagnosis from AI */}
+                        {clinicalSynthesis.primary_diagnosis && (
+                          <div className={`p-4 rounded-lg border ${isDark ? 'bg-emerald-900/20 border-emerald-500/30' : 'bg-emerald-50 border-emerald-200'}`}>
+                            <div className="flex items-center justify-between mb-3">
+                              <h4 className={`text-sm font-semibold flex items-center gap-2 ${isDark ? 'text-emerald-300' : 'text-emerald-700'}`}>
+                                <Target className="w-4 h-4" /> Primary Diagnosis
+                              </h4>
+                              <Badge className="bg-emerald-500 text-white">
+                                {clinicalSynthesis.primary_diagnosis.probability}% likely
+                              </Badge>
+                            </div>
+                            <p className={`text-lg font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                              {clinicalSynthesis.primary_diagnosis.name}
+                            </p>
+                            <p className={`text-xs mb-3 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                              {clinicalSynthesis.primary_diagnosis.icd10}
+                            </p>
+                            <div className={`text-sm ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                              {clinicalSynthesis.primary_diagnosis.reasoning}
+                            </div>
+                            
+                            {/* Key Supporting Findings */}
+                            {clinicalSynthesis.primary_diagnosis.key_supporting_findings?.length > 0 && (
+                              <div className="mt-3">
+                                <p className={`text-xs font-semibold mb-2 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                                  Supporting Evidence:
+                                </p>
+                                <div className="space-y-1">
+                                  {clinicalSynthesis.primary_diagnosis.key_supporting_findings.map((f, i) => (
+                                    <div key={i} className={`text-xs flex items-start gap-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                                      <CheckCircle className="w-3 h-3 text-emerald-500 mt-0.5 flex-shrink-0" />
+                                      <span><strong>{f.finding}:</strong> {f.significance}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {/* Next Steps */}
+                            {clinicalSynthesis.primary_diagnosis.next_steps?.length > 0 && (
+                              <div className="mt-3">
+                                <p className={`text-xs font-semibold mb-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                                  Recommended Next Steps:
+                                </p>
+                                <div className="flex flex-wrap gap-1">
+                                  {clinicalSynthesis.primary_diagnosis.next_steps.map((step, i) => (
+                                    <Badge key={i} variant="outline" className="text-xs">
+                                      {step}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        
+                        {/* Clinical Reasoning Steps */}
+                        {clinicalSynthesis.clinical_reasoning_steps?.length > 0 && (
+                          <div className={`p-4 rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-gray-100'}`}>
+                            <h4 className={`text-sm font-semibold mb-3 flex items-center gap-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                              <Brain className="w-4 h-4" /> Diagnostic Reasoning Process
+                            </h4>
+                            <div className="space-y-3">
+                              {clinicalSynthesis.clinical_reasoning_steps.map((step, i) => (
+                                <div key={i} className="flex gap-3">
+                                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${isDark ? 'bg-gray-700 text-gray-300' : 'bg-gray-300 text-gray-700'}`}>
+                                    {step.step}
+                                  </div>
+                                  <div>
+                                    <p className={`text-sm ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+                                      {step.thought}
+                                    </p>
+                                    {step.hypothesis && (
+                                      <p className={`text-xs mt-1 ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>
+                                        → {step.hypothesis}
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Mathematical Analysis */}
+                        {clinicalSynthesis.mathematical_analysis && (
+                          <div className={`p-4 rounded-lg ${isDark ? 'bg-blue-900/20' : 'bg-blue-50'}`}>
+                            <h4 className={`text-sm font-semibold mb-2 flex items-center gap-2 ${isDark ? 'text-blue-300' : 'text-blue-700'}`}>
+                              <Gauge className="w-4 h-4" /> Bayesian Probability Analysis
+                            </h4>
+                            {clinicalSynthesis.mathematical_analysis.pre_test_probability && (
+                              <p className={`text-xs mb-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                                <strong>Pre-test probability:</strong> {clinicalSynthesis.mathematical_analysis.pre_test_probability}
+                              </p>
+                            )}
+                            {clinicalSynthesis.mathematical_analysis.combined_probability_estimate && (
+                              <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                                <strong>Combined analysis:</strong> {clinicalSynthesis.mathematical_analysis.combined_probability_estimate}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                        
+                        {/* Urgency Assessment */}
+                        {clinicalSynthesis.urgency_assessment && (
+                          <div className={`p-3 rounded-lg flex items-center gap-3 ${
+                            clinicalSynthesis.urgency_assessment.level === 'emergent' 
+                              ? (isDark ? 'bg-red-900/30 border border-red-500/50' : 'bg-red-50 border border-red-200')
+                              : clinicalSynthesis.urgency_assessment.level === 'urgent'
+                              ? (isDark ? 'bg-orange-900/30 border border-orange-500/50' : 'bg-orange-50 border border-orange-200')
+                              : (isDark ? 'bg-gray-800/50' : 'bg-gray-100')
+                          }`}>
+                            <Shield className={`w-5 h-5 ${
+                              clinicalSynthesis.urgency_assessment.level === 'emergent' ? 'text-red-500' :
+                              clinicalSynthesis.urgency_assessment.level === 'urgent' ? 'text-orange-500' : 'text-gray-500'
+                            }`} />
+                            <div>
+                              <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                {clinicalSynthesis.urgency_assessment.level?.toUpperCase()} Evaluation
+                              </p>
+                              {clinicalSynthesis.urgency_assessment.can_miss_diagnosis && (
+                                <p className={`text-xs ${isDark ? 'text-red-400' : 'text-red-600'}`}>
+                                  ⚠️ Don't miss: {clinicalSynthesis.urgency_assessment.can_miss_diagnosis}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {/* Divider */}
+                {clinicalSynthesis && differentialResults.length > 0 && (
+                  <div className={`mb-4 py-2 flex items-center gap-3 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                    <div className="flex-1 h-px bg-current opacity-30" />
+                    <span className="text-xs uppercase tracking-wider">Individual Parameter Analysis</span>
+                    <div className="flex-1 h-px bg-current opacity-30" />
+                  </div>
+                )}
+                
                 {isAnalyzing ? (
                   <div className="flex items-center justify-center py-12">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500" />
