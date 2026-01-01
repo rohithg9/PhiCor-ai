@@ -486,6 +486,397 @@ const PatientProfilePanel = ({ patient, setPatient, onExtractFromText }) => {
   );
 };
 
+// =====================================================
+// DRUG KNOWLEDGE BASE - Families, Cross-Reactivity & Interactions
+// Based on BNF/pharmacological classifications
+// =====================================================
+
+const DRUG_FAMILIES = {
+  // Antibiotics
+  penicillins: {
+    name: 'Penicillins (Beta-lactam antibiotics)',
+    drugs: ['amoxicillin', 'ampicillin', 'penicillin', 'flucloxacillin', 'co-amoxiclav', 'piperacillin', 'benzylpenicillin', 'phenoxymethylpenicillin', 'ticarcillin'],
+    allergyTerms: ['penicillin', 'amoxicillin', 'ampicillin', 'beta-lactam', 'augmentin', 'co-amoxiclav'],
+    crossReactivity: ['cephalosporins'], // 10% cross-reactivity
+    crossReactivityRisk: 'moderate' // 1-10% chance
+  },
+  cephalosporins: {
+    name: 'Cephalosporins (Beta-lactam antibiotics)',
+    drugs: ['cefazolin', 'cephalexin', 'cefuroxime', 'ceftriaxone', 'cefotaxime', 'ceftazidime', 'cefixime', 'cefpodoxime', 'cefepime', 'ceftaroline'],
+    allergyTerms: ['cephalosporin', 'cefazolin', 'cephalexin', 'ceftriaxone', 'cefuroxime'],
+    crossReactivity: ['penicillins'],
+    crossReactivityRisk: 'moderate'
+  },
+  carbapenems: {
+    name: 'Carbapenems',
+    drugs: ['meropenem', 'imipenem', 'ertapenem', 'doripenem'],
+    allergyTerms: ['carbapenem', 'meropenem', 'imipenem'],
+    crossReactivity: ['penicillins', 'cephalosporins'],
+    crossReactivityRisk: 'low'
+  },
+  fluoroquinolones: {
+    name: 'Fluoroquinolones',
+    drugs: ['ciprofloxacin', 'levofloxacin', 'moxifloxacin', 'ofloxacin', 'norfloxacin'],
+    allergyTerms: ['quinolone', 'fluoroquinolone', 'ciprofloxacin', 'levofloxacin', 'cipro'],
+    crossReactivity: [],
+    crossReactivityRisk: 'none'
+  },
+  macrolides: {
+    name: 'Macrolides',
+    drugs: ['azithromycin', 'clarithromycin', 'erythromycin', 'roxithromycin'],
+    allergyTerms: ['macrolide', 'azithromycin', 'clarithromycin', 'erythromycin', 'zithromax'],
+    crossReactivity: [],
+    crossReactivityRisk: 'none'
+  },
+  sulfonamides: {
+    name: 'Sulfonamides',
+    drugs: ['sulfamethoxazole', 'trimethoprim-sulfamethoxazole', 'sulfasalazine', 'sulfadiazine'],
+    allergyTerms: ['sulfa', 'sulfonamide', 'sulfamethoxazole', 'bactrim', 'septra', 'cotrimoxazole'],
+    crossReactivity: [],
+    crossReactivityRisk: 'none'
+  },
+  aminoglycosides: {
+    name: 'Aminoglycosides',
+    drugs: ['gentamicin', 'tobramycin', 'amikacin', 'streptomycin', 'neomycin'],
+    allergyTerms: ['aminoglycoside', 'gentamicin', 'tobramycin'],
+    crossReactivity: [],
+    crossReactivityRisk: 'none'
+  },
+  tetracyclines: {
+    name: 'Tetracyclines',
+    drugs: ['doxycycline', 'tetracycline', 'minocycline', 'tigecycline'],
+    allergyTerms: ['tetracycline', 'doxycycline', 'minocycline'],
+    crossReactivity: [],
+    crossReactivityRisk: 'none'
+  },
+  
+  // NSAIDs
+  nsaids: {
+    name: 'NSAIDs (Non-steroidal anti-inflammatory drugs)',
+    drugs: ['ibuprofen', 'naproxen', 'diclofenac', 'indomethacin', 'piroxicam', 'meloxicam', 'ketorolac', 'aspirin', 'celecoxib'],
+    allergyTerms: ['nsaid', 'ibuprofen', 'naproxen', 'diclofenac', 'aspirin', 'anti-inflammatory'],
+    crossReactivity: [],
+    crossReactivityRisk: 'high' // NSAIDs have high cross-reactivity
+  },
+  
+  // Opioids
+  opioids: {
+    name: 'Opioids',
+    drugs: ['morphine', 'codeine', 'tramadol', 'fentanyl', 'oxycodone', 'hydrocodone', 'methadone', 'buprenorphine'],
+    allergyTerms: ['opioid', 'morphine', 'codeine', 'opiate'],
+    crossReactivity: [],
+    crossReactivityRisk: 'moderate'
+  },
+  
+  // ACE Inhibitors
+  ace_inhibitors: {
+    name: 'ACE Inhibitors',
+    drugs: ['captopril', 'enalapril', 'lisinopril', 'ramipril', 'perindopril', 'quinapril', 'benazepril', 'fosinopril'],
+    allergyTerms: ['ace inhibitor', 'captopril', 'lisinopril', 'ramipril', '-pril'],
+    crossReactivity: [],
+    crossReactivityRisk: 'high' // ACE-inhibitor angioedema
+  },
+  
+  // ARBs
+  arbs: {
+    name: 'Angiotensin II Receptor Blockers',
+    drugs: ['losartan', 'valsartan', 'irbesartan', 'candesartan', 'olmesartan', 'telmisartan', 'eprosartan'],
+    allergyTerms: ['arb', 'losartan', 'valsartan', '-sartan', 'angiotensin receptor'],
+    crossReactivity: [],
+    crossReactivityRisk: 'low'
+  },
+  
+  // Beta Blockers
+  beta_blockers: {
+    name: 'Beta Blockers',
+    drugs: ['metoprolol', 'atenolol', 'propranolol', 'bisoprolol', 'carvedilol', 'labetalol', 'nebivolol', 'sotalol'],
+    allergyTerms: ['beta blocker', 'metoprolol', 'atenolol', '-olol'],
+    crossReactivity: [],
+    crossReactivityRisk: 'moderate'
+  },
+  
+  // Calcium Channel Blockers
+  ccbs: {
+    name: 'Calcium Channel Blockers',
+    drugs: ['amlodipine', 'diltiazem', 'verapamil', 'nifedipine', 'felodipine', 'nicardipine'],
+    allergyTerms: ['calcium channel blocker', 'amlodipine', 'diltiazem', 'verapamil'],
+    crossReactivity: [],
+    crossReactivityRisk: 'low'
+  },
+  
+  // Statins
+  statins: {
+    name: 'Statins (HMG-CoA reductase inhibitors)',
+    drugs: ['atorvastatin', 'simvastatin', 'rosuvastatin', 'pravastatin', 'lovastatin', 'fluvastatin'],
+    allergyTerms: ['statin', 'atorvastatin', 'simvastatin', '-statin'],
+    crossReactivity: [],
+    crossReactivityRisk: 'moderate'
+  },
+  
+  // PPIs
+  ppis: {
+    name: 'Proton Pump Inhibitors',
+    drugs: ['omeprazole', 'esomeprazole', 'lansoprazole', 'pantoprazole', 'rabeprazole'],
+    allergyTerms: ['ppi', 'omeprazole', 'lansoprazole', '-prazole', 'proton pump'],
+    crossReactivity: [],
+    crossReactivityRisk: 'moderate'
+  },
+  
+  // Benzodiazepines
+  benzodiazepines: {
+    name: 'Benzodiazepines',
+    drugs: ['diazepam', 'lorazepam', 'alprazolam', 'clonazepam', 'midazolam', 'temazepam'],
+    allergyTerms: ['benzodiazepine', 'diazepam', 'lorazepam', '-azepam', '-azolam'],
+    crossReactivity: [],
+    crossReactivityRisk: 'high'
+  },
+  
+  // Contrast Media (common allergen)
+  contrast_media: {
+    name: 'Iodinated Contrast Media',
+    drugs: ['iohexol', 'iodixanol', 'iopamidol', 'ioversol'],
+    allergyTerms: ['contrast', 'iodine', 'dye', 'iodinated', 'contrast media', 'ct contrast'],
+    crossReactivity: [],
+    crossReactivityRisk: 'high'
+  }
+};
+
+// Major Drug-Drug Interactions Database
+const DRUG_INTERACTIONS = {
+  warfarin: {
+    severeInteractions: ['aspirin', 'ibuprofen', 'naproxen', 'celecoxib', 'fluconazole', 'metronidazole', 'ciprofloxacin', 'amiodarone', 'simvastatin'],
+    moderateInteractions: ['acetaminophen', 'omeprazole', 'tramadol', 'clopidogrel'],
+    effect: 'Increased bleeding risk'
+  },
+  metformin: {
+    severeInteractions: ['contrast_media', 'iodinated_contrast'],
+    moderateInteractions: ['alcohol', 'furosemide'],
+    effect: 'Risk of lactic acidosis'
+  },
+  digoxin: {
+    severeInteractions: ['amiodarone', 'verapamil', 'quinidine', 'dronedarone'],
+    moderateInteractions: ['clarithromycin', 'erythromycin', 'omeprazole'],
+    effect: 'Increased digoxin toxicity risk'
+  },
+  lithium: {
+    severeInteractions: ['ibuprofen', 'naproxen', 'diclofenac', 'celecoxib', 'ace_inhibitors', 'diuretics'],
+    moderateInteractions: ['metronidazole', 'fluoxetine'],
+    effect: 'Lithium toxicity'
+  },
+  ssris: {
+    drugs: ['fluoxetine', 'sertraline', 'paroxetine', 'citalopram', 'escitalopram'],
+    severeInteractions: ['tramadol', 'maois', 'linezolid', 'st_johns_wort'],
+    moderateInteractions: ['nsaids', 'warfarin', 'aspirin'],
+    effect: 'Serotonin syndrome / Bleeding risk'
+  },
+  maois: {
+    drugs: ['phenelzine', 'tranylcypromine', 'selegiline', 'rasagiline'],
+    severeInteractions: ['ssris', 'tramadol', 'meperidine', 'dextromethorphan', 'tyramine'],
+    effect: 'Hypertensive crisis / Serotonin syndrome'
+  },
+  simvastatin: {
+    severeInteractions: ['clarithromycin', 'erythromycin', 'itraconazole', 'cyclosporine', 'gemfibrozil', 'amiodarone'],
+    effect: 'Rhabdomyolysis risk'
+  },
+  clopidogrel: {
+    severeInteractions: ['omeprazole', 'esomeprazole'],
+    moderateInteractions: ['aspirin'],
+    effect: 'Reduced antiplatelet effect'
+  },
+  methotrexate: {
+    severeInteractions: ['nsaids', 'trimethoprim', 'probenecid'],
+    effect: 'Methotrexate toxicity'
+  },
+  potassium_sparing: {
+    drugs: ['spironolactone', 'amiloride', 'triamterene', 'eplerenone'],
+    severeInteractions: ['ace_inhibitors', 'arbs', 'potassium_supplements'],
+    effect: 'Hyperkalemia'
+  }
+};
+
+// Helper function to check if a drug belongs to a family
+const getDrugFamily = (drugId) => {
+  const drugLower = drugId?.toLowerCase();
+  for (const [familyId, family] of Object.entries(DRUG_FAMILIES)) {
+    if (family.drugs.some(d => drugLower?.includes(d) || d.includes(drugLower))) {
+      return { familyId, ...family };
+    }
+  }
+  return null;
+};
+
+// Helper function to check allergy match
+const checkAllergyMatch = (drugId, drugClass, allergies) => {
+  const results = [];
+  const drugFamily = getDrugFamily(drugId);
+  
+  for (const allergy of allergies) {
+    const allergyLower = allergy.toLowerCase();
+    
+    // Direct drug match
+    if (drugId?.toLowerCase().includes(allergyLower) || allergyLower.includes(drugId?.toLowerCase())) {
+      results.push({
+        type: 'DIRECT',
+        severity: 'critical',
+        allergy,
+        message: `Patient has documented allergy to ${allergy} - CONTRAINDICATED`
+      });
+      continue;
+    }
+    
+    // Check drug family/class match
+    if (drugFamily) {
+      // Check if allergy matches any term in the drug family
+      const isAllergyMatch = drugFamily.allergyTerms.some(term => 
+        allergyLower.includes(term.toLowerCase()) || term.toLowerCase().includes(allergyLower)
+      );
+      
+      if (isAllergyMatch) {
+        results.push({
+          type: 'FAMILY',
+          severity: 'critical',
+          allergy,
+          family: drugFamily.name,
+          message: `Patient allergic to ${allergy} → ${drugId} is a ${drugFamily.name} - CONTRAINDICATED`
+        });
+        continue;
+      }
+      
+      // Check cross-reactivity
+      for (const crossFamily of drugFamily.crossReactivity || []) {
+        const crossFamilyData = DRUG_FAMILIES[crossFamily];
+        if (crossFamilyData) {
+          const isCrossReactive = crossFamilyData.allergyTerms.some(term =>
+            allergyLower.includes(term.toLowerCase()) || term.toLowerCase().includes(allergyLower)
+          );
+          
+          if (isCrossReactive) {
+            results.push({
+              type: 'CROSS_REACTIVITY',
+              severity: drugFamily.crossReactivityRisk === 'high' ? 'critical' : 'moderate',
+              allergy,
+              family: drugFamily.name,
+              crossFamily: crossFamilyData.name,
+              message: `Patient allergic to ${allergy} (${crossFamilyData.name}) - Cross-reactivity risk with ${drugFamily.name} (${drugFamily.crossReactivityRisk} risk)`
+            });
+          }
+        }
+      }
+    }
+    
+    // Check drug class match from drug data
+    if (drugClass) {
+      const classLower = drugClass.toLowerCase();
+      if (classLower.includes(allergyLower) || allergyLower.includes(classLower)) {
+        results.push({
+          type: 'CLASS',
+          severity: 'critical',
+          allergy,
+          message: `Patient allergic to ${allergy} - Drug class ${drugClass} - CONTRAINDICATED`
+        });
+      }
+    }
+  }
+  
+  return results;
+};
+
+// Helper function to check drug-drug interactions
+const checkDrugInteractions = (drugId, currentMedications) => {
+  const results = [];
+  const drugLower = drugId?.toLowerCase();
+  const drugFamily = getDrugFamily(drugId);
+  
+  for (const med of currentMedications) {
+    const medLower = med.toLowerCase();
+    
+    // Check if the selected drug has known interactions
+    for (const [interactingDrug, interactionData] of Object.entries(DRUG_INTERACTIONS)) {
+      // Check if patient is on a drug with known interactions
+      if (medLower.includes(interactingDrug) || interactingDrug.includes(medLower)) {
+        // Check severe interactions
+        for (const severeInt of interactionData.severeInteractions || []) {
+          if (drugLower?.includes(severeInt) || severeInt.includes(drugLower) ||
+              (drugFamily && (drugFamily.familyId === severeInt || drugFamily.drugs.includes(severeInt)))) {
+            results.push({
+              type: 'SEVERE',
+              drug1: med,
+              drug2: drugId,
+              effect: interactionData.effect,
+              message: `SEVERE INTERACTION: ${med} + ${drugId} → ${interactionData.effect}`
+            });
+          }
+        }
+        
+        // Check moderate interactions
+        for (const modInt of interactionData.moderateInteractions || []) {
+          if (drugLower?.includes(modInt) || modInt.includes(drugLower) ||
+              (drugFamily && (drugFamily.familyId === modInt || drugFamily.drugs.includes(modInt)))) {
+            results.push({
+              type: 'MODERATE',
+              drug1: med,
+              drug2: drugId,
+              effect: interactionData.effect,
+              message: `MODERATE INTERACTION: ${med} + ${drugId} → ${interactionData.effect}`
+            });
+          }
+        }
+      }
+      
+      // Check if the selected drug is one with known interactions
+      if (drugLower?.includes(interactingDrug) || interactingDrug.includes(drugLower)) {
+        for (const severeInt of interactionData.severeInteractions || []) {
+          if (medLower.includes(severeInt) || severeInt.includes(medLower)) {
+            results.push({
+              type: 'SEVERE',
+              drug1: drugId,
+              drug2: med,
+              effect: interactionData.effect,
+              message: `SEVERE INTERACTION: ${drugId} + ${med} → ${interactionData.effect}`
+            });
+          }
+        }
+      }
+    }
+    
+    // Check family-level interactions (e.g., NSAIDs with anticoagulants)
+    if (drugFamily) {
+      // NSAIDs + Anticoagulants
+      if (drugFamily.familyId === 'nsaids') {
+        if (['warfarin', 'coumadin', 'apixaban', 'rivaroxaban', 'dabigatran', 'edoxaban', 'heparin', 'enoxaparin'].some(ac => medLower.includes(ac))) {
+          results.push({
+            type: 'SEVERE',
+            drug1: drugId,
+            drug2: med,
+            effect: 'Significantly increased bleeding risk',
+            message: `SEVERE INTERACTION: NSAIDs + Anticoagulants → High bleeding risk`
+          });
+        }
+      }
+      
+      // ACE-I/ARBs + Potassium-sparing diuretics
+      if (['ace_inhibitors', 'arbs'].includes(drugFamily.familyId)) {
+        if (['spironolactone', 'amiloride', 'triamterene', 'eplerenone', 'potassium'].some(k => medLower.includes(k))) {
+          results.push({
+            type: 'SEVERE',
+            drug1: drugId,
+            drug2: med,
+            effect: 'Hyperkalemia risk',
+            message: `SEVERE INTERACTION: ${drugFamily.name} + ${med} → Risk of hyperkalemia`
+          });
+        }
+      }
+    }
+  }
+  
+  // Remove duplicates
+  const unique = results.filter((item, index, self) =>
+    index === self.findIndex(t => t.message === item.message)
+  );
+  
+  return unique;
+};
+
 // Drug Simulation Panel - Redesigned with clear flow and dose recommendations
 const DrugSimulationPanel = ({ drug, patient, dosage, setDosage, simulation, isSimulating }) => {
   // Calculate GFR for renal dosing adjustments
@@ -514,30 +905,82 @@ const DrugSimulationPanel = ({ drug, patient, dosage, setDosage, simulation, isS
     let recommendedDose = standardDoseMg;
     let adjustments = [];
     let riskLevel = 'low';
+    let isContraindicated = false;
+    let contraindications = [];
+    let allergyWarnings = [];
+    let interactionWarnings = [];
     
-    // Renal adjustment based on GFR
-    if (gfr < 30) {
-      recommendedDose = Math.round(standardDoseMg * 0.25);
-      adjustments.push({ factor: 'Severe renal impairment (GFR <30)', action: '75% dose reduction', severity: 'critical' });
-      riskLevel = 'high';
-    } else if (gfr < 60) {
-      recommendedDose = Math.round(standardDoseMg * 0.5);
-      adjustments.push({ factor: 'Moderate renal impairment (GFR 30-60)', action: '50% dose reduction', severity: 'moderate' });
-      riskLevel = 'moderate';
-    } else if (gfr < 90) {
-      recommendedDose = Math.round(standardDoseMg * 0.75);
-      adjustments.push({ factor: 'Mild renal impairment (GFR 60-90)', action: '25% dose reduction', severity: 'low' });
+    // =====================================================
+    // CRITICAL: Check allergies FIRST
+    // =====================================================
+    if (patient.allergies?.length > 0) {
+      const allergyResults = checkAllergyMatch(drug.id, drug.drug_class, patient.allergies);
+      allergyWarnings = allergyResults;
+      
+      // Any direct or family match is contraindicated
+      const criticalAllergies = allergyResults.filter(a => a.severity === 'critical');
+      if (criticalAllergies.length > 0) {
+        isContraindicated = true;
+        riskLevel = 'contraindicated';
+        contraindications.push(...criticalAllergies.map(a => a.message));
+      }
+      
+      // Cross-reactivity warnings
+      const crossReactivityWarnings = allergyResults.filter(a => a.type === 'CROSS_REACTIVITY' && a.severity !== 'critical');
+      if (crossReactivityWarnings.length > 0) {
+        riskLevel = riskLevel === 'contraindicated' ? 'contraindicated' : 'high';
+        adjustments.push(...crossReactivityWarnings.map(w => ({
+          factor: `Cross-reactivity: ${w.allergy}`,
+          action: w.message,
+          severity: 'critical'
+        })));
+      }
     }
     
-    // Hepatic adjustment
-    if (liverFunction === 'severe_impairment') {
-      recommendedDose = Math.round(recommendedDose * 0.25);
-      adjustments.push({ factor: 'Severe hepatic impairment', action: '75% dose reduction', severity: 'critical' });
-      riskLevel = 'high';
-    } else if (liverFunction === 'moderate_impairment') {
-      recommendedDose = Math.round(recommendedDose * 0.5);
-      adjustments.push({ factor: 'Moderate hepatic impairment', action: '50% dose reduction', severity: 'moderate' });
-      if (riskLevel !== 'high') riskLevel = 'moderate';
+    // =====================================================
+    // Check drug-drug interactions
+    // =====================================================
+    if (patient.current_medications?.length > 0) {
+      const interactions = checkDrugInteractions(drug.id, patient.current_medications);
+      interactionWarnings = interactions;
+      
+      const severeInteractions = interactions.filter(i => i.type === 'SEVERE');
+      if (severeInteractions.length > 0) {
+        if (riskLevel !== 'contraindicated') riskLevel = 'high';
+        adjustments.push(...severeInteractions.map(i => ({
+          factor: `Drug Interaction: ${i.drug1} + ${i.drug2}`,
+          action: i.effect,
+          severity: 'critical'
+        })));
+      }
+      
+      const moderateInteractions = interactions.filter(i => i.type === 'MODERATE');
+      if (moderateInteractions.length > 0) {
+        if (riskLevel === 'low') riskLevel = 'moderate';
+        adjustments.push(...moderateInteractions.map(i => ({
+          factor: `Drug Interaction: ${i.drug1} + ${i.drug2}`,
+          action: i.effect,
+          severity: 'moderate'
+        })));
+      }
+    }
+    
+    // =====================================================
+    // Renal adjustment based on GFR (if not contraindicated)
+    // =====================================================
+    if (!isContraindicated) {
+      if (gfr < 30) {
+        recommendedDose = Math.round(standardDoseMg * 0.25);
+        adjustments.push({ factor: 'Severe renal impairment (GFR <30)', action: '75% dose reduction', severity: 'critical' });
+        if (riskLevel === 'low') riskLevel = 'high';
+      } else if (gfr < 60) {
+        recommendedDose = Math.round(standardDoseMg * 0.5);
+        adjustments.push({ factor: 'Moderate renal impairment (GFR 30-60)', action: '50% dose reduction', severity: 'moderate' });
+        if (riskLevel === 'low') riskLevel = 'moderate';
+      } else if (gfr < 90) {
+        recommendedDose = Math.round(standardDoseMg * 0.75);
+        adjustments.push({ factor: 'Mild renal impairment (GFR 60-90)', action: '25% dose reduction', severity: 'low' });
+      }
     } else if (liverFunction === 'mild_impairment') {
       recommendedDose = Math.round(recommendedDose * 0.75);
       adjustments.push({ factor: 'Mild hepatic impairment', action: '25% dose reduction', severity: 'low' });
