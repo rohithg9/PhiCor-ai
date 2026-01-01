@@ -1035,6 +1035,7 @@ def run_all_tests():
     drug_tests = ['drug_total_count', 'cns_drugs', 'dermatological_drugs', 'immunosuppressant_drugs', 'urological_drugs', 'ophthalmic_drugs']
     disease_tests = ['disease_total_count', 'cardiovascular_diseases', 'type2_diabetes_detail', 'leukemia_search']
     simulation_tests = ['drug_simulation']
+    knowledge_base_tests = ['drug_generation_status', 'drug_chunk_generation', 'icd10_status', 'generated_drugs_list', 'disease_database_stats', 'drug_data_quality']
     infrastructure_tests = ['backend_url', 'backend_health']
     
     print(f"\n📊 DRUG DATABASE TESTS:")
