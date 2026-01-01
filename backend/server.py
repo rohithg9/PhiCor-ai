@@ -2163,21 +2163,26 @@ class ClinicalSynthesisRequest(BaseModel):
 @api_router.post("/diagnosis/synthesize")
 async def synthesize_clinical_case(request: ClinicalSynthesisRequest):
     """
-    Perform AI-powered clinical synthesis.
-    Analyzes the ENTIRE clinical picture like an experienced physician.
-    Connects patterns, calculates probabilities, and explains reasoning.
+    Perform INTEGRATED clinical synthesis using PhiCor's unified knowledge base.
+    
+    This endpoint:
+    1. Queries our disease database (132 diseases) for matching conditions
+    2. Cross-references with our drug database (115 drugs) for treatments
+    3. Uses AI to synthesize findings with curated medical knowledge
+    4. Returns evidence-based recommendations with database references
     """
     try:
-        from services.clinical_synthesis import get_synthesis_engine
+        # Use the new integrated engine that connects all data sources
+        from services.integrated_clinical_engine import create_integrated_engine
         
-        engine = get_synthesis_engine()
+        engine = create_integrated_engine(db)
         
         # Convert Pydantic models to dicts
         lab_findings = [f.model_dump() for f in request.lab_findings]
         imaging_findings = [f.model_dump() for f in request.imaging_findings]
         symptoms = [f.model_dump() for f in request.symptoms]
         
-        synthesis = await engine.synthesize_clinical_case(
+        synthesis = await engine.synthesize_with_knowledge_base(
             clinical_text=request.clinical_text,
             lab_findings=lab_findings,
             imaging_findings=imaging_findings,
@@ -2187,11 +2192,40 @@ async def synthesize_clinical_case(request: ClinicalSynthesisRequest):
         
         return {
             "success": True,
-            "synthesis": synthesis
+            "synthesis": synthesis,
+            "integrated": True,
+            "data_sources": {
+                "disease_database": True,
+                "drug_database": True,
+                "ai_synthesis": True
+            }
         }
         
     except ImportError as e:
-        raise HTTPException(status_code=500, detail=f"Synthesis engine not available: {str(e)}")
+        # Fallback to original synthesis engine if integrated not available
+        try:
+            from services.clinical_synthesis import get_synthesis_engine
+            engine = get_synthesis_engine()
+            
+            lab_findings = [f.model_dump() for f in request.lab_findings]
+            imaging_findings = [f.model_dump() for f in request.imaging_findings]
+            symptoms = [f.model_dump() for f in request.symptoms]
+            
+            synthesis = await engine.synthesize_clinical_case(
+                clinical_text=request.clinical_text,
+                lab_findings=lab_findings,
+                imaging_findings=imaging_findings,
+                symptoms=symptoms,
+                patient_info=request.patient_info
+            )
+            
+            return {
+                "success": True,
+                "synthesis": synthesis,
+                "integrated": False
+            }
+        except Exception as fallback_error:
+            raise HTTPException(status_code=500, detail=f"Synthesis engine not available: {str(e)}, fallback also failed: {str(fallback_error)}")
     except Exception as e:
         logger.error(f"Error in clinical synthesis: {e}")
         raise HTTPException(status_code=500, detail=str(e))
