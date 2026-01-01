@@ -744,19 +744,19 @@ const LandingPage = () => {
           >
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
               <div className="text-center">
-                <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">186+</div>
+                <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">{platformStats.diseases}</div>
                 <p className="text-sm text-muted-foreground mt-1">Disease Profiles</p>
               </div>
               <div className="text-center">
-                <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">115+</div>
+                <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">{platformStats.drugs}</div>
                 <p className="text-sm text-muted-foreground mt-1">Drug Monographs</p>
               </div>
               <div className="text-center">
-                <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-rose-400 to-pink-400 bg-clip-text text-transparent">6</div>
+                <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-rose-400 to-pink-400 bg-clip-text text-transparent">{platformStats.organ_systems}</div>
                 <p className="text-sm text-muted-foreground mt-1">Organ Systems</p>
               </div>
               <div className="text-center">
-                <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">∞</div>
+                <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">{platformStats.models}</div>
                 <p className="text-sm text-muted-foreground mt-1">Mathematical Models</p>
               </div>
             </div>
