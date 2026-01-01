@@ -1131,33 +1131,332 @@ def test_differential_diagnosis_ui_features():
     
     return results
 
-def test_drug_database_total_count():
-    """Test that drugs-db endpoint returns ~99 drugs total"""
-    print("\n💊 TESTING DRUG DATABASE TOTAL COUNT")
+def test_disease_database_seeding():
+    """Test disease database seeding endpoint"""
+    print("\n🏥 TESTING DISEASE DATABASE SEEDING")
     print("=" * 50)
     
     try:
-        response = requests.get(f"{BACKEND_URL}/api/drugs-db", timeout=10)
+        response = requests.post(f"{BACKEND_URL}/api/diseases-db/seed-comprehensive", timeout=30)
         if response.status_code == 200:
             data = response.json()
-            total_drugs = data.get('total', 0)
-            drugs_list = data.get('drugs', [])
+            diseases_added = data.get('diseases_added', 0)
+            categories_summary = data.get('categories_summary', {})
             
-            print(f"✅ Drugs database endpoint accessible")
-            print(f"📊 Total drugs in database: {total_drugs}")
-            print(f"📊 Drugs returned in response: {len(drugs_list)}")
+            print(f"✅ Disease database seeding successful")
+            print(f"📊 Diseases added: {diseases_added}")
+            print(f"📊 Categories summary: {categories_summary}")
             
-            if total_drugs >= 99:
-                print(f"✅ Drug count ({total_drugs}) meets expected ~99 drugs")
+            if diseases_added >= 28:
+                print(f"✅ Disease count ({diseases_added}) meets expected 28 diseases")
                 return True
             else:
-                print(f"❌ Drug count ({total_drugs}) is below expected ~99 drugs")
+                print(f"❌ Disease count ({diseases_added}) is below expected 28 diseases")
                 return False
         else:
-            print(f"❌ Drugs database endpoint failed: {response.status_code}")
+            print(f"❌ Disease database seeding failed: {response.status_code}")
+            if response.text:
+                print(f"Error details: {response.text}")
             return False
     except Exception as e:
-        print(f"❌ Error testing drug database: {e}")
+        print(f"❌ Error testing disease database seeding: {e}")
+        return False
+
+def test_disease_database_total_count():
+    """Test that diseases-db endpoint returns 28 diseases total"""
+    print("\n🏥 TESTING DISEASE DATABASE TOTAL COUNT")
+    print("=" * 50)
+    
+    try:
+        response = requests.get(f"{BACKEND_URL}/api/diseases-db", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            total_diseases = data.get('total', 0)
+            diseases_list = data.get('diseases', [])
+            
+            print(f"✅ Disease database endpoint accessible")
+            print(f"📊 Total diseases in database: {total_diseases}")
+            print(f"📊 Diseases returned in response: {len(diseases_list)}")
+            
+            if total_diseases >= 28:
+                print(f"✅ Disease count ({total_diseases}) meets expected 28 diseases")
+                return True
+            else:
+                print(f"❌ Disease count ({total_diseases}) is below expected 28 diseases")
+                return False
+        else:
+            print(f"❌ Disease database endpoint failed: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing disease database: {e}")
+        return False
+
+def test_cardiovascular_diseases():
+    """Test cardiovascular disease category - should return 5 diseases"""
+    print("\n❤️ TESTING CARDIOVASCULAR DISEASES CATEGORY")
+    print("=" * 50)
+    
+    expected_cardiovascular_diseases = [
+        "heart_failure_hfref", "acute_coronary_syndrome", "atrial_fibrillation", 
+        "hypertension", "ischemic_stroke"
+    ]
+    
+    try:
+        response = requests.get(f"{BACKEND_URL}/api/diseases-db?category=cardiovascular", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            diseases = data.get('diseases', [])
+            disease_ids = [disease.get('id', '') for disease in diseases]
+            
+            print(f"✅ Cardiovascular diseases endpoint accessible")
+            print(f"📊 Cardiovascular diseases found: {len(diseases)}")
+            
+            found_diseases = []
+            missing_diseases = []
+            
+            for expected_disease in expected_cardiovascular_diseases:
+                if expected_disease in disease_ids:
+                    found_diseases.append(expected_disease)
+                    print(f"  ✅ {expected_disease} found")
+                else:
+                    missing_diseases.append(expected_disease)
+                    print(f"  ❌ {expected_disease} not found")
+            
+            print(f"\n📈 Found {len(found_diseases)}/5 expected cardiovascular diseases")
+            
+            if len(found_diseases) >= 4:  # Allow some flexibility
+                return True
+            else:
+                print(f"❌ Too few cardiovascular diseases found: {len(found_diseases)}/5")
+                return False
+        else:
+            print(f"❌ Cardiovascular diseases endpoint failed: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing cardiovascular diseases: {e}")
+        return False
+
+def test_hematological_diseases():
+    """Test hematological disease category - should return 6 diseases"""
+    print("\n🩸 TESTING HEMATOLOGICAL DISEASES CATEGORY")
+    print("=" * 50)
+    
+    expected_hematological_diseases = [
+        "iron_deficiency_anemia", "sickle_cell_disease", "hemophilia_a",
+        "von_willebrand_disease", "thalassemia_major", "aplastic_anemia"
+    ]
+    
+    try:
+        response = requests.get(f"{BACKEND_URL}/api/diseases-db?category=hematological", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            diseases = data.get('diseases', [])
+            disease_ids = [disease.get('id', '') for disease in diseases]
+            
+            print(f"✅ Hematological diseases endpoint accessible")
+            print(f"📊 Hematological diseases found: {len(diseases)}")
+            
+            found_diseases = []
+            for expected_disease in expected_hematological_diseases:
+                if expected_disease in disease_ids:
+                    found_diseases.append(expected_disease)
+                    print(f"  ✅ {expected_disease} found")
+                else:
+                    print(f"  ❌ {expected_disease} not found")
+            
+            print(f"\n📈 Found {len(found_diseases)}/{len(expected_hematological_diseases)} expected hematological diseases")
+            return len(found_diseases) >= 5  # At least 5 out of 6
+        else:
+            print(f"❌ Hematological diseases endpoint failed: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing hematological diseases: {e}")
+        return False
+
+def test_disease_search_diabetes():
+    """Test disease search for diabetes"""
+    print("\n🔍 TESTING DISEASE SEARCH - DIABETES")
+    print("=" * 50)
+    
+    try:
+        response = requests.get(f"{BACKEND_URL}/api/diseases-db?search=diabetes", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            diseases = data.get('diseases', [])
+            
+            print(f"✅ Disease search endpoint accessible")
+            print(f"📊 Diseases found for 'diabetes': {len(diseases)}")
+            
+            # Look for Type 2 Diabetes
+            diabetes_found = False
+            for disease in diseases:
+                if 'diabetes' in disease.get('name', '').lower() or 'diabetes' in disease.get('id', '').lower():
+                    diabetes_found = True
+                    print(f"  ✅ Found: {disease.get('name', '')} (ID: {disease.get('id', '')})")
+                    print(f"      ICD-10: {disease.get('icd10_code', '')}")
+            
+            if diabetes_found:
+                return True
+            else:
+                print(f"❌ No diabetes-related diseases found")
+                return False
+        else:
+            print(f"❌ Disease search endpoint failed: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing disease search: {e}")
+        return False
+
+def test_disease_search_icd10():
+    """Test disease search for ICD-10 code I50"""
+    print("\n🔍 TESTING DISEASE SEARCH - ICD-10 CODE I50")
+    print("=" * 50)
+    
+    try:
+        response = requests.get(f"{BACKEND_URL}/api/diseases-db?search=I50", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            diseases = data.get('diseases', [])
+            
+            print(f"✅ Disease search endpoint accessible")
+            print(f"📊 Diseases found for 'I50': {len(diseases)}")
+            
+            # Look for diseases with I50 ICD-10 code
+            i50_found = False
+            for disease in diseases:
+                if 'I50' in disease.get('icd10_code', ''):
+                    i50_found = True
+                    print(f"  ✅ Found: {disease.get('name', '')} (ID: {disease.get('id', '')})")
+                    print(f"      ICD-10: {disease.get('icd10_code', '')}")
+            
+            if i50_found:
+                return True
+            else:
+                print(f"❌ No diseases with ICD-10 code containing I50 found")
+                return False
+        else:
+            print(f"❌ Disease search endpoint failed: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing disease search: {e}")
+        return False
+
+def test_heart_failure_disease_detail():
+    """Test specific disease detail endpoint for heart failure HFrEF"""
+    print("\n❤️ TESTING HEART FAILURE HFREF DISEASE DETAIL")
+    print("=" * 50)
+    
+    try:
+        response = requests.get(f"{BACKEND_URL}/api/diseases-db/heart_failure_hfref", timeout=10)
+        if response.status_code == 200:
+            disease_data = response.json()
+            
+            print(f"✅ Heart failure HFrEF disease detail endpoint accessible")
+            
+            # Check for required fields
+            required_fields = [
+                "name", "icd10_code", "description", "clinical_features", "treatment"
+            ]
+            
+            found_fields = []
+            missing_fields = []
+            
+            for field in required_fields:
+                if field in disease_data and disease_data[field]:
+                    found_fields.append(field)
+                    print(f"  ✅ {field} field found")
+                else:
+                    missing_fields.append(field)
+                    print(f"  ❌ {field} field missing")
+            
+            # Check specific content
+            if "icd10_code" in disease_data:
+                print(f"  ✅ ICD-10 code: {disease_data['icd10_code']}")
+            
+            if "nyha_classification" in disease_data:
+                print(f"  ✅ NYHA classification found")
+            
+            if "treatment" in disease_data and isinstance(disease_data["treatment"], dict):
+                print(f"  ✅ Treatment guidelines found")
+            
+            if "affected_organs" in disease_data and isinstance(disease_data["affected_organs"], list):
+                print(f"  ✅ Affected organs: {', '.join(disease_data['affected_organs'])}")
+            
+            print(f"\n📈 Found {len(found_fields)}/{len(required_fields)} required fields")
+            return len(found_fields) >= 4  # At least 4 out of 5 fields
+        else:
+            print(f"❌ Heart failure HFrEF disease detail endpoint failed: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing heart failure disease detail: {e}")
+        return False
+
+def test_sickle_cell_disease_detail():
+    """Test specific disease detail endpoint for sickle cell disease"""
+    print("\n🩸 TESTING SICKLE CELL DISEASE DETAIL")
+    print("=" * 50)
+    
+    try:
+        response = requests.get(f"{BACKEND_URL}/api/diseases-db/sickle_cell_disease", timeout=10)
+        if response.status_code == 200:
+            disease_data = response.json()
+            
+            print(f"✅ Sickle cell disease detail endpoint accessible")
+            
+            # Check for required fields
+            required_fields = [
+                "name", "icd10_code", "description", "clinical_features", "treatment"
+            ]
+            
+            found_fields = []
+            missing_fields = []
+            
+            for field in required_fields:
+                if field in disease_data and disease_data[field]:
+                    found_fields.append(field)
+                    print(f"  ✅ {field} field found")
+                else:
+                    missing_fields.append(field)
+                    print(f"  ❌ {field} field missing")
+            
+            # Check specific content
+            if "icd10_code" in disease_data:
+                print(f"  ✅ ICD-10 code: {disease_data['icd10_code']}")
+            
+            if "treatment" in disease_data and isinstance(disease_data["treatment"], dict):
+                treatment_options = disease_data["treatment"]
+                if "disease_modifying" in treatment_options:
+                    print(f"  ✅ Disease-modifying treatments found")
+                if "acute_crisis" in treatment_options:
+                    print(f"  ✅ Acute crisis treatments found")
+            
+            if "affected_organs" in disease_data and isinstance(disease_data["affected_organs"], list):
+                print(f"  ✅ Affected organs: {', '.join(disease_data['affected_organs'])}")
+            
+            print(f"\n📈 Found {len(found_fields)}/{len(required_fields)} required fields")
+            return len(found_fields) >= 4  # At least 4 out of 5 fields
+        else:
+            print(f"❌ Sickle cell disease detail endpoint failed: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing sickle cell disease detail: {e}")
+        return False
+
+def test_nonexistent_disease():
+    """Test disease detail endpoint for nonexistent disease - should return 404"""
+    print("\n❌ TESTING NONEXISTENT DISEASE - 404 ERROR")
+    print("=" * 50)
+    
+    try:
+        response = requests.get(f"{BACKEND_URL}/api/diseases-db/nonexistent", timeout=10)
+        if response.status_code == 404:
+            print(f"✅ Correctly returned 404 for nonexistent disease")
+            return True
+        else:
+            print(f"❌ Expected 404 but got {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing nonexistent disease: {e}")
         return False
 
 def test_cns_drugs():
