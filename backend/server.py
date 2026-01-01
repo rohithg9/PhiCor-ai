@@ -2236,6 +2236,79 @@ async def synthesize_clinical_case(request: ClinicalSynthesisRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ============== CASE GENERATOR ==============
+
+class CaseGenerationRequest(BaseModel):
+    """Request model for generating test cases"""
+    specialty: str = "cardiology"
+    difficulty: str = "intermediate"
+
+@api_router.post("/diagnosis/generate-case")
+async def generate_test_case(request: CaseGenerationRequest):
+    """
+    Generate a realistic clinical case using AI for practice/testing.
+    """
+    try:
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        import json
+        import re
+        
+        api_key = os.environ.get('EMERGENT_LLM_KEY')
+        if not api_key:
+            raise HTTPException(status_code=500, detail="LLM key not configured")
+        
+        chat = LlmChat(
+            api_key=api_key,
+            session_id=f"case_gen_{request.specialty}_{request.difficulty}",
+            system_message="You are a medical educator creating realistic clinical cases for training."
+        ).with_model("openai", "gpt-4o")
+        
+        prompt = f"""Generate a realistic clinical case for medical education.
+
+Specialty: {request.specialty}
+Difficulty: {request.difficulty}
+
+Create a case with:
+1. Patient demographics
+2. Chief complaint
+3. History of present illness
+4. Past medical history
+5. Vital signs
+6. Physical examination findings
+7. Laboratory results with specific values
+8. Imaging findings if relevant
+9. The case should have a clear diagnosis but also reasonable differential diagnoses
+
+Return as JSON:
+{{
+    "title": "Brief case title",
+    "description": "One sentence description",
+    "clinicalText": "Complete clinical presentation text that would be entered into the diagnosis tool",
+    "expectedDiagnosis": "The correct diagnosis",
+    "differentials": ["alternative diagnosis 1", "alternative diagnosis 2"]
+}}
+
+Return ONLY valid JSON."""
+
+        user_message = UserMessage(text=prompt)
+        response = await chat.send_message(user_message)
+        
+        # Parse JSON
+        json_match = re.search(r'\{[\s\S]*\}', response)
+        if json_match:
+            case_data = json.loads(json_match.group())
+            return {
+                "success": True,
+                "case": case_data
+            }
+        
+        raise HTTPException(status_code=500, detail="Failed to generate case")
+        
+    except Exception as e:
+        logger.error(f"Error generating case: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # ============== AI-POWERED MEDICAL KNOWLEDGE GENERATION ==============
 
 class DiseaseGenerationRequest(BaseModel):
