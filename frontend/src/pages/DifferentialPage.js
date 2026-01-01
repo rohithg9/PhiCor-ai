@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import FeatureNav from '../components/FeatureNav';
 import TestPatientPanel from '../components/TestPatientPanel';
