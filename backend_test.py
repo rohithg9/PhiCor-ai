@@ -916,10 +916,10 @@ def test_drug_data_quality():
 
 def run_all_tests():
     """Run all tests and provide summary"""
-    print("🧪 PHICOR PK/PD SIMULATION ENGINE TESTING")
+    print("🧪 PHICOR MEDICAL KNOWLEDGE BASE API TESTING")
     print("=" * 80)
-    print("Testing comprehensive drug database (115 drugs) and disease database (28 diseases)")
-    print("Focus: Drug categories, disease search, and simulation engine functionality")
+    print("Testing newly implemented Medical Knowledge Base API endpoints for PhiCore.ai")
+    print("Focus: Drug generation status, ICD-10 conditions, generated drugs quality")
     print("=" * 80)
     
     test_results = {}
