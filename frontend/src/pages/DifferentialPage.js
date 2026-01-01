@@ -63,6 +63,11 @@ const DifferentialPage = () => {
   const [expandedDisease, setExpandedDisease] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   
+  // NEW: Clinical Synthesis state
+  const [clinicalSynthesis, setClinicalSynthesis] = useState(null);
+  const [isSynthesizing, setIsSynthesizing] = useState(false);
+  const [synthesisExpanded, setSynthesisExpanded] = useState(true);
+  
   // Get all parameters organized by organ
   const allParameters = useMemo(() => getAllParameters(), []);
   
