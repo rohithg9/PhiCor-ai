@@ -971,11 +971,32 @@ async def get_available_drugs(
 
 @api_router.get("/drugs/{drug_id}")
 async def get_drug_info(drug_id: str):
-    """Get detailed drug information."""
-    drug = DRUG_DATABASE.get(drug_id.lower())
-    if not drug:
+    """Get detailed drug information from comprehensive database."""
+    try:
+        from data.comprehensive_drugs import get_all_comprehensive_drugs
+        all_drugs = get_all_comprehensive_drugs()
+        
+        # Find drug by ID
+        drug = next((d for d in all_drugs if d.get("id", "").lower() == drug_id.lower()), None)
+        
+        if drug:
+            return drug
+        
+        # Fallback to basic DRUG_DATABASE
+        basic_drug = DRUG_DATABASE.get(drug_id.lower())
+        if basic_drug:
+            return basic_drug
+            
         raise HTTPException(status_code=404, detail="Drug not found")
-    return drug
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting drug {drug_id}: {e}")
+        # Fallback to basic DRUG_DATABASE
+        drug = DRUG_DATABASE.get(drug_id.lower())
+        if not drug:
+            raise HTTPException(status_code=404, detail="Drug not found")
+        return drug
 
 class DrugSimulationRequest(BaseModel):
     drug_name: str
