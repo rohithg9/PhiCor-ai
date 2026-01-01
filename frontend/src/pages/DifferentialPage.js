@@ -689,6 +689,26 @@ PMH: Hypertension, Type 2 Diabetes"
                     {differentialResults.length} conditions
                   </Badge>
                 )}
+                {/* AI Synthesis Button in header */}
+                {(clinicalText.trim() || differentialResults.length > 0) && !clinicalSynthesis && (
+                  <Button
+                    onClick={runClinicalSynthesis}
+                    disabled={isSynthesizing}
+                    className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-xs py-1 px-3 h-auto"
+                  >
+                    {isSynthesizing ? (
+                      <>
+                        <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2" />
+                        Analyzing...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-3 h-3 mr-1" />
+                        Run AI Synthesis
+                      </>
+                    )}
+                  </Button>
+                )}
               </div>
             </div>
             
