@@ -1594,24 +1594,33 @@ export const getCalculatorById = (calculatorId) => {
 
 // Get relevant calculators for a disease
 export const getCalculatorsForDisease = (diseaseId) => {
-  // Normalize the disease ID
-  const normalizedId = diseaseId?.toLowerCase().replace(/[._]/g, '');
+  if (!diseaseId) return [];
+  
+  // Normalize the disease ID - handle formats like "I48_0", "I48.0", "I48", "atrial_fibrillation"
+  const normalizedId = diseaseId.toLowerCase().replace(/[._]/g, '');
   
   // Direct match
   if (DISEASE_CALCULATOR_MAP[diseaseId]) {
     return DISEASE_CALCULATOR_MAP[diseaseId].map(id => getCalculatorById(id)).filter(Boolean);
   }
   
-  // Try with ICD code variations
-  const icdBase = diseaseId?.split('.')[0] || diseaseId?.split('_')[0];
+  // Try converting underscore format to dot format (I48_0 -> I48.0)
+  const dotFormat = diseaseId.replace('_', '.');
+  if (DISEASE_CALCULATOR_MAP[dotFormat]) {
+    return DISEASE_CALCULATOR_MAP[dotFormat].map(id => getCalculatorById(id)).filter(Boolean);
+  }
+  
+  // Try with ICD code base (I48_0 -> I48)
+  const icdBase = diseaseId.split(/[._]/)[0];
   if (DISEASE_CALCULATOR_MAP[icdBase]) {
     return DISEASE_CALCULATOR_MAP[icdBase].map(id => getCalculatorById(id)).filter(Boolean);
   }
   
-  // Search for partial matches in the map
+  // Search for partial matches in the map (for text-based disease names)
   for (const [key, calcIds] of Object.entries(DISEASE_CALCULATOR_MAP)) {
-    if (normalizedId?.includes(key.replace(/[._]/g, '')) || 
-        key.replace(/[._]/g, '').includes(normalizedId)) {
+    const normalizedKey = key.toLowerCase().replace(/[._]/g, '');
+    // Match if the ICD codes are related or names overlap
+    if (normalizedId.includes(normalizedKey) || normalizedKey.includes(normalizedId)) {
       return calcIds.map(id => getCalculatorById(id)).filter(Boolean);
     }
   }
