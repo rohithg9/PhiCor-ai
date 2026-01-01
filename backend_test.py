@@ -1534,128 +1534,82 @@ def run_all_tests():
         test_results['backend_health'] = test_backend_health()
     else:
         test_results['backend_health'] = False
-        
-    # Test 3: Frontend accessibility
-    if test_results['backend_url']:
-        print("\n3️⃣ FRONTEND ACCESSIBILITY")
-        test_results['frontend_access'] = test_frontend_accessibility()
-    else:
-        test_results['frontend_access'] = False
     
-    # Test 4: Comprehensive parameter ranges (NEW - from review request)
-    test_results['parameter_ranges'] = test_comprehensive_parameter_ranges()
-    
-    # Test 5: Differential diagnosis UI features (NEW - from review request)
-    test_results['dd_ui_features'] = test_differential_diagnosis_ui_features()
-    
-    # Test 6: Specific diseases from review request
-    test_results['specific_diseases'] = test_specific_diseases_from_review()
-    
-    # Test 7: Disease data structure (diagnosticCriteria, differentialDiagnosis, treatment, riskStratification)
-    test_results['disease_data_structure'] = test_disease_data_structure()
-    
-    # Test 8: Mathematical equations
+    # Test 3: Drug Database Total Count
     if test_results['backend_health']:
-        test_results['mathematical_equations'] = test_mathematical_equations()
+        print("\n3️⃣ DRUG DATABASE TOTAL COUNT")
+        test_results['drug_total_count'] = test_drug_database_total_count()
     else:
-        test_results['mathematical_equations'] = False
+        test_results['drug_total_count'] = False
     
-    # Test 9: Calculation endpoints
+    # Test 4: CNS Drugs Category
     if test_results['backend_health']:
-        test_results['calculation_endpoints'] = test_calculation_endpoints()
+        test_results['cns_drugs'] = test_cns_drugs()
     else:
-        test_results['calculation_endpoints'] = []
+        test_results['cns_drugs'] = False
     
-    # Test 10: Differential diagnosis data
-    test_results['differential_diagnosis'] = test_differential_diagnosis_data()
+    # Test 5: Gastrointestinal Drugs Category
+    if test_results['backend_health']:
+        test_results['gi_drugs'] = test_gastrointestinal_drugs()
+    else:
+        test_results['gi_drugs'] = False
     
-    # Test 11: Disease count verification (should be 284+)
-    test_results['disease_count'] = test_disease_count()
+    # Test 6: Analgesic Drugs Category
+    if test_results['backend_health']:
+        test_results['analgesic_drugs'] = test_analgesic_drugs()
+    else:
+        test_results['analgesic_drugs'] = False
     
-    # Test 12: Organ models compatibility
-    test_results['organ_models'] = test_organ_models_compatibility()
+    # Test 7: Antiinfective Drugs Category
+    if test_results['backend_health']:
+        test_results['antiinfective_drugs'] = test_antiinfective_drugs()
+    else:
+        test_results['antiinfective_drugs'] = False
+    
+    # Test 8: Endocrine Drugs Category
+    if test_results['backend_health']:
+        test_results['endocrine_drugs'] = test_endocrine_drugs()
+    else:
+        test_results['endocrine_drugs'] = False
+    
+    # Test 9: Hematological Drugs Category
+    if test_results['backend_health']:
+        test_results['hematological_drugs'] = test_hematological_drugs()
+    else:
+        test_results['hematological_drugs'] = False
+    
+    # Test 10: Sertraline Drug Detail
+    if test_results['backend_health']:
+        test_results['sertraline_detail'] = test_sertraline_drug_detail()
+    else:
+        test_results['sertraline_detail'] = False
+    
+    # Test 11: Drug Simulation
+    if test_results['backend_health']:
+        test_results['drug_simulation'] = test_drug_simulation()
+    else:
+        test_results['drug_simulation'] = False
     
     # Summary
     print("\n" + "=" * 80)
-    print("📊 COMPREHENSIVE TEST SUMMARY")
+    print("📊 COMPREHENSIVE DRUG DATABASE EXPANSION TEST SUMMARY")
     print("=" * 80)
     
-    # NEW: Parameter ranges summary (from review request)
-    if 'parameter_ranges' in test_results:
-        print("\n🎯 COMPREHENSIVE PARAMETER RANGES (REVIEW REQUEST):")
-        found_params = 0
-        correct_ranges = 0
-        
-        for param in test_results['parameter_ranges']:
-            if param['found']:
-                found_params += 1
-                if param['range_correct']:
-                    correct_ranges += 1
-                    print(f"  ✅ {param['name']} ({param['organ']}): Found with correct range")
-                else:
-                    print(f"  ⚠️  {param['name']} ({param['organ']}): Found but range differs")
-            else:
-                print(f"  ❌ {param['name']} ({param['organ']}): Not found")
-        
-        print(f"\n📈 PARAMETERS FOUND: {found_params}/10")
-        print(f"📈 CORRECT RANGES: {correct_ranges}/10")
+    # Drug categories summary
+    drug_categories = ['cns_drugs', 'gi_drugs', 'analgesic_drugs', 'antiinfective_drugs', 'endocrine_drugs', 'hematological_drugs']
+    passed_categories = sum(1 for cat in drug_categories if test_results.get(cat, False))
     
-    # NEW: Differential diagnosis UI features summary
-    if 'dd_ui_features' in test_results:
-        print("\n🔍 DIFFERENTIAL DIAGNOSIS UI FEATURES:")
-        found_features = 0
-        total_features = len(test_results['dd_ui_features'])
-        
-        for feature in test_results['dd_ui_features']:
-            if feature['status'] == 'found':
-                found_features += 1
-                print(f"  ✅ {feature['feature']}: Found")
-            elif feature['status'] == 'partial':
-                print(f"  ⚠️  {feature['feature']}: Partially implemented")
-            else:
-                print(f"  ❌ {feature['feature']}: {feature['status']}")
-        
-        print(f"\n📈 UI FEATURES FOUND: {found_features}/{total_features}")
-    
-    # Specific diseases summary
-    if 'specific_diseases' in test_results:
-        print("\n🎯 SPECIFIC DISEASES FROM REVIEW REQUEST:")
-        found_diseases = 0
-        complete_diseases = 0
-        
-        for disease in test_results['specific_diseases']:
-            if disease['status'] == 'found':
-                found_diseases += 1
-                if disease['completeness'] >= 75:  # At least 3 out of 4 required fields
-                    complete_diseases += 1
-                    print(f"  ✅ {disease['disease']} ({disease['icd_code']}): {disease['completeness']:.0f}% complete")
-                else:
-                    print(f"  ⚠️  {disease['disease']} ({disease['icd_code']}): {disease['completeness']:.0f}% complete")
-            else:
-                print(f"  ❌ {disease['disease']} ({disease['icd_code']}): {disease['status']}")
-        
-        print(f"\n📈 DISEASES FOUND: {found_diseases}/10")
-        print(f"📈 COMPLETE DISEASES: {complete_diseases}/10")
-    
-    # Disease data structure summary
-    if 'disease_data_structure' in test_results:
-        print("\n📊 DISEASE DATA STRUCTURE:")
-        for category, sections in test_results['disease_data_structure'].items():
-            total_sections = sum(1 for count in sections.values() if count > 0)
-            print(f"  {category}: {total_sections}/4 required sections found")
-    
-    # Calculation endpoints summary
-    if 'calculation_endpoints' in test_results:
-        print("\n⚗️ CALCULATION ENDPOINTS:")
-        successful = len([r for r in test_results['calculation_endpoints'] if r['status'] == 'success'])
-        total = len(test_results['calculation_endpoints'])
-        print(f"  {successful}/{total} calculation endpoints working")
+    print(f"\n💊 DRUG CATEGORIES TESTED: {passed_categories}/{len(drug_categories)}")
+    for category in drug_categories:
+        status = "✅ PASSED" if test_results.get(category, False) else "❌ FAILED"
+        category_name = category.replace('_', ' ').title()
+        print(f"  {status}: {category_name}")
     
     # Overall pass/fail summary
     passed = 0
     total = 0
     
-    critical_tests = ['backend_url', 'backend_health', 'frontend_access', 'disease_count', 'mathematical_equations']
+    critical_tests = ['backend_url', 'backend_health', 'drug_total_count', 'sertraline_detail', 'drug_simulation']
     
     for test_name, result in test_results.items():
         if test_name in critical_tests:
@@ -1665,45 +1619,20 @@ def run_all_tests():
             else:
                 print(f"❌ {test_name}: FAILED")
             total += 1
-        elif test_name == 'parameter_ranges':
-            found_count = len([p for p in result if p['found']])
-            correct_count = len([p for p in result if p['range_correct']])
-            if found_count >= 8 and correct_count >= 6:  # At least 8 found, 6 with correct ranges
-                print(f"✅ {test_name}: PASSED ({found_count}/10 found, {correct_count}/10 correct ranges)")
-                passed += 1
-            else:
-                print(f"❌ {test_name}: FAILED ({found_count}/10 found, {correct_count}/10 correct ranges)")
-            total += 1
-        elif test_name == 'dd_ui_features':
-            found_count = len([f for f in result if f['status'] == 'found'])
-            if found_count >= 3:  # At least half of UI features found
-                print(f"✅ {test_name}: PASSED ({found_count}/{len(result)} features found)")
-                passed += 1
-            else:
-                print(f"❌ {test_name}: FAILED ({found_count}/{len(result)} features found)")
-            total += 1
-        elif test_name == 'specific_diseases':
-            found_count = len([d for d in result if d['status'] == 'found'])
-            if found_count >= 8:  # At least 8 out of 10 diseases found
-                print(f"✅ {test_name}: PASSED ({found_count}/10 diseases found)")
-                passed += 1
-            else:
-                print(f"❌ {test_name}: FAILED ({found_count}/10 diseases found)")
-            total += 1
-        elif test_name == 'calculation_endpoints':
-            successful_count = len([r for r in result if r['status'] == 'success'])
-            if successful_count >= 3:  # At least 3 out of 4 endpoints working
-                print(f"✅ {test_name}: PASSED ({successful_count}/4 endpoints working)")
-                passed += 1
-            else:
-                print(f"❌ {test_name}: FAILED ({successful_count}/4 endpoints working)")
-            total += 1
+    
+    # Add drug categories to critical tests
+    if passed_categories >= 4:  # At least 4 out of 6 categories working
+        print(f"✅ drug_categories: PASSED ({passed_categories}/6 categories working)")
+        passed += 1
+    else:
+        print(f"❌ drug_categories: FAILED ({passed_categories}/6 categories working)")
+    total += 1
     
     print(f"\n🎯 OVERALL RESULT: {passed}/{total} critical tests passed")
     
     if passed >= total * 0.8:  # 80% pass rate
-        print("🎉 PHICORE.AI MEDICAL SIMULATION PLATFORM TESTS PASSED!")
-        print("✅ NEW COMPREHENSIVE PARAMETER RANGES VERIFIED!")
+        print("🎉 PHICOR DRUG ENGINE COMPREHENSIVE DATABASE EXPANSION TESTS PASSED!")
+        print("✅ NEW DRUG CATEGORIES AND COMPREHENSIVE DATA VERIFIED!")
         return True
     else:
         print("⚠️  Some critical tests failed - see details above")
