@@ -238,24 +238,36 @@ const DifferentialPage = () => {
     setIsAnalyzing(true);
     const parsed = parseClinicalText(clinicalText);
     
+    console.log('Parsed clinical text:', parsed);
+    
     if (parsed.findings?.length > 0) {
       const newFindings = parsed.findings.map((f, idx) => ({
         id: `text-${Date.now()}-${idx}`,
         organ: f.organ || 'unknown',
         parameterId: f.parameterId,
         parameterName: f.name || f.parameterId,
-        value: f.value,
+        value: f.value || '',
         unit: f.unit || '',
         direction: f.direction,
         severity: f.severity || 'moderate',
         deviation: '',
-        normalRange: '',
+        normalRange: f.normalRange || '',
         source: 'clinical-text',
+        diseases: f.diseases || [],
       }));
-      setAbnormalFindings(prev => [...prev, ...newFindings]);
+      
+      setAbnormalFindings(prev => {
+        const updated = [...prev, ...newFindings];
+        // Trigger diagnosis after state update
+        setTimeout(() => {
+          runDiagnosis(updated);
+        }, 100);
+        return updated;
+      });
+    } else {
+      setIsAnalyzing(false);
+      alert('No clinical findings detected. Try adding specific findings like "dilated ventricle", "pulmonary congestion", "pleural effusion", or lab values like "BNP 500".');
     }
-    
-    runDiagnosis();
   };
   
   // Get probability color
