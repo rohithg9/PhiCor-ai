@@ -384,7 +384,16 @@ Always base your response on the CURATED DATA provided, supplemented by your med
                 name = drug.get('name', 'Unknown')
                 mechanism = drug.get('mechanism', '')[:100] if drug.get('mechanism') else ''
                 dose = drug.get('dose', '') or drug.get('typical_dose', '')
-                indications = ', '.join(drug.get('indications', [])[:3]) if drug.get('indications') else ''
+                
+                # Safely handle indications which might be dicts
+                raw_indications = drug.get('indications', [])[:3] if drug.get('indications') else []
+                indication_strings = []
+                for ind in raw_indications:
+                    if isinstance(ind, dict):
+                        indication_strings.append(ind.get('name', str(ind)))
+                    else:
+                        indication_strings.append(str(ind))
+                indications = ', '.join(indication_strings) if indication_strings else ''
                 
                 drug_info = f"  • {name}"
                 if dose:
