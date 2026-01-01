@@ -612,7 +612,7 @@ PMH: Hypertension, Type 2 Diabetes"
                           <div className={`mt-3 h-2 rounded-full ${isDark ? 'bg-gray-700' : 'bg-gray-200'} overflow-hidden`}>
                             <div 
                               className={`h-full bg-gradient-to-r ${getProbabilityColor(diagnosis.probabilityScore)} transition-all`}
-                              style={{ width: `${diagnosis.probabilityScore}%` }}
+                              style={{ width: `${Math.min(100, Math.round(diagnosis.probabilityScore))}%` }}
                             />
                           </div>
                         </div>
