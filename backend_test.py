@@ -1,25 +1,27 @@
 #!/usr/bin/env python3
 """
-Backend Testing for PhiCor Drug Engine Comprehensive Drug Database Expansion
-Testing comprehensive drug database expansion from ~51 drugs to 99 drugs:
-- New drug categories: CNS/cns (SSRIs, SNRIs, benzodiazepines, anticonvulsants)
-- Gastrointestinal (PPIs, antiemetics)
-- Analgesic (NSAIDs, acetaminophen, tramadol)
-- Antiinfective (antibiotics)
-- Endocrine (diabetes meds, thyroid, corticosteroids)
-- Hematological (antiplatelet, anticoagulants)
-- Updated seed endpoint using external data file /app/backend/data/comprehensive_drugs.py
+Backend Testing for Comprehensive Disease Database
+Testing comprehensive disease database with 28 diseases across 9 categories:
+- Cardiovascular diseases (5 diseases)
+- Respiratory diseases (2 diseases) 
+- Endocrine diseases (2 diseases)
+- Renal diseases (1 disease)
+- Neurological diseases (2 diseases)
+- Hematological diseases (6 diseases)
+- Oncological diseases (3 diseases)
+- Genetic diseases (3 diseases)
+- Hematological malignancy diseases (4 diseases)
 
 Focus on testing specific endpoints from review request:
-- GET /api/drugs-db - Should return ~99 drugs total
-- GET /api/drugs-db?category=cns - Should return 10 CNS drugs
-- GET /api/drugs-db?category=gastrointestinal - Should return GI drugs
-- GET /api/drugs-db?category=analgesic - Should return pain drugs
-- GET /api/drugs-db?category=antiinfective - Should return antibiotics
-- GET /api/drugs-db?category=endocrine - Should return endocrine drugs
-- GET /api/drugs-db?category=hematological - Should return blood drugs
-- GET /api/drugs-db/sertraline - Should return full drug details
-- POST /api/drugs-db/simulate - Test simulation with CNS drug
+- POST /api/diseases-db/seed-comprehensive - Seeds the database
+- GET /api/diseases-db - Should return 28 diseases total
+- GET /api/diseases-db?category=cardiovascular - Should return 5 cardiovascular diseases
+- GET /api/diseases-db?category=hematological - Should return 6 hematological diseases
+- GET /api/diseases-db?search=diabetes - Should find Type 2 Diabetes
+- GET /api/diseases-db?search=I50 - Should find diseases with ICD-10 code containing I50
+- GET /api/diseases-db/heart_failure_hfref - Should return full HFrEF details
+- GET /api/diseases-db/sickle_cell_disease - Should return full SCD details
+- GET /api/diseases-db/nonexistent - Should return 404 error
 """
 
 import requests
