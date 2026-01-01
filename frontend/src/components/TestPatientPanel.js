@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   User, BookOpen, Sparkles, Shuffle, Play, Heart, 
   Stethoscope, Brain, FlaskConical, AlertTriangle,
   ChevronRight, Clock, Target, Zap, GraduationCap,
-  Activity, Wind, Droplets, Thermometer
+  Activity, Wind, Droplets, Thermometer, Upload,
+  FileText, Loader2, CheckCircle, X, ChevronDown
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
