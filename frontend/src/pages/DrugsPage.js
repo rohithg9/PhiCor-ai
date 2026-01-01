@@ -718,6 +718,7 @@ const DrugsPage = () => {
     const fetchDrugs = async () => {
       try {
         setLoading(true);
+        setError(null);
         const params = new URLSearchParams();
         if (selectedCategory) params.append('category', selectedCategory);
         if (searchQuery) params.append('search', searchQuery);
@@ -732,14 +733,22 @@ const DrugsPage = () => {
         if (response.ok) {
           const data = await response.json();
           console.log('Drugs received:', data.drugs?.length || 0, 'Total:', data.total);
-          setDrugs(data.drugs || []);
+          if (data.drugs && Array.isArray(data.drugs)) {
+            setDrugs(data.drugs);
+          } else {
+            console.error('Invalid data format:', data);
+            setDrugs([]);
+            setError('Invalid data format received');
+          }
         } else {
           console.error('Error response:', response.status, response.statusText);
           setDrugs([]);
+          setError(`API Error: ${response.status}`);
         }
       } catch (err) {
         console.error('Error fetching drugs:', err);
         setDrugs([]);
+        setError(err.message);
       } finally {
         setLoading(false);
       }
