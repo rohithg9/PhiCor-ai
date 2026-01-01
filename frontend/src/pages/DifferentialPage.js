@@ -214,7 +214,7 @@ const DifferentialPage = () => {
         results = results.map(r => {
           const icdBase = r.icd10?.split('_')[0] || r.icd10?.split('.')[0];
           if (imagingDiseases.has(r.icd10) || imagingDiseases.has(icdBase)) {
-            return { ...r, probabilityScore: Math.min(100, (r.probabilityScore || 0) + 20) };
+            return { ...r, probabilityScore: Math.min(100, Math.round(((r.probabilityScore || 0) + 20) * 10) / 10) };
           }
           return r;
         });
