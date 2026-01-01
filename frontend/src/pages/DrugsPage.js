@@ -859,8 +859,16 @@ const DrugsPage = () => {
               Patient Simulation
             </button>
           </div>
+          </div>
         </div>
       </div>
+      
+      {/* Tutorial Overlay */}
+      <FeatureTutorial 
+        feature="drugs" 
+        isOpen={tutorial.isOpen} 
+        onClose={tutorial.close} 
+      />
 
       <div className="flex-1 flex overflow-hidden">
         {/* Left Sidebar - Drug List */}
