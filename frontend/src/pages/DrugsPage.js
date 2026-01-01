@@ -835,8 +835,11 @@ const DrugsPage = () => {
             </div>
           </div>
           
-          {/* Tab Switcher */}
-          <div className="flex bg-muted/30 rounded-lg p-1">
+          <div className="flex items-center gap-3">
+            <TutorialButton onClick={tutorial.open} />
+            
+            {/* Tab Switcher */}
+            <div className="flex bg-muted/30 rounded-lg p-1" data-tutorial="simulation-tab">
             <button
               onClick={() => setActiveTab('drugs')}
               className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
