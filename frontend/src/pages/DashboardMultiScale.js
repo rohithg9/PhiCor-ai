@@ -38,6 +38,7 @@ import { ALL_PSYCHIATRIC_DISEASES, PSYCHIATRIC_CATEGORIES } from '../data/psychi
 import { ALL_PEDIATRIC_DISEASES, PEDIATRIC_CATEGORIES } from '../data/pediatricDiseasesIndex';
 import { ALL_OBGYN_DISEASES, OBGYN_CATEGORIES } from '../data/obgynDiseasesIndex';
 import { enhanceDiseaseWithTemplates, generateModifications } from '../data/diseaseTemplates';
+import { getCalculatorsForDisease, getCalculatorsForOrgan, CLINICAL_CALCULATORS } from '../data/clinicalCalculators';
 import LungCancerModule from '../components/LungCancerModule';
 import TreatmentGuidelinesPanel from '../components/TreatmentGuidelinesPanel';
 import DiseaseDetailPanel from '../components/DiseaseDetailPanel';
