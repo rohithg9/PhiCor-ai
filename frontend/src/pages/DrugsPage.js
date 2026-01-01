@@ -701,6 +701,7 @@ const DrugSimulationPanel = ({ drug, patient, dosage, setDosage, simulation, isS
 // Main Drugs Page Component
 const DrugsPage = () => {
   const { isDark } = useTheme();
+  const tutorial = useTutorial('drugs');
   const [activeTab, setActiveTab] = useState('drugs'); // 'drugs' or 'engine'
   
   // Drug list state
