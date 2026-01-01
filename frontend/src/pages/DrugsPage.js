@@ -136,6 +136,10 @@ const DRUG_CATEGORIES = {
   immunosuppressant: { name: 'Immunosuppressant', icon: '🛡️', color: 'from-indigo-500 to-purple-500' },
   urological: { name: 'Urology', icon: '💧', color: 'from-sky-500 to-blue-500' },
   ophthalmic: { name: 'Ophthalmic', icon: '👁️', color: 'from-emerald-500 to-teal-500' },
+  renal: { name: 'Renal/Nephrology', icon: '🫘', color: 'from-teal-500 to-cyan-500' },
+  oncology: { name: 'Oncology', icon: '🎗️', color: 'from-violet-500 to-purple-500' },
+  antiviral: { name: 'Antivirals', icon: '🦠', color: 'from-lime-500 to-green-500' },
+  antifungal: { name: 'Antifungals', icon: '🍄', color: 'from-amber-600 to-yellow-500' },
 };
 
 // Default Virtual Patient
