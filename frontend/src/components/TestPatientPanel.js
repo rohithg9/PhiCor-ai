@@ -713,7 +713,7 @@ const TestPatientPanel = ({ isDark, onLoadCase }) => {
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="bg-purple-500 text-white w-4 h-4 rounded-full flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">4</span>
-                    Compare your differential with PhiCor's synthesis
+                    Compare your differential with PhiCor&apos;s synthesis
                   </li>
                 </ol>
               </div>
