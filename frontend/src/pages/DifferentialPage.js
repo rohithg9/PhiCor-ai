@@ -56,9 +56,11 @@ const EXTENDED_NORMAL_RANGES = buildAllNormalRanges();
 const DifferentialPage = () => {
   const { isDark } = useTheme();
   const tutorial = useTutorial('differential');
+  const [searchParams] = useSearchParams();
   
   // State management
-  const [activeTab, setActiveTab] = useState('parameters');
+  const initialTab = searchParams.get('tab') || 'parameters';
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [selectedOrgan, setSelectedOrgan] = useState('');
   const [selectedParameter, setSelectedParameter] = useState('');
   const [parameterValue, setParameterValue] = useState(50);
