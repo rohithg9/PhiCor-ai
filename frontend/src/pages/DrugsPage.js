@@ -896,11 +896,6 @@ const DrugsPage = () => {
           
           {/* Drug List */}
           <ScrollArea className="flex-1">
-            {/* Debug info - temporary */}
-            <div className="p-2 bg-yellow-100 text-yellow-800 text-xs border-b">
-              Debug: {debugInfo} | API: {API_URL || 'UNDEFINED'}
-            </div>
-            
             {loading ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="w-6 h-6 animate-spin text-primary" />
