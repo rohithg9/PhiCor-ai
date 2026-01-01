@@ -1089,17 +1089,18 @@ def run_all_tests():
             print(f"  {status} - {test_name.replace('_', ' ').title()}")
     
     if passed_tests == total_tests:
-        print(f"\n🎉 ALL TESTS PASSED! PhiCor PK/PD Simulation Engine is working perfectly.")
-        print(f"✅ Drug database contains 115+ drugs across multiple categories")
-        print(f"✅ Disease database contains 28 diseases with comprehensive data")
-        print(f"✅ Drug simulation engine functional with efficacy/safety scoring")
-        print(f"✅ All API endpoints operational")
+        print(f"\n🎉 ALL TESTS PASSED! PhiCor Medical Knowledge Base API is working perfectly.")
+        print(f"✅ Drug generation status API functional")
+        print(f"✅ ICD-10 conditions system operational")
+        print(f"✅ Generated drugs list with comprehensive data")
+        print(f"✅ Disease database stats accessible")
+        print(f"✅ All Medical Knowledge Base API endpoints operational")
     elif passed_tests >= total_tests * 0.8:
         print(f"\n✅ MOSTLY SUCCESSFUL! {passed_tests}/{total_tests} tests passed.")
         print(f"⚠️  Some minor issues detected - see failed tests above")
     else:
         print(f"\n❌ SIGNIFICANT ISSUES DETECTED! Only {passed_tests}/{total_tests} tests passed.")
-        print(f"🔧 Major fixes needed for PhiCor PK/PD Simulation Engine functionality")
+        print(f"🔧 Major fixes needed for Medical Knowledge Base API functionality")
     
     return test_results
 
