@@ -279,11 +279,12 @@ export const FeatureTutorial = ({ feature, isOpen, onClose }) => {
   const steps = TUTORIAL_STEPS[feature] || [];
   const step = steps[currentStep];
   
-  // Find and highlight target element
+  // Find and highlight target element - use separate effects to avoid cascading renders
+  // Reset targetRect when tutorial closes
+  const shouldFindTarget = isOpen && step?.target;
+  
   useEffect(() => {
-    if (!isOpen || !step?.target) {
-      // Use callback form to avoid lint warning
-      setTargetRect(() => null);
+    if (!shouldFindTarget) {
       return;
     }
     
@@ -296,13 +297,19 @@ export const FeatureTutorial = ({ feature, isOpen, onClose }) => {
         
         // Scroll element into view if needed
         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      } else {
-        setTargetRect(() => null);
       }
     }, 100);
     
     return () => clearTimeout(timeoutId);
-  }, [isOpen, step, currentStep]);
+  }, [shouldFindTarget, step?.target]);
+  
+  // Reset targetRect when not needed
+  useEffect(() => {
+    if (!isOpen) {
+      const timeoutId = setTimeout(() => setTargetRect(null), 0);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [isOpen]);
   
   const handleNext = useCallback(() => {
     if (currentStep < steps.length - 1) {
