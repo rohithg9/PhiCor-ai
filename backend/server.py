@@ -2309,6 +2309,114 @@ Return ONLY valid JSON."""
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@api_router.post("/diagnosis/extract-document")
+async def extract_document_text(file: UploadFile = File(...)):
+    """
+    Extract clinical text from uploaded documents (PDF, Word, TXT).
+    """
+    import tempfile
+    import os
+    
+    try:
+        # Validate file type
+        allowed_extensions = {'.pdf', '.doc', '.docx', '.txt'}
+        file_ext = os.path.splitext(file.filename)[1].lower()
+        
+        if file_ext not in allowed_extensions:
+            return {
+                "success": False,
+                "error": f"Unsupported file type. Allowed: {', '.join(allowed_extensions)}"
+            }
+        
+        # Read file content
+        content = await file.read()
+        
+        # Extract text based on file type
+        extracted_text = ""
+        
+        if file_ext == '.txt':
+            # Plain text file
+            extracted_text = content.decode('utf-8', errors='ignore')
+            
+        elif file_ext == '.pdf':
+            # PDF extraction using PyPDF2 or pdfplumber
+            try:
+                import io
+                try:
+                    import pdfplumber
+                    with pdfplumber.open(io.BytesIO(content)) as pdf:
+                        pages_text = []
+                        for page in pdf.pages:
+                            text = page.extract_text()
+                            if text:
+                                pages_text.append(text)
+                        extracted_text = "\n\n".join(pages_text)
+                except ImportError:
+                    # Fallback to PyPDF2
+                    from PyPDF2 import PdfReader
+                    reader = PdfReader(io.BytesIO(content))
+                    pages_text = []
+                    for page in reader.pages:
+                        text = page.extract_text()
+                        if text:
+                            pages_text.append(text)
+                    extracted_text = "\n\n".join(pages_text)
+            except Exception as pdf_error:
+                logger.error(f"PDF extraction error: {pdf_error}")
+                return {
+                    "success": False,
+                    "error": "Failed to extract text from PDF. The file may be image-based or corrupted."
+                }
+                
+        elif file_ext in {'.doc', '.docx'}:
+            # Word document extraction
+            try:
+                import io
+                from docx import Document
+                doc = Document(io.BytesIO(content))
+                paragraphs = [para.text for para in doc.paragraphs if para.text.strip()]
+                extracted_text = "\n\n".join(paragraphs)
+            except ImportError:
+                return {
+                    "success": False,
+                    "error": "Word document processing not available. Please upload a PDF or TXT file."
+                }
+            except Exception as doc_error:
+                logger.error(f"Word extraction error: {doc_error}")
+                return {
+                    "success": False,
+                    "error": "Failed to extract text from Word document."
+                }
+        
+        if not extracted_text.strip():
+            return {
+                "success": False,
+                "error": "No text could be extracted from the document. The file may be empty or image-based."
+            }
+        
+        # Clean up the extracted text
+        extracted_text = extracted_text.strip()
+        
+        # Limit text length if very long
+        max_chars = 10000
+        if len(extracted_text) > max_chars:
+            extracted_text = extracted_text[:max_chars] + "\n\n[Text truncated - document was too long]"
+        
+        return {
+            "success": True,
+            "extractedText": extracted_text,
+            "filename": file.filename,
+            "characterCount": len(extracted_text)
+        }
+        
+    except Exception as e:
+        logger.error(f"Error extracting document: {e}")
+        return {
+            "success": False,
+            "error": f"Error processing document: {str(e)}"
+        }
+
+
 # ============== AI-POWERED MEDICAL KNOWLEDGE GENERATION ==============
 
 class DiseaseGenerationRequest(BaseModel):
