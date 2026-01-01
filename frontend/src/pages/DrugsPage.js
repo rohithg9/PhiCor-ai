@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import FeatureNav from '../components/FeatureNav';
+import { FeatureTutorial, TutorialButton, useTutorial } from '../components/FeatureTutorial';
 import {
   Pill, Search, ChevronDown, ChevronUp, ChevronRight,
   Heart, AlertTriangle, TrendingUp, TrendingDown,
