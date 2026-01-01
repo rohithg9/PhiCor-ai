@@ -727,7 +727,7 @@ PMH: Hypertension, Type 2 Diabetes"
             
             <ScrollArea className="h-[600px]">
               <div className="p-4">
-                {/* AI Clinical Synthesis Section - FIRST */}
+                {/* PhiCor Synthesis Section - FIRST */}
                 {(isSynthesizing || clinicalSynthesis) && (
                   <div className={`mb-6 rounded-xl border-2 ${isDark ? 'bg-gradient-to-br from-purple-900/30 to-indigo-900/30 border-purple-500/50' : 'bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-300'} overflow-hidden`}>
                     <div 
@@ -736,11 +736,11 @@ PMH: Hypertension, Type 2 Diabetes"
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center shadow-lg">
-                          <Sparkles className="w-5 h-5 text-white" />
+                          <span className="text-white font-serif text-xl font-bold">Φ</span>
                         </div>
                         <div>
                           <h3 className={`font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                            AI Clinical Synthesis
+                            PhiCor Synthesis
                           </h3>
                           <p className={`text-xs ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>
                             Holistic analysis connecting all findings
