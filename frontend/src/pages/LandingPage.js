@@ -866,7 +866,7 @@ const LandingPage = () => {
               Ready to <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">explore</span> the equations of life?
             </h2>
             <p className="text-muted-foreground mb-8 max-w-lg mx-auto leading-relaxed">
-              Experience our digital physiology platform. Browse 186+ diseases, explore mathematical models, and see how conditions affect organ parameters.
+              Experience our digital physiology platform. Browse 200+ diseases, explore mathematical models, and see how conditions affect organ parameters.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button
