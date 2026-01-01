@@ -344,6 +344,19 @@ const TestPatientPanel = ({ isDark, onLoadCase }) => {
   const [generatedCase, setGeneratedCase] = useState(null);
   const [selectedSpecialty, setSelectedSpecialty] = useState('cardiology');
   const [selectedDifficulty, setSelectedDifficulty] = useState('intermediate');
+  const [expandedCategory, setExpandedCategory] = useState('cardiology');
+  const [selectedLibraryCase, setSelectedLibraryCase] = useState(null);
+  
+  // Upload states
+  const fileInputRef = useRef(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
+  const [uploadSuccess, setUploadSuccess] = useState(null);
+  
+  // Simulator states
+  const [simulatorStep, setSimulatorStep] = useState(0);
+  const [simulatorCase, setSimulatorCase] = useState(null);
+  const [isLoadingSimulator, setIsLoadingSimulator] = useState(false);
 
   // Generate a random case using AI
   const generateRandomCase = async () => {
