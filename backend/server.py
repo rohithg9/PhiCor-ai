@@ -1521,16 +1521,6 @@ async def delete_drug(drug_id: str):
         raise HTTPException(status_code=404, detail="Drug not found")
     return {"message": "Drug deleted successfully"}
 
-@api_router.get("/drugs-db/categories")
-async def get_drug_categories():
-    """Get all unique drug categories."""
-    categories = await db.drugs.distinct("category")
-    classes = await db.drugs.distinct("drug_class")
-    return {
-        "categories": categories,
-        "drug_classes": classes
-    }
-
 @api_router.get("/drugs-db/by-disease/{disease_id}")
 async def get_drugs_for_disease(disease_id: str):
     """Get all drugs indicated for a specific disease."""
