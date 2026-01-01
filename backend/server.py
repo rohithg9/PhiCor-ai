@@ -2581,6 +2581,150 @@ async def generate_diseases_batch(request: BatchDiseaseGenerationRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ============== DRUG KNOWLEDGE BASE GENERATION ==============
+
+class DrugGenerationRequest(BaseModel):
+    """Request model for generating a single drug"""
+    drug_name: str
+    category: Optional[str] = None
+    region: str = "international"  # "uk", "us", "india", "international"
+
+class BatchDrugGenerationRequest(BaseModel):
+    """Request model for batch drug generation"""
+    drugs: List[DrugGenerationRequest]
+    batch_size: int = 5
+
+@api_router.post("/drugs-db/generate")
+async def generate_drug(request: DrugGenerationRequest):
+    """
+    Generate comprehensive drug data using AI.
+    Creates evidence-based drug profiles with BNF/FDA information.
+    """
+    try:
+        from services.medical_knowledge_generator import DrugKnowledgeGenerator
+        
+        generator = DrugKnowledgeGenerator()
+        drug_data = await generator.generate_drug(
+            request.drug_name,
+            request.category,
+            request.region
+        )
+        
+        # Save to database
+        await db.drugs_generated.update_one(
+            {"id": drug_data["id"]},
+            {"$set": drug_data},
+            upsert=True
+        )
+        
+        return {
+            "success": True,
+            "message": f"Generated drug: {drug_data['name']}",
+            "drug_id": drug_data["id"],
+            "drug": drug_data
+        }
+        
+    except ImportError as e:
+        raise HTTPException(status_code=500, detail=f"Generator not available: {str(e)}")
+    except Exception as e:
+        logger.error(f"Error generating drug: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/drugs-db/generate-batch")
+async def generate_drugs_batch(request: BatchDrugGenerationRequest):
+    """
+    Generate multiple drugs using AI in batches.
+    Useful for expanding the drug knowledge base efficiently.
+    """
+    try:
+        from services.medical_knowledge_generator import DrugKnowledgeGenerator
+        
+        generator = DrugKnowledgeGenerator()
+        drugs_to_generate = [
+            {
+                "name": d.drug_name,
+                "category": d.category,
+                "region": d.region
+            }
+            for d in request.drugs
+        ]
+        
+        generated = await generator.generate_drugs_batch(
+            drugs_to_generate,
+            batch_size=request.batch_size
+        )
+        
+        # Save all to database
+        saved_count = 0
+        for drug_data in generated:
+            await db.drugs_generated.update_one(
+                {"id": drug_data["id"]},
+                {"$set": drug_data},
+                upsert=True
+            )
+            saved_count += 1
+        
+        return {
+            "success": True,
+            "message": f"Generated {saved_count} drugs",
+            "generated_count": saved_count,
+            "requested_count": len(request.drugs),
+            "drugs": [{"id": d["id"], "name": d["name"]} for d in generated]
+        }
+        
+    except ImportError as e:
+        raise HTTPException(status_code=500, detail=f"Generator not available: {str(e)}")
+    except Exception as e:
+        logger.error(f"Error generating drug batch: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/drugs-db/priority-list")
+async def get_priority_drug_list():
+    """
+    Get the list of priority drugs for generation (BNF + US + India essentials).
+    """
+    from services.medical_knowledge_generator import get_priority_drugs
+    drugs = get_priority_drugs()
+    
+    # Group by category
+    by_category = {}
+    for drug in drugs:
+        cat = drug.get("category", "other")
+        if cat not in by_category:
+            by_category[cat] = []
+        by_category[cat].append(drug["name"])
+    
+    return {
+        "total_drugs": len(drugs),
+        "categories": list(by_category.keys()),
+        "by_category": by_category,
+        "drugs": drugs
+    }
+
+@api_router.get("/drugs-db/generated")
+async def get_generated_drugs(
+    category: Optional[str] = None,
+    limit: int = 100,
+    skip: int = 0
+):
+    """
+    Get all AI-generated drugs from the database.
+    """
+    query = {}
+    if category:
+        query["category"] = category
+    
+    drugs = await db.drugs_generated.find(query, {"_id": 0}).skip(skip).limit(limit).to_list(limit)
+    total = await db.drugs_generated.count_documents(query)
+    
+    return {
+        "total": total,
+        "drugs": drugs,
+        "limit": limit,
+        "skip": skip
+    }
+
+
 # ============== VIRTUAL PATIENT & DRUG SIMULATION ==============
 
 class VirtualPatient(BaseModel):
