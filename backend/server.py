@@ -2725,52 +2725,6 @@ async def generate_drugs_batch(request: BatchDrugGenerationRequest):
         logger.error(f"Error generating drug batch: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@api_router.get("/drugs-db/priority-list")
-async def get_priority_drug_list():
-    """
-    Get the list of priority drugs for generation (BNF + US + India essentials).
-    """
-    from services.medical_knowledge_generator import get_priority_drugs
-    drugs = get_priority_drugs()
-    
-    # Group by category
-    by_category = {}
-    for drug in drugs:
-        cat = drug.get("category", "other")
-        if cat not in by_category:
-            by_category[cat] = []
-        by_category[cat].append(drug["name"])
-    
-    return {
-        "total_drugs": len(drugs),
-        "categories": list(by_category.keys()),
-        "by_category": by_category,
-        "drugs": drugs
-    }
-
-@api_router.get("/drugs-db/generated")
-async def get_generated_drugs(
-    category: Optional[str] = None,
-    limit: int = 100,
-    skip: int = 0
-):
-    """
-    Get all AI-generated drugs from the database.
-    """
-    query = {}
-    if category:
-        query["category"] = category
-    
-    drugs = await db.drugs_generated.find(query, {"_id": 0}).skip(skip).limit(limit).to_list(limit)
-    total = await db.drugs_generated.count_documents(query)
-    
-    return {
-        "total": total,
-        "drugs": drugs,
-        "limit": limit,
-        "skip": skip
-    }
-
 
 # ============== VIRTUAL PATIENT & DRUG SIMULATION ==============
 
