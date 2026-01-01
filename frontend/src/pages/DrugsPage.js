@@ -1236,35 +1236,36 @@ const DrugSimulationPanel = ({ drug, patient, dosage, setDosage, simulation, isS
         {/* Dosage Slider - Only show if NOT contraindicated */}
         {recommendation && !recommendation.isContraindicated && (
           <div className="bg-card/50 rounded-lg p-4 border border-border/50">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium flex items-center gap-2">
-              <Sliders className="w-4 h-4" />
-              Current Dosage
-            </span>
-            <span className={`text-lg font-bold ${
-              recommendation && dosage > recommendation.recommendedDose * 1.5 ? 'text-red-500' :
-              recommendation && dosage < recommendation.recommendedDose * 0.5 ? 'text-amber-500' :
-              'text-primary'
-            }`}>{dosage} mg</span>
-          </div>
-          <Slider
-            value={[dosage]}
-            onValueChange={([val]) => setDosage(val)}
-            min={5}
-            max={200}
-            step={5}
-            className="my-3"
-          />
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>Low (5mg)</span>
-            {recommendation && (
-              <span className="text-primary font-medium">
-                ↑ Recommended: {recommendation.recommendedDose}mg
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium flex items-center gap-2">
+                <Sliders className="w-4 h-4" />
+                Current Dosage
               </span>
-            )}
-            <span>High (200mg)</span>
+              <span className={`text-lg font-bold ${
+                recommendation && dosage > recommendation.recommendedDose * 1.5 ? 'text-red-500' :
+                recommendation && dosage < recommendation.recommendedDose * 0.5 ? 'text-amber-500' :
+                'text-primary'
+              }`}>{dosage} mg</span>
+            </div>
+            <Slider
+              value={[dosage]}
+              onValueChange={([val]) => setDosage(val)}
+              min={5}
+              max={200}
+              step={5}
+              className="my-3"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>Low (5mg)</span>
+              {recommendation && (
+                <span className="text-primary font-medium">
+                  ↑ Recommended: {recommendation.recommendedDose}mg
+                </span>
+              )}
+              <span>High (200mg)</span>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Simulation Results */}
