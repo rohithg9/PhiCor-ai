@@ -897,7 +897,7 @@ PMH: Hypertension, Type 2 Diabetes"
                             }`} />
                             <div>
                               <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                                {clinicalSynthesis.urgency_assessment.level?.toUpperCase()} Evaluation
+                                PhiCor Alert: {clinicalSynthesis.urgency_assessment.level?.toUpperCase()}
                               </p>
                               {clinicalSynthesis.urgency_assessment.can_miss_diagnosis && (
                                 <p className={`text-xs ${isDark ? 'text-red-400' : 'text-red-600'}`}>
