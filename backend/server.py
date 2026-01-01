@@ -2796,7 +2796,7 @@ async def generate_icd10_chunk(request: ICD10ChunkRequest):
         else:
             # Use category priority order
             conditions_pool = []
-            for cat in ICD10_CATEGORY_ORDER:
+            for cat in ICD10_CATEGORY_ORDER_STATIC:
                 cat_conditions = [c for c in icd10_conditions if c.get("category") == cat]
                 conditions_pool.extend(cat_conditions)
         
