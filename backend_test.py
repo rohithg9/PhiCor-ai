@@ -451,135 +451,50 @@ def test_disease_stats():
         return False
 
 def run_all_tests():
-    """Run all tests and provide summary"""
-    print("🧪 PHICOR MEDICAL KNOWLEDGE BASE API TESTING")
+    """Run all PhiCore.ai Medical Knowledge Base Integration tests"""
+    print("🧪 PHICORE.AI MEDICAL KNOWLEDGE BASE INTEGRATION TESTING")
     print("=" * 80)
-    print("Testing newly implemented Medical Knowledge Base API endpoints for PhiCore.ai")
-    print("Focus: Drug generation status, ICD-10 conditions, generated drugs quality")
+    print("Testing the integrated Medical Knowledge Base API endpoints as requested in review")
+    print("API Base URL: https://medcalc-ai.preview.emergentagent.com")
     print("=" * 80)
     
     test_results = {}
     
     # Test 1: Backend URL configuration
-    print("\n1️⃣ BACKEND URL CONFIGURATION")
+    print("\n🔧 BACKEND URL CONFIGURATION")
     test_results['backend_url'] = get_backend_url()
     
     # Test 2: Backend health (if URL is available)
     if test_results['backend_url']:
-        print("\n2️⃣ BACKEND HEALTH CHECK")
+        print("\n🏥 BACKEND HEALTH CHECK")
         test_results['backend_health'] = test_backend_health()
     else:
         test_results['backend_health'] = False
     
-    # DRUG DATABASE TESTS
+    # PHICORE.AI MEDICAL KNOWLEDGE BASE INTEGRATION TESTS
     if test_results['backend_health']:
-        print("\n3️⃣ DRUG DATABASE TOTAL COUNT (115 DRUGS)")
-        test_results['drug_total_count'] = test_drug_database_total_count()
+        test_results['platform_stats'] = test_platform_stats_api()
+        test_results['merged_drugs_list'] = test_merged_drugs_list_api()
+        test_results['drug_detail_mathematical'] = test_drug_detail_mathematical_models()
+        test_results['drug_search'] = test_drug_search()
+        test_results['drug_category_filter'] = test_drug_category_filter()
+        test_results['generated_drug_detail'] = test_generated_drug_detail()
+        test_results['disease_stats'] = test_disease_stats()
     else:
-        test_results['drug_total_count'] = False
-    
-    if test_results['backend_health']:
-        print("\n4️⃣ CNS DRUGS CATEGORY")
-        test_results['cns_drugs'] = test_cns_drugs()
-    else:
-        test_results['cns_drugs'] = False
-    
-    if test_results['backend_health']:
-        print("\n5️⃣ DERMATOLOGICAL DRUGS CATEGORY")
-        test_results['dermatological_drugs'] = test_dermatological_drugs()
-    else:
-        test_results['dermatological_drugs'] = False
-    
-    if test_results['backend_health']:
-        print("\n6️⃣ IMMUNOSUPPRESSANT DRUGS CATEGORY")
-        test_results['immunosuppressant_drugs'] = test_immunosuppressant_drugs()
-    else:
-        test_results['immunosuppressant_drugs'] = False
-    
-    if test_results['backend_health']:
-        print("\n7️⃣ UROLOGICAL DRUGS CATEGORY")
-        test_results['urological_drugs'] = test_urological_drugs()
-    else:
-        test_results['urological_drugs'] = False
-    
-    if test_results['backend_health']:
-        print("\n8️⃣ OPHTHALMIC DRUGS CATEGORY")
-        test_results['ophthalmic_drugs'] = test_ophthalmic_drugs()
-    else:
-        test_results['ophthalmic_drugs'] = False
-    
-    # DISEASE DATABASE TESTS
-    if test_results['backend_health']:
-        print("\n9️⃣ DISEASE DATABASE TOTAL COUNT (28 DISEASES)")
-        test_results['disease_total_count'] = test_disease_database_total_count()
-    else:
-        test_results['disease_total_count'] = False
-    
-    if test_results['backend_health']:
-        print("\n🔟 CARDIOVASCULAR DISEASES CATEGORY")
-        test_results['cardiovascular_diseases'] = test_cardiovascular_diseases()
-    else:
-        test_results['cardiovascular_diseases'] = False
-    
-    if test_results['backend_health']:
-        print("\n1️⃣1️⃣ TYPE 2 DIABETES DISEASE DETAIL")
-        test_results['type2_diabetes_detail'] = test_type2_diabetes_detail()
-    else:
-        test_results['type2_diabetes_detail'] = False
-    
-    if test_results['backend_health']:
-        print("\n1️⃣2️⃣ LEUKEMIA DISEASE SEARCH")
-        test_results['leukemia_search'] = test_leukemia_search()
-    else:
-        test_results['leukemia_search'] = False
-    
-    # DRUG SIMULATION TEST
-    if test_results['backend_health']:
-        print("\n1️⃣3️⃣ DRUG SIMULATION ENGINE")
-        test_results['drug_simulation'] = test_drug_simulation()
-    else:
-        test_results['drug_simulation'] = False
-    
-    # MEDICAL KNOWLEDGE BASE API TESTS
-    if test_results['backend_health']:
-        print("\n1️⃣4️⃣ DRUG GENERATION STATUS API")
-        test_results['drug_generation_status'] = test_drug_generation_status()
-    else:
-        test_results['drug_generation_status'] = False
-    
-    if test_results['backend_health']:
-        print("\n1️⃣5️⃣ DRUG CHUNK GENERATION API")
-        test_results['drug_chunk_generation'] = test_drug_chunk_generation()
-    else:
-        test_results['drug_chunk_generation'] = False
-    
-    if test_results['backend_health']:
-        print("\n1️⃣6️⃣ ICD-10 STATUS API")
-        test_results['icd10_status'] = test_icd10_status()
-    else:
-        test_results['icd10_status'] = False
-    
-    if test_results['backend_health']:
-        print("\n1️⃣7️⃣ GENERATED DRUGS LIST API")
-        test_results['generated_drugs_list'] = test_generated_drugs_list()
-    else:
-        test_results['generated_drugs_list'] = False
-    
-    if test_results['backend_health']:
-        print("\n1️⃣8️⃣ DISEASE DATABASE STATS API")
-        test_results['disease_database_stats'] = test_disease_database_stats()
-    else:
-        test_results['disease_database_stats'] = False
-    
-    if test_results['backend_health']:
-        print("\n1️⃣9️⃣ DRUG DATA QUALITY VERIFICATION")
-        test_results['drug_data_quality'] = test_drug_data_quality()
-    else:
-        test_results['drug_data_quality'] = False
+        # Set all tests to False if backend is not accessible
+        test_results.update({
+            'platform_stats': False,
+            'merged_drugs_list': False,
+            'drug_detail_mathematical': False,
+            'drug_search': False,
+            'drug_category_filter': False,
+            'generated_drug_detail': False,
+            'disease_stats': False
+        })
     
     # Summary
     print("\n" + "=" * 80)
-    print("🏁 PHICOR PK/PD SIMULATION ENGINE TEST SUMMARY")
+    print("🏁 PHICORE.AI MEDICAL KNOWLEDGE BASE INTEGRATION TEST SUMMARY")
     print("=" * 80)
     
     passed_tests = sum(1 for result in test_results.values() if result)
@@ -587,56 +502,53 @@ def run_all_tests():
     
     print(f"\n📊 OVERALL RESULTS: {passed_tests}/{total_tests} tests passed")
     
-    # Group results by category
-    drug_tests = ['drug_total_count', 'cns_drugs', 'dermatological_drugs', 'immunosuppressant_drugs', 'urological_drugs', 'ophthalmic_drugs']
-    disease_tests = ['disease_total_count', 'cardiovascular_diseases', 'type2_diabetes_detail', 'leukemia_search']
-    simulation_tests = ['drug_simulation']
-    knowledge_base_tests = ['drug_generation_status', 'drug_chunk_generation', 'icd10_status', 'generated_drugs_list', 'disease_database_stats', 'drug_data_quality']
-    infrastructure_tests = ['backend_url', 'backend_health']
+    # Test results breakdown
+    integration_tests = [
+        ('platform_stats', 'Test 1: Platform Stats API'),
+        ('merged_drugs_list', 'Test 2: Merged Drugs List API'),
+        ('drug_detail_mathematical', 'Test 3: Drug Detail with Mathematical Models'),
+        ('drug_search', 'Test 4: Drug Search'),
+        ('drug_category_filter', 'Test 5: Drug Category Filter'),
+        ('generated_drug_detail', 'Test 6: Generated Drug Detail'),
+        ('disease_stats', 'Test 7: Disease Stats')
+    ]
     
-    print(f"\n📊 DRUG DATABASE TESTS:")
-    for test_name in drug_tests:
-        if test_name in test_results:
-            status = "✅ PASS" if test_results[test_name] else "❌ FAIL"
-            print(f"  {status} - {test_name.replace('_', ' ').title()}")
+    infrastructure_tests = [
+        ('backend_url', 'Backend URL Configuration'),
+        ('backend_health', 'Backend Health Check')
+    ]
     
-    print(f"\n📊 DISEASE DATABASE TESTS:")
-    for test_name in disease_tests:
-        if test_name in test_results:
-            status = "✅ PASS" if test_results[test_name] else "❌ FAIL"
-            print(f"  {status} - {test_name.replace('_', ' ').title()}")
-    
-    print(f"\n📊 SIMULATION ENGINE TESTS:")
-    for test_name in simulation_tests:
-        if test_name in test_results:
-            status = "✅ PASS" if test_results[test_name] else "❌ FAIL"
-            print(f"  {status} - {test_name.replace('_', ' ').title()}")
-    
-    print(f"\n📊 MEDICAL KNOWLEDGE BASE API TESTS:")
-    for test_name in knowledge_base_tests:
-        if test_name in test_results:
-            status = "✅ PASS" if test_results[test_name] else "❌ FAIL"
-            print(f"  {status} - {test_name.replace('_', ' ').title()}")
+    print(f"\n📊 PHICORE.AI MEDICAL KNOWLEDGE BASE INTEGRATION TESTS:")
+    for test_key, test_name in integration_tests:
+        if test_key in test_results:
+            status = "✅ PASS" if test_results[test_key] else "❌ FAIL"
+            print(f"  {status} - {test_name}")
     
     print(f"\n📊 INFRASTRUCTURE TESTS:")
-    for test_name in infrastructure_tests:
-        if test_name in test_results:
-            status = "✅ PASS" if test_results[test_name] else "❌ FAIL"
-            print(f"  {status} - {test_name.replace('_', ' ').title()}")
+    for test_key, test_name in infrastructure_tests:
+        if test_key in test_results:
+            status = "✅ PASS" if test_results[test_key] else "❌ FAIL"
+            print(f"  {status} - {test_name}")
     
-    if passed_tests == total_tests:
-        print(f"\n🎉 ALL TESTS PASSED! PhiCor Medical Knowledge Base API is working perfectly.")
-        print(f"✅ Drug generation status API functional")
-        print(f"✅ ICD-10 conditions system operational")
-        print(f"✅ Generated drugs list with comprehensive data")
-        print(f"✅ Disease database stats accessible")
-        print(f"✅ All Medical Knowledge Base API endpoints operational")
-    elif passed_tests >= total_tests * 0.8:
-        print(f"\n✅ MOSTLY SUCCESSFUL! {passed_tests}/{total_tests} tests passed.")
+    # Calculate integration test success rate
+    integration_passed = sum(1 for test_key, _ in integration_tests if test_results.get(test_key, False))
+    integration_total = len(integration_tests)
+    
+    if integration_passed == integration_total:
+        print(f"\n🎉 ALL INTEGRATION TESTS PASSED! PhiCore.ai Medical Knowledge Base is working perfectly.")
+        print(f"✅ Platform stats API returns drugs.total > 300, diseases.total > 200")
+        print(f"✅ Merged drugs list API returns > 300 drugs with both comprehensive and AI-generated")
+        print(f"✅ Drug detail with mathematical models (lisinopril) has mechanisms and therapeutic effects")
+        print(f"✅ Drug search (metformin) returns full details")
+        print(f"✅ Drug category filter (cardiovascular) returns only cardiovascular drugs")
+        print(f"✅ Generated drug detail (amlodipine) has mechanisms for simulation")
+        print(f"✅ Disease stats API returns total_diseases > 200 with category breakdown")
+    elif integration_passed >= integration_total * 0.8:
+        print(f"\n✅ MOSTLY SUCCESSFUL! {integration_passed}/{integration_total} integration tests passed.")
         print(f"⚠️  Some minor issues detected - see failed tests above")
     else:
-        print(f"\n❌ SIGNIFICANT ISSUES DETECTED! Only {passed_tests}/{total_tests} tests passed.")
-        print(f"🔧 Major fixes needed for Medical Knowledge Base API functionality")
+        print(f"\n❌ SIGNIFICANT ISSUES DETECTED! Only {integration_passed}/{integration_total} integration tests passed.")
+        print(f"🔧 Major fixes needed for PhiCore.ai Medical Knowledge Base integration")
     
     return test_results
 
