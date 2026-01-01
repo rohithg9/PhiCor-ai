@@ -2679,6 +2679,10 @@ const DashboardMultiScale = () => {
             </Badge>
           )}
         </div>
+        
+        {/* Mobile Tutorial Button */}
+        <TutorialButton onClick={tutorial.open} className="h-8 text-xs px-2" />
+        </div>
 
         <Sheet>
           <SheetTrigger asChild>
