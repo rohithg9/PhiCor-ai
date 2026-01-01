@@ -1106,16 +1106,35 @@ def _build_therapeutic_effects(gen_drug: dict) -> list:
 
 @api_router.get("/drugs/{drug_id}")
 async def get_drug_info(drug_id: str):
-    """Get detailed drug information from comprehensive database."""
+    """Get detailed drug information from comprehensive database + AI-generated drugs."""
     try:
         from data.comprehensive_drugs import get_all_comprehensive_drugs
         all_drugs = get_all_comprehensive_drugs()
         
-        # Find drug by ID
+        # Find drug by ID in comprehensive database
         drug = next((d for d in all_drugs if d.get("id", "").lower() == drug_id.lower()), None)
         
         if drug:
             return drug
+        
+        # Check AI-generated drugs in MongoDB
+        gen_drug = await db.drugs_generated.find_one({"id": drug_id}, {"_id": 0})
+        if not gen_drug:
+            # Try case-insensitive search
+            gen_drug = await db.drugs_generated.find_one(
+                {"id": {"$regex": f"^{drug_id}$", "$options": "i"}}, 
+                {"_id": 0}
+            )
+        
+        if gen_drug:
+            # Ensure it has simulation-compatible fields
+            if "mechanisms" not in gen_drug:
+                gen_drug["mechanisms"] = _convert_to_mechanisms(gen_drug)
+            if "max_daily_dose_mg" not in gen_drug:
+                gen_drug["max_daily_dose_mg"] = _extract_max_dose(gen_drug)
+            if "therapeutic_effects" not in gen_drug:
+                gen_drug["therapeutic_effects"] = _build_therapeutic_effects(gen_drug)
+            return gen_drug
         
         # Fallback to basic DRUG_DATABASE
         basic_drug = DRUG_DATABASE.get(drug_id.lower())
