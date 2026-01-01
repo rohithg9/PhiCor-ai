@@ -1967,17 +1967,9 @@ async def seed_comprehensive_drug_database():
         "drugs_list": [{"id": d["id"], "name": d["name"], "class": d.get("drug_class", "")} for d in comprehensive_drugs]
     }
 
-# Legacy inline seed endpoint - kept for backwards compatibility but uses same data source
-@api_router.post("/drugs-db/seed-comprehensive-legacy")
-async def seed_comprehensive_drug_database_legacy():
-    """
-    Legacy seed endpoint - redirects to main comprehensive seed.
-    Kept for backwards compatibility.
-    """
-    # Just a placeholder - this was the old inline data that's now in comprehensive_drugs.py
-    legacy_drugs = [
-        # ============== ACE INHIBITORS ==============
-        {
+# ============== VIRTUAL PATIENT & DRUG SIMULATION ==============
+
+
             "id": "enalapril",
             "name": "Enalapril",
             "brand_names": ["Vasotec (USA)", "Innovace (UK)", "Enam (India)", "Epaned"],
