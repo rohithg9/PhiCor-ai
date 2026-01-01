@@ -125,8 +125,12 @@ const DiseaseDetailPanel = ({ diseaseId, diseaseName }) => {
       setError(null);
       
       try {
-        // Try to fetch by ID first, then by name search
-        let response = await fetch(`${API_URL}/api/diseases-db/${diseaseId}`);
+        // Get the backend disease ID using mapping
+        const backendId = getBackendDiseaseId(diseaseId, diseaseName);
+        console.log('Fetching disease:', diseaseId, '-> backend:', backendId);
+        
+        // Try to fetch by mapped ID first
+        let response = await fetch(`${API_URL}/api/diseases-db/${backendId}`);
         
         if (!response.ok) {
           // Try searching by name
