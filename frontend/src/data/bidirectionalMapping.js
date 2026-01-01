@@ -279,7 +279,8 @@ export const getDifferentialDiagnosis = (abnormalFindings, options = {}) => {
     if (diseases && diseases.length > 0) {
       diseases.forEach(diseaseCode => {
         const disease = ALL_DISEASES[diseaseCode];
-        const diseaseName = disease?.name || diseaseCode.replace(/_/g, ' ');
+        // Use disease name from ALL_DISEASES, fallback to ICD_CODE_NAMES, then to formatted code
+        const diseaseName = disease?.name || ICD_CODE_NAMES[diseaseCode] || diseaseCode.replace(/_/g, ' ');
         
         if (!conditionScores[diseaseCode]) {
           conditionScores[diseaseCode] = {
