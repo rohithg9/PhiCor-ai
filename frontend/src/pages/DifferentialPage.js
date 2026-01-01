@@ -2,12 +2,13 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import FeatureNav from '../components/FeatureNav';
 import TestPatientPanel from '../components/TestPatientPanel';
+import ClinicalCalculatorPanel from '../components/ClinicalCalculatorPanel';
 import { FeatureTutorial, TutorialButton, useTutorial } from '../components/FeatureTutorial';
 import { 
   Search, Plus, Trash2, FileText, Upload, AlertTriangle,
   CheckCircle, ChevronDown, ChevronUp, Activity, User, Clipboard,
   TrendingUp, TrendingDown, Minus, Brain, FlaskConical, Heart,
-  Stethoscope, Gauge, Info, Sparkles, Target, Zap, Shield, Pill
+  Stethoscope, Gauge, Info, Sparkles, Target, Zap, Shield, Pill, Calculator
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -23,6 +24,7 @@ import {
   NORMAL_RANGES,
 } from '../data/bidirectionalMapping';
 import { ORGAN_MODELS } from '../data/organModels';
+import { CLINICAL_CALCULATORS, searchCalculators } from '../data/clinicalCalculators';
 
 // Build comprehensive normal ranges from organ models
 const buildAllNormalRanges = () => {
