@@ -919,12 +919,33 @@ async def calculate_frank_starling(params: Dict[str, float]):
 async def get_available_drugs(
     category: Optional[str] = None,
     search: Optional[str] = None,
-    limit: int = 200
+    limit: int = 500,
+    include_generated: bool = True
 ):
-    """Get list of available drugs from comprehensive database."""
+    """Get list of available drugs from comprehensive database + AI-generated drugs."""
     try:
         from data.comprehensive_drugs import get_all_comprehensive_drugs
         all_drugs = get_all_comprehensive_drugs()
+        
+        # Also include AI-generated drugs from MongoDB
+        if include_generated:
+            generated_drugs = await db.drugs_generated.find({}, {"_id": 0}).to_list(1000)
+            
+            # Add simulation-compatible fields to generated drugs
+            for gen_drug in generated_drugs:
+                # Ensure it has required fields for simulation
+                if "mechanisms" not in gen_drug:
+                    gen_drug["mechanisms"] = _convert_to_mechanisms(gen_drug)
+                if "max_daily_dose_mg" not in gen_drug:
+                    gen_drug["max_daily_dose_mg"] = _extract_max_dose(gen_drug)
+                if "therapeutic_effects" not in gen_drug:
+                    gen_drug["therapeutic_effects"] = _build_therapeutic_effects(gen_drug)
+            
+            # Merge - generated drugs take precedence (they're more comprehensive)
+            existing_ids = {d.get("id", "").lower() for d in all_drugs}
+            for gen_drug in generated_drugs:
+                if gen_drug.get("id", "").lower() not in existing_ids:
+                    all_drugs.append(gen_drug)
         
         # Filter by category if provided
         if category:
@@ -936,7 +957,8 @@ async def get_available_drugs(
             all_drugs = [d for d in all_drugs if 
                 search_lower in d.get("name", "").lower() or 
                 search_lower in d.get("id", "").lower() or
-                search_lower in d.get("drug_class", "").lower()]
+                search_lower in d.get("drug_class", "").lower() or
+                any(search_lower in str(b).lower() for b in d.get("brand_names", []))]
         
         # Apply limit
         all_drugs = all_drugs[:limit]
@@ -948,11 +970,15 @@ async def get_available_drugs(
                     "name": drug.get("name"),
                     "category": drug.get("category"),
                     "drug_class": drug.get("drug_class"),
+                    "brand_names": drug.get("brand_names", []),
+                    "mechanism_short": drug.get("mechanism_short", ""),
                     "mechanisms_count": len(drug.get("mechanisms", [])),
-                    "max_daily_dose_mg": drug.get("max_daily_dose_mg", 0)
+                    "max_daily_dose_mg": drug.get("max_daily_dose_mg", 0),
+                    "ai_generated": drug.get("generator_version") is not None
                 }
                 for drug in all_drugs
-            ]
+            ],
+            "total": len(all_drugs)
         }
     except Exception as e:
         logger.error(f"Error getting drugs: {e}")
@@ -968,6 +994,115 @@ async def get_available_drugs(
                 for key, drug in DRUG_DATABASE.items()
             ]
         }
+
+
+def _convert_to_mechanisms(gen_drug: dict) -> list:
+    """Convert AI-generated drug data to simulation-compatible mechanisms."""
+    mechanisms = []
+    
+    # Extract from therapeutic_effects if available
+    for effect in gen_drug.get("therapeutic_effects", []):
+        organ = effect.get("organ_system", "cardiovascular").lower()
+        for param in effect.get("parameters_affected", []):
+            mechanisms.append({
+                "parameter": param.lower().replace(" ", "_"),
+                "organ": organ,
+                "effect_type": "decrease" if "lower" in effect.get("effect", "").lower() else "increase",
+                "magnitude": 0.15,  # Default moderate effect
+                "ec50_ratio": 0.5
+            })
+    
+    # Fallback: create basic mechanism based on drug class
+    if not mechanisms:
+        drug_class = gen_drug.get("drug_class", "").lower()
+        category = gen_drug.get("category", "").lower()
+        
+        # Map common drug classes to mechanisms
+        class_mechanisms = {
+            "ace inhibitor": [{"parameter": "blood_pressure", "organ": "cardiovascular", "effect_type": "decrease", "magnitude": 0.15}],
+            "beta blocker": [{"parameter": "heart_rate", "organ": "cardiovascular", "effect_type": "decrease", "magnitude": 0.20}],
+            "statin": [{"parameter": "cholesterol", "organ": "cardiovascular", "effect_type": "decrease", "magnitude": 0.30}],
+            "antibiotic": [{"parameter": "bacterial_load", "organ": "immune", "effect_type": "decrease", "magnitude": 0.50}],
+            "antidepressant": [{"parameter": "serotonin", "organ": "neurological", "effect_type": "increase", "magnitude": 0.25}],
+            "proton pump inhibitor": [{"parameter": "gastric_acid", "organ": "gastrointestinal", "effect_type": "decrease", "magnitude": 0.80}],
+            "diuretic": [{"parameter": "fluid_volume", "organ": "renal", "effect_type": "decrease", "magnitude": 0.20}],
+            "insulin": [{"parameter": "blood_glucose", "organ": "endocrine", "effect_type": "decrease", "magnitude": 0.40}],
+            "biguanide": [{"parameter": "blood_glucose", "organ": "endocrine", "effect_type": "decrease", "magnitude": 0.25}],
+            "bronchodilator": [{"parameter": "airway_resistance", "organ": "respiratory", "effect_type": "decrease", "magnitude": 0.30}],
+            "anticoagulant": [{"parameter": "clotting_factors", "organ": "hematological", "effect_type": "decrease", "magnitude": 0.40}],
+            "antiviral": [{"parameter": "viral_load", "organ": "immune", "effect_type": "decrease", "magnitude": 0.50}],
+            "antifungal": [{"parameter": "fungal_load", "organ": "immune", "effect_type": "decrease", "magnitude": 0.50}],
+            "immunosuppressant": [{"parameter": "immune_response", "organ": "immune", "effect_type": "decrease", "magnitude": 0.40}],
+            "analgesic": [{"parameter": "pain_perception", "organ": "neurological", "effect_type": "decrease", "magnitude": 0.50}],
+            "nsaid": [{"parameter": "inflammation", "organ": "immune", "effect_type": "decrease", "magnitude": 0.30}],
+            "opioid": [{"parameter": "pain_perception", "organ": "neurological", "effect_type": "decrease", "magnitude": 0.70}],
+        }
+        
+        for class_key, mechs in class_mechanisms.items():
+            if class_key in drug_class:
+                mechanisms = mechs
+                break
+        
+        # If still no mechanisms, create generic one based on category
+        if not mechanisms:
+            category_organs = {
+                "cardiovascular": "cardiovascular",
+                "antibiotics": "immune",
+                "cns_neurological": "neurological",
+                "respiratory": "respiratory",
+                "gastrointestinal": "gastrointestinal",
+                "endocrine": "endocrine",
+                "analgesics": "neurological",
+                "antivirals": "immune",
+                "antifungals": "immune",
+                "immunosuppressants": "immune",
+                "hematological": "hematological",
+                "renal": "renal"
+            }
+            organ = category_organs.get(category, "cardiovascular")
+            mechanisms = [{"parameter": "general_effect", "organ": organ, "effect_type": "modulate", "magnitude": 0.10}]
+    
+    return mechanisms
+
+
+def _extract_max_dose(gen_drug: dict) -> float:
+    """Extract maximum daily dose from AI-generated drug data."""
+    dosages = gen_drug.get("dosages", [])
+    if dosages:
+        for dosage in dosages:
+            max_dose_str = dosage.get("max_daily_dose", "")
+            # Try to extract numeric value
+            import re
+            numbers = re.findall(r'[\d.]+', str(max_dose_str))
+            if numbers:
+                return float(numbers[0])
+    return 1000.0  # Default max dose
+
+
+def _build_therapeutic_effects(gen_drug: dict) -> list:
+    """Build therapeutic effects from AI-generated drug data."""
+    effects = []
+    
+    # Use mechanism of action to infer effects
+    mechanism = gen_drug.get("mechanism_of_action", "")
+    drug_class = gen_drug.get("drug_class", "").lower()
+    
+    # Common effect mappings
+    if "ace inhibitor" in drug_class or "angiotensin" in mechanism.lower():
+        effects.append({"organ": "cardiovascular", "parameter": "blood_pressure", "direction": "decrease", "magnitude": 15})
+    if "beta" in drug_class.lower() or "adrenergic" in mechanism.lower():
+        effects.append({"organ": "cardiovascular", "parameter": "heart_rate", "direction": "decrease", "magnitude": 20})
+    if "statin" in drug_class or "hmg-coa" in mechanism.lower():
+        effects.append({"organ": "cardiovascular", "parameter": "ldl_cholesterol", "direction": "decrease", "magnitude": 30})
+    if "diuretic" in drug_class:
+        effects.append({"organ": "renal", "parameter": "urine_output", "direction": "increase", "magnitude": 25})
+    if "ssri" in drug_class or "serotonin" in mechanism.lower():
+        effects.append({"organ": "neurological", "parameter": "serotonin", "direction": "increase", "magnitude": 25})
+    if "biguanide" in drug_class or "metformin" in gen_drug.get("name", "").lower():
+        effects.append({"organ": "endocrine", "parameter": "blood_glucose", "direction": "decrease", "magnitude": 25})
+    
+    return effects
+
 
 @api_router.get("/drugs/{drug_id}")
 async def get_drug_info(drug_id: str):
