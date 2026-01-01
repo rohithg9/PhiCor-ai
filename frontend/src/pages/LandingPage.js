@@ -891,7 +891,7 @@ const LandingPage = () => {
             <div className="mt-10 pt-8 border-t border-white/10">
               <p className="text-xs text-muted-foreground mb-4">What you'll discover</p>
               <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1"><span className="text-indigo-400">✓</span> 186+ Diseases</span>
+                <span className="flex items-center gap-1"><span className="text-indigo-400">✓</span> 200+ Diseases</span>
                 <span className="flex items-center gap-1"><span className="text-purple-400">✓</span> 6 Organ Systems</span>
                 <span className="flex items-center gap-1"><span className="text-pink-400">✓</span> Real-time Equations</span>
                 <span className="flex items-center gap-1"><span className="text-green-400">✓</span> No Login Required</span>
