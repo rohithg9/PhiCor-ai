@@ -759,13 +759,15 @@ Return ONLY valid JSON, no additional text."""
             json_match = re.search(r'\{[\s\S]*\}', response)
             if json_match:
                 drug_data = json.loads(json_match.group())
-            
-            # Add metadata
-            drug_data["generated_at"] = datetime.now(timezone.utc).isoformat()
-            drug_data["generator_version"] = "2.0"
-            drug_data["source"] = "ai_generated_bnf_fda"
-            
-            return drug_data
+                
+                # Add metadata
+                drug_data["generated_at"] = datetime.now(timezone.utc).isoformat()
+                drug_data["generator_version"] = "2.0"
+                drug_data["source"] = "ai_generated_bnf_fda"
+                
+                return drug_data
+            else:
+                raise ValueError("No JSON found in response")
             
         except Exception as e:
             print(f"Error generating drug {drug_name}: {e}")
