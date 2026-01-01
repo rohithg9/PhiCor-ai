@@ -117,10 +117,66 @@ const CASE_LIBRARY = {
     icon: Heart,
     color: 'red',
     cases: [
-      { id: 'afib', title: 'Atrial Fibrillation', difficulty: 'Beginner' },
-      { id: 'endocarditis', title: 'Infective Endocarditis', difficulty: 'Advanced' },
-      { id: 'tamponade', title: 'Cardiac Tamponade', difficulty: 'Intermediate' },
-      { id: 'aortic-dissection', title: 'Aortic Dissection', difficulty: 'Advanced' },
+      { 
+        id: 'afib', 
+        title: 'Atrial Fibrillation', 
+        difficulty: 'Beginner',
+        clinicalText: `68-year-old male presents with palpitations and shortness of breath for 3 days.
+Associated: Fatigue, lightheadedness, exercise intolerance.
+Vitals: BP 130/85, HR 142 irregular, RR 20, SpO2 96%.
+Physical: Irregularly irregular pulse, no murmurs, mild bilateral ankle edema.
+ECG: Atrial fibrillation with rapid ventricular response, no ST changes.
+Labs: TSH 0.8, BNP 380 pg/mL, Troponin negative.
+PMH: Hypertension, Type 2 DM, Obesity (BMI 34).
+CHA2DS2-VASc Score: 3 (HTN, DM, age 65-74).`,
+        expectedDiagnosis: 'Atrial Fibrillation with Rapid Ventricular Response',
+        learningPoints: ['Calculate CHA2DS2-VASc score', 'Rate vs rhythm control', 'Anticoagulation decision making']
+      },
+      { 
+        id: 'endocarditis', 
+        title: 'Infective Endocarditis', 
+        difficulty: 'Advanced',
+        clinicalText: `42-year-old male with history of IV drug use presents with fever, chills, and malaise for 2 weeks.
+Associated: Night sweats, weight loss 5kg, fatigue, new murmur.
+Vitals: Temp 38.9°C, BP 110/50, HR 105, SpO2 94%.
+Physical: New diastolic murmur at left sternal border, splinter hemorrhages, Janeway lesions on palms.
+Echo (TTE): Vegetation on aortic valve (12mm), moderate aortic regurgitation.
+Labs: WBC 18,000 with left shift, CRP 180, ESR 65, Procalcitonin 4.2.
+Blood cultures: 3/3 positive for Staphylococcus aureus (MSSA).
+PMH: IVDU, Hepatitis C.`,
+        expectedDiagnosis: 'Infective Endocarditis (Native Valve)',
+        learningPoints: ['Modified Duke criteria', 'Indications for surgery', 'Antibiotic duration and choice']
+      },
+      { 
+        id: 'tamponade', 
+        title: 'Cardiac Tamponade', 
+        difficulty: 'Intermediate',
+        clinicalText: `55-year-old female with breast cancer presents with progressive dyspnea and chest discomfort over 1 week.
+Associated: Orthopnea, dizziness when standing, decreased appetite.
+Vitals: BP 85/70, HR 120, Pulsus paradoxus 18mmHg, RR 28, SpO2 90%.
+Physical: Muffled heart sounds, JVP elevated with prominent x descent, clear lungs.
+ECG: Low voltage, electrical alternans.
+Echo: Large circumferential pericardial effusion with diastolic collapse of RA and RV.
+CXR: Enlarged cardiac silhouette "water bottle" heart.
+PMH: Metastatic breast cancer, on chemotherapy.`,
+        expectedDiagnosis: 'Cardiac Tamponade (Malignant Pericardial Effusion)',
+        learningPoints: ['Beck\'s triad recognition', 'Echo findings in tamponade', 'Pericardiocentesis indications']
+      },
+      { 
+        id: 'aortic-dissection', 
+        title: 'Aortic Dissection', 
+        difficulty: 'Advanced',
+        clinicalText: `62-year-old male with sudden onset severe tearing chest pain radiating to back, started 2 hours ago.
+Associated: Diaphoresis, syncope briefly, now awake but anxious.
+Risk factors: Long-standing uncontrolled hypertension, Marfan habitus.
+Vitals: Right arm BP 180/95, Left arm BP 140/80 (40mmHg difference), HR 95, RR 22.
+Physical: Tall thin habitus, early diastolic murmur (new AR), diminished left femoral pulse.
+CXR: Widened mediastinum (>8cm), pleural effusion left.
+CT Angiogram: Stanford Type A dissection with intimal flap from aortic root extending to descending aorta.
+Labs: D-dimer 8500, Troponin mildly elevated, Cr 1.2.`,
+        expectedDiagnosis: 'Stanford Type A Aortic Dissection',
+        learningPoints: ['Stanford vs DeBakey classification', 'Blood pressure differential', 'Surgical emergency recognition']
+      },
     ]
   },
   pulmonology: {
@@ -128,9 +184,50 @@ const CASE_LIBRARY = {
     icon: Wind,
     color: 'blue',
     cases: [
-      { id: 'copd-exac', title: 'COPD Exacerbation', difficulty: 'Beginner' },
-      { id: 'ards', title: 'ARDS', difficulty: 'Advanced' },
-      { id: 'pneumothorax', title: 'Tension Pneumothorax', difficulty: 'Intermediate' },
+      { 
+        id: 'copd-exac', 
+        title: 'COPD Exacerbation', 
+        difficulty: 'Beginner',
+        clinicalText: `71-year-old male with known COPD presents with worsening dyspnea and increased sputum production for 4 days.
+Associated: Sputum changed from white to yellow-green, increased cough frequency, decreased exercise tolerance.
+Social: 50 pack-year smoking history, quit 2 years ago, on home O2 2L.
+Vitals: Temp 37.6°C, BP 145/85, HR 98, RR 26, SpO2 85% on 2L.
+Physical: Pursed lip breathing, accessory muscle use, bilateral wheezes and rhonchi, prolonged expiration.
+Labs: WBC 12,500, ABG: pH 7.32, pCO2 55, pO2 52, HCO3 28.
+CXR: Hyperinflation, no infiltrate, flattened diaphragms.
+PFT (baseline): FEV1 35% predicted, FEV1/FVC 0.55.`,
+        expectedDiagnosis: 'Acute Exacerbation of COPD (AECOPD)',
+        learningPoints: ['GOLD classification', 'NIV indications', 'Steroid and antibiotic guidelines']
+      },
+      { 
+        id: 'ards', 
+        title: 'ARDS', 
+        difficulty: 'Advanced',
+        clinicalText: `45-year-old female admitted 3 days ago for severe pancreatitis, now with acute respiratory failure.
+Course: Progressive hypoxemia despite supplemental O2, now requiring mechanical ventilation.
+Vitals on vent: BP 95/60 (on vasopressors), HR 115, Temp 38.5°C.
+Ventilator: AC/VC, TV 350mL (6mL/kg IBW), RR 24, PEEP 14, FiO2 80%.
+ABG: pH 7.28, pCO2 48, pO2 65, P/F ratio 81.
+CXR: Bilateral diffuse airspace opacities, no cardiomegaly.
+Echo: Normal LV function, no elevated filling pressures.
+Labs: WBC 22,000, Lipase 2500, Procalcitonin 8.5, Cr 2.1.`,
+        expectedDiagnosis: 'Acute Respiratory Distress Syndrome (ARDS) - Severe',
+        learningPoints: ['Berlin criteria for ARDS', 'Lung protective ventilation', 'Prone positioning indications']
+      },
+      { 
+        id: 'pneumothorax', 
+        title: 'Tension Pneumothorax', 
+        difficulty: 'Intermediate',
+        clinicalText: `28-year-old male brought in after motorcycle accident, GCS 14, complaining of severe right chest pain and dyspnea.
+Mechanism: High-speed impact with guardrail, helmet worn.
+Vitals: BP 85/50, HR 135, RR 32, SpO2 82% on 15L NRB.
+Physical: Tracheal deviation to left, absent breath sounds right hemithorax, hyperresonance to percussion right, distended neck veins.
+Other injuries: Right rib fractures 4-7 palpable, abrasions.
+Pre-hospital: Progressively worsening despite 2L crystalloid.
+CXR (portable): Large right pneumothorax with mediastinal shift to left.`,
+        expectedDiagnosis: 'Tension Pneumothorax (Traumatic)',
+        learningPoints: ['Clinical diagnosis - don\'t wait for CXR', 'Needle decompression technique', 'Chest tube placement']
+      },
     ]
   },
   neurology: {
@@ -138,9 +235,51 @@ const CASE_LIBRARY = {
     icon: Brain,
     color: 'purple',
     cases: [
-      { id: 'stroke', title: 'Ischemic Stroke', difficulty: 'Beginner' },
-      { id: 'meningitis', title: 'Bacterial Meningitis', difficulty: 'Intermediate' },
-      { id: 'sah', title: 'Subarachnoid Hemorrhage', difficulty: 'Advanced' },
+      { 
+        id: 'stroke', 
+        title: 'Ischemic Stroke', 
+        difficulty: 'Beginner',
+        clinicalText: `72-year-old female found by family with right-sided weakness and slurred speech, last known well 2 hours ago.
+Associated: Facial droop right side, unable to lift right arm, confused.
+Vitals: BP 185/105, HR 88 irregular, RR 18, SpO2 97%.
+Physical: NIHSS 14, Right facial droop, Right arm 0/5, Right leg 2/5, Expressive aphasia, Left gaze preference.
+PMH: Atrial fibrillation (not on anticoagulation), Hypertension, Type 2 DM.
+CT Head (non-con): No hemorrhage, Early hypodensity left MCA territory with hyperdense MCA sign.
+CT Angiogram: Left M1 occlusion.
+Labs: Glucose 145, INR 1.0, Platelets 220,000.`,
+        expectedDiagnosis: 'Acute Ischemic Stroke (Left MCA Territory)',
+        learningPoints: ['NIHSS scoring', 'tPA eligibility criteria', 'Mechanical thrombectomy indications']
+      },
+      { 
+        id: 'meningitis', 
+        title: 'Bacterial Meningitis', 
+        difficulty: 'Intermediate',
+        clinicalText: `22-year-old college student presents with severe headache, fever, and neck stiffness for 12 hours.
+Associated: Photophobia, nausea, vomiting, confusion developing.
+Vitals: Temp 39.5°C, BP 90/60, HR 125, RR 22.
+Physical: GCS 13, Positive Kernig and Brudzinski signs, petechial rash on trunk and extremities, no focal deficits.
+Labs: WBC 24,000 with 92% neutrophils.
+LP: Opening pressure 32 cmH2O, WBC 2500 (95% PMN), Protein 250, Glucose 25 (serum 120).
+Gram stain: Gram-positive diplococci.
+CT Head: No mass effect, safe for LP.`,
+        expectedDiagnosis: 'Bacterial Meningitis (Streptococcus pneumoniae)',
+        learningPoints: ['Don\'t delay antibiotics for LP', 'Dexamethasone timing', 'Chemoprophylaxis for contacts']
+      },
+      { 
+        id: 'sah', 
+        title: 'Subarachnoid Hemorrhage', 
+        difficulty: 'Advanced',
+        clinicalText: `48-year-old female with sudden onset "worst headache of my life" that started during exercise.
+Associated: Brief LOC, nausea, vomiting, photophobia, neck stiffness.
+Vitals: BP 175/95, HR 65, RR 16, SpO2 98%.
+Physical: GCS 14 (E4V4M6), nuchal rigidity, no focal deficits, Hunt-Hess Grade 2.
+PMH: Hypertension (untreated), smoker, family history of aneurysm (mother).
+CT Head: Diffuse subarachnoid blood in basal cisterns, Fisher Grade 3.
+CT Angiogram: 7mm saccular aneurysm at anterior communicating artery.
+Labs: Troponin mildly elevated, Na 132.`,
+        expectedDiagnosis: 'Aneurysmal Subarachnoid Hemorrhage',
+        learningPoints: ['Hunt-Hess and Fisher grading', 'Vasospasm monitoring', 'Blood pressure management']
+      },
     ]
   },
   emergency: {
@@ -148,9 +287,51 @@ const CASE_LIBRARY = {
     icon: AlertTriangle,
     color: 'amber',
     cases: [
-      { id: 'sepsis', title: 'Septic Shock', difficulty: 'Intermediate' },
-      { id: 'anaphylaxis', title: 'Anaphylaxis', difficulty: 'Beginner' },
-      { id: 'overdose', title: 'Drug Overdose', difficulty: 'Intermediate' },
+      { 
+        id: 'sepsis', 
+        title: 'Septic Shock', 
+        difficulty: 'Intermediate',
+        clinicalText: `78-year-old female from nursing home presents with altered mental status, fever, and hypotension.
+History: Foley catheter in place for 2 months, recent UTI treated 1 week ago.
+Vitals: Temp 39.2°C, BP 75/45, HR 125, RR 28, SpO2 92%.
+Physical: Lethargic, warm extremities, suprapubic tenderness, cloudy urine in catheter bag.
+Labs: WBC 22,000, Lactate 5.2 mmol/L, Cr 2.8 (baseline 1.2), BUN 45.
+UA: Large leukocytes, positive nitrites, bacteria >100,000 CFU/mL E. coli.
+CXR: No infiltrate.
+Procalcitonin: 15 ng/mL.
+After 2L NS: MAP still 55mmHg.`,
+        expectedDiagnosis: 'Septic Shock (Urosepsis)',
+        learningPoints: ['Surviving Sepsis Guidelines', 'Early goal-directed therapy', 'Vasopressor selection']
+      },
+      { 
+        id: 'anaphylaxis', 
+        title: 'Anaphylaxis', 
+        difficulty: 'Beginner',
+        clinicalText: `32-year-old male presents 15 minutes after eating shrimp at restaurant with progressive symptoms.
+Symptoms: Diffuse urticaria, lip/tongue swelling, throat tightness, wheezing, lightheadedness.
+Vitals: BP 80/50, HR 130, RR 30, SpO2 88%.
+Physical: Widespread hives, angioedema of lips and tongue, inspiratory stridor, diffuse wheezes.
+PMH: Known shellfish allergy (milder reaction previously), asthma.
+Medications: Carries EpiPen but did not use.
+Pre-hospital: No treatment given.`,
+        expectedDiagnosis: 'Anaphylaxis (Food Allergy)',
+        learningPoints: ['Epinephrine is first-line', 'Biphasic reaction monitoring', 'Discharge planning and education']
+      },
+      { 
+        id: 'overdose', 
+        title: 'Drug Overdose', 
+        difficulty: 'Intermediate',
+        clinicalText: `24-year-old male found unresponsive in bathroom by roommate, unknown down time.
+Scene: Empty pill bottles nearby (acetaminophen, oxycodone), alcohol bottles.
+Vitals: BP 90/55, HR 55, RR 6, SpO2 78%, Temp 35.8°C.
+Physical: Unresponsive, pinpoint pupils, decreased respiratory effort, no trauma.
+Fingerstick glucose: 95 mg/dL.
+Response to Naloxone 2mg IN: Partial improvement in RR to 12, remains somnolent.
+Labs: AST 85, ALT 72, Acetaminophen level 180 mcg/mL (at 6 hours post-ingestion).
+UDS: Positive opioids, negative other substances.`,
+        expectedDiagnosis: 'Mixed Overdose (Opioid + Acetaminophen)',
+        learningPoints: ['Naloxone dosing and duration', 'Rumack-Matthew nomogram', 'NAC protocol for acetaminophen']
+      },
     ]
   }
 };
