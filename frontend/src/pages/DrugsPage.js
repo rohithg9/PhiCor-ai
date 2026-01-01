@@ -769,7 +769,8 @@ const DrugsPage = () => {
         return;
       }
       try {
-        const response = await fetch(`${API_URL}/api/drugs-db/${selectedDrug}`);
+        // Use /api/drugs endpoint
+        const response = await fetch(`${API_URL}/api/drugs/${selectedDrug}`);
         if (response.ok) {
           const data = await response.json();
           setDrugDetail(data);
@@ -788,7 +789,8 @@ const DrugsPage = () => {
       
       setIsSimulating(true);
       try {
-        const response = await fetch(`${API_URL}/api/drugs-db/simulate`, {
+        // Use /api/drugs/simulate endpoint
+        const response = await fetch(`${API_URL}/api/drugs/simulate`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
