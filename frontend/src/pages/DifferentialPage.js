@@ -24,7 +24,7 @@ import {
   NORMAL_RANGES,
 } from '../data/bidirectionalMapping';
 import { ORGAN_MODELS } from '../data/organModels';
-import { CLINICAL_CALCULATORS, searchCalculators } from '../data/clinicalCalculators';
+import { CLINICAL_CALCULATORS, searchCalculators, getCalculatorsForDisease, getCalculatorById } from '../data/clinicalCalculators';
 
 // Build comprehensive normal ranges from organ models
 const buildAllNormalRanges = () => {
