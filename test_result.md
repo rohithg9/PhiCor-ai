@@ -190,20 +190,20 @@ agent_communication:
   - agent: "testing"
     message: "PHICOR PK/PD SIMULATION ENGINE FINAL COMPREHENSIVE TESTING COMPLETE: Successfully tested all requested features from review request. 🎉 ALL 13/13 TESTS PASSED! Drug Database: 115 drugs total (meets requirement), all category filters working perfectly (CNS: quetiapine, risperidone, aripiprazole, lithium, methylphenidate; Dermatological: isotretinoin, finasteride; Immunosuppressant: methotrexate, cyclosporine, tacrolimus, mycophenolate; Urological: tamsulosin, sildenafil, oxybutynin; Ophthalmic: latanoprost, timolol_ophthalmic). Disease Database: 28 diseases total, cardiovascular category returns all 5 expected diseases (heart_failure_hfref, acute_coronary_syndrome, atrial_fibrillation, hypertension, ischemic_stroke), type2_diabetes detail endpoint working with complete treatment guidelines, leukemia search returns all 3 types (ALL, AML, CLL) with proper ICD-10 codes. Drug Simulation: /api/drugs/simulate endpoint working perfectly with metformin showing proper glucose reduction (76.3 mg/dL), concentration calculation, and mechanism attributions. PhiCor PK/PD Simulation Engine is fully functional and operational."
 
-  - task: "Differential Diagnosis Clinical Text Analysis"
+  - task: "Differential Diagnosis AI Clinical Synthesis Testing"
     implemented: true
-    working: true
-    file: "/app/frontend/src/data/bidirectionalMapping.js"
-    stuck_count: 0
+    working: false
+    file: "/app/frontend/src/pages/DifferentialPage.js"
+    stuck_count: 1
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
-        agent: "main"
-        comment: "Fixed JavaScript runtime error 'slice is not a function' in getDifferentialDiagnosis function. Issue was caused by attempting to call .slice() on non-array properties. Added Array.isArray() checks before slicing symptoms and lab findings. Also added ICD_CODE_NAMES mapping for better disease name display and fixed probability score formatting in DifferentialPage.js"
-      - working: true
         agent: "testing"
-        comment: "✅ COMPREHENSIVE DIFFERENTIAL DIAGNOSIS TESTING COMPLETE: Successfully verified all requested functionality. Clinical Text Analysis: Clinical text with imaging findings (dilated LV, reduced EF, cardiomegaly, pulmonary congestion, pleural effusion) properly extracted and analyzed. Current Findings section displays 11 extracted findings including labs (BNP 850 pg/mL, Creatinine 1.8 mg/dL, Hemoglobin 10.5 g/dL) and imaging findings. Differential Diagnosis panel shows 20 ranked conditions with top diagnoses 'Heart Failure' (85.8%) and 'Cardiomyopathy' (75.4%) displaying human-readable names (not just ICD codes). Probability scores properly formatted without long decimals. Parameters Tab: Organ selection (Heart) working, parameter dropdown functional, slider controls working, Add Finding button functional, generates differential diagnosis. Expand Diagnosis Details: First diagnosis expansion working, Clinical Reasoning section displays with supporting evidence (dilated_lv, cardiomegaly, pulmonary_congestion, pleural_effusion imaging findings), Evidence-Based Guidelines integration working with tabs (Overview, Clinical, Treatment, Prognosis). No JavaScript errors detected, specifically no 'slice is not a function' errors. Bug fix verification successful - all critical functionality working as expected."
+        comment: "Testing enhanced Differential Diagnosis (Δ) page with AI Clinical Synthesis feature as requested in review"
+      - working: false
+        agent: "testing"
+        comment: "CRITICAL ISSUE: AI Clinical Synthesis feature not working properly. ✅ Navigation to Differential Diagnosis page works (cyan Δ button). ✅ Clinical text analysis works (extracted 10 findings from comprehensive clinical text). ✅ Individual diagnosis expansion works (Clinical Reasoning section visible). ✅ Evidence-Based Guidelines panel works. ❌ AI Clinical Synthesis section is not appearing at TOP of results panel despite API calls being made. Backend synthesis endpoint /api/diagnosis/synthesize returns 422 validation errors when called from frontend, though direct curl test works. Frontend is sending malformed request data that doesn't match backend Pydantic model validation. Error: 'Failed to execute text on Response: body stream already read' suggests response handling issue. Backend logs show mix of 200 OK and 422 Unprocessable Entity responses for synthesis endpoint."
 
 agent_communication:
   - agent: "main"
