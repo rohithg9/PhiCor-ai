@@ -401,9 +401,9 @@ const DifferentialPage = () => {
   // Auto-run synthesis when findings change (with debounce)
   useEffect(() => {
     const timer = setTimeout(() => {
-      console.log('Synthesis check:', { findingsCount: abnormalFindings.length, hasText: !!clinicalText.trim() });
-      // Trigger synthesis if we have 2+ findings OR if we have clinical text with 1+ findings OR just clinical text
-      if (abnormalFindings.length >= 2 || (clinicalText.trim() && abnormalFindings.length > 0) || (clinicalText.trim().length > 50 && differentialResults.length > 0)) {
+      console.log('Synthesis check:', { findingsCount: abnormalFindings.length, hasText: !!clinicalText.trim(), resultsCount: differentialResults.length });
+      // Trigger synthesis if we have 1+ findings with differential results OR clinical text with results
+      if ((abnormalFindings.length >= 1 && differentialResults.length > 0) || (clinicalText.trim() && differentialResults.length > 0)) {
         console.log('Triggering clinical synthesis...');
         runClinicalSynthesis();
       } else {
