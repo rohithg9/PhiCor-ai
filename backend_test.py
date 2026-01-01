@@ -1160,12 +1160,366 @@ def test_differential_diagnosis_ui_features():
     
     return results
 
+def test_drug_database_total_count():
+    """Test that drugs-db endpoint returns ~99 drugs total"""
+    print("\n💊 TESTING DRUG DATABASE TOTAL COUNT")
+    print("=" * 50)
+    
+    try:
+        response = requests.get(f"{BACKEND_URL}/api/drugs-db", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            total_drugs = data.get('total', 0)
+            drugs_list = data.get('drugs', [])
+            
+            print(f"✅ Drugs database endpoint accessible")
+            print(f"📊 Total drugs in database: {total_drugs}")
+            print(f"📊 Drugs returned in response: {len(drugs_list)}")
+            
+            if total_drugs >= 99:
+                print(f"✅ Drug count ({total_drugs}) meets expected ~99 drugs")
+                return True
+            else:
+                print(f"❌ Drug count ({total_drugs}) is below expected ~99 drugs")
+                return False
+        else:
+            print(f"❌ Drugs database endpoint failed: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing drug database: {e}")
+        return False
+
+def test_cns_drugs():
+    """Test CNS drug category - should return 10 CNS drugs"""
+    print("\n🧠 TESTING CNS DRUGS CATEGORY")
+    print("=" * 50)
+    
+    expected_cns_drugs = [
+        "sertraline", "escitalopram", "fluoxetine", "venlafaxine", "duloxetine",
+        "alprazolam", "lorazepam", "gabapentin", "pregabalin", "levetiracetam"
+    ]
+    
+    try:
+        response = requests.get(f"{BACKEND_URL}/api/drugs-db?category=cns", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            drugs = data.get('drugs', [])
+            drug_names = [drug.get('name', '').lower() for drug in drugs]
+            
+            print(f"✅ CNS drugs endpoint accessible")
+            print(f"📊 CNS drugs found: {len(drugs)}")
+            
+            found_drugs = []
+            missing_drugs = []
+            
+            for expected_drug in expected_cns_drugs:
+                if any(expected_drug in name for name in drug_names):
+                    found_drugs.append(expected_drug)
+                    print(f"  ✅ {expected_drug.title()} found")
+                else:
+                    missing_drugs.append(expected_drug)
+                    print(f"  ❌ {expected_drug.title()} not found")
+            
+            print(f"\n📈 Found {len(found_drugs)}/10 expected CNS drugs")
+            
+            if len(found_drugs) >= 8:  # Allow some flexibility
+                return True
+            else:
+                print(f"❌ Too few CNS drugs found: {len(found_drugs)}/10")
+                return False
+        else:
+            print(f"❌ CNS drugs endpoint failed: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing CNS drugs: {e}")
+        return False
+
+def test_gastrointestinal_drugs():
+    """Test gastrointestinal drug category"""
+    print("\n🫄 TESTING GASTROINTESTINAL DRUGS")
+    print("=" * 50)
+    
+    expected_gi_drugs = [
+        "omeprazole", "pantoprazole", "esomeprazole", "famotidine", "ondansetron", "metoclopramide"
+    ]
+    
+    try:
+        response = requests.get(f"{BACKEND_URL}/api/drugs-db?category=gastrointestinal", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            drugs = data.get('drugs', [])
+            drug_names = [drug.get('name', '').lower() for drug in drugs]
+            
+            print(f"✅ GI drugs endpoint accessible")
+            print(f"📊 GI drugs found: {len(drugs)}")
+            
+            found_drugs = []
+            for expected_drug in expected_gi_drugs:
+                if any(expected_drug in name for name in drug_names):
+                    found_drugs.append(expected_drug)
+                    print(f"  ✅ {expected_drug.title()} found")
+                else:
+                    print(f"  ❌ {expected_drug.title()} not found")
+            
+            print(f"\n📈 Found {len(found_drugs)}/{len(expected_gi_drugs)} expected GI drugs")
+            return len(found_drugs) >= 4  # At least 4 out of 6
+        else:
+            print(f"❌ GI drugs endpoint failed: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing GI drugs: {e}")
+        return False
+
+def test_analgesic_drugs():
+    """Test analgesic drug category"""
+    print("\n💊 TESTING ANALGESIC DRUGS")
+    print("=" * 50)
+    
+    expected_analgesic_drugs = [
+        "acetaminophen", "ibuprofen", "naproxen", "celecoxib", "tramadol"
+    ]
+    
+    try:
+        response = requests.get(f"{BACKEND_URL}/api/drugs-db?category=analgesic", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            drugs = data.get('drugs', [])
+            drug_names = [drug.get('name', '').lower() for drug in drugs]
+            
+            print(f"✅ Analgesic drugs endpoint accessible")
+            print(f"📊 Analgesic drugs found: {len(drugs)}")
+            
+            found_drugs = []
+            for expected_drug in expected_analgesic_drugs:
+                if any(expected_drug in name for name in drug_names):
+                    found_drugs.append(expected_drug)
+                    print(f"  ✅ {expected_drug.title()} found")
+                else:
+                    print(f"  ❌ {expected_drug.title()} not found")
+            
+            print(f"\n📈 Found {len(found_drugs)}/{len(expected_analgesic_drugs)} expected analgesic drugs")
+            return len(found_drugs) >= 3  # At least 3 out of 5
+        else:
+            print(f"❌ Analgesic drugs endpoint failed: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing analgesic drugs: {e}")
+        return False
+
+def test_antiinfective_drugs():
+    """Test antiinfective drug category"""
+    print("\n🦠 TESTING ANTIINFECTIVE DRUGS")
+    print("=" * 50)
+    
+    expected_antiinfective_drugs = [
+        "amoxicillin", "amoxicillin_clavulanate", "azithromycin", "ciprofloxacin", "levofloxacin", "cephalexin"
+    ]
+    
+    try:
+        response = requests.get(f"{BACKEND_URL}/api/drugs-db?category=antiinfective", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            drugs = data.get('drugs', [])
+            drug_names = [drug.get('name', '').lower() for drug in drugs]
+            
+            print(f"✅ Antiinfective drugs endpoint accessible")
+            print(f"📊 Antiinfective drugs found: {len(drugs)}")
+            
+            found_drugs = []
+            for expected_drug in expected_antiinfective_drugs:
+                if any(expected_drug in name for name in drug_names):
+                    found_drugs.append(expected_drug)
+                    print(f"  ✅ {expected_drug.title()} found")
+                else:
+                    print(f"  ❌ {expected_drug.title()} not found")
+            
+            print(f"\n📈 Found {len(found_drugs)}/{len(expected_antiinfective_drugs)} expected antiinfective drugs")
+            return len(found_drugs) >= 4  # At least 4 out of 6
+        else:
+            print(f"❌ Antiinfective drugs endpoint failed: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing antiinfective drugs: {e}")
+        return False
+
+def test_endocrine_drugs():
+    """Test endocrine drug category"""
+    print("\n🩺 TESTING ENDOCRINE DRUGS")
+    print("=" * 50)
+    
+    expected_endocrine_drugs = [
+        "levothyroxine", "metformin", "glipizide", "sitagliptin", "prednisone"
+    ]
+    
+    try:
+        response = requests.get(f"{BACKEND_URL}/api/drugs-db?category=endocrine", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            drugs = data.get('drugs', [])
+            drug_names = [drug.get('name', '').lower() for drug in drugs]
+            
+            print(f"✅ Endocrine drugs endpoint accessible")
+            print(f"📊 Endocrine drugs found: {len(drugs)}")
+            
+            found_drugs = []
+            for expected_drug in expected_endocrine_drugs:
+                if any(expected_drug in name for name in drug_names):
+                    found_drugs.append(expected_drug)
+                    print(f"  ✅ {expected_drug.title()} found")
+                else:
+                    print(f"  ❌ {expected_drug.title()} not found")
+            
+            print(f"\n📈 Found {len(found_drugs)}/{len(expected_endocrine_drugs)} expected endocrine drugs")
+            return len(found_drugs) >= 3  # At least 3 out of 5
+        else:
+            print(f"❌ Endocrine drugs endpoint failed: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing endocrine drugs: {e}")
+        return False
+
+def test_hematological_drugs():
+    """Test hematological drug category"""
+    print("\n🩸 TESTING HEMATOLOGICAL DRUGS")
+    print("=" * 50)
+    
+    expected_hematological_drugs = [
+        "aspirin", "clopidogrel", "rivaroxaban", "apixaban"
+    ]
+    
+    try:
+        response = requests.get(f"{BACKEND_URL}/api/drugs-db?category=hematological", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            drugs = data.get('drugs', [])
+            drug_names = [drug.get('name', '').lower() for drug in drugs]
+            
+            print(f"✅ Hematological drugs endpoint accessible")
+            print(f"📊 Hematological drugs found: {len(drugs)}")
+            
+            found_drugs = []
+            for expected_drug in expected_hematological_drugs:
+                if any(expected_drug in name for name in drug_names):
+                    found_drugs.append(expected_drug)
+                    print(f"  ✅ {expected_drug.title()} found")
+                else:
+                    print(f"  ❌ {expected_drug.title()} not found")
+            
+            print(f"\n📈 Found {len(found_drugs)}/{len(expected_hematological_drugs)} expected hematological drugs")
+            return len(found_drugs) >= 3  # At least 3 out of 4
+        else:
+            print(f"❌ Hematological drugs endpoint failed: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing hematological drugs: {e}")
+        return False
+
+def test_sertraline_drug_detail():
+    """Test specific drug detail endpoint for sertraline"""
+    print("\n🧠 TESTING SERTRALINE DRUG DETAIL")
+    print("=" * 50)
+    
+    try:
+        response = requests.get(f"{BACKEND_URL}/api/drugs-db/sertraline", timeout=10)
+        if response.status_code == 200:
+            drug_data = response.json()
+            
+            print(f"✅ Sertraline drug detail endpoint accessible")
+            
+            # Check for required fields
+            required_fields = [
+                "name", "brand_names", "mechanism_of_action", "indications", "contraindications"
+            ]
+            
+            found_fields = []
+            missing_fields = []
+            
+            for field in required_fields:
+                if field in drug_data and drug_data[field]:
+                    found_fields.append(field)
+                    print(f"  ✅ {field} field found")
+                else:
+                    missing_fields.append(field)
+                    print(f"  ❌ {field} field missing")
+            
+            # Check specific content
+            if "brand_names" in drug_data and isinstance(drug_data["brand_names"], list):
+                print(f"  ✅ Brand names: {', '.join(drug_data['brand_names'][:3])}")
+            
+            if "mechanism_of_action" in drug_data:
+                mechanism = drug_data["mechanism_of_action"][:100] + "..." if len(drug_data["mechanism_of_action"]) > 100 else drug_data["mechanism_of_action"]
+                print(f"  ✅ Mechanism: {mechanism}")
+            
+            if "indications" in drug_data and isinstance(drug_data["indications"], list):
+                print(f"  ✅ Indications count: {len(drug_data['indications'])}")
+            
+            if "contraindications" in drug_data and isinstance(drug_data["contraindications"], list):
+                print(f"  ✅ Contraindications count: {len(drug_data['contraindications'])}")
+            
+            print(f"\n📈 Found {len(found_fields)}/{len(required_fields)} required fields")
+            return len(found_fields) >= 4  # At least 4 out of 5 fields
+        else:
+            print(f"❌ Sertraline drug detail endpoint failed: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing sertraline drug detail: {e}")
+        return False
+
+def test_drug_simulation():
+    """Test drug simulation endpoint with sertraline"""
+    print("\n🧪 TESTING DRUG SIMULATION")
+    print("=" * 50)
+    
+    try:
+        simulation_data = {
+            "drug_name": "sertraline",
+            "dosage": 50,
+            "frequency": "once",
+            "duration_hours": 24,
+            "route": "oral"
+        }
+        
+        response = requests.post(f"{BACKEND_URL}/api/drugs-db/simulate", json=simulation_data, timeout=10)
+        if response.status_code == 200:
+            result = response.json()
+            
+            print(f"✅ Drug simulation endpoint accessible")
+            
+            # Check for expected response fields
+            expected_fields = ["drug", "dosage_mg", "modified_state"]
+            found_fields = []
+            
+            for field in expected_fields:
+                if field in result:
+                    found_fields.append(field)
+                    print(f"  ✅ {field} field found")
+                else:
+                    print(f"  ❌ {field} field missing")
+            
+            if "drug" in result:
+                print(f"  ✅ Drug name: {result['drug']}")
+            
+            if "dosage_mg" in result:
+                print(f"  ✅ Dosage: {result['dosage_mg']}mg")
+            
+            if "modified_state" in result and isinstance(result["modified_state"], dict):
+                print(f"  ✅ Modified state parameters: {len(result['modified_state'])}")
+            
+            print(f"\n📈 Found {len(found_fields)}/{len(expected_fields)} expected fields")
+            return len(found_fields) >= 2  # At least 2 out of 3 fields
+        else:
+            print(f"❌ Drug simulation endpoint failed: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing drug simulation: {e}")
+        return False
+
 def run_all_tests():
     """Run all tests and provide summary"""
-    print("🧪 PHICORE.AI MEDICAL SIMULATION PLATFORM - COMPREHENSIVE TESTING")
+    print("🧪 PHICOR DRUG ENGINE - COMPREHENSIVE DRUG DATABASE EXPANSION TESTING")
     print("=" * 80)
-    print("Testing comprehensive medical simulation platform features")
-    print("Focus: New comprehensive parameter ranges for differential diagnosis")
+    print("Testing comprehensive drug database expansion from ~51 to 99 drugs")
+    print("Focus: New drug categories and comprehensive drug data")
     print("=" * 80)
     
     test_results = {}
