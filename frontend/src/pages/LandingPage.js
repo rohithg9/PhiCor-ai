@@ -709,7 +709,7 @@ const LandingPage = () => {
                   <ul className="space-y-2">
                     <li className="flex items-start gap-2 text-sm text-muted-foreground">
                       <span className="text-rose-400 mt-0.5">→</span>
-                      115+ drugs with complete profiles
+                      {platformStats.drugs} drugs with complete profiles
                     </li>
                     <li className="flex items-start gap-2 text-sm text-muted-foreground">
                       <span className="text-rose-400 mt-0.5">→</span>
