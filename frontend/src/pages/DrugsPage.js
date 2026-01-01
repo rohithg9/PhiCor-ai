@@ -981,55 +981,71 @@ const DrugSimulationPanel = ({ drug, patient, dosage, setDosage, simulation, isS
         recommendedDose = Math.round(standardDoseMg * 0.75);
         adjustments.push({ factor: 'Mild renal impairment (GFR 60-90)', action: '25% dose reduction', severity: 'low' });
       }
-    } else if (liverFunction === 'mild_impairment') {
-      recommendedDose = Math.round(recommendedDose * 0.75);
-      adjustments.push({ factor: 'Mild hepatic impairment', action: '25% dose reduction', severity: 'low' });
+      
+      // Hepatic adjustment
+      if (liverFunction === 'severe_impairment') {
+        recommendedDose = Math.round(recommendedDose * 0.25);
+        adjustments.push({ factor: 'Severe hepatic impairment', action: '75% dose reduction', severity: 'critical' });
+        if (riskLevel === 'low') riskLevel = 'high';
+      } else if (liverFunction === 'moderate_impairment') {
+        recommendedDose = Math.round(recommendedDose * 0.5);
+        adjustments.push({ factor: 'Moderate hepatic impairment', action: '50% dose reduction', severity: 'moderate' });
+        if (riskLevel === 'low') riskLevel = 'moderate';
+      } else if (liverFunction === 'mild_impairment') {
+        recommendedDose = Math.round(recommendedDose * 0.75);
+        adjustments.push({ factor: 'Mild hepatic impairment', action: '25% dose reduction', severity: 'low' });
+      }
+    
+      // Age adjustment for elderly
+      if (age >= 75) {
+        recommendedDose = Math.round(recommendedDose * 0.5);
+        adjustments.push({ factor: 'Elderly patient (≥75 years)', action: 'Start with 50% dose', severity: 'moderate' });
+        if (riskLevel === 'low') riskLevel = 'moderate';
+      } else if (age >= 65) {
+        recommendedDose = Math.round(recommendedDose * 0.75);
+        adjustments.push({ factor: 'Geriatric patient (65-74 years)', action: 'Consider 25% dose reduction', severity: 'low' });
+      }
+    
+      // Weight-based adjustment for extremes
+      if (weight < 50) {
+        recommendedDose = Math.round(recommendedDose * 0.75);
+        adjustments.push({ factor: 'Low body weight (<50kg)', action: '25% dose reduction', severity: 'low' });
+      } else if (weight > 100) {
+        recommendedDose = Math.round(recommendedDose * 1.25);
+        adjustments.push({ factor: 'High body weight (>100kg)', action: 'Consider 25% dose increase', severity: 'low' });
+      }
+    
+      // Check for contraindicated conditions from drug data
+      if (drug.contraindications) {
+        patient.conditions?.forEach(condition => {
+          const match = drug.contraindications.find(ci => 
+            ci.toLowerCase().includes(condition.toLowerCase()) ||
+            condition.toLowerCase().includes(ci.toLowerCase())
+          );
+          if (match) {
+            contraindications.push(`Medical condition: ${condition} - ${match}`);
+            isContraindicated = true;
+            riskLevel = 'contraindicated';
+          }
+        });
+      }
     }
     
-    // Age adjustment for elderly
-    if (age >= 75) {
-      recommendedDose = Math.round(recommendedDose * 0.5);
-      adjustments.push({ factor: 'Elderly patient (≥75 years)', action: 'Start with 50% dose', severity: 'moderate' });
-      if (riskLevel !== 'high') riskLevel = 'moderate';
-    } else if (age >= 65) {
-      recommendedDose = Math.round(recommendedDose * 0.75);
-      adjustments.push({ factor: 'Geriatric patient (65-74 years)', action: 'Consider 25% dose reduction', severity: 'low' });
+    // Ensure minimum effective dose (if not contraindicated)
+    if (!isContraindicated) {
+      recommendedDose = Math.max(recommendedDose, 5);
     }
-    
-    // Weight-based adjustment for extremes
-    if (weight < 50) {
-      recommendedDose = Math.round(recommendedDose * 0.75);
-      adjustments.push({ factor: 'Low body weight (<50kg)', action: '25% dose reduction', severity: 'low' });
-    } else if (weight > 100) {
-      recommendedDose = Math.round(recommendedDose * 1.25);
-      adjustments.push({ factor: 'High body weight (>100kg)', action: 'Consider 25% dose increase', severity: 'low' });
-    }
-    
-    // Check for contraindicated conditions
-    const contraindicated = [];
-    if (drug.contraindications) {
-      patient.conditions?.forEach(condition => {
-        const match = drug.contraindications.find(ci => 
-          ci.toLowerCase().includes(condition.toLowerCase()) ||
-          condition.toLowerCase().includes(ci.toLowerCase())
-        );
-        if (match) {
-          contraindicated.push(condition);
-          riskLevel = 'high';
-        }
-      });
-    }
-    
-    // Ensure minimum effective dose
-    recommendedDose = Math.max(recommendedDose, 5);
     
     return {
       standardDose: standardDoseMg,
-      recommendedDose,
+      recommendedDose: isContraindicated ? 0 : recommendedDose,
       adjustments,
       gfr,
       riskLevel,
-      contraindicated
+      isContraindicated,
+      contraindications,
+      allergyWarnings,
+      interactionWarnings
     };
   };
 
