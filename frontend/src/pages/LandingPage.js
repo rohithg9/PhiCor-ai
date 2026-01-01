@@ -399,7 +399,7 @@ const LandingPage = () => {
                   </div>
                   <div className="grid grid-cols-3 gap-4 w-full mt-4">
                     <div className="text-center p-3 rounded-lg bg-white/5">
-                      <div className="text-2xl font-bold text-indigo-400">124</div>
+                      <div className="text-2xl font-bold text-indigo-400">186</div>
                       <div className="text-xs text-muted-foreground">Diseases</div>
                     </div>
                     <div className="text-center p-3 rounded-lg bg-white/5">
