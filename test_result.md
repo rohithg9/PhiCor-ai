@@ -124,8 +124,8 @@ frontend:
 
 metadata:
   created_by: "testing_agent"
-  version: "1.2"
-  test_sequence: 3
+  version: "1.3"
+  test_sequence: 4
 
 test_plan:
   current_focus:
@@ -146,3 +146,5 @@ agent_communication:
     message: "CRITICAL REACT ERROR FIXED: Found and resolved React hooks violation in PKCurveVisualization component (useMemo called conditionally after early return). This was causing red screen compilation error preventing app from loading."
   - agent: "testing"
     message: "PHICOR DRUG ENGINE COMPREHENSIVE TESTING COMPLETE: All requested functionality working perfectly. Fixed React hooks issue, tested all 13 major features including drug list (51 drugs), search, filters, drug details, patient simulation, PK/PD parameters, contraindication warnings, and proper labeling. Application is fully functional and meets all requirements."
+  - agent: "testing"
+    message: "COMPREHENSIVE DRUG DATABASE EXPANSION TESTING COMPLETE: Successfully verified expansion from ~51 to 99 drugs across all new categories. All 6 drug categories tested (CNS, GI, Analgesic, Antiinfective, Endocrine, Hematological) with excellent results. Drug detail endpoints working perfectly with complete information including international brand names, mechanisms, indications, and contraindications. Drug simulation endpoint functional. Database expansion fully verified and operational."
