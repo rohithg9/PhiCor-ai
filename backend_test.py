@@ -1056,6 +1056,12 @@ def run_all_tests():
             status = "✅ PASS" if test_results[test_name] else "❌ FAIL"
             print(f"  {status} - {test_name.replace('_', ' ').title()}")
     
+    print(f"\n📊 MEDICAL KNOWLEDGE BASE API TESTS:")
+    for test_name in knowledge_base_tests:
+        if test_name in test_results:
+            status = "✅ PASS" if test_results[test_name] else "❌ FAIL"
+            print(f"  {status} - {test_name.replace('_', ' ').title()}")
+    
     print(f"\n📊 INFRASTRUCTURE TESTS:")
     for test_name in infrastructure_tests:
         if test_name in test_results:
