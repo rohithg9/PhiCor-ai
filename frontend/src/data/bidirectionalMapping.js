@@ -269,7 +269,11 @@ const findDiseaseParameterMatch = (disease, parameterId) => {
       
       for (const [paramId, modification] of Object.entries(params)) {
         if (paramId === parameterId || `${organKey}.${paramId}` === parameterId) {
-          return modification;
+          // Normalize factor vs multiplier
+          return {
+            ...modification,
+            factor: modification.factor || modification.multiplier || 1
+          };
         }
       }
     }
