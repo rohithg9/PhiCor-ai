@@ -896,6 +896,11 @@ const DrugsPage = () => {
           
           {/* Drug List */}
           <ScrollArea className="flex-1">
+            {/* Debug info - temporary */}
+            <div className="p-2 bg-yellow-100 text-yellow-800 text-xs border-b">
+              Debug: {debugInfo} | API: {API_URL || 'UNDEFINED'}
+            </div>
+            
             {loading ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="w-6 h-6 animate-spin text-primary" />
@@ -906,7 +911,7 @@ const DrugsPage = () => {
               </div>
             ) : drugs.length === 0 ? (
               <div className="p-4 text-center text-muted-foreground text-sm">
-                No drugs found. API: {API_URL ? 'configured' : 'NOT configured'}
+                No drugs found
               </div>
             ) : (
               <div className="p-2 space-y-1">
