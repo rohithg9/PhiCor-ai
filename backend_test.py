@@ -1,44 +1,39 @@
 #!/usr/bin/env python3
 """
-Backend Testing for PhiCor Medical Knowledge Base API
-Testing newly implemented Medical Knowledge Base API endpoints:
+Backend Testing for PhiCore.ai Medical Knowledge Base Integration
+Testing the integrated Medical Knowledge Base API endpoints as requested in review:
 
-MEDICAL KNOWLEDGE BASE API TESTING:
-1. Drug Generation Status API - GET /api/drugs-db/generation-status
-   - Should return completion percentage (100%), categories with counts, last generated drugs
+PHICORE.AI MEDICAL KNOWLEDGE BASE INTEGRATION TESTING:
 
-2. Drug Chunk Generation API - POST /api/drugs-db/generate-chunk  
-   - Body: {"category": "cardiovascular", "count": 1, "skip_existing": true}
-   - Should return message indicating drugs already generated (skip_existing=true)
+Test 1: Platform Stats API
+- Endpoint: GET /api/platform/stats
+- Expected: Returns drugs.total > 300, diseases.total > 200, dynamic display_stats
 
-3. ICD-10 Status API - GET /api/diseases-db/icd10-status
-   - Should return completion percentage, by_category breakdown showing generated vs total counts
+Test 2: Merged Drugs List API  
+- Endpoint: GET /api/drugs?limit=500
+- Expected: Returns total > 300 drugs, includes both comprehensive (ai_generated=false) and AI-generated (ai_generated=true) drugs
 
-4. Generated Drugs List API - GET /api/drugs-db/generated?limit=10
-   - Should return list of AI-generated drugs with comprehensive data
+Test 3: Drug Detail with Mathematical Models
+- Endpoint: GET /api/drugs/lisinopril
+- Expected: Returns drug with mechanisms array (for simulation), therapeutic_effects array, max_daily_dose_mg
 
-5. Disease Database Stats - GET /api/diseases-db/stats
-   - Should return total_diseases, ai_generated count, by_category breakdown
+Test 4: Drug Search
+- Endpoint: GET /api/drugs?search=metformin
+- Expected: Returns metformin drug with full details
 
-6. Drug Data Quality Verification - GET /api/drugs-db/generated?limit=1
-   - Check returned drug has: id, name, brand_names, mechanism_of_action, dosages, contraindications, drug_interactions, side_effects
+Test 5: Drug Category Filter
+- Endpoint: GET /api/drugs?category=cardiovascular
+- Expected: Returns only cardiovascular drugs
 
-LEGACY DRUG DATABASE TESTING (115 drugs):
-- GET /api/drugs-db?limit=200 - Should return ~115 drugs
-- GET /api/drugs-db?category=cns - Should return CNS drugs including quetiapine, risperidone, aripiprazole, lithium, methylphenidate
-- GET /api/drugs-db?category=dermatological - Should return isotretinoin, finasteride
-- GET /api/drugs-db?category=immunosuppressant - Should return methotrexate, cyclosporine, tacrolimus, mycophenolate
-- GET /api/drugs-db?category=urological - Should return tamsulosin, sildenafil, oxybutynin
-- GET /api/drugs-db?category=ophthalmic - Should return latanoprost, timolol_ophthalmic
+Test 6: Generated Drug Detail
+- Endpoint: GET /api/drugs/amlodipine  
+- Expected: Returns AI-generated drug with mechanisms for simulation
 
-DISEASE DATABASE TESTING (28 diseases):
-- GET /api/diseases-db - Should return 28 diseases
-- GET /api/diseases-db?category=cardiovascular - Should return heart_failure_hfref, acute_coronary_syndrome, atrial_fibrillation, hypertension, ischemic_stroke
-- GET /api/diseases-db/type2_diabetes - Should return full diabetes details with treatment guidelines
-- GET /api/diseases-db?search=leukemia - Should return ALL, AML, CLL
+Test 7: Disease Stats
+- Endpoint: GET /api/diseases-db/stats
+- Expected: Returns total_diseases > 200, by_category breakdown
 
-DRUG SIMULATION TESTING:
-- POST /api/drug-engine/simulate with a drug and virtual patient should return efficacy/safety scores
+API Base URL: https://medcalc-ai.preview.emergentagent.com
 """
 
 import requests
