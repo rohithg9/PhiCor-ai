@@ -111,7 +111,7 @@ const CalculatorInput = ({ input, value, onChange, isDark }) => {
 // Main Calculator Component
 const ClinicalCalculatorPanel = ({ isDark = true, initialCalculator = null }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState('cardiovascular'); // Open cardiovascular by default
   const [selectedCalculator, setSelectedCalculator] = useState(initialCalculator);
   const [inputs, setInputs] = useState({});
   const [showResult, setShowResult] = useState(false);
