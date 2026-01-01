@@ -256,7 +256,49 @@ export const getDifferentialDiagnosis = (abnormalFindings, options = {}) => {
   
   // First pass: Match parameters to diseases
   abnormalFindings.forEach(finding => {
-    const { parameterId, direction, value, severity = 1 } = finding;
+    const { parameterId, direction, value, severity = 1, diseases = [] } = finding;
+    
+    // Check if finding has pre-defined disease associations (from imaging findings)
+    if (diseases && diseases.length > 0) {
+      diseases.forEach(diseaseCode => {
+        const disease = ALL_DISEASES[diseaseCode];
+        const diseaseName = disease?.name || diseaseCode.replace(/_/g, ' ');
+        
+        if (!conditionScores[diseaseCode]) {
+          conditionScores[diseaseCode] = {
+            diseaseCode: diseaseCode,
+            diseaseName: diseaseName,
+            icd10: diseaseCode.replace('_', '.'),
+            category: disease?.category || 'cardiovascular',
+            primaryOrgan: disease?.primaryOrgan || 'heart',
+            matchCount: 0,
+            matchedParams: [],
+            totalMagnitudeScore: 0,
+            probabilityScore: 0,
+            confidence: 'low',
+            supportingEvidence: [],
+            contradictingEvidence: [],
+          };
+        }
+        
+        conditionScores[diseaseCode].matchCount += 1;
+        conditionScores[diseaseCode].matchedParams.push({
+          param: parameterId,
+          direction,
+          factor: 1.5,
+          expectedChange: 'N/A',
+          note: `Imaging finding: ${parameterId.replace(/_/g, ' ')}`,
+        });
+        conditionScores[diseaseCode].totalMagnitudeScore += severity === 'severe' ? 2 : severity === 'moderate' ? 1.5 : 1;
+        conditionScores[diseaseCode].supportingEvidence.push({
+          finding: parameterId,
+          direction,
+          explanation: `Imaging finding suggests ${diseaseName}`,
+        });
+      });
+    }
+    
+    // Also check parameter-to-disease mapping
     const matches = getConditionsAffectingParameter(parameterId, direction);
     
     matches.forEach(match => {
@@ -288,7 +330,7 @@ export const getDifferentialDiagnosis = (abnormalFindings, options = {}) => {
         expectedChange: `${match.percentChange}%`,
         note: match.note,
       });
-      conditionScores[key].totalMagnitudeScore += Math.abs(match.factor - 1) * severity;
+      conditionScores[key].totalMagnitudeScore += Math.abs(match.factor - 1) * (typeof severity === 'number' ? severity : 1);
       
       // Add to supporting evidence
       conditionScores[key].supportingEvidence.push({
