@@ -1462,9 +1462,9 @@ const DrugsPage = () => {
         const params = new URLSearchParams();
         if (selectedCategory) params.append('category', selectedCategory);
         if (searchQuery) params.append('search', searchQuery);
-        params.append('limit', '200');
+        params.append('limit', '500');
         
-        // Use /api/drugs endpoint (from comprehensive_drugs.py)
+        // Use /api/drugs endpoint (from comprehensive_drugs.py + AI-generated)
         const url = `${API_URL}/api/drugs?${params.toString()}`;
         setDebugInfo(`Fetching: ${url}`);
         
