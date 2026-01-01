@@ -674,55 +674,195 @@ const TestPatientPanel = ({ isDark, onLoadCase }) => {
       {/* Virtual Patient Simulator */}
       {activeSection === 'simulator' && (
         <div className="space-y-4">
-          <div className={`p-4 rounded-lg border ${isDark ? 'bg-gradient-to-br from-purple-900/20 to-indigo-900/20 border-purple-500/30' : 'bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-200'}`}>
+          {simulatorStep === 0 ? (
+            // Welcome screen
+            <div className={`p-4 rounded-lg border ${isDark ? 'bg-gradient-to-br from-purple-900/20 to-indigo-900/20 border-purple-500/30' : 'bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-200'}`}>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 rounded-lg bg-purple-500/20">
+                  <Stethoscope className="w-5 h-5 text-purple-400" />
+                </div>
+                <div>
+                  <h4 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                    Interactive Patient Encounter
+                  </h4>
+                  <p className={`text-xs ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>
+                    Step-by-step diagnostic reasoning practice
+                  </p>
+                </div>
+              </div>
+              
+              <div className={`p-3 rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-white'} space-y-3`}>
+                <div className="flex items-center gap-2 text-sm">
+                  <Clock className="w-4 h-4 text-amber-500" />
+                  <span className={isDark ? 'text-gray-300' : 'text-gray-700'}>
+                    How it works:
+                  </span>
+                </div>
+                <ol className={`text-xs space-y-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <li className="flex items-start gap-2">
+                    <span className="bg-purple-500 text-white w-4 h-4 rounded-full flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">1</span>
+                    PhiCor presents a patient with chief complaint
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="bg-purple-500 text-white w-4 h-4 rounded-full flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">2</span>
+                    Review the clinical presentation
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="bg-purple-500 text-white w-4 h-4 rounded-full flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">3</span>
+                    Load the case for full analysis
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="bg-purple-500 text-white w-4 h-4 rounded-full flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">4</span>
+                    Compare your differential with PhiCor's synthesis
+                  </li>
+                </ol>
+              </div>
+              
+              <Button 
+                onClick={startSimulator}
+                disabled={isLoadingSimulator}
+                className="w-full mt-3 bg-gradient-to-r from-purple-500 to-indigo-500 text-white"
+              >
+                {isLoadingSimulator ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Generating Patient...
+                  </>
+                ) : (
+                  <>
+                    <Target className="w-4 h-4 mr-2" />
+                    Start Simulation
+                  </>
+                )}
+              </Button>
+            </div>
+          ) : (
+            // Active simulation
+            <div className={`p-4 rounded-lg border ${isDark ? 'bg-gray-800/50 border-purple-500/30' : 'bg-white border-purple-200'}`}>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-purple-500/20">
+                    <User className="w-4 h-4 text-purple-400" />
+                  </div>
+                  <span className={`font-medium text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                    {simulatorCase?.title || 'Virtual Patient'}
+                  </span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => { setSimulatorStep(0); setSimulatorCase(null); }}
+                  className="h-7 text-xs"
+                >
+                  <X className="w-3 h-3 mr-1" />
+                  Reset
+                </Button>
+              </div>
+              
+              {/* Chief Complaint */}
+              <div className={`p-3 rounded-lg mb-3 ${isDark ? 'bg-amber-900/20 border border-amber-500/30' : 'bg-amber-50 border border-amber-200'}`}>
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertTriangle className="w-4 h-4 text-amber-500" />
+                  <span className={`text-xs font-medium ${isDark ? 'text-amber-400' : 'text-amber-700'}`}>
+                    Chief Complaint
+                  </span>
+                </div>
+                <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                  {simulatorCase?.description || 'Patient presenting with clinical symptoms...'}
+                </p>
+              </div>
+              
+              {/* Clinical Details Preview */}
+              <div className={`p-3 rounded-lg mb-3 ${isDark ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
+                <div className="flex items-center gap-2 mb-2">
+                  <FileText className="w-4 h-4 text-blue-500" />
+                  <span className={`text-xs font-medium ${isDark ? 'text-blue-400' : 'text-blue-700'}`}>
+                    Clinical Presentation
+                  </span>
+                </div>
+                <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'} line-clamp-4`}>
+                  {simulatorCase?.clinicalText?.substring(0, 200)}...
+                </p>
+              </div>
+              
+              {/* Action buttons */}
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => onLoadCase(simulatorCase)}
+                  className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white text-xs"
+                >
+                  <Play className="w-3 h-3 mr-1" />
+                  Load Full Case
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={startSimulator}
+                  disabled={isLoadingSimulator}
+                  className="text-xs"
+                >
+                  <Shuffle className="w-3 h-3 mr-1" />
+                  New Patient
+                </Button>
+              </div>
+            </div>
+          )}
+          
+          {/* Document Upload Section */}
+          <div className={`p-4 rounded-lg border ${isDark ? 'bg-gray-800/30 border-gray-700' : 'bg-gray-50 border-gray-200'}`}>
             <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 rounded-lg bg-purple-500/20">
-                <Stethoscope className="w-5 h-5 text-purple-400" />
+              <div className="p-2 rounded-lg bg-blue-500/20">
+                <Upload className="w-5 h-5 text-blue-400" />
               </div>
               <div>
-                <h4 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  Interactive Patient Encounter
+                <h4 className={`font-medium text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  Upload Document
                 </h4>
-                <p className={`text-xs ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>
-                  Step-by-step diagnostic reasoning practice
+                <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                  Extract clinical data from lab reports, case files
                 </p>
               </div>
             </div>
             
-            <div className={`p-3 rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-white'} space-y-3`}>
-              <div className="flex items-center gap-2 text-sm">
-                <Clock className="w-4 h-4 text-amber-500" />
-                <span className={isDark ? 'text-gray-300' : 'text-gray-700'}>
-                  How it works:
-                </span>
-              </div>
-              <ol className={`text-xs space-y-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                <li className="flex items-start gap-2">
-                  <span className="bg-purple-500 text-white w-4 h-4 rounded-full flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">1</span>
-                  AI presents a patient with chief complaint
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="bg-purple-500 text-white w-4 h-4 rounded-full flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">2</span>
-                  You ask questions & order tests
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="bg-purple-500 text-white w-4 h-4 rounded-full flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">3</span>
-                  Form your differential diagnosis
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="bg-purple-500 text-white w-4 h-4 rounded-full flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">4</span>
-                  Compare with PhiCor's analysis
-                </li>
-              </ol>
-            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.doc,.docx,.txt"
+              onChange={handleFileUpload}
+              className="hidden"
+            />
             
-            <Button 
-              className="w-full mt-3 bg-gradient-to-r from-purple-500 to-indigo-500 text-white"
-              disabled
+            <Button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+              variant="outline"
+              className="w-full"
             >
-              <Target className="w-4 h-4 mr-2" />
-              Start Simulation (Coming Soon)
+              {isUploading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Extracting Text...
+                </>
+              ) : (
+                <>
+                  <Upload className="w-4 h-4 mr-2" />
+                  Select PDF, Word, or Text File
+                </>
+              )}
             </Button>
+            
+            {uploadError && (
+              <div className={`mt-2 p-2 rounded text-xs flex items-center gap-2 ${isDark ? 'bg-red-900/20 text-red-400' : 'bg-red-50 text-red-600'}`}>
+                <X className="w-3 h-3" />
+                {uploadError}
+              </div>
+            )}
+            
+            {uploadSuccess && (
+              <div className={`mt-2 p-2 rounded text-xs flex items-center gap-2 ${isDark ? 'bg-emerald-900/20 text-emerald-400' : 'bg-emerald-50 text-emerald-600'}`}>
+                <CheckCircle className="w-3 h-3" />
+                {uploadSuccess}
+              </div>
+            )}
           </div>
         </div>
       )}
