@@ -621,10 +621,31 @@ PMH: Hypertension, Type 2 Diabetes"
             {/* Current Findings */}
             {abnormalFindings.length > 0 && (
               <div className={`rounded-2xl border ${isDark ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'} p-4`}>
-                <h3 className={`text-sm font-semibold mb-3 flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  <Activity className="w-4 h-4 text-emerald-500" />
-                  Current Findings ({abnormalFindings.length})
-                </h3>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className={`text-sm font-semibold flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                    <Activity className="w-4 h-4 text-emerald-500" />
+                    Current Findings ({abnormalFindings.length})
+                  </h3>
+                  {abnormalFindings.length >= 2 && (
+                    <Button
+                      onClick={runClinicalSynthesis}
+                      disabled={isSynthesizing}
+                      className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-xs py-1 px-3 h-auto"
+                    >
+                      {isSynthesizing ? (
+                        <>
+                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2" />
+                          Synthesizing...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-3 h-3 mr-1" />
+                          AI Synthesis
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
                 <div className="flex flex-wrap gap-2">
                   {abnormalFindings.map(finding => (
                     <Badge
