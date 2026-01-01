@@ -701,6 +701,7 @@ const DrugsPage = () => {
   // Drug list state
   const [drugs, setDrugs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedDrug, setSelectedDrug] = useState(null);
