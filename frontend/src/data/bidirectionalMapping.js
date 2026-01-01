@@ -144,16 +144,25 @@ export const buildParameterToDiseaseIndex = () => {
 export const getConditionsAffectingParameter = (parameterId, direction = null) => {
   const index = buildParameterToDiseaseIndex();
   
+  console.log('getConditionsAffectingParameter: parameterId:', parameterId);
+  console.log('getConditionsAffectingParameter: index sample keys:', Object.keys(index).slice(0, 10));
+  
   // Try exact match first
   let conditions = index[parameterId] || [];
+  console.log('getConditionsAffectingParameter: exact match found:', conditions.length);
   
   // If no exact match, try searching all organs for this parameter
   if (conditions.length === 0) {
+    // Extract just the parameter name (last part after dot)
+    const paramName = parameterId.includes('.') ? parameterId.split('.').pop() : parameterId;
+    console.log('getConditionsAffectingParameter: trying partial match with paramName:', paramName);
+    
     Object.entries(index).forEach(([key, diseases]) => {
-      if (key.endsWith(`.${parameterId}`)) {
+      if (key.endsWith(`.${paramName}`) || key === paramName) {
         conditions = [...conditions, ...diseases];
       }
     });
+    console.log('getConditionsAffectingParameter: partial match found:', conditions.length);
   }
   
   // Filter by direction if specified
