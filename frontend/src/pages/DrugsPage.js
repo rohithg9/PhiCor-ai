@@ -7,7 +7,8 @@ import {
   Heart, AlertTriangle, TrendingUp, TrendingDown,
   Beaker, Shield, Clock, Info, Loader2, X, ArrowLeft,
   User, Scale, Activity, FileText, Upload, Sliders,
-  CheckCircle, XCircle, AlertCircle, Brain, Zap, LineChart
+  CheckCircle, XCircle, AlertCircle, Brain, Zap, LineChart,
+  Target, Check
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../components/ui/button';
