@@ -185,20 +185,39 @@ const DifferentialPage = () => {
   };
   
   // Run differential diagnosis
-  const runDiagnosis = useCallback(() => {
+  const runDiagnosis = useCallback((overrideFindings = null) => {
     setIsAnalyzing(true);
     
     setTimeout(() => {
       let results = [];
+      const findings = overrideFindings || abnormalFindings;
       
-      if (abnormalFindings.length > 0) {
-        const findingsForAnalysis = abnormalFindings.map(f => ({
+      if (findings.length > 0) {
+        const findingsForAnalysis = findings.map(f => ({
           parameterId: f.parameterId,
           direction: f.direction,
           severity: f.severity,
           value: f.value,
+          diseases: f.diseases || [],
         }));
         results = getDifferentialDiagnosis(findingsForAnalysis);
+        
+        // Also add disease suggestions from imaging findings
+        const imagingDiseases = new Set();
+        findings.forEach(f => {
+          if (f.diseases && f.diseases.length > 0) {
+            f.diseases.forEach(d => imagingDiseases.add(d));
+          }
+        });
+        
+        // Boost scores for diseases found in imaging findings
+        results = results.map(r => {
+          const icdBase = r.icd10?.split('_')[0] || r.icd10?.split('.')[0];
+          if (imagingDiseases.has(r.icd10) || imagingDiseases.has(icdBase)) {
+            return { ...r, probabilityScore: Math.min(100, (r.probabilityScore || 0) + 20) };
+          }
+          return r;
+        });
       }
       
       if (clinicalText.trim()) {
