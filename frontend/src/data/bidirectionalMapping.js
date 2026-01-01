@@ -6,6 +6,7 @@
 // ============================================================
 
 import ORGAN_MODELS from './organModels';
+import { DISEASE_MODELS } from './diseaseModels';  // Models with 'modifications' for parameter mapping
 import { ALL_CARDIAC_DISEASES } from './cardiacDiseasesIndex';
 import { ALL_RESPIRATORY_DISEASES } from './respiratoryDiseasesIndex';
 import { ALL_RENAL_DISEASES } from './renalDiseasesIndex';
@@ -23,8 +24,9 @@ import { ALL_PSYCHIATRIC_DISEASES } from './psychiatricDiseasesIndex';
 import { ALL_PEDIATRIC_DISEASES } from './pediatricDiseasesIndex';
 import { ALL_OBGYN_DISEASES } from './obgynDiseasesIndex';
 
-// Combine all disease databases
+// Combine all disease databases - DISEASE_MODELS has parameter modifications
 const ALL_DISEASES = {
+  ...DISEASE_MODELS,  // These have 'modifications' for parameter-to-disease mapping
   ...ALL_CARDIAC_DISEASES,
   ...ALL_RESPIRATORY_DISEASES,
   ...ALL_RENAL_DISEASES,
