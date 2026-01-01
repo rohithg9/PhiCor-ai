@@ -297,54 +297,72 @@ const DifferentialPage = () => {
   // NEW: Run AI-powered clinical synthesis
   const runClinicalSynthesis = useCallback(async () => {
     // Need some findings to synthesize
+    console.log('runClinicalSynthesis called:', { 
+      findingsCount: abnormalFindings.length, 
+      hasText: !!clinicalText.trim() 
+    });
+    
     if (abnormalFindings.length === 0 && !clinicalText.trim()) {
       setClinicalSynthesis(null);
       return;
     }
     
     setIsSynthesizing(true);
+    console.log('Starting synthesis API call...');
     
     try {
       const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
+      console.log('Backend URL:', backendUrl);
       
       // Separate findings by type
       const labFindings = abnormalFindings.filter(f => f.source !== 'clinical-text' || !f.diseases?.length);
       const imagingFindings = abnormalFindings.filter(f => f.diseases?.length > 0);
       const symptoms = abnormalFindings.filter(f => f.source === 'clinical-text' && f.type === 'symptom');
       
+      const requestBody = {
+        clinical_text: clinicalText,
+        lab_findings: labFindings.map(f => ({
+          parameterId: f.parameterId,
+          name: f.parameterName || f.parameterId,
+          value: f.value,
+          unit: f.unit,
+          direction: f.direction,
+          normalRange: f.normalRange,
+          severity: f.severity
+        })),
+        imaging_findings: imagingFindings.map(f => ({
+          parameterId: f.parameterId,
+          name: f.parameterName || f.parameterId,
+          direction: f.direction,
+          severity: f.severity
+        })),
+        symptoms: symptoms.map(f => ({
+          parameterId: f.parameterId,
+          name: f.parameterName || f.parameterId
+        })),
+        patient_info: null
+      };
+      
+      console.log('Synthesis request:', requestBody);
+      
       const response = await fetch(`${backendUrl}/api/diagnosis/synthesize`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          clinical_text: clinicalText,
-          lab_findings: labFindings.map(f => ({
-            parameterId: f.parameterId,
-            name: f.parameterName || f.parameterId,
-            value: f.value,
-            unit: f.unit,
-            direction: f.direction,
-            normalRange: f.normalRange,
-            severity: f.severity
-          })),
-          imaging_findings: imagingFindings.map(f => ({
-            parameterId: f.parameterId,
-            name: f.parameterName || f.parameterId,
-            direction: f.direction,
-            severity: f.severity
-          })),
-          symptoms: symptoms.map(f => ({
-            parameterId: f.parameterId,
-            name: f.parameterName || f.parameterId
-          })),
-          patient_info: null
-        })
+        body: JSON.stringify(requestBody)
       });
+      
+      console.log('Synthesis response status:', response.status);
       
       if (response.ok) {
         const data = await response.json();
+        console.log('Synthesis response:', data);
         if (data.success && data.synthesis) {
           setClinicalSynthesis(data.synthesis);
+          console.log('Clinical synthesis set!');
         }
+      } else {
+        const errorText = await response.text();
+        console.error('Synthesis API error:', errorText);
       }
     } catch (error) {
       console.error('Clinical synthesis error:', error);
