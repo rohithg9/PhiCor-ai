@@ -385,6 +385,77 @@ const TestPatientPanel = ({ isDark, onLoadCase }) => {
     }
   };
 
+  // Handle file upload for document extraction
+  const handleFileUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    setIsUploading(true);
+    setUploadError(null);
+    setUploadSuccess(null);
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    try {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
+      const response = await fetch(`${backendUrl}/api/diagnosis/extract-document`, {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.extractedText) {
+          setUploadSuccess(`Extracted text from ${file.name}`);
+          // Auto-load the extracted text into the analyzer
+          onLoadCase({ clinicalText: data.extractedText });
+        } else {
+          setUploadError(data.error || 'Failed to extract text from document');
+        }
+      } else {
+        setUploadError('Failed to process document. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error uploading document:', error);
+      setUploadError('Error uploading document. Please try again.');
+    } finally {
+      setIsUploading(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  // Start simulator with a random case
+  const startSimulator = async () => {
+    setIsLoadingSimulator(true);
+    try {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
+      const response = await fetch(`${backendUrl}/api/diagnosis/generate-case`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          specialty: 'emergency',
+          difficulty: 'intermediate'
+        })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.case) {
+          setSimulatorCase(data.case);
+          setSimulatorStep(1);
+        }
+      }
+    } catch (error) {
+      console.error('Error starting simulator:', error);
+    } finally {
+      setIsLoadingSimulator(false);
+    }
+  };
+
   const getDifficultyColor = (difficulty) => {
     switch(difficulty?.toLowerCase()) {
       case 'beginner': return 'bg-emerald-500/20 text-emerald-400';
