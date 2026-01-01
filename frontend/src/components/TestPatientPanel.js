@@ -590,49 +590,84 @@ const TestPatientPanel = ({ isDark, onLoadCase }) => {
       {activeSection === 'library' && (
         <div className="space-y-3">
           <div className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-            Organized clinical cases by specialty
+            Click any case to load it into the analyzer
           </div>
-          <ScrollArea className="h-[300px]">
-            <div className="space-y-4 pr-2">
+          <ScrollArea className="h-[320px]">
+            <div className="space-y-3 pr-2">
               {Object.entries(CASE_LIBRARY).map(([key, category]) => {
                 const colors = getColorClasses(category.color);
                 const Icon = category.icon;
+                const isExpanded = expandedCategory === key;
                 return (
                   <div key={key} className={`rounded-lg border ${isDark ? 'bg-gray-800/30 border-gray-700' : 'bg-gray-50 border-gray-200'}`}>
-                    <div className={`p-3 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'} flex items-center gap-2`}>
+                    <button 
+                      onClick={() => setExpandedCategory(isExpanded ? null : key)}
+                      className={`w-full p-3 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'} flex items-center gap-2`}
+                    >
                       <div className={`p-1.5 rounded ${colors.bg}`}>
                         <Icon className={`w-4 h-4 ${colors.text}`} />
                       </div>
                       <span className={`font-medium text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
                         {category.name}
                       </span>
-                      <Badge className="text-[10px] ml-auto">{category.cases.length} cases</Badge>
-                    </div>
-                    <div className="p-2 space-y-1">
-                      {category.cases.map(caseItem => (
-                        <button
-                          key={caseItem.id}
-                          className={`w-full text-left p-2 rounded flex items-center justify-between transition-all ${
-                            isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-100'
-                          }`}
-                        >
-                          <span className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                            {caseItem.title}
-                          </span>
-                          <Badge className={`text-[10px] ${getDifficultyColor(caseItem.difficulty)}`}>
-                            {caseItem.difficulty}
-                          </Badge>
-                        </button>
-                      ))}
-                    </div>
+                      <Badge className="text-[10px] ml-auto mr-2">{category.cases.length} cases</Badge>
+                      <ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''} ${isDark ? 'text-gray-500' : 'text-gray-400'}`} />
+                    </button>
+                    {isExpanded && (
+                      <div className="p-2 space-y-1">
+                        {category.cases.map(caseItem => (
+                          <button
+                            key={caseItem.id}
+                            onClick={() => setSelectedLibraryCase(caseItem)}
+                            className={`w-full text-left p-2 rounded flex items-center justify-between transition-all ${
+                              selectedLibraryCase?.id === caseItem.id
+                                ? `${colors.bg} ${colors.border} border`
+                                : isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-100'
+                            }`}
+                          >
+                            <span className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                              {caseItem.title}
+                            </span>
+                            <Badge className={`text-[10px] ${getDifficultyColor(caseItem.difficulty)}`}>
+                              {caseItem.difficulty}
+                            </Badge>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 );
               })}
             </div>
           </ScrollArea>
-          <p className={`text-xs text-center ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
-            Full case details available in Quick Demo section
-          </p>
+          
+          {selectedLibraryCase && (
+            <div className={`p-3 rounded-lg ${isDark ? 'bg-emerald-900/20 border border-emerald-500/30' : 'bg-emerald-50 border border-emerald-200'}`}>
+              <div className="flex items-center justify-between mb-2">
+                <span className={`text-sm font-medium ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>
+                  {selectedLibraryCase.title} Selected
+                </span>
+                <Button 
+                  onClick={() => onLoadCase(selectedLibraryCase)}
+                  className="bg-emerald-500 hover:bg-emerald-600 text-white text-xs py-1 px-3 h-auto"
+                >
+                  <Play className="w-3 h-3 mr-1" />
+                  Load & Analyze
+                </Button>
+              </div>
+              <div className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                <strong>Learning Points:</strong>
+                <ul className="mt-1 space-y-0.5">
+                  {selectedLibraryCase.learningPoints?.map((point, i) => (
+                    <li key={i} className="flex items-start gap-1">
+                      <GraduationCap className="w-3 h-3 mt-0.5 text-emerald-500" />
+                      {point}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
