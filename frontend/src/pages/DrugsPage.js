@@ -874,7 +874,7 @@ const DrugsPage = () => {
         {/* Left Sidebar - Drug List */}
         <div className="w-72 lg:w-80 border-r border-border/50 bg-card/20 flex flex-col">
           {/* Search */}
-          <div className="p-3 border-b border-border/50">
+          <div className="p-3 border-b border-border/50" data-tutorial="drug-search">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
@@ -887,7 +887,7 @@ const DrugsPage = () => {
           </div>
           
           {/* Category Filters */}
-          <div className="p-2 border-b border-border/50 overflow-x-auto">
+          <div className="p-2 border-b border-border/50 overflow-x-auto" data-tutorial="category-filter">
             <div className="flex flex-wrap gap-1">
               <Button
                 variant={selectedCategory === null ? 'default' : 'ghost'}
