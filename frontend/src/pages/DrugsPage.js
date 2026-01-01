@@ -1566,7 +1566,7 @@ const DrugsPage = () => {
             <div>
               <h1 className="text-2xl font-bold">Drug Engine</h1>
               <p className="text-sm text-muted-foreground">
-                PK/PD simulation with patient-specific analysis
+                {drugs.length > 0 ? `${drugs.length} drugs` : 'Loading'} • PK/PD simulation with patient-specific analysis
               </p>
             </div>
           </div>
