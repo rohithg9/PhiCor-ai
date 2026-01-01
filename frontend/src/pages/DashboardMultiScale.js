@@ -2419,6 +2419,7 @@ const DiseasePanel = ({
 // Main Dashboard Component
 const DashboardMultiScale = () => {
   const { toggleTheme, isDark } = useTheme();
+  const tutorial = useTutorial('dashboard');
   
   const [selectedOrgan, setSelectedOrgan] = useState('heart');
   const [selectedScale, setSelectedScale] = useState('geometry');
