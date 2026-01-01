@@ -268,8 +268,8 @@ const ClinicalCalculatorPanel = ({ isDark = true, initialCalculator = null }) =>
           {/* Calculator Form */}
           {selectedCalculator && (
             <div className="flex-1 flex flex-col overflow-hidden">
-              {/* Calculator Header */}
-              <div className={`p-4 border-b ${isDark ? 'border-gray-800' : 'border-gray-200'}`}>
+              {/* Calculator Header - Compact */}
+              <div className={`p-3 border-b shrink-0 ${isDark ? 'border-gray-800' : 'border-gray-200'}`}>
                 <div className="flex items-center justify-between mb-2">
                   <Button
                     variant="ghost"
@@ -289,25 +289,17 @@ const ClinicalCalculatorPanel = ({ isDark = true, initialCalculator = null }) =>
                     Reset
                   </Button>
                 </div>
-                <h3 className={`font-bold text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                <h3 className={`font-bold text-base ${isDark ? 'text-white' : 'text-gray-900'}`}>
                   {selectedCalculator.name}
                 </h3>
-                <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                   {selectedCalculator.description}
                 </p>
-                <div className="flex items-center gap-2 mt-2">
-                  <Badge>{selectedCalculator.category}</Badge>
-                  {selectedCalculator.evidence && (
-                    <Badge variant="outline" className="text-[10px]">
-                      {selectedCalculator.evidence}
-                    </Badge>
-                  )}
-                </div>
               </div>
               
-              {/* Inputs */}
-              <ScrollArea className="flex-1 p-4">
-                <div className="space-y-3">
+              {/* Inputs - Main scrollable area */}
+              <div className={`flex-1 overflow-y-auto p-4 ${isDark ? 'bg-gray-900/30' : 'bg-gray-50/50'}`}>
+                <div className="space-y-2">
                   {selectedCalculator.inputs.map(input => (
                     <CalculatorInput
                       key={input.id}
@@ -321,7 +313,7 @@ const ClinicalCalculatorPanel = ({ isDark = true, initialCalculator = null }) =>
                 
                 {/* Formula */}
                 {selectedCalculator.formula && (
-                  <div className={`mt-4 p-3 rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-gray-50'}`}>
+                  <div className={`mt-4 p-3 rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-gray-100'}`}>
                     <div className="flex items-center gap-2 mb-2">
                       <BookOpen className={`w-4 h-4 ${isDark ? 'text-gray-500' : 'text-gray-400'}`} />
                       <span className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
@@ -333,13 +325,14 @@ const ClinicalCalculatorPanel = ({ isDark = true, initialCalculator = null }) =>
                     </p>
                   </div>
                 )}
-              </ScrollArea>
+              </div>
               
-              {/* Result */}
-              <div className={`p-4 border-t ${isDark ? 'border-gray-800' : 'border-gray-200'}`}>
+              {/* Result - Fixed at bottom */}
+              <div className={`p-3 border-t shrink-0 ${isDark ? 'border-gray-800 bg-gray-900' : 'border-gray-200 bg-white'}`}>
                 <Button
                   onClick={() => setShowResult(true)}
                   className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white"
+                  size="sm"
                 >
                   <Calculator className="w-4 h-4 mr-2" />
                   Calculate Score
