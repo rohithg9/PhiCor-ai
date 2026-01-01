@@ -311,9 +311,8 @@ const DifferentialPage = () => {
       resultsCount: differentialResults.length
     });
     
-    // Synthesis is useful if we have clinical text (even without extracted findings)
-    // OR if we have 2+ findings
-    if (abnormalFindings.length === 0 && !clinicalText.trim()) {
+    // Synthesis is useful if we have findings OR clinical text with differential results
+    if (abnormalFindings.length === 0 && !clinicalText.trim() && differentialResults.length === 0) {
       setClinicalSynthesis(null);
       return;
     }
@@ -325,16 +324,27 @@ const DifferentialPage = () => {
       const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
       console.log('Backend URL:', backendUrl);
       
-      // Separate findings by type
-      const labFindings = abnormalFindings.filter(f => f.source !== 'clinical-text' || !f.diseases?.length);
+      // Separate findings by type - treat ALL findings as lab findings if from parameters
+      const labFindings = abnormalFindings.filter(f => !f.diseases?.length);
       const imagingFindings = abnormalFindings.filter(f => f.diseases?.length > 0);
       const symptoms = abnormalFindings.filter(f => f.source === 'clinical-text' && f.type === 'symptom');
       
-      // Include info from differential results if no explicit findings
+      // Include info from differential results
       const topDifferentials = differentialResults.slice(0, 5).map(d => d.diseaseName).join(', ');
       
+      // Generate clinical context from findings if no text provided
+      let contextText = clinicalText;
+      if (!contextText && abnormalFindings.length > 0) {
+        const findingsSummary = abnormalFindings.map(f => 
+          `${f.parameterName || f.parameterId}: ${f.value} ${f.unit || ''} (${f.direction}, ${f.severity})`
+        ).join('; ');
+        contextText = `Patient presents with the following abnormal parameters: ${findingsSummary}. Top differential diagnoses being considered: ${topDifferentials}`;
+      } else if (topDifferentials && !contextText.includes('differential')) {
+        contextText = `${contextText}. Top differential diagnoses being considered: ${topDifferentials}`;
+      }
+      
       const requestBody = {
-        clinical_text: clinicalText || `Top differential diagnoses being considered: ${topDifferentials}`,
+        clinical_text: contextText || `Top differential diagnoses being considered: ${topDifferentials}`,
         lab_findings: labFindings.map(f => ({
           parameterId: f.parameterId || '',
           name: f.parameterName || f.parameterId || '',
@@ -396,7 +406,7 @@ const DifferentialPage = () => {
     } finally {
       setIsSynthesizing(false);
     }
-  }, [abnormalFindings, clinicalText]);
+  }, [abnormalFindings, clinicalText, differentialResults]);
   
   // Auto-run synthesis when findings change (with debounce)
   useEffect(() => {
