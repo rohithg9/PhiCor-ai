@@ -612,5 +612,551 @@ def get_priority_diseases() -> List[Dict[str, str]]:
 
 def get_disease_categories() -> Dict[str, Any]:
     """Return disease categories"""
+
+
+# ============================================================================
+# DRUG KNOWLEDGE GENERATOR
+# Generates comprehensive drug data based on BNF, FDA, and pharmacological sources
+# ============================================================================
+
+class DrugKnowledgeGenerator:
+    """
+    Generates comprehensive drug knowledge using AI.
+    Creates evidence-based drug profiles with pharmacological data.
+    """
+    
+    def __init__(self):
+        self.api_key = os.environ.get('EMERGENT_LLM_KEY')
+        self.model_provider = "openai"
+        self.model_name = "gpt-4o"
+        
+        # Drug categories for comprehensive coverage
+        self.drug_categories = {
+            "cardiovascular": ["antihypertensives", "antiarrhythmics", "anticoagulants", "antiplatelets", "lipid_lowering", "heart_failure", "vasodilators"],
+            "antibiotics": ["penicillins", "cephalosporins", "fluoroquinolones", "macrolides", "aminoglycosides", "tetracyclines", "sulfonamides", "carbapenems", "glycopeptides"],
+            "cns_neurological": ["antidepressants", "anxiolytics", "antipsychotics", "anticonvulsants", "parkinsons", "migraine", "sedatives", "stimulants"],
+            "respiratory": ["bronchodilators", "corticosteroids_inhaled", "antihistamines", "decongestants", "antitussives", "mucolytics"],
+            "gastrointestinal": ["ppis", "h2_blockers", "antiemetics", "laxatives", "antidiarrheals", "antispasmodics", "ibd_drugs"],
+            "endocrine": ["insulin", "oral_antidiabetics", "thyroid", "corticosteroids", "bisphosphonates", "hormone_replacement"],
+            "analgesics": ["nsaids", "opioids", "acetaminophen", "neuropathic_pain", "muscle_relaxants"],
+            "antivirals": ["hiv", "hepatitis", "influenza", "herpes", "covid"],
+            "antifungals": ["azoles", "echinocandins", "polyenes", "allylamines"],
+            "immunosuppressants": ["calcineurin_inhibitors", "antimetabolites", "biologics", "dmards"],
+            "oncology": ["cytotoxics", "targeted_therapy", "immunotherapy", "supportive_care"],
+            "renal_urology": ["diuretics", "potassium_sparing", "bph", "overactive_bladder"],
+            "hematology": ["anticoagulants", "antiplatelets", "thrombolytics", "hematopoietics", "iron_supplements"],
+            "dermatology": ["topical_steroids", "antifungals_topical", "retinoids", "emollients"],
+            "ophthalmology": ["glaucoma", "anti_vegf", "antibiotics_ophthalmic", "lubricants"],
+            "psychiatry": ["antidepressants", "antipsychotics", "mood_stabilizers", "adhd", "anxiolytics"]
+        }
+    
+    async def generate_drug(self, drug_name: str, category: str = None, region: str = "international") -> Dict[str, Any]:
+        """
+        Generate comprehensive drug data using AI.
+        
+        Args:
+            drug_name: Name of the drug (generic or brand)
+            category: Drug category (e.g., "cardiovascular", "antibiotics")
+            region: Region for regulatory info ("uk", "us", "india", "international")
+        
+        Returns:
+            Comprehensive drug profile
+        """
+        if not EMERGENT_AVAILABLE or not self.api_key:
+            raise ValueError("AI generation not available - EMERGENT_LLM_KEY required")
+        
+        prompt = f"""Generate comprehensive pharmaceutical data for: {drug_name}
+        
+Category: {category or "to be determined"}
+Region focus: {region}
+
+Provide a complete drug profile in the following JSON structure:
+{{
+    "id": "lowercase_no_spaces",
+    "name": "Generic Name",
+    "brand_names": ["Brand1", "Brand2"],
+    "drug_class": "Pharmacological class",
+    "category": "therapeutic_category",
+    "atc_code": "ATC classification code",
+    "mechanism_of_action": "Detailed mechanism",
+    "mechanism_short": "Brief mechanism for UI display",
+    "pharmacokinetics": {{
+        "absorption": "Absorption details",
+        "distribution": "Distribution and protein binding",
+        "metabolism": "Hepatic metabolism details",
+        "elimination": "Elimination route and half-life",
+        "half_life": "hours",
+        "bioavailability": "percentage",
+        "protein_binding": "percentage",
+        "volume_of_distribution": "L/kg"
+    }},
+    "dosages": [
+        {{
+            "indication": "Primary indication",
+            "route": "oral/IV/IM/SC/topical",
+            "form": "tablet/capsule/injection/solution",
+            "strength": "Available strengths",
+            "typical_dose": "Standard adult dose",
+            "max_daily_dose": "Maximum dose",
+            "frequency": "Dosing frequency",
+            "renal_adjustment": "Dose adjustment for renal impairment",
+            "hepatic_adjustment": "Dose adjustment for hepatic impairment",
+            "pediatric_dose": "Pediatric dosing if applicable",
+            "geriatric_dose": "Geriatric considerations"
+        }}
+    ],
+    "indications": ["List of approved indications"],
+    "contraindications": ["List of contraindications"],
+    "warnings": ["Important warnings and precautions"],
+    "drug_interactions": [
+        {{
+            "drug": "Interacting drug",
+            "severity": "severe/moderate/minor",
+            "effect": "Description of interaction"
+        }}
+    ],
+    "side_effects": {{
+        "common": ["Common side effects (>1%)"],
+        "uncommon": ["Uncommon (0.1-1%)"],
+        "rare": ["Rare (<0.1%)"],
+        "serious": ["Serious/life-threatening"]
+    }},
+    "pregnancy_category": "Category or specific guidance",
+    "lactation": "Breastfeeding guidance",
+    "monitoring": ["Required monitoring parameters"],
+    "storage": "Storage requirements",
+    "cost_category": "low/medium/high/very_high",
+    "regulatory_status": {{
+        "uk_bnf": "BNF status and chapter",
+        "us_fda": "FDA approval status",
+        "india": "Indian regulatory status"
+    }},
+    "clinical_pearls": ["Key clinical points for prescribers"],
+    "therapeutic_effects": [
+        {{
+            "organ_system": "Affected organ",
+            "effect": "Description of therapeutic effect",
+            "parameters_affected": ["List of physiological parameters affected"]
+        }}
+    ]
+}}
+
+Ensure all data is evidence-based and clinically accurate. Include BNF/FDA standard information.
+Return ONLY valid JSON, no additional text."""
+
+        try:
+            chat = LlmChat(api_key=self.api_key)
+            response = await chat.send_async(
+                UserMessage(prompt),
+                model_provider=self.model_provider,
+                model_name=self.model_name,
+                temperature=0.3
+            )
+            
+            # Parse the response
+            response_text = response.content.strip()
+            
+            # Clean up JSON
+            if response_text.startswith("```json"):
+                response_text = response_text[7:]
+            if response_text.startswith("```"):
+                response_text = response_text[3:]
+            if response_text.endswith("```"):
+                response_text = response_text[:-3]
+            
+            drug_data = json.loads(response_text.strip())
+            
+            # Add metadata
+            drug_data["generated_at"] = datetime.now(timezone.utc).isoformat()
+            drug_data["generator_version"] = "2.0"
+            drug_data["source"] = "ai_generated_bnf_fda"
+            
+            return drug_data
+            
+        except Exception as e:
+            print(f"Error generating drug {drug_name}: {e}")
+            raise
+    
+    async def generate_drugs_batch(self, drugs: List[Dict[str, str]], batch_size: int = 5) -> List[Dict[str, Any]]:
+        """
+        Generate multiple drugs in batches.
+        
+        Args:
+            drugs: List of {"name": "drug_name", "category": "category"}
+            batch_size: Number of drugs to generate in parallel
+        
+        Returns:
+            List of generated drug profiles
+        """
+        results = []
+        
+        for i in range(0, len(drugs), batch_size):
+            batch = drugs[i:i + batch_size]
+            tasks = [
+                self.generate_drug(
+                    d["name"],
+                    d.get("category"),
+                    d.get("region", "international")
+                )
+                for d in batch
+            ]
+            
+            batch_results = await asyncio.gather(*tasks, return_exceptions=True)
+            
+            for drug, result in zip(batch, batch_results):
+                if isinstance(result, Exception):
+                    print(f"Failed to generate {drug['name']}: {result}")
+                else:
+                    results.append(result)
+            
+            # Small delay between batches to avoid rate limiting
+            if i + batch_size < len(drugs):
+                await asyncio.sleep(1)
+        
+        return results
+
+
+# Priority drugs list - BNF essential drugs + US common drugs + India essential drugs
+PRIORITY_DRUGS = [
+    # ============ CARDIOVASCULAR (50 drugs) ============
+    {"name": "Lisinopril", "category": "cardiovascular"},
+    {"name": "Ramipril", "category": "cardiovascular"},
+    {"name": "Enalapril", "category": "cardiovascular"},
+    {"name": "Perindopril", "category": "cardiovascular"},
+    {"name": "Captopril", "category": "cardiovascular"},
+    {"name": "Losartan", "category": "cardiovascular"},
+    {"name": "Valsartan", "category": "cardiovascular"},
+    {"name": "Candesartan", "category": "cardiovascular"},
+    {"name": "Irbesartan", "category": "cardiovascular"},
+    {"name": "Telmisartan", "category": "cardiovascular"},
+    {"name": "Amlodipine", "category": "cardiovascular"},
+    {"name": "Nifedipine", "category": "cardiovascular"},
+    {"name": "Diltiazem", "category": "cardiovascular"},
+    {"name": "Verapamil", "category": "cardiovascular"},
+    {"name": "Felodipine", "category": "cardiovascular"},
+    {"name": "Metoprolol", "category": "cardiovascular"},
+    {"name": "Bisoprolol", "category": "cardiovascular"},
+    {"name": "Carvedilol", "category": "cardiovascular"},
+    {"name": "Atenolol", "category": "cardiovascular"},
+    {"name": "Propranolol", "category": "cardiovascular"},
+    {"name": "Nebivolol", "category": "cardiovascular"},
+    {"name": "Furosemide", "category": "cardiovascular"},
+    {"name": "Bumetanide", "category": "cardiovascular"},
+    {"name": "Hydrochlorothiazide", "category": "cardiovascular"},
+    {"name": "Indapamide", "category": "cardiovascular"},
+    {"name": "Spironolactone", "category": "cardiovascular"},
+    {"name": "Eplerenone", "category": "cardiovascular"},
+    {"name": "Atorvastatin", "category": "cardiovascular"},
+    {"name": "Rosuvastatin", "category": "cardiovascular"},
+    {"name": "Simvastatin", "category": "cardiovascular"},
+    {"name": "Pravastatin", "category": "cardiovascular"},
+    {"name": "Warfarin", "category": "cardiovascular"},
+    {"name": "Apixaban", "category": "cardiovascular"},
+    {"name": "Rivaroxaban", "category": "cardiovascular"},
+    {"name": "Dabigatran", "category": "cardiovascular"},
+    {"name": "Edoxaban", "category": "cardiovascular"},
+    {"name": "Enoxaparin", "category": "cardiovascular"},
+    {"name": "Heparin", "category": "cardiovascular"},
+    {"name": "Aspirin", "category": "cardiovascular"},
+    {"name": "Clopidogrel", "category": "cardiovascular"},
+    {"name": "Ticagrelor", "category": "cardiovascular"},
+    {"name": "Prasugrel", "category": "cardiovascular"},
+    {"name": "Digoxin", "category": "cardiovascular"},
+    {"name": "Amiodarone", "category": "cardiovascular"},
+    {"name": "Flecainide", "category": "cardiovascular"},
+    {"name": "Sotalol", "category": "cardiovascular"},
+    {"name": "Isosorbide Mononitrate", "category": "cardiovascular"},
+    {"name": "Glyceryl Trinitrate (GTN)", "category": "cardiovascular"},
+    {"name": "Ivabradine", "category": "cardiovascular"},
+    {"name": "Sacubitril/Valsartan", "category": "cardiovascular"},
+    
+    # ============ ANTIBIOTICS (60 drugs) ============
+    {"name": "Amoxicillin", "category": "antibiotics"},
+    {"name": "Ampicillin", "category": "antibiotics"},
+    {"name": "Co-amoxiclav (Augmentin)", "category": "antibiotics"},
+    {"name": "Flucloxacillin", "category": "antibiotics"},
+    {"name": "Phenoxymethylpenicillin", "category": "antibiotics"},
+    {"name": "Benzylpenicillin", "category": "antibiotics"},
+    {"name": "Piperacillin/Tazobactam", "category": "antibiotics"},
+    {"name": "Cefalexin", "category": "antibiotics"},
+    {"name": "Cefuroxime", "category": "antibiotics"},
+    {"name": "Ceftriaxone", "category": "antibiotics"},
+    {"name": "Ceftazidime", "category": "antibiotics"},
+    {"name": "Cefotaxime", "category": "antibiotics"},
+    {"name": "Cefixime", "category": "antibiotics"},
+    {"name": "Cefpodoxime", "category": "antibiotics"},
+    {"name": "Meropenem", "category": "antibiotics"},
+    {"name": "Imipenem/Cilastatin", "category": "antibiotics"},
+    {"name": "Ertapenem", "category": "antibiotics"},
+    {"name": "Azithromycin", "category": "antibiotics"},
+    {"name": "Clarithromycin", "category": "antibiotics"},
+    {"name": "Erythromycin", "category": "antibiotics"},
+    {"name": "Ciprofloxacin", "category": "antibiotics"},
+    {"name": "Levofloxacin", "category": "antibiotics"},
+    {"name": "Moxifloxacin", "category": "antibiotics"},
+    {"name": "Norfloxacin", "category": "antibiotics"},
+    {"name": "Ofloxacin", "category": "antibiotics"},
+    {"name": "Doxycycline", "category": "antibiotics"},
+    {"name": "Tetracycline", "category": "antibiotics"},
+    {"name": "Minocycline", "category": "antibiotics"},
+    {"name": "Tigecycline", "category": "antibiotics"},
+    {"name": "Gentamicin", "category": "antibiotics"},
+    {"name": "Amikacin", "category": "antibiotics"},
+    {"name": "Tobramycin", "category": "antibiotics"},
+    {"name": "Vancomycin", "category": "antibiotics"},
+    {"name": "Teicoplanin", "category": "antibiotics"},
+    {"name": "Linezolid", "category": "antibiotics"},
+    {"name": "Daptomycin", "category": "antibiotics"},
+    {"name": "Trimethoprim", "category": "antibiotics"},
+    {"name": "Co-trimoxazole", "category": "antibiotics"},
+    {"name": "Nitrofurantoin", "category": "antibiotics"},
+    {"name": "Metronidazole", "category": "antibiotics"},
+    {"name": "Clindamycin", "category": "antibiotics"},
+    {"name": "Rifampicin", "category": "antibiotics"},
+    {"name": "Isoniazid", "category": "antibiotics"},
+    {"name": "Pyrazinamide", "category": "antibiotics"},
+    {"name": "Ethambutol", "category": "antibiotics"},
+    {"name": "Colistin", "category": "antibiotics"},
+    {"name": "Fosfomycin", "category": "antibiotics"},
+    {"name": "Chloramphenicol", "category": "antibiotics"},
+    
+    # ============ CNS/NEUROLOGICAL (40 drugs) ============
+    {"name": "Sertraline", "category": "cns_neurological"},
+    {"name": "Fluoxetine", "category": "cns_neurological"},
+    {"name": "Citalopram", "category": "cns_neurological"},
+    {"name": "Escitalopram", "category": "cns_neurological"},
+    {"name": "Paroxetine", "category": "cns_neurological"},
+    {"name": "Venlafaxine", "category": "cns_neurological"},
+    {"name": "Duloxetine", "category": "cns_neurological"},
+    {"name": "Mirtazapine", "category": "cns_neurological"},
+    {"name": "Amitriptyline", "category": "cns_neurological"},
+    {"name": "Nortriptyline", "category": "cns_neurological"},
+    {"name": "Bupropion", "category": "cns_neurological"},
+    {"name": "Trazodone", "category": "cns_neurological"},
+    {"name": "Diazepam", "category": "cns_neurological"},
+    {"name": "Lorazepam", "category": "cns_neurological"},
+    {"name": "Alprazolam", "category": "cns_neurological"},
+    {"name": "Clonazepam", "category": "cns_neurological"},
+    {"name": "Midazolam", "category": "cns_neurological"},
+    {"name": "Zopiclone", "category": "cns_neurological"},
+    {"name": "Zolpidem", "category": "cns_neurological"},
+    {"name": "Risperidone", "category": "cns_neurological"},
+    {"name": "Olanzapine", "category": "cns_neurological"},
+    {"name": "Quetiapine", "category": "cns_neurological"},
+    {"name": "Aripiprazole", "category": "cns_neurological"},
+    {"name": "Haloperidol", "category": "cns_neurological"},
+    {"name": "Lithium", "category": "cns_neurological"},
+    {"name": "Valproate", "category": "cns_neurological"},
+    {"name": "Carbamazepine", "category": "cns_neurological"},
+    {"name": "Lamotrigine", "category": "cns_neurological"},
+    {"name": "Levetiracetam", "category": "cns_neurological"},
+    {"name": "Phenytoin", "category": "cns_neurological"},
+    {"name": "Gabapentin", "category": "cns_neurological"},
+    {"name": "Pregabalin", "category": "cns_neurological"},
+    {"name": "Topiramate", "category": "cns_neurological"},
+    {"name": "Levodopa/Carbidopa", "category": "cns_neurological"},
+    {"name": "Pramipexole", "category": "cns_neurological"},
+    {"name": "Ropinirole", "category": "cns_neurological"},
+    {"name": "Donepezil", "category": "cns_neurological"},
+    {"name": "Memantine", "category": "cns_neurological"},
+    {"name": "Sumatriptan", "category": "cns_neurological"},
+    {"name": "Methylphenidate", "category": "cns_neurological"},
+    
+    # ============ RESPIRATORY (25 drugs) ============
+    {"name": "Salbutamol", "category": "respiratory"},
+    {"name": "Ipratropium", "category": "respiratory"},
+    {"name": "Tiotropium", "category": "respiratory"},
+    {"name": "Salmeterol", "category": "respiratory"},
+    {"name": "Formoterol", "category": "respiratory"},
+    {"name": "Beclometasone", "category": "respiratory"},
+    {"name": "Budesonide", "category": "respiratory"},
+    {"name": "Fluticasone", "category": "respiratory"},
+    {"name": "Mometasone", "category": "respiratory"},
+    {"name": "Ciclesonide", "category": "respiratory"},
+    {"name": "Montelukast", "category": "respiratory"},
+    {"name": "Theophylline", "category": "respiratory"},
+    {"name": "Aminophylline", "category": "respiratory"},
+    {"name": "Prednisolone", "category": "respiratory"},
+    {"name": "Dexamethasone", "category": "respiratory"},
+    {"name": "Hydrocortisone", "category": "respiratory"},
+    {"name": "Cetirizine", "category": "respiratory"},
+    {"name": "Loratadine", "category": "respiratory"},
+    {"name": "Fexofenadine", "category": "respiratory"},
+    {"name": "Chlorphenamine", "category": "respiratory"},
+    {"name": "Pseudoephedrine", "category": "respiratory"},
+    {"name": "Codeine (antitussive)", "category": "respiratory"},
+    {"name": "Dextromethorphan", "category": "respiratory"},
+    {"name": "Carbocisteine", "category": "respiratory"},
+    {"name": "N-Acetylcysteine", "category": "respiratory"},
+    
+    # ============ GASTROINTESTINAL (30 drugs) ============
+    {"name": "Omeprazole", "category": "gastrointestinal"},
+    {"name": "Lansoprazole", "category": "gastrointestinal"},
+    {"name": "Pantoprazole", "category": "gastrointestinal"},
+    {"name": "Esomeprazole", "category": "gastrointestinal"},
+    {"name": "Rabeprazole", "category": "gastrointestinal"},
+    {"name": "Ranitidine", "category": "gastrointestinal"},
+    {"name": "Famotidine", "category": "gastrointestinal"},
+    {"name": "Metoclopramide", "category": "gastrointestinal"},
+    {"name": "Domperidone", "category": "gastrointestinal"},
+    {"name": "Ondansetron", "category": "gastrointestinal"},
+    {"name": "Cyclizine", "category": "gastrointestinal"},
+    {"name": "Prochlorperazine", "category": "gastrointestinal"},
+    {"name": "Lactulose", "category": "gastrointestinal"},
+    {"name": "Senna", "category": "gastrointestinal"},
+    {"name": "Bisacodyl", "category": "gastrointestinal"},
+    {"name": "Macrogol", "category": "gastrointestinal"},
+    {"name": "Loperamide", "category": "gastrointestinal"},
+    {"name": "Hyoscine Butylbromide", "category": "gastrointestinal"},
+    {"name": "Mebeverine", "category": "gastrointestinal"},
+    {"name": "Sulfasalazine", "category": "gastrointestinal"},
+    {"name": "Mesalazine", "category": "gastrointestinal"},
+    {"name": "Azathioprine", "category": "gastrointestinal"},
+    {"name": "Infliximab", "category": "gastrointestinal"},
+    {"name": "Adalimumab", "category": "gastrointestinal"},
+    {"name": "Pancreatin", "category": "gastrointestinal"},
+    {"name": "Ursodeoxycholic Acid", "category": "gastrointestinal"},
+    {"name": "Cholestyramine", "category": "gastrointestinal"},
+    {"name": "Sucralfate", "category": "gastrointestinal"},
+    {"name": "Misoprostol", "category": "gastrointestinal"},
+    {"name": "Octreotide", "category": "gastrointestinal"},
+    
+    # ============ ENDOCRINE/DIABETES (35 drugs) ============
+    {"name": "Metformin", "category": "endocrine"},
+    {"name": "Gliclazide", "category": "endocrine"},
+    {"name": "Glimepiride", "category": "endocrine"},
+    {"name": "Glipizide", "category": "endocrine"},
+    {"name": "Pioglitazone", "category": "endocrine"},
+    {"name": "Sitagliptin", "category": "endocrine"},
+    {"name": "Linagliptin", "category": "endocrine"},
+    {"name": "Empagliflozin", "category": "endocrine"},
+    {"name": "Dapagliflozin", "category": "endocrine"},
+    {"name": "Canagliflozin", "category": "endocrine"},
+    {"name": "Liraglutide", "category": "endocrine"},
+    {"name": "Semaglutide", "category": "endocrine"},
+    {"name": "Dulaglutide", "category": "endocrine"},
+    {"name": "Insulin Aspart", "category": "endocrine"},
+    {"name": "Insulin Lispro", "category": "endocrine"},
+    {"name": "Insulin Glargine", "category": "endocrine"},
+    {"name": "Insulin Degludec", "category": "endocrine"},
+    {"name": "Insulin NPH", "category": "endocrine"},
+    {"name": "Levothyroxine", "category": "endocrine"},
+    {"name": "Carbimazole", "category": "endocrine"},
+    {"name": "Propylthiouracil", "category": "endocrine"},
+    {"name": "Prednisolone", "category": "endocrine"},
+    {"name": "Hydrocortisone", "category": "endocrine"},
+    {"name": "Fludrocortisone", "category": "endocrine"},
+    {"name": "Alendronate", "category": "endocrine"},
+    {"name": "Risedronate", "category": "endocrine"},
+    {"name": "Zoledronic Acid", "category": "endocrine"},
+    {"name": "Denosumab", "category": "endocrine"},
+    {"name": "Teriparatide", "category": "endocrine"},
+    {"name": "Raloxifene", "category": "endocrine"},
+    {"name": "HRT (Estradiol)", "category": "endocrine"},
+    {"name": "Testosterone", "category": "endocrine"},
+    {"name": "Finasteride", "category": "endocrine"},
+    {"name": "Tamsulosin", "category": "endocrine"},
+    {"name": "Desmopressin", "category": "endocrine"},
+    
+    # ============ ANALGESICS (25 drugs) ============
+    {"name": "Paracetamol (Acetaminophen)", "category": "analgesics"},
+    {"name": "Ibuprofen", "category": "analgesics"},
+    {"name": "Naproxen", "category": "analgesics"},
+    {"name": "Diclofenac", "category": "analgesics"},
+    {"name": "Celecoxib", "category": "analgesics"},
+    {"name": "Etoricoxib", "category": "analgesics"},
+    {"name": "Meloxicam", "category": "analgesics"},
+    {"name": "Indomethacin", "category": "analgesics"},
+    {"name": "Codeine", "category": "analgesics"},
+    {"name": "Tramadol", "category": "analgesics"},
+    {"name": "Morphine", "category": "analgesics"},
+    {"name": "Oxycodone", "category": "analgesics"},
+    {"name": "Fentanyl", "category": "analgesics"},
+    {"name": "Buprenorphine", "category": "analgesics"},
+    {"name": "Hydromorphone", "category": "analgesics"},
+    {"name": "Tapentadol", "category": "analgesics"},
+    {"name": "Co-codamol", "category": "analgesics"},
+    {"name": "Co-dydramol", "category": "analgesics"},
+    {"name": "Methocarbamol", "category": "analgesics"},
+    {"name": "Baclofen", "category": "analgesics"},
+    {"name": "Tizanidine", "category": "analgesics"},
+    {"name": "Lidocaine (topical)", "category": "analgesics"},
+    {"name": "Capsaicin", "category": "analgesics"},
+    {"name": "Naloxone", "category": "analgesics"},
+    {"name": "Naltrexone", "category": "analgesics"},
+    
+    # ============ ANTIVIRALS (20 drugs) ============
+    {"name": "Aciclovir", "category": "antivirals"},
+    {"name": "Valaciclovir", "category": "antivirals"},
+    {"name": "Famciclovir", "category": "antivirals"},
+    {"name": "Oseltamivir", "category": "antivirals"},
+    {"name": "Zanamivir", "category": "antivirals"},
+    {"name": "Remdesivir", "category": "antivirals"},
+    {"name": "Nirmatrelvir/Ritonavir", "category": "antivirals"},
+    {"name": "Molnupiravir", "category": "antivirals"},
+    {"name": "Tenofovir", "category": "antivirals"},
+    {"name": "Entecavir", "category": "antivirals"},
+    {"name": "Sofosbuvir", "category": "antivirals"},
+    {"name": "Ledipasvir", "category": "antivirals"},
+    {"name": "Ribavirin", "category": "antivirals"},
+    {"name": "Dolutegravir", "category": "antivirals"},
+    {"name": "Bictegravir", "category": "antivirals"},
+    {"name": "Efavirenz", "category": "antivirals"},
+    {"name": "Lamivudine", "category": "antivirals"},
+    {"name": "Abacavir", "category": "antivirals"},
+    {"name": "Darunavir", "category": "antivirals"},
+    {"name": "Atazanavir", "category": "antivirals"},
+    
+    # ============ ANTIFUNGALS (15 drugs) ============
+    {"name": "Fluconazole", "category": "antifungals"},
+    {"name": "Itraconazole", "category": "antifungals"},
+    {"name": "Voriconazole", "category": "antifungals"},
+    {"name": "Posaconazole", "category": "antifungals"},
+    {"name": "Amphotericin B", "category": "antifungals"},
+    {"name": "Caspofungin", "category": "antifungals"},
+    {"name": "Anidulafungin", "category": "antifungals"},
+    {"name": "Micafungin", "category": "antifungals"},
+    {"name": "Flucytosine", "category": "antifungals"},
+    {"name": "Terbinafine", "category": "antifungals"},
+    {"name": "Griseofulvin", "category": "antifungals"},
+    {"name": "Nystatin", "category": "antifungals"},
+    {"name": "Clotrimazole", "category": "antifungals"},
+    {"name": "Miconazole", "category": "antifungals"},
+    {"name": "Ketoconazole", "category": "antifungals"},
+    
+    # ============ IMMUNOSUPPRESSANTS/BIOLOGICS (20 drugs) ============
+    {"name": "Ciclosporin", "category": "immunosuppressants"},
+    {"name": "Tacrolimus", "category": "immunosuppressants"},
+    {"name": "Mycophenolate", "category": "immunosuppressants"},
+    {"name": "Sirolimus", "category": "immunosuppressants"},
+    {"name": "Everolimus", "category": "immunosuppressants"},
+    {"name": "Methotrexate", "category": "immunosuppressants"},
+    {"name": "Leflunomide", "category": "immunosuppressants"},
+    {"name": "Hydroxychloroquine", "category": "immunosuppressants"},
+    {"name": "Sulfasalazine", "category": "immunosuppressants"},
+    {"name": "Etanercept", "category": "immunosuppressants"},
+    {"name": "Rituximab", "category": "immunosuppressants"},
+    {"name": "Tocilizumab", "category": "immunosuppressants"},
+    {"name": "Secukinumab", "category": "immunosuppressants"},
+    {"name": "Ustekinumab", "category": "immunosuppressants"},
+    {"name": "Vedolizumab", "category": "immunosuppressants"},
+    {"name": "Baricitinib", "category": "immunosuppressants"},
+    {"name": "Tofacitinib", "category": "immunosuppressants"},
+    {"name": "Anakinra", "category": "immunosuppressants"},
+    {"name": "Belimumab", "category": "immunosuppressants"},
+    {"name": "Dupilumab", "category": "immunosuppressants"},
+]
+
+
+def get_priority_drugs() -> List[Dict[str, str]]:
+    """Return the list of priority drugs for generation"""
+    return PRIORITY_DRUGS
+
+
+def get_drug_categories() -> Dict[str, Any]:
+    """Return drug categories"""
+    generator = DrugKnowledgeGenerator()
+    return generator.drug_categories
+
     generator = MedicalKnowledgeGenerator()
     return generator.disease_categories
