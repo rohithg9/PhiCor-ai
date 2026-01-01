@@ -524,6 +524,212 @@ const LandingPage = () => {
         </div>
       </section>
 
+      {/* ========== PLATFORM FEATURES SECTION ========== */}
+      <section id="platform-features" className="relative py-24 px-6 border-t border-white/5">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 mb-6">
+              <HeartPulse className="w-4 h-4 text-indigo-400" />
+              <span className="text-xs text-indigo-400 font-medium uppercase tracking-wider">Clinical Tools</span>
+            </div>
+            <h2 className="font-manrope text-3xl sm:text-4xl font-bold mb-4">
+              Three Pillars of <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Clinical Excellence</span>
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Every tool designed to reduce diagnostic uncertainty, accelerate clinical decisions, and improve patient outcomes
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Φ - PhiCor Engine */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="group relative"
+            >
+              <div className="glass-panel rounded-2xl p-8 h-full border border-indigo-500/20 hover:border-indigo-500/40 transition-all hover:shadow-lg hover:shadow-indigo-500/10">
+                {/* Icon */}
+                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center mb-6 shadow-lg shadow-indigo-500/20 group-hover:scale-110 transition-transform">
+                  <span className="text-white font-serif text-3xl font-bold">Φ</span>
+                </div>
+                
+                <h3 className="font-manrope text-xl font-bold mb-2 text-foreground">PhiCor Engine</h3>
+                <p className="text-sm text-indigo-400 font-medium mb-4">Physiological Modeling</p>
+                
+                <p className="text-muted-foreground text-sm leading-relaxed mb-6">
+                  Visualize how each organ system responds to disease in real-time. Understand the mathematical trajectory of your patient's condition before symptoms manifest.
+                </p>
+                
+                {/* Clinical Value */}
+                <div className="space-y-3 pt-4 border-t border-white/10">
+                  <p className="text-xs text-indigo-400 font-medium uppercase tracking-wider">Clinical Value</p>
+                  <ul className="space-y-2">
+                    <li className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <span className="text-indigo-400 mt-0.5">→</span>
+                      Predict deterioration 24-48 hours earlier
+                    </li>
+                    <li className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <span className="text-indigo-400 mt-0.5">→</span>
+                      Reduce unnecessary ICU admissions
+                    </li>
+                    <li className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <span className="text-indigo-400 mt-0.5">→</span>
+                      Quantify treatment response objectively
+                    </li>
+                  </ul>
+                </div>
+                
+                <Button
+                  onClick={() => navigate('/dashboard')}
+                  variant="ghost"
+                  className="mt-6 w-full text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10"
+                >
+                  Explore Engine
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </div>
+            </motion.div>
+
+            {/* Δ - Differential Diagnosis */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="group relative"
+            >
+              <div className="glass-panel rounded-2xl p-8 h-full border border-emerald-500/20 hover:border-emerald-500/40 transition-all hover:shadow-lg hover:shadow-emerald-500/10">
+                {/* Icon */}
+                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center mb-6 shadow-lg shadow-emerald-500/20 group-hover:scale-110 transition-transform">
+                  <span className="text-white font-serif text-3xl font-bold">Δ</span>
+                </div>
+                
+                <h3 className="font-manrope text-xl font-bold mb-2 text-foreground">PhiCor Synthesis</h3>
+                <p className="text-sm text-emerald-400 font-medium mb-4">Differential Diagnosis</p>
+                
+                <p className="text-muted-foreground text-sm leading-relaxed mb-6">
+                  Transform clinical notes into actionable diagnoses. PhiCor synthesizes symptoms, labs, and imaging to deliver ranked differentials with evidence-based reasoning.
+                </p>
+                
+                {/* Clinical Value */}
+                <div className="space-y-3 pt-4 border-t border-white/10">
+                  <p className="text-xs text-emerald-400 font-medium uppercase tracking-wider">Clinical Value</p>
+                  <ul className="space-y-2">
+                    <li className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <span className="text-emerald-400 mt-0.5">→</span>
+                      Reduce diagnostic errors by 40%
+                    </li>
+                    <li className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <span className="text-emerald-400 mt-0.5">→</span>
+                      Catch rare conditions often missed
+                    </li>
+                    <li className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <span className="text-emerald-400 mt-0.5">→</span>
+                      Evidence citations from 130+ disease profiles
+                    </li>
+                  </ul>
+                </div>
+                
+                <Button
+                  onClick={() => navigate('/differential')}
+                  variant="ghost"
+                  className="mt-6 w-full text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
+                >
+                  Try Synthesis
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </div>
+            </motion.div>
+
+            {/* ρ - Drug Engine */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+              className="group relative"
+            >
+              <div className="glass-panel rounded-2xl p-8 h-full border border-rose-500/20 hover:border-rose-500/40 transition-all hover:shadow-lg hover:shadow-rose-500/10">
+                {/* Icon */}
+                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center mb-6 shadow-lg shadow-rose-500/20 group-hover:scale-110 transition-transform">
+                  <span className="text-white font-serif text-3xl font-bold">ρ</span>
+                </div>
+                
+                <h3 className="font-manrope text-xl font-bold mb-2 text-foreground">Drug Engine</h3>
+                <p className="text-sm text-rose-400 font-medium mb-4">Pharmacological Intelligence</p>
+                
+                <p className="text-muted-foreground text-sm leading-relaxed mb-6">
+                  Access comprehensive drug profiles with dosing, interactions, and organ-specific effects. Make prescribing decisions with complete pharmacological context.
+                </p>
+                
+                {/* Clinical Value */}
+                <div className="space-y-3 pt-4 border-t border-white/10">
+                  <p className="text-xs text-rose-400 font-medium uppercase tracking-wider">Clinical Value</p>
+                  <ul className="space-y-2">
+                    <li className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <span className="text-rose-400 mt-0.5">→</span>
+                      115+ drugs with complete profiles
+                    </li>
+                    <li className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <span className="text-rose-400 mt-0.5">→</span>
+                      Prevent adverse drug interactions
+                    </li>
+                    <li className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <span className="text-rose-400 mt-0.5">→</span>
+                      Optimize dosing for patient profile
+                    </li>
+                  </ul>
+                </div>
+                
+                <Button
+                  onClick={() => navigate('/drugs')}
+                  variant="ghost"
+                  className="mt-6 w-full text-rose-400 hover:text-rose-300 hover:bg-rose-500/10"
+                >
+                  Browse Drugs
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Bottom Stats Bar */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.4 }}
+            className="mt-16 glass-panel rounded-2xl p-8 border border-white/10"
+          >
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              <div className="text-center">
+                <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">130+</div>
+                <p className="text-sm text-muted-foreground mt-1">Disease Profiles</p>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">115+</div>
+                <p className="text-sm text-muted-foreground mt-1">Drug Monographs</p>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-rose-400 to-pink-400 bg-clip-text text-transparent">6</div>
+                <p className="text-sm text-muted-foreground mt-1">Organ Systems</p>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">∞</div>
+                <p className="text-sm text-muted-foreground mt-1">Mathematical Models</p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* ========== ADVANTAGE SECTION ========== */}
       <section id="advantages" className="relative py-24 px-6 bg-gradient-to-b from-transparent via-purple-950/20 to-transparent">
         <div className="max-w-6xl mx-auto">
