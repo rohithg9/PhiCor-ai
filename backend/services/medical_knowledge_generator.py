@@ -745,11 +745,14 @@ Ensure all data is evidence-based and clinically accurate. Include BNF/FDA stand
 Return ONLY valid JSON, no additional text."""
 
         try:
-            chat = LlmChat(api_key=self.api_key)
+            chat = LlmChat(
+                api_key=self.api_key,
+                session_id=f"drug_gen_{drug_name.replace(' ', '_')}",
+                system_message="You are a pharmaceutical expert. Generate accurate drug information based on BNF, FDA, and international pharmacological sources. Return only valid JSON."
+            ).with_model(self.model_provider, self.model_name)
+            
             response = await chat.send_async(
                 UserMessage(prompt),
-                model_provider=self.model_provider,
-                model_name=self.model_name,
                 temperature=0.3
             )
             
