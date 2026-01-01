@@ -134,6 +134,10 @@ const DRUG_CATEGORIES = {
   analgesics: { name: 'Analgesics', icon: '💊', color: 'from-pink-500 to-rose-500' },
   analgesic: { name: 'Pain', icon: '💊', color: 'from-pink-500 to-fuchsia-500' },
   hematological: { name: 'Blood', icon: '🩸', color: 'from-red-600 to-rose-600' },
+  dermatological: { name: 'Dermatology', icon: '🧴', color: 'from-amber-500 to-orange-500' },
+  immunosuppressant: { name: 'Immunosuppressant', icon: '🛡️', color: 'from-indigo-500 to-purple-500' },
+  urological: { name: 'Urology', icon: '💧', color: 'from-sky-500 to-blue-500' },
+  ophthalmic: { name: 'Ophthalmic', icon: '👁️', color: 'from-emerald-500 to-teal-500' },
 };
 
 // Default Virtual Patient
