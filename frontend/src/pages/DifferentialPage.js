@@ -375,8 +375,13 @@ const DifferentialPage = () => {
           console.log('Clinical synthesis set!');
         }
       } else {
-        const errorText = await response.text();
-        console.error('Synthesis API error:', errorText);
+        try {
+          const errorData = await response.json();
+          console.error('Synthesis API error (JSON):', errorData);
+        } catch (e) {
+          const errorText = await response.text();
+          console.error('Synthesis API error (text):', errorText);
+        }
       }
     } catch (error) {
       console.error('Clinical synthesis error:', error);
