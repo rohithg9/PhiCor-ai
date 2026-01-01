@@ -107,10 +107,22 @@ frontend:
         agent: "testing"
         comment: "✅ COMPREHENSIVE TESTING COMPLETE: All major functionality working correctly. Fixed critical React hooks violation that was causing red screen error. Successfully tested: 1) Drug list with 51 drugs (exceeds 40+ requirement), 2) Category filters (Cardiovascular, Antibiotics, Respiratory), 3) Search functionality (metformin, lisinopril), 4) Drug detail view with all tabs (Overview, Effects, Dosing, Interactions), 5) Patient simulation with Virtual Patient panel (Age, Sex, Weight, Height, BMI), 6) Dosage slider, 7) Efficacy/Safety scores, 8) Therapeutic Effects and Side Effects display, 9) PK parameters (Half-life, Time to Peak, Steady State, Peak Conc.), 10) Patient profile testing (medical conditions, medications, allergies), 11) Contraindication warnings when allergy matches drug class, 12) Correct tab labels ('Drug Details' not 'Drug Database'), 13) Navigation with 'ρ' symbol. All requested features are functional and working as expected."
 
+  - task: "Comprehensive Drug Database Expansion"
+    implemented: true
+    working: true
+    file: "/app/backend/data/comprehensive_drugs.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Expanded drug database from 51 to 99 drugs across 12 categories. Added CNS (SSRIs, SNRIs, benzodiazepines, anticonvulsants), GI (PPIs, H2 blockers, antiemetics), Pain/Analgesics (NSAIDs, acetaminophen, tramadol), Anti-infectives (penicillins, macrolides, fluoroquinolones, cephalosporins), Endocrine (levothyroxine, metformin, sulfonylureas, DPP4i, corticosteroids), Hematological (aspirin, clopidogrel, DOACs). All drugs include international brand names (USA/UK/India), mechanisms, dosages, indications, contraindications, and PK/PD parameters."
+
 metadata:
   created_by: "testing_agent"
-  version: "1.1"
-  test_sequence: 2
+  version: "1.2"
+  test_sequence: 3
 
 test_plan:
   current_focus:
