@@ -791,11 +791,11 @@ const LandingPage = () => {
               </div>
               
               <h2 className="font-manrope text-3xl sm:text-4xl font-bold mb-6">
-                Beyond AI. <span className="bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">Mechanistic Math.</span>
+                Beyond AI. <span className="bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">Mathematical Precision.</span>
               </h2>
               
               <p className="text-muted-foreground mb-8 leading-relaxed">
-                Standard AI "guesses" based on past populations. PhiCor is different. We use <span className="text-foreground font-medium">Mechanistic Mathematics</span> to model the actual physics of <span className="text-purple-400">this specific patient</span>.
+                PhiCor combines <span className="text-foreground font-medium">AI-powered diagnosis</span> with <span className="text-purple-400">validated mathematical models</span> of human physiology. Not just pattern matching — real equations modeling real organ systems.
               </p>
               
               <div className="space-y-4">
