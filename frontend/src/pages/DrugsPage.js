@@ -1060,7 +1060,7 @@ const DrugSimulationPanel = ({ drug, patient, dosage, setDosage, simulation, isS
           </div>
           <h3 className="text-xl font-semibold mb-2">Patient-Specific Drug Simulation</h3>
           <p className="text-muted-foreground mb-6">
-            Select a drug from the list to see personalized dosing recommendations based on your patient's characteristics.
+            Select a drug from the list to see personalized dosing recommendations based on your patient&apos;s characteristics.
           </p>
           <div className="text-left p-4 rounded-lg bg-card/50 border border-border/50">
             <h4 className="font-medium mb-3 flex items-center gap-2">
@@ -1068,7 +1068,7 @@ const DrugSimulationPanel = ({ drug, patient, dosage, setDosage, simulation, isS
               How it works:
             </h4>
             <ol className="space-y-2 text-sm text-muted-foreground">
-              <li className="flex gap-2"><span className="font-bold text-primary">1.</span> Configure your patient's profile (age, weight, renal/liver function)</li>
+              <li className="flex gap-2"><span className="font-bold text-primary">1.</span> Configure your patient&apos;s profile (age, weight, renal/liver function)</li>
               <li className="flex gap-2"><span className="font-bold text-primary">2.</span> Select a drug from the list</li>
               <li className="flex gap-2"><span className="font-bold text-primary">3.</span> Get personalized dose recommendations with safety alerts</li>
               <li className="flex gap-2"><span className="font-bold text-primary">4.</span> Adjust dosage and see real-time PK/PD simulation</li>
