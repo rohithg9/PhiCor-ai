@@ -2560,12 +2560,13 @@ const DashboardMultiScale = () => {
     const fetchDiseaseParams = async () => {
       try {
         const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
-        const response = await fetch(`${backendUrl}/api/diseases-db`);
+        // Fetch all diseases with parameter_modifications (limit increased to get all)
+        const response = await fetch(`${backendUrl}/api/diseases-db?include_params=true&limit=500`);
         if (response.ok) {
           const data = await response.json();
           // Map diseases by their ID with their parameter_modifications
           const diseaseMap = {};
-          data.forEach(disease => {
+          (data.diseases || []).forEach(disease => {
             if (disease.parameter_modifications && Object.keys(disease.parameter_modifications).length > 0) {
               diseaseMap[disease.id] = disease.parameter_modifications;
             }
