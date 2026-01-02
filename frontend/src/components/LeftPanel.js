@@ -734,7 +734,11 @@ const LeftPanel = ({
           </TabsContent>
           
           <TabsContent value="assistant" className="mt-0 h-full">
-            <PhiCorAssistant selectedDisease={selectedDisease} currentOrgan={currentOrgan} />
+            <PhiCorAssistant 
+              selectedDisease={selectedDisease} 
+              currentOrgan={currentOrgan}
+              diseaseModifications={selectedDisease?.parameter_modifications || selectedDisease?.modifications}
+            />
           </TabsContent>
           
           <TabsContent value="calc" className="mt-0">
