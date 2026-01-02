@@ -811,6 +811,62 @@ export const ORGAN_MODELS = {
           description: "Saturable reabsorption with flow dependence",
           evidence: "novel",
           source: "Michaelis-Menten + flow term"
+        },
+        {
+          id: "ckd_epi_2021",
+          name: "CKD-EPI 2021 (Race-Free)",
+          latex: "eGFR = 142 \\times min(SCr/\\kappa, 1)^\\alpha \\times max(SCr/\\kappa, 1)^{-1.200} \\times 0.9938^{Age} \\times 1.012_{female}",
+          description: "Race-free GFR estimation (κ=0.7F/0.9M, α=-0.241F/-0.302M)",
+          evidence: "established",
+          source: "NKF/ASN 2021"
+        },
+        {
+          id: "mdrd_gfr",
+          name: "MDRD Study GFR",
+          latex: "eGFR = 175 \\times SCr^{-1.154} \\times Age^{-0.203} \\times 0.742_{female}",
+          description: "4-variable MDRD equation (IDMS-traceable)",
+          evidence: "established",
+          source: "MDRD Study"
+        },
+        {
+          id: "bun_creatinine_ratio",
+          name: "BUN/Creatinine Ratio",
+          latex: "\\frac{BUN}{Cr} = \\frac{[BUN]}{[Creatinine]}",
+          description: "Prerenal (>20:1) vs intrinsic renal (<15:1) AKI",
+          evidence: "established",
+          source: "Clinical nephrology"
+        },
+        {
+          id: "anion_gap",
+          name: "Anion Gap",
+          latex: "AG = Na^+ - (Cl^- + HCO_3^-)",
+          description: "Normal 8-12 mEq/L; elevated in metabolic acidosis",
+          evidence: "established",
+          source: "Acid-base"
+        },
+        {
+          id: "osmolar_gap",
+          name: "Osmolar Gap",
+          latex: "OG = Osm_{measured} - Osm_{calc} = Osm_{measured} - [2Na + \\frac{Glucose}{18} + \\frac{BUN}{2.8}]",
+          description: "Elevated (>10) suggests toxic alcohols",
+          evidence: "established",
+          source: "Toxicology"
+        },
+        {
+          id: "transtubular_k_gradient",
+          name: "Transtubular K Gradient",
+          latex: "TTKG = \\frac{U_K / P_K}{U_{osm} / P_{osm}}",
+          description: "Aldosterone activity assessment",
+          evidence: "established",
+          source: "Nephrology"
+        },
+        {
+          id: "kidney_failure_risk",
+          name: "Kidney Failure Risk",
+          latex: "Risk = 1 - 0.9961^{e^{X\\beta}}",
+          description: "2-year ESRD risk from GFR, ACR, age, sex",
+          evidence: "established",
+          source: "Tangri 2016"
         }
       ]
     },
