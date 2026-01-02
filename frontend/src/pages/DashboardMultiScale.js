@@ -8,7 +8,7 @@ import {
   AlertTriangle, Check, Menu, X, Stethoscope, FlaskConical,
   FileImage, Pill, Clock, TrendingUp, TrendingDown, Info, Microscope,
   Brain, Sparkles, Loader2, Search, Thermometer, HeartPulse,
-  TestTube, ScanLine, Syringe, ClipboardList, Calculator, Home
+  TestTube, ScanLine, Syringe, ClipboardList, Calculator, Home, User
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { ScrollArea } from '../components/ui/scroll-area';
@@ -18,6 +18,7 @@ import { Badge } from '../components/ui/badge';
 import { Sheet, SheetContent, SheetTrigger } from '../components/ui/sheet';
 import { Input } from '../components/ui/input';
 import { FeatureTutorial, TutorialButton, useTutorial } from '../components/FeatureTutorial';
+import LeftPanel from '../components/LeftPanel';
 import { ORGAN_MODELS } from '../data/organModels';
 import { DISEASE_MODELS } from '../data/diseaseModels';
 import { BIOCHEMISTRY } from '../data/biochemistry';
