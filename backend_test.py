@@ -214,91 +214,91 @@ def test_drugs_database():
         print(f"❌ Error testing drugs database: {e}")
         return False
 
-def test_diseases_database():
-    """Test 3: Diseases Database - GET /api/diseases-db?limit=10"""
-    print("\n🏥 TEST 3: DISEASES DATABASE")
+def test_diseases_database_api():
+    """Test 2: Diseases Database API - GET /api/diseases-db (Review Request)"""
+    print("\n🏥 TEST 2: DISEASES DATABASE API")
     print("=" * 50)
+    print("Testing requirements from review request:")
+    print("- Test with search parameter: search=diabetes")
+    print("- Verify returns diseases with ICD-10 codes")
+    print("- Test category filter: category=cardiovascular")
     
     try:
-        # Test basic diseases list
-        response = requests.get(f"{BACKEND_URL}/api/diseases-db?limit=10", timeout=10)
-        if response.status_code == 200:
-            data = response.json()
+        # Test with search=diabetes (review requirement)
+        print(f"\n  🔍 Testing search parameter: search=diabetes")
+        search_response = requests.get(f"{BACKEND_URL}/api/diseases-db?search=diabetes", timeout=10)
+        if search_response.status_code == 200:
+            search_data = search_response.json()
+            search_diseases = search_data.get('diseases', [])
             
-            print(f"✅ Diseases database endpoint accessible")
+            print(f"  📊 Diseases found with 'diabetes' search: {len(search_diseases)}")
             
-            diseases = data.get('diseases', [])
-            total = data.get('total', 0)
-            print(f"  📊 Diseases returned: {len(diseases)}, Total available: {total}")
-            
-            if len(diseases) > 0:
-                print(f"  ✅ Disease list returned with {len(diseases)} diseases ✓")
+            if len(search_diseases) > 0:
+                print(f"  ✅ Search functionality working - found {len(search_diseases)} diabetes-related diseases ✓")
                 
-                # Check disease data structure
-                sample_disease = diseases[0]
-                required_fields = ['id', 'name']
-                optional_fields = ['icd_10_code', 'parameter_modifications']
+                # Verify returns diseases with ICD-10 codes (review requirement)
+                diseases_with_icd = []
+                for disease in search_diseases:
+                    icd_code = disease.get('icd_10_code') or disease.get('icd10_code') or disease.get('icd_code')
+                    if icd_code:
+                        diseases_with_icd.append(disease)
+                        print(f"    - {disease.get('name', 'Unknown')}: {icd_code}")
                 
-                missing_required = [field for field in required_fields if field not in sample_disease]
-                present_optional = [field for field in optional_fields if field in sample_disease]
-                
-                if not missing_required:
-                    print(f"  ✅ Disease data structure complete (id, name) ✓")
-                    print(f"    Sample disease: {sample_disease.get('name')} (ID: {sample_disease.get('id')})")
-                    
-                    if 'icd_10_code' in sample_disease:
-                        print(f"    ICD-10 code: {sample_disease.get('icd_10_code')}")
-                    
-                    basic_pass = True
+                if diseases_with_icd:
+                    print(f"  ✅ Diseases have ICD-10 codes: {len(diseases_with_icd)}/{len(search_diseases)} diseases ✓")
+                    search_pass = True
                 else:
-                    print(f"  ❌ Missing required fields: {missing_required}")
-                    basic_pass = False
-                
-                print(f"  📊 Optional fields present: {present_optional}")
+                    print(f"  ❌ No diseases have ICD-10 codes")
+                    search_pass = False
             else:
-                print(f"  ❌ No diseases returned")
-                basic_pass = False
+                print(f"  ❌ No diseases found with 'diabetes' search")
+                search_pass = False
         else:
-            print(f"❌ Diseases database endpoint failed: {response.status_code}")
-            basic_pass = False
+            print(f"  ❌ Search test failed: {search_response.status_code}")
+            search_pass = False
         
-        # Test with include_params
-        print(f"\n  🔍 Testing include_params=true")
-        try:
-            params_response = requests.get(f"{BACKEND_URL}/api/diseases-db?include_params=true&limit=5", timeout=10)
-            if params_response.status_code == 200:
-                params_data = params_response.json()
-                params_diseases = params_data.get('diseases', [])
+        # Test category filter: category=cardiovascular (review requirement)
+        print(f"\n  🔍 Testing category filter: category=cardiovascular")
+        category_response = requests.get(f"{BACKEND_URL}/api/diseases-db?category=cardiovascular", timeout=10)
+        if category_response.status_code == 200:
+            category_data = category_response.json()
+            category_diseases = category_data.get('diseases', [])
+            
+            print(f"  📊 Cardiovascular diseases found: {len(category_diseases)}")
+            
+            if len(category_diseases) > 0:
+                # Verify all returned diseases are cardiovascular
+                all_cardiovascular = True
+                for disease in category_diseases:
+                    disease_category = disease.get('category', '').lower()
+                    if 'cardiovascular' not in disease_category and 'cardiac' not in disease_category and 'heart' not in disease_category:
+                        all_cardiovascular = False
+                        break
                 
-                print(f"  📊 Diseases with params returned: {len(params_diseases)}")
-                
-                if len(params_diseases) > 0:
-                    # Check if parameter_modifications are included
-                    diseases_with_params = [d for d in params_diseases 
-                                          if 'parameter_modifications' in d and d['parameter_modifications']]
+                if all_cardiovascular:
+                    print(f"  ✅ Category filter working - all diseases are cardiovascular ✓")
                     
-                    if diseases_with_params:
-                        print(f"  ✅ Parameter modifications included for {len(diseases_with_params)} diseases ✓")
-                        sample_params = diseases_with_params[0]['parameter_modifications']
-                        print(f"    Sample parameter modifications keys: {list(sample_params.keys())[:3]}")
-                        params_pass = True
-                    else:
-                        print(f"  ⚠️ No diseases have parameter_modifications data")
-                        params_pass = True  # Don't fail if data structure is different
+                    # Show sample diseases with ICD-10 codes
+                    print(f"    Sample cardiovascular diseases:")
+                    for disease in category_diseases[:3]:
+                        icd_code = disease.get('icd_10_code') or disease.get('icd10_code') or 'No ICD-10'
+                        print(f"    - {disease.get('name', 'Unknown')}: {icd_code}")
+                    
+                    category_pass = True
                 else:
-                    print(f"  ❌ No diseases returned with include_params")
-                    params_pass = False
+                    print(f"  ❌ Category filter not working - non-cardiovascular diseases returned")
+                    category_pass = False
             else:
-                print(f"  ❌ Include params test failed: {params_response.status_code}")
-                params_pass = False
-        except Exception as e:
-            print(f"  ❌ Error testing include_params: {e}")
-            params_pass = False
+                print(f"  ⚠️ No cardiovascular diseases found")
+                category_pass = True  # Don't fail if no diseases in this category
+        else:
+            print(f"  ❌ Category filter test failed: {category_response.status_code}")
+            category_pass = False
         
-        return basic_pass and params_pass
+        return search_pass and category_pass
         
     except Exception as e:
-        print(f"❌ Error testing diseases database: {e}")
+        print(f"❌ Error testing diseases database API: {e}")
         return False
 
 def test_disease_detail_with_parameters():
