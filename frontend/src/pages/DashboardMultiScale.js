@@ -2553,6 +2553,32 @@ const DashboardMultiScale = () => {
   const [showClinicalPanel, setShowClinicalPanel] = useState(false);
   const [paramFilterOrgan, setParamFilterOrgan] = useState(null); // Filter affected params by organ
   const [showAllParams, setShowAllParams] = useState(false); // Expand to show all params
+  const [apiDiseaseData, setApiDiseaseData] = useState({}); // Store parameter_modifications from API
+
+  // Fetch disease parameter_modifications from API
+  useEffect(() => {
+    const fetchDiseaseParams = async () => {
+      try {
+        const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
+        const response = await fetch(`${backendUrl}/api/diseases-db`);
+        if (response.ok) {
+          const data = await response.json();
+          // Map diseases by their ID with their parameter_modifications
+          const diseaseMap = {};
+          data.forEach(disease => {
+            if (disease.parameter_modifications && Object.keys(disease.parameter_modifications).length > 0) {
+              diseaseMap[disease.id] = disease.parameter_modifications;
+            }
+          });
+          setApiDiseaseData(diseaseMap);
+          console.log(`Loaded parameter_modifications for ${Object.keys(diseaseMap).length} diseases`);
+        }
+      } catch (error) {
+        console.error('Failed to fetch disease params:', error);
+      }
+    };
+    fetchDiseaseParams();
+  }, []);
 
   const organs = useMemo(() => Object.entries(ORGAN_MODELS), []);
   const diseases = useMemo(() => Object.entries(MERGED_DISEASE_MODELS), []);
