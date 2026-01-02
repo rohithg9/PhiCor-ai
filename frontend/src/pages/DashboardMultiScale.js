@@ -3138,7 +3138,7 @@ const DashboardMultiScale = () => {
           <div className="flex gap-1 py-2 overflow-x-auto scrollbar-hide">
             {SCALE_LEVELS.map((scale) => {
               const hasData = currentOrgan?.[scale.id];
-              const hasChanges = currentDisease?.modifications?.[selectedOrgan]?.[scale.id];
+              const hasChanges = mergedModifications?.[selectedOrgan]?.[scale.id];
               
               return (
                 <button
