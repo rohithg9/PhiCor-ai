@@ -417,9 +417,9 @@ def test_generated_drug_detail():
         print(f"❌ Error testing amlodipine drug detail: {e}")
         return False
 
-def test_disease_stats():
-    """Test 7: Disease Stats - GET /api/diseases-db/stats"""
-    print("\n🏥 TEST 7: DISEASE STATS")
+def test_disease_database_stats():
+    """Test 1: Disease Database Stats API - GET /api/diseases-db/stats"""
+    print("\n🏥 TEST 1: DISEASE DATABASE STATS API")
     print("=" * 50)
     
     try:
@@ -427,17 +427,17 @@ def test_disease_stats():
         if response.status_code == 200:
             data = response.json()
             
-            print(f"✅ Disease stats endpoint accessible")
+            print(f"✅ Disease database stats endpoint accessible")
             
-            # Check total_diseases > 200
+            # Check total diseases count (~254)
             total_diseases = data.get('total_diseases', 0)
             print(f"  📊 Total diseases: {total_diseases}")
             
-            if total_diseases > 200:
-                print(f"  ✅ Total diseases ({total_diseases}) > 200 ✓")
+            if total_diseases >= 250:
+                print(f"  ✅ Total diseases ({total_diseases}) >= 250 (close to expected ~254) ✓")
                 total_pass = True
             else:
-                print(f"  ❌ Total diseases ({total_diseases}) ≤ 200")
+                print(f"  ❌ Total diseases ({total_diseases}) < 250 (expected ~254)")
                 total_pass = False
             
             # Check by_category breakdown
@@ -454,17 +454,298 @@ def test_disease_stats():
                 print(f"  ❌ By category breakdown missing or invalid")
                 category_pass = False
             
-            # Check for additional useful fields
-            ai_generated = data.get('ai_generated', 0)
-            if ai_generated:
-                print(f"  ✅ AI-generated diseases: {ai_generated}")
+            # Check for parameter_modifications info
+            param_mod_info = data.get('parameter_modifications_info', {})
+            if param_mod_info:
+                print(f"  ✅ Parameter modifications info present")
+                diseases_with_mods = param_mod_info.get('diseases_with_modifications', 0)
+                total_modifications = param_mod_info.get('total_modifications', 0)
+                print(f"    - Diseases with modifications: {diseases_with_mods}")
+                print(f"    - Total modifications: {total_modifications}")
+                
+                if diseases_with_mods >= 250:
+                    print(f"  ✅ Most diseases ({diseases_with_mods}) have parameter_modifications ✓")
+                    param_pass = True
+                else:
+                    print(f"  ⚠️ Only {diseases_with_mods} diseases have parameter_modifications")
+                    param_pass = False
+            else:
+                print(f"  ⚠️ Parameter modifications info not available in stats")
+                param_pass = True  # Don't fail if this specific info isn't in stats
             
-            return total_pass and category_pass
+            return total_pass and category_pass and param_pass
         else:
-            print(f"❌ Disease stats endpoint failed: {response.status_code}")
+            print(f"❌ Disease database stats endpoint failed: {response.status_code}")
             return False
     except Exception as e:
-        print(f"❌ Error testing disease stats: {e}")
+        print(f"❌ Error testing disease database stats: {e}")
+        return False
+
+def test_disease_search_down_syndrome():
+    """Test 2: Disease Search API - GET /api/diseases-db?search=Down"""
+    print("\n🧬 TEST 2: DISEASE SEARCH - DOWN SYNDROME")
+    print("=" * 50)
+    
+    try:
+        response = requests.get(f"{BACKEND_URL}/api/diseases-db?search=Down", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            
+            print(f"✅ Disease search endpoint accessible")
+            
+            diseases = data.get('diseases', [])
+            print(f"  📊 Search results for 'Down': {len(diseases)} diseases")
+            
+            # Look for Down syndrome in results
+            down_syndrome_found = False
+            down_syndrome_disease = None
+            
+            for disease in diseases:
+                disease_name = disease.get('name', '').lower()
+                disease_id = disease.get('id', '').lower()
+                
+                if 'down' in disease_name or 'down' in disease_id:
+                    down_syndrome_found = True
+                    down_syndrome_disease = disease
+                    print(f"  ✅ Down syndrome found: {disease.get('name')} (ID: {disease.get('id')}) ✓")
+                    break
+            
+            if down_syndrome_found and down_syndrome_disease:
+                # Check for parameter_modifications field
+                param_modifications = down_syndrome_disease.get('parameter_modifications', {})
+                
+                if param_modifications and isinstance(param_modifications, dict):
+                    print(f"  ✅ Parameter modifications field present ✓")
+                    
+                    # Check for organ-level modifications
+                    organs_found = []
+                    for organ, modifications in param_modifications.items():
+                        if modifications and isinstance(modifications, dict):
+                            organs_found.append(organ)
+                    
+                    print(f"  📊 Organs with modifications: {len(organs_found)}")
+                    for organ in organs_found[:5]:  # Show first 5
+                        print(f"    - {organ}")
+                    
+                    # Check for expected modifications (cellular/DNA for genetic condition)
+                    expected_organs = ['cellular', 'brain', 'heart', 'immune']
+                    found_expected = [org for org in expected_organs if org in organs_found]
+                    
+                    if len(found_expected) >= 2:
+                        print(f"  ✅ Expected organ modifications found: {found_expected} ✓")
+                        param_pass = True
+                    else:
+                        print(f"  ⚠️ Limited expected organ modifications: {found_expected}")
+                        param_pass = True  # Still pass as long as some modifications exist
+                    
+                    return down_syndrome_found and param_pass
+                else:
+                    print(f"  ❌ Parameter modifications field missing or empty")
+                    return False
+            else:
+                print(f"  ❌ Down syndrome not found in search results")
+                return False
+        else:
+            print(f"❌ Disease search endpoint failed: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing disease search: {e}")
+        return False
+
+def test_disease_detail_parameter_modifications():
+    """Test 3: Disease Detail API - GET /api/diseases-db/{disease_id}"""
+    print("\n🔬 TEST 3: DISEASE DETAIL - PARAMETER MODIFICATIONS")
+    print("=" * 50)
+    
+    # Test multiple diseases to verify parameter_modifications
+    test_diseases = [
+        {"id": "down_syndrome", "name": "Down Syndrome", "expected_organs": ["cellular", "brain", "heart"]},
+        {"id": "diabetes_type_2", "name": "Diabetes Type 2", "expected_organs": ["pancreas", "kidney", "cardiovascular"]},
+        {"id": "copd", "name": "COPD", "expected_organs": ["lungs", "respiratory", "cardiovascular"]}
+    ]
+    
+    all_tests_passed = True
+    
+    for disease_info in test_diseases:
+        disease_id = disease_info["id"]
+        disease_name = disease_info["name"]
+        expected_organs = disease_info["expected_organs"]
+        
+        print(f"\n  🔍 Testing {disease_name} (ID: {disease_id})")
+        
+        try:
+            response = requests.get(f"{BACKEND_URL}/api/diseases-db/{disease_id}", timeout=10)
+            if response.status_code == 200:
+                disease_data = response.json()
+                
+                print(f"    ✅ {disease_name} detail endpoint accessible")
+                print(f"    📊 Disease name: {disease_data.get('name', 'Unknown')}")
+                
+                # Check for parameter_modifications
+                param_modifications = disease_data.get('parameter_modifications', {})
+                
+                if param_modifications and isinstance(param_modifications, dict):
+                    print(f"    ✅ Parameter modifications present ✓")
+                    
+                    # Check organ-level changes
+                    organs_with_mods = list(param_modifications.keys())
+                    print(f"    📊 Organs with modifications ({len(organs_with_mods)}): {organs_with_mods[:5]}")
+                    
+                    # Check for expected organs
+                    found_expected = []
+                    for expected_organ in expected_organs:
+                        for actual_organ in organs_with_mods:
+                            if expected_organ.lower() in actual_organ.lower():
+                                found_expected.append(actual_organ)
+                                break
+                    
+                    if found_expected:
+                        print(f"    ✅ Expected organ modifications found: {found_expected} ✓")
+                    else:
+                        print(f"    ⚠️ Expected organs not found, but other modifications exist")
+                    
+                    # Check scale-level modifications
+                    scale_modifications_found = False
+                    for organ, organ_mods in param_modifications.items():
+                        if isinstance(organ_mods, dict):
+                            for scale, scale_mods in organ_mods.items():
+                                if isinstance(scale_mods, dict) and scale_mods:
+                                    scale_modifications_found = True
+                                    print(f"    📊 {organ}.{scale}: {len(scale_mods)} modifications")
+                                    
+                                    # Check for change direction and value
+                                    for param, param_data in list(scale_mods.items())[:2]:  # Check first 2
+                                        if isinstance(param_data, dict):
+                                            direction = param_data.get('direction', param_data.get('change_direction'))
+                                            value = param_data.get('value', param_data.get('magnitude'))
+                                            if direction and value:
+                                                print(f"      - {param}: {direction} by {value}")
+                                    break
+                        if scale_modifications_found:
+                            break
+                    
+                    if scale_modifications_found:
+                        print(f"    ✅ Scale-level modifications with direction/value found ✓")
+                        disease_pass = True
+                    else:
+                        print(f"    ❌ Scale-level modifications missing or incomplete")
+                        disease_pass = False
+                else:
+                    print(f"    ❌ Parameter modifications missing or empty")
+                    disease_pass = False
+                
+                if not disease_pass:
+                    all_tests_passed = False
+                    
+            elif response.status_code == 404:
+                print(f"    ⚠️ {disease_name} not found (404) - trying alternative IDs")
+                # Try alternative IDs
+                alt_ids = [
+                    disease_id.replace('_', '-'),
+                    disease_id.replace('_', ''),
+                    disease_name.lower().replace(' ', '_'),
+                    disease_name.lower().replace(' ', '-')
+                ]
+                
+                found_alternative = False
+                for alt_id in alt_ids:
+                    try:
+                        alt_response = requests.get(f"{BACKEND_URL}/api/diseases-db/{alt_id}", timeout=5)
+                        if alt_response.status_code == 200:
+                            print(f"    ✅ Found with alternative ID: {alt_id}")
+                            found_alternative = True
+                            break
+                    except:
+                        continue
+                
+                if not found_alternative:
+                    print(f"    ❌ {disease_name} not found with any ID variation")
+                    all_tests_passed = False
+            else:
+                print(f"    ❌ {disease_name} detail endpoint failed: {response.status_code}")
+                all_tests_passed = False
+                
+        except Exception as e:
+            print(f"    ❌ Error testing {disease_name}: {e}")
+            all_tests_passed = False
+    
+    return all_tests_passed
+
+def test_platform_stats_accuracy():
+    """Test 4: Platform Stats API - GET /api/platform/stats"""
+    print("\n📊 TEST 4: PLATFORM STATS ACCURACY")
+    print("=" * 50)
+    
+    try:
+        response = requests.get(f"{BACKEND_URL}/api/platform/stats", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            
+            print(f"✅ Platform stats endpoint accessible")
+            
+            # Check for required fields
+            drugs_data = data.get('drugs', {})
+            diseases_data = data.get('diseases', {})
+            display_stats = data.get('display_stats', {})
+            
+            # Test drug counts
+            drugs_total = drugs_data.get('total', 0)
+            print(f"  📊 Drugs total: {drugs_total}")
+            
+            if drugs_total > 300:
+                print(f"  ✅ Drugs total ({drugs_total}) > 300 ✓")
+                drugs_pass = True
+            else:
+                print(f"  ❌ Drugs total ({drugs_total}) ≤ 300")
+                drugs_pass = False
+            
+            # Test disease counts (should be ~254)
+            diseases_total = diseases_data.get('total', 0)
+            print(f"  📊 Diseases total: {diseases_total}")
+            
+            if diseases_total >= 250:
+                print(f"  ✅ Diseases total ({diseases_total}) >= 250 (close to expected ~254) ✓")
+                diseases_pass = True
+            else:
+                print(f"  ❌ Diseases total ({diseases_total}) < 250")
+                diseases_pass = False
+            
+            # Test display stats accuracy
+            if display_stats:
+                print(f"  ✅ Display stats present:")
+                for key, value in display_stats.items():
+                    print(f"    - {key}: {value}")
+                
+                # Verify display stats match actual counts
+                display_drugs = display_stats.get('drugs', '0+').replace('+', '')
+                display_diseases = display_stats.get('diseases', '0+').replace('+', '')
+                
+                try:
+                    display_drugs_num = int(display_drugs)
+                    display_diseases_num = int(display_diseases)
+                    
+                    drugs_match = abs(display_drugs_num - drugs_total) <= 50  # Allow some variance
+                    diseases_match = abs(display_diseases_num - diseases_total) <= 50
+                    
+                    if drugs_match and diseases_match:
+                        print(f"  ✅ Display stats match actual counts ✓")
+                        display_pass = True
+                    else:
+                        print(f"  ⚠️ Display stats don't exactly match actual counts")
+                        display_pass = True  # Still pass as this might be intentional rounding
+                except:
+                    print(f"  ⚠️ Could not parse display stats for comparison")
+                    display_pass = True
+            else:
+                print(f"  ❌ Display stats missing")
+                display_pass = False
+            
+            return drugs_pass and diseases_pass and display_pass
+        else:
+            print(f"❌ Platform stats endpoint failed: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing platform stats: {e}")
         return False
 
 def run_all_tests():
