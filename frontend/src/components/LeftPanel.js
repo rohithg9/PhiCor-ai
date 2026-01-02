@@ -738,7 +738,7 @@ const LeftPanel = ({
             <PhiCorAssistant 
               selectedDisease={selectedDisease} 
               currentOrgan={currentOrgan}
-              diseaseModifications={selectedDisease?.parameter_modifications || selectedDisease?.modifications}
+              diseaseModifications={diseaseModifications || selectedDisease?.parameter_modifications || selectedDisease?.modifications}
             />
           </TabsContent>
           
