@@ -2455,79 +2455,74 @@ async def generate_disease_parameter_modifications(request: ParameterModificatio
             system_message="You are a medical expert that generates precise physiological parameter modifications for diseases. Return only valid JSON."
         ).with_model("openai", "gpt-4o")
         
-        prompt = f"""You are a medical expert. Generate comprehensive parameter modifications for the disease: {request.disease_name}
+        prompt = f"""You are a medical expert specializing in molecular medicine and systems biology. Generate COMPREHENSIVE parameter modifications for: {request.disease_name}
 
-For this disease, specify how it affects various physiological parameters across ALL relevant organ systems. Return a JSON object with this structure:
+IMPORTANT: This disease should have modifications at ALL relevant levels - from organ systems down to specific genes and molecular pathways. Think deeply about the molecular basis of this disease.
 
+Return a JSON object with this structure:
 {{
     "disease_id": "{request.disease_id}",
     "disease_name": "{request.disease_name}",
     "parameter_modifications": {{
-        "heart": {{
-            "geometry": {{
-                "lv_edv": {{ "change_percent": 20, "direction": "increase", "evidence": "Cardiac remodeling" }}
-            }},
-            "lab_tests": {{
-                "troponin_i": {{ "change_percent": 500, "direction": "increase", "evidence": "Myocardial injury" }},
-                "bnp": {{ "change_percent": 300, "direction": "increase", "evidence": "Wall stress" }}
-            }},
-            "imaging": {{
-                "echo_ef": {{ "change_percent": 25, "direction": "decrease", "evidence": "Systolic dysfunction" }}
-            }}
-        }},
         "cellular": {{
             "dna": {{
-                "chromosome_count": {{ "value": 47, "direction": "increase", "evidence": "Trisomy (for chromosomal disorders)" }},
-                "hbb_gene_expression": {{ "change_percent": 100, "direction": "decrease", "evidence": "For β-thalassemia: HBB gene mutations cause absent/reduced β-globin" }},
-                "hba_gene_expression": {{ "change_percent": 0, "direction": "normal", "evidence": "α-globin unaffected in β-thalassemia" }},
-                "alpha_beta_globin_ratio": {{ "value": 4.0, "direction": "increase", "evidence": "Excess α-chains in β-thalassemia cause precipitation and hemolysis" }},
-                "hbs_variant": {{ "value": 80, "direction": "increase", "evidence": "HbS >50% in sickle cell disease" }},
-                "hbf_level": {{ "value": 5, "direction": "increase", "evidence": "Compensatory HbF increase" }},
-                "cftr_function": {{ "change_percent": 100, "direction": "decrease", "evidence": "For cystic fibrosis: CFTR channel dysfunction" }},
-                "mutation_burden": {{ "change_percent": 50, "direction": "increase", "evidence": "Inherited or somatic mutations" }},
-                "karyotype_abnormalities": {{ "value": 1, "direction": "increase", "evidence": "Chromosomal abnormalities" }}
+                // GENETIC MARKERS - Include ALL relevant genes for this disease
+                // For CANCER: tp53_status, brca1/2_function, kras_mutation, egfr_amplification, her2_amplification, pik3ca_mutation, braf_mutation, etc.
+                // For METABOLIC (diabetes, obesity): tcf7l2_variant, pparg_function, kcnj11_variant, hnf1a_function, gck_function, irs1_function, fto_variant, etc.
+                // For CARDIOVASCULAR: ldlr_function, apob_variant, pcsk9_activity, ace_activity, scn5a_function, mybpc3_function, etc.
+                // For NEUROPSYCHIATRIC: comt_activity, disc1_function, drd2_expression, slc6a4_function, bdnf_expression, grin2a_function, maoa_activity, etc.
+                // For NEURODEGENERATIVE: apoe4_copies, app_mutation, psen1_mutation, snca_expression, lrrk2_mutation, htt_cag_repeats, sod1_function, etc.
+                // For AUTOIMMUNE/INFLAMMATORY: hla_b27_status, hla_dr4_status, ptpn22_variant, il6_expression, tnf_expression, nfkb_activity, etc.
+                "relevant_gene_marker": {{ "change_percent": X, "direction": "increase/decrease", "evidence": "Specific mechanism" }}
             }},
             "gene_expression": {{
-                "p53_expression": {{ "change_percent": 50, "direction": "increase", "evidence": "Stress response" }},
-                "vegf_expression": {{ "change_percent": 100, "direction": "increase", "evidence": "Angiogenesis compensation" }},
-                "nfkb_activity": {{ "change_percent": 200, "direction": "increase", "evidence": "Inflammatory signaling" }},
-                "hif1a_expression": {{ "change_percent": 150, "direction": "increase", "evidence": "Hypoxia response" }}
+                // SIGNALING PATHWAYS - Include relevant pathways
+                // mtor_activity, pi3k_akt_activity, mapk_erk_activity, wnt_beta_catenin, notch_activity, jak_stat_activity, nfkb_activity
+                // dopamine_signaling, serotonin_signaling, gaba_signaling, glutamate_signaling (for psychiatric/neurological)
+                // insulin_receptor_expression, irs_phosphorylation, glut4_expression (for metabolic)
+                // vegf_expression, hif1a_expression, egf_expression (for cancer/angiogenesis)
+                "relevant_pathway": {{ "change_percent": X, "direction": "increase/decrease", "evidence": "Mechanism" }}
             }},
             "metabolism": {{
-                "atp_production": {{ "change_percent": 20, "direction": "decrease", "evidence": "Metabolic dysfunction" }},
-                "ros_level": {{ "change_percent": 50, "direction": "increase", "evidence": "Oxidative stress from unstable hemoglobin" }}
+                "atp_production": {{ "change_percent": X, "direction": "increase/decrease", "evidence": "..." }},
+                "ros_level": {{ "change_percent": X, "direction": "increase/decrease", "evidence": "..." }},
+                "mitochondrial_function": {{ "change_percent": X, "direction": "...", "evidence": "..." }}
             }},
             "cell_cycle": {{
-                "ki67_index": {{ "change_percent": 100, "direction": "increase", "evidence": "For proliferative diseases" }},
-                "apoptotic_index": {{ "change_percent": 200, "direction": "increase", "evidence": "Ineffective erythropoiesis in thalassemia" }}
+                "ki67_index": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "apoptotic_index": {{ "change_percent": X, "direction": "...", "evidence": "..." }}
             }}
         }},
-        "blood": {{
-            "lab_tests": {{
-                "hemoglobin": {{ "change_percent": 50, "direction": "decrease", "evidence": "Anemia" }},
-                "mcv": {{ "change_percent": 30, "direction": "decrease", "evidence": "Microcytosis" }},
-                "mch": {{ "change_percent": 30, "direction": "decrease", "evidence": "Hypochromia" }},
-                "reticulocyte_count": {{ "change_percent": 200, "direction": "increase", "evidence": "Compensatory erythropoiesis" }}
-            }}
-        }},
-        "bonemarrow": {{
-            "geometry": {{
-                "marrow_cellularity": {{ "change_percent": 100, "direction": "increase", "evidence": "Erythroid hyperplasia" }},
-                "me_ratio": {{ "value": 0.5, "direction": "decrease", "evidence": "Reversed M:E ratio in hemolytic anemias" }}
-            }}
+        "affected_organ": {{
+            "geometry/structure": {{ ... }},
+            "physiology": {{ ... }},
+            "lab_tests": {{ ... }},
+            "imaging": {{ ... }}
         }}
     }},
-    "affected_organs": ["heart", "cellular", "blood", "bonemarrow", "kidneys", "liver", "spleen"],
-    "severity_factors": [
-        {{ "name": "Hemoglobin Level", "threshold": "<7 g/dL", "impact": "severe" }},
-        {{ "name": "Key Marker", "threshold": ">value", "impact": "severe/moderate/mild" }}
-    ],
-    "mathematical_models": [
-        {{
-            "name": "Model Name",
-            "equation": "mathematical equation",
-            "description": "What this model describes"
-        }}
+    "affected_organs": ["list", "of", "affected", "organs"],
+    "molecular_summary": "Brief description of the molecular basis of this disease"
+}}
+
+DISEASE-SPECIFIC REQUIREMENTS:
+
+1. **CANCER** (breast, lung, colon, etc.): MUST include oncogenes (kras, egfr, her2, myc, pik3ca, braf), tumor suppressors (tp53, brca1/2, rb1, apc, pten), hormone receptors (esr1, pgr, ar), cell cycle (ki67, cyclin_d1), and pathway changes (mtor, pi3k_akt, mapk_erk, wnt)
+
+2. **DIABETES** (Type 1, Type 2, MODY): MUST include metabolic genes (tcf7l2, pparg, kcnj11, hnf1a, gck), insulin signaling (insulin_receptor, irs_phosphorylation, glut4), metabolic pathways (ampk, mtor, srebp), and inflammatory markers
+
+3. **PSYCHIATRIC** (schizophrenia, bipolar, depression, ADHD): MUST include neurotransmitter genes (comt, drd2, drd4, slc6a4, htr2a, grin2a, chrna7, maoa), neuroplasticity (bdnf), and relevant signaling (dopamine_signaling, serotonin_signaling, gaba_signaling, glutamate_signaling)
+
+4. **NEURODEGENERATIVE** (Alzheimer's, Parkinson's, ALS, Huntington's): MUST include disease-specific genes (apoe4, app, psen1/2, snca, lrrk2, htt_cag_repeats, sod1, c9orf72), protein aggregation markers, and neuroinflammatory changes
+
+5. **AUTOIMMUNE** (RA, lupus, MS, IBD): MUST include HLA associations (hla_b27, hla_dr4), immune genes (ptpn22, stat4), cytokines (il6, tnf, il1b, ifng, tgfb), and inflammatory pathways (nfkb, jak_stat)
+
+6. **CARDIOVASCULAR** (CAD, cardiomyopathy, arrhythmias): MUST include lipid genes (ldlr, apob, pcsk9), cardiac genes (scn5a, kcnq1, mybpc3), and relevant pathways
+
+7. **GENETIC/INHERITED** disorders: MUST include the causative gene mutations and their functional impact
+
+Include SPECIFIC gene names and their expression changes. Use realistic change percentages based on medical literature. Mark direction as 'normal' only if truly unaffected.
+
+Return ONLY valid JSON, no other text."""
     ]
 }}
 
