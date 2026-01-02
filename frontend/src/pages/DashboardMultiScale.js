@@ -3168,9 +3168,10 @@ const DashboardMultiScale = () => {
         </div>
       </div>
 
-      {/* Mobile Header - Simplified */}
-      <div className="lg:hidden fixed top-14 left-0 right-0 z-40 bg-background/95 backdrop-blur border-b border-border/50">
-        <div className="h-12 flex items-center justify-between px-3 gap-2">
+      {/* Mobile Header - Fixed at top with proper z-index */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-background border-b border-border/50">
+        {/* Main Mobile Header Bar */}
+        <div className="h-14 flex items-center justify-between px-3 gap-2 border-b border-border/30">
           {/* Left Panel Slide-in */}
           <Sheet>
             <SheetTrigger asChild>
@@ -3178,7 +3179,7 @@ const DashboardMultiScale = () => {
                 <User className="w-5 h-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-80 p-4">
+            <SheetContent side="left" className="w-80 p-4 z-[60]">
               <LeftPanel 
                 selectedDisease={currentDisease}
                 currentOrgan={currentOrgan}
@@ -3200,7 +3201,7 @@ const DashboardMultiScale = () => {
                 <Stethoscope className="w-5 h-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-80 p-0 flex flex-col">
+            <SheetContent side="right" className="w-80 p-0 flex flex-col z-[60]">
               <DiseasePanel 
                 diseases={diseases}
                 selectedDisease={selectedDisease}
@@ -3223,7 +3224,7 @@ const DashboardMultiScale = () => {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="bg-gradient-to-r from-destructive/15 to-orange-500/10 border-t border-destructive/20 px-3 py-2"
+              className="bg-gradient-to-r from-destructive/15 to-orange-500/10 border-b border-destructive/20 px-3 py-2"
             >
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
@@ -3239,7 +3240,7 @@ const DashboardMultiScale = () => {
         </AnimatePresence>
 
         {/* Mobile Organ Tabs */}
-        <div className="overflow-x-auto border-t border-border/30">
+        <div className="overflow-x-auto border-b border-border/30">
           <div className="flex items-center gap-1 px-2 py-1.5">
             {organs.map(([organId, organ]) => {
               const count = affectedCounts[organId] || 0;
