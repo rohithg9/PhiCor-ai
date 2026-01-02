@@ -720,16 +720,16 @@ const LeftPanel = ({
     <div className="h-full flex flex-col">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
         <TabsList className="grid grid-cols-4 h-9">
-          <TabsTrigger value="patient" className="text-xs px-1">
-            <User className="w-3 h-3" />
+          <TabsTrigger value="patient" className="text-xs px-1" title="Patient Profiles">
+            <Users className="w-3 h-3" />
           </TabsTrigger>
-          <TabsTrigger value="assistant" className="text-xs px-1">
+          <TabsTrigger value="assistant" className="text-xs px-1" title="PhiCor Assistant">
             <MessageSquare className="w-3 h-3" />
           </TabsTrigger>
-          <TabsTrigger value="calc" className="text-xs px-1">
+          <TabsTrigger value="calc" className="text-xs px-1" title="Clinical Calculators">
             <Calculator className="w-3 h-3" />
           </TabsTrigger>
-          <TabsTrigger value="emr" className="text-xs px-1">
+          <TabsTrigger value="emr" className="text-xs px-1" title="EMR Connect">
             <FileText className="w-3 h-3" />
           </TabsTrigger>
         </TabsList>
