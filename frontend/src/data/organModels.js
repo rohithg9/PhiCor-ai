@@ -1337,6 +1337,62 @@ export const ORGAN_MODELS = {
           description: "Q10 relationship (typically 2-3)",
           evidence: "established",
           source: "van 't Hoff equation"
+        },
+        {
+          id: "gcs_mortality",
+          name: "GCS-Mortality Relationship",
+          latex: "Mortality \\% \\approx 100 - (GCS \\times 6.67)",
+          description: "Rough mortality estimate from Glasgow Coma Scale",
+          evidence: "novel",
+          source: "TBI studies"
+        },
+        {
+          id: "brain_compliance",
+          name: "Brain Compliance",
+          latex: "C = \\frac{\\Delta V}{\\Delta ICP} = \\frac{PVI}{ICP}",
+          description: "Volume buffering capacity (normal ~25 mL)",
+          evidence: "established",
+          source: "Pressure-volume index"
+        },
+        {
+          id: "csf_dynamics",
+          name: "CSF Dynamics",
+          latex: "ICP = \\frac{(I_f - Q_o)}{C_b} + P_v",
+          description: "ICP from formation, absorption, and compliance",
+          evidence: "established",
+          source: "Davson equation"
+        },
+        {
+          id: "co2_reactivity",
+          name: "CO₂ Reactivity",
+          latex: "\\frac{\\Delta CBF}{\\Delta PaCO_2} \\approx 3\\% / mmHg",
+          description: "CBF change per mmHg CO₂ change",
+          evidence: "established",
+          source: "Cerebrovascular physiology"
+        },
+        {
+          id: "ischemic_threshold",
+          name: "Ischemic Threshold",
+          latex: "CBF_{threshold} = \\begin{cases} 22 & \\text{EEG slowing} \\\\ 15 & \\text{Isoelectric EEG} \\\\ <10 & \\text{Cell death} \\end{cases}",
+          description: "CBF thresholds for neuronal function (mL/100g/min)",
+          evidence: "established",
+          source: "Stroke studies"
+        },
+        {
+          id: "penumbra_model",
+          name: "Ischemic Penumbra",
+          latex: "Penumbra = V_{CBF<22} - V_{CBF<10}",
+          description: "Tissue at risk (salvageable with reperfusion)",
+          evidence: "established",
+          source: "Stroke imaging"
+        },
+        {
+          id: "osmotic_effect",
+          name: "Osmotic Effect on ICP",
+          latex: "\\Delta ICP \\propto \\Delta Osm \\times \\sigma_{brain}",
+          description: "ICP reduction from hyperosmolar therapy",
+          evidence: "established",
+          source: "Mannitol/hypertonic saline"
         }
       ]
     },
