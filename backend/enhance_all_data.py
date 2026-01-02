@@ -195,12 +195,11 @@ Structure:
 Return ONLY valid JSON with comprehensive drug effects for {drug_name}:"""
 
     try:
-        response = await chat(
+        llm = LlmChat(
             api_key=EMERGENT_LLM_KEY,
-            model=LlmModel.GPT4O_MINI,
-            user_message=prompt,
-            system_prompt="You are a pharmacology expert. Return only valid JSON with comprehensive drug effect profiles. No markdown."
+            system_message="You are a pharmacology expert. Return only valid JSON with comprehensive drug effect profiles. No markdown."
         )
+        response = await llm.send_message_async(prompt, model="gpt-4o-mini")
         
         content = response.strip()
         if content.startswith('```'):
