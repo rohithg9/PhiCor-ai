@@ -901,23 +901,227 @@ const ClinicalInsightsPanel = ({ disease, severity }) => {
   );
 };
 
-// Clinical Data API Component
-const ClinicalDataPanel = ({ disease, severity }) => {
-  const [clinicalData, setClinicalData] = React.useState(null);
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState(null);
-
-  // Fetch clinical data from API
-  React.useEffect(() => {
-    if (!disease?.icd10) return;
+// Clinical Data API Component - Extracts vitals, labs, physical exam, DNA from API data
+const ClinicalDataPanel = ({ modifications, disease, severity }) => {
+  if (!modifications || !disease) return null;
+  
+  // Extract clinical data from API parameter_modifications
+  const extractClinicalData = () => {
+    const vitalSigns = [];
+    const labTests = [];
+    const physicalExam = [];
+    const dnaMarkers = [];
+    const ecgFindings = [];
+    const riskFactors = [];
     
-    const fetchClinicalData = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await fetch(`/api/clinical-data/${disease.icd10}`);
-        if (!response.ok) throw new Error('Failed to fetch clinical data');
-        const data = await response.json();
+    // Process each organ's modifications
+    Object.entries(modifications).forEach(([organId, organMods]) => {
+      if (!organMods || typeof organMods !== 'object') return;
+      
+      Object.entries(organMods).forEach(([scaleId, scaleMods]) => {
+        if (!scaleMods || typeof scaleMods !== 'object') return;
+        
+        // Handle different scale types
+        if (scaleId === 'vital_signs' || scaleId === 'vitals') {
+          Object.entries(scaleMods).forEach(([paramId, param]) => {
+            vitalSigns.push({
+              name: paramId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+              change: param.change_percent ? `${param.direction === 'decrease' ? '-' : '+'}${param.change_percent}%` : param.value,
+              evidence: param.evidence || ''
+            });
+          });
+        } else if (scaleId === 'lab_tests' || scaleId === 'labs') {
+          Object.entries(scaleMods).forEach(([paramId, param]) => {
+            labTests.push({
+              name: paramId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+              change: param.change_percent ? `${param.direction === 'decrease' ? '-' : '+'}${param.change_percent}%` : param.value,
+              evidence: param.evidence || ''
+            });
+          });
+        } else if (scaleId === 'physical_exam') {
+          Object.entries(scaleMods).forEach(([paramId, param]) => {
+            physicalExam.push({
+              name: paramId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+              finding: param.value !== undefined ? (param.value === 1 ? 'Present' : param.value === 0 ? 'Absent' : param.value) : `${param.direction}`,
+              evidence: param.evidence || ''
+            });
+          });
+        } else if (scaleId === 'dna' || scaleId === 'genetics' || scaleId === 'gene_expression') {
+          Object.entries(scaleMods).forEach(([paramId, param]) => {
+            dnaMarkers.push({
+              name: paramId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+              change: param.change_percent ? `${param.direction === 'decrease' ? '-' : '+'}${param.change_percent}%` : param.value || param.direction,
+              evidence: param.evidence || ''
+            });
+          });
+        } else if (scaleId === 'ecg') {
+          Object.entries(scaleMods).forEach(([paramId, param]) => {
+            ecgFindings.push({
+              name: paramId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+              change: param.change_percent ? `${param.direction === 'decrease' ? '-' : '+'}${param.change_percent}%` : param.value,
+              evidence: param.evidence || ''
+            });
+          });
+        } else if (scaleId === 'risk_factors') {
+          Object.entries(scaleMods).forEach(([paramId, param]) => {
+            riskFactors.push({
+              name: paramId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+              level: param.risk_level || param.value || param.direction,
+              evidence: param.evidence || ''
+            });
+          });
+        }
+      });
+    });
+    
+    return { vitalSigns, labTests, physicalExam, dnaMarkers, ecgFindings, riskFactors };
+  };
+  
+  const clinicalData = extractClinicalData();
+  const hasAnyData = Object.values(clinicalData).some(arr => arr.length > 0);
+  
+  if (!hasAnyData) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold flex items-center gap-2">
+            <Stethoscope className="w-4 h-4 text-primary" />
+            Clinical Parameters
+          </h3>
+        </div>
+        <div className="rounded-lg border border-border/50 bg-card/50 p-3 text-center">
+          <p className="text-xs text-muted-foreground">No clinical data available for this disease</p>
+        </div>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold flex items-center gap-2">
+          <Stethoscope className="w-4 h-4 text-primary" />
+          Clinical Parameters
+        </h3>
+        <Badge variant="outline" className="text-xs">
+          {severity < 0.33 ? 'Mild' : severity < 0.66 ? 'Moderate' : 'Severe'}
+        </Badge>
+      </div>
+
+      {/* Vital Signs */}
+      {clinicalData.vitalSigns.length > 0 && (
+        <div className="rounded-lg border border-border/50 bg-card/50 p-3">
+          <h4 className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
+            <Activity className="w-3 h-3" /> Vital Signs
+          </h4>
+          <div className="space-y-1.5">
+            {clinicalData.vitalSigns.slice(0, 5).map((vital, i) => (
+              <div key={i} className="text-xs flex items-center justify-between">
+                <span className="font-medium">{vital.name}</span>
+                <span className={`px-1.5 py-0.5 rounded ${
+                  vital.change?.includes('-') ? 'bg-blue-500/10 text-blue-500' : 'bg-orange-500/10 text-orange-500'
+                }`}>{vital.change}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Lab Tests */}
+      {clinicalData.labTests.length > 0 && (
+        <div className="rounded-lg border border-border/50 bg-card/50 p-3">
+          <h4 className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
+            <FlaskConical className="w-3 h-3" /> Laboratory Tests
+          </h4>
+          <div className="space-y-1.5">
+            {clinicalData.labTests.slice(0, 6).map((lab, i) => (
+              <div key={i} className="text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">{lab.name}</span>
+                  <span className={`px-1.5 py-0.5 rounded ${
+                    lab.change?.includes('-') ? 'bg-blue-500/10 text-blue-500' : 'bg-destructive/10 text-destructive'
+                  }`}>{lab.change}</span>
+                </div>
+                {lab.evidence && <p className="text-[10px] text-muted-foreground mt-0.5">{lab.evidence}</p>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Physical Exam */}
+      {clinicalData.physicalExam.length > 0 && (
+        <div className="rounded-lg border border-border/50 bg-card/50 p-3">
+          <h4 className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
+            <Stethoscope className="w-3 h-3" /> Physical Examination
+          </h4>
+          <div className="space-y-1.5">
+            {clinicalData.physicalExam.slice(0, 5).map((exam, i) => (
+              <div key={i} className="text-xs flex items-center justify-between">
+                <span className="font-medium">{exam.name}</span>
+                <Badge variant="outline" className="text-[10px]">{exam.finding}</Badge>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* DNA/Genetic Markers */}
+      {clinicalData.dnaMarkers.length > 0 && (
+        <div className="rounded-lg border border-purple-500/30 bg-purple-500/5 p-3">
+          <h4 className="text-xs font-medium text-purple-400 mb-2 flex items-center gap-1">
+            🧬 DNA & Genetic Markers
+          </h4>
+          <div className="space-y-1.5">
+            {clinicalData.dnaMarkers.slice(0, 5).map((marker, i) => (
+              <div key={i} className="text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-purple-300">{marker.name}</span>
+                  <span className="px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-400">{marker.change}</span>
+                </div>
+                {marker.evidence && <p className="text-[10px] text-muted-foreground mt-0.5">{marker.evidence}</p>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ECG Findings */}
+      {clinicalData.ecgFindings.length > 0 && (
+        <div className="rounded-lg border border-border/50 bg-card/50 p-3">
+          <h4 className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
+            <Activity className="w-3 h-3" /> ECG Findings
+          </h4>
+          <div className="space-y-1.5">
+            {clinicalData.ecgFindings.slice(0, 4).map((ecg, i) => (
+              <div key={i} className="text-xs flex items-center justify-between">
+                <span className="font-medium">{ecg.name}</span>
+                <span className="text-primary">{ecg.change}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Risk Factors */}
+      {clinicalData.riskFactors.length > 0 && (
+        <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
+          <h4 className="text-xs font-medium text-amber-400 mb-2 flex items-center gap-1">
+            <AlertTriangle className="w-3 h-3" /> Risk Factors
+          </h4>
+          <div className="space-y-1.5">
+            {clinicalData.riskFactors.slice(0, 4).map((risk, i) => (
+              <div key={i} className="text-xs flex items-center justify-between">
+                <span className="font-medium">{risk.name}</span>
+                <Badge variant="outline" className="text-[10px] border-amber-500/30 text-amber-400">{risk.level}</Badge>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
         setClinicalData(data);
       } catch (err) {
         setError(err.message);
