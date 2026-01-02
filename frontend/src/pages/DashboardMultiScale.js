@@ -3061,73 +3061,124 @@ const DashboardMultiScale = () => {
   }, [currentDisease, affectedCounts]);
 
   // Get ALL modified parameters across ALL organs - for quick summary view
+  // Handles both ORGAN_MODELS structure and API clinical data structure
   const allModifiedParameters = useMemo(() => {
     if (!mergedModifications) return [];
     
     const params = [];
+    
+    // Helper to format parameter name from snake_case
+    const formatParamName = (id) => {
+      return id.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    };
+    
+    // Helper to get organ display info
+    const getOrganInfo = (organId) => {
+      const organ = ORGAN_MODELS[organId];
+      if (organ) return { name: organ.name, icon: organ.icon };
+      // Fallback for organs not in ORGAN_MODELS
+      const fallbackIcons = {
+        cellular: '🔬', immune_system: '🛡️', tumor_site: '🎯', gi_tract: '🫃',
+        bone_marrow: '🦴', joints: '🦴', pancreas: '🔹', systemic: '⚕️'
+      };
+      return { 
+        name: organId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        icon: fallbackIcons[organId] || '📊'
+      };
+    };
+    
     Object.entries(mergedModifications).forEach(([organId, organMods]) => {
       const organ = ORGAN_MODELS[organId];
-      if (!organ) return;
+      const organInfo = getOrganInfo(organId);
       
       Object.entries(organMods).forEach(([scaleId, scaleMods]) => {
-        const scaleData = organ[scaleId];
-        if (!scaleData?.parameters) return;
+        if (!scaleMods || typeof scaleMods !== 'object') return;
+        
+        // Try to get scale data from ORGAN_MODELS first
+        const scaleData = organ?.[scaleId];
         
         Object.entries(scaleMods).forEach(([paramId, mod]) => {
-          const paramDef = scaleData.parameters.find(p => p.id === paramId);
-          if (!paramDef) return;
+          if (!mod || typeof mod !== 'object') return;
           
-          const baseValue = paramDef.value;
+          // Skip if direction is 'normal' or no meaningful data
+          if (mod.direction === 'normal' && !mod.change_percent && !mod.value) return;
+          
+          // Try to find parameter definition in ORGAN_MODELS
+          const paramDef = scaleData?.parameters?.find(p => p.id === paramId);
+          
+          let baseValue = paramDef?.value ?? mod.normal_min ?? 100;
           let newValue = baseValue;
+          let unit = paramDef?.unit || mod.unit || '';
+          let paramName = paramDef?.name || formatParamName(paramId);
           
           // Handle different modification formats
-          const multiplier = mod.multiplier || mod.factor;
           const changePercent = mod.change_percent;
           const direction = mod.direction;
-          const absoluteValue = mod.value || mod.absolute;
+          const absoluteValue = mod.value;
+          const multiplier = mod.multiplier || mod.factor;
           
-          if (absoluteValue !== undefined && direction !== 'normal') {
-            // Direct value from API (e.g., HbS variant = 80%)
+          if (absoluteValue !== undefined && absoluteValue !== null) {
+            // Direct value from API
             newValue = absoluteValue;
-          } else if (changePercent !== undefined) {
+            // If we have both value and normal values, use those for base
+            if (mod.normal_min !== undefined || mod.normal_max !== undefined) {
+              baseValue = (mod.normal_min || 0 + mod.normal_max || 100) / 2;
+              if (mod.normal_min && mod.normal_max) {
+                baseValue = (mod.normal_min + mod.normal_max) / 2;
+              }
+            }
+          } else if (changePercent !== undefined && changePercent !== null) {
             // Percentage change from API
             const sign = direction === 'decrease' ? -1 : 1;
-            const factor = 1 + (sign * changePercent / 100) * diseaseSeverity;
+            const factor = 1 + (sign * Math.abs(changePercent) / 100) * diseaseSeverity;
             newValue = baseValue * factor;
           } else if (multiplier) {
             const factor = 1 + (multiplier - 1) * diseaseSeverity;
             newValue = baseValue * factor;
+          } else if (direction === 'increase') {
+            newValue = baseValue * 1.2; // Default 20% increase
+          } else if (direction === 'decrease') {
+            newValue = baseValue * 0.8; // Default 20% decrease
+          } else if (direction === 'present' || direction === 'abnormal') {
+            newValue = 1;
+            baseValue = 0;
+          } else if (direction === 'absent') {
+            newValue = 0;
+            baseValue = 1;
           }
+          
           if (mod.absolute) {
             newValue = mod.absolute;
           }
           
-          // Skip if no actual change
-          if (direction === 'normal') return;
-          
           // Calculate delta safely
           let delta = 0;
-          if (baseValue !== 0 && !isNaN(baseValue) && isFinite(baseValue)) {
-            delta = ((newValue - baseValue) / baseValue * 100);
-          } else if (newValue !== 0) {
-            delta = newValue > 0 ? 100 : -100;
+          if (typeof baseValue === 'number' && typeof newValue === 'number' && baseValue !== 0 && !isNaN(baseValue) && isFinite(baseValue)) {
+            delta = ((newValue - baseValue) / Math.abs(baseValue) * 100);
+          } else if (changePercent !== undefined) {
+            delta = direction === 'decrease' ? -Math.abs(changePercent) : Math.abs(changePercent);
+          } else if (direction === 'increase' || direction === 'present') {
+            delta = 20;
+          } else if (direction === 'decrease' || direction === 'absent') {
+            delta = -20;
           }
-          if (isNaN(delta) || !isFinite(delta)) delta = 0;
+          if (isNaN(delta) || !isFinite(delta)) delta = changePercent || 0;
           
           params.push({
             id: paramId,
-            name: paramDef.name,
+            name: paramName,
             organId,
-            organName: organ.name,
-            organIcon: organ.icon,
+            organName: organInfo.name,
+            organIcon: organInfo.icon,
             scaleId,
-            baseValue,
-            newValue,
-            unit: paramDef.unit || '',
+            baseValue: typeof baseValue === 'number' ? baseValue : 0,
+            newValue: typeof newValue === 'number' ? newValue : (newValue === 'present' ? 1 : 0),
+            unit,
             delta,
-            direction: delta > 0 ? 'increase' : 'decrease',
-            note: mod.note || mod.evidence,
-            isPrimary: currentDisease?.primaryOrgan === organId
+            direction: delta >= 0 ? 'increase' : 'decrease',
+            note: mod.note || mod.evidence || '',
+            isPrimary: currentDisease?.primaryOrgan === organId,
+            abnormal: mod.abnormal || Math.abs(delta) > 10
           });
         });
       });
