@@ -2739,7 +2739,14 @@ const DashboardMultiScale = () => {
           // Skip if no actual change
           if (direction === 'normal') return;
           
-          const delta = baseValue !== 0 ? ((newValue - baseValue) / baseValue * 100) : (newValue > 0 ? 100 : 0);
+          // Calculate delta safely
+          let delta = 0;
+          if (baseValue !== 0 && !isNaN(baseValue) && isFinite(baseValue)) {
+            delta = ((newValue - baseValue) / baseValue * 100);
+          } else if (newValue !== 0) {
+            delta = newValue > 0 ? 100 : -100;
+          }
+          if (isNaN(delta) || !isFinite(delta)) delta = 0;
           
           params.push({
             id: paramId,
