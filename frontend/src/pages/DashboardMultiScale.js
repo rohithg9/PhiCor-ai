@@ -2937,62 +2937,94 @@ const DashboardMultiScale = () => {
       
       <div className="flex-1 flex">
       {/* Mobile Header */}
-      <div className="lg:hidden fixed top-14 left-0 right-0 z-40 h-14 bg-background/95 backdrop-blur border-b border-border/50 flex items-center justify-between px-4">
-        <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <Menu className="w-5 h-5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-72 p-0">
-            <OrganSidebar 
-              organs={organs}
-              selectedOrgan={selectedOrgan}
-              onSelectOrgan={handleOrganSelect}
-              currentDisease={currentDisease}
-              affectedCounts={affectedCounts}
-              onToggleTheme={toggleTheme}
-              isDark={isDark}
-              isMobile
-            />
-          </SheetContent>
-        </Sheet>
-
-        <div className="flex items-center gap-2">
-          <span className="text-xl">{currentOrgan?.icon}</span>
-          <span className="font-semibold text-sm">{currentOrgan?.name}</span>
-          {selectedDisease && currentDisease && (
-            <Badge variant="destructive" className="text-[10px]">
-              {currentDisease.name.split(' ')[0]}...
-            </Badge>
-          )}
-        </div>
-        
-        {/* Mobile Tutorial Button and Disease Sheet */}
-        <div className="flex items-center gap-2">
-          <TutorialButton onClick={tutorial.open} className="h-8 text-xs px-2" />
-
-          <Sheet>
+      <div className="lg:hidden fixed top-14 left-0 right-0 z-40 bg-background/95 backdrop-blur border-b border-border/50">
+        {/* Main Mobile Header Row */}
+        <div className="h-14 flex items-center justify-between px-3">
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Stethoscope className="w-5 h-5" />
+              <Button variant="ghost" size="icon" className="shrink-0">
+                <Menu className="w-5 h-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-80 p-0 flex flex-col">
-              <DiseasePanel 
-                diseases={diseases}
-                selectedDisease={selectedDisease}
-                onSelectDisease={handleDiseaseSelect}
+            <SheetContent side="left" className="w-72 p-0">
+              <OrganSidebar 
+                organs={organs}
+                selectedOrgan={selectedOrgan}
+                onSelectOrgan={handleOrganSelect}
                 currentDisease={currentDisease}
-                diseaseSeverity={diseaseSeverity}
-                onChangeSeverity={setDiseaseSeverity}
-                showClinicalPanel={showClinicalPanel}
-                onToggleClinicalPanel={handleToggleClinicalPanel}
+                affectedCounts={affectedCounts}
+                onToggleTheme={toggleTheme}
+                isDark={isDark}
                 isMobile
               />
             </SheetContent>
           </Sheet>
+
+          <div className="flex items-center gap-2 flex-1 justify-center min-w-0">
+            <span className="text-xl">{currentOrgan?.icon}</span>
+            <span className="font-semibold text-sm truncate">{currentOrgan?.name}</span>
+          </div>
+          
+          {/* Mobile Tutorial Button and Disease Sheet */}
+          <div className="flex items-center gap-1 shrink-0">
+            <TutorialButton onClick={tutorial.open} className="h-8 text-xs px-2" />
+
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className={selectedDisease ? 'text-destructive' : ''}>
+                  <Stethoscope className="w-5 h-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-80 p-0 flex flex-col">
+                <DiseasePanel 
+                  diseases={diseases}
+                  selectedDisease={selectedDisease}
+                  onSelectDisease={handleDiseaseSelect}
+                  currentDisease={currentDisease}
+                  diseaseSeverity={diseaseSeverity}
+                  onChangeSeverity={setDiseaseSeverity}
+                  showClinicalPanel={showClinicalPanel}
+                  onToggleClinicalPanel={handleToggleClinicalPanel}
+                  isMobile
+                />
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
+        
+        {/* Mobile Condition Banner - Only shows when disease is selected */}
+        <AnimatePresence>
+          {currentDisease && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden bg-gradient-to-r from-destructive/15 to-orange-500/10 border-t border-destructive/20"
+            >
+              <div className="px-3 py-2 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  <AlertTriangle className="w-4 h-4 text-destructive shrink-0" />
+                  <div className="min-w-0">
+                    <span className="text-[9px] text-destructive font-semibold uppercase tracking-wider">
+                      Active:
+                    </span>
+                    <p className="text-sm font-semibold text-foreground truncate">
+                      {currentDisease.name}
+                    </p>
+                  </div>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={resetDisease} 
+                  className="h-7 px-2 text-destructive hover:bg-destructive/10 shrink-0"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Desktop Left Sidebar */}
