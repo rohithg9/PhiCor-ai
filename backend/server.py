@@ -2519,9 +2519,9 @@ IMPORTANT:
         response_text = response.content
         
         # Try to find JSON in the response
-        json_match = re.search(r'\{[\s\S]*\}', response_text)
+        json_match = re_module.search(r'\{[\s\S]*\}', response_text)
         if json_match:
-            param_data = json.loads(json_match.group())
+            param_data = json_module.loads(json_match.group())
         else:
             raise ValueError("No valid JSON found in response")
         
