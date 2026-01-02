@@ -2210,7 +2210,7 @@ export const ORGAN_MODELS = {
         }
       ]
     }
-  },
+  }
 };
 
 export default ORGAN_MODELS;
