@@ -2576,8 +2576,14 @@ async def generate_params_batch(
     """
     import asyncio
     
-    # Get diseases that don't have parameter_modifications yet
-    query = {"parameter_modifications": {"$exists": False}}
+    # Get diseases that don't have parameter_modifications yet (or have empty/null)
+    query = {
+        "$or": [
+            {"parameter_modifications": {"$exists": False}},
+            {"parameter_modifications": {}},
+            {"parameter_modifications": None}
+        ]
+    }
     if category:
         query["category"] = category
     
