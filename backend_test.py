@@ -301,94 +301,133 @@ def test_diseases_database_api():
         print(f"❌ Error testing diseases database API: {e}")
         return False
 
-def test_disease_detail_with_parameters():
-    """Test 4: Disease Detail with Parameter Modifications"""
-    print("\n🔬 TEST 4: DISEASE DETAIL WITH PARAMETER MODIFICATIONS")
+def test_disease_detail_api():
+    """Test 3: Disease Detail API - GET /api/diseases-db/{disease_id} (Review Request)"""
+    print("\n🔬 TEST 3: DISEASE DETAIL API")
     print("=" * 50)
+    print("Testing requirements from review request:")
+    print("- Test with disease_id=type2_diabetes")
+    print("- Verify returns comprehensive data with parameter_modifications")
     
-    # Try multiple disease IDs that might exist
-    test_disease_ids = [
-        'unstable_angina',
-        'unstable-angina', 
-        'acute_coronary_syndrome',
-        'acute-coronary-syndrome',
-        'heart_failure',
-        'heart-failure',
-        'type2_diabetes',
-        'type-2-diabetes',
-        'diabetes_type_2',
-        'hypertension',
-        'pneumonia'
-    ]
+    # Test with disease_id=type2_diabetes (review requirement)
+    disease_id = "type2_diabetes"
+    print(f"\n  🔍 Testing disease ID: {disease_id}")
     
-    disease_found = False
-    
-    for disease_id in test_disease_ids:
-        print(f"\n  🔍 Testing disease ID: {disease_id}")
-        
-        try:
-            response = requests.get(f"{BACKEND_URL}/api/diseases-db/{disease_id}", timeout=10)
-            if response.status_code == 200:
-                disease_data = response.json()
-                disease_found = True
-                
-                print(f"    ✅ Disease found: {disease_data.get('name', 'Unknown')}")
-                
-                # Check for ICD-10 code
-                icd_code = disease_data.get('icd_10_code') or disease_data.get('icd10_code')
-                if icd_code:
-                    print(f"    ✅ ICD-10 code present: {icd_code} ✓")
+    try:
+        response = requests.get(f"{BACKEND_URL}/api/diseases-db/{disease_id}", timeout=10)
+        if response.status_code == 200:
+            disease_data = response.json()
+            
+            print(f"    ✅ Disease found: {disease_data.get('name', 'Unknown')}")
+            
+            # Check for comprehensive data (review requirement)
+            comprehensive_fields = ['name', 'id', 'icd_10_code', 'parameter_modifications']
+            present_fields = []
+            missing_fields = []
+            
+            for field in comprehensive_fields:
+                alt_field = field.replace('_', '') if field == 'icd_10_code' else None
+                if field in disease_data or (alt_field and alt_field in disease_data):
+                    present_fields.append(field)
                 else:
-                    print(f"    ⚠️ ICD-10 code not found")
-                
-                # Check for parameter_modifications
-                param_modifications = disease_data.get('parameter_modifications', {})
-                if param_modifications and isinstance(param_modifications, dict):
-                    print(f"    ✅ Parameter modifications present ✓")
-                    
-                    # Check affected organs
-                    affected_organs = list(param_modifications.keys())
-                    print(f"    📊 Affected organs ({len(affected_organs)}): {affected_organs[:5]}")
-                    
-                    # Check for detailed modifications
-                    detailed_mods_found = False
-                    for organ, organ_mods in param_modifications.items():
-                        if isinstance(organ_mods, dict) and organ_mods:
-                            detailed_mods_found = True
-                            print(f"    📊 {organ}: {len(organ_mods)} modifications")
-                            break
-                    
-                    if detailed_mods_found:
-                        print(f"    ✅ Detailed parameter modifications found ✓")
-                        return True
-                    else:
-                        print(f"    ⚠️ Parameter modifications structure unclear")
-                        return True  # Still pass if basic structure exists
-                else:
-                    print(f"    ❌ Parameter modifications missing or empty")
-                
-                # If we found a disease but no params, continue to next
-                if not param_modifications:
-                    continue
-                else:
-                    return True
-                    
-            elif response.status_code == 404:
-                print(f"    ⚠️ Disease not found (404)")
-                continue
+                    missing_fields.append(field)
+            
+            print(f"    📊 Comprehensive data fields present: {present_fields}")
+            if missing_fields:
+                print(f"    ⚠️ Missing fields: {missing_fields}")
+            
+            # Check for ICD-10 code
+            icd_code = disease_data.get('icd_10_code') or disease_data.get('icd10_code') or disease_data.get('icd_code')
+            if icd_code:
+                print(f"    ✅ ICD-10 code present: {icd_code} ✓")
+                icd_pass = True
             else:
-                print(f"    ❌ Error: {response.status_code}")
-                continue
+                print(f"    ❌ ICD-10 code missing")
+                icd_pass = False
+            
+            # Check for parameter_modifications (review requirement)
+            param_modifications = disease_data.get('parameter_modifications', {})
+            if param_modifications and isinstance(param_modifications, dict):
+                print(f"    ✅ Parameter modifications present ✓")
                 
-        except Exception as e:
-            print(f"    ❌ Error testing {disease_id}: {e}")
-            continue
-    
-    if not disease_found:
-        print(f"  ❌ No diseases found with any of the test IDs")
+                # Check affected organs/systems
+                affected_systems = list(param_modifications.keys())
+                print(f"    📊 Affected systems ({len(affected_systems)}): {affected_systems[:5]}")
+                
+                # Check for detailed modifications
+                detailed_mods_found = False
+                total_modifications = 0
+                for system, system_mods in param_modifications.items():
+                    if isinstance(system_mods, dict) and system_mods:
+                        detailed_mods_found = True
+                        total_modifications += len(system_mods)
+                        print(f"    📊 {system}: {len(system_mods)} modifications")
+                    elif isinstance(system_mods, list):
+                        detailed_mods_found = True
+                        total_modifications += len(system_mods)
+                        print(f"    📊 {system}: {len(system_mods)} modifications")
+                
+                if detailed_mods_found:
+                    print(f"    ✅ Detailed parameter modifications found (total: {total_modifications}) ✓")
+                    params_pass = True
+                else:
+                    print(f"    ❌ Parameter modifications structure unclear")
+                    params_pass = False
+            else:
+                print(f"    ❌ Parameter modifications missing or empty")
+                params_pass = False
+            
+            # Overall comprehensive data check
+            comprehensive_pass = len(present_fields) >= 3  # At least 3 out of 4 fields
+            
+            if comprehensive_pass and icd_pass and params_pass:
+                print(f"    ✅ Comprehensive data with parameter_modifications verified ✓")
+                return True
+            else:
+                print(f"    ❌ Comprehensive data requirements not fully met")
+                return False
+                
+        elif response.status_code == 404:
+            print(f"    ❌ Disease 'type2_diabetes' not found (404)")
+            
+            # Try alternative IDs for type 2 diabetes
+            alternative_ids = [
+                'type_2_diabetes',
+                'diabetes_type_2', 
+                'diabetes_mellitus_type_2',
+                'type2diabetes',
+                'diabetes_type2',
+                'diabetes'
+            ]
+            
+            print(f"    🔍 Trying alternative disease IDs...")
+            for alt_id in alternative_ids:
+                try:
+                    alt_response = requests.get(f"{BACKEND_URL}/api/diseases-db/{alt_id}", timeout=10)
+                    if alt_response.status_code == 200:
+                        alt_data = alt_response.json()
+                        disease_name = alt_data.get('name', 'Unknown')
+                        if 'diabetes' in disease_name.lower() and 'type' in disease_name.lower():
+                            print(f"    ✅ Found alternative: {alt_id} -> {disease_name}")
+                            # Quick check for parameter_modifications
+                            if alt_data.get('parameter_modifications'):
+                                print(f"    ✅ Alternative has parameter_modifications ✓")
+                                return True
+                            else:
+                                print(f"    ❌ Alternative missing parameter_modifications")
+                                return False
+                except:
+                    continue
+            
+            print(f"    ❌ No suitable type 2 diabetes disease found")
+            return False
+        else:
+            print(f"    ❌ Error: {response.status_code}")
+            return False
+            
+    except Exception as e:
+        print(f"    ❌ Error testing {disease_id}: {e}")
         return False
-    
-    return True
 
 def test_drug_detail():
     """Test 5: Drug Detail - GET /api/drugs/captopril"""
