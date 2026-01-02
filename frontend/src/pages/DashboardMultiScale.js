@@ -3178,7 +3178,7 @@ const DashboardMultiScale = () => {
                     </div>
                   </div>
                   <div className={`text-[9px] mt-0.5 ${param.direction === 'increase' ? 'text-red-400' : 'text-blue-400'}`}>
-                    {param.delta > 0 ? '+' : ''}{param.delta.toFixed(0)}% {param.unit}
+                    {param.delta != null ? `${param.delta > 0 ? '+' : ''}${typeof param.delta === 'number' ? param.delta.toFixed(0) : param.delta}%` : ''} {param.unit}
                   </div>
                 </motion.button>
               ))}
