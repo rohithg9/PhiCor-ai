@@ -3418,8 +3418,8 @@ const DashboardMultiScale = () => {
             <div className="container mx-auto px-4 py-3">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="shrink-0 w-10 h-10 rounded-xl bg-destructive/20 flex items-center justify-center">
-                    <AlertTriangle className="w-5 h-5 text-destructive" />
+                  <div className="shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-destructive/30 to-orange-500/20 flex items-center justify-center border border-destructive/30 shadow-lg shadow-destructive/10">
+                    <AlertTriangle className="w-6 h-6 text-destructive" />
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -3430,11 +3430,11 @@ const DashboardMultiScale = () => {
                         </Badge>
                       )}
                     </div>
-                    <h2 className="text-lg lg:text-xl font-bold text-foreground truncate">{currentDisease.name}</h2>
+                    <h2 className="text-xl lg:text-2xl font-bold text-foreground truncate bg-gradient-to-r from-destructive to-orange-600 bg-clip-text text-transparent">{currentDisease.name}</h2>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="secondary" className="hidden sm:flex">
+                  <Badge variant="secondary" className="hidden sm:flex text-sm">
                     {Object.values(affectedCounts).reduce((a, b) => a + b, 0)} affected parameters
                   </Badge>
                   <Button variant="outline" size="sm" onClick={resetDisease} className="border-destructive/30 text-destructive hover:bg-destructive/10">
