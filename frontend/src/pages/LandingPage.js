@@ -432,15 +432,15 @@ const LandingPage = () => {
                   </div>
                   <div className="grid grid-cols-3 gap-4 w-full mt-4">
                     <div className="text-center p-3 rounded-lg bg-white/5">
-                      <div className="text-2xl font-bold text-indigo-400">200+</div>
+                      <div className="text-2xl font-bold text-indigo-400">{platformStats.diseases}</div>
                       <div className="text-xs text-muted-foreground">Diseases</div>
                     </div>
                     <div className="text-center p-3 rounded-lg bg-white/5">
-                      <div className="text-2xl font-bold text-purple-400">6</div>
+                      <div className="text-2xl font-bold text-purple-400">{platformStats.organ_systems}</div>
                       <div className="text-xs text-muted-foreground">Organ Systems</div>
                     </div>
                     <div className="text-center p-3 rounded-lg bg-white/5">
-                      <div className="text-2xl font-bold text-pink-400">∞</div>
+                      <div className="text-2xl font-bold text-pink-400">{platformStats.models}</div>
                       <div className="text-xs text-muted-foreground">Equations</div>
                     </div>
                   </div>
@@ -666,7 +666,7 @@ const LandingPage = () => {
                     </li>
                     <li className="flex items-start gap-2 text-sm text-muted-foreground">
                       <span className="text-emerald-400 mt-0.5">→</span>
-                      Evidence citations from 200+ disease profiles
+                      Evidence citations from {platformStats.diseases} disease profiles
                     </li>
                   </ul>
                 </div>
