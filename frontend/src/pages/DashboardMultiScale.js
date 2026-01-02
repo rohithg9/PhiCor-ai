@@ -3917,7 +3917,7 @@ const DashboardMultiScale = () => {
 
                 {/* Parameters Section */}
                 {currentScale.parameters && currentScale.parameters.length > 0 && (
-                  <section>
+                  <section ref={parametersRef}>
                     <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
                       <Layers className="w-4 h-4" />
                       Parameters
