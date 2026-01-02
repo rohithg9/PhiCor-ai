@@ -2571,6 +2571,17 @@ const DashboardMultiScale = () => {
   const currentScale = currentOrgan?.[selectedScale];
   const currentDisease = selectedDisease ? MERGED_DISEASE_MODELS[selectedDisease] : null;
 
+  // Auto-select first available scale when organ changes
+  useEffect(() => {
+    if (currentOrgan) {
+      // Find the first scale that has data for this organ
+      const availableScale = SCALE_LEVELS.find(scale => currentOrgan[scale.id]);
+      if (availableScale && !currentOrgan[selectedScale]) {
+        setSelectedScale(availableScale.id);
+      }
+    }
+  }, [selectedOrgan, currentOrgan, selectedScale]);
+
   // Calculate affected parameters count for each organ
   const getAffectedCounts = useCallback(() => {
     if (!currentDisease?.modifications) return {};
