@@ -18,7 +18,7 @@ EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
 
 # Import LLM
 try:
-    from emergentintegrations.llm.chat import chat, LlmModel
+    from emergentintegrations.llm.chat import LlmChat
     HAS_LLM = True
 except ImportError:
     HAS_LLM = False
