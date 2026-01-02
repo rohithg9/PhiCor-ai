@@ -2510,13 +2510,11 @@ IMPORTANT:
 - Include evidence for each modification
 - Return ONLY the JSON, no other text"""
 
-        response = await chat.send_async_message(
-            UserMessage(content=prompt),
-            session_id=f"param_gen_{request.disease_id}"
-        )
+        user_message = UserMessage(text=prompt)
+        response = await chat.send_message(user_message)
         
         # Extract JSON from response
-        response_text = response.content
+        response_text = response
         
         # Try to find JSON in the response
         json_match = re_module.search(r'\{[\s\S]*\}', response_text)
