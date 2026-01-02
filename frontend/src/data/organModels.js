@@ -2404,6 +2404,21 @@ export const ORGAN_MODELS = {
         { id: "chromosomal_instability", name: "Chromosomal Instability Index", value: 0.1, unit: "fraction", range: [0, 1], evidence: "novel" },
         { id: "dna_damage_markers", name: "γH2AX Foci", value: 5, unit: "foci/cell", range: [0, 20], evidence: "established" },
         { id: "8ohdg", name: "8-OHdG (Oxidative DNA Damage)", value: 5, unit: "ng/mL", range: [2, 15], evidence: "established" },
+        // Chromosomal Parameters
+        { id: "chromosome_count", name: "Chromosome Count", value: 46, unit: "", range: [45, 47], evidence: "established" },
+        { id: "karyotype_abnormalities", name: "Karyotype Abnormalities", value: 0, unit: "count", range: [0, 5], evidence: "established" },
+        { id: "copy_number_variants", name: "CNV Count", value: 10, unit: "count", range: [5, 50], evidence: "established" },
+        // Specific Gene Mutations
+        { id: "hbb_gene_expression", name: "HBB Gene Expression (β-globin)", value: 1.0, unit: "fold", range: [0, 1.2], evidence: "established" },
+        { id: "hba_gene_expression", name: "HBA Gene Expression (α-globin)", value: 1.0, unit: "fold", range: [0.5, 1.5], evidence: "established" },
+        { id: "alpha_beta_globin_ratio", name: "α/β Globin Chain Ratio", value: 1.0, unit: "ratio", range: [0.8, 1.2], evidence: "established" },
+        { id: "hbs_variant", name: "HbS (Sickle) Variant", value: 0, unit: "%", range: [0, 100], evidence: "established" },
+        { id: "hbe_variant", name: "HbE Variant", value: 0, unit: "%", range: [0, 100], evidence: "established" },
+        { id: "hbf_level", name: "Fetal Hemoglobin (HbF)", value: 1, unit: "%", range: [0, 100], evidence: "established" },
+        { id: "cftr_function", name: "CFTR Channel Function", value: 100, unit: "%", range: [0, 100], evidence: "established" },
+        { id: "brca1_function", name: "BRCA1 Function", value: 100, unit: "%", range: [0, 100], evidence: "established" },
+        { id: "brca2_function", name: "BRCA2 Function", value: 100, unit: "%", range: [0, 100], evidence: "established" },
+        { id: "tp53_mutation_status", name: "TP53 Mutation Status", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
       ],
       equations: [
         {
@@ -2469,6 +2484,30 @@ export const ORGAN_MODELS = {
           description: "Allele frequency equilibrium in populations",
           evidence: "established",
           source: "Population genetics"
+        },
+        {
+          id: "globin_chain_balance",
+          name: "Globin Chain Imbalance",
+          latex: "Imbalance = |\\frac{[\\alpha]}{[\\beta]} - 1| \\times 100\\%",
+          description: "Excess α-chains precipitate in β-thalassemia",
+          evidence: "established",
+          source: "Hematology"
+        },
+        {
+          id: "sickling_threshold",
+          name: "HbS Polymerization Threshold",
+          latex: "P_{sickle} = \\frac{[HbS]^n}{K_s^n + [HbS]^n} \\times f(PO_2, pH, 2,3-DPG)",
+          description: "HbS polymerization dependent on concentration and deoxygenation",
+          evidence: "established",
+          source: "Sickle cell pathophysiology"
+        },
+        {
+          id: "trisomy_gene_dosage",
+          name: "Trisomy Gene Dosage Effect",
+          latex: "Expression_{trisomy} = 1.5 \\times Expression_{diploid}",
+          description: "Expected 1.5-fold increase in gene expression from trisomy",
+          evidence: "established",
+          source: "Cytogenetics"
         }
       ]
     },
