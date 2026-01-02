@@ -79,10 +79,14 @@ def test_backend_health():
 
 # Old test functions removed - replaced with Mathematical Human Body Dashboard specific tests
 
-def test_platform_stats_verification():
-    """Test 1: Platform Stats Verification - GET /api/platform/stats"""
-    print("\n📊 TEST 1: PLATFORM STATS VERIFICATION")
+def test_platform_stats_api():
+    """Test 1: Platform Stats API - GET /api/platform/stats (Review Request)"""
+    print("\n📊 TEST 1: PLATFORM STATS API")
     print("=" * 50)
+    print("Testing requirements from review request:")
+    print("- Verify returns diseases.total > 500")
+    print("- Verify returns drugs.total > 300") 
+    print("- Verify returns display_stats with formatted values")
     
     try:
         response = requests.get(f"{BACKEND_URL}/api/platform/stats", timeout=10)
@@ -91,38 +95,42 @@ def test_platform_stats_verification():
             
             print(f"✅ Platform stats endpoint accessible")
             
-            # Check drugs.total >= 300
-            drugs_data = data.get('drugs', {})
-            drugs_total = drugs_data.get('total', 0)
-            print(f"  📊 Drugs total: {drugs_total}")
-            
-            if drugs_total >= 300:
-                print(f"  ✅ Drugs total ({drugs_total}) >= 300 ✓")
-                drugs_pass = True
-            else:
-                print(f"  ❌ Drugs total ({drugs_total}) < 300")
-                drugs_pass = False
-            
-            # Check diseases.total >= 250
+            # Check diseases.total > 500 (review requirement)
             diseases_data = data.get('diseases', {})
             diseases_total = diseases_data.get('total', 0)
             print(f"  📊 Diseases total: {diseases_total}")
             
-            if diseases_total >= 250:
-                print(f"  ✅ Diseases total ({diseases_total}) >= 250 ✓")
+            if diseases_total > 500:
+                print(f"  ✅ Diseases total ({diseases_total}) > 500 ✓")
                 diseases_pass = True
             else:
-                print(f"  ❌ Diseases total ({diseases_total}) < 250")
+                print(f"  ❌ Diseases total ({diseases_total}) <= 500 (requirement: > 500)")
                 diseases_pass = False
             
-            # Additional stats verification
+            # Check drugs.total > 300 (review requirement)
+            drugs_data = data.get('drugs', {})
+            drugs_total = drugs_data.get('total', 0)
+            print(f"  📊 Drugs total: {drugs_total}")
+            
+            if drugs_total > 300:
+                print(f"  ✅ Drugs total ({drugs_total}) > 300 ✓")
+                drugs_pass = True
+            else:
+                print(f"  ❌ Drugs total ({drugs_total}) <= 300 (requirement: > 300)")
+                drugs_pass = False
+            
+            # Check display_stats with formatted values (review requirement)
             display_stats = data.get('display_stats', {})
             if display_stats:
-                print(f"  ✅ Display stats present:")
+                print(f"  ✅ Display stats present with formatted values:")
                 for key, value in display_stats.items():
                     print(f"    - {key}: {value}")
+                display_pass = True
+            else:
+                print(f"  ❌ Display stats missing")
+                display_pass = False
             
-            return drugs_pass and diseases_pass
+            return diseases_pass and drugs_pass and display_pass
         else:
             print(f"❌ Platform stats endpoint failed: {response.status_code}")
             return False
