@@ -353,51 +353,240 @@ const PatientInputPanel = ({ onPatientDataChange }) => {
 };
 
 // PhiCor AI Assistant Component
-const PhiCorAssistant = ({ selectedDisease, currentOrgan }) => {
-  const [messages, setMessages] = useState([
-    {
-      role: 'assistant',
-      content: 'I\'m PhiCor Assistant. Ask me about disease parameters, treatment effects, or clinical decisions. I\'ll show how choices affect the mathematical model.'
+const PhiCorAssistant = ({ selectedDisease, currentOrgan, diseaseModifications }) => {
+  const API_URL = process.env.REACT_APP_BACKEND_URL || '';
+  
+  const getInitialMessage = () => {
+    if (selectedDisease?.name) {
+      return `I'm PhiCor Assistant analyzing **${selectedDisease.name}** (${selectedDisease.icd10 || 'N/A'}). Ask me about:\n• DNA/genetic changes\n• Clinical parameters\n• Treatment effects\n• Diagnostic tests`;
     }
+    return 'I\'m PhiCor Assistant. Please select a disease first, then ask me about its parameters, genetic changes, or clinical implications.';
+  };
+  
+  const [messages, setMessages] = useState([
+    { role: 'assistant', content: getInitialMessage() }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const suggestedQuestions = [
-    'How does beta-blocker affect heart rate in this condition?',
-    'What parameters indicate worsening?',
-    'Suggest next diagnostic tests',
-    'Compare treatment options'
+  // Update welcome message when disease changes
+  React.useEffect(() => {
+    setMessages([{ role: 'assistant', content: getInitialMessage() }]);
+  }, [selectedDisease?.name]);
+
+  // Get suggested questions based on selected disease
+  const suggestedQuestions = selectedDisease ? [
+    `What are the DNA/genetic changes in ${selectedDisease.name?.split(' ')[0]}?`,
+    `What clinical parameters are affected?`,
+    `What lab tests should be monitored?`,
+    `What are the risk factors?`
+  ] : [
+    'Select a disease to get started',
+    'What diseases affect the heart?',
+    'Tell me about lung cancer genetics'
   ];
+
+  // Extract relevant data from disease modifications
+  const extractDiseaseInfo = () => {
+    if (!diseaseModifications) return null;
+    
+    const info = {
+      dnaChanges: [],
+      labTests: [],
+      vitalSigns: [],
+      physicalExam: [],
+      riskFactors: []
+    };
+    
+    Object.entries(diseaseModifications).forEach(([organId, organMods]) => {
+      if (!organMods || typeof organMods !== 'object') return;
+      
+      Object.entries(organMods).forEach(([scaleId, scaleMods]) => {
+        if (!scaleMods || typeof scaleMods !== 'object') return;
+        
+        if (scaleId === 'dna' || scaleId === 'gene_expression' || scaleId === 'genetics') {
+          Object.entries(scaleMods).forEach(([paramId, param]) => {
+            info.dnaChanges.push({
+              name: paramId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+              change: param.change_percent ? `${param.direction === 'decrease' ? '-' : '+'}${param.change_percent}%` : (param.value || param.direction),
+              evidence: param.evidence
+            });
+          });
+        } else if (scaleId === 'lab_tests' || scaleId === 'labs') {
+          Object.entries(scaleMods).forEach(([paramId, param]) => {
+            info.labTests.push({
+              name: paramId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+              change: param.change_percent ? `${param.direction === 'decrease' ? '↓' : '↑'}${param.change_percent}%` : (param.value || ''),
+              evidence: param.evidence
+            });
+          });
+        } else if (scaleId === 'vital_signs' || scaleId === 'vitals') {
+          Object.entries(scaleMods).forEach(([paramId, param]) => {
+            info.vitalSigns.push({
+              name: paramId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+              change: param.change_percent ? `${param.direction === 'decrease' ? '↓' : '↑'}${param.change_percent}%` : ''
+            });
+          });
+        } else if (scaleId === 'risk_factors') {
+          Object.entries(scaleMods).forEach(([paramId, param]) => {
+            info.riskFactors.push({
+              name: paramId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+              level: param.risk_level || param.value || ''
+            });
+          });
+        }
+      });
+    });
+    
+    return info;
+  };
 
   const handleSend = async () => {
     if (!input.trim()) return;
     
     const userMessage = { role: 'user', content: input };
     setMessages(prev => [...prev, userMessage]);
+    const question = input.toLowerCase();
     setInput('');
     setIsLoading(true);
 
-    // Simulate AI response (in production, this would call the backend)
-    setTimeout(() => {
-      const response = {
-        role: 'assistant',
-        content: `Based on ${selectedDisease?.name || 'the selected condition'}, here's my analysis:\n\n` +
-          `**Parameter Impact:**\n` +
-          `• Heart Rate: Expected to ${Math.random() > 0.5 ? 'increase' : 'decrease'} by ~15%\n` +
-          `• Blood Pressure: Systolic may ${Math.random() > 0.5 ? 'rise' : 'fall'}\n\n` +
-          `**Recommended Actions:**\n` +
-          `1. Monitor troponin levels\n` +
-          `2. Consider echo if EF <40%\n` +
-          `3. Review medication interactions`,
-        parameterChanges: [
-          { name: 'Heart Rate', change: '+15%', icon: '❤️' },
-          { name: 'Systolic BP', change: '-10mmHg', icon: '📊' }
-        ]
-      };
+    try {
+      // First try to answer from local disease data
+      const diseaseInfo = extractDiseaseInfo();
+      let response = null;
+      
+      // Check if question is about DNA/genetics
+      if (question.includes('dna') || question.includes('genetic') || question.includes('mutation') || question.includes('gene')) {
+        if (diseaseInfo?.dnaChanges?.length > 0) {
+          const dnaList = diseaseInfo.dnaChanges.slice(0, 8).map(d => 
+            `• **${d.name}**: ${d.change}${d.evidence ? ` - ${d.evidence}` : ''}`
+          ).join('\n');
+          
+          response = {
+            role: 'assistant',
+            content: `**DNA/Genetic Changes in ${selectedDisease?.name || 'this disease'}:**\n\n${dnaList}\n\n${diseaseInfo.dnaChanges.length > 8 ? `_Plus ${diseaseInfo.dnaChanges.length - 8} more genetic markers..._` : ''}`,
+            parameterChanges: diseaseInfo.dnaChanges.slice(0, 4).map(d => ({
+              name: d.name,
+              change: d.change,
+              icon: '🧬'
+            }))
+          };
+        } else {
+          response = {
+            role: 'assistant',
+            content: `No specific DNA/genetic data is currently available for ${selectedDisease?.name || 'this disease'} in the database. This may be because:\n\n• The disease doesn't have known genetic markers\n• Data is being added\n\nTry asking about clinical parameters or lab tests instead.`
+          };
+        }
+      }
+      // Check if question is about lab tests
+      else if (question.includes('lab') || question.includes('test') || question.includes('blood')) {
+        if (diseaseInfo?.labTests?.length > 0) {
+          const labList = diseaseInfo.labTests.slice(0, 6).map(l => 
+            `• **${l.name}**: ${l.change}${l.evidence ? ` - ${l.evidence}` : ''}`
+          ).join('\n');
+          
+          response = {
+            role: 'assistant',
+            content: `**Laboratory Tests for ${selectedDisease?.name || 'this disease'}:**\n\n${labList}`,
+            parameterChanges: diseaseInfo.labTests.slice(0, 4).map(l => ({
+              name: l.name,
+              change: l.change,
+              icon: '🧪'
+            }))
+          };
+        }
+      }
+      // Check if question is about clinical parameters / vitals
+      else if (question.includes('clinical') || question.includes('vital') || question.includes('parameter') || question.includes('affect')) {
+        const allParams = [];
+        if (diseaseInfo?.vitalSigns?.length > 0) {
+          allParams.push('**Vital Signs:**');
+          diseaseInfo.vitalSigns.slice(0, 4).forEach(v => allParams.push(`• ${v.name}: ${v.change}`));
+        }
+        if (diseaseInfo?.labTests?.length > 0) {
+          allParams.push('\n**Key Labs:**');
+          diseaseInfo.labTests.slice(0, 4).forEach(l => allParams.push(`• ${l.name}: ${l.change}`));
+        }
+        if (diseaseInfo?.dnaChanges?.length > 0) {
+          allParams.push('\n**Genetic Markers:**');
+          diseaseInfo.dnaChanges.slice(0, 3).forEach(d => allParams.push(`• ${d.name}`));
+        }
+        
+        response = {
+          role: 'assistant',
+          content: `**Clinical Parameters Affected by ${selectedDisease?.name || 'this disease'}:**\n\n${allParams.join('\n')}`,
+          parameterChanges: diseaseInfo?.vitalSigns?.slice(0, 4).map(v => ({
+            name: v.name,
+            change: v.change,
+            icon: '📊'
+          }))
+        };
+      }
+      // Check if question is about risk factors
+      else if (question.includes('risk') || question.includes('factor')) {
+        if (diseaseInfo?.riskFactors?.length > 0) {
+          const riskList = diseaseInfo.riskFactors.map(r => 
+            `• **${r.name}**: ${r.level}`
+          ).join('\n');
+          
+          response = {
+            role: 'assistant',
+            content: `**Risk Factors for ${selectedDisease?.name || 'this disease'}:**\n\n${riskList}`
+          };
+        }
+      }
+      
+      // If no local answer, call backend API
+      if (!response) {
+        try {
+          const apiResponse = await fetch(`${API_URL}/api/assistant/query`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              question: input,
+              disease_id: selectedDisease?.id,
+              disease_name: selectedDisease?.name,
+              context: diseaseInfo
+            })
+          });
+          
+          if (apiResponse.ok) {
+            const data = await apiResponse.json();
+            response = {
+              role: 'assistant',
+              content: data.answer || data.response || 'I apologize, I could not generate a response.',
+              parameterChanges: data.parameter_changes
+            };
+          }
+        } catch (apiError) {
+          console.log('API call failed, using fallback response');
+        }
+      }
+      
+      // Fallback response if nothing else worked
+      if (!response) {
+        if (!selectedDisease) {
+          response = {
+            role: 'assistant',
+            content: 'Please select a disease first using the "Find Condition" button in the header. Once a disease is selected, I can provide detailed information about its:\n\n• DNA/genetic changes\n• Clinical parameters\n• Laboratory tests\n• Risk factors\n• Treatment implications'
+          };
+        } else {
+          response = {
+            role: 'assistant',
+            content: `For **${selectedDisease.name}**, I can provide information about:\n\n• **DNA changes** - Ask "What are the DNA changes?"\n• **Lab tests** - Ask "What lab tests are affected?"\n• **Clinical parameters** - Ask "What clinical parameters are affected?"\n• **Risk factors** - Ask "What are the risk factors?"\n\nPlease ask a more specific question about one of these topics.`
+          };
+        }
+      }
+      
       setMessages(prev => [...prev, response]);
+    } catch (error) {
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: 'I encountered an error processing your question. Please try again.'
+      }]);
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (
