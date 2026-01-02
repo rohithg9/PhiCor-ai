@@ -989,7 +989,7 @@ export const ORGAN_MODELS = {
 
   kidneys: {
     name: "Kidneys",
-    icon: "💜",
+    icon: ORGAN_ICONS.kidneys,
     category: "renal",
     
     geometry: {
@@ -1305,7 +1305,7 @@ export const ORGAN_MODELS = {
 
   liver: {
     name: "Liver",
-    icon: "🔴",
+    icon: ORGAN_ICONS.liver,
     category: "hepatic",
     
     geometry: {
@@ -1772,7 +1772,7 @@ export const ORGAN_MODELS = {
 
   pancreas: {
     name: "Pancreas",
-    icon: "🟡",
+    icon: ORGAN_ICONS.pancreas,
     category: "metabolic",
     
     geometry: {
@@ -1940,7 +1940,7 @@ export const ORGAN_MODELS = {
 
   blood: {
     name: "Blood",
-    icon: "🩸",
+    icon: ORGAN_ICONS.blood,
     category: "hematological",
     
     geometry: {
@@ -2166,7 +2166,7 @@ export const ORGAN_MODELS = {
 
   bonemarrow: {
     name: "Bone Marrow",
-    icon: "🦴",
+    icon: ORGAN_ICONS.bone_marrow,
     category: "hematological",
     
     geometry: {
@@ -2236,7 +2236,7 @@ export const ORGAN_MODELS = {
 
   spleen: {
     name: "Spleen",
-    icon: "🟤",
+    icon: ORGAN_ICONS.spleen,
     category: "hematological",
     
     geometry: {
@@ -2283,7 +2283,7 @@ export const ORGAN_MODELS = {
 
   lymphatic: {
     name: "Lymphatic System",
-    icon: "💚",
+    icon: ORGAN_ICONS.thyroid,
     category: "hematological",
     
     geometry: {
@@ -2333,7 +2333,7 @@ export const ORGAN_MODELS = {
 
   thyroid: {
     name: "Thyroid",
-    icon: "🦋",
+    icon: ORGAN_ICONS.adrenal,
     category: "endocrine",
     
     geometry: {
@@ -2411,7 +2411,7 @@ export const ORGAN_MODELS = {
 
   gi_tract: {
     name: "GI Tract",
-    icon: "🫄",
+    icon: ORGAN_ICONS.stomach,
     category: "gastrointestinal",
     
     geometry: {
@@ -2480,7 +2480,7 @@ export const ORGAN_MODELS = {
 
   breast: {
     name: "Breast",
-    icon: "🎀",
+    icon: ORGAN_ICONS.intestines,
     category: "oncology",
     
     geometry: {
@@ -2527,7 +2527,7 @@ export const ORGAN_MODELS = {
 
   prostate: {
     name: "Prostate",
-    icon: "🔵",
+    icon: ORGAN_ICONS.lymph,
     category: "oncology",
     
     geometry: {
@@ -2584,7 +2584,7 @@ export const ORGAN_MODELS = {
   // ============== ADRENAL GLANDS ==============
   adrenals: {
     name: "Adrenal Glands",
-    icon: "⚡",
+    icon: ORGAN_ICONS.muscle,
     category: "endocrine",
     
     geometry: {
@@ -2661,7 +2661,7 @@ export const ORGAN_MODELS = {
   // ============== MUSCULOSKELETAL SYSTEM ==============
   musculoskeletal: {
     name: "Musculoskeletal",
-    icon: "🦴",
+    icon: ORGAN_ICONS.bone_marrow,
     category: "rheumatological",
     
     geometry: {
@@ -2758,7 +2758,7 @@ export const ORGAN_MODELS = {
   // ============== SKIN ==============
   skin: {
     name: "Skin",
-    icon: "🧴",
+    icon: ORGAN_ICONS.skin,
     category: "dermatological",
     
     geometry: {
@@ -2805,7 +2805,7 @@ export const ORGAN_MODELS = {
   // ============== CELLULAR & MOLECULAR LEVEL ==============
   cellular: {
     name: "Cellular & Molecular",
-    icon: "🧬",
+    icon: ORGAN_ICONS.cellular,
     category: "molecular",
     
     // DNA & GENETICS
