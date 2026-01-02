@@ -586,7 +586,7 @@ export const ORGAN_MODELS = {
 
   lungs: {
     name: "Lungs",
-    icon: "🫁",
+    icon: ORGAN_ICONS.lungs,
     category: "respiratory",
     
     geometry: {
@@ -1537,7 +1537,7 @@ export const ORGAN_MODELS = {
 
   brain: {
     name: "Brain",
-    icon: "🧠",
+    icon: ORGAN_ICONS.brain,
     category: "neurological",
     
     geometry: {
