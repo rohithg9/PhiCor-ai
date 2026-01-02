@@ -2449,11 +2449,10 @@ async def generate_disease_parameter_modifications(request: ParameterModificatio
         if not api_key:
             raise HTTPException(status_code=500, detail="EMERGENT_LLM_KEY not configured")
         
-        llm = LlmChat(
+        chat = LlmChat(
             api_key=api_key,
-            model_provider="openai",
-            model_name="gpt-4o"
-        )
+            session_id=f"param_gen_{request.disease_id}"
+        ).with_model("openai", "gpt-4o")
         
         prompt = f"""You are a medical expert. Generate parameter modifications for the disease: {request.disease_name}
 
