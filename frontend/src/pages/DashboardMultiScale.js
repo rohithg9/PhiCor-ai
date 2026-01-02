@@ -3422,6 +3422,7 @@ const DashboardMultiScale = () => {
               <LeftPanel 
                 selectedDisease={currentDisease}
                 currentOrgan={currentOrgan}
+                diseaseModifications={mergedModifications}
                 isMobile={true}
               />
             </SheetContent>
