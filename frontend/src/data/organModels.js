@@ -2605,16 +2605,65 @@ export const ORGAN_MODELS = {
 
     // GENE EXPRESSION
     gene_expression: {
-      title: "Gene Expression & Transcriptomics",
+      title: "Gene Expression & Signaling Pathways",
       parameters: [
+        // === CELL CYCLE & APOPTOSIS ===
         { id: "p53_expression", name: "p53 Expression Level", value: 1.0, unit: "fold", range: [0.5, 5], evidence: "established" },
-        { id: "bcl2_expression", name: "BCL-2 Expression", value: 1.0, unit: "fold", range: [0.2, 3], evidence: "established" },
+        { id: "bcl2_expression", name: "BCL-2 (Anti-apoptotic)", value: 1.0, unit: "fold", range: [0.2, 3], evidence: "established" },
+        { id: "bax_expression", name: "BAX (Pro-apoptotic)", value: 1.0, unit: "fold", range: [0.5, 3], evidence: "established" },
+        { id: "caspase3_activity", name: "Caspase-3 Activity", value: 1.0, unit: "fold", range: [0.5, 5], evidence: "established" },
+        { id: "cyclin_d1_expression", name: "Cyclin D1 Expression", value: 1.0, unit: "fold", range: [0.5, 5], evidence: "established" },
+        { id: "p21_expression", name: "p21 (CDKN1A) Expression", value: 1.0, unit: "fold", range: [0.5, 5], evidence: "established" },
+        
+        // === GROWTH FACTORS & ANGIOGENESIS ===
         { id: "vegf_expression", name: "VEGF Expression", value: 1.0, unit: "fold", range: [0.5, 10], evidence: "established" },
+        { id: "egf_expression", name: "EGF Expression", value: 1.0, unit: "fold", range: [0.5, 5], evidence: "established" },
+        { id: "igf1_expression", name: "IGF-1 Expression", value: 1.0, unit: "fold", range: [0.5, 3], evidence: "established" },
+        { id: "tgfb_expression", name: "TGF-β Expression", value: 1.0, unit: "fold", range: [0.5, 5], evidence: "established" },
+        { id: "pdgf_expression", name: "PDGF Expression", value: 1.0, unit: "fold", range: [0.5, 5], evidence: "established" },
+        { id: "fgf_expression", name: "FGF Expression", value: 1.0, unit: "fold", range: [0.5, 5], evidence: "established" },
         { id: "hif1a_expression", name: "HIF-1α Expression", value: 1.0, unit: "fold", range: [0.5, 5], evidence: "established" },
-        { id: "nfkb_activity", name: "NF-κB Activity", value: 1.0, unit: "fold", range: [0.5, 10], evidence: "established" },
+        
+        // === MAJOR SIGNALING PATHWAYS ===
         { id: "mtor_activity", name: "mTOR Pathway Activity", value: 1.0, unit: "fold", range: [0.3, 3], evidence: "established" },
+        { id: "pi3k_akt_activity", name: "PI3K/AKT Pathway", value: 1.0, unit: "fold", range: [0.5, 3], evidence: "established" },
+        { id: "mapk_erk_activity", name: "MAPK/ERK Pathway", value: 1.0, unit: "fold", range: [0.5, 3], evidence: "established" },
+        { id: "wnt_beta_catenin", name: "Wnt/β-Catenin Pathway", value: 1.0, unit: "fold", range: [0.5, 5], evidence: "established" },
+        { id: "notch_activity", name: "Notch Pathway", value: 1.0, unit: "fold", range: [0.5, 3], evidence: "established" },
+        { id: "hedgehog_activity", name: "Hedgehog Pathway", value: 1.0, unit: "fold", range: [0.5, 3], evidence: "established" },
+        { id: "jak_stat_activity", name: "JAK/STAT Pathway", value: 1.0, unit: "fold", range: [0.5, 5], evidence: "established" },
+        { id: "nfkb_activity", name: "NF-κB Pathway", value: 1.0, unit: "fold", range: [0.5, 10], evidence: "established" },
         { id: "ampk_activity", name: "AMPK Activity", value: 1.0, unit: "fold", range: [0.5, 3], evidence: "established" },
+        
+        // === METABOLIC REGULATORS ===
         { id: "sirt1_expression", name: "SIRT1 Expression", value: 1.0, unit: "fold", range: [0.3, 2], evidence: "established" },
+        { id: "pgc1a_expression", name: "PGC-1α Expression", value: 1.0, unit: "fold", range: [0.3, 3], evidence: "established" },
+        { id: "ppar_gamma_activity", name: "PPAR-γ Activity", value: 1.0, unit: "fold", range: [0.5, 2], evidence: "established" },
+        { id: "foxo_activity", name: "FOXO Activity", value: 1.0, unit: "fold", range: [0.5, 3], evidence: "established" },
+        { id: "srebp_activity", name: "SREBP Activity", value: 1.0, unit: "fold", range: [0.5, 3], evidence: "established" },
+        
+        // === INSULIN SIGNALING ===
+        { id: "insulin_receptor_expression", name: "Insulin Receptor Expression", value: 1.0, unit: "fold", range: [0.3, 1.5], evidence: "established" },
+        { id: "irs_phosphorylation", name: "IRS Phosphorylation", value: 1.0, unit: "fold", range: [0.3, 1.5], evidence: "established" },
+        { id: "glut4_expression", name: "GLUT4 Expression", value: 1.0, unit: "fold", range: [0.3, 1.5], evidence: "established" },
+        
+        // === NEUROTRANSMITTER SIGNALING ===
+        { id: "dopamine_signaling", name: "Dopamine Signaling", value: 1.0, unit: "fold", range: [0.3, 3], evidence: "established" },
+        { id: "serotonin_signaling", name: "Serotonin Signaling", value: 1.0, unit: "fold", range: [0.3, 3], evidence: "established" },
+        { id: "gaba_signaling", name: "GABA Signaling", value: 1.0, unit: "fold", range: [0.3, 2], evidence: "established" },
+        { id: "glutamate_signaling", name: "Glutamate Signaling", value: 1.0, unit: "fold", range: [0.5, 3], evidence: "established" },
+        { id: "acetylcholine_signaling", name: "Acetylcholine Signaling", value: 1.0, unit: "fold", range: [0.3, 2], evidence: "established" },
+        
+        // === IMMUNE/INFLAMMATORY SIGNALING ===
+        { id: "tlr_signaling", name: "TLR Signaling", value: 1.0, unit: "fold", range: [0.5, 5], evidence: "established" },
+        { id: "inflammasome_activity", name: "Inflammasome Activity", value: 1.0, unit: "fold", range: [0.5, 5], evidence: "established" },
+        { id: "complement_activity", name: "Complement Activation", value: 1.0, unit: "fold", range: [0.5, 3], evidence: "established" },
+        
+        // === EXTRACELLULAR MATRIX ===
+        { id: "mmp_activity", name: "MMP Activity", value: 1.0, unit: "fold", range: [0.5, 5], evidence: "established" },
+        { id: "timp_expression", name: "TIMP Expression", value: 1.0, unit: "fold", range: [0.5, 3], evidence: "established" },
+        { id: "collagen_expression", name: "Collagen Expression", value: 1.0, unit: "fold", range: [0.5, 3], evidence: "established" },
+        { id: "fibronectin_expression", name: "Fibronectin Expression", value: 1.0, unit: "fold", range: [0.5, 3], evidence: "established" },
       ],
       equations: [
         {
