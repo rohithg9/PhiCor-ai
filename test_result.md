@@ -638,3 +638,18 @@ agent_communication:
       - working: true
         agent: "main"
         comment: "✅ PATIENT MANAGEMENT SYSTEM COMPLETE: Implemented comprehensive patient management with: 1) Patient profiles with demographics (age, sex, height, weight, BMI auto-calc), 2) Risk factors (smoking, alcohol), 3) Family history (CAD, diabetes, stroke, cancer, etc.), 4) Comorbidities (diabetes, HTN, CKD, COPD, etc.), 5) Null Patient baseline state, 6) localStorage persistence, 7) Parameter modifiers calculation based on patient characteristics. Frontend testing agent verified all functionality working correctly."
+
+  - task: "DNA/Skin Icon Count Fix + UI Refinements + Code Refactoring"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/DashboardMultiScale.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "User reported DNA/Skin icon has no number next to it but has items. Also implementing UI refinements and code refactoring."
+      - working: true
+        agent: "main"
+        comment: "✅ ALL FIXES COMPLETE: 1) DNA/Skin Icon Fix - Updated getAffectedCounts() to count parameters with factor/multiplier (not just change_percent/value/direction). Now shows counts for all organs including Skin (4), Cellular & Molecular (11), etc. 2) UI Refinements - Enhanced ACTIVE CONDITION banner with larger icon (12x12), gradient text for disease title (text-xl lg:text-2xl), shadow effects, more prominent affected parameters badge. Added scroll-to-panel behavior when scale tabs clicked. 3) Code Refactoring - Created /app/frontend/src/components/ClinicalPanels.js (extracted ClinicalInsightsPanel and ClinicalDataPanel) and /app/frontend/src/utils/diseaseTransformers.js (extracted 16 disease transformer functions). Frontend testing agent verified all 5 critical test cases passed."
