@@ -120,11 +120,16 @@ IMPORTANT:
 Generate comprehensive parameters for {disease_name}:"""
 
     try:
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        
         llm = LlmChat(
             api_key=EMERGENT_LLM_KEY,
+            session_id=f"disease_enhance_{disease_name[:20]}",
             system_message="You are a medical expert. Return only valid JSON with comprehensive clinical parameter modifications. No markdown, no explanations."
-        )
-        response = await llm.send_message_async(prompt, model="gpt-4o-mini")
+        ).with_model("openai", "gpt-4o-mini")
+        
+        user_msg = UserMessage(text=prompt)
+        response = await llm.send_message(user_msg)
         
         content = response.strip()
         if content.startswith('```'):
