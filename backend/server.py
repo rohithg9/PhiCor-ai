@@ -2455,9 +2455,9 @@ async def generate_disease_parameter_modifications(request: ParameterModificatio
             system_message="You are a medical expert that generates precise physiological parameter modifications for diseases. Return only valid JSON."
         ).with_model("openai", "gpt-4o")
         
-        prompt = f"""You are a medical expert. Generate parameter modifications for the disease: {request.disease_name}
+        prompt = f"""You are a medical expert. Generate comprehensive parameter modifications for the disease: {request.disease_name}
 
-For this disease, specify how it affects various physiological parameters. Return a JSON object with this structure:
+For this disease, specify how it affects various physiological parameters across ALL relevant organ systems. Return a JSON object with this structure:
 
 {{
     "disease_id": "{request.disease_id}",
@@ -2465,50 +2465,62 @@ For this disease, specify how it affects various physiological parameters. Retur
     "parameter_modifications": {{
         "heart": {{
             "geometry": {{
-                "lv_edv": {{ "change_percent": 20, "direction": "increase", "evidence": "Cardiac remodeling in heart failure" }},
-                "lv_wall_thickness": {{ "change_percent": 15, "direction": "increase", "evidence": "LVH compensation" }}
+                "lv_edv": {{ "change_percent": 20, "direction": "increase", "evidence": "Cardiac remodeling" }}
             }},
             "lab_tests": {{
-                "troponin_i": {{ "change_percent": 500, "direction": "increase", "evidence": "Myocardial injury marker" }},
-                "bnp": {{ "change_percent": 300, "direction": "increase", "evidence": "Wall stress marker" }}
+                "troponin_i": {{ "change_percent": 500, "direction": "increase", "evidence": "Myocardial injury" }},
+                "bnp": {{ "change_percent": 300, "direction": "increase", "evidence": "Wall stress" }}
             }},
             "imaging": {{
                 "echo_ef": {{ "change_percent": 25, "direction": "decrease", "evidence": "Systolic dysfunction" }}
             }}
         }},
-        "kidneys": {{
-            "physiology": {{
-                "gfr": {{ "change_percent": 30, "direction": "decrease", "evidence": "Cardiorenal syndrome" }}
+        "cellular": {{
+            "dna": {{
+                "chromosomal_instability": {{ "change_percent": 100, "direction": "increase", "evidence": "For genetic diseases" }},
+                "mutation_burden": {{ "change_percent": 50, "direction": "increase", "evidence": "Increased mutations" }}
             }},
-            "urinalysis": {{
-                "urine_protein": {{ "change_percent": 100, "direction": "increase", "evidence": "Proteinuria from hypoperfusion" }}
+            "gene_expression": {{
+                "p53_expression": {{ "change_percent": 50, "direction": "increase", "evidence": "Stress response" }},
+                "vegf_expression": {{ "change_percent": 100, "direction": "increase", "evidence": "Angiogenesis" }}
+            }},
+            "metabolism": {{
+                "atp_production": {{ "change_percent": 20, "direction": "decrease", "evidence": "Metabolic dysfunction" }},
+                "ros_level": {{ "change_percent": 50, "direction": "increase", "evidence": "Oxidative stress" }}
+            }},
+            "cell_cycle": {{
+                "ki67_index": {{ "change_percent": 100, "direction": "increase", "evidence": "For proliferative diseases" }},
+                "apoptotic_index": {{ "change_percent": 50, "direction": "increase", "evidence": "Cell death" }}
             }}
         }},
         "blood": {{
-            "pressures": {{
-                "systolic_bp": {{ "change_percent": 20, "direction": "increase", "evidence": "Compensatory mechanism" }}
+            "lab_tests": {{
+                "wbc_count": {{ "change_percent": 30, "direction": "increase", "evidence": "Inflammation" }}
             }}
         }}
     }},
-    "affected_organs": ["heart", "kidneys", "blood", "lungs"],
+    "affected_organs": ["heart", "cellular", "blood", "kidneys"],
     "severity_factors": [
-        {{ "name": "Ejection Fraction", "threshold": "<40%", "impact": "severe" }},
-        {{ "name": "BNP Level", "threshold": ">400", "impact": "moderate" }}
+        {{ "name": "Key Marker", "threshold": ">value", "impact": "severe/moderate/mild" }}
     ],
     "mathematical_models": [
         {{
-            "name": "Frank-Starling Curve Shift",
-            "equation": "SV = SV_max * (1 - e^(-k*EDV)) * contractility",
-            "description": "Reduced contractility shifts curve downward"
+            "name": "Model Name",
+            "equation": "mathematical equation",
+            "description": "What this model describes"
         }}
     ]
 }}
 
-IMPORTANT: 
-- Only include parameters that are actually affected by this specific disease
-- Use realistic change percentages based on medical literature
-- Include evidence for each modification
-- Return ONLY the JSON, no other text"""
+CRITICAL RULES:
+1. For GENETIC diseases (Down syndrome, Turner syndrome, etc.): MUST include "cellular" organ with "dna" and "gene_expression" modifications
+2. For CANCER diseases: MUST include "cellular" with "cell_cycle" modifications (ki67_index, apoptotic_index)
+3. For METABOLIC diseases: MUST include "cellular" with "metabolism" modifications (atp_production, ros_level)
+4. For INFLAMMATORY diseases: MUST include "cellular" with "gene_expression" (nfkb_activity, cytokines)
+5. Include lab_tests and imaging for ALL relevant organs
+6. Use realistic change percentages from medical literature
+7. Include evidence citations for each modification
+8. Return ONLY valid JSON, no other text"""
 
         user_message = UserMessage(text=prompt)
         response = await chat.send_message(user_message)
