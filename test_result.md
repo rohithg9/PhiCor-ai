@@ -285,6 +285,21 @@ agent_communication:
         agent: "testing"
         comment: "CRITICAL ISSUE: AI Clinical Synthesis feature not working properly. ✅ Navigation to Differential Diagnosis page works (cyan Δ button). ✅ Clinical text analysis works (extracted 10 findings from comprehensive clinical text). ✅ Individual diagnosis expansion works (Clinical Reasoning section visible). ✅ Evidence-Based Guidelines panel works. ❌ AI Clinical Synthesis section is not appearing at TOP of results panel despite API calls being made. Backend synthesis endpoint /api/diagnosis/synthesize returns 422 validation errors when called from frontend, though direct curl test works. Frontend is sending malformed request data that doesn't match backend Pydantic model validation. Error: 'Failed to execute text on Response: body stream already read' suggests response handling issue. Backend logs show mix of 200 OK and 422 Unprocessable Entity responses for synthesis endpoint."
 
+  - task: "PhiCor Assistant in Dashboard Testing"
+    implemented: true
+    working: false
+    file: "/app/frontend/src/components/LeftPanel.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Testing PhiCor Assistant in Dashboard as requested in review request - testing disease selection, respiratory diseases, lung cancer selection, and DNA changes query"
+      - working: false
+        agent: "testing"
+        comment: "❌ PHICOR ASSISTANT TESTING FAILED: PhiCor Assistant feature has critical implementation issues. ✅ Dashboard loads correctly at https://digitalhealth-3.preview.emergentagent.com/dashboard. ✅ Patient Data panel opens successfully with left panel containing tabs. ✅ Assistant tab (2nd tab with MessageSquare icon) is accessible and clickable. ✅ Input field found and 'What are the DNA changes?' question was sent successfully. ✅ Basic genetic markers (DNA, genetic, gene) found on page. ❌ CRITICAL ISSUES: 1) PhiCor Assistant welcome message 'I'm PhiCor Assistant analyzing [disease name]...' is NOT visible despite tab being clicked. 2) Assistant content area appears empty or not properly rendered. 3) Backend /api/chat endpoint requires authentication but frontend may not be sending proper auth tokens. 4) Disease selection workflow partially works but assistant doesn't recognize selected diseases. 5) No specific lung cancer genetic markers (EGFR, KRAS, ALK, TP53, PD-L1) found in responses. The PhiCor Assistant implementation exists in code (/app/frontend/src/components/LeftPanel.js lines 355-669) but is not functioning properly in the UI. Authentication issues with backend /api/chat endpoint likely preventing proper assistant responses."
+
 agent_communication:
   - agent: "main"
     message: "Fixed P0 Differential Diagnosis bug. Changes made: 1) bidirectionalMapping.js - Added Array.isArray() checks to prevent slice errors on non-array data, added ICD_CODE_NAMES mapping for human-readable disease names. 2) DifferentialPage.js - Fixed probability display formatting to avoid long decimal numbers. Need comprehensive testing of clinical text analysis with imaging findings."
