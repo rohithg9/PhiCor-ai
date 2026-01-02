@@ -3042,7 +3042,7 @@ const DashboardMultiScale = () => {
 
       {/* Main Content */}
       <main className={`flex-1 flex flex-col overflow-hidden lg:pt-0 ${currentDisease ? 'pt-[7.5rem]' : 'pt-28'}`}>
-        {/* Active Condition Banner - Prominent title showing selected condition */}
+        {/* Active Condition Banner - Prominent title showing selected condition (Desktop only - mobile has its own in header) */}
         <AnimatePresence>
           {currentDisease && (
             <motion.div
@@ -3050,7 +3050,7 @@ const DashboardMultiScale = () => {
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="bg-gradient-to-r from-destructive/10 via-red-500/10 to-orange-500/10 border-b border-destructive/30 overflow-hidden"
+              className="hidden lg:block bg-gradient-to-r from-destructive/10 via-red-500/10 to-orange-500/10 border-b border-destructive/30 overflow-hidden"
             >
               <div className="px-4 lg:px-6 py-3 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0 flex-1">
