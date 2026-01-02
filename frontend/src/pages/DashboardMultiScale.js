@@ -3261,69 +3261,26 @@ const DashboardMultiScale = () => {
 
         {/* Main Content */}
         <main className={`flex-1 flex flex-col overflow-hidden pt-32 lg:pt-0`}>
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-[10px] lg:text-xs text-destructive font-semibold uppercase tracking-wider">
-                        Active Condition
-                      </span>
-                      {currentDisease.icd10 && (
-                        <Badge variant="outline" className="text-[9px] lg:text-[10px] border-destructive/40 text-destructive shrink-0">
-                          ICD-10: {currentDisease.icd10}
-                        </Badge>
-                      )}
-                    </div>
-                    <h2 className="text-base sm:text-lg lg:text-xl font-bold text-foreground truncate" title={currentDisease.name}>
-                      {currentDisease.name}
-                    </h2>
-                    <p className="text-[10px] lg:text-xs text-muted-foreground line-clamp-1 hidden sm:block">
-                      {currentDisease.description || currentDisease.definition || `Affecting ${currentDisease.affectedOrgans?.length || 1} organ systems`}
-                    </p>
-                  </div>
-                </div>
-                <div className="shrink-0 flex items-center gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={resetDisease} 
-                    className="border-destructive/30 text-destructive hover:bg-destructive/10 h-8 lg:h-9 text-xs lg:text-sm"
-                  >
-                    <RotateCcw className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2" />
-                    <span className="hidden sm:inline">Reset</span>
-                    <span className="sm:hidden">×</span>
-                  </Button>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Desktop Header - Organ Info */}
-        <header className="hidden lg:flex h-14 border-b border-border/50 px-6 items-center justify-between bg-card/30">
-          <div>
-            <h2 className="font-bold text-lg flex items-center gap-2">
-              <span className="text-2xl">{currentOrgan?.icon}</span>
-              {currentOrgan?.name}
-              {currentScale && (
-                <span className="text-sm font-normal text-muted-foreground">
-                  → {currentScale.name || selectedScale}
-                </span>
-              )}
-            </h2>
-            <p className="text-xs text-muted-foreground">
-              {currentScale?.description || 'Complete mathematical model at multiple scales'}
-            </p>
-          </div>
-          {selectedDisease !== null && selectedDisease !== undefined && currentDisease && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span className="text-destructive">●</span>
-              <span>Viewing disease effects on {currentOrgan?.name}</span>
+          {/* Scale/Tab Navigation */}
+          <div className="border-b border-border/50 bg-card/10">
+            <div className="container mx-auto px-4">
+              <Tabs value={selectedScale} onValueChange={setSelectedScale} className="w-full">
+                <TabsList className="h-10 w-full justify-start overflow-x-auto">
+                  {currentOrgan && Object.entries(currentOrgan).filter(([key]) => 
+                    key !== 'icon' && key !== 'name' && key !== 'description'
+                  ).map(([scaleId, scale]) => (
+                    <TabsTrigger key={scaleId} value={scaleId} className="text-xs gap-1">
+                      {scale.icon && <span>{scale.icon}</span>}
+                      {scale.name || scaleId}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
             </div>
-          )}
-        </header>
+          </div>
 
-        {/* Affected Organs Summary Bar - Shows when disease is selected */}
-        {currentDisease && affectedOrgansSummary.length > 0 && (
+          {/* Affected Organs Summary Bar - Shows when disease is selected */}
+          {currentDisease && affectedOrgansSummary.length > 0 && (
           <div className="border-b border-border/50 px-3 lg:px-6 py-2 bg-gradient-to-r from-destructive/5 to-orange-500/5">
             <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
               <span className="text-[10px] text-muted-foreground uppercase tracking-wider shrink-0">Affected:</span>
