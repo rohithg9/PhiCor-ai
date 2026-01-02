@@ -1899,64 +1899,75 @@ const DiseasePanel = ({
         icon: "🫁",
         subcategories: {
           respiratory: { label: "Respiratory", diseases: [] },
-          renal: { label: "Renal", diseases: [] },
+          renal: { label: "Renal/Urology", diseases: [] },
           neurological: { label: "Neurological", diseases: [] },
-          hepatic: { label: "Hepatic/Liver", diseases: [] },
+          hepatic: { label: "GI/Hepatic", diseases: [] },
+          hematological: { label: "Hematological", diseases: [] },
+          infectious: { label: "Infectious", diseases: [] },
+          oncology: { label: "Oncology", diseases: [] },
+          rheumatological: { label: "Rheumatology", diseases: [] },
+          dermatological: { label: "Dermatology", diseases: [] },
+          ophthalmology: { label: "Eye/ENT", diseases: [] },
+          obstetrics: { label: "OB/GYN", diseases: [] },
+          pediatric: { label: "Pediatric", diseases: [] },
+          psychiatric: { label: "Psychiatric", diseases: [] },
+          emergency: { label: "Emergency/Critical", diseases: [] },
           vascular: { label: "Vascular", diseases: [] },
-          cerebrovascular: { label: "Cerebrovascular", diseases: [] },
-          acute: { label: "Acute/Critical", diseases: [] },
           misc: { label: "Other", diseases: [] }
         }
       }
     };
 
     diseases.forEach(([id, disease]) => {
-      const cat = disease.category || 'other';
+      const cat = (disease.category || 'other').toLowerCase();
+      const name = disease.name?.toLowerCase() || '';
+      const icd10 = disease.icd10?.toUpperCase() || '';
       
-      // Cardiac subcategorization
-      if (['cardiac', 'ischemic', 'cardiomyopathy', 'valvular', 'arrhythmia', 
-           'heartFailure', 'hypertensive', 'rheumatic', 'pericardial',
-           'pulmonary_vascular'].includes(cat)) {
-        // Map 'cardiac' category to appropriate subcategory based on name
+      // Cardiac/Cardiovascular subcategorization
+      if (['cardiac', 'cardiovascular', 'ischemic', 'cardiomyopathy', 'valvular', 'arrhythmia', 
+           'heartfailure', 'hypertensive', 'rheumatic', 'pericardial', 'pulmonary_vascular'].includes(cat) ||
+           icd10.startsWith('I')) {
         let subcat;
-        if (cat === 'cardiac') {
-          // Try to infer subcategory from disease name
-          const name = disease.name?.toLowerCase() || '';
-          if (name.includes('cardiomyopathy')) {
-            subcat = groups.cardiac.subcategories.cardiomyopathy;
-          } else if (name.includes('arrhythmia') || name.includes('fibrillation')) {
-            subcat = groups.cardiac.subcategories.arrhythmia;
-          } else if (name.includes('hypertens')) {
-            subcat = groups.cardiac.subcategories.hypertensive;
-          } else if (name.includes('heart failure') || name.includes('hf')) {
-            subcat = groups.cardiac.subcategories.heartFailure;
-          } else if (name.includes('infarct') || name.includes('ischemic') || name.includes('angina')) {
-            subcat = groups.cardiac.subcategories.ischemic;
-          } else {
-            subcat = groups.cardiac.subcategories.other_cardiac;
-          }
+        if (name.includes('cardiomyopathy') || cat === 'cardiomyopathy') {
+          subcat = groups.cardiac.subcategories.cardiomyopathy;
+        } else if (name.includes('arrhythmia') || name.includes('fibrillation') || name.includes('flutter') ||
+                   name.includes('block') || name.includes('tachycardia') || name.includes('bradycardia') ||
+                   cat === 'arrhythmia') {
+          subcat = groups.cardiac.subcategories.arrhythmia;
+        } else if (name.includes('hypertens') || cat === 'hypertensive') {
+          subcat = groups.cardiac.subcategories.hypertensive;
+        } else if (name.includes('heart failure') || name.includes('hfref') || name.includes('hfpef') ||
+                   cat === 'heartfailure') {
+          subcat = groups.cardiac.subcategories.heartFailure;
+        } else if (name.includes('infarct') || name.includes('ischemic') || name.includes('angina') ||
+                   name.includes('coronary') || name.includes('stemi') || name.includes('nstemi') ||
+                   cat === 'ischemic') {
+          subcat = groups.cardiac.subcategories.ischemic;
+        } else if (name.includes('valv') || name.includes('stenosis') || name.includes('regurgitation') ||
+                   cat === 'valvular') {
+          subcat = groups.cardiac.subcategories.valvular;
+        } else if (name.includes('pericardi') || cat === 'pericardial') {
+          subcat = groups.cardiac.subcategories.pericardial;
         } else {
-          subcat = groups.cardiac.subcategories[cat] || groups.cardiac.subcategories.other_cardiac;
+          subcat = groups.cardiac.subcategories.other_cardiac;
         }
         subcat.diseases.push([id, disease]);
       }
-      // Metabolic
-      else if (['metabolic', 'diabetes', 'hepatic'].includes(cat)) {
-        // Smarter subcategorization for metabolic diseases
-        const name = disease.name?.toLowerCase() || '';
-        const icd10 = disease.icd10?.toUpperCase() || '';
+      // Metabolic/Endocrine
+      else if (['metabolic', 'endocrine', 'diabetes'].includes(cat) ||
+               icd10.startsWith('E')) {
         let subcat;
-        
         if (name.includes('diabetes') || name.includes('dka') || name.includes('ketoacidosis') ||
+            name.includes('hyperglyc') || name.includes('hypoglyc') ||
             icd10.startsWith('E10') || icd10.startsWith('E11') || icd10.startsWith('E13')) {
           subcat = groups.metabolic.subcategories.diabetes;
         } else if (name.includes('thyroid') || name.includes('hyperthyroid') || name.includes('hypothyroid') ||
-                   name.includes('graves') || name.includes('hashimoto') ||
+                   name.includes('graves') || name.includes('hashimoto') || name.includes('thyrotoxic') ||
                    icd10.startsWith('E03') || icd10.startsWith('E05') || icd10.startsWith('E06')) {
           subcat = groups.metabolic.subcategories.thyroid;
         } else if (name.includes('adrenal') || name.includes('cushing') || name.includes('addison') ||
-                   name.includes('pheochromocytoma') ||
-                   icd10.startsWith('E24') || icd10.startsWith('E27') || icd10.startsWith('D35')) {
+                   name.includes('pheochromocytoma') || name.includes('aldosterone') ||
+                   icd10.startsWith('E24') || icd10.startsWith('E27')) {
           subcat = groups.metabolic.subcategories.adrenal;
         } else if (name.includes('cholesterol') || name.includes('hyperlipid') || name.includes('triglyceride') ||
                    icd10.startsWith('E78')) {
@@ -1964,38 +1975,74 @@ const DiseasePanel = ({
         } else if (name.includes('obesity') || name.includes('metabolic syndrome') ||
                    icd10.startsWith('E66') || icd10.startsWith('E88')) {
           subcat = groups.metabolic.subcategories.obesity;
-        } else if (name.includes('osteoporosis') || name.includes('gout') ||
-                   icd10.startsWith('M81') || icd10.startsWith('M10')) {
-          subcat = groups.metabolic.subcategories.bone;
-        } else if (cat === 'hepatic') {
-          subcat = groups.metabolic.subcategories.hepatic;
         } else {
           subcat = groups.metabolic.subcategories.other_metabolic;
         }
         subcat.diseases.push([id, disease]);
       }
-      // Other systems
-      else if (cat === 'respiratory') {
+      // Respiratory
+      else if (cat === 'respiratory' || cat === 'pulmonary' || icd10.startsWith('J')) {
         groups.other.subcategories.respiratory.diseases.push([id, disease]);
       }
-      else if (cat === 'renal') {
+      // Renal/Urology
+      else if (['renal', 'nephrology', 'urology'].includes(cat) || icd10.startsWith('N')) {
         groups.other.subcategories.renal.diseases.push([id, disease]);
       }
-      else if (cat === 'neurological') {
+      // Neurological
+      else if (cat === 'neurological' || icd10.startsWith('G')) {
         groups.other.subcategories.neurological.diseases.push([id, disease]);
       }
-      else if (cat === 'hepatic') {
+      // Gastrointestinal/Hepatic
+      else if (['hepatic', 'gastrointestinal', 'gi'].includes(cat) || icd10.startsWith('K')) {
         groups.other.subcategories.hepatic.diseases.push([id, disease]);
       }
-      else if (cat === 'vascular') {
+      // Hematological
+      else if (['hematological', 'hematological_malignancy'].includes(cat) || icd10.startsWith('D')) {
+        groups.other.subcategories.hematological.diseases.push([id, disease]);
+      }
+      // Infectious
+      else if (cat === 'infectious' || icd10.startsWith('A') || icd10.startsWith('B')) {
+        groups.other.subcategories.infectious.diseases.push([id, disease]);
+      }
+      // Oncology
+      else if (['oncology', 'oncological'].includes(cat) || icd10.startsWith('C')) {
+        groups.other.subcategories.oncology.diseases.push([id, disease]);
+      }
+      // Rheumatological/Musculoskeletal
+      else if (['rheumatological', 'musculoskeletal'].includes(cat) || icd10.startsWith('M')) {
+        groups.other.subcategories.rheumatological.diseases.push([id, disease]);
+      }
+      // Dermatological
+      else if (cat === 'dermatological' || icd10.startsWith('L')) {
+        groups.other.subcategories.dermatological.diseases.push([id, disease]);
+      }
+      // Ophthalmology/ENT
+      else if (['ophthalmology', 'otolaryngology'].includes(cat) || icd10.startsWith('H')) {
+        groups.other.subcategories.ophthalmology.diseases.push([id, disease]);
+      }
+      // Obstetrics/Gynecology
+      else if (['obstetrics', 'gynecology', 'neonatology'].includes(cat) || 
+               icd10.startsWith('O') || icd10.startsWith('P')) {
+        groups.other.subcategories.obstetrics.diseases.push([id, disease]);
+      }
+      // Pediatric
+      else if (cat === 'pediatric' || icd10.startsWith('Q')) {
+        groups.other.subcategories.pediatric.diseases.push([id, disease]);
+      }
+      // Psychiatric
+      else if (cat === 'psychiatric' || icd10.startsWith('F')) {
+        groups.other.subcategories.psychiatric.diseases.push([id, disease]);
+      }
+      // Emergency/Critical
+      else if (['emergency', 'acute', 'critical'].includes(cat) || 
+               icd10.startsWith('R') || icd10.startsWith('T') || icd10.startsWith('S')) {
+        groups.other.subcategories.emergency.diseases.push([id, disease]);
+      }
+      // Vascular
+      else if (['vascular', 'cerebrovascular'].includes(cat)) {
         groups.other.subcategories.vascular.diseases.push([id, disease]);
       }
-      else if (cat === 'cerebrovascular') {
-        groups.other.subcategories.cerebrovascular.diseases.push([id, disease]);
-      }
-      else if (cat === 'acute') {
-        groups.other.subcategories.acute.diseases.push([id, disease]);
-      }
+      // Misc/Other
       else {
         groups.other.subcategories.misc.diseases.push([id, disease]);
       }
