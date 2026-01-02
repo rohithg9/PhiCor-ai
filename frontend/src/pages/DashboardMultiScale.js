@@ -2886,7 +2886,7 @@ const DashboardMultiScale = () => {
       try {
         const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
         // Fetch all diseases with parameter_modifications (limit increased to get all)
-        const response = await fetch(`${backendUrl}/api/diseases-db?include_params=true&limit=1000`);
+        const response = await fetch(`${backendUrl}/api/diseases-db?include_params=true&limit=2500`);
         if (response.ok) {
           const data = await response.json();
           // Map diseases by their ID with their parameter_modifications
