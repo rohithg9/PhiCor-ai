@@ -2451,7 +2451,8 @@ async def generate_disease_parameter_modifications(request: ParameterModificatio
         
         chat = LlmChat(
             api_key=api_key,
-            session_id=f"param_gen_{request.disease_id}"
+            session_id=f"param_gen_{request.disease_id}",
+            system_message="You are a medical expert that generates precise physiological parameter modifications for diseases. Return only valid JSON."
         ).with_model("openai", "gpt-4o")
         
         prompt = f"""You are a medical expert. Generate parameter modifications for the disease: {request.disease_name}
