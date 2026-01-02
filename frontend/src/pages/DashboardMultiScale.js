@@ -2554,6 +2554,7 @@ const DashboardMultiScale = () => {
   const [paramFilterOrgan, setParamFilterOrgan] = useState(null); // Filter affected params by organ
   const [showAllParams, setShowAllParams] = useState(false); // Expand to show all params
   const [apiDiseaseData, setApiDiseaseData] = useState({}); // Store parameter_modifications from API
+  const [apiDiseaseByIcd, setApiDiseaseByIcd] = useState({}); // Also map by ICD-10 code
 
   // Fetch disease parameter_modifications from API
   useEffect(() => {
@@ -2566,12 +2567,19 @@ const DashboardMultiScale = () => {
           const data = await response.json();
           // Map diseases by their ID with their parameter_modifications
           const diseaseMap = {};
+          const icdMap = {};
           (data.diseases || []).forEach(disease => {
             if (disease.parameter_modifications && Object.keys(disease.parameter_modifications).length > 0) {
               diseaseMap[disease.id] = disease.parameter_modifications;
+              // Also map by ICD-10 code (convert to UI format: D56.1 -> D56_1)
+              if (disease.icd10_code) {
+                const icdKey = disease.icd10_code.replace('.', '_');
+                icdMap[icdKey] = disease.parameter_modifications;
+              }
             }
           });
           setApiDiseaseData(diseaseMap);
+          setApiDiseaseByIcd(icdMap);
           console.log(`Loaded parameter_modifications for ${Object.keys(diseaseMap).length} diseases`);
         }
       } catch (error) {
