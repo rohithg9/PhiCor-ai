@@ -1,36 +1,33 @@
 #!/usr/bin/env python3
 """
-Backend Testing for PhiCore.ai "Mathematical Human Body" Dashboard
-Testing the Mathematical Human Body Dashboard comprehensively as requested in review:
+Backend Testing for PhiCore.ai Medical Knowledge Base and Active Condition Banner
+Testing comprehensive verification as requested in review:
 
-MATHEMATICAL HUMAN BODY DASHBOARD TESTING:
+PHICORE.AI MEDICAL KNOWLEDGE BASE TESTING:
 
-Test 1: Disease Database Stats API
-- Endpoint: GET /api/diseases-db/stats
-- Expected: Verify total diseases count (~254) and verify all have parameter_modifications
-
-Test 2: Disease Search API
-- Endpoint: GET /api/diseases-db?search=Down
-- Expected: Search for Down syndrome, verify it returns with parameter_modifications field populated
-
-Test 3: Disease Detail API
-- Endpoint: GET /api/diseases-db/{disease_id}
-- Expected: Get full details for diseases like "down_syndrome" and verify parameter_modifications for cellular, heart, brain etc.
-
-Test 4: Platform Stats API
+Test 1: Platform Stats Verification
 - Endpoint: GET /api/platform/stats
-- Expected: Verify drug and disease counts are accurate
+- Expected: drugs.total >= 300, diseases.total >= 250
 
-Key Verification Points:
-- All 254 diseases should have non-empty parameter_modifications
-- Parameter_modifications should include organ-level changes (heart, brain, cellular, etc.)
-- Changes should include scale-level modifications (geometry, physiology, lab_tests, etc.)
-- Each modification should have change direction (increase/decrease) and value
+Test 2: Drugs Database
+- Endpoint: GET /api/drugs?limit=10
+- Expected: Returns drug list with names, categories, and complete data
+- Test category filter: GET /api/drugs?category=cardiovascular
+- Expected: Returns cardiovascular drugs only
 
-Sample diseases to check in detail:
-- Down Syndrome (genetic) - should have cellular/DNA modifications
-- Diabetes Type 2 - should have pancreas/kidney modifications
-- COPD - should have lung modifications
+Test 3: Diseases Database
+- Endpoint: GET /api/diseases-db?limit=10
+- Expected: Returns disease list with names, ICD-10 codes, parameter_modifications
+- Test with include_params: GET /api/diseases-db?include_params=true&limit=5
+- Expected: Returns diseases with full parameter_modifications data
+
+Test 4: Disease Detail with Parameter Modifications
+- Endpoint: GET /api/diseases-db/unstable_angina (or similar disease ID)
+- Expected: Returns disease with parameter_modifications for affected organs
+
+Test 5: Drug Detail
+- Endpoint: GET /api/drugs/captopril
+- Expected: Returns drug with mechanisms, dosages, contraindications, interactions
 
 API Base URL: https://healthcompute-1.preview.emergentagent.com
 """
