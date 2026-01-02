@@ -866,7 +866,7 @@ const LandingPage = () => {
               Ready to <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">explore</span> the equations of life?
             </h2>
             <p className="text-muted-foreground mb-8 max-w-lg mx-auto leading-relaxed">
-              Experience our digital physiology platform. Browse 200+ diseases, explore mathematical models, and see how conditions affect organ parameters.
+              Experience our digital physiology platform. Browse {platformStats.diseases} diseases, explore mathematical models, and see how conditions affect organ parameters.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button
@@ -891,7 +891,7 @@ const LandingPage = () => {
             <div className="mt-10 pt-8 border-t border-white/10">
               <p className="text-xs text-muted-foreground mb-4">What you'll discover</p>
               <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1"><span className="text-indigo-400">✓</span> 200+ Diseases</span>
+                <span className="flex items-center gap-1"><span className="text-indigo-400">✓</span> {platformStats.diseases} Diseases</span>
                 <span className="flex items-center gap-1"><span className="text-purple-400">✓</span> 6 Organ Systems</span>
                 <span className="flex items-center gap-1"><span className="text-pink-400">✓</span> Real-time Equations</span>
                 <span className="flex items-center gap-1"><span className="text-green-400">✓</span> No Login Required</span>
