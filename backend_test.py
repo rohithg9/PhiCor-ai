@@ -32,7 +32,7 @@ Sample diseases to check in detail:
 - Diabetes Type 2 - should have pancreas/kidney modifications
 - COPD - should have lung modifications
 
-API Base URL: https://phicore-1.preview.emergentagent.com
+API Base URL: https://healthcompute-1.preview.emergentagent.com
 """
 
 import requests
@@ -433,7 +433,7 @@ def run_all_tests():
     print("🧪 MATHEMATICAL HUMAN BODY DASHBOARD COMPREHENSIVE TESTING")
     print("=" * 80)
     print("Testing the Mathematical Human Body Dashboard comprehensively as requested in review")
-    print("API Base URL: https://phicore-1.preview.emergentagent.com")
+    print("API Base URL: https://healthcompute-1.preview.emergentagent.com")
     print("=" * 80)
     
     test_results = {}
