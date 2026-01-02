@@ -33,7 +33,7 @@ Test 7: Disease Stats
 - Endpoint: GET /api/diseases-db/stats
 - Expected: Returns total_diseases > 200, by_category breakdown
 
-API Base URL: https://medcalc-ai.preview.emergentagent.com
+API Base URL: https://phicore-1.preview.emergentagent.com
 """
 
 import requests
@@ -473,7 +473,7 @@ def run_all_tests():
     print("🧪 PHICORE.AI MEDICAL KNOWLEDGE BASE INTEGRATION TESTING")
     print("=" * 80)
     print("Testing the integrated Medical Knowledge Base API endpoints as requested in review")
-    print("API Base URL: https://medcalc-ai.preview.emergentagent.com")
+    print("API Base URL: https://phicore-1.preview.emergentagent.com")
     print("=" * 80)
     
     test_results = {}
