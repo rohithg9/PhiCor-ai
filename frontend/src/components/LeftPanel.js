@@ -705,6 +705,7 @@ const EMRConnectPanel = () => {
 const LeftPanel = ({ 
   selectedDisease, 
   currentOrgan,
+  diseaseModifications,
   onPatientDataChange,
   isMobile = false 
 }) => {
