@@ -232,11 +232,10 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Dashboard organ filter functionality"
-    - "Dashboard Show All/Show Less toggle"
+    - "PhiCore.ai Mathematical Human Body Dashboard Backend API Testing"
   stuck_tasks:
-    - "Dashboard organ filter functionality"
-    - "Dashboard Show All/Show Less toggle"
+    - "Differential Diagnosis AI Clinical Synthesis Testing"
+    - "PhiCor Assistant in Dashboard Testing"
   test_all: false
   test_priority: "high_first"
 
