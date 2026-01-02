@@ -371,8 +371,12 @@ const PhiCorAssistant = ({ selectedDisease, currentOrgan, diseaseModifications }
 
   // Update welcome message when disease changes
   React.useEffect(() => {
-    setMessages([{ role: 'assistant', content: getInitialMessage() }]);
-  }, [selectedDisease?.name]);
+    if (selectedDisease?.name) {
+      setMessages([{ role: 'assistant', content: `I'm PhiCor Assistant analyzing **${selectedDisease.name}** (${selectedDisease.icd10 || 'N/A'}). Ask me about:\n• DNA/genetic changes\n• Clinical parameters\n• Treatment effects\n• Diagnostic tests` }]);
+    } else {
+      setMessages([{ role: 'assistant', content: 'I\'m PhiCor Assistant. Please select a disease first, then ask me about its parameters, genetic changes, or clinical implications.' }]);
+    }
+  }, [selectedDisease?.name, selectedDisease?.icd10]);
 
   // Get suggested questions based on selected disease
   const suggestedQuestions = selectedDisease ? [
