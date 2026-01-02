@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Comprehensive script to generate complete parameter_modifications for ALL diseases.
-Uses OpenAI to generate medically accurate data with proper mathematical modeling.
+Uses templates to generate medically accurate data with proper mathematical modeling.
 """
 
 import asyncio
@@ -9,11 +9,9 @@ import os
 import json
 from motor.motor_asyncio import AsyncIOMotorClient
 from datetime import datetime
-from emergentintegrations.llm.chat import chat, LlmModel
 
 MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
 DB_NAME = os.environ.get('DB_NAME', 'test_database')
-EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
 
 # Comprehensive parameter modification template based on organ system
 def get_comprehensive_prompt(disease_name, icd10, category, affected_organs):
