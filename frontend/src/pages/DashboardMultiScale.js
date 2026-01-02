@@ -3873,7 +3873,7 @@ const DashboardMultiScale = () => {
               return (
                 <button
                   key={scale.id}
-                  onClick={() => hasData && setSelectedScale(scale.id)}
+                  onClick={() => hasData && handleScaleSelect(scale.id)}
                   disabled={!hasData}
                   className={`flex items-center gap-1 md:gap-2 px-2 md:px-4 py-2 rounded-lg text-xs md:text-sm whitespace-nowrap transition-all ${
                     selectedScale === scale.id
