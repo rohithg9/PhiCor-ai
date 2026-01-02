@@ -420,14 +420,15 @@ def test_crash_prevention():
         return False
 
 def run_all_tests():
-    """Run all PhiCore.ai Platform Stats and Disease Database API tests"""
-    print("🧪 PHICORE.AI PLATFORM STATS AND DISEASE DATABASE API TESTING")
+    """Run all PhiCore.ai Mathematical Human Body Dashboard tests"""
+    print("🧪 PHICORE.AI MATHEMATICAL HUMAN BODY DASHBOARD TESTING")
     print("=" * 80)
     print("Testing specific requirements from review request:")
-    print("1. Platform Stats API - diseases.total > 500, drugs.total > 300, display_stats")
-    print("2. Diseases Database API - search=diabetes, ICD-10 codes, category=cardiovascular")
-    print("3. Disease Detail API - disease_id=type2_diabetes, parameter_modifications")
-    print("4. Count verification - landing page (506+), dashboard (784 merged)")
+    print("1. Disease Database Stats API - verify 509 diseases with parameter_modifications")
+    print("2. Disease Search API - search=diabetes functionality")
+    print("3. Specific Disease Detail APIs - Heart Failure, Type 2 Diabetes, COPD")
+    print("4. Disease Categories Testing - different categories with parameter display")
+    print("5. Crash Prevention Verification - multiple disease selections")
     print("=" * 80)
     
     test_results = {}
@@ -443,24 +444,26 @@ def run_all_tests():
     else:
         test_results['backend_health'] = False
     
-    # PHICORE.AI PLATFORM STATS AND DISEASE DATABASE API TESTS
+    # PHICORE.AI MATHEMATICAL HUMAN BODY DASHBOARD TESTS
     if test_results['backend_health']:
-        test_results['platform_stats_api'] = test_platform_stats_api()
-        test_results['diseases_database_api'] = test_diseases_database_api()
-        test_results['disease_detail_api'] = test_disease_detail_api()
-        test_results['count_verification'] = test_count_verification()
+        test_results['disease_database_stats'] = test_disease_database_stats()
+        test_results['disease_search_diabetes'] = test_disease_search_diabetes()
+        test_results['specific_disease_details'] = test_specific_disease_details()
+        test_results['disease_categories'] = test_disease_categories()
+        test_results['crash_prevention'] = test_crash_prevention()
     else:
         # Set all tests to False if backend is not accessible
         test_results.update({
-            'platform_stats_api': False,
-            'diseases_database_api': False,
-            'disease_detail_api': False,
-            'count_verification': False
+            'disease_database_stats': False,
+            'disease_search_diabetes': False,
+            'specific_disease_details': False,
+            'disease_categories': False,
+            'crash_prevention': False
         })
     
     # Summary
     print("\n" + "=" * 80)
-    print("🏁 PHICORE.AI PLATFORM STATS AND DISEASE DATABASE API TEST SUMMARY")
+    print("🏁 PHICORE.AI MATHEMATICAL HUMAN BODY DASHBOARD TEST SUMMARY")
     print("=" * 80)
     
     passed_tests = sum(1 for result in test_results.values() if result)
@@ -470,10 +473,11 @@ def run_all_tests():
     
     # Test results breakdown
     backend_tests = [
-        ('platform_stats_api', 'Test 1: Platform Stats API (diseases.total > 500, drugs.total > 300, display_stats)'),
-        ('diseases_database_api', 'Test 2: Diseases Database API (search=diabetes, ICD-10 codes, category=cardiovascular)'),
-        ('disease_detail_api', 'Test 3: Disease Detail API (disease_id=type2_diabetes, parameter_modifications)'),
-        ('count_verification', 'Test 4: Count Verification (landing page 506+, dashboard 784 merged)')
+        ('disease_database_stats', 'Test 1: Disease Database Stats API (509 diseases with parameter_modifications)'),
+        ('disease_search_diabetes', 'Test 2: Disease Search API (search=diabetes functionality)'),
+        ('specific_disease_details', 'Test 3: Specific Disease Detail APIs (Heart Failure, Type 2 Diabetes, COPD)'),
+        ('disease_categories', 'Test 4: Disease Categories Testing (different categories with parameter display)'),
+        ('crash_prevention', 'Test 5: Crash Prevention Verification (multiple disease selections)')
     ]
     
     infrastructure_tests = [
@@ -498,39 +502,45 @@ def run_all_tests():
     backend_total = len(backend_tests)
     
     if backend_passed == backend_total:
-        print(f"\n🎉 ALL BACKEND API TESTS PASSED! PhiCore.ai Platform Stats and Disease Database APIs working perfectly.")
-        print(f"✅ Platform stats show diseases.total > 500 and drugs.total > 300")
-        print(f"✅ Diseases database search and category filtering working with ICD-10 codes")
-        print(f"✅ Disease detail API returns type2_diabetes with parameter_modifications")
-        print(f"✅ Count verification shows appropriate disease counts for landing page and dashboard")
+        print(f"\n🎉 ALL BACKEND API TESTS PASSED! PhiCore.ai Mathematical Human Body Dashboard APIs working perfectly.")
+        print(f"✅ Disease database stats show 509+ diseases with parameter_modifications")
+        print(f"✅ Disease search functionality working with diabetes results")
+        print(f"✅ Specific disease details working for Heart Failure, Type 2 Diabetes, COPD")
+        print(f"✅ Disease categories testing successful with parameter display")
+        print(f"✅ Crash prevention verified - multiple disease selections work without errors")
     elif backend_passed >= backend_total * 0.75:
         print(f"\n✅ MOSTLY SUCCESSFUL! {backend_passed}/{backend_total} backend tests passed.")
         print(f"⚠️  Some minor issues detected - see failed tests above")
     else:
         print(f"\n❌ SIGNIFICANT ISSUES DETECTED! Only {backend_passed}/{backend_total} backend tests passed.")
-        print(f"🔧 Major fixes needed for PhiCore.ai Platform Stats and Disease Database APIs")
+        print(f"🔧 Major fixes needed for PhiCore.ai Mathematical Human Body Dashboard APIs")
     
     # Detailed verification summary
     print(f"\n📋 KEY VERIFICATION POINTS:")
-    if test_results.get('platform_stats_api'):
-        print(f"  ✅ Platform Stats API verified (diseases > 500, drugs > 300, display_stats)")
+    if test_results.get('disease_database_stats'):
+        print(f"  ✅ Disease Database Stats API verified (509+ diseases with parameter_modifications)")
     else:
-        print(f"  ❌ Platform Stats API verification failed")
+        print(f"  ❌ Disease Database Stats API verification failed")
     
-    if test_results.get('diseases_database_api'):
-        print(f"  ✅ Diseases Database API working (search=diabetes, ICD-10 codes, category=cardiovascular)")
+    if test_results.get('disease_search_diabetes'):
+        print(f"  ✅ Disease Search API working (search=diabetes returns results)")
     else:
-        print(f"  ❌ Diseases Database API verification failed")
+        print(f"  ❌ Disease Search API verification failed")
     
-    if test_results.get('disease_detail_api'):
-        print(f"  ✅ Disease Detail API working (type2_diabetes with parameter_modifications)")
+    if test_results.get('specific_disease_details'):
+        print(f"  ✅ Specific Disease Detail APIs working (Heart Failure, Type 2 Diabetes, COPD)")
     else:
-        print(f"  ❌ Disease Detail API verification failed")
+        print(f"  ❌ Specific Disease Detail APIs verification failed")
     
-    if test_results.get('count_verification'):
-        print(f"  ✅ Count verification passed (landing page and dashboard counts)")
+    if test_results.get('disease_categories'):
+        print(f"  ✅ Disease Categories testing successful (different categories with parameter display)")
     else:
-        print(f"  ❌ Count verification failed")
+        print(f"  ❌ Disease Categories testing failed")
+    
+    if test_results.get('crash_prevention'):
+        print(f"  ✅ Crash Prevention verified (multiple disease selections work without errors)")
+    else:
+        print(f"  ❌ Crash Prevention verification failed")
     
     return test_results
 
