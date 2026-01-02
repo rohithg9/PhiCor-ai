@@ -1125,23 +1125,6 @@ const ClinicalDataPanel = ({ modifications, disease, severity }) => {
 
 // Equation Derivation Component with Calculated Results
 const EquationDerivation = ({ equation, expanded, onToggle, currentParams = {}, diseaseSeverity = 0.5, isDiseasedState = false }) => {
-              <ul className="space-y-1">
-                {clinicalData.treatments.slice(0, 3).map((treatment, i) => (
-                  <li key={i} className="text-xs flex items-start gap-2">
-                    <span className="text-primary mt-0.5">•</span>
-                    <span>{treatment}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </>
-      )}
-    </div>
-  );
-};
-// Equation Derivation Component with Calculated Results
-const EquationDerivation = ({ equation, expanded, onToggle, currentParams = {}, diseaseSeverity = 0.5, isDiseasedState = false }) => {
   const isNovel = equation.evidence === 'novel' || equation.isNovel;
   
   // Calculate values based on equation type
