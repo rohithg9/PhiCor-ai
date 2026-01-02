@@ -2667,7 +2667,11 @@ const DashboardMultiScale = () => {
   
   const currentOrgan = ORGAN_MODELS[selectedOrgan];
   const currentScale = currentOrgan?.[selectedScale];
-  const currentDisease = selectedDisease ? MERGED_DISEASE_MODELS[selectedDisease] : null;
+  // Look up disease from merged sources - try static first, then API
+  const currentDisease = useMemo(() => {
+    if (!selectedDisease) return null;
+    return MERGED_DISEASE_MODELS[selectedDisease] || apiDiseases[selectedDisease] || null;
+  }, [selectedDisease, apiDiseases]);
 
   // Auto-select first available scale when organ changes
   useEffect(() => {
