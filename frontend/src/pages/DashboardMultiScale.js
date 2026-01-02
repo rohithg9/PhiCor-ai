@@ -2687,10 +2687,10 @@ const DashboardMultiScale = () => {
 
   // Get ALL modified parameters across ALL organs - for quick summary view
   const allModifiedParameters = useMemo(() => {
-    if (!currentDisease?.modifications) return [];
+    if (!mergedModifications) return [];
     
     const params = [];
-    Object.entries(currentDisease.modifications).forEach(([organId, organMods]) => {
+    Object.entries(mergedModifications).forEach(([organId, organMods]) => {
       const organ = ORGAN_MODELS[organId];
       if (!organ) return;
       
@@ -2704,8 +2704,22 @@ const DashboardMultiScale = () => {
           
           const baseValue = paramDef.value;
           let newValue = baseValue;
+          
+          // Handle different modification formats
           const multiplier = mod.multiplier || mod.factor;
-          if (multiplier) {
+          const changePercent = mod.change_percent;
+          const direction = mod.direction;
+          const absoluteValue = mod.value || mod.absolute;
+          
+          if (absoluteValue !== undefined && direction !== 'normal') {
+            // Direct value from API (e.g., HbS variant = 80%)
+            newValue = absoluteValue;
+          } else if (changePercent !== undefined) {
+            // Percentage change from API
+            const sign = direction === 'decrease' ? -1 : 1;
+            const factor = 1 + (sign * changePercent / 100) * diseaseSeverity;
+            newValue = baseValue * factor;
+          } else if (multiplier) {
             const factor = 1 + (multiplier - 1) * diseaseSeverity;
             newValue = baseValue * factor;
           }
@@ -2713,7 +2727,10 @@ const DashboardMultiScale = () => {
             newValue = mod.absolute;
           }
           
-          const delta = ((newValue - baseValue) / baseValue * 100);
+          // Skip if no actual change
+          if (direction === 'normal') return;
+          
+          const delta = baseValue !== 0 ? ((newValue - baseValue) / baseValue * 100) : (newValue > 0 ? 100 : 0);
           
           params.push({
             id: paramId,
@@ -2727,8 +2744,8 @@ const DashboardMultiScale = () => {
             unit: paramDef.unit || '',
             delta,
             direction: delta > 0 ? 'increase' : 'decrease',
-            note: mod.note,
-            isPrimary: currentDisease.primaryOrgan === organId
+            note: mod.note || mod.evidence,
+            isPrimary: currentDisease?.primaryOrgan === organId
           });
         });
       });
@@ -2740,7 +2757,7 @@ const DashboardMultiScale = () => {
       if (!a.isPrimary && b.isPrimary) return 1;
       return Math.abs(b.delta) - Math.abs(a.delta);
     });
-  }, [currentDisease, diseaseSeverity]);
+  }, [mergedModifications, currentDisease, diseaseSeverity]);
 
   // Filtered parameters based on organ filter
   const filteredParameters = useMemo(() => {
