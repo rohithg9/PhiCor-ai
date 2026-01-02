@@ -3021,9 +3021,11 @@ const DashboardMultiScale = () => {
             // Count all parameters that have meaningful modifications
             Object.entries(scaleMods).forEach(([paramId, mod]) => {
               if (mod && typeof mod === 'object') {
-                // Count if it has change_percent, value, or direction
+                // Count if it has change_percent, value, direction, factor, or multiplier
                 if (mod.change_percent !== undefined || 
                     mod.value !== undefined || 
+                    mod.factor !== undefined ||
+                    mod.multiplier !== undefined ||
                     (mod.direction && mod.direction !== 'normal')) {
                   count++;
                 }
