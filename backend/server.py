@@ -2523,8 +2523,6 @@ DISEASE-SPECIFIC REQUIREMENTS:
 Include SPECIFIC gene names and their expression changes. Use realistic change percentages based on medical literature. Mark direction as 'normal' only if truly unaffected.
 
 Return ONLY valid JSON, no other text."""
-    ]
-}}
 
         user_message = UserMessage(text=prompt)
         response = await chat.send_message(user_message)
