@@ -3266,12 +3266,23 @@ const DashboardMultiScale = () => {
 
       {/* Main Content Area */}
       <div className="flex-1 flex">
-        {/* Desktop Left Panel */}
-        <LeftPanel 
-          selectedDisease={currentDisease}
-          currentOrgan={currentOrgan}
-          className="hidden lg:flex"
-        />
+        {/* Desktop Left Panel - Collapsible */}
+        <AnimatePresence>
+          {leftPanelOpen && (
+            <motion.div
+              initial={{ width: 0, opacity: 0 }}
+              animate={{ width: 280, opacity: 1 }}
+              exit={{ width: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="hidden lg:block border-r border-border/50 overflow-hidden"
+            >
+              <LeftPanel 
+                selectedDisease={currentDisease}
+                currentOrgan={currentOrgan}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Main Content */}
         <main className={`flex-1 flex flex-col overflow-hidden pt-32 lg:pt-0`}>
