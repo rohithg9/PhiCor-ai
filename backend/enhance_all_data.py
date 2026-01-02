@@ -200,11 +200,16 @@ Structure:
 Return ONLY valid JSON with comprehensive drug effects for {drug_name}:"""
 
     try:
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        
         llm = LlmChat(
             api_key=EMERGENT_LLM_KEY,
+            session_id=f"drug_enhance_{drug_name[:20]}",
             system_message="You are a pharmacology expert. Return only valid JSON with comprehensive drug effect profiles. No markdown."
-        )
-        response = await llm.send_message_async(prompt, model="gpt-4o-mini")
+        ).with_model("openai", "gpt-4o-mini")
+        
+        user_msg = UserMessage(text=prompt)
+        response = await llm.send_message(user_msg)
         
         content = response.strip()
         if content.startswith('```'):
