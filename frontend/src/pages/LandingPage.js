@@ -430,10 +430,14 @@ const LandingPage = () => {
                       Aerospace-grade precision for medicine
                     </p>
                   </div>
-                  <div className="grid grid-cols-3 gap-4 w-full mt-4">
+                  <div className="grid grid-cols-4 gap-3 w-full mt-4">
                     <div className="text-center p-3 rounded-lg bg-white/5">
                       <div className="text-2xl font-bold text-indigo-400">{platformStats.diseases}</div>
                       <div className="text-xs text-muted-foreground">Diseases</div>
+                    </div>
+                    <div className="text-center p-3 rounded-lg bg-white/5">
+                      <div className="text-2xl font-bold text-orange-400">{platformStats.drugs}</div>
+                      <div className="text-xs text-muted-foreground">Drugs</div>
                     </div>
                     <div className="text-center p-3 rounded-lg bg-white/5">
                       <div className="text-2xl font-bold text-purple-400">{platformStats.organ_systems}</div>
