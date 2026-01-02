@@ -3378,8 +3378,8 @@ const DashboardMultiScale = () => {
         )}
       </AnimatePresence>
 
-      {/* Horizontal Organ Tabs */}
-      <div className="border-b border-border/50 bg-card/20 overflow-x-auto">
+      {/* Horizontal Organ Tabs - Desktop Only */}
+      <div className="hidden lg:block border-b border-border/50 bg-card/20 overflow-x-auto">
         <div className="container mx-auto px-4">
           <div className="flex items-center gap-1 py-2">
             {organs.map(([organId, organ]) => {
