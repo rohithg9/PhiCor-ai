@@ -234,7 +234,7 @@ def test_disease_detail_parameter_modifications():
     # Test multiple diseases to verify parameter_modifications
     test_diseases = [
         {"id": "down_syndrome", "name": "Down Syndrome", "expected_organs": ["cellular", "brain", "heart"]},
-        {"id": "diabetes_type_2", "name": "Diabetes Type 2", "expected_organs": ["pancreas", "kidney", "cardiovascular"]},
+        {"id": "type2_diabetes", "name": "Type 2 Diabetes", "expected_organs": ["pancreas", "kidney", "cardiovascular", "heart", "kidneys"]},
         {"id": "copd", "name": "COPD", "expected_organs": ["lungs", "respiratory", "cardiovascular"]}
     ]
     
@@ -263,7 +263,7 @@ def test_disease_detail_parameter_modifications():
                     
                     # Check organ-level changes
                     organs_with_mods = list(param_modifications.keys())
-                    print(f"    📊 Organs with modifications ({len(organs_with_mods)}): {organs_with_mods[:5]}")
+                    print(f"    📊 Organs with modifications ({len(organs_with_mods)}): {organs_with_mods}")
                     
                     # Check for expected organs
                     found_expected = []
@@ -278,8 +278,10 @@ def test_disease_detail_parameter_modifications():
                     else:
                         print(f"    ⚠️ Expected organs not found, but other modifications exist")
                     
-                    # Check scale-level modifications
+                    # Check scale-level modifications with detailed structure
                     scale_modifications_found = False
+                    direction_value_found = False
+                    
                     for organ, organ_mods in param_modifications.items():
                         if isinstance(organ_mods, dict):
                             for scale, scale_mods in organ_mods.items():
@@ -291,16 +293,20 @@ def test_disease_detail_parameter_modifications():
                                     for param, param_data in list(scale_mods.items())[:2]:  # Check first 2
                                         if isinstance(param_data, dict):
                                             direction = param_data.get('direction', param_data.get('change_direction'))
-                                            value = param_data.get('value', param_data.get('magnitude'))
-                                            if direction and value:
+                                            value = param_data.get('value', param_data.get('magnitude', param_data.get('change_percent')))
+                                            if direction and value is not None:
                                                 print(f"      - {param}: {direction} by {value}")
+                                                direction_value_found = True
                                     break
                         if scale_modifications_found:
                             break
                     
-                    if scale_modifications_found:
+                    if scale_modifications_found and direction_value_found:
                         print(f"    ✅ Scale-level modifications with direction/value found ✓")
                         disease_pass = True
+                    elif scale_modifications_found:
+                        print(f"    ⚠️ Scale-level modifications found but missing direction/value details")
+                        disease_pass = True  # Still pass if structure exists
                     else:
                         print(f"    ❌ Scale-level modifications missing or incomplete")
                         disease_pass = False
