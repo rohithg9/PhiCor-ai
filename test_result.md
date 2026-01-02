@@ -300,6 +300,21 @@ agent_communication:
         agent: "testing"
         comment: "❌ PHICOR ASSISTANT TESTING FAILED: PhiCor Assistant feature has critical implementation issues. ✅ Dashboard loads correctly at https://healthtwin-5.preview.emergentagent.com/dashboard. ✅ Patient Data panel opens successfully with left panel containing tabs. ✅ Assistant tab (2nd tab with MessageSquare icon) is accessible and clickable. ✅ Input field found and 'What are the DNA changes?' question was sent successfully. ✅ Basic genetic markers (DNA, genetic, gene) found on page. ❌ CRITICAL ISSUES: 1) PhiCor Assistant welcome message 'I'm PhiCor Assistant analyzing [disease name]...' is NOT visible despite tab being clicked. 2) Assistant content area appears empty or not properly rendered. 3) Backend /api/chat endpoint requires authentication but frontend may not be sending proper auth tokens. 4) Disease selection workflow partially works but assistant doesn't recognize selected diseases. 5) No specific lung cancer genetic markers (EGFR, KRAS, ALK, TP53, PD-L1) found in responses. The PhiCor Assistant implementation exists in code (/app/frontend/src/components/LeftPanel.js lines 355-669) but is not functioning properly in the UI. Authentication issues with backend /api/chat endpoint likely preventing proper assistant responses."
 
+  - task: "PhiCore.ai Mathematical Human Body Dashboard Backend API Testing"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Testing PhiCore.ai Mathematical Human Body Dashboard backend APIs as requested in review request - disease selection stability, data display across multiple disease selections, and crash prevention"
+      - working: true
+        agent: "testing"
+        comment: "✅ PHICORE.AI MATHEMATICAL HUMAN BODY DASHBOARD BACKEND API TESTING COMPLETE: Successfully verified ALL 5 critical test cases from review request. 🎉 ALL BACKEND API TESTS PASSED PERFECTLY! Test 1 - Disease Database Stats API: ✅ Returns 509 total diseases (exceeds 509 requirement), ✅ Category breakdown present with 32 categories (cardiovascular: 51, gastrointestinal: 43, neurological: 40, infectious: 34, hematological: 34), ✅ AI-generated diseases: 306. Test 2 - Disease Search API: ✅ Search for 'diabetes' returns 9 diabetes-related diseases, ✅ Type 2 Diabetes Mellitus found in search results (ID: type2_diabetes), ✅ Search functionality working perfectly. Test 3 - Specific Disease Detail APIs: ✅ Heart Failure with Reduced Ejection Fraction (HFrEF) found with 22 parameter modifications affecting 7 systems including heart, ✅ Type 2 Diabetes Mellitus found with 25 parameter modifications affecting 8 systems including pancreas and kidneys, ✅ COPD found with 25 parameter modifications affecting 8 systems including lungs, ✅ All diseases have comprehensive parameter_modifications for affected organs. Test 4 - Disease Categories Testing: ✅ Cardiovascular category has 5 diseases with parameter modifications, ✅ Respiratory category has 5 diseases with parameter modifications, ✅ Endocrine category has 5 diseases with parameter modifications, ✅ All categories working with proper parameter display. Test 5 - Crash Prevention Verification: ✅ Tested 5 diseases from different categories (Heart Failure, Type 2 Diabetes, COPD, Hypertension, Pneumonia), ✅ 100% success rate - all API responses successful, ✅ All diseases load parameters correctly without errors, ✅ No crashes detected in multiple disease selections. Backend APIs are fully operational and support stable disease selection across multiple categories with comprehensive parameter_modifications data as required for dashboard functionality."
+
 agent_communication:
   - agent: "main"
     message: "Fixed P0 Differential Diagnosis bug. Changes made: 1) bidirectionalMapping.js - Added Array.isArray() checks to prevent slice errors on non-array data, added ICD_CODE_NAMES mapping for human-readable disease names. 2) DifferentialPage.js - Fixed probability display formatting to avoid long decimal numbers. Need comprehensive testing of clinical text analysis with imaging findings."
