@@ -2605,6 +2605,41 @@ const DashboardMultiScale = () => {
   const [apiDiseaseByIcd, setApiDiseaseByIcd] = useState({}); // Also map by ICD-10 code
   const [apiDiseases, setApiDiseases] = useState({}); // Full disease data from API
 
+  // Helper function to determine primary organ from category - defined early for use in useEffect
+  const getPrimaryOrganFromCategory = useCallback((category) => {
+    const categoryOrganMap = {
+      'cardiovascular': 'heart',
+      'cardiac': 'heart',
+      'respiratory': 'lungs',
+      'pulmonary': 'lungs',
+      'renal': 'kidneys',
+      'nephrology': 'kidneys',
+      'hepatic': 'liver',
+      'gastrointestinal': 'liver',
+      'neurological': 'brain',
+      'psychiatric': 'brain',
+      'hematological': 'blood',
+      'hematological_malignancy': 'blood',
+      'oncology': 'blood',
+      'endocrine': 'pancreas',
+      'metabolic': 'pancreas',
+      'infectious': 'blood',
+      'rheumatological': 'blood',
+      'dermatological': 'blood',
+      'ophthalmology': 'brain',
+      'otolaryngology': 'brain',
+      'obstetrics': 'blood',
+      'gynecology': 'blood',
+      'neonatology': 'lungs',
+      'urology': 'kidneys',
+      'musculoskeletal': 'blood',
+      'emergency': 'heart',
+      'pediatric': 'heart',
+      'geriatric': 'heart'
+    };
+    return categoryOrganMap[category?.toLowerCase()] || 'heart';
+  }, []);
+
   // Fetch disease parameter_modifications from API
   useEffect(() => {
     const fetchDiseaseParams = async () => {
