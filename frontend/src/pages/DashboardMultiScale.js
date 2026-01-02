@@ -3056,18 +3056,29 @@ const DashboardMultiScale = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              {/* Patient Panel Toggle - Clear button */}
+              <Button 
+                variant={leftPanelOpen ? "default" : "outline"} 
+                className="gap-2"
+                onClick={() => setLeftPanelOpen(!leftPanelOpen)}
+              >
+                <User className="w-4 h-4" />
+                <span>Patient Data</span>
+                {leftPanelOpen && <ChevronDown className="w-3 h-3" />}
+              </Button>
+              
               {/* Disease Search Button */}
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="outline" className="gap-2">
+                  <Button variant={selectedDisease ? "destructive" : "outline"} className="gap-2">
                     <Search className="w-4 h-4" />
                     <span>Find Condition</span>
                     {selectedDisease && currentDisease && (
-                      <Badge variant="destructive" className="ml-1">{currentDisease.name?.split(' ')[0]}</Badge>
+                      <Badge variant="secondary" className="ml-1">{currentDisease.name?.split(' ')[0]}</Badge>
                     )}
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="right" className="w-96 p-0 flex flex-col">
+                <SheetContent side="right" className="w-96 p-0 flex flex-col z-[60]">
                   <DiseasePanel 
                     diseases={diseases}
                     selectedDisease={selectedDisease}
