@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   MessageSquare, Calculator, FileText, Mail, User, History,
   Cigarette, Wine, HeartPulse, Pill, AlertCircle, ChevronRight,
-  Send, Sparkles, X, Phone, ExternalLink
+  Send, Sparkles, X, Phone, ExternalLink, Users
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -13,6 +13,7 @@ import { ScrollArea } from './ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { Slider } from './ui/slider';
+import PatientManager from './PatientManager';
 
 // Clinical Calculators Component
 const ClinicalCalculators = ({ selectedDisease }) => {
