@@ -2198,6 +2198,13 @@ export const ORGAN_MODELS = {
         { id: "s_phase_fraction", name: "S-Phase Fraction", value: 10, unit: "%", range: [5, 30], evidence: "established" },
         { id: "ploidy", name: "DNA Ploidy (DI)", value: 1.0, unit: "index", range: [0.9, 2.5], evidence: "established" },
         { id: "senescence_markers", name: "Senescent Cell Fraction", value: 5, unit: "%", range: [1, 30], evidence: "novel" },
+        { id: "g1_phase_duration", name: "G1 Phase Duration", value: 11, unit: "hours", range: [6, 24], evidence: "established" },
+        { id: "s_phase_duration", name: "S Phase Duration", value: 8, unit: "hours", range: [4, 12], evidence: "established" },
+        { id: "g2_phase_duration", name: "G2 Phase Duration", value: 4, unit: "hours", range: [2, 8], evidence: "established" },
+        { id: "m_phase_duration", name: "M Phase Duration", value: 1, unit: "hours", range: [0.5, 2], evidence: "established" },
+        { id: "p21_expression", name: "p21 Expression (CDK Inhibitor)", value: 1.0, unit: "fold", range: [0.5, 10], evidence: "established" },
+        { id: "cyclin_d1", name: "Cyclin D1 Level", value: 1.0, unit: "fold", range: [0.5, 5], evidence: "established" },
+        { id: "rb_phosphorylation", name: "Rb Phosphorylation", value: 0.3, unit: "fraction", range: [0.1, 0.9], evidence: "established" },
       ],
       equations: [
         {
@@ -2207,6 +2214,46 @@ export const ORGAN_MODELS = {
           description: "Time for cell population to double",
           evidence: "established",
           source: "Cell biology"
+        },
+        {
+          id: "growth_fraction",
+          name: "Growth Fraction (GF)",
+          latex: "GF = \\frac{N_{cycling}}{N_{total}} = \\frac{Ki67^+}{Total\\ cells}",
+          description: "Fraction of cells actively in cycle",
+          evidence: "established",
+          source: "Oncology"
+        },
+        {
+          id: "cell_loss_factor",
+          name: "Cell Loss Factor (φ)",
+          latex: "\\phi = 1 - \\frac{T_d^{actual}}{T_d^{potential}}",
+          description: "Fraction of cells lost (apoptosis, necrosis, differentiation)",
+          evidence: "established",
+          source: "Tumor kinetics"
+        },
+        {
+          id: "gompertz_growth",
+          name: "Gompertz Tumor Growth",
+          latex: "V(t) = V_0 \\times e^{\\frac{A}{B}(1-e^{-Bt})}",
+          description: "Tumor volume over time with growth deceleration",
+          evidence: "established",
+          source: "Cancer biology"
+        },
+        {
+          id: "rb_checkpoint",
+          name: "Rb Checkpoint Regulation",
+          latex: "G1 \\rightarrow S = f(\\frac{[CyclinD \\cdot CDK4]}{[p16] + [p21]})",
+          description: "G1/S transition gated by Rb phosphorylation",
+          evidence: "established",
+          source: "Cell cycle regulation"
+        },
+        {
+          id: "apoptosis_rate",
+          name: "Apoptosis Rate",
+          latex: "k_{apoptosis} = k_0 \\times \\frac{[Bax]}{[Bcl2]} \\times f([p53])",
+          description: "Rate of programmed cell death",
+          evidence: "established",
+          source: "Apoptosis signaling"
         }
       ]
     }
