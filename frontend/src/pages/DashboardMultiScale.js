@@ -3258,95 +3258,9 @@ const DashboardMultiScale = () => {
           currentOrgan={currentOrgan}
           className="hidden lg:flex"
         />
-            <TutorialButton onClick={tutorial.open} className="h-8 text-xs px-2" />
 
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className={selectedDisease ? 'text-destructive' : ''}>
-                  <Stethoscope className="w-5 h-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-80 p-0 flex flex-col">
-                <DiseasePanel 
-                  diseases={diseases}
-                  selectedDisease={selectedDisease}
-                  onSelectDisease={handleDiseaseSelect}
-                  currentDisease={currentDisease}
-                  diseaseSeverity={diseaseSeverity}
-                  onChangeSeverity={setDiseaseSeverity}
-                  showClinicalPanel={showClinicalPanel}
-                  onToggleClinicalPanel={handleToggleClinicalPanel}
-                  isMobile
-                />
-              </SheetContent>
-            </Sheet>
-          </div>
-        </div>
-        
-        {/* Mobile Condition Banner - Only shows when disease is selected */}
-        <AnimatePresence>
-          {currentDisease && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="overflow-hidden bg-gradient-to-r from-destructive/15 to-orange-500/10 border-t border-destructive/20"
-            >
-              <div className="px-3 py-2 flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 min-w-0 flex-1">
-                  <AlertTriangle className="w-4 h-4 text-destructive shrink-0" />
-                  <div className="min-w-0">
-                    <span className="text-[9px] text-destructive font-semibold uppercase tracking-wider">
-                      Active:
-                    </span>
-                    <p className="text-sm font-semibold text-foreground truncate">
-                      {currentDisease.name}
-                    </p>
-                  </div>
-                </div>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={resetDisease} 
-                  className="h-7 px-2 text-destructive hover:bg-destructive/10 shrink-0"
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* Desktop Left Sidebar */}
-      <aside className="hidden lg:flex bg-card/30">
-        <OrganSidebar 
-          organs={organs}
-          selectedOrgan={selectedOrgan}
-          onSelectOrgan={handleOrganSelect}
-          currentDisease={currentDisease}
-          affectedCounts={affectedCounts}
-          onToggleTheme={toggleTheme}
-          isDark={isDark}
-        />
-      </aside>
-
-      {/* Main Content */}
-      <main className={`flex-1 flex flex-col overflow-hidden lg:pt-0 ${currentDisease ? 'pt-[7.5rem]' : 'pt-28'}`}>
-        {/* Active Condition Banner - Prominent title showing selected condition (Desktop only - mobile has its own in header) */}
-        <AnimatePresence>
-          {currentDisease && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="hidden lg:block bg-gradient-to-r from-destructive/10 via-red-500/10 to-orange-500/10 border-b border-destructive/30 overflow-hidden"
-            >
-              <div className="px-4 lg:px-6 py-3 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <div className="shrink-0 w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-destructive/20 flex items-center justify-center">
-                    <AlertTriangle className="w-5 h-5 lg:w-6 lg:h-6 text-destructive" />
+        {/* Main Content */}
+        <main className={`flex-1 flex flex-col overflow-hidden pt-32 lg:pt-0`}>
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
