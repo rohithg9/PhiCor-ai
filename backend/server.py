@@ -2455,29 +2455,171 @@ async def generate_disease_parameter_modifications(request: ParameterModificatio
             system_message="You are a medical expert that generates precise physiological parameter modifications for diseases. Return only valid JSON."
         ).with_model("openai", "gpt-4o")
         
-        prompt = f"""You are a medical expert specializing in molecular medicine and systems biology. Generate COMPREHENSIVE parameter modifications for: {request.disease_name}
+        prompt = f"""You are a clinical medicine expert and systems biologist. Generate COMPREHENSIVE clinical parameter modifications for: {request.disease_name}
 
-IMPORTANT: This disease should have modifications at ALL relevant levels - from organ systems down to specific genes and molecular pathways. Think deeply about the molecular basis of this disease.
+MISSION: Transform ALL medical knowledge about this disease from text into QUANTIFIABLE PARAMETERS. Every clinical finding must be expressed mathematically as a deviation from normal.
 
 Return a JSON object with this structure:
 {{
     "disease_id": "{request.disease_id}",
     "disease_name": "{request.disease_name}",
     "parameter_modifications": {{
+        
+        // === VITAL SIGNS (heart organ, vital_signs scale) ===
+        "heart": {{
+            "vital_signs": {{
+                "systolic_bp": {{ "change_percent": X, "direction": "increase/decrease", "evidence": "..." }},
+                "diastolic_bp": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "resting_hr": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "hr_variability": {{ "change_percent": X, "direction": "...", "evidence": "..." }}
+            }},
+            "physical_exam": {{
+                "s3_present": {{ "value": 1, "direction": "increase", "evidence": "Heart failure" }},
+                "jvp": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "peripheral_edema": {{ "value": X, "direction": "...", "evidence": "..." }},
+                "systolic_murmur_grade": {{ "value": X, "direction": "...", "evidence": "..." }}
+            }},
+            "ecg": {{
+                "pr_interval": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "qtc_interval": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "st_elevation": {{ "value": X, "direction": "...", "evidence": "..." }}
+            }},
+            "lab_tests": {{
+                "troponin_i": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "bnp": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "ldl_cholesterol": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "crp": {{ "change_percent": X, "direction": "...", "evidence": "..." }}
+            }},
+            "imaging": {{
+                "echo_ef": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "coronary_calcium": {{ "value": X, "direction": "...", "evidence": "..." }}
+            }}
+        }},
+        
+        // === COMPLETE BLOOD COUNT (blood organ) ===
+        "blood": {{
+            "geometry": {{
+                "rbc_count": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "wbc_count": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "platelet_count": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "hematocrit": {{ "change_percent": X, "direction": "...", "evidence": "..." }}
+            }},
+            "physiology": {{
+                "hemoglobin": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "mcv": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "mch": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "rdw": {{ "change_percent": X, "direction": "...", "evidence": "..." }}
+            }},
+            "lab_tests": {{
+                // WBC DIFFERENTIAL - critical for diagnosis
+                "neutrophils_absolute": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "lymphocytes_absolute": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "eosinophils_absolute": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "bands": {{ "change_percent": X, "direction": "...", "evidence": "Left shift in infection" }},
+                "cd4_count": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "nlr": {{ "change_percent": X, "direction": "...", "evidence": "Inflammation marker" }}
+            }},
+            "structure": {{
+                "ferritin": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "serum_iron": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "vitamin_b12": {{ "change_percent": X, "direction": "...", "evidence": "..." }}
+            }},
+            "pressures": {{
+                // COAGULATION
+                "pt": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "inr": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "d_dimer": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "fibrinogen": {{ "change_percent": X, "direction": "...", "evidence": "..." }}
+            }}
+        }},
+        
+        // === METABOLIC PANEL (kidneys, liver organs) ===
+        "kidneys": {{
+            "lab_tests": {{
+                "creatinine": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "bun": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "egfr": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "sodium": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "potassium": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "chloride": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "bicarbonate": {{ "change_percent": X, "direction": "...", "evidence": "..." }}
+            }},
+            "urinalysis": {{
+                "urine_protein": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "urine_glucose": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "urine_rbc": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "urine_wbc": {{ "change_percent": X, "direction": "...", "evidence": "..." }}
+            }}
+        }},
+        
+        "liver": {{
+            "lab_tests": {{
+                "ast": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "alt": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "alp": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "ggt": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "total_bilirubin": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "albumin": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "total_protein": {{ "change_percent": X, "direction": "...", "evidence": "..." }}
+            }}
+        }},
+        
+        // === GENETIC & MOLECULAR (cellular organ) ===
         "cellular": {{
             "dna": {{
-                // GENETIC MARKERS - Include ALL relevant genes for this disease
-                // For CANCER: tp53_status, brca1/2_function, kras_mutation, egfr_amplification, her2_amplification, pik3ca_mutation, braf_mutation, etc.
-                // For METABOLIC (diabetes, obesity): tcf7l2_variant, pparg_function, kcnj11_variant, hnf1a_function, gck_function, irs1_function, fto_variant, etc.
-                // For CARDIOVASCULAR: ldlr_function, apob_variant, pcsk9_activity, ace_activity, scn5a_function, mybpc3_function, etc.
-                // For NEUROPSYCHIATRIC: comt_activity, disc1_function, drd2_expression, slc6a4_function, bdnf_expression, grin2a_function, maoa_activity, etc.
-                // For NEURODEGENERATIVE: apoe4_copies, app_mutation, psen1_mutation, snca_expression, lrrk2_mutation, htt_cag_repeats, sod1_function, etc.
-                // For AUTOIMMUNE/INFLAMMATORY: hla_b27_status, hla_dr4_status, ptpn22_variant, il6_expression, tnf_expression, nfkb_activity, etc.
-                "relevant_gene_marker": {{ "change_percent": X, "direction": "increase/decrease", "evidence": "Specific mechanism" }}
+                // Include ALL relevant genetic markers for this disease
+                // Gene mutations, expression changes, variants
+                "relevant_gene": {{ "change_percent": X, "direction": "...", "evidence": "..." }}
             }},
             "gene_expression": {{
-                // SIGNALING PATHWAYS - Include relevant pathways
-                // mtor_activity, pi3k_akt_activity, mapk_erk_activity, wnt_beta_catenin, notch_activity, jak_stat_activity, nfkb_activity
+                // Signaling pathways affected
+                "relevant_pathway": {{ "change_percent": X, "direction": "...", "evidence": "..." }}
+            }},
+            "metabolism": {{
+                "atp_production": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
+                "ros_level": {{ "change_percent": X, "direction": "...", "evidence": "..." }}
+            }}
+        }},
+        
+        // === OTHER AFFECTED ORGANS ===
+        // Include lungs, brain, pancreas, thyroid, etc. as relevant
+        
+    }},
+    "affected_organs": ["list all affected organs"],
+    "molecular_summary": "Brief description of pathophysiology"
+}}
+
+COMPREHENSIVE EXTRACTION RULES:
+
+1. **VITAL SIGNS**: For EVERY disease, determine how BP, HR, temperature, RR are affected
+
+2. **LABORATORY VALUES**: Extract ALL relevant lab changes:
+   - CBC with differential (especially if infection, inflammation, cancer, autoimmune)
+   - BMP/CMP (especially if renal, hepatic, metabolic disease)
+   - Liver function tests (hepatic conditions, drug toxicity)
+   - Coagulation (bleeding disorders, liver disease, DIC)
+   - Cardiac markers (cardiac conditions)
+   - Inflammatory markers (CRP, ESR, ferritin for inflammatory conditions)
+   - Tumor markers (for cancers)
+   - Autoantibodies (autoimmune conditions)
+
+3. **PHYSICAL EXAM FINDINGS**: Quantify what would be found on exam:
+   - Heart sounds (S3, S4, murmurs)
+   - Breath sounds (crackles, wheezes)
+   - Neurological (reflexes, sensory changes)
+   - Skin findings
+   - Lymphadenopathy
+   - Hepatosplenomegaly
+
+4. **IMAGING FINDINGS**: Include measurable imaging parameters
+
+5. **GENETIC/MOLECULAR**: Include relevant genes, pathways, mutations
+
+6. **FUNCTIONAL SCORES**: Include relevant scoring systems (NYHA, GCS, MMSE, etc.)
+
+REMEMBER: The goal is to convert ALL textbook medical knowledge into quantifiable deviations from normal. Be comprehensive - include every parameter that would be abnormal in this disease.
+
+Return ONLY valid JSON, no other text."""
                 // dopamine_signaling, serotonin_signaling, gaba_signaling, glutamate_signaling (for psychiatric/neurological)
                 // insulin_receptor_expression, irs_phosphorylation, glut4_expression (for metabolic)
                 // vegf_expression, hif1a_expression, egf_expression (for cancer/angiogenesis)
