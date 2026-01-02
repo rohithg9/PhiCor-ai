@@ -2664,11 +2664,13 @@ async def generate_params_batch(
 async def get_diseases(
     search: Optional[str] = None,
     category: Optional[str] = None,
+    include_params: bool = False,
     limit: int = 100,
     skip: int = 0
 ):
     """
     Get diseases from database with optional search and category filter.
+    Use include_params=true to get parameter_modifications for the Mathematical Human Body dashboard.
     """
     query = {}
     
@@ -2685,6 +2687,16 @@ async def get_diseases(
     
     diseases = await db.diseases.find(query, {"_id": 0}).skip(skip).limit(limit).to_list(limit)
     total = await db.diseases.count_documents(query)
+    
+    # Return full or simplified list based on include_params flag
+    if include_params:
+        # Return full disease data including parameter_modifications
+        return {
+            "diseases": diseases,
+            "total": total,
+            "limit": limit,
+            "skip": skip
+        }
     
     # Return simplified list for overview
     simplified = []
