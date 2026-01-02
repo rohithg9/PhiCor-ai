@@ -760,32 +760,22 @@ const MERGED_DISEASE_MODELS = {
 };
 
 const SCALE_LEVELS = [
+  // Core anatomical scales
   { id: 'geometry', name: 'Geometry', fullName: 'Geometry & Dimensions', icon: '📐', description: 'Shape, size, volumes' },
   { id: 'pressures', name: 'Pressures', fullName: 'Pressures & Gradients', icon: '📊', description: 'Forces and flows' },
   { id: 'structure', name: 'Structure', fullName: 'Structure & Tissue', icon: '🔬', description: 'Tissue composition' },
   { id: 'physiology', name: 'Physiology', fullName: 'Physiology & Function', icon: '⚡', description: 'Functional measures' },
   { id: 'cellular', name: 'Cellular', fullName: 'Cellular & Molecular', icon: '🧬', description: 'Cell-level processes' },
-  // New scale levels for expanded organ systems
-  { id: 'dna', name: 'DNA', fullName: 'DNA & Genetic Parameters', icon: '🧬', description: 'Genetic & epigenetic markers' },
-  { id: 'gene_expression', name: 'Gene Expr', fullName: 'Gene Expression & Transcriptomics', icon: '📊', description: 'mRNA & protein levels' },
-  { id: 'metabolism', name: 'Metabolism', fullName: 'Cellular Metabolism', icon: '⚗️', description: 'ATP, redox, metabolites' },
-  { id: 'cell_cycle', name: 'Cell Cycle', fullName: 'Cell Cycle & Proliferation', icon: '🔄', description: 'Proliferation & senescence' },
-  { id: 'physical', name: 'Physical', fullName: 'Physical Properties', icon: '💧', description: 'Volume, density, pH' },
-  { id: 'chemical', name: 'Chemical', fullName: 'Chemical Analysis', icon: '🧪', description: 'Biochemical markers' },
-  { id: 'microscopy', name: 'Microscopy', fullName: 'Urine Microscopy', icon: '🔬', description: 'Cells & casts' },
-  { id: 'ct', name: 'CT', fullName: 'CT Imaging (Hounsfield)', icon: '📷', description: 'CT densities' },
-  { id: 'mri', name: 'MRI', fullName: 'MRI Signal Characteristics', icon: '🧲', description: 'T1, T2, diffusion' },
-  { id: 'ultrasound', name: 'Ultrasound', fullName: 'Ultrasound Parameters', icon: '📡', description: 'Echogenicity, Doppler' },
-  { id: 'nuclear', name: 'Nuclear', fullName: 'Nuclear Medicine', icon: '☢️', description: 'PET, SPECT, scintigraphy' },
-  { id: 'anatomy', name: 'Anatomy', fullName: 'Ocular Anatomy', icon: '👁️', description: 'Eye structure' },
-  { id: 'function', name: 'Function', fullName: 'Visual Function', icon: '👓', description: 'Acuity, pressure, fields' },
-  { id: 'acute_phase', name: 'Acute Phase', fullName: 'Acute Phase Reactants', icon: '🔥', description: 'CRP, ESR, ferritin' },
-  { id: 'cytokines', name: 'Cytokines', fullName: 'Cytokines & Mediators', icon: '💉', description: 'IL-6, TNF, interferons' },
-  { id: 'complement', name: 'Complement', fullName: 'Complement System', icon: '🛡️', description: 'C3, C4, CH50' },
-  { id: 'markers', name: 'Markers', fullName: 'Serum Tumor Markers', icon: '🎯', description: 'PSA, CEA, CA-125' },
-  { id: 'upper_gi', name: 'Upper GI', fullName: 'Upper GI Tract', icon: '🫁', description: 'Esophagus, stomach' },
-  { id: 'small_bowel', name: 'Small Bowel', fullName: 'Small Intestine', icon: '➰', description: 'Absorption, motility' },
-  { id: 'colon', name: 'Colon', fullName: 'Colon & Rectum', icon: '🔄', description: 'Transit, sphincter' },
+  // Lab tests & biomarkers
+  { id: 'lab_tests', name: 'Lab Tests', fullName: 'Laboratory Tests', icon: '🧪', description: 'Blood tests, biomarkers' },
+  { id: 'urinalysis', name: 'Urinalysis', fullName: 'Urinalysis', icon: '💧', description: 'Urine analysis' },
+  // Imaging
+  { id: 'imaging', name: 'Imaging', fullName: 'Imaging Parameters', icon: '📷', description: 'CT, MRI, Ultrasound' },
+  // Cellular/Molecular for cross-cutting organ
+  { id: 'dna', name: 'DNA', fullName: 'DNA & Genetics', icon: '🧬', description: 'Genetic markers' },
+  { id: 'gene_expression', name: 'Gene Expr', fullName: 'Gene Expression', icon: '📊', description: 'mRNA & proteins' },
+  { id: 'metabolism', name: 'Metabolism', fullName: 'Metabolism', icon: '⚗️', description: 'ATP, redox' },
+  { id: 'cell_cycle', name: 'Cell Cycle', fullName: 'Cell Cycle', icon: '🔄', description: 'Proliferation' },
 ];
 
 // Clinical Insights Component with AI
