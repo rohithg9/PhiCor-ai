@@ -503,3 +503,30 @@ agent_communication:
       - working: true
         agent: "testing"
         comment: "✅ ACTIVE CONDITION BANNER COMPREHENSIVE TESTING COMPLETE: Successfully verified ALL major functionality requested in review. Desktop Tests: ✅ PhiCor Engine header with Φ symbol found, ✅ Find Condition panel accessible, ✅ Ischemic/CAD category expansion working, ✅ Disease selection (Unstable Angina) successful, ✅ Desktop banner appears with red/orange gradient background, ✅ 'ACTIVE CONDITION' label visible in red, ✅ ICD-10 code badge displayed (ICD-10: I20.0), ✅ Disease name shown in large font (Unstable Angina), ✅ Disease description displayed, ✅ Reset button with rotating arrow icon functional, ✅ Banner disappears after reset, ✅ Disease deselection confirmed. Mobile Tests: ✅ Mobile viewport (390x844) set correctly, ✅ Stethoscope icon accessible for disease panel, ✅ Disease panel opens successfully, ✅ Disease categories and options visible. Minor: Mobile disease selection encountered UI overlay issues preventing full mobile banner testing, but desktop functionality is fully operational and meets all requirements. Multiple disease selection verified - banner updates correctly when different diseases are selected. Active Condition banner feature is working as designed with proper responsive behavior."
+
+  - task: "Disease Crash Fix Verification (Left Ventricular Failure)"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/DashboardMultiScale.js"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Verifying crash fix for disease selection. Previous agent fixed ClinicalDataPanel .includes() bug."
+      - working: true
+        agent: "main"
+        comment: "✅ VERIFIED: Left Ventricular Failure (Acute Pulmonary Edema) now displays correctly with 225 affected parameters, 12 key changes shown (NT-proBNP +600%, BNP +450%, etc.), molecular profile with 212 findings. No crash observed."
+
+  - task: "Full Data Migration - Static to MongoDB"
+    implemented: false
+    working: false
+    file: "/app/backend/migrate_all_diseases.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Planning migration of ~280 remaining diseases from static frontend files to MongoDB with AI-generated parameter_modifications"
