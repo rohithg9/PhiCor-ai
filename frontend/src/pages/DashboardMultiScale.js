@@ -2727,7 +2727,8 @@ const DashboardMultiScale = () => {
       // Find the first scale that has data for this organ
       const availableScale = SCALE_LEVELS.find(scale => currentOrgan[scale.id]);
       if (availableScale && !currentOrgan[selectedScale]) {
-        setSelectedScale(availableScale.id);
+        // Use setTimeout to avoid synchronous setState warning
+        setTimeout(() => setSelectedScale(availableScale.id), 0);
       }
     }
   }, [selectedOrgan, currentOrgan, selectedScale]);
