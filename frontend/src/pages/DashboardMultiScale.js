@@ -1019,7 +1019,7 @@ const ClinicalDataPanel = ({ modifications, disease, severity }) => {
               <div key={i} className="text-xs flex items-center justify-between">
                 <span className="font-medium">{vital.name}</span>
                 <span className={`px-1.5 py-0.5 rounded ${
-                  vital.change?.includes('-') ? 'bg-blue-500/10 text-blue-500' : 'bg-orange-500/10 text-orange-500'
+                  String(vital.change || '').includes('-') ? 'bg-blue-500/10 text-blue-500' : 'bg-orange-500/10 text-orange-500'
                 }`}>{vital.change}</span>
               </div>
             ))}
@@ -1039,7 +1039,7 @@ const ClinicalDataPanel = ({ modifications, disease, severity }) => {
                 <div className="flex items-center justify-between">
                   <span className="font-medium">{lab.name}</span>
                   <span className={`px-1.5 py-0.5 rounded ${
-                    lab.change?.includes('-') ? 'bg-blue-500/10 text-blue-500' : 'bg-destructive/10 text-destructive'
+                    String(lab.change || '').includes('-') ? 'bg-blue-500/10 text-blue-500' : 'bg-destructive/10 text-destructive'
                   }`}>{lab.change}</span>
                 </div>
                 {lab.evidence && <p className="text-[10px] text-muted-foreground mt-0.5">{lab.evidence}</p>}
