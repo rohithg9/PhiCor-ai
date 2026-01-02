@@ -2607,6 +2607,13 @@ const DashboardMultiScale = () => {
     const apiMods = apiDiseaseData[selectedDisease];
     const staticMods = currentDisease?.modifications;
     
+    console.log('getMergedModifications:', {
+      selectedDisease,
+      hasApiMods: !!apiMods,
+      apiModsKeys: apiMods ? Object.keys(apiMods) : [],
+      hasStaticMods: !!staticMods
+    });
+    
     if (apiMods) {
       // API data takes precedence - merge with static if both exist
       if (staticMods) {
