@@ -256,6 +256,54 @@ export const ORGAN_MODELS = {
           source: "Hodgkin-Huxley framework"
         }
       ]
+    },
+
+    // LAB TESTS - Cardiac biomarkers
+    lab_tests: {
+      title: "Lab Tests",
+      parameters: [
+        { id: "troponin_i", name: "Troponin I", value: 0.01, unit: "ng/mL", range: [0, 0.04], evidence: "established" },
+        { id: "troponin_t", name: "Troponin T (hs)", value: 10, unit: "ng/L", range: [0, 14], evidence: "established" },
+        { id: "bnp", name: "BNP", value: 50, unit: "pg/mL", range: [0, 100], evidence: "established" },
+        { id: "nt_probnp", name: "NT-proBNP", value: 100, unit: "pg/mL", range: [0, 300], evidence: "established" },
+        { id: "ck_mb", name: "CK-MB", value: 3, unit: "ng/mL", range: [0, 5], evidence: "established" },
+        { id: "ldh", name: "LDH", value: 200, unit: "U/L", range: [140, 280], evidence: "established" },
+        { id: "d_dimer", name: "D-Dimer", value: 200, unit: "ng/mL", range: [0, 500], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "troponin_kinetics",
+          name: "Troponin Release Kinetics",
+          latex: "cTn(t) = cTn_{peak} \\times (e^{-k_1 t} - e^{-k_2 t})",
+          description: "Troponin rise and fall after MI",
+          evidence: "established",
+          source: "Cardiology"
+        }
+      ]
+    },
+
+    // IMAGING - Cardiac imaging parameters
+    imaging: {
+      title: "Imaging",
+      parameters: [
+        { id: "echo_ef", name: "Ejection Fraction (Echo)", value: 60, unit: "%", range: [55, 70], evidence: "established" },
+        { id: "echo_e_e_prime", name: "E/e' Ratio", value: 8, unit: "ratio", range: [6, 14], evidence: "established" },
+        { id: "echo_tapse", name: "TAPSE", value: 22, unit: "mm", range: [17, 30], evidence: "established" },
+        { id: "coronary_calcium", name: "Coronary Calcium Score", value: 0, unit: "Agatston", range: [0, 100], evidence: "established" },
+        { id: "mri_native_t1", name: "Native T1 (CMR)", value: 1000, unit: "ms", range: [900, 1100], evidence: "established" },
+        { id: "mri_ecv", name: "ECV (CMR)", value: 25, unit: "%", range: [20, 30], evidence: "established" },
+        { id: "lvef_muga", name: "LVEF (MUGA)", value: 60, unit: "%", range: [55, 70], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "ejection_fraction",
+          name: "Ejection Fraction",
+          latex: "EF = \\frac{EDV - ESV}{EDV} \\times 100",
+          description: "Systolic function quantification",
+          evidence: "established",
+          source: "Cardiology"
+        }
+      ]
     }
   },
 
