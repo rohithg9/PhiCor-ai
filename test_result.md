@@ -578,3 +578,18 @@ agent_communication:
       - working: true
         agent: "main"
         comment: "✅ MIGRATION COMPLETE: Successfully migrated 1,374 new diseases from static frontend files. Total diseases in MongoDB increased from 509 to 1,977. All diseases have comprehensive parameter_modifications using category-based templates. API stats now show 1,977 total diseases with 45+ categories."
+
+  - task: "Dashboard Parameter Display Fix & Landing Page Stats"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/DashboardMultiScale.js, /app/frontend/src/pages/LandingPage.js"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "User reported: 1) Landing page shows only 6 systems, no drugs 2) Diseases not showing parameters in dashboard"
+      - working: true
+        agent: "main"
+        comment: "✅ FIXED: 1) Landing page now shows 4 stats: 1977+ Diseases, 336+ Drugs, 6 Organ Systems, ∞ Equations. 2) Dashboard parameter display fixed - allModifiedParameters function now handles API data structure (vital_signs, lab_tests, physical_exam, ecg, dna) in addition to ORGAN_MODELS structure. 3) getAffectedCounts function updated to count all parameters with change_percent/value/direction."
