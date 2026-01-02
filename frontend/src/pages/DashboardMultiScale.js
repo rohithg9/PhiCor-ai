@@ -3086,7 +3086,14 @@ const DashboardMultiScale = () => {
 
           <div className="flex items-center gap-2 flex-1 justify-center min-w-0">
             <span className="text-xl">{currentOrgan?.icon}</span>
-            <span className="font-semibold text-sm truncate">{currentOrgan?.name}</span>
+            <div className="flex flex-col items-start min-w-0">
+              <span className="font-semibold text-sm truncate">{currentOrgan?.name}</span>
+              {currentScale && (
+                <span className="text-[10px] text-muted-foreground truncate">
+                  Viewing: {currentScale.name || selectedScale}
+                </span>
+              )}
+            </div>
           </div>
           
           {/* Mobile Tutorial Button and Disease Sheet */}
