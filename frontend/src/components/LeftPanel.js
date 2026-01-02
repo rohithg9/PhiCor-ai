@@ -736,7 +736,10 @@ const LeftPanel = ({
 
         <ScrollArea className="flex-1 mt-3">
           <TabsContent value="patient" className="mt-0 h-full">
-            <PatientInputPanel onPatientDataChange={onPatientDataChange} />
+            <PatientManager 
+              onPatientChange={onPatientDataChange}
+              selectedDisease={selectedDisease}
+            />
           </TabsContent>
           
           <TabsContent value="assistant" className="mt-0 h-full">
