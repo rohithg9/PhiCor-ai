@@ -1122,38 +1122,8 @@ const ClinicalDataPanel = ({ modifications, disease, severity }) => {
     </div>
   );
 };
-        setClinicalData(data);
-      } catch (err) {
-        setError(err.message);
-        console.error('Error fetching clinical data:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
 
-    fetchClinicalData();
-  }, [disease?.icd10]);
-
-  if (!disease) return null;
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold flex items-center gap-2">
-          <Brain className="w-4 h-4 text-primary" />
-          Clinical Data API
-        </h3>
-        <Badge variant="outline" className="text-xs">
-          {loading ? 'Loading...' : error ? 'Error' : 'Live Data'}
-        </Badge>
-      </div>
-
-      {loading && (
-        <div className="rounded-lg border border-border/50 bg-card/50 p-3 flex items-center justify-center">
-          <Loader2 className="w-4 h-4 animate-spin mr-2" />
-          <span className="text-sm text-muted-foreground">Fetching clinical data...</span>
-        </div>
-      )}
+// Equation Derivation Component with Calculated Results
 
       {error && (
         <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-3">
