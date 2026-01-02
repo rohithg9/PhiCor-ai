@@ -540,6 +540,86 @@ export const ORGAN_MODELS = {
           description: "Arterial PO₂ from V/Q distribution",
           evidence: "novel",
           source: "Multi-compartment V/Q model"
+        },
+        {
+          id: "bohr_dead_space",
+          name: "Bohr Dead Space",
+          latex: "\\frac{V_D}{V_T} = \\frac{P_ACO_2 - P_ECO_2}{P_ACO_2}",
+          description: "Physiologic dead space fraction",
+          evidence: "established",
+          source: "Bohr equation"
+        },
+        {
+          id: "pf_ratio",
+          name: "P/F Ratio",
+          latex: "P/F = \\frac{P_aO_2}{F_iO_2}",
+          description: "Oxygenation efficiency (ARDS: <300 mild, <200 moderate, <100 severe)",
+          evidence: "established",
+          source: "Berlin Definition"
+        },
+        {
+          id: "oxygenation_index",
+          name: "Oxygenation Index",
+          latex: "OI = \\frac{MAP \\times F_iO_2 \\times 100}{P_aO_2}",
+          description: "ARDS severity (MAP = mean airway pressure)",
+          evidence: "established",
+          source: "Pediatric ARDS"
+        },
+        {
+          id: "oxygen_delivery",
+          name: "Oxygen Delivery",
+          latex: "DO_2 = CO \\times C_aO_2 \\times 10 = CO \\times (1.34 \\times Hb \\times S_aO_2 + 0.003 \\times P_aO_2) \\times 10",
+          description: "Total O₂ delivered to tissues (mL/min)",
+          evidence: "established",
+          source: "Clinical physiology"
+        },
+        {
+          id: "oxygen_extraction_ratio",
+          name: "Oxygen Extraction Ratio",
+          latex: "O_2ER = \\frac{VO_2}{DO_2} = \\frac{C_aO_2 - C_vO_2}{C_aO_2}",
+          description: "Tissue O₂ extraction (normal 25-30%)",
+          evidence: "established",
+          source: "Critical care"
+        },
+        {
+          id: "respiratory_quotient",
+          name: "Respiratory Quotient",
+          latex: "RQ = \\frac{VCO_2}{VO_2}",
+          description: "CO₂ produced per O₂ consumed (normal ~0.8)",
+          evidence: "established",
+          source: "Metabolism"
+        },
+        {
+          id: "airway_resistance",
+          name: "Airway Resistance",
+          latex: "R_{aw} = \\frac{PIP - P_{plat}}{\\dot{V}}",
+          description: "Flow resistance in airways",
+          evidence: "established",
+          source: "Mechanical ventilation"
+        },
+        {
+          id: "static_compliance",
+          name: "Static Compliance",
+          latex: "C_{st} = \\frac{V_T}{P_{plat} - PEEP}",
+          description: "Lung-thorax compliance (normal 50-80 mL/cmH₂O)",
+          evidence: "established",
+          source: "Mechanical ventilation"
+        },
+        {
+          id: "equation_of_motion",
+          name: "Equation of Motion",
+          latex: "P_{vent} + P_{mus} = (R \\times \\dot{V}) + \\frac{V}{C} + PEEP",
+          description: "Pressure balance during breathing",
+          evidence: "established",
+          source: "Respiratory mechanics"
+        },
+        {
+          id: "rapid_shallow_breathing",
+          name: "Rapid Shallow Breathing Index",
+          latex: "RSBI = \\frac{RR}{V_T(L)}",
+          description: "Weaning predictor (>105 = failure likely)",
+          evidence: "established",
+          source: "Tobin index"
         }
       ]
     },
