@@ -2555,6 +2555,7 @@ const DashboardMultiScale = () => {
   const [showAllParams, setShowAllParams] = useState(false); // Expand to show all params
   const [apiDiseaseData, setApiDiseaseData] = useState({}); // Store parameter_modifications from API
   const [apiDiseaseByIcd, setApiDiseaseByIcd] = useState({}); // Also map by ICD-10 code
+  const [apiDiseases, setApiDiseases] = useState({}); // Full disease data from API
 
   // Fetch disease parameter_modifications from API
   useEffect(() => {
@@ -2562,13 +2563,31 @@ const DashboardMultiScale = () => {
       try {
         const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
         // Fetch all diseases with parameter_modifications (limit increased to get all)
-        const response = await fetch(`${backendUrl}/api/diseases-db?include_params=true&limit=500`);
+        const response = await fetch(`${backendUrl}/api/diseases-db?include_params=true&limit=1000`);
         if (response.ok) {
           const data = await response.json();
           // Map diseases by their ID with their parameter_modifications
           const diseaseMap = {};
           const icdMap = {};
+          const fullDiseaseMap = {};
           (data.diseases || []).forEach(disease => {
+            // Store full disease data for dynamic rendering
+            const diseaseKey = disease.id || disease.icd10_code?.replace('.', '_');
+            if (diseaseKey) {
+              fullDiseaseMap[diseaseKey] = {
+                name: disease.name,
+                icd10: disease.icd10_code,
+                category: disease.category || 'general',
+                description: disease.definition || disease.description || disease.name,
+                definition: disease.definition,
+                primaryOrgan: disease.primaryOrgan || getPrimaryOrganFromCategory(disease.category),
+                affectedOrgans: disease.affectedOrgans || [getPrimaryOrganFromCategory(disease.category)],
+                modifications: disease.parameter_modifications || {},
+                hasModifications: disease.parameter_modifications && Object.keys(disease.parameter_modifications).length > 0,
+                isFromAPI: true
+              };
+            }
+            
             if (disease.parameter_modifications && Object.keys(disease.parameter_modifications).length > 0) {
               diseaseMap[disease.id] = disease.parameter_modifications;
               // Also map by ICD-10 code (convert to UI format: D56.1 -> D56_1)
@@ -2580,7 +2599,8 @@ const DashboardMultiScale = () => {
           });
           setApiDiseaseData(diseaseMap);
           setApiDiseaseByIcd(icdMap);
-          console.log(`Loaded parameter_modifications for ${Object.keys(diseaseMap).length} diseases`);
+          setApiDiseases(fullDiseaseMap);
+          console.log(`Loaded ${Object.keys(fullDiseaseMap).length} diseases from API, ${Object.keys(diseaseMap).length} with parameter_modifications`);
         }
       } catch (error) {
         console.error('Failed to fetch disease params:', error);
@@ -2589,8 +2609,61 @@ const DashboardMultiScale = () => {
     fetchDiseaseParams();
   }, []);
 
+  // Helper function to determine primary organ from category
+  const getPrimaryOrganFromCategory = (category) => {
+    const categoryOrganMap = {
+      'cardiovascular': 'heart',
+      'cardiac': 'heart',
+      'respiratory': 'lungs',
+      'pulmonary': 'lungs',
+      'renal': 'kidneys',
+      'nephrology': 'kidneys',
+      'hepatic': 'liver',
+      'gastrointestinal': 'liver',
+      'neurological': 'brain',
+      'psychiatric': 'brain',
+      'hematological': 'blood',
+      'hematological_malignancy': 'blood',
+      'oncology': 'blood',
+      'endocrine': 'pancreas',
+      'metabolic': 'pancreas',
+      'infectious': 'blood',
+      'rheumatological': 'blood',
+      'dermatological': 'blood',
+      'ophthalmology': 'brain',
+      'otolaryngology': 'brain',
+      'obstetrics': 'blood',
+      'gynecology': 'blood',
+      'neonatology': 'lungs',
+      'urology': 'kidneys',
+      'musculoskeletal': 'blood',
+      'emergency': 'heart',
+      'pediatric': 'heart',
+      'geriatric': 'heart'
+    };
+    return categoryOrganMap[category?.toLowerCase()] || 'heart';
+  };
+
   const organs = useMemo(() => Object.entries(ORGAN_MODELS), []);
-  const diseases = useMemo(() => Object.entries(MERGED_DISEASE_MODELS), []);
+  
+  // Merge static disease models with API diseases
+  const diseases = useMemo(() => {
+    const merged = { ...MERGED_DISEASE_MODELS };
+    // Add API diseases that aren't in static models
+    Object.entries(apiDiseases).forEach(([key, disease]) => {
+      if (!merged[key]) {
+        merged[key] = disease;
+      } else {
+        // Merge API data into existing entry (API takes precedence for modifications)
+        merged[key] = {
+          ...merged[key],
+          modifications: disease.modifications || merged[key].modifications,
+          hasModifications: disease.hasModifications || merged[key].hasModifications
+        };
+      }
+    });
+    return Object.entries(merged);
+  }, [apiDiseases]);
   
   const currentOrgan = ORGAN_MODELS[selectedOrgan];
   const currentScale = currentOrgan?.[selectedScale];
