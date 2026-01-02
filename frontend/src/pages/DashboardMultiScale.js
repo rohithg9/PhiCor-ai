@@ -3389,10 +3389,12 @@ const DashboardMultiScale = () => {
                                 animate={{ scale: 1 }}
                                 className={`text-xl md:text-2xl font-mono font-bold ${mod.modified ? 'text-destructive' : ''}`}
                               >
-                                {mod.value.toFixed(param.value % 1 === 0 ? 0 : 1)}
+                                {mod.value != null && typeof mod.value === 'number' 
+                                  ? mod.value.toFixed(param.value % 1 === 0 ? 0 : 1)
+                                  : mod.value ?? 'N/A'}
                               </motion.span>
                               <span className="text-xs md:text-sm text-muted-foreground">{param.unit}</span>
-                              {mod.modified && (
+                              {mod.modified && mod.delta && (
                                 <motion.span 
                                   initial={{ scale: 1.3 }}
                                   animate={{ scale: 1 }}
