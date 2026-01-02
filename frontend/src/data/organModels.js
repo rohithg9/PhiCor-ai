@@ -1809,6 +1809,7 @@ export const ORGAN_MODELS = {
         { id: "wbc_count", name: "WBC Count", value: 7.0, unit: "×10⁹/L", range: [4.0, 11.0], evidence: "established" },
         { id: "platelet_count", name: "Platelet Count", value: 250, unit: "×10⁹/L", range: [150, 400], evidence: "established" },
         { id: "hematocrit", name: "Hematocrit", value: 45, unit: "%", range: [40, 50], evidence: "established" },
+        { id: "mpv", name: "Mean Platelet Volume", value: 9.5, unit: "fL", range: [7.5, 11.5], evidence: "established" },
       ],
       equations: [
         {
@@ -1831,6 +1832,7 @@ export const ORGAN_MODELS = {
         { id: "mchc", name: "MCHC", value: 34, unit: "g/dL", range: [32, 36], evidence: "established" },
         { id: "rdw", name: "RDW (Red Cell Distribution Width)", value: 13, unit: "%", range: [11.5, 14.5], evidence: "established" },
         { id: "reticulocyte_count", name: "Reticulocyte Count", value: 1.0, unit: "%", range: [0.5, 2.0], evidence: "established" },
+        { id: "reticulocyte_absolute", name: "Absolute Reticulocyte Count", value: 50000, unit: "/μL", range: [25000, 100000], evidence: "established" },
         { id: "esr", name: "ESR", value: 10, unit: "mm/hr", range: [0, 20], evidence: "established" },
       ],
       equations: [
@@ -1841,17 +1843,63 @@ export const ORGAN_MODELS = {
           description: "Total oxygen content of arterial blood",
           evidence: "established",
           source: "Fick principle"
-        },
+        }
+      ]
+    },
+
+    // WBC DIFFERENTIAL - Critical for diagnosis
+    lab_tests: {
+      title: "WBC Differential & CBC",
+      parameters: [
+        // === ABSOLUTE WBC DIFFERENTIAL ===
+        { id: "neutrophils_absolute", name: "Neutrophils (Absolute)", value: 4.0, unit: "×10⁹/L", range: [1.8, 7.7], evidence: "established" },
+        { id: "lymphocytes_absolute", name: "Lymphocytes (Absolute)", value: 2.0, unit: "×10⁹/L", range: [1.0, 4.8], evidence: "established" },
+        { id: "monocytes_absolute", name: "Monocytes (Absolute)", value: 0.4, unit: "×10⁹/L", range: [0.2, 0.8], evidence: "established" },
+        { id: "eosinophils_absolute", name: "Eosinophils (Absolute)", value: 0.2, unit: "×10⁹/L", range: [0.04, 0.4], evidence: "established" },
+        { id: "basophils_absolute", name: "Basophils (Absolute)", value: 0.04, unit: "×10⁹/L", range: [0.01, 0.1], evidence: "established" },
+        
+        // === PERCENTAGE WBC DIFFERENTIAL ===
+        { id: "neutrophils_percent", name: "Neutrophils (%)", value: 60, unit: "%", range: [40, 70], evidence: "established" },
+        { id: "lymphocytes_percent", name: "Lymphocytes (%)", value: 30, unit: "%", range: [20, 45], evidence: "established" },
+        { id: "monocytes_percent", name: "Monocytes (%)", value: 6, unit: "%", range: [2, 10], evidence: "established" },
+        { id: "eosinophils_percent", name: "Eosinophils (%)", value: 3, unit: "%", range: [1, 6], evidence: "established" },
+        { id: "basophils_percent", name: "Basophils (%)", value: 0.5, unit: "%", range: [0, 2], evidence: "established" },
+        
+        // === BAND FORMS & IMMATURE ===
+        { id: "bands", name: "Band Neutrophils", value: 3, unit: "%", range: [0, 5], evidence: "established" },
+        { id: "metamyelocytes", name: "Metamyelocytes", value: 0, unit: "%", range: [0, 0], evidence: "established" },
+        { id: "myelocytes", name: "Myelocytes", value: 0, unit: "%", range: [0, 0], evidence: "established" },
+        { id: "blasts", name: "Blasts", value: 0, unit: "%", range: [0, 0], evidence: "established" },
+        
+        // === LYMPHOCYTE SUBSETS ===
+        { id: "cd4_count", name: "CD4+ T-Cells", value: 800, unit: "/μL", range: [500, 1500], evidence: "established" },
+        { id: "cd8_count", name: "CD8+ T-Cells", value: 400, unit: "/μL", range: [200, 800], evidence: "established" },
+        { id: "cd4_cd8_ratio", name: "CD4/CD8 Ratio", value: 2.0, unit: "ratio", range: [1.0, 3.0], evidence: "established" },
+        { id: "nk_cells", name: "NK Cells", value: 200, unit: "/μL", range: [100, 400], evidence: "established" },
+        { id: "b_cells", name: "B-Cells (CD19+)", value: 200, unit: "/μL", range: [100, 500], evidence: "established" },
+        
+        // === SPECIAL STAINS & MORPHOLOGY ===
+        { id: "nucleated_rbc", name: "Nucleated RBCs", value: 0, unit: "/100 WBC", range: [0, 0], evidence: "established" },
+        { id: "atypical_lymphocytes", name: "Atypical Lymphocytes", value: 0, unit: "%", range: [0, 3], evidence: "established" },
+        { id: "toxic_granulation", name: "Toxic Granulation", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "dohle_bodies", name: "Döhle Bodies Present", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        
+        // === DERIVED INDICES ===
+        { id: "nlr", name: "Neutrophil-Lymphocyte Ratio", value: 2.0, unit: "ratio", range: [1.0, 3.5], evidence: "established" },
+        { id: "plr", name: "Platelet-Lymphocyte Ratio", value: 125, unit: "ratio", range: [50, 200], evidence: "established" },
+        { id: "mlr", name: "Monocyte-Lymphocyte Ratio", value: 0.2, unit: "ratio", range: [0.1, 0.4], evidence: "established" },
+      ],
+      equations: [
         {
-          id: "oxygen_delivery",
-          name: "Oxygen Delivery",
-          latex: "DO_2 = CO \\times CaO_2 \\times 10",
-          description: "Oxygen delivery to tissues",
+          id: "nlr_calculation",
+          name: "Neutrophil-Lymphocyte Ratio",
+          latex: "NLR = \\frac{ANC}{ALC}",
+          description: "Marker of systemic inflammation (elevated in sepsis, cancer, CVD)",
           evidence: "established",
-          source: "Fick equation"
+          source: "Clinical inflammation marker"
         },
         {
-          id: "reticulocyte_production_index",
+          id: "reticulocyte_index",
           name: "Reticulocyte Production Index",
           latex: "RPI = \\frac{Retic\\% \\times (Hct/45)}{Maturation_{factor}}",
           description: "Corrected reticulocyte count for anemia",
@@ -1868,9 +1916,14 @@ export const ORGAN_MODELS = {
         { id: "ferritin", name: "Ferritin", value: 100, unit: "ng/mL", range: [20, 300], evidence: "established" },
         { id: "tibc", name: "TIBC", value: 300, unit: "μg/dL", range: [250, 400], evidence: "established" },
         { id: "transferrin_sat", name: "Transferrin Saturation", value: 30, unit: "%", range: [20, 50], evidence: "established" },
+        { id: "soluble_transferrin_receptor", name: "Soluble Transferrin Receptor", value: 3, unit: "mg/L", range: [2, 5], evidence: "established" },
         { id: "vitamin_b12", name: "Vitamin B12", value: 400, unit: "pg/mL", range: [200, 900], evidence: "established" },
         { id: "folate", name: "Folate", value: 10, unit: "ng/mL", range: [3, 17], evidence: "established" },
+        { id: "rbc_folate", name: "RBC Folate", value: 300, unit: "ng/mL", range: [140, 628], evidence: "established" },
         { id: "erythropoietin", name: "Erythropoietin", value: 10, unit: "mIU/mL", range: [4, 20], evidence: "established" },
+        { id: "haptoglobin", name: "Haptoglobin", value: 100, unit: "mg/dL", range: [30, 200], evidence: "established" },
+        { id: "ldh", name: "LDH", value: 200, unit: "U/L", range: [140, 280], evidence: "established" },
+        { id: "indirect_bilirubin", name: "Indirect Bilirubin", value: 0.4, unit: "mg/dL", range: [0.1, 0.7], evidence: "established" },
       ],
       equations: [
         {
@@ -1885,15 +1938,43 @@ export const ORGAN_MODELS = {
     },
 
     pressures: {
-      title: "Coagulation",
+      title: "Coagulation & Hemostasis",
       parameters: [
+        // === PRIMARY COAGULATION TESTS ===
         { id: "pt", name: "Prothrombin Time (PT)", value: 12, unit: "sec", range: [11, 14], evidence: "established" },
         { id: "inr", name: "INR", value: 1.0, unit: "", range: [0.9, 1.1], evidence: "established" },
         { id: "ptt", name: "PTT", value: 30, unit: "sec", range: [25, 35], evidence: "established" },
+        { id: "aptt", name: "aPTT", value: 30, unit: "sec", range: [25, 35], evidence: "established" },
         { id: "fibrinogen", name: "Fibrinogen", value: 300, unit: "mg/dL", range: [200, 400], evidence: "established" },
-        { id: "d_dimer", name: "D-Dimer", value: 0.3, unit: "μg/mL", range: [0, 0.5], evidence: "established" },
-        { id: "bleeding_time", name: "Bleeding Time", value: 5, unit: "min", range: [2, 9], evidence: "established" },
         { id: "thrombin_time", name: "Thrombin Time", value: 15, unit: "sec", range: [14, 19], evidence: "established" },
+        { id: "d_dimer", name: "D-Dimer", value: 0.3, unit: "μg/mL", range: [0, 0.5], evidence: "established" },
+        
+        // === CLOTTING FACTORS ===
+        { id: "factor_viii", name: "Factor VIII Activity", value: 100, unit: "%", range: [50, 150], evidence: "established" },
+        { id: "factor_ix", name: "Factor IX Activity", value: 100, unit: "%", range: [50, 150], evidence: "established" },
+        { id: "von_willebrand", name: "von Willebrand Factor", value: 100, unit: "%", range: [50, 200], evidence: "established" },
+        { id: "vwf_antigen", name: "vWF Antigen", value: 100, unit: "%", range: [50, 200], evidence: "established" },
+        { id: "factor_v_leiden", name: "Factor V Leiden Mutation", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        
+        // === ANTICOAGULANT PROTEINS ===
+        { id: "protein_c", name: "Protein C Activity", value: 100, unit: "%", range: [70, 140], evidence: "established" },
+        { id: "protein_s", name: "Protein S Activity", value: 100, unit: "%", range: [60, 140], evidence: "established" },
+        { id: "antithrombin_iii", name: "Antithrombin III", value: 100, unit: "%", range: [80, 120], evidence: "established" },
+        
+        // === PLATELET FUNCTION ===
+        { id: "bleeding_time", name: "Bleeding Time", value: 5, unit: "min", range: [2, 9], evidence: "established" },
+        { id: "pfa_100", name: "PFA-100 Closure Time", value: 100, unit: "sec", range: [70, 150], evidence: "established" },
+        { id: "platelet_aggregation", name: "Platelet Aggregation (%)", value: 80, unit: "%", range: [60, 100], evidence: "established" },
+        
+        // === FIBRINOLYSIS ===
+        { id: "fibrin_degradation", name: "Fibrin Degradation Products", value: 5, unit: "μg/mL", range: [0, 10], evidence: "established" },
+        { id: "plasminogen", name: "Plasminogen Activity", value: 100, unit: "%", range: [75, 135], evidence: "established" },
+        { id: "alpha2_antiplasmin", name: "α2-Antiplasmin", value: 100, unit: "%", range: [85, 115], evidence: "established" },
+        
+        // === SPECIAL TESTS ===
+        { id: "lupus_anticoagulant", name: "Lupus Anticoagulant", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "anticardiolipin_igg", name: "Anticardiolipin IgG", value: 10, unit: "GPL", range: [0, 20], evidence: "established" },
+        { id: "beta2_glycoprotein", name: "β2-Glycoprotein I Ab", value: 10, unit: "U/mL", range: [0, 20], evidence: "established" },
       ],
       equations: [
         {
