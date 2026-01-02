@@ -687,9 +687,16 @@ export const ORGAN_MODELS = {
         { id: "alveolar_ventilation", name: "Alveolar Ventilation", value: 4.2, unit: "L/min", range: [3.5, 5.5], evidence: "established" },
         { id: "dead_space", name: "Dead Space", value: 150, unit: "mL", range: [120, 180], evidence: "established" },
         { id: "vq_ratio", name: "V/Q Ratio (overall)", value: 0.8, unit: "", range: [0.7, 1.0], evidence: "established" },
-        { id: "spo2", name: "Oxygen Saturation", value: 98, unit: "%", range: [95, 100], evidence: "established" },
+        { id: "spo2", name: "Oxygen Saturation (SpO₂)", value: 98, unit: "%", range: [95, 100], evidence: "established" },
         { id: "fev1", name: "FEV₁", value: 3.5, unit: "L", range: [3.0, 4.5], evidence: "established" },
         { id: "fev1_fvc", name: "FEV₁/FVC Ratio", value: 80, unit: "%", range: [75, 85], evidence: "established" },
+        { id: "fvc", name: "Forced Vital Capacity", value: 4.5, unit: "L", range: [3.8, 5.5], evidence: "established" },
+        { id: "pef", name: "Peak Expiratory Flow", value: 500, unit: "L/min", range: [400, 650], evidence: "established" },
+        { id: "fef_25_75", name: "FEF 25-75%", value: 3.5, unit: "L/sec", range: [2.5, 4.5], evidence: "established" },
+        { id: "dlco", name: "DLCO (Diffusion Capacity)", value: 25, unit: "mL/min/mmHg", range: [20, 30], evidence: "established" },
+        { id: "dlco_va", name: "DLCO/VA (KCO)", value: 5, unit: "mL/min/mmHg/L", range: [4, 6], evidence: "established" },
+        { id: "tlc", name: "Total Lung Capacity", value: 6, unit: "L", range: [5, 7], evidence: "established" },
+        { id: "rv_tlc", name: "RV/TLC Ratio", value: 25, unit: "%", range: [20, 35], evidence: "established" },
       ],
       equations: [
         {
