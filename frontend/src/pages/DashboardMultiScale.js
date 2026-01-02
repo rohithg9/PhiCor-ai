@@ -2767,29 +2767,44 @@ const DashboardMultiScale = () => {
 
   // Calculate modified parameters based on disease
   const getModifiedValue = useCallback((organId, scaleId, paramId, baseValue) => {
-    if (!currentDisease) return { value: baseValue, modified: false };
+    if (!mergedModifications) return { value: baseValue, modified: false };
     
-    const mods = currentDisease.modifications?.[organId]?.[scaleId]?.[paramId];
+    const mods = mergedModifications?.[organId]?.[scaleId]?.[paramId];
     if (!mods) return { value: baseValue, modified: false };
     
     let newValue = baseValue;
-    // Support both 'multiplier' and 'factor' for compatibility
+    
+    // Handle different modification formats from API and static
     const multiplier = mods.multiplier || mods.factor;
-    if (multiplier) {
+    const changePercent = mods.change_percent;
+    const direction = mods.direction;
+    const absoluteValue = mods.value || mods.absolute;
+    
+    // Skip if marked as 'normal'
+    if (direction === 'normal') return { value: baseValue, modified: false };
+    
+    if (absoluteValue !== undefined) {
+      // Direct value from API
+      newValue = absoluteValue;
+    } else if (changePercent !== undefined) {
+      // Percentage change from API (e.g., change_percent: 50, direction: "decrease")
+      const sign = direction === 'decrease' ? -1 : 1;
+      const factor = 1 + (sign * changePercent / 100) * diseaseSeverity;
+      newValue = baseValue * factor;
+    } else if (multiplier) {
       const factor = 1 + (multiplier - 1) * diseaseSeverity;
       newValue = baseValue * factor;
     }
-    if (mods.absolute) {
-      newValue = mods.absolute;
-    }
+    
+    const delta = baseValue !== 0 ? ((newValue - baseValue) / baseValue * 100) : (newValue > 0 ? 100 : 0);
     
     return { 
       value: newValue, 
       modified: true, 
-      note: mods.note,
-      delta: ((newValue - baseValue) / baseValue * 100).toFixed(0)
+      note: mods.note || mods.evidence,
+      delta: delta.toFixed(0)
     };
-  }, [currentDisease, diseaseSeverity]);
+  }, [mergedModifications, diseaseSeverity]);
 
   const toggleEquation = useCallback((eqId) => {
     setExpandedEquations(prev => ({ ...prev, [eqId]: !prev[eqId] }));
