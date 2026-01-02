@@ -29,7 +29,7 @@ Test 5: Drug Detail
 - Endpoint: GET /api/drugs/captopril
 - Expected: Returns drug with mechanisms, dosages, contraindications, interactions
 
-API Base URL: https://healthcompute-1.preview.emergentagent.com
+API Base URL: https://digitalhealth-3.preview.emergentagent.com
 """
 
 import requests
@@ -477,7 +477,7 @@ def run_all_tests():
     print("🧪 PHICORE.AI MEDICAL KNOWLEDGE BASE COMPREHENSIVE TESTING")
     print("=" * 80)
     print("Testing comprehensive verification of PhiCore.ai Medical Knowledge Base and Active Condition Banner")
-    print("API Base URL: https://healthcompute-1.preview.emergentagent.com")
+    print("API Base URL: https://digitalhealth-3.preview.emergentagent.com")
     print("=" * 80)
     
     test_results = {}
