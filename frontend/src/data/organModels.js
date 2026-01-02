@@ -206,6 +206,70 @@ export const ORGAN_MODELS = {
           description: "Non-invasive estimate of filling pressure",
           evidence: "established",
           source: "Nagueh et al."
+        },
+        {
+          id: "fick_cardiac_output",
+          name: "Fick Principle (CO)",
+          latex: "CO = \\frac{VO_2}{C_aO_2 - C_vO_2} = \\frac{VO_2}{(1.34 \\times Hb \\times (S_aO_2 - S_vO_2))}",
+          description: "Gold standard CO measurement from O₂ consumption",
+          evidence: "established",
+          source: "Fick 1870"
+        },
+        {
+          id: "cardiac_index",
+          name: "Cardiac Index",
+          latex: "CI = \\frac{CO}{BSA} = \\frac{SV \\times HR}{BSA}",
+          description: "CO normalized to body size (normal 2.5-4.0 L/min/m²)",
+          evidence: "established",
+          source: "Clinical cardiology"
+        },
+        {
+          id: "mean_arterial_pressure",
+          name: "Mean Arterial Pressure",
+          latex: "MAP = DBP + \\frac{1}{3}(SBP - DBP) = \\frac{SBP + 2 \\times DBP}{3}",
+          description: "Average arterial pressure during cardiac cycle",
+          evidence: "established",
+          source: "Basic hemodynamics"
+        },
+        {
+          id: "systemic_vascular_resistance",
+          name: "Systemic Vascular Resistance",
+          latex: "SVR = \\frac{(MAP - CVP) \\times 80}{CO}",
+          description: "Afterload in dyn·s/cm⁵ (normal 800-1200)",
+          evidence: "established",
+          source: "Ohm's law for circulation"
+        },
+        {
+          id: "pulmonary_vascular_resistance",
+          name: "Pulmonary Vascular Resistance",
+          latex: "PVR = \\frac{(mPAP - PCWP) \\times 80}{CO}",
+          description: "RV afterload (normal <250 dyn·s/cm⁵)",
+          evidence: "established",
+          source: "Pulmonary hemodynamics"
+        },
+        {
+          id: "coronary_flow_reserve",
+          name: "Coronary Flow Reserve",
+          latex: "CFR = \\frac{CBF_{hyperemia}}{CBF_{baseline}}",
+          description: "Coronary vasodilator capacity (normal >2.0)",
+          evidence: "established",
+          source: "Coronary physiology"
+        },
+        {
+          id: "fractional_flow_reserve",
+          name: "Fractional Flow Reserve",
+          latex: "FFR = \\frac{P_d}{P_a}",
+          description: "Pd/Pa at maximal hyperemia (<0.80 = significant stenosis)",
+          evidence: "established",
+          source: "FAME trial"
+        },
+        {
+          id: "qrs_duration_mortality",
+          name: "QRS-Mortality Risk",
+          latex: "HR_{death} = 1.5^{(QRS - 100)/30}",
+          description: "Mortality hazard ratio from QRS widening",
+          evidence: "novel",
+          source: "Heart failure studies"
         }
       ]
     },
