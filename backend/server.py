@@ -2735,7 +2735,7 @@ async def get_diseases(
     search: Optional[str] = None,
     category: Optional[str] = None,
     include_params: bool = False,
-    limit: int = 100,
+    limit: int = 2500,
     skip: int = 0
 ):
     """
