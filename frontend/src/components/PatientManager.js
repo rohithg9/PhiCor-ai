@@ -1,24 +1,14 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   User, UserPlus, Save, Trash2, Check, ChevronDown, ChevronUp,
   Cigarette, Wine, AlertCircle, History, Pill, Heart, Edit2,
-  UserX, Users, RefreshCw, Copy, X
+  UserX, Users, RefreshCw, X
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { Textarea } from './ui/textarea';
 import { Badge } from './ui/badge';
 import { ScrollArea } from './ui/scroll-area';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from './ui/dialog';
 
 // Default "Null Patient" - baseline patient with no modifiers
 const NULL_PATIENT = {
@@ -36,9 +26,7 @@ const NULL_PATIENT = {
     smoking: 'never',
     smokingPackYears: 0,
     alcohol: 'none',
-    alcoholDrinksPerWeek: 0,
-    exercise: 'moderate',
-    diet: 'average'
+    alcoholDrinksPerWeek: 0
   },
   familyHistory: {
     cad: false,
@@ -50,9 +38,7 @@ const NULL_PATIENT = {
     suddenDeath: false
   },
   comorbidities: [],
-  medications: [],
-  allergies: [],
-  modifiers: {} // No parameter modifiers
+  modifiers: {}
 };
 
 // Calculate parameter modifiers based on patient characteristics
@@ -68,122 +54,86 @@ const calculatePatientModifiers = (patient) => {
     if (age >= 65) {
       modifiers.age_risk = {
         cardiac_risk: 1.2 + (age - 65) * 0.02,
-        renal_function: 0.95 - (age - 65) * 0.01,
-        metabolic_rate: 0.95 - (age - 65) * 0.005
+        renal_function: 0.95 - (age - 65) * 0.01
       };
     }
     if (age >= 75) {
-      modifiers.age_risk = {
-        ...modifiers.age_risk,
-        stroke_risk: 1.5,
-        bleeding_risk: 1.3
-      };
+      modifiers.age_risk = { ...modifiers.age_risk, stroke_risk: 1.5, bleeding_risk: 1.3 };
     }
   }
   
   // Sex-based modifiers
   if (demographics?.sex === 'female') {
-    modifiers.sex_factors = {
-      hemoglobin_base: 0.9, // Lower baseline hemoglobin
-      qrs_duration_base: 0.95,
-      cardiac_output_base: 0.92
-    };
+    modifiers.sex_factors = { hemoglobin_base: 0.9, cardiac_output_base: 0.92 };
   }
   
   // BMI-based modifiers
   if (demographics?.bmi) {
     const bmi = parseFloat(demographics.bmi);
     if (bmi >= 30) {
-      modifiers.obesity = {
-        insulin_resistance: 1.3 + (bmi - 30) * 0.05,
-        cardiac_strain: 1.1 + (bmi - 30) * 0.02,
-        inflammation: 1.2
-      };
-    }
-    if (bmi >= 35) {
-      modifiers.obesity = {
-        ...modifiers.obesity,
-        sleep_apnea_risk: 2.0,
-        hypertension_risk: 1.5
-      };
+      modifiers.obesity = { insulin_resistance: 1.3 + (bmi - 30) * 0.05, cardiac_strain: 1.1 + (bmi - 30) * 0.02 };
     }
   }
   
   // Smoking modifiers
   if (riskFactors?.smoking === 'current') {
     const packYears = riskFactors.smokingPackYears || 10;
-    modifiers.smoking = {
-      lung_function: 0.85 - packYears * 0.01,
-      vascular_damage: 1.3 + packYears * 0.02,
-      cancer_risk: 1.5 + packYears * 0.1,
-      copd_risk: 1.4 + packYears * 0.05
-    };
+    modifiers.smoking = { lung_function: 0.85 - packYears * 0.01, vascular_damage: 1.3 + packYears * 0.02 };
   } else if (riskFactors?.smoking === 'former') {
-    const packYears = riskFactors.smokingPackYears || 10;
-    modifiers.smoking = {
-      lung_function: 0.9 - packYears * 0.005,
-      vascular_damage: 1.1,
-      cancer_risk: 1.2 + packYears * 0.03
-    };
+    modifiers.smoking = { lung_function: 0.9, vascular_damage: 1.1 };
   }
   
   // Alcohol modifiers
   if (riskFactors?.alcohol === 'heavy') {
-    modifiers.alcohol = {
-      liver_function: 0.7,
-      bleeding_risk: 1.3,
-      cardiomyopathy_risk: 1.5,
-      hepatic_enzyme: 1.5
-    };
-  } else if (riskFactors?.alcohol === 'moderate') {
-    modifiers.alcohol = {
-      hdl_effect: 1.1, // Slight positive effect on HDL
-      liver_function: 0.95
-    };
+    modifiers.alcohol = { liver_function: 0.7, bleeding_risk: 1.3 };
   }
   
   // Family history modifiers
-  if (familyHistory?.cad) {
-    modifiers.family_cardiac = { cad_risk: 1.5, mi_risk: 1.4 };
-  }
-  if (familyHistory?.diabetes) {
-    modifiers.family_metabolic = { diabetes_risk: 2.0, metabolic_syndrome: 1.3 };
-  }
-  if (familyHistory?.stroke) {
-    modifiers.family_cerebral = { stroke_risk: 1.4 };
-  }
-  if (familyHistory?.suddenDeath) {
-    modifiers.family_arrhythmia = { arrhythmia_risk: 1.8, scd_risk: 2.0 };
-  }
+  if (familyHistory?.cad) modifiers.family_cardiac = { cad_risk: 1.5 };
+  if (familyHistory?.diabetes) modifiers.family_metabolic = { diabetes_risk: 2.0 };
+  if (familyHistory?.stroke) modifiers.family_cerebral = { stroke_risk: 1.4 };
   
   // Comorbidity modifiers
   if (comorbidities?.includes('diabetes')) {
-    modifiers.diabetes = {
-      vascular_disease: 1.5,
-      renal_risk: 1.3,
-      neuropathy: 1.2,
-      wound_healing: 0.8
-    };
+    modifiers.diabetes = { vascular_disease: 1.5, renal_risk: 1.3 };
   }
   if (comorbidities?.includes('hypertension')) {
-    modifiers.hypertension = {
-      stroke_risk: 1.6,
-      heart_failure: 1.4,
-      renal_disease: 1.3,
-      lvh_risk: 1.5
-    };
+    modifiers.hypertension = { stroke_risk: 1.6, heart_failure: 1.4 };
   }
   if (comorbidities?.includes('ckd')) {
-    modifiers.ckd = {
-      drug_clearance: 0.6,
-      anemia_risk: 1.5,
-      bleeding_risk: 1.2,
-      cardiovascular_risk: 1.8
-    };
+    modifiers.ckd = { drug_clearance: 0.6, cardiovascular_risk: 1.8 };
   }
   
   return modifiers;
 };
+
+// Collapsible Section Component - defined outside of PatientEditor
+const CollapsibleSection = ({ title, icon: Icon, isExpanded, onToggle, children }) => (
+  <div className="border border-border/50 rounded-lg overflow-hidden">
+    <button
+      className="w-full flex items-center justify-between p-2 bg-muted/30 hover:bg-muted/50 transition-colors"
+      onClick={onToggle}
+    >
+      <div className="flex items-center gap-2 text-xs font-medium">
+        <Icon className="w-3 h-3" />
+        {title}
+      </div>
+      {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+    </button>
+    <AnimatePresence>
+      {isExpanded && (
+        <motion.div
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: 'auto', opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          className="p-2 space-y-2"
+        >
+          {children}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  </div>
+);
 
 // Patient Profile Card Component
 const PatientCard = ({ patient, isActive, onSelect, onEdit, onDelete, compact = false }) => {
@@ -194,7 +144,7 @@ const PatientCard = ({ patient, isActive, onSelect, onEdit, onDelete, compact = 
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       className={`
-        relative p-2 rounded-lg border cursor-pointer transition-all
+        relative p-2 rounded-lg border cursor-pointer transition-all group
         ${isActive 
           ? 'border-primary bg-primary/10 ring-2 ring-primary/50' 
           : 'border-border/50 bg-card/50 hover:border-border hover:bg-card/80'
@@ -226,16 +176,12 @@ const PatientCard = ({ patient, isActive, onSelect, onEdit, onDelete, compact = 
             </div>
           )}
           {isNull && (
-            <div className="text-[10px] text-muted-foreground">
-              No patient factors applied
-            </div>
+            <div className="text-[10px] text-muted-foreground">No patient factors applied</div>
           )}
         </div>
         
         {isActive && (
-          <Badge variant="default" className="text-[9px] h-4 px-1">
-            Active
-          </Badge>
+          <Badge variant="default" className="text-[9px] h-4 px-1">Active</Badge>
         )}
       </div>
       
@@ -287,85 +233,56 @@ const PatientCard = ({ patient, isActive, onSelect, onEdit, onDelete, compact = 
 
 // Patient Editor Form
 const PatientEditor = ({ patient, onSave, onCancel }) => {
-  const [formData, setFormData] = useState({
-    name: patient?.name || '',
-    demographics: {
-      age: patient?.demographics?.age || '',
-      sex: patient?.demographics?.sex || '',
-      height: patient?.demographics?.height || '',
-      weight: patient?.demographics?.weight || '',
-      bmi: patient?.demographics?.bmi || ''
-    },
-    riskFactors: {
-      smoking: patient?.riskFactors?.smoking || 'never',
-      smokingPackYears: patient?.riskFactors?.smokingPackYears || 0,
-      alcohol: patient?.riskFactors?.alcohol || 'none',
-      alcoholDrinksPerWeek: patient?.riskFactors?.alcoholDrinksPerWeek || 0,
-      exercise: patient?.riskFactors?.exercise || 'moderate',
-      diet: patient?.riskFactors?.diet || 'average'
-    },
-    familyHistory: {
-      cad: patient?.familyHistory?.cad || false,
-      diabetes: patient?.familyHistory?.diabetes || false,
-      stroke: patient?.familyHistory?.stroke || false,
-      cancer: patient?.familyHistory?.cancer || false,
-      hypertension: patient?.familyHistory?.hypertension || false,
-      arrhythmia: patient?.familyHistory?.arrhythmia || false,
-      suddenDeath: patient?.familyHistory?.suddenDeath || false
-    },
-    comorbidities: patient?.comorbidities || [],
-    medications: patient?.medications || [],
-    allergies: patient?.allergies || []
+  const [name, setName] = useState(patient?.name || '');
+  const [age, setAge] = useState(patient?.demographics?.age || '');
+  const [sex, setSex] = useState(patient?.demographics?.sex || '');
+  const [height, setHeight] = useState(patient?.demographics?.height || '');
+  const [weight, setWeight] = useState(patient?.demographics?.weight || '');
+  const [smoking, setSmoking] = useState(patient?.riskFactors?.smoking || 'never');
+  const [smokingPackYears, setSmokingPackYears] = useState(patient?.riskFactors?.smokingPackYears || 0);
+  const [alcohol, setAlcohol] = useState(patient?.riskFactors?.alcohol || 'none');
+  const [familyHistory, setFamilyHistory] = useState(patient?.familyHistory || {
+    cad: false, diabetes: false, stroke: false, cancer: false, hypertension: false, arrhythmia: false, suddenDeath: false
   });
+  const [comorbidities, setComorbidities] = useState(patient?.comorbidities || []);
+  const [expanded, setExpanded] = useState({ demographics: true, riskFactors: true, familyHistory: false, comorbidities: false });
   
-  const [expanded, setExpanded] = useState({
-    demographics: true,
-    riskFactors: true,
-    familyHistory: false,
-    comorbidities: false
-  });
-  
-  // Calculate BMI when height/weight change
-  useEffect(() => {
-    const { height, weight } = formData.demographics;
+  // Calculate BMI
+  const bmi = useMemo(() => {
     if (height && weight) {
       const heightM = parseFloat(height) / 100;
       const weightKg = parseFloat(weight);
       if (heightM > 0 && weightKg > 0) {
-        const bmi = (weightKg / (heightM * heightM)).toFixed(1);
-        setFormData(prev => ({
-          ...prev,
-          demographics: { ...prev.demographics, bmi }
-        }));
+        return (weightKg / (heightM * heightM)).toFixed(1);
       }
     }
-  }, [formData.demographics.height, formData.demographics.weight]);
+    return null;
+  }, [height, weight]);
   
-  const updateField = (section, field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [section]: { ...prev[section], [field]: value }
-    }));
-  };
+  const toggleExpanded = useCallback((section) => {
+    setExpanded(prev => ({ ...prev, [section]: !prev[section] }));
+  }, []);
   
-  const toggleFamilyHistory = (key) => {
-    setFormData(prev => ({
-      ...prev,
-      familyHistory: { ...prev.familyHistory, [key]: !prev.familyHistory[key] }
-    }));
-  };
+  const toggleFamilyHistory = useCallback((key) => {
+    setFamilyHistory(prev => ({ ...prev, [key]: !prev[key] }));
+  }, []);
   
-  const toggleComorbidity = (condition) => {
-    setFormData(prev => ({
-      ...prev,
-      comorbidities: prev.comorbidities.includes(condition)
-        ? prev.comorbidities.filter(c => c !== condition)
-        : [...prev.comorbidities, condition]
-    }));
-  };
+  const toggleComorbidity = useCallback((condition) => {
+    setComorbidities(prev => 
+      prev.includes(condition) ? prev.filter(c => c !== condition) : [...prev, condition]
+    );
+  }, []);
   
-  const handleSave = () => {
-    if (!formData.name.trim()) return;
+  const handleSave = useCallback(() => {
+    if (!name.trim()) return;
+    
+    const formData = {
+      name,
+      demographics: { age, sex, height, weight, bmi },
+      riskFactors: { smoking, smokingPackYears, alcohol, alcoholDrinksPerWeek: 0 },
+      familyHistory,
+      comorbidities
+    };
     
     const newPatient = {
       id: patient?.id || `patient_${Date.now()}`,
@@ -376,34 +293,7 @@ const PatientEditor = ({ patient, onSave, onCancel }) => {
     };
     
     onSave(newPatient);
-  };
-  
-  const Section = ({ title, icon: Icon, id, children }) => (
-    <div className="border border-border/50 rounded-lg overflow-hidden">
-      <button
-        className="w-full flex items-center justify-between p-2 bg-muted/30 hover:bg-muted/50 transition-colors"
-        onClick={() => setExpanded(prev => ({ ...prev, [id]: !prev[id] }))}
-      >
-        <div className="flex items-center gap-2 text-xs font-medium">
-          <Icon className="w-3 h-3" />
-          {title}
-        </div>
-        {expanded[id] ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-      </button>
-      <AnimatePresence>
-        {expanded[id] && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="p-2 space-y-2"
-          >
-            {children}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
+  }, [name, age, sex, height, weight, bmi, smoking, smokingPackYears, alcohol, familyHistory, comorbidities, patient, onSave]);
   
   return (
     <div className="space-y-3">
@@ -412,30 +302,35 @@ const PatientEditor = ({ patient, onSave, onCancel }) => {
         <label className="text-xs font-medium text-muted-foreground">Patient Name</label>
         <Input
           placeholder="e.g., John Doe, Case #123"
-          value={formData.name}
-          onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
           className="h-8 text-sm mt-1"
         />
       </div>
       
       {/* Demographics */}
-      <Section title="Demographics" icon={User} id="demographics">
+      <CollapsibleSection 
+        title="Demographics" 
+        icon={User} 
+        isExpanded={expanded.demographics}
+        onToggle={() => toggleExpanded('demographics')}
+      >
         <div className="grid grid-cols-2 gap-2">
           <div>
             <label className="text-[10px] text-muted-foreground">Age</label>
             <Input
               type="number"
               placeholder="Years"
-              value={formData.demographics.age}
-              onChange={(e) => updateField('demographics', 'age', e.target.value)}
+              value={age}
+              onChange={(e) => setAge(e.target.value)}
               className="h-7 text-xs"
             />
           </div>
           <div>
             <label className="text-[10px] text-muted-foreground">Sex</label>
             <select
-              value={formData.demographics.sex}
-              onChange={(e) => updateField('demographics', 'sex', e.target.value)}
+              value={sex}
+              onChange={(e) => setSex(e.target.value)}
               className="w-full h-7 text-xs rounded-md border border-border bg-background px-2"
             >
               <option value="">Select</option>
@@ -448,8 +343,8 @@ const PatientEditor = ({ patient, onSave, onCancel }) => {
             <Input
               type="number"
               placeholder="cm"
-              value={formData.demographics.height}
-              onChange={(e) => updateField('demographics', 'height', e.target.value)}
+              value={height}
+              onChange={(e) => setHeight(e.target.value)}
               className="h-7 text-xs"
             />
           </div>
@@ -458,28 +353,28 @@ const PatientEditor = ({ patient, onSave, onCancel }) => {
             <Input
               type="number"
               placeholder="kg"
-              value={formData.demographics.weight}
-              onChange={(e) => updateField('demographics', 'weight', e.target.value)}
+              value={weight}
+              onChange={(e) => setWeight(e.target.value)}
               className="h-7 text-xs"
             />
           </div>
         </div>
-        {formData.demographics.bmi && (
+        {bmi && (
           <div className="text-xs text-center mt-2">
-            <Badge variant={
-              parseFloat(formData.demographics.bmi) >= 30 ? 'destructive' :
-              parseFloat(formData.demographics.bmi) >= 25 ? 'secondary' : 'outline'
-            }>
-              BMI: {formData.demographics.bmi}
-              {parseFloat(formData.demographics.bmi) >= 30 ? ' (Obese)' :
-               parseFloat(formData.demographics.bmi) >= 25 ? ' (Overweight)' : ' (Normal)'}
+            <Badge variant={parseFloat(bmi) >= 30 ? 'destructive' : parseFloat(bmi) >= 25 ? 'secondary' : 'outline'}>
+              BMI: {bmi} {parseFloat(bmi) >= 30 ? '(Obese)' : parseFloat(bmi) >= 25 ? '(Overweight)' : '(Normal)'}
             </Badge>
           </div>
         )}
-      </Section>
+      </CollapsibleSection>
       
       {/* Risk Factors */}
-      <Section title="Risk Factors" icon={AlertCircle} id="riskFactors">
+      <CollapsibleSection 
+        title="Risk Factors" 
+        icon={AlertCircle}
+        isExpanded={expanded.riskFactors}
+        onToggle={() => toggleExpanded('riskFactors')}
+      >
         {/* Smoking */}
         <div className="space-y-1">
           <label className="text-[10px] text-muted-foreground flex items-center gap-1">
@@ -489,21 +384,21 @@ const PatientEditor = ({ patient, onSave, onCancel }) => {
             {['never', 'former', 'current'].map(status => (
               <Button
                 key={status}
-                variant={formData.riskFactors.smoking === status ? 'default' : 'outline'}
+                variant={smoking === status ? 'default' : 'outline'}
                 size="sm"
                 className="text-[10px] h-6 px-2 capitalize"
-                onClick={() => updateField('riskFactors', 'smoking', status)}
+                onClick={() => setSmoking(status)}
               >
                 {status}
               </Button>
             ))}
           </div>
-          {formData.riskFactors.smoking !== 'never' && (
+          {smoking !== 'never' && (
             <Input
               type="number"
               placeholder="Pack-years"
-              value={formData.riskFactors.smokingPackYears}
-              onChange={(e) => updateField('riskFactors', 'smokingPackYears', e.target.value)}
+              value={smokingPackYears}
+              onChange={(e) => setSmokingPackYears(e.target.value)}
               className="h-6 text-xs w-24 mt-1"
             />
           )}
@@ -518,20 +413,25 @@ const PatientEditor = ({ patient, onSave, onCancel }) => {
             {['none', 'social', 'moderate', 'heavy'].map(status => (
               <Button
                 key={status}
-                variant={formData.riskFactors.alcohol === status ? 'default' : 'outline'}
+                variant={alcohol === status ? 'default' : 'outline'}
                 size="sm"
                 className="text-[10px] h-6 px-2 capitalize"
-                onClick={() => updateField('riskFactors', 'alcohol', status)}
+                onClick={() => setAlcohol(status)}
               >
                 {status}
               </Button>
             ))}
           </div>
         </div>
-      </Section>
+      </CollapsibleSection>
       
       {/* Family History */}
-      <Section title="Family History (1st Degree)" icon={Users} id="familyHistory">
+      <CollapsibleSection 
+        title="Family History (1st Degree)" 
+        icon={Users}
+        isExpanded={expanded.familyHistory}
+        onToggle={() => toggleExpanded('familyHistory')}
+      >
         <div className="flex flex-wrap gap-1">
           {[
             { key: 'cad', label: 'CAD' },
@@ -544,43 +444,45 @@ const PatientEditor = ({ patient, onSave, onCancel }) => {
           ].map(item => (
             <Badge
               key={item.key}
-              variant={formData.familyHistory[item.key] ? 'default' : 'outline'}
+              variant={familyHistory[item.key] ? 'default' : 'outline'}
               className="cursor-pointer text-[10px] h-5"
               onClick={() => toggleFamilyHistory(item.key)}
             >
-              {formData.familyHistory[item.key] && <Check className="w-2 h-2 mr-0.5" />}
+              {familyHistory[item.key] && <Check className="w-2 h-2 mr-0.5" />}
               {item.label}
             </Badge>
           ))}
         </div>
-      </Section>
+      </CollapsibleSection>
       
       {/* Comorbidities */}
-      <Section title="Comorbidities" icon={History} id="comorbidities">
+      <CollapsibleSection 
+        title="Comorbidities" 
+        icon={History}
+        isExpanded={expanded.comorbidities}
+        onToggle={() => toggleExpanded('comorbidities')}
+      >
         <div className="flex flex-wrap gap-1">
-          {[
-            'diabetes', 'hypertension', 'ckd', 'copd', 'chf',
-            'afib', 'cad', 'pah', 'cirrhosis', 'obesity'
-          ].map(condition => (
+          {['diabetes', 'hypertension', 'ckd', 'copd', 'chf', 'afib', 'cad', 'pah', 'cirrhosis', 'obesity'].map(condition => (
             <Badge
               key={condition}
-              variant={formData.comorbidities.includes(condition) ? 'destructive' : 'outline'}
+              variant={comorbidities.includes(condition) ? 'destructive' : 'outline'}
               className="cursor-pointer text-[10px] h-5 uppercase"
               onClick={() => toggleComorbidity(condition)}
             >
-              {formData.comorbidities.includes(condition) && <Check className="w-2 h-2 mr-0.5" />}
+              {comorbidities.includes(condition) && <Check className="w-2 h-2 mr-0.5" />}
               {condition}
             </Badge>
           ))}
         </div>
-      </Section>
+      </CollapsibleSection>
       
       {/* Action Buttons */}
       <div className="flex gap-2 pt-2">
         <Button variant="outline" size="sm" className="flex-1" onClick={onCancel}>
           Cancel
         </Button>
-        <Button size="sm" className="flex-1" onClick={handleSave} disabled={!formData.name.trim()}>
+        <Button size="sm" className="flex-1" onClick={handleSave} disabled={!name.trim()}>
           <Save className="w-3 h-3 mr-1" />
           Save Patient
         </Button>
@@ -590,29 +492,21 @@ const PatientEditor = ({ patient, onSave, onCancel }) => {
 };
 
 // Main Patient Manager Component
-const PatientManager = ({ 
-  onPatientChange, 
-  selectedDisease,
-  compact = false 
-}) => {
-  const [patients, setPatients] = useState([]);
+const PatientManager = ({ onPatientChange, selectedDisease, compact = false }) => {
+  // Initialize state with data from localStorage
+  const [patients, setPatients] = useState(() => {
+    try {
+      const saved = localStorage.getItem('phicore_patients');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+  
   const [activePatient, setActivePatient] = useState(NULL_PATIENT);
   const [isEditing, setIsEditing] = useState(false);
   const [editingPatient, setEditingPatient] = useState(null);
   const [showPatientList, setShowPatientList] = useState(false);
-  
-  // Load patients from localStorage on mount
-  useEffect(() => {
-    const savedPatients = localStorage.getItem('phicore_patients');
-    if (savedPatients) {
-      try {
-        const parsed = JSON.parse(savedPatients);
-        setPatients(parsed);
-      } catch (e) {
-        console.error('Error loading patients:', e);
-      }
-    }
-  }, []);
   
   // Save patients to localStorage when they change
   useEffect(() => {
@@ -658,8 +552,8 @@ const PatientManager = ({
     setIsEditing(true);
   }, []);
   
-  // Apply patient modifiers to disease parameters
-  const getModifiedParameterInfo = useCallback(() => {
+  // Calculate modifier info
+  const modifierInfo = useMemo(() => {
     if (!activePatient || activePatient.isNull || !selectedDisease) return null;
     
     const modifiers = activePatient.modifiers || calculatePatientModifiers(activePatient);
@@ -667,13 +561,8 @@ const PatientManager = ({
       return acc + Object.keys(modifiers[key]).length;
     }, 0);
     
-    return {
-      count: modifierCount,
-      categories: Object.keys(modifiers)
-    };
+    return { count: modifierCount, categories: Object.keys(modifiers) };
   }, [activePatient, selectedDisease]);
-  
-  const modifierInfo = getModifiedParameterInfo();
   
   if (isEditing) {
     return (
@@ -701,12 +590,7 @@ const PatientManager = ({
           <User className="w-3 h-3" />
           Active Patient
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-6 text-xs"
-          onClick={() => setIsEditing(true)}
-        >
+        <Button variant="ghost" size="sm" className="h-6 text-xs" onClick={() => setIsEditing(true)}>
           <UserPlus className="w-3 h-3 mr-1" />
           New
         </Button>
@@ -749,32 +633,24 @@ const PatientManager = ({
           >
             <div className="text-xs font-semibold text-muted-foreground flex items-center justify-between">
               <span>Saved Patients ({patients.length + 1})</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-5 w-5 p-0"
-                onClick={() => setShowPatientList(false)}
-              >
+              <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={() => setShowPatientList(false)}>
                 <X className="w-3 h-3" />
               </Button>
             </div>
             
             <ScrollArea className="max-h-48">
               <div className="space-y-1.5">
-                {/* Null Patient Option */}
                 <PatientCard
                   patient={NULL_PATIENT}
                   isActive={activePatient.id === 'null'}
                   onSelect={handleSelectPatient}
                   compact
                 />
-                
-                {/* Saved Patients */}
-                {patients.map(patient => (
+                {patients.map(p => (
                   <PatientCard
-                    key={patient.id}
-                    patient={patient}
-                    isActive={activePatient.id === patient.id}
+                    key={p.id}
+                    patient={p}
+                    isActive={activePatient.id === p.id}
                     onSelect={handleSelectPatient}
                     onEdit={handleEditPatient}
                     onDelete={handleDeletePatient}
