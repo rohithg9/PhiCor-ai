@@ -3041,7 +3041,7 @@ const DashboardMultiScale = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col overflow-hidden pt-28 lg:pt-0">
+      <main className={`flex-1 flex flex-col overflow-hidden lg:pt-0 ${currentDisease ? 'pt-[7.5rem]' : 'pt-28'}`}>
         {/* Active Condition Banner - Prominent title showing selected condition */}
         <AnimatePresence>
           {currentDisease && (
