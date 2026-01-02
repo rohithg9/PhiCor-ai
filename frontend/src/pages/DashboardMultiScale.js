@@ -3032,26 +3032,6 @@ const DashboardMultiScale = () => {
       {/* Global Feature Navigation */}
       <FeatureNav />
       
-      {/* Page Title Header - Like other pages */}
-      <div className="hidden lg:block container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-              <span className="text-white font-serif text-3xl font-bold">Φ</span>
-            </div>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-                PhiCor Engine
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Multi-scale organ models & physiology database
-              </p>
-            </div>
-          </div>
-          <TutorialButton onClick={tutorial.open} />
-        </div>
-      </div>
-      
       {/* Tutorial Overlay */}
       <FeatureTutorial 
         feature="dashboard" 
@@ -3059,45 +3039,224 @@ const DashboardMultiScale = () => {
         onClose={tutorial.close} 
       />
       
-      <div className="flex-1 flex">
-      {/* Mobile Header */}
+      {/* Desktop Page Header */}
+      <div className="hidden lg:block border-b border-border/50 bg-card/30">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                <span className="text-white font-serif text-2xl font-bold">Φ</span>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-foreground">PhiCor Engine</h1>
+                <p className="text-xs text-muted-foreground">Mathematical Human Body Model</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {/* Disease Search Button */}
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="outline" className="gap-2">
+                    <Search className="w-4 h-4" />
+                    <span>Find Condition</span>
+                    {selectedDisease && currentDisease && (
+                      <Badge variant="destructive" className="ml-1">{currentDisease.name?.split(' ')[0]}</Badge>
+                    )}
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-96 p-0 flex flex-col">
+                  <DiseasePanel 
+                    diseases={diseases}
+                    selectedDisease={selectedDisease}
+                    onSelectDisease={handleDiseaseSelect}
+                    currentDisease={currentDisease}
+                    diseaseSeverity={diseaseSeverity}
+                    onChangeSeverity={setDiseaseSeverity}
+                    showClinicalPanel={showClinicalPanel}
+                    onToggleClinicalPanel={handleToggleClinicalPanel}
+                  />
+                </SheetContent>
+              </Sheet>
+              <TutorialButton onClick={tutorial.open} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Active Disease Banner - When disease selected */}
+      <AnimatePresence>
+        {currentDisease && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="bg-gradient-to-r from-destructive/10 via-red-500/10 to-orange-500/10 border-b border-destructive/30 overflow-hidden"
+          >
+            <div className="container mx-auto px-4 py-3">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="shrink-0 w-10 h-10 rounded-xl bg-destructive/20 flex items-center justify-center">
+                    <AlertTriangle className="w-5 h-5 text-destructive" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[10px] text-destructive font-semibold uppercase tracking-wider">Active Condition</span>
+                      {currentDisease.icd10 && (
+                        <Badge variant="outline" className="text-[9px] border-destructive/40 text-destructive">
+                          ICD-10: {currentDisease.icd10}
+                        </Badge>
+                      )}
+                    </div>
+                    <h2 className="text-lg lg:text-xl font-bold text-foreground truncate">{currentDisease.name}</h2>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary" className="hidden sm:flex">
+                    {Object.values(affectedCounts).reduce((a, b) => a + b, 0)} affected parameters
+                  </Badge>
+                  <Button variant="outline" size="sm" onClick={resetDisease} className="border-destructive/30 text-destructive hover:bg-destructive/10">
+                    <X className="w-4 h-4 mr-1" />
+                    Clear
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Horizontal Organ Tabs */}
+      <div className="border-b border-border/50 bg-card/20 overflow-x-auto">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center gap-1 py-2">
+            {organs.map(([organId, organ]) => {
+              const count = affectedCounts[organId] || 0;
+              const isSelected = selectedOrgan === organId;
+              return (
+                <Button
+                  key={organId}
+                  variant={isSelected ? "default" : "ghost"}
+                  size="sm"
+                  className={`gap-1.5 shrink-0 ${isSelected ? '' : 'text-muted-foreground'}`}
+                  onClick={() => setSelectedOrgan(organId)}
+                >
+                  <span className="text-base">{organ.icon}</span>
+                  <span className="hidden sm:inline text-xs">{organ.name}</span>
+                  {selectedDisease && count > 0 && (
+                    <Badge variant={isSelected ? "secondary" : "outline"} className="h-4 px-1 text-[10px]">
+                      {count}
+                    </Badge>
+                  )}
+                </Button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Header - Simplified */}
       <div className="lg:hidden fixed top-14 left-0 right-0 z-40 bg-background/95 backdrop-blur border-b border-border/50">
-        {/* Main Mobile Header Row */}
-        <div className="h-14 flex items-center justify-between px-3">
-          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+        <div className="h-12 flex items-center justify-between px-3 gap-2">
+          {/* Left Panel Slide-in */}
+          <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="shrink-0">
-                <Menu className="w-5 h-5" />
+                <User className="w-5 h-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-72 p-0">
-              <OrganSidebar 
-                organs={organs}
-                selectedOrgan={selectedOrgan}
-                onSelectOrgan={handleOrganSelect}
-                currentDisease={currentDisease}
-                affectedCounts={affectedCounts}
-                onToggleTheme={toggleTheme}
-                isDark={isDark}
-                isMobile
+            <SheetContent side="left" className="w-80 p-4">
+              <LeftPanel 
+                selectedDisease={currentDisease}
+                currentOrgan={currentOrgan}
+                isMobile={true}
               />
             </SheetContent>
           </Sheet>
 
-          <div className="flex items-center gap-2 flex-1 justify-center min-w-0">
-            <span className="text-xl">{currentOrgan?.icon}</span>
-            <div className="flex flex-col items-start min-w-0">
-              <span className="font-semibold text-sm truncate">{currentOrgan?.name}</span>
-              {currentScale && (
-                <span className="text-[10px] text-muted-foreground truncate">
-                  Viewing: {currentScale.name || selectedScale}
-                </span>
-              )}
-            </div>
+          {/* Current Organ/View Info */}
+          <div className="flex-1 flex items-center justify-center gap-2 min-w-0">
+            <span className="text-lg">{currentOrgan?.icon}</span>
+            <span className="font-medium text-sm truncate">{currentOrgan?.name}</span>
           </div>
           
-          {/* Mobile Tutorial Button and Disease Sheet */}
-          <div className="flex items-center gap-1 shrink-0">
+          {/* Disease Search */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className={selectedDisease ? 'text-destructive' : ''}>
+                <Stethoscope className="w-5 h-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-80 p-0 flex flex-col">
+              <DiseasePanel 
+                diseases={diseases}
+                selectedDisease={selectedDisease}
+                onSelectDisease={handleDiseaseSelect}
+                currentDisease={currentDisease}
+                diseaseSeverity={diseaseSeverity}
+                onChangeSeverity={setDiseaseSeverity}
+                showClinicalPanel={showClinicalPanel}
+                onToggleClinicalPanel={handleToggleClinicalPanel}
+                isMobile
+              />
+            </SheetContent>
+          </Sheet>
+        </div>
+
+        {/* Mobile Disease Banner */}
+        <AnimatePresence>
+          {currentDisease && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="bg-gradient-to-r from-destructive/15 to-orange-500/10 border-t border-destructive/20 px-3 py-2"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <AlertTriangle className="w-4 h-4 text-destructive shrink-0" />
+                  <span className="text-sm font-semibold truncate">{currentDisease.name}</span>
+                </div>
+                <Button variant="ghost" size="sm" onClick={resetDisease} className="h-6 px-2 text-destructive">
+                  <X className="w-3 h-3" />
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Mobile Organ Tabs */}
+        <div className="overflow-x-auto border-t border-border/30">
+          <div className="flex items-center gap-1 px-2 py-1.5">
+            {organs.map(([organId, organ]) => {
+              const count = affectedCounts[organId] || 0;
+              const isSelected = selectedOrgan === organId;
+              return (
+                <Button
+                  key={organId}
+                  variant={isSelected ? "default" : "ghost"}
+                  size="sm"
+                  className={`gap-1 shrink-0 h-8 px-2 ${isSelected ? '' : 'text-muted-foreground'}`}
+                  onClick={() => setSelectedOrgan(organId)}
+                >
+                  <span className="text-sm">{organ.icon}</span>
+                  {selectedDisease && count > 0 && (
+                    <span className="text-[10px]">{count}</span>
+                  )}
+                </Button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex">
+        {/* Desktop Left Panel */}
+        <LeftPanel 
+          selectedDisease={currentDisease}
+          currentOrgan={currentOrgan}
+          className="hidden lg:flex"
+        />
             <TutorialButton onClick={tutorial.open} className="h-8 text-xs px-2" />
 
             <Sheet>
