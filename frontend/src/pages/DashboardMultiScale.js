@@ -2690,7 +2690,7 @@ const DashboardMultiScale = () => {
       }
     };
     fetchDiseaseParams();
-  }, []);
+  }, [getPrimaryOrganFromCategory]);
 
   const organs = useMemo(() => Object.entries(ORGAN_MODELS), []);
   
