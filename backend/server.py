@@ -2548,7 +2548,7 @@ IMPORTANT:
             "data": param_data
         }
         
-    except json.JSONDecodeError as e:
+    except json_module.JSONDecodeError as e:
         logger.error(f"JSON parse error: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to parse AI response: {str(e)}")
     except Exception as e:
