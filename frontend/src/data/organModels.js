@@ -1111,6 +1111,62 @@ export const ORGAN_MODELS = {
           description: "Bioavailability after first pass",
           evidence: "established",
           source: "Well-stirred model"
+        },
+        {
+          id: "meld_score",
+          name: "MELD Score",
+          latex: "MELD = 3.78 \\times ln(Bili) + 11.2 \\times ln(INR) + 9.57 \\times ln(Cr) + 6.43",
+          description: "Model for End-Stage Liver Disease (6-40 scale)",
+          evidence: "established",
+          source: "UNOS"
+        },
+        {
+          id: "child_pugh",
+          name: "Child-Pugh Score",
+          latex: "Score = Bili_{pts} + Alb_{pts} + INR_{pts} + Ascites_{pts} + Enceph_{pts}",
+          description: "Cirrhosis prognosis (A: 5-6, B: 7-9, C: 10-15)",
+          evidence: "established",
+          source: "Child-Pugh 1973"
+        },
+        {
+          id: "apri_score",
+          name: "APRI Score",
+          latex: "APRI = \\frac{AST / AST_{ULN}}{Platelets (10^9/L)} \\times 100",
+          description: "AST-to-Platelet Ratio Index (<0.5 rules out cirrhosis)",
+          evidence: "established",
+          source: "HCV fibrosis"
+        },
+        {
+          id: "fib4_score",
+          name: "FIB-4 Index",
+          latex: "FIB4 = \\frac{Age \\times AST}{Platelets \\times \\sqrt{ALT}}",
+          description: "Fibrosis staging (<1.3 F0-1, >2.67 F3-4)",
+          evidence: "established",
+          source: "Sterling 2006"
+        },
+        {
+          id: "maddrey_df",
+          name: "Maddrey Discriminant Function",
+          latex: "MDF = 4.6 \\times (PT_{patient} - PT_{control}) + Bilirubin",
+          description: "Alcoholic hepatitis severity (>32 = severe)",
+          evidence: "established",
+          source: "Maddrey 1978"
+        },
+        {
+          id: "r_ratio",
+          name: "R Ratio (Injury Pattern)",
+          latex: "R = \\frac{ALT / ALT_{ULN}}{ALP / ALP_{ULN}}",
+          description: "Hepatocellular (>5), cholestatic (<2), mixed (2-5)",
+          evidence: "established",
+          source: "ACG guidelines"
+        },
+        {
+          id: "half_life_liver",
+          name: "Drug Half-Life (Hepatic)",
+          latex: "t_{1/2} = \\frac{0.693 \\times V_d}{Cl_H}",
+          description: "Elimination half-life in liver disease",
+          evidence: "established",
+          source: "Pharmacokinetics"
         }
       ]
     },
