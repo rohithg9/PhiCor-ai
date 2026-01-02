@@ -1124,60 +1124,7 @@ const ClinicalDataPanel = ({ modifications, disease, severity }) => {
 };
 
 // Equation Derivation Component with Calculated Results
-
-      {error && (
-        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-3">
-          <div className="flex items-center gap-2 text-destructive text-sm">
-            <AlertTriangle className="w-4 h-4" />
-            <span>Failed to load clinical data: {error}</span>
-          </div>
-        </div>
-      )}
-
-      {clinicalData && !loading && !error && (
-        <>
-          {/* API Symptoms */}
-          {clinicalData.symptoms && (
-            <div className="rounded-lg border border-border/50 bg-card/50 p-3">
-              <h4 className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
-                <Thermometer className="w-3 h-3" /> API Symptoms
-              </h4>
-              <ul className="space-y-1">
-                {clinicalData.symptoms.slice(0, 4).map((symptom, i) => (
-                  <li key={i} className="text-xs flex items-start gap-2">
-                    <span className="text-primary mt-0.5">•</span>
-                    <span>{symptom}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* API Lab Values */}
-          {clinicalData.labValues && (
-            <div className="rounded-lg border border-border/50 bg-card/50 p-3">
-              <h4 className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
-                <TestTube className="w-3 h-3" /> API Lab Values
-              </h4>
-              <div className="space-y-2">
-                {Object.entries(clinicalData.labValues).slice(0, 3).map(([test, value], i) => (
-                  <div key={i} className="text-xs">
-                    <div className="flex justify-between">
-                      <span className="font-medium">{test}</span>
-                      <span className="text-primary">{value}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* API Treatment Recommendations */}
-          {clinicalData.treatments && (
-            <div className="rounded-lg border border-border/50 bg-card/50 p-3">
-              <h4 className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
-                <Pill className="w-3 h-3" /> API Treatment Recommendations
-              </h4>
+const EquationDerivation = ({ equation, expanded, onToggle, currentParams = {}, diseaseSeverity = 0.5, isDiseasedState = false }) => {
               <ul className="space-y-1">
                 {clinicalData.treatments.slice(0, 3).map((treatment, i) => (
                   <li key={i} className="text-xs flex items-start gap-2">
