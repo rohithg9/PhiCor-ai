@@ -3119,8 +3119,8 @@ const DashboardMultiScale = () => {
         Object.entries(scaleMods).forEach(([paramId, mod]) => {
           if (!mod || typeof mod !== 'object') return;
           
-          // Skip if direction is 'normal' or no meaningful data
-          if (mod.direction === 'normal' && !mod.change_percent && !mod.value) return;
+          // Skip if direction is 'normal' and no meaningful modification data
+          if (mod.direction === 'normal' && !mod.change_percent && !mod.value && !mod.factor && !mod.multiplier) return;
           
           // Try to find parameter definition in ORGAN_MODELS
           const paramDef = scaleData?.parameters?.find(p => p.id === paramId);
