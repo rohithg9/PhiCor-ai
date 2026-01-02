@@ -847,6 +847,121 @@ export const ORGAN_MODELS = {
           source: "Severinghaus equation"
         }
       ]
+    },
+
+    // PHYSICAL EXAM - Respiratory findings
+    physical_exam: {
+      title: "Physical Examination",
+      parameters: [
+        // === INSPECTION ===
+        { id: "respiratory_effort", name: "Respiratory Effort", value: 0, unit: "scale 0-3", range: [0, 3], evidence: "established" },
+        { id: "accessory_muscle_use", name: "Accessory Muscle Use", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "nasal_flaring", name: "Nasal Flaring Present", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "intercostal_retractions", name: "Intercostal Retractions", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "tripod_position", name: "Tripod Position", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "cyanosis", name: "Central Cyanosis", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "clubbing", name: "Digital Clubbing", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        
+        // === BREATH SOUNDS ===
+        { id: "breath_sounds_intensity", name: "Breath Sound Intensity", value: 1.0, unit: "scale", range: [0.5, 1.5], evidence: "established" },
+        { id: "crackles_present", name: "Crackles (Rales) Present", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "crackles_location", name: "Crackles Location Score", value: 0, unit: "zones", range: [0, 6], evidence: "established" },
+        { id: "wheezes_present", name: "Wheezes Present", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "wheeze_timing", name: "Wheeze Timing (exp/insp)", value: 0, unit: "score", range: [0, 2], evidence: "established" },
+        { id: "rhonchi_present", name: "Rhonchi Present", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "stridor_present", name: "Stridor Present", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "pleural_rub", name: "Pleural Friction Rub", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "bronchial_breath_sounds", name: "Bronchial Breath Sounds", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "diminished_breath_sounds", name: "Diminished Breath Sounds", value: 0, unit: "zones", range: [0, 6], evidence: "established" },
+        
+        // === PERCUSSION & PALPATION ===
+        { id: "percussion_dullness", name: "Percussion Dullness", value: 0, unit: "zones", range: [0, 6], evidence: "established" },
+        { id: "hyperresonance", name: "Hyperresonance Present", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "tactile_fremitus", name: "Tactile Fremitus", value: 1.0, unit: "scale", range: [0.5, 1.5], evidence: "established" },
+        { id: "chest_expansion", name: "Chest Expansion (asymmetry)", value: 0, unit: "cm difference", range: [0, 3], evidence: "established" },
+        { id: "tracheal_deviation", name: "Tracheal Deviation", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        
+        // === COUGH & SPUTUM ===
+        { id: "cough_severity", name: "Cough Severity", value: 0, unit: "scale 0-10", range: [0, 10], evidence: "established" },
+        { id: "sputum_production", name: "Sputum Production", value: 0, unit: "mL/day", range: [0, 100], evidence: "established" },
+        { id: "sputum_purulence", name: "Sputum Purulence Score", value: 0, unit: "scale 1-3", range: [0, 3], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "curb_65",
+          name: "CURB-65 Score",
+          latex: "CURB65 = Confusion + Urea>7 + RR>30 + BP<90 + Age\\geq65",
+          description: "Pneumonia severity (0-1 outpt, 2 short stay, 3+ ICU)",
+          evidence: "established",
+          source: "BTS Guidelines"
+        }
+      ]
+    },
+
+    // ARTERIAL BLOOD GAS & LABS
+    lab_tests: {
+      title: "Blood Gases & Respiratory Labs",
+      parameters: [
+        // === ARTERIAL BLOOD GAS ===
+        { id: "ph", name: "Arterial pH", value: 7.40, unit: "", range: [7.35, 7.45], evidence: "established" },
+        { id: "paco2", name: "PaCO₂", value: 40, unit: "mmHg", range: [35, 45], evidence: "established" },
+        { id: "pao2", name: "PaO₂", value: 95, unit: "mmHg", range: [80, 100], evidence: "established" },
+        { id: "hco3", name: "HCO₃⁻ (Bicarbonate)", value: 24, unit: "mEq/L", range: [22, 26], evidence: "established" },
+        { id: "base_excess", name: "Base Excess", value: 0, unit: "mEq/L", range: [-2, 2], evidence: "established" },
+        { id: "sao2", name: "SaO₂ (ABG)", value: 97, unit: "%", range: [95, 100], evidence: "established" },
+        { id: "aa_gradient", name: "A-a Gradient", value: 10, unit: "mmHg", range: [5, 15], evidence: "established" },
+        { id: "pf_ratio", name: "P/F Ratio", value: 450, unit: "", range: [400, 500], evidence: "established" },
+        
+        // === DERIVED VALUES ===
+        { id: "anion_gap", name: "Anion Gap", value: 10, unit: "mEq/L", range: [8, 12], evidence: "established" },
+        { id: "delta_delta", name: "Delta-Delta Ratio", value: 1.0, unit: "ratio", range: [1, 2], evidence: "established" },
+        { id: "expected_pco2", name: "Expected PaCO₂ (for HCO3)", value: 40, unit: "mmHg", range: [35, 45], evidence: "established" },
+        
+        // === RESPIRATORY BIOMARKERS ===
+        { id: "procalcitonin", name: "Procalcitonin", value: 0.1, unit: "ng/mL", range: [0, 0.5], evidence: "established" },
+        { id: "lactate", name: "Lactate", value: 1.0, unit: "mmol/L", range: [0.5, 2.0], evidence: "established" },
+        { id: "bnp_respiratory", name: "BNP (for CHF eval)", value: 50, unit: "pg/mL", range: [0, 100], evidence: "established" },
+        
+        // === SPUTUM ANALYSIS ===
+        { id: "sputum_wbc", name: "Sputum WBC Count", value: 0, unit: "/hpf", range: [0, 25], evidence: "established" },
+        { id: "sputum_gram_positive", name: "Gram Positive Organisms", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "sputum_gram_negative", name: "Gram Negative Organisms", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "henderson_hasselbalch",
+          name: "Henderson-Hasselbalch",
+          latex: "pH = 6.1 + \\log\\frac{[HCO_3^-]}{0.03 \\times P_aCO_2}",
+          description: "Relationship between pH, HCO3, and CO2",
+          evidence: "established",
+          source: "Acid-base physiology"
+        },
+        {
+          id: "winters_formula",
+          name: "Winter's Formula",
+          latex: "Expected\\ P_aCO_2 = 1.5 \\times [HCO_3] + 8 \\pm 2",
+          description: "Expected respiratory compensation in metabolic acidosis",
+          evidence: "established",
+          source: "Acid-base calculations"
+        }
+      ]
+    },
+
+    // IMAGING - Chest imaging parameters
+    imaging: {
+      title: "Imaging Parameters",
+      parameters: [
+        { id: "chest_xray_opacity", name: "CXR Opacity Score", value: 0, unit: "quadrants", range: [0, 4], evidence: "established" },
+        { id: "ct_consolidation", name: "CT Consolidation %", value: 0, unit: "%", range: [0, 100], evidence: "established" },
+        { id: "ground_glass_opacity", name: "Ground Glass Opacity %", value: 0, unit: "%", range: [0, 100], evidence: "established" },
+        { id: "pleural_effusion", name: "Pleural Effusion Size", value: 0, unit: "mm", range: [0, 100], evidence: "established" },
+        { id: "pneumothorax", name: "Pneumothorax %", value: 0, unit: "%", range: [0, 100], evidence: "established" },
+        { id: "nodule_size", name: "Pulmonary Nodule Size", value: 0, unit: "mm", range: [0, 30], evidence: "established" },
+        { id: "emphysema_score", name: "Emphysema Score (CT)", value: 0, unit: "%", range: [0, 100], evidence: "established" },
+        { id: "bronchial_wall_thickening", name: "Bronchial Wall Thickening", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "cardiomegaly", name: "Cardiomegaly (CTR)", value: 45, unit: "%", range: [30, 50], evidence: "established" },
+      ],
+      equations: []
     }
   },
 
