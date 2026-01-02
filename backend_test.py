@@ -473,10 +473,10 @@ def test_drug_detail():
     return True
 
 def run_all_tests():
-    """Run all Mathematical Human Body Dashboard tests"""
-    print("🧪 MATHEMATICAL HUMAN BODY DASHBOARD COMPREHENSIVE TESTING")
+    """Run all PhiCore.ai Medical Knowledge Base tests"""
+    print("🧪 PHICORE.AI MEDICAL KNOWLEDGE BASE COMPREHENSIVE TESTING")
     print("=" * 80)
-    print("Testing the Mathematical Human Body Dashboard comprehensively as requested in review")
+    print("Testing comprehensive verification of PhiCore.ai Medical Knowledge Base and Active Condition Banner")
     print("API Base URL: https://healthcompute-1.preview.emergentagent.com")
     print("=" * 80)
     
@@ -493,24 +493,26 @@ def run_all_tests():
     else:
         test_results['backend_health'] = False
     
-    # MATHEMATICAL HUMAN BODY DASHBOARD TESTS
+    # PHICORE.AI MEDICAL KNOWLEDGE BASE TESTS
     if test_results['backend_health']:
-        test_results['disease_database_stats'] = test_disease_database_stats()
-        test_results['disease_search_down'] = test_disease_search_down_syndrome()
-        test_results['disease_detail_param_mods'] = test_disease_detail_parameter_modifications()
-        test_results['platform_stats_accuracy'] = test_platform_stats_accuracy()
+        test_results['platform_stats_verification'] = test_platform_stats_verification()
+        test_results['drugs_database'] = test_drugs_database()
+        test_results['diseases_database'] = test_diseases_database()
+        test_results['disease_detail_parameters'] = test_disease_detail_with_parameters()
+        test_results['drug_detail'] = test_drug_detail()
     else:
         # Set all tests to False if backend is not accessible
         test_results.update({
-            'disease_database_stats': False,
-            'disease_search_down': False,
-            'disease_detail_param_mods': False,
-            'platform_stats_accuracy': False
+            'platform_stats_verification': False,
+            'drugs_database': False,
+            'diseases_database': False,
+            'disease_detail_parameters': False,
+            'drug_detail': False
         })
     
     # Summary
     print("\n" + "=" * 80)
-    print("🏁 MATHEMATICAL HUMAN BODY DASHBOARD TEST SUMMARY")
+    print("🏁 PHICORE.AI MEDICAL KNOWLEDGE BASE TEST SUMMARY")
     print("=" * 80)
     
     passed_tests = sum(1 for result in test_results.values() if result)
@@ -519,11 +521,12 @@ def run_all_tests():
     print(f"\n📊 OVERALL RESULTS: {passed_tests}/{total_tests} tests passed")
     
     # Test results breakdown
-    dashboard_tests = [
-        ('disease_database_stats', 'Test 1: Disease Database Stats (~254 diseases with parameter_modifications)'),
-        ('disease_search_down', 'Test 2: Disease Search - Down Syndrome with parameter_modifications'),
-        ('disease_detail_param_mods', 'Test 3: Disease Detail - Parameter Modifications (Down, Diabetes, COPD)'),
-        ('platform_stats_accuracy', 'Test 4: Platform Stats Accuracy (drug and disease counts)')
+    backend_tests = [
+        ('platform_stats_verification', 'Test 1: Platform Stats Verification (drugs.total >= 300, diseases.total >= 250)'),
+        ('drugs_database', 'Test 2: Drugs Database (list with names, categories, cardiovascular filter)'),
+        ('diseases_database', 'Test 3: Diseases Database (list with ICD-10 codes, parameter_modifications)'),
+        ('disease_detail_parameters', 'Test 4: Disease Detail with Parameter Modifications (affected organs)'),
+        ('drug_detail', 'Test 5: Drug Detail (mechanisms, dosages, contraindications, interactions)')
     ]
     
     infrastructure_tests = [
@@ -531,8 +534,8 @@ def run_all_tests():
         ('backend_health', 'Backend Health Check')
     ]
     
-    print(f"\n📊 MATHEMATICAL HUMAN BODY DASHBOARD TESTS:")
-    for test_key, test_name in dashboard_tests:
+    print(f"\n📊 BACKEND API TESTS:")
+    for test_key, test_name in backend_tests:
         if test_key in test_results:
             status = "✅ PASS" if test_results[test_key] else "❌ FAIL"
             print(f"  {status} - {test_name}")
@@ -543,46 +546,50 @@ def run_all_tests():
             status = "✅ PASS" if test_results[test_key] else "❌ FAIL"
             print(f"  {status} - {test_name}")
     
-    # Calculate dashboard test success rate
-    dashboard_passed = sum(1 for test_key, _ in dashboard_tests if test_results.get(test_key, False))
-    dashboard_total = len(dashboard_tests)
+    # Calculate backend test success rate
+    backend_passed = sum(1 for test_key, _ in backend_tests if test_results.get(test_key, False))
+    backend_total = len(backend_tests)
     
-    if dashboard_passed == dashboard_total:
-        print(f"\n🎉 ALL DASHBOARD TESTS PASSED! Mathematical Human Body Dashboard is working perfectly.")
-        print(f"✅ Disease database has ~254 diseases with comprehensive parameter_modifications")
-        print(f"✅ Disease search finds Down syndrome with proper parameter_modifications")
-        print(f"✅ Disease details show organ-level changes (heart, brain, cellular, etc.)")
-        print(f"✅ Parameter modifications include scale-level changes with direction/value")
-        print(f"✅ Platform stats show accurate drug and disease counts")
-    elif dashboard_passed >= dashboard_total * 0.75:
-        print(f"\n✅ MOSTLY SUCCESSFUL! {dashboard_passed}/{dashboard_total} dashboard tests passed.")
+    if backend_passed == backend_total:
+        print(f"\n🎉 ALL BACKEND API TESTS PASSED! PhiCore.ai Medical Knowledge Base is working perfectly.")
+        print(f"✅ Platform stats show drugs.total >= 300 and diseases.total >= 250")
+        print(f"✅ Drugs database returns complete drug list with categories and filtering")
+        print(f"✅ Diseases database returns disease list with ICD-10 codes and parameter_modifications")
+        print(f"✅ Disease detail endpoints return diseases with parameter_modifications for affected organs")
+        print(f"✅ Drug detail endpoints return drugs with mechanisms, dosages, contraindications, interactions")
+    elif backend_passed >= backend_total * 0.75:
+        print(f"\n✅ MOSTLY SUCCESSFUL! {backend_passed}/{backend_total} backend tests passed.")
         print(f"⚠️  Some minor issues detected - see failed tests above")
     else:
-        print(f"\n❌ SIGNIFICANT ISSUES DETECTED! Only {dashboard_passed}/{dashboard_total} dashboard tests passed.")
-        print(f"🔧 Major fixes needed for Mathematical Human Body Dashboard")
+        print(f"\n❌ SIGNIFICANT ISSUES DETECTED! Only {backend_passed}/{backend_total} backend tests passed.")
+        print(f"🔧 Major fixes needed for PhiCore.ai Medical Knowledge Base")
     
     # Detailed verification summary
     print(f"\n📋 KEY VERIFICATION POINTS:")
-    if test_results.get('disease_database_stats'):
-        print(f"  ✅ Total diseases count verified (~254)")
+    if test_results.get('platform_stats_verification'):
+        print(f"  ✅ Platform stats verified (drugs >= 300, diseases >= 250)")
     else:
-        print(f"  ❌ Total diseases count verification failed")
+        print(f"  ❌ Platform stats verification failed")
     
-    if test_results.get('disease_search_down'):
-        print(f"  ✅ Down syndrome found with parameter_modifications")
+    if test_results.get('drugs_database'):
+        print(f"  ✅ Drugs database working with complete data and category filtering")
     else:
-        print(f"  ❌ Down syndrome search or parameter_modifications failed")
+        print(f"  ❌ Drugs database verification failed")
     
-    if test_results.get('disease_detail_param_mods'):
-        print(f"  ✅ Disease details have organ-level parameter_modifications")
-        print(f"  ✅ Scale-level modifications include direction and value")
+    if test_results.get('diseases_database'):
+        print(f"  ✅ Diseases database working with ICD-10 codes and parameter_modifications")
     else:
-        print(f"  ❌ Disease parameter_modifications verification failed")
+        print(f"  ❌ Diseases database verification failed")
     
-    if test_results.get('platform_stats_accuracy'):
-        print(f"  ✅ Platform stats show accurate counts")
+    if test_results.get('disease_detail_parameters'):
+        print(f"  ✅ Disease details have parameter_modifications for affected organs")
     else:
-        print(f"  ❌ Platform stats accuracy verification failed")
+        print(f"  ❌ Disease detail parameter_modifications verification failed")
+    
+    if test_results.get('drug_detail'):
+        print(f"  ✅ Drug details have mechanisms, dosages, contraindications, interactions")
+    else:
+        print(f"  ❌ Drug detail verification failed")
     
     return test_results
 
