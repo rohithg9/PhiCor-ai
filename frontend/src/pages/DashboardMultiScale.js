@@ -2774,6 +2774,45 @@ const DashboardMultiScale = () => {
     return allModifiedParameters.filter(p => p.organId === paramFilterOrgan);
   }, [allModifiedParameters, paramFilterOrgan]);
 
+  // Extract EXTRA disease-specific molecular findings that don't have predefined UI parameters
+  // This enables dynamic display of ANY molecular detail from the API
+  const extraMolecularFindings = useMemo(() => {
+    if (!mergedModifications) return [];
+    
+    const findings = [];
+    const processedParams = new Set(allModifiedParameters.map(p => `${p.organId}.${p.scaleId}.${p.id}`));
+    
+    Object.entries(mergedModifications).forEach(([organId, organMods]) => {
+      Object.entries(organMods).forEach(([scaleId, scaleMods]) => {
+        Object.entries(scaleMods).forEach(([paramId, mod]) => {
+          const key = `${organId}.${scaleId}.${paramId}`;
+          // Only include if not already in processed parameters
+          if (!processedParams.has(key) && mod.direction !== 'normal') {
+            // Format the parameter name nicely
+            const name = paramId.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+            
+            findings.push({
+              id: paramId,
+              name: name,
+              organId,
+              scaleId,
+              value: mod.value,
+              changePercent: mod.change_percent,
+              direction: mod.direction,
+              evidence: mod.evidence || mod.note,
+              category: scaleId === 'dna' ? 'Genetic' : 
+                       scaleId === 'gene_expression' ? 'Expression' :
+                       scaleId === 'metabolism' ? 'Metabolic' :
+                       scaleId === 'cell_cycle' ? 'Cell Cycle' : 'Molecular'
+            });
+          }
+        });
+      });
+    });
+    
+    return findings;
+  }, [mergedModifications, allModifiedParameters]);
+
   // Calculate modified parameters based on disease
   const getModifiedValue = useCallback((organId, scaleId, paramId, baseValue) => {
     if (!mergedModifications) return { value: baseValue, modified: false };
