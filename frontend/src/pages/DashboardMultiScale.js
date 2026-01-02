@@ -3230,15 +3230,20 @@ const DashboardMultiScale = () => {
             <h2 className="font-bold text-lg flex items-center gap-2">
               <span className="text-2xl">{currentOrgan?.icon}</span>
               {currentOrgan?.name}
+              {currentScale && (
+                <span className="text-sm font-normal text-muted-foreground">
+                  → {currentScale.name || selectedScale}
+                </span>
+              )}
             </h2>
             <p className="text-xs text-muted-foreground">
-              Complete mathematical model at multiple scales
+              {currentScale?.description || 'Complete mathematical model at multiple scales'}
             </p>
           </div>
           {selectedDisease !== null && selectedDisease !== undefined && currentDisease && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span className="text-destructive">●</span>
-              <span>Viewing effects on {currentOrgan?.name}</span>
+              <span>Viewing disease effects on {currentOrgan?.name}</span>
             </div>
           )}
         </header>
