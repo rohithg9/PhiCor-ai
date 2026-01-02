@@ -2190,6 +2190,30 @@ export const ORGAN_MODELS = {
           description: "mRNA to protein translation kinetics",
           evidence: "established",
           source: "Molecular Biology"
+        },
+        {
+          id: "p53_activation",
+          name: "p53 Activation Dynamics",
+          latex: "\\frac{d[p53^*]}{dt} = k_{act}[DNA_{damage}] - k_{MDM2}[p53^*][MDM2]",
+          description: "p53 activation by DNA damage and inhibition by MDM2",
+          evidence: "established",
+          source: "Tumor suppressor biology"
+        },
+        {
+          id: "nfkb_signaling",
+          name: "NF-κB Signaling Cascade",
+          latex: "[NF\\kappa B]_{nuclear} = \\frac{[NF\\kappa B]_0}{1 + [I\\kappa B]/K_d}",
+          description: "Nuclear translocation gated by IκB degradation",
+          evidence: "established",
+          source: "Inflammatory signaling"
+        },
+        {
+          id: "hypoxia_response",
+          name: "HIF-1α Hypoxia Response",
+          latex: "[HIF1\\alpha] = \\frac{k_{synth}}{k_{deg} \\cdot f([O_2])}",
+          description: "HIF-1α stabilization under low oxygen",
+          evidence: "established",
+          source: "Hypoxia biology"
         }
       ]
     },
