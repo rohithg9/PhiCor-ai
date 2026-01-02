@@ -2477,30 +2477,49 @@ For this disease, specify how it affects various physiological parameters across
         }},
         "cellular": {{
             "dna": {{
-                "chromosomal_instability": {{ "change_percent": 100, "direction": "increase", "evidence": "For genetic diseases" }},
-                "mutation_burden": {{ "change_percent": 50, "direction": "increase", "evidence": "Increased mutations" }}
+                "chromosome_count": {{ "value": 47, "direction": "increase", "evidence": "Trisomy (for chromosomal disorders)" }},
+                "hbb_gene_expression": {{ "change_percent": 100, "direction": "decrease", "evidence": "For β-thalassemia: HBB gene mutations cause absent/reduced β-globin" }},
+                "hba_gene_expression": {{ "change_percent": 0, "direction": "normal", "evidence": "α-globin unaffected in β-thalassemia" }},
+                "alpha_beta_globin_ratio": {{ "value": 4.0, "direction": "increase", "evidence": "Excess α-chains in β-thalassemia cause precipitation and hemolysis" }},
+                "hbs_variant": {{ "value": 80, "direction": "increase", "evidence": "HbS >50% in sickle cell disease" }},
+                "hbf_level": {{ "value": 5, "direction": "increase", "evidence": "Compensatory HbF increase" }},
+                "cftr_function": {{ "change_percent": 100, "direction": "decrease", "evidence": "For cystic fibrosis: CFTR channel dysfunction" }},
+                "mutation_burden": {{ "change_percent": 50, "direction": "increase", "evidence": "Inherited or somatic mutations" }},
+                "karyotype_abnormalities": {{ "value": 1, "direction": "increase", "evidence": "Chromosomal abnormalities" }}
             }},
             "gene_expression": {{
                 "p53_expression": {{ "change_percent": 50, "direction": "increase", "evidence": "Stress response" }},
-                "vegf_expression": {{ "change_percent": 100, "direction": "increase", "evidence": "Angiogenesis" }}
+                "vegf_expression": {{ "change_percent": 100, "direction": "increase", "evidence": "Angiogenesis compensation" }},
+                "nfkb_activity": {{ "change_percent": 200, "direction": "increase", "evidence": "Inflammatory signaling" }},
+                "hif1a_expression": {{ "change_percent": 150, "direction": "increase", "evidence": "Hypoxia response" }}
             }},
             "metabolism": {{
                 "atp_production": {{ "change_percent": 20, "direction": "decrease", "evidence": "Metabolic dysfunction" }},
-                "ros_level": {{ "change_percent": 50, "direction": "increase", "evidence": "Oxidative stress" }}
+                "ros_level": {{ "change_percent": 50, "direction": "increase", "evidence": "Oxidative stress from unstable hemoglobin" }}
             }},
             "cell_cycle": {{
                 "ki67_index": {{ "change_percent": 100, "direction": "increase", "evidence": "For proliferative diseases" }},
-                "apoptotic_index": {{ "change_percent": 50, "direction": "increase", "evidence": "Cell death" }}
+                "apoptotic_index": {{ "change_percent": 200, "direction": "increase", "evidence": "Ineffective erythropoiesis in thalassemia" }}
             }}
         }},
         "blood": {{
             "lab_tests": {{
-                "wbc_count": {{ "change_percent": 30, "direction": "increase", "evidence": "Inflammation" }}
+                "hemoglobin": {{ "change_percent": 50, "direction": "decrease", "evidence": "Anemia" }},
+                "mcv": {{ "change_percent": 30, "direction": "decrease", "evidence": "Microcytosis" }},
+                "mch": {{ "change_percent": 30, "direction": "decrease", "evidence": "Hypochromia" }},
+                "reticulocyte_count": {{ "change_percent": 200, "direction": "increase", "evidence": "Compensatory erythropoiesis" }}
+            }}
+        }},
+        "bonemarrow": {{
+            "geometry": {{
+                "marrow_cellularity": {{ "change_percent": 100, "direction": "increase", "evidence": "Erythroid hyperplasia" }},
+                "me_ratio": {{ "value": 0.5, "direction": "decrease", "evidence": "Reversed M:E ratio in hemolytic anemias" }}
             }}
         }}
     }},
-    "affected_organs": ["heart", "cellular", "blood", "kidneys"],
+    "affected_organs": ["heart", "cellular", "blood", "bonemarrow", "kidneys", "liver", "spleen"],
     "severity_factors": [
+        {{ "name": "Hemoglobin Level", "threshold": "<7 g/dL", "impact": "severe" }},
         {{ "name": "Key Marker", "threshold": ">value", "impact": "severe/moderate/mild" }}
     ],
     "mathematical_models": [
@@ -2512,14 +2531,24 @@ For this disease, specify how it affects various physiological parameters across
     ]
 }}
 
-CRITICAL RULES:
-1. For GENETIC diseases (Down syndrome, Turner syndrome, etc.): MUST include "cellular" organ with "dna" and "gene_expression" modifications
-2. For CANCER diseases: MUST include "cellular" with "cell_cycle" modifications (ki67_index, apoptotic_index)
-3. For METABOLIC diseases: MUST include "cellular" with "metabolism" modifications (atp_production, ros_level)
-4. For INFLAMMATORY diseases: MUST include "cellular" with "gene_expression" (nfkb_activity, cytokines)
-5. Include lab_tests and imaging for ALL relevant organs
-6. Use realistic change percentages from medical literature
-7. Include evidence citations for each modification
+CRITICAL RULES FOR GENETIC DISEASES:
+1. For HEMOGLOBINOPATHIES (β-thalassemia, sickle cell, α-thalassemia):
+   - MUST include "cellular.dna" with: hbb_gene_expression, hba_gene_expression, alpha_beta_globin_ratio, hbs_variant, hbf_level
+   - β-thalassemia Major: hbb_gene_expression=0 (absent), alpha_beta_globin_ratio=4-5 (severely elevated)
+   - Sickle Cell: hbs_variant=80-100%, alpha_beta_globin_ratio=1.0 (normal)
+   
+2. For CHROMOSOMAL DISORDERS (Down syndrome, Turner, Klinefelter):
+   - MUST include "cellular.dna" with: chromosome_count (47 for trisomy, 45 for monosomy), karyotype_abnormalities
+   
+3. For CYSTIC FIBROSIS: cftr_function=0 (absent)
+
+4. For CANCER/HEREDITARY CANCER SYNDROMES:
+   - MUST include: tp53_mutation_status, brca1_function, brca2_function, mutation_burden, cell_cycle changes
+
+5. For ALL GENETIC DISEASES: Always include "cellular" organ with "dna" modifications
+
+6. Use realistic values based on medical literature
+7. Include evidence citations for each modification  
 8. Return ONLY valid JSON, no other text"""
 
         user_message = UserMessage(text=prompt)
