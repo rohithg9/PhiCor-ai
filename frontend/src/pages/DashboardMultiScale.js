@@ -3006,6 +3006,7 @@ const DashboardMultiScale = () => {
   const mergedModifications = useMemo(() => getMergedModifications(), [getMergedModifications]);
 
   // Calculate affected parameters count for each organ
+  // Handles both ORGAN_MODELS structure and API clinical data structure
   const getAffectedCounts = useCallback(() => {
     if (!mergedModifications) return {};
     
@@ -3014,10 +3015,26 @@ const DashboardMultiScale = () => {
     
     Object.entries(mods).forEach(([organId, organMods]) => {
       let count = 0;
-      Object.entries(organMods).forEach(([scaleId, scaleMods]) => {
-        count += Object.keys(scaleMods).length;
-      });
-      counts[organId] = count;
+      if (typeof organMods === 'object' && organMods !== null) {
+        Object.entries(organMods).forEach(([scaleId, scaleMods]) => {
+          if (typeof scaleMods === 'object' && scaleMods !== null) {
+            // Count all parameters that have meaningful modifications
+            Object.entries(scaleMods).forEach(([paramId, mod]) => {
+              if (mod && typeof mod === 'object') {
+                // Count if it has change_percent, value, or direction
+                if (mod.change_percent !== undefined || 
+                    mod.value !== undefined || 
+                    (mod.direction && mod.direction !== 'normal')) {
+                  count++;
+                }
+              }
+            });
+          }
+        });
+      }
+      if (count > 0) {
+        counts[organId] = count;
+      }
     });
     
     return counts;
