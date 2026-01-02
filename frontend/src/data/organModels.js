@@ -650,6 +650,73 @@ export const ORGAN_MODELS = {
           source: "Multi-input RAAS model"
         }
       ]
+    },
+
+    // URINALYSIS - Kidney output parameters
+    urinalysis: {
+      title: "Urinalysis",
+      parameters: [
+        { id: "urine_volume_24h", name: "24-Hour Urine Volume", value: 1500, unit: "mL/day", range: [800, 2500], evidence: "established" },
+        { id: "urine_specific_gravity", name: "Specific Gravity", value: 1.020, unit: "", range: [1.003, 1.030], evidence: "established" },
+        { id: "urine_osmolality", name: "Urine Osmolality", value: 600, unit: "mOsm/kg", range: [300, 1200], evidence: "established" },
+        { id: "urine_ph", name: "Urine pH", value: 6.0, unit: "", range: [4.5, 8.0], evidence: "established" },
+        { id: "urine_protein", name: "Urine Protein", value: 0, unit: "mg/dL", range: [0, 30], evidence: "established" },
+        { id: "urine_albumin", name: "Urine Albumin", value: 10, unit: "mg/L", range: [0, 30], evidence: "established" },
+        { id: "urine_glucose", name: "Urine Glucose", value: 0, unit: "mg/dL", range: [0, 15], evidence: "established" },
+        { id: "urine_ketones", name: "Urine Ketones", value: 0, unit: "mg/dL", range: [0, 5], evidence: "established" },
+        { id: "urine_blood", name: "Urine Blood", value: 0, unit: "scale", range: [0, 3], evidence: "established" },
+        { id: "urine_rbc", name: "Urine RBCs", value: 2, unit: "/HPF", range: [0, 5], evidence: "established" },
+        { id: "urine_wbc", name: "Urine WBCs", value: 3, unit: "/HPF", range: [0, 5], evidence: "established" },
+        { id: "urine_casts", name: "Urine Casts", value: 0, unit: "/LPF", range: [0, 2], evidence: "established" },
+        { id: "fena", name: "FENa", value: 1.0, unit: "%", range: [0.5, 2.0], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "fena_calc",
+          name: "Fractional Excretion of Sodium",
+          latex: "FE_{Na} = \\frac{U_{Na} \\times P_{Cr}}{P_{Na} \\times U_{Cr}} \\times 100",
+          description: "Prerenal (<1%) vs intrinsic renal (>2%) AKI",
+          evidence: "established",
+          source: "Nephrology"
+        },
+        {
+          id: "albumin_creatinine_ratio",
+          name: "Albumin-Creatinine Ratio",
+          latex: "ACR = \\frac{U_{albumin}}{U_{creatinine}}",
+          description: "Microalbuminuria screening (mg/g)",
+          evidence: "established",
+          source: "Diabetes guidelines"
+        },
+        {
+          id: "free_water_clearance",
+          name: "Free Water Clearance",
+          latex: "C_{H_2O} = V(1 - \\frac{U_{osm}}{P_{osm}})",
+          description: "Electrolyte-free water excretion",
+          evidence: "established",
+          source: "Renal physiology"
+        }
+      ]
+    },
+
+    // IMAGING - Kidney imaging parameters
+    imaging: {
+      title: "Imaging",
+      parameters: [
+        { id: "us_kidney_echogenicity", name: "Echogenicity (US)", value: 1, unit: "grade", range: [1, 4], evidence: "established" },
+        { id: "us_resistive_index", name: "Resistive Index", value: 0.60, unit: "index", range: [0.50, 0.70], evidence: "established" },
+        { id: "gfr_dtpa", name: "GFR (DTPA scan)", value: 100, unit: "mL/min", range: [80, 120], evidence: "established" },
+        { id: "split_function", name: "Split Renal Function", value: 50, unit: "%", range: [45, 55], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "resistive_index",
+          name: "Resistive Index",
+          latex: "RI = \\frac{V_{systolic} - V_{diastolic}}{V_{systolic}}",
+          description: "Intrarenal vascular resistance",
+          evidence: "established",
+          source: "Renal Doppler"
+        }
+      ]
     }
   },
 
