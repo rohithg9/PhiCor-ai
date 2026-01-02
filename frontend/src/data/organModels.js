@@ -2117,6 +2117,46 @@ export const ORGAN_MODELS = {
           description: "Linear accumulation of somatic mutations with age",
           evidence: "established",
           source: "Welch et al. 2012"
+        },
+        {
+          id: "dna_repair_kinetics",
+          name: "DNA Repair Kinetics",
+          latex: "\\frac{d[DSB]}{dt} = k_{damage} - k_{NHEJ}[DSB] - k_{HR}[DSB]",
+          description: "Double-strand break repair dynamics (NHEJ and HR pathways)",
+          evidence: "established",
+          source: "DNA repair biology"
+        },
+        {
+          id: "mismatch_repair",
+          name: "Mismatch Repair Efficiency",
+          latex: "\\eta_{MMR} = 1 - \\frac{Mutations_{observed}}{Mutations_{expected}}",
+          description: "Efficiency of mismatch repair (deficient in Lynch syndrome)",
+          evidence: "established",
+          source: "Cancer genetics"
+        },
+        {
+          id: "cpg_methylation",
+          name: "CpG Island Methylation",
+          latex: "\\beta = \\frac{M}{M + U + 100}",
+          description: "Methylation β-value from methylated/unmethylated signal",
+          evidence: "established",
+          source: "Epigenetics"
+        },
+        {
+          id: "copy_number_variation",
+          name: "Copy Number Variation (CNV)",
+          latex: "CNV = \\log_2\\frac{Sample_{intensity}}{Reference_{intensity}}",
+          description: "Log-ratio for detecting genomic amplifications/deletions",
+          evidence: "established",
+          source: "Cytogenetics"
+        },
+        {
+          id: "hardy_weinberg",
+          name: "Hardy-Weinberg Equilibrium",
+          latex: "p^2 + 2pq + q^2 = 1",
+          description: "Allele frequency equilibrium in populations",
+          evidence: "established",
+          source: "Population genetics"
         }
       ]
     },
