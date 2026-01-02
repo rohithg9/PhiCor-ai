@@ -2692,41 +2692,6 @@ const DashboardMultiScale = () => {
     fetchDiseaseParams();
   }, []);
 
-  // Helper function to determine primary organ from category
-  const getPrimaryOrganFromCategory = (category) => {
-    const categoryOrganMap = {
-      'cardiovascular': 'heart',
-      'cardiac': 'heart',
-      'respiratory': 'lungs',
-      'pulmonary': 'lungs',
-      'renal': 'kidneys',
-      'nephrology': 'kidneys',
-      'hepatic': 'liver',
-      'gastrointestinal': 'liver',
-      'neurological': 'brain',
-      'psychiatric': 'brain',
-      'hematological': 'blood',
-      'hematological_malignancy': 'blood',
-      'oncology': 'blood',
-      'endocrine': 'pancreas',
-      'metabolic': 'pancreas',
-      'infectious': 'blood',
-      'rheumatological': 'blood',
-      'dermatological': 'blood',
-      'ophthalmology': 'brain',
-      'otolaryngology': 'brain',
-      'obstetrics': 'blood',
-      'gynecology': 'blood',
-      'neonatology': 'lungs',
-      'urology': 'kidneys',
-      'musculoskeletal': 'blood',
-      'emergency': 'heart',
-      'pediatric': 'heart',
-      'geriatric': 'heart'
-    };
-    return categoryOrganMap[category?.toLowerCase()] || 'heart';
-  };
-
   const organs = useMemo(() => Object.entries(ORGAN_MODELS), []);
   
   // Merge static disease models with API diseases
