@@ -2598,12 +2598,44 @@ const DashboardMultiScale = () => {
     }
   }, [selectedOrgan, currentOrgan, selectedScale]);
 
+  // Get merged modifications: combine static disease modifications with API parameter_modifications
+  const getMergedModifications = useCallback(() => {
+    if (!selectedDisease) return null;
+    
+    // Check if we have API data for this disease
+    const apiMods = apiDiseaseData[selectedDisease];
+    const staticMods = currentDisease?.modifications;
+    
+    if (apiMods) {
+      // API data takes precedence - merge with static if both exist
+      if (staticMods) {
+        // Deep merge: apiMods override staticMods
+        const merged = { ...staticMods };
+        Object.entries(apiMods).forEach(([organId, organMods]) => {
+          if (!merged[organId]) merged[organId] = {};
+          Object.entries(organMods).forEach(([scaleId, scaleMods]) => {
+            if (!merged[organId][scaleId]) merged[organId][scaleId] = {};
+            Object.entries(scaleMods).forEach(([paramId, paramMod]) => {
+              merged[organId][scaleId][paramId] = paramMod;
+            });
+          });
+        });
+        return merged;
+      }
+      return apiMods;
+    }
+    
+    return staticMods || null;
+  }, [selectedDisease, apiDiseaseData, currentDisease]);
+
+  const mergedModifications = useMemo(() => getMergedModifications(), [getMergedModifications]);
+
   // Calculate affected parameters count for each organ
   const getAffectedCounts = useCallback(() => {
-    if (!currentDisease?.modifications) return {};
+    if (!mergedModifications) return {};
     
     const counts = {};
-    const mods = currentDisease.modifications;
+    const mods = mergedModifications;
     
     Object.entries(mods).forEach(([organId, organMods]) => {
       let count = 0;
@@ -2614,7 +2646,7 @@ const DashboardMultiScale = () => {
     });
     
     return counts;
-  }, [currentDisease]);
+  }, [mergedModifications]);
 
   const affectedCounts = useMemo(() => getAffectedCounts(), [getAffectedCounts]);
 
