@@ -1,10 +1,32 @@
 // Complete Multi-Scale Mathematical Model of the Human Body
 // Each organ modeled at: Geometry → Structure → Physiology → Cellular levels
 
+// Distinct organ icons - using minimalistic symbols
+const ORGAN_ICONS = {
+  heart: "🫀",      // Anatomical heart
+  lungs: "🫁",      // Lungs
+  kidneys: "🫘",    // Bean shape for kidneys
+  liver: "🔶",      // Orange diamond for liver
+  brain: "🧠",      // Brain
+  pancreas: "🔹",   // Blue diamond for pancreas
+  blood: "🩸",      // Blood drop
+  bone_marrow: "🦴", // Bone
+  spleen: "🟣",     // Purple circle
+  thyroid: "🦋",    // Butterfly shape
+  adrenal: "🔺",    // Triangle for adrenal
+  lymph: "💧",      // Droplet for lymphatic
+  muscle: "💪",     // Muscle
+  skin: "🧬",       // DNA/skin layers
+  eye: "👁️",       // Eye
+  stomach: "🫃",    // Stomach area
+  intestines: "🔄", // Coiled
+  cellular: "🔬"    // Microscope for cellular
+};
+
 export const ORGAN_MODELS = {
   heart: {
     name: "Heart",
-    icon: "❤️",
+    icon: ORGAN_ICONS.heart,
     category: "cardiovascular",
     
     // GEOMETRY & DIMENSIONS
