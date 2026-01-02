@@ -2509,7 +2509,7 @@ IMPORTANT:
 - Include evidence for each modification
 - Return ONLY the JSON, no other text"""
 
-        response = await llm.send_async_message(
+        response = await chat.send_async_message(
             UserMessage(content=prompt),
             session_id=f"param_gen_{request.disease_id}"
         )
