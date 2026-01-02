@@ -307,9 +307,9 @@ const DiseaseDetailPanel = ({ diseaseId, diseaseName }) => {
                           <Pill className="w-3 h-3" /> First-Line Treatment
                         </h4>
                         <div className="flex flex-wrap gap-1">
-                          {disease.treatment.first_line.map((tx, i) => (
+                          {Array.isArray(disease.treatment.first_line) ? disease.treatment.first_line.map((tx, i) => (
                             <Badge key={i} className="text-xs bg-green-500/10 text-green-600 border-green-500/30">{tx}</Badge>
-                          ))}
+                          )) : <Badge className="text-xs bg-green-500/10 text-green-600 border-green-500/30">{disease.treatment.first_line}</Badge>}
                         </div>
                       </div>
                     )}
@@ -320,9 +320,9 @@ const DiseaseDetailPanel = ({ diseaseId, diseaseName }) => {
                           <Pill className="w-3 h-3" /> Second-Line Treatment
                         </h4>
                         <div className="flex flex-wrap gap-1">
-                          {disease.treatment.second_line.map((tx, i) => (
+                          {Array.isArray(disease.treatment.second_line) ? disease.treatment.second_line.map((tx, i) => (
                             <Badge key={i} className="text-xs bg-yellow-500/10 text-yellow-600 border-yellow-500/30">{tx}</Badge>
-                          ))}
+                          )) : <Badge className="text-xs bg-yellow-500/10 text-yellow-600 border-yellow-500/30">{disease.treatment.second_line}</Badge>}
                         </div>
                       </div>
                     )}
