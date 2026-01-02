@@ -324,15 +324,44 @@ export const ORGAN_MODELS = {
 
     // LAB TESTS - Cardiac biomarkers
     lab_tests: {
-      title: "Lab Tests",
+      title: "Laboratory Tests",
       parameters: [
+        // === CARDIAC BIOMARKERS ===
         { id: "troponin_i", name: "Troponin I", value: 0.01, unit: "ng/mL", range: [0, 0.04], evidence: "established" },
         { id: "troponin_t", name: "Troponin T (hs)", value: 10, unit: "ng/L", range: [0, 14], evidence: "established" },
         { id: "bnp", name: "BNP", value: 50, unit: "pg/mL", range: [0, 100], evidence: "established" },
         { id: "nt_probnp", name: "NT-proBNP", value: 100, unit: "pg/mL", range: [0, 300], evidence: "established" },
         { id: "ck_mb", name: "CK-MB", value: 3, unit: "ng/mL", range: [0, 5], evidence: "established" },
+        { id: "myoglobin", name: "Myoglobin", value: 50, unit: "ng/mL", range: [25, 72], evidence: "established" },
         { id: "ldh", name: "LDH", value: 200, unit: "U/L", range: [140, 280], evidence: "established" },
+        
+        // === COAGULATION ===
         { id: "d_dimer", name: "D-Dimer", value: 200, unit: "ng/mL", range: [0, 500], evidence: "established" },
+        { id: "pt", name: "Prothrombin Time (PT)", value: 12, unit: "sec", range: [11, 13.5], evidence: "established" },
+        { id: "inr", name: "INR", value: 1.0, unit: "ratio", range: [0.9, 1.1], evidence: "established" },
+        { id: "ptt", name: "PTT", value: 30, unit: "sec", range: [25, 35], evidence: "established" },
+        { id: "fibrinogen", name: "Fibrinogen", value: 300, unit: "mg/dL", range: [200, 400], evidence: "established" },
+        
+        // === LIPID PANEL ===
+        { id: "total_cholesterol", name: "Total Cholesterol", value: 180, unit: "mg/dL", range: [0, 200], evidence: "established" },
+        { id: "ldl_cholesterol", name: "LDL Cholesterol", value: 100, unit: "mg/dL", range: [0, 100], evidence: "established" },
+        { id: "hdl_cholesterol", name: "HDL Cholesterol", value: 55, unit: "mg/dL", range: [40, 80], evidence: "established" },
+        { id: "triglycerides", name: "Triglycerides", value: 120, unit: "mg/dL", range: [0, 150], evidence: "established" },
+        { id: "vldl", name: "VLDL", value: 24, unit: "mg/dL", range: [5, 40], evidence: "established" },
+        { id: "lpa", name: "Lipoprotein(a)", value: 20, unit: "mg/dL", range: [0, 30], evidence: "established" },
+        { id: "apob", name: "Apolipoprotein B", value: 90, unit: "mg/dL", range: [50, 130], evidence: "established" },
+        { id: "apoa1", name: "Apolipoprotein A1", value: 150, unit: "mg/dL", range: [100, 200], evidence: "established" },
+        
+        // === INFLAMMATORY MARKERS ===
+        { id: "crp", name: "C-Reactive Protein", value: 1.0, unit: "mg/L", range: [0, 3], evidence: "established" },
+        { id: "hs_crp", name: "High-Sensitivity CRP", value: 1.0, unit: "mg/L", range: [0, 3], evidence: "established" },
+        { id: "esr", name: "ESR", value: 10, unit: "mm/hr", range: [0, 20], evidence: "established" },
+        { id: "homocysteine", name: "Homocysteine", value: 10, unit: "µmol/L", range: [5, 15], evidence: "established" },
+        
+        // === METABOLIC MARKERS ===
+        { id: "glucose_fasting", name: "Fasting Glucose", value: 90, unit: "mg/dL", range: [70, 100], evidence: "established" },
+        { id: "hba1c", name: "HbA1c", value: 5.4, unit: "%", range: [4, 5.6], evidence: "established" },
+        { id: "uric_acid", name: "Uric Acid", value: 5.5, unit: "mg/dL", range: [3.5, 7.2], evidence: "established" },
       ],
       equations: [
         {
@@ -342,6 +371,168 @@ export const ORGAN_MODELS = {
           description: "Troponin rise and fall after MI",
           evidence: "established",
           source: "Cardiology"
+        },
+        {
+          id: "framingham_risk",
+          name: "Framingham Risk Score",
+          latex: "Risk = 1 - S_0^{e^{\\sum \\beta_i X_i - \\bar{X}}}",
+          description: "10-year CVD risk from lipids, BP, age, smoking",
+          evidence: "established",
+          source: "Framingham Heart Study"
+        },
+        {
+          id: "ldl_friedewald",
+          name: "LDL (Friedewald)",
+          latex: "LDL = TC - HDL - \\frac{TG}{5}",
+          description: "Calculated LDL from lipid panel",
+          evidence: "established",
+          source: "Friedewald 1972"
+        },
+        {
+          id: "non_hdl",
+          name: "Non-HDL Cholesterol",
+          latex: "NonHDL = TC - HDL",
+          description: "All atherogenic lipoproteins",
+          evidence: "established",
+          source: "ACC/AHA Guidelines"
+        }
+      ]
+    },
+
+    // VITAL SIGNS - Cardiovascular vitals
+    vital_signs: {
+      title: "Vital Signs & Hemodynamics",
+      parameters: [
+        // === BLOOD PRESSURE ===
+        { id: "systolic_bp", name: "Systolic Blood Pressure", value: 120, unit: "mmHg", range: [90, 130], evidence: "established" },
+        { id: "diastolic_bp", name: "Diastolic Blood Pressure", value: 80, unit: "mmHg", range: [60, 85], evidence: "established" },
+        { id: "mean_arterial_pressure", name: "Mean Arterial Pressure", value: 93, unit: "mmHg", range: [70, 105], evidence: "established" },
+        { id: "pulse_pressure", name: "Pulse Pressure", value: 40, unit: "mmHg", range: [30, 50], evidence: "established" },
+        { id: "bp_variability", name: "BP Variability (SD)", value: 10, unit: "mmHg", range: [5, 15], evidence: "established" },
+        
+        // === HEART RATE ===
+        { id: "resting_hr", name: "Resting Heart Rate", value: 70, unit: "bpm", range: [60, 100], evidence: "established" },
+        { id: "hr_variability", name: "Heart Rate Variability (SDNN)", value: 100, unit: "ms", range: [50, 150], evidence: "established" },
+        { id: "rmssd", name: "HRV (RMSSD)", value: 40, unit: "ms", range: [20, 75], evidence: "established" },
+        { id: "max_hr", name: "Maximum Heart Rate", value: 180, unit: "bpm", range: [150, 200], evidence: "established" },
+        { id: "hr_recovery_1min", name: "HR Recovery (1 min)", value: 25, unit: "bpm", range: [12, 40], evidence: "established" },
+        
+        // === ADVANCED HEMODYNAMICS ===
+        { id: "cvp", name: "Central Venous Pressure", value: 6, unit: "mmHg", range: [2, 8], evidence: "established" },
+        { id: "pcwp", name: "Pulmonary Capillary Wedge Pressure", value: 10, unit: "mmHg", range: [6, 12], evidence: "established" },
+        { id: "pap_systolic", name: "PA Systolic Pressure", value: 25, unit: "mmHg", range: [15, 30], evidence: "established" },
+        { id: "pap_diastolic", name: "PA Diastolic Pressure", value: 10, unit: "mmHg", range: [4, 12], evidence: "established" },
+        { id: "pap_mean", name: "Mean PA Pressure", value: 15, unit: "mmHg", range: [10, 20], evidence: "established" },
+        { id: "svr", name: "Systemic Vascular Resistance", value: 1000, unit: "dyn·s/cm⁵", range: [800, 1200], evidence: "established" },
+        { id: "pvr", name: "Pulmonary Vascular Resistance", value: 100, unit: "dyn·s/cm⁵", range: [20, 250], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "map_calc",
+          name: "Mean Arterial Pressure",
+          latex: "MAP = DBP + \\frac{1}{3}(SBP - DBP)",
+          description: "Average arterial pressure during cardiac cycle",
+          evidence: "established",
+          source: "Hemodynamics"
+        },
+        {
+          id: "svr_calc",
+          name: "Systemic Vascular Resistance",
+          latex: "SVR = \\frac{(MAP - CVP) \\times 80}{CO}",
+          description: "Afterload in dyn·s/cm⁵",
+          evidence: "established",
+          source: "Hemodynamics"
+        }
+      ]
+    },
+
+    // PHYSICAL EXAM - Heart sounds and findings
+    physical_exam: {
+      title: "Physical Examination",
+      parameters: [
+        // === HEART SOUNDS ===
+        { id: "s1_intensity", name: "S1 Intensity", value: 1.0, unit: "scale", range: [0.5, 1.5], evidence: "established" },
+        { id: "s2_intensity", name: "S2 Intensity", value: 1.0, unit: "scale", range: [0.5, 1.5], evidence: "established" },
+        { id: "s2_splitting", name: "S2 Splitting", value: 0.04, unit: "sec", range: [0.02, 0.08], evidence: "established" },
+        { id: "s3_present", name: "S3 Gallop Present", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "s4_present", name: "S4 Gallop Present", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        
+        // === MURMURS ===
+        { id: "systolic_murmur_grade", name: "Systolic Murmur Grade", value: 0, unit: "/6", range: [0, 6], evidence: "established" },
+        { id: "diastolic_murmur_grade", name: "Diastolic Murmur Grade", value: 0, unit: "/4", range: [0, 4], evidence: "established" },
+        
+        // === JVP & EDEMA ===
+        { id: "jvp", name: "JVP Height", value: 3, unit: "cm H2O", range: [1, 5], evidence: "established" },
+        { id: "peripheral_edema", name: "Peripheral Edema", value: 0, unit: "scale 0-4", range: [0, 4], evidence: "established" },
+        { id: "hepatojugular_reflux", name: "Hepatojugular Reflux", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        
+        // === PULSES ===
+        { id: "carotid_pulse_quality", name: "Carotid Pulse Quality", value: 2, unit: "scale 0-4", range: [2, 3], evidence: "established" },
+        { id: "radial_pulse_quality", name: "Radial Pulse Quality", value: 2, unit: "scale 0-4", range: [2, 3], evidence: "established" },
+        { id: "pulsus_paradoxus", name: "Pulsus Paradoxus", value: 5, unit: "mmHg", range: [0, 10], evidence: "established" },
+        { id: "pulsus_alternans", name: "Pulsus Alternans Present", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        
+        // === PMI ===
+        { id: "pmi_location", name: "PMI Location (intercostal space)", value: 5, unit: "ICS", range: [4, 5], evidence: "established" },
+        { id: "pmi_size", name: "PMI Size", value: 2, unit: "cm", range: [1, 3], evidence: "established" },
+        { id: "pmi_sustained", name: "PMI Sustained/Heaving", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "jvp_estimate",
+          name: "CVP from JVP",
+          latex: "CVP \\approx JVP_{cm} + 5",
+          description: "Estimate CVP from JVP height above sternal angle",
+          evidence: "established",
+          source: "Clinical cardiology"
+        }
+      ]
+    },
+
+    // ECG PARAMETERS
+    ecg: {
+      title: "ECG & Electrophysiology",
+      parameters: [
+        // === INTERVALS ===
+        { id: "pr_interval", name: "PR Interval", value: 160, unit: "ms", range: [120, 200], evidence: "established" },
+        { id: "qrs_duration", name: "QRS Duration", value: 90, unit: "ms", range: [60, 100], evidence: "established" },
+        { id: "qtc_interval", name: "QTc Interval", value: 420, unit: "ms", range: [350, 450], evidence: "established" },
+        { id: "qt_interval", name: "QT Interval", value: 380, unit: "ms", range: [350, 440], evidence: "established" },
+        
+        // === AXIS & MORPHOLOGY ===
+        { id: "p_wave_axis", name: "P Wave Axis", value: 60, unit: "degrees", range: [0, 75], evidence: "established" },
+        { id: "qrs_axis", name: "QRS Axis", value: 60, unit: "degrees", range: [-30, 90], evidence: "established" },
+        { id: "t_wave_axis", name: "T Wave Axis", value: 45, unit: "degrees", range: [15, 75], evidence: "established" },
+        
+        // === VOLTAGE ===
+        { id: "sokolow_lyon", name: "Sokolow-Lyon (SV1+RV5)", value: 25, unit: "mm", range: [0, 35], evidence: "established" },
+        { id: "cornell_voltage", name: "Cornell Voltage", value: 18, unit: "mm", range: [0, 28], evidence: "established" },
+        
+        // === ST SEGMENT ===
+        { id: "st_elevation", name: "ST Elevation", value: 0, unit: "mm", range: [-0.5, 1], evidence: "established" },
+        { id: "st_depression", name: "ST Depression", value: 0, unit: "mm", range: [-1, 0.5], evidence: "established" },
+        
+        // === RHYTHM ===
+        { id: "sinus_rhythm", name: "Sinus Rhythm Present", value: 1, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "atrial_rate", name: "Atrial Rate", value: 70, unit: "bpm", range: [60, 100], evidence: "established" },
+        { id: "ventricular_rate", name: "Ventricular Rate", value: 70, unit: "bpm", range: [60, 100], evidence: "established" },
+      ],
+      equations: [
+        {
+          id: "qtc_bazett",
+          name: "QTc (Bazett)",
+          latex: "QTc = \\frac{QT}{\\sqrt{RR}}",
+          description: "Rate-corrected QT interval",
+          evidence: "established",
+          source: "Bazett 1920"
+        },
+        {
+          id: "qtc_fridericia",
+          name: "QTc (Fridericia)",
+          latex: "QTc = \\frac{QT}{\\sqrt[3]{RR}}",
+          description: "More accurate at extreme HRs",
+          evidence: "established",
+          source: "Fridericia 1920"
         }
       ]
     },
