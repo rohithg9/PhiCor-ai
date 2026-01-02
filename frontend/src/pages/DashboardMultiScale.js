@@ -2844,7 +2844,16 @@ const DashboardMultiScale = () => {
       newValue = baseValue * factor;
     }
     
-    const delta = baseValue !== 0 ? ((newValue - baseValue) / baseValue * 100) : (newValue > 0 ? 100 : 0);
+    // Calculate delta safely - handle edge cases
+    let delta = 0;
+    if (baseValue !== 0 && !isNaN(baseValue) && isFinite(baseValue)) {
+      delta = ((newValue - baseValue) / baseValue * 100);
+    } else if (newValue !== 0) {
+      delta = newValue > 0 ? 100 : -100;
+    }
+    
+    // Ensure delta is a valid number
+    if (isNaN(delta) || !isFinite(delta)) delta = 0;
     
     return { 
       value: newValue, 
