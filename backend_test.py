@@ -1,37 +1,36 @@
 #!/usr/bin/env python3
 """
-Backend Testing for PhiCore.ai Medical Knowledge Base Integration
-Testing the integrated Medical Knowledge Base API endpoints as requested in review:
+Backend Testing for PhiCore.ai "Mathematical Human Body" Dashboard
+Testing the Mathematical Human Body Dashboard comprehensively as requested in review:
 
-PHICORE.AI MEDICAL KNOWLEDGE BASE INTEGRATION TESTING:
+MATHEMATICAL HUMAN BODY DASHBOARD TESTING:
 
-Test 1: Platform Stats API
-- Endpoint: GET /api/platform/stats
-- Expected: Returns drugs.total > 300, diseases.total > 200, dynamic display_stats
-
-Test 2: Merged Drugs List API  
-- Endpoint: GET /api/drugs?limit=500
-- Expected: Returns total > 300 drugs, includes both comprehensive (ai_generated=false) and AI-generated (ai_generated=true) drugs
-
-Test 3: Drug Detail with Mathematical Models
-- Endpoint: GET /api/drugs/lisinopril
-- Expected: Returns drug with mechanisms array (for simulation), therapeutic_effects array, max_daily_dose_mg
-
-Test 4: Drug Search
-- Endpoint: GET /api/drugs?search=metformin
-- Expected: Returns metformin drug with full details
-
-Test 5: Drug Category Filter
-- Endpoint: GET /api/drugs?category=cardiovascular
-- Expected: Returns only cardiovascular drugs
-
-Test 6: Generated Drug Detail
-- Endpoint: GET /api/drugs/amlodipine  
-- Expected: Returns AI-generated drug with mechanisms for simulation
-
-Test 7: Disease Stats
+Test 1: Disease Database Stats API
 - Endpoint: GET /api/diseases-db/stats
-- Expected: Returns total_diseases > 200, by_category breakdown
+- Expected: Verify total diseases count (~254) and verify all have parameter_modifications
+
+Test 2: Disease Search API
+- Endpoint: GET /api/diseases-db?search=Down
+- Expected: Search for Down syndrome, verify it returns with parameter_modifications field populated
+
+Test 3: Disease Detail API
+- Endpoint: GET /api/diseases-db/{disease_id}
+- Expected: Get full details for diseases like "down_syndrome" and verify parameter_modifications for cellular, heart, brain etc.
+
+Test 4: Platform Stats API
+- Endpoint: GET /api/platform/stats
+- Expected: Verify drug and disease counts are accurate
+
+Key Verification Points:
+- All 254 diseases should have non-empty parameter_modifications
+- Parameter_modifications should include organ-level changes (heart, brain, cellular, etc.)
+- Changes should include scale-level modifications (geometry, physiology, lab_tests, etc.)
+- Each modification should have change direction (increase/decrease) and value
+
+Sample diseases to check in detail:
+- Down Syndrome (genetic) - should have cellular/DNA modifications
+- Diabetes Type 2 - should have pancreas/kidney modifications
+- COPD - should have lung modifications
 
 API Base URL: https://phicore-1.preview.emergentagent.com
 """
