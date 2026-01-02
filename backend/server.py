@@ -2439,6 +2439,9 @@ async def generate_disease_parameter_modifications(request: ParameterModificatio
     Generate physiological parameter modifications for a disease using AI.
     This populates how a disease affects various organ parameters.
     """
+    import json as json_module
+    import re as re_module
+    
     try:
         from emergentintegrations.llm.chat import LlmChat, UserMessage
         
