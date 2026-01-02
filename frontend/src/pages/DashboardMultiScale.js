@@ -3765,7 +3765,22 @@ const DashboardMultiScale = () => {
           </div>
         )}
 
-        {/* Scale Tabs */}
+        {/* Clinical Data Panel - Displays Vitals, Labs, Physical Exam, DNA from API */}
+        {currentDisease && mergedModifications && (
+          <div className="px-3 lg:px-6 py-4 border-b border-border/50 bg-gradient-to-r from-blue-500/5 via-green-500/5 to-purple-500/5">
+            <div className="flex items-center gap-2 mb-3">
+              <Stethoscope className="w-4 h-4 text-primary" />
+              <span className="text-sm font-semibold">Clinical Parameters for {currentDisease.name}</span>
+            </div>
+            <ClinicalDataPanel 
+              modifications={mergedModifications}
+              disease={currentDisease}
+              severity={diseaseSeverity}
+            />
+          </div>
+        )}
+
+        {/* Scale Tabs - Moved below clinical data when disease selected */}
         <div className="border-b border-border/50 px-3 lg:px-6 bg-card/20">
           <div className="flex gap-1 py-2 overflow-x-auto scrollbar-hide">
             {SCALE_LEVELS.map((scale) => {
