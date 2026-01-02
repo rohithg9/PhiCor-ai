@@ -2611,8 +2611,8 @@ const DashboardMultiScale = () => {
   const getMergedModifications = useCallback(() => {
     if (!selectedDisease) return null;
     
-    // Check if we have API data for this disease
-    const apiMods = apiDiseaseData[selectedDisease];
+    // Check if we have API data for this disease (try by ID first, then by ICD-10 code)
+    const apiMods = apiDiseaseData[selectedDisease] || apiDiseaseByIcd[selectedDisease];
     const staticMods = currentDisease?.modifications;
     
     console.log('getMergedModifications:', {
@@ -2642,7 +2642,7 @@ const DashboardMultiScale = () => {
     }
     
     return staticMods || null;
-  }, [selectedDisease, apiDiseaseData, currentDisease]);
+  }, [selectedDisease, apiDiseaseData, apiDiseaseByIcd, currentDisease]);
 
   const mergedModifications = useMemo(() => getMergedModifications(), [getMergedModifications]);
 
