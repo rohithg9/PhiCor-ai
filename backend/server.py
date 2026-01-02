@@ -2620,51 +2620,6 @@ COMPREHENSIVE EXTRACTION RULES:
 REMEMBER: The goal is to convert ALL textbook medical knowledge into quantifiable deviations from normal. Be comprehensive - include every parameter that would be abnormal in this disease.
 
 Return ONLY valid JSON, no other text."""
-                // dopamine_signaling, serotonin_signaling, gaba_signaling, glutamate_signaling (for psychiatric/neurological)
-                // insulin_receptor_expression, irs_phosphorylation, glut4_expression (for metabolic)
-                // vegf_expression, hif1a_expression, egf_expression (for cancer/angiogenesis)
-                "relevant_pathway": {{ "change_percent": X, "direction": "increase/decrease", "evidence": "Mechanism" }}
-            }},
-            "metabolism": {{
-                "atp_production": {{ "change_percent": X, "direction": "increase/decrease", "evidence": "..." }},
-                "ros_level": {{ "change_percent": X, "direction": "increase/decrease", "evidence": "..." }},
-                "mitochondrial_function": {{ "change_percent": X, "direction": "...", "evidence": "..." }}
-            }},
-            "cell_cycle": {{
-                "ki67_index": {{ "change_percent": X, "direction": "...", "evidence": "..." }},
-                "apoptotic_index": {{ "change_percent": X, "direction": "...", "evidence": "..." }}
-            }}
-        }},
-        "affected_organ": {{
-            "geometry/structure": {{ ... }},
-            "physiology": {{ ... }},
-            "lab_tests": {{ ... }},
-            "imaging": {{ ... }}
-        }}
-    }},
-    "affected_organs": ["list", "of", "affected", "organs"],
-    "molecular_summary": "Brief description of the molecular basis of this disease"
-}}
-
-DISEASE-SPECIFIC REQUIREMENTS:
-
-1. **CANCER** (breast, lung, colon, etc.): MUST include oncogenes (kras, egfr, her2, myc, pik3ca, braf), tumor suppressors (tp53, brca1/2, rb1, apc, pten), hormone receptors (esr1, pgr, ar), cell cycle (ki67, cyclin_d1), and pathway changes (mtor, pi3k_akt, mapk_erk, wnt)
-
-2. **DIABETES** (Type 1, Type 2, MODY): MUST include metabolic genes (tcf7l2, pparg, kcnj11, hnf1a, gck), insulin signaling (insulin_receptor, irs_phosphorylation, glut4), metabolic pathways (ampk, mtor, srebp), and inflammatory markers
-
-3. **PSYCHIATRIC** (schizophrenia, bipolar, depression, ADHD): MUST include neurotransmitter genes (comt, drd2, drd4, slc6a4, htr2a, grin2a, chrna7, maoa), neuroplasticity (bdnf), and relevant signaling (dopamine_signaling, serotonin_signaling, gaba_signaling, glutamate_signaling)
-
-4. **NEURODEGENERATIVE** (Alzheimer's, Parkinson's, ALS, Huntington's): MUST include disease-specific genes (apoe4, app, psen1/2, snca, lrrk2, htt_cag_repeats, sod1, c9orf72), protein aggregation markers, and neuroinflammatory changes
-
-5. **AUTOIMMUNE** (RA, lupus, MS, IBD): MUST include HLA associations (hla_b27, hla_dr4), immune genes (ptpn22, stat4), cytokines (il6, tnf, il1b, ifng, tgfb), and inflammatory pathways (nfkb, jak_stat)
-
-6. **CARDIOVASCULAR** (CAD, cardiomyopathy, arrhythmias): MUST include lipid genes (ldlr, apob, pcsk9), cardiac genes (scn5a, kcnq1, mybpc3), and relevant pathways
-
-7. **GENETIC/INHERITED** disorders: MUST include the causative gene mutations and their functional impact
-
-Include SPECIFIC gene names and their expression changes. Use realistic change percentages based on medical literature. Mark direction as 'normal' only if truly unaffected.
-
-Return ONLY valid JSON, no other text."""
 
         user_message = UserMessage(text=prompt)
         response = await chat.send_message(user_message)
