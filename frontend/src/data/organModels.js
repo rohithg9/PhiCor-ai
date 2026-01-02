@@ -2396,6 +2396,7 @@ export const ORGAN_MODELS = {
     dna: {
       title: "DNA & Genetic Parameters",
       parameters: [
+        // === CHROMOSOMAL & GENOMIC STABILITY ===
         { id: "telomere_length", name: "Telomere Length", value: 7000, unit: "bp", range: [4000, 15000], evidence: "established" },
         { id: "dna_methylation_global", name: "Global DNA Methylation", value: 4.5, unit: "%", range: [3, 6], evidence: "established" },
         { id: "mitochondrial_dna_copy", name: "mtDNA Copy Number", value: 500, unit: "copies/cell", range: [100, 1000], evidence: "established" },
@@ -2404,21 +2405,111 @@ export const ORGAN_MODELS = {
         { id: "chromosomal_instability", name: "Chromosomal Instability Index", value: 0.1, unit: "fraction", range: [0, 1], evidence: "novel" },
         { id: "dna_damage_markers", name: "γH2AX Foci", value: 5, unit: "foci/cell", range: [0, 20], evidence: "established" },
         { id: "8ohdg", name: "8-OHdG (Oxidative DNA Damage)", value: 5, unit: "ng/mL", range: [2, 15], evidence: "established" },
-        // Chromosomal Parameters
         { id: "chromosome_count", name: "Chromosome Count", value: 46, unit: "", range: [45, 47], evidence: "established" },
         { id: "karyotype_abnormalities", name: "Karyotype Abnormalities", value: 0, unit: "count", range: [0, 5], evidence: "established" },
         { id: "copy_number_variants", name: "CNV Count", value: 10, unit: "count", range: [5, 50], evidence: "established" },
-        // Specific Gene Mutations
-        { id: "hbb_gene_expression", name: "HBB Gene Expression (β-globin)", value: 1.0, unit: "fold", range: [0, 1.2], evidence: "established" },
-        { id: "hba_gene_expression", name: "HBA Gene Expression (α-globin)", value: 1.0, unit: "fold", range: [0.5, 1.5], evidence: "established" },
-        { id: "alpha_beta_globin_ratio", name: "α/β Globin Chain Ratio", value: 1.0, unit: "ratio", range: [0.8, 1.2], evidence: "established" },
+        
+        // === HEMOGLOBIN & BLOOD GENES ===
+        { id: "hbb_gene_expression", name: "HBB Gene (β-globin)", value: 1.0, unit: "fold", range: [0, 1.2], evidence: "established" },
+        { id: "hba_gene_expression", name: "HBA Gene (α-globin)", value: 1.0, unit: "fold", range: [0.5, 1.5], evidence: "established" },
+        { id: "alpha_beta_globin_ratio", name: "α/β Globin Ratio", value: 1.0, unit: "ratio", range: [0.8, 1.2], evidence: "established" },
         { id: "hbs_variant", name: "HbS (Sickle) Variant", value: 0, unit: "%", range: [0, 100], evidence: "established" },
         { id: "hbe_variant", name: "HbE Variant", value: 0, unit: "%", range: [0, 100], evidence: "established" },
         { id: "hbf_level", name: "Fetal Hemoglobin (HbF)", value: 1, unit: "%", range: [0, 100], evidence: "established" },
-        { id: "cftr_function", name: "CFTR Channel Function", value: 100, unit: "%", range: [0, 100], evidence: "established" },
+        
+        // === TUMOR SUPPRESSORS ===
+        { id: "tp53_status", name: "TP53 (p53) Status", value: 100, unit: "%function", range: [0, 100], evidence: "established" },
         { id: "brca1_function", name: "BRCA1 Function", value: 100, unit: "%", range: [0, 100], evidence: "established" },
         { id: "brca2_function", name: "BRCA2 Function", value: 100, unit: "%", range: [0, 100], evidence: "established" },
-        { id: "tp53_mutation_status", name: "TP53 Mutation Status", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "rb1_function", name: "RB1 (Retinoblastoma) Function", value: 100, unit: "%", range: [0, 100], evidence: "established" },
+        { id: "apc_function", name: "APC Gene Function", value: 100, unit: "%", range: [0, 100], evidence: "established" },
+        { id: "pten_function", name: "PTEN Function", value: 100, unit: "%", range: [0, 100], evidence: "established" },
+        { id: "cdkn2a_function", name: "CDKN2A (p16) Function", value: 100, unit: "%", range: [0, 100], evidence: "established" },
+        { id: "vhl_function", name: "VHL Function", value: 100, unit: "%", range: [0, 100], evidence: "established" },
+        { id: "mlh1_function", name: "MLH1 (Lynch) Function", value: 100, unit: "%", range: [0, 100], evidence: "established" },
+        { id: "msh2_function", name: "MSH2 Function", value: 100, unit: "%", range: [0, 100], evidence: "established" },
+        
+        // === ONCOGENES ===
+        { id: "kras_mutation", name: "KRAS Mutation Status", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "egfr_amplification", name: "EGFR Amplification", value: 1.0, unit: "fold", range: [1, 10], evidence: "established" },
+        { id: "her2_amplification", name: "HER2/ERBB2 Amplification", value: 1.0, unit: "fold", range: [1, 10], evidence: "established" },
+        { id: "myc_amplification", name: "MYC Amplification", value: 1.0, unit: "fold", range: [1, 20], evidence: "established" },
+        { id: "pik3ca_mutation", name: "PIK3CA Mutation", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "braf_mutation", name: "BRAF Mutation (V600E)", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "alk_fusion", name: "ALK Fusion Status", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "ret_mutation", name: "RET Mutation/Fusion", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "bcr_abl_fusion", name: "BCR-ABL Fusion (Philadelphia)", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        
+        // === METABOLIC GENES (Diabetes, Obesity, Lipids) ===
+        { id: "tcf7l2_variant", name: "TCF7L2 Risk Variant", value: 0, unit: "copies", range: [0, 2], evidence: "established" },
+        { id: "pparg_function", name: "PPARG Function", value: 100, unit: "%", range: [0, 100], evidence: "established" },
+        { id: "kcnj11_variant", name: "KCNJ11 (Kir6.2) Variant", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "hnf1a_function", name: "HNF1A Function (MODY3)", value: 100, unit: "%", range: [0, 100], evidence: "established" },
+        { id: "gck_function", name: "GCK Function (MODY2)", value: 100, unit: "%", range: [0, 100], evidence: "established" },
+        { id: "irs1_function", name: "IRS1 Signaling", value: 100, unit: "%", range: [0, 100], evidence: "established" },
+        { id: "adipoq_expression", name: "Adiponectin (ADIPOQ) Expression", value: 1.0, unit: "fold", range: [0.5, 1.5], evidence: "established" },
+        { id: "lep_expression", name: "Leptin (LEP) Expression", value: 1.0, unit: "fold", range: [0.5, 3], evidence: "established" },
+        { id: "fto_variant", name: "FTO Obesity Variant", value: 0, unit: "copies", range: [0, 2], evidence: "established" },
+        { id: "mc4r_function", name: "MC4R Function", value: 100, unit: "%", range: [0, 100], evidence: "established" },
+        
+        // === CARDIOVASCULAR GENES ===
+        { id: "ldlr_function", name: "LDL Receptor Function", value: 100, unit: "%", range: [0, 100], evidence: "established" },
+        { id: "apob_variant", name: "APOB Variant", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "pcsk9_activity", name: "PCSK9 Activity", value: 1.0, unit: "fold", range: [0.5, 2], evidence: "established" },
+        { id: "ace_activity", name: "ACE Gene Activity", value: 1.0, unit: "fold", range: [0.5, 2], evidence: "established" },
+        { id: "agt_expression", name: "Angiotensinogen (AGT) Expression", value: 1.0, unit: "fold", range: [0.5, 2], evidence: "established" },
+        { id: "scn5a_function", name: "SCN5A (Sodium Channel) Function", value: 100, unit: "%", range: [0, 100], evidence: "established" },
+        { id: "kcnq1_function", name: "KCNQ1 (Long QT) Function", value: 100, unit: "%", range: [0, 100], evidence: "established" },
+        { id: "mybpc3_function", name: "MYBPC3 (HCM) Function", value: 100, unit: "%", range: [0, 100], evidence: "established" },
+        
+        // === NEUROPSYCHIATRIC GENES ===
+        { id: "comt_activity", name: "COMT Activity (Val/Met)", value: 1.0, unit: "fold", range: [0.5, 1.5], evidence: "established" },
+        { id: "disc1_function", name: "DISC1 Function", value: 100, unit: "%", range: [0, 100], evidence: "established" },
+        { id: "nrg1_expression", name: "Neuregulin-1 (NRG1) Expression", value: 1.0, unit: "fold", range: [0.5, 2], evidence: "established" },
+        { id: "dtnbp1_expression", name: "Dysbindin (DTNBP1) Expression", value: 1.0, unit: "fold", range: [0.5, 1.5], evidence: "established" },
+        { id: "bdnf_expression", name: "BDNF Expression", value: 1.0, unit: "fold", range: [0.5, 2], evidence: "established" },
+        { id: "slc6a4_function", name: "Serotonin Transporter (5-HTTLPR)", value: 1.0, unit: "fold", range: [0.5, 1.5], evidence: "established" },
+        { id: "drd2_expression", name: "Dopamine D2 Receptor (DRD2)", value: 1.0, unit: "fold", range: [0.5, 2], evidence: "established" },
+        { id: "drd4_variant", name: "DRD4 Variant (7R)", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "htr2a_expression", name: "5-HT2A Receptor Expression", value: 1.0, unit: "fold", range: [0.5, 2], evidence: "established" },
+        { id: "grin2a_function", name: "GRIN2A (NMDA) Function", value: 100, unit: "%", range: [0, 100], evidence: "established" },
+        { id: "chrna7_function", name: "CHRNA7 (Nicotinic) Function", value: 100, unit: "%", range: [0, 100], evidence: "established" },
+        { id: "maoa_activity", name: "MAO-A Activity", value: 1.0, unit: "fold", range: [0.5, 2], evidence: "established" },
+        
+        // === NEURODEGENERATIVE GENES ===
+        { id: "apoe4_copies", name: "APOE4 Allele Copies", value: 0, unit: "copies", range: [0, 2], evidence: "established" },
+        { id: "app_mutation", name: "APP Mutation Status", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "psen1_mutation", name: "PSEN1 Mutation", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "psen2_mutation", name: "PSEN2 Mutation", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "mapt_mutation", name: "MAPT (Tau) Mutation", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "snca_expression", name: "α-Synuclein (SNCA) Expression", value: 1.0, unit: "fold", range: [0.5, 3], evidence: "established" },
+        { id: "lrrk2_mutation", name: "LRRK2 Mutation", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "gba_function", name: "GBA (Glucocerebrosidase) Function", value: 100, unit: "%", range: [0, 100], evidence: "established" },
+        { id: "park2_function", name: "Parkin (PARK2) Function", value: 100, unit: "%", range: [0, 100], evidence: "established" },
+        { id: "htt_cag_repeats", name: "HTT CAG Repeats (Huntington)", value: 20, unit: "repeats", range: [10, 36], evidence: "established" },
+        { id: "sod1_function", name: "SOD1 Function (ALS)", value: 100, unit: "%", range: [0, 100], evidence: "established" },
+        { id: "c9orf72_expansion", name: "C9orf72 Expansion (ALS/FTD)", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        
+        // === INFLAMMATORY & IMMUNE GENES ===
+        { id: "il6_expression", name: "IL-6 Gene Expression", value: 1.0, unit: "fold", range: [0.5, 5], evidence: "established" },
+        { id: "tnf_expression", name: "TNF-α Gene Expression", value: 1.0, unit: "fold", range: [0.5, 5], evidence: "established" },
+        { id: "il1b_expression", name: "IL-1β Gene Expression", value: 1.0, unit: "fold", range: [0.5, 5], evidence: "established" },
+        { id: "nfkb_activity", name: "NF-κB Activity", value: 1.0, unit: "fold", range: [0.5, 5], evidence: "established" },
+        { id: "hla_b27_status", name: "HLA-B27 Status", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "hla_dr4_status", name: "HLA-DR4 Status", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "ptpn22_variant", name: "PTPN22 Risk Variant", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "stat4_variant", name: "STAT4 Risk Variant", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        { id: "tgfb1_expression", name: "TGF-β1 Expression", value: 1.0, unit: "fold", range: [0.5, 3], evidence: "established" },
+        { id: "ifng_expression", name: "IFN-γ Expression", value: 1.0, unit: "fold", range: [0.5, 5], evidence: "established" },
+        
+        // === CYSTIC FIBROSIS & ION CHANNELS ===
+        { id: "cftr_function", name: "CFTR Channel Function", value: 100, unit: "%", range: [0, 100], evidence: "established" },
+        { id: "cftr_f508del", name: "CFTR F508del Mutation", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
+        
+        // === HORMONE RECEPTORS (Cancer) ===
+        { id: "esr1_expression", name: "Estrogen Receptor (ESR1)", value: 1.0, unit: "fold", range: [0, 3], evidence: "established" },
+        { id: "pgr_expression", name: "Progesterone Receptor (PGR)", value: 1.0, unit: "fold", range: [0, 3], evidence: "established" },
+        { id: "ar_expression", name: "Androgen Receptor (AR)", value: 1.0, unit: "fold", range: [0.5, 3], evidence: "established" },
       ],
       equations: [
         {
