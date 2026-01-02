@@ -3010,27 +3010,73 @@ const DashboardMultiScale = () => {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden pt-28 lg:pt-0">
-        {/* Desktop Header */}
+        {/* Active Condition Banner - Prominent title showing selected condition */}
+        <AnimatePresence>
+          {currentDisease && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="bg-gradient-to-r from-destructive/10 via-red-500/10 to-orange-500/10 border-b border-destructive/30 overflow-hidden"
+            >
+              <div className="px-4 lg:px-6 py-3 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="shrink-0 w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-destructive/20 flex items-center justify-center">
+                    <AlertTriangle className="w-5 h-5 lg:w-6 lg:h-6 text-destructive" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[10px] lg:text-xs text-destructive font-semibold uppercase tracking-wider">
+                        Active Condition
+                      </span>
+                      {currentDisease.icd10 && (
+                        <Badge variant="outline" className="text-[9px] lg:text-[10px] border-destructive/40 text-destructive shrink-0">
+                          ICD-10: {currentDisease.icd10}
+                        </Badge>
+                      )}
+                    </div>
+                    <h2 className="text-base sm:text-lg lg:text-xl font-bold text-foreground truncate" title={currentDisease.name}>
+                      {currentDisease.name}
+                    </h2>
+                    <p className="text-[10px] lg:text-xs text-muted-foreground line-clamp-1 hidden sm:block">
+                      {currentDisease.description || currentDisease.definition || `Affecting ${currentDisease.affectedOrgans?.length || 1} organ systems`}
+                    </p>
+                  </div>
+                </div>
+                <div className="shrink-0 flex items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={resetDisease} 
+                    className="border-destructive/30 text-destructive hover:bg-destructive/10 h-8 lg:h-9 text-xs lg:text-sm"
+                  >
+                    <RotateCcw className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2" />
+                    <span className="hidden sm:inline">Reset</span>
+                    <span className="sm:hidden">×</span>
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Desktop Header - Organ Info */}
         <header className="hidden lg:flex h-14 border-b border-border/50 px-6 items-center justify-between bg-card/30">
           <div>
             <h2 className="font-bold text-lg flex items-center gap-2">
               <span className="text-2xl">{currentOrgan?.icon}</span>
               {currentOrgan?.name}
-              {selectedDisease !== null && selectedDisease !== undefined && currentDisease && (
-                <Badge variant="destructive" className="ml-2" data-testid="disease-badge">
-                  {currentDisease.name}
-                </Badge>
-              )}
             </h2>
             <p className="text-xs text-muted-foreground">
               Complete mathematical model at multiple scales
             </p>
           </div>
           {selectedDisease !== null && selectedDisease !== undefined && currentDisease && (
-            <Button variant="outline" size="sm" onClick={resetDisease} className="border-border/50">
-              <RotateCcw className="w-3 h-3 mr-2" />
-              Reset Model
-            </Button>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span className="text-destructive">●</span>
+              <span>Viewing effects on {currentOrgan?.name}</span>
+            </div>
           )}
         </header>
 
