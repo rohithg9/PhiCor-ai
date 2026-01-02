@@ -2526,26 +2526,6 @@ Return ONLY valid JSON, no other text."""
     ]
 }}
 
-CRITICAL RULES FOR GENETIC DISEASES:
-1. For HEMOGLOBINOPATHIES (β-thalassemia, sickle cell, α-thalassemia):
-   - MUST include "cellular.dna" with: hbb_gene_expression, hba_gene_expression, alpha_beta_globin_ratio, hbs_variant, hbf_level
-   - β-thalassemia Major: hbb_gene_expression=0 (absent), alpha_beta_globin_ratio=4-5 (severely elevated)
-   - Sickle Cell: hbs_variant=80-100%, alpha_beta_globin_ratio=1.0 (normal)
-   
-2. For CHROMOSOMAL DISORDERS (Down syndrome, Turner, Klinefelter):
-   - MUST include "cellular.dna" with: chromosome_count (47 for trisomy, 45 for monosomy), karyotype_abnormalities
-   
-3. For CYSTIC FIBROSIS: cftr_function=0 (absent)
-
-4. For CANCER/HEREDITARY CANCER SYNDROMES:
-   - MUST include: tp53_mutation_status, brca1_function, brca2_function, mutation_burden, cell_cycle changes
-
-5. For ALL GENETIC DISEASES: Always include "cellular" organ with "dna" modifications
-
-6. Use realistic values based on medical literature
-7. Include evidence citations for each modification  
-8. Return ONLY valid JSON, no other text"""
-
         user_message = UserMessage(text=prompt)
         response = await chat.send_message(user_message)
         
