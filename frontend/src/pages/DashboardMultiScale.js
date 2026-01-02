@@ -3181,6 +3181,82 @@ const DashboardMultiScale = () => {
           </div>
         )}
 
+        {/* Dynamic Disease-Specific Molecular Findings Panel */}
+        {currentDisease && extraMolecularFindings.length > 0 && (
+          <div className="px-3 lg:px-6 py-3 bg-gradient-to-r from-purple-500/5 to-violet-500/5 border-b border-purple-500/20">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-pulse" />
+              <span className="text-xs font-semibold text-purple-400 uppercase tracking-wider">
+                Disease-Specific Molecular Profile
+              </span>
+              <Badge variant="outline" className="text-[10px] border-purple-500/30 text-purple-400">
+                {extraMolecularFindings.length} findings
+              </Badge>
+            </div>
+            <p className="text-[10px] text-muted-foreground mb-2">
+              Molecular changes specific to {currentDisease.name} without predefined baselines
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {extraMolecularFindings.slice(0, showAllParams ? 50 : 8).map((finding, idx) => (
+                <motion.div
+                  key={finding.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: idx * 0.02 }}
+                  className="px-2 py-1.5 rounded-md bg-purple-500/10 border border-purple-500/20 hover:border-purple-500/40 transition-all"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span className={`text-[10px] px-1 py-0.5 rounded ${
+                      finding.category === 'Genetic' ? 'bg-blue-500/20 text-blue-400' :
+                      finding.category === 'Expression' ? 'bg-green-500/20 text-green-400' :
+                      finding.category === 'Metabolic' ? 'bg-yellow-500/20 text-yellow-400' :
+                      'bg-purple-500/20 text-purple-400'
+                    }`}>
+                      {finding.category}
+                    </span>
+                    <span className="text-xs font-medium text-foreground">
+                      {finding.name}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    {finding.value !== undefined && (
+                      <span className="text-[10px] font-bold text-purple-400">
+                        Value: {finding.value}
+                      </span>
+                    )}
+                    {finding.changePercent !== undefined && (
+                      <span className={`text-[10px] font-bold flex items-center gap-0.5 ${
+                        finding.direction === 'increase' ? 'text-red-400' : 
+                        finding.direction === 'decrease' ? 'text-blue-400' : 'text-muted-foreground'
+                      }`}>
+                        {finding.direction === 'increase' ? <TrendingUp className="w-2.5 h-2.5" /> : 
+                         finding.direction === 'decrease' ? <TrendingDown className="w-2.5 h-2.5" /> : null}
+                        {finding.direction === 'increase' ? '+' : finding.direction === 'decrease' ? '-' : ''}{finding.changePercent}%
+                      </span>
+                    )}
+                  </div>
+                  {finding.evidence && (
+                    <p className="text-[9px] text-muted-foreground mt-0.5 line-clamp-1" title={finding.evidence}>
+                      {finding.evidence}
+                    </p>
+                  )}
+                </motion.div>
+              ))}
+              {extraMolecularFindings.length > 8 && !showAllParams && (
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowAllParams(true);
+                  }}
+                  className="px-2 py-1 text-[10px] text-purple-400 hover:text-purple-300 border border-dashed border-purple-500/30 rounded-md"
+                >
+                  +{extraMolecularFindings.length - 8} more...
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Scale Tabs */}
         <div className="border-b border-border/50 px-3 lg:px-6 bg-card/20">
           <div className="flex gap-1 py-2 overflow-x-auto scrollbar-hide">
