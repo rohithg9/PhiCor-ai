@@ -921,52 +921,69 @@ const ClinicalDataPanel = ({ modifications, disease, severity }) => {
       Object.entries(organMods).forEach(([scaleId, scaleMods]) => {
         if (!scaleMods || typeof scaleMods !== 'object') return;
         
+        // Helper function to format change value as string
+        const formatChange = (param) => {
+          if (param.change_percent !== undefined && param.change_percent !== null) {
+            return `${param.direction === 'decrease' ? '-' : '+'}${param.change_percent}%`;
+          }
+          if (param.value !== undefined && param.value !== null) {
+            return String(param.value);
+          }
+          return param.direction || 'N/A';
+        };
+        
         // Handle different scale types
         if (scaleId === 'vital_signs' || scaleId === 'vitals') {
           Object.entries(scaleMods).forEach(([paramId, param]) => {
+            if (!param || typeof param !== 'object') return;
             vitalSigns.push({
               name: paramId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-              change: param.change_percent ? `${param.direction === 'decrease' ? '-' : '+'}${param.change_percent}%` : param.value,
+              change: formatChange(param),
               evidence: param.evidence || ''
             });
           });
         } else if (scaleId === 'lab_tests' || scaleId === 'labs') {
           Object.entries(scaleMods).forEach(([paramId, param]) => {
+            if (!param || typeof param !== 'object') return;
             labTests.push({
               name: paramId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-              change: param.change_percent ? `${param.direction === 'decrease' ? '-' : '+'}${param.change_percent}%` : param.value,
+              change: formatChange(param),
               evidence: param.evidence || ''
             });
           });
         } else if (scaleId === 'physical_exam') {
           Object.entries(scaleMods).forEach(([paramId, param]) => {
+            if (!param || typeof param !== 'object') return;
             physicalExam.push({
               name: paramId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-              finding: param.value !== undefined ? (param.value === 1 ? 'Present' : param.value === 0 ? 'Absent' : param.value) : `${param.direction}`,
+              finding: param.value !== undefined ? (param.value === 1 ? 'Present' : param.value === 0 ? 'Absent' : String(param.value)) : `${param.direction || 'N/A'}`,
               evidence: param.evidence || ''
             });
           });
         } else if (scaleId === 'dna' || scaleId === 'genetics' || scaleId === 'gene_expression') {
           Object.entries(scaleMods).forEach(([paramId, param]) => {
+            if (!param || typeof param !== 'object') return;
             dnaMarkers.push({
               name: paramId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-              change: param.change_percent ? `${param.direction === 'decrease' ? '-' : '+'}${param.change_percent}%` : param.value || param.direction,
+              change: formatChange(param),
               evidence: param.evidence || ''
             });
           });
         } else if (scaleId === 'ecg') {
           Object.entries(scaleMods).forEach(([paramId, param]) => {
+            if (!param || typeof param !== 'object') return;
             ecgFindings.push({
               name: paramId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-              change: param.change_percent ? `${param.direction === 'decrease' ? '-' : '+'}${param.change_percent}%` : param.value,
+              change: formatChange(param),
               evidence: param.evidence || ''
             });
           });
         } else if (scaleId === 'risk_factors') {
           Object.entries(scaleMods).forEach(([paramId, param]) => {
+            if (!param || typeof param !== 'object') return;
             riskFactors.push({
               name: paramId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-              level: param.risk_level || param.value || param.direction,
+              level: String(param.risk_level || param.value || param.direction || 'N/A'),
               evidence: param.evidence || ''
             });
           });
