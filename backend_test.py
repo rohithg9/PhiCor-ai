@@ -29,7 +29,7 @@ Test 5: Drug Detail
 - Endpoint: GET /api/drugs/captopril
 - Expected: Returns drug with mechanisms, dosages, contraindications, interactions
 
-API Base URL: https://digitalhealth-3.preview.emergentagent.com
+API Base URL: https://healthtwin-5.preview.emergentagent.com
 """
 
 import requests
