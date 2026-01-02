@@ -2424,6 +2424,194 @@ async def seed_comprehensive_disease_database():
     }
 
 
+# ============== PARAMETER MODIFICATION GENERATION ==============
+
+class ParameterModificationRequest(BaseModel):
+    """Request for generating parameter modifications"""
+    disease_id: str
+    disease_name: str
+    category: Optional[str] = None
+
+
+@api_router.post("/diseases-db/generate-parameter-mods")
+async def generate_disease_parameter_modifications(request: ParameterModificationRequest):
+    """
+    Generate physiological parameter modifications for a disease using AI.
+    This populates how a disease affects various organ parameters.
+    """
+    try:
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        
+        api_key = os.environ.get('EMERGENT_LLM_KEY')
+        if not api_key:
+            raise HTTPException(status_code=500, detail="EMERGENT_LLM_KEY not configured")
+        
+        llm = LlmChat(
+            api_key=api_key,
+            model_provider="openai",
+            model_name="gpt-4o"
+        )
+        
+        prompt = f"""You are a medical expert. Generate parameter modifications for the disease: {request.disease_name}
+
+For this disease, specify how it affects various physiological parameters. Return a JSON object with this structure:
+
+{{
+    "disease_id": "{request.disease_id}",
+    "disease_name": "{request.disease_name}",
+    "parameter_modifications": {{
+        "heart": {{
+            "geometry": {{
+                "lv_edv": {{ "change_percent": 20, "direction": "increase", "evidence": "Cardiac remodeling in heart failure" }},
+                "lv_wall_thickness": {{ "change_percent": 15, "direction": "increase", "evidence": "LVH compensation" }}
+            }},
+            "lab_tests": {{
+                "troponin_i": {{ "change_percent": 500, "direction": "increase", "evidence": "Myocardial injury marker" }},
+                "bnp": {{ "change_percent": 300, "direction": "increase", "evidence": "Wall stress marker" }}
+            }},
+            "imaging": {{
+                "echo_ef": {{ "change_percent": 25, "direction": "decrease", "evidence": "Systolic dysfunction" }}
+            }}
+        }},
+        "kidneys": {{
+            "physiology": {{
+                "gfr": {{ "change_percent": 30, "direction": "decrease", "evidence": "Cardiorenal syndrome" }}
+            }},
+            "urinalysis": {{
+                "urine_protein": {{ "change_percent": 100, "direction": "increase", "evidence": "Proteinuria from hypoperfusion" }}
+            }}
+        }},
+        "blood": {{
+            "pressures": {{
+                "systolic_bp": {{ "change_percent": 20, "direction": "increase", "evidence": "Compensatory mechanism" }}
+            }}
+        }}
+    }},
+    "affected_organs": ["heart", "kidneys", "blood", "lungs"],
+    "severity_factors": [
+        {{ "name": "Ejection Fraction", "threshold": "<40%", "impact": "severe" }},
+        {{ "name": "BNP Level", "threshold": ">400", "impact": "moderate" }}
+    ],
+    "mathematical_models": [
+        {{
+            "name": "Frank-Starling Curve Shift",
+            "equation": "SV = SV_max * (1 - e^(-k*EDV)) * contractility",
+            "description": "Reduced contractility shifts curve downward"
+        }}
+    ]
+}}
+
+IMPORTANT: 
+- Only include parameters that are actually affected by this specific disease
+- Use realistic change percentages based on medical literature
+- Include evidence for each modification
+- Return ONLY the JSON, no other text"""
+
+        response = await llm.send_async_message(
+            UserMessage(content=prompt),
+            session_id=f"param_gen_{request.disease_id}"
+        )
+        
+        # Extract JSON from response
+        response_text = response.content
+        
+        # Try to find JSON in the response
+        json_match = re.search(r'\{[\s\S]*\}', response_text)
+        if json_match:
+            param_data = json.loads(json_match.group())
+        else:
+            raise ValueError("No valid JSON found in response")
+        
+        # Save to disease document
+        update_result = await db.diseases.update_one(
+            {"id": request.disease_id},
+            {
+                "$set": {
+                    "parameter_modifications": param_data.get("parameter_modifications", {}),
+                    "affected_organs": param_data.get("affected_organs", []),
+                    "severity_factors": param_data.get("severity_factors", []),
+                    "mathematical_models_disease": param_data.get("mathematical_models", []),
+                    "params_generated_at": datetime.now(timezone.utc).isoformat()
+                }
+            }
+        )
+        
+        return {
+            "success": True,
+            "disease_id": request.disease_id,
+            "disease_name": request.disease_name,
+            "modifications_generated": len(param_data.get("parameter_modifications", {})),
+            "affected_organs": param_data.get("affected_organs", []),
+            "data": param_data
+        }
+        
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON parse error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to parse AI response: {str(e)}")
+    except Exception as e:
+        logger.error(f"Error generating parameter modifications: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.post("/diseases-db/generate-params-batch")
+async def generate_params_batch(
+    count: int = 10,
+    category: Optional[str] = None
+):
+    """
+    Generate parameter modifications for multiple diseases in batch.
+    """
+    import asyncio
+    
+    # Get diseases that don't have parameter_modifications yet
+    query = {"parameter_modifications": {"$exists": False}}
+    if category:
+        query["category"] = category
+    
+    diseases = await db.diseases.find(query, {"_id": 0, "id": 1, "name": 1, "category": 1}).limit(count).to_list(count)
+    
+    if not diseases:
+        return {
+            "success": True,
+            "message": "No diseases found without parameter modifications",
+            "processed": 0
+        }
+    
+    results = []
+    errors = []
+    
+    for disease in diseases:
+        try:
+            logger.info(f"Generating params for: {disease['name']}")
+            request = ParameterModificationRequest(
+                disease_id=disease["id"],
+                disease_name=disease["name"],
+                category=disease.get("category")
+            )
+            result = await generate_disease_parameter_modifications(request)
+            results.append({
+                "disease_id": disease["id"],
+                "disease_name": disease["name"],
+                "success": True
+            })
+            await asyncio.sleep(0.5)  # Rate limiting
+        except Exception as e:
+            logger.error(f"Error generating params for {disease['name']}: {e}")
+            errors.append({
+                "disease_id": disease["id"],
+                "disease_name": disease["name"],
+                "error": str(e)
+            })
+    
+    return {
+        "success": True,
+        "processed": len(results),
+        "errors": len(errors),
+        "results": results,
+        "error_details": errors if errors else None
+    }
+
+
 @api_router.get("/diseases-db")
 async def get_diseases(
     search: Optional[str] = None,
