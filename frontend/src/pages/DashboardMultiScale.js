@@ -3318,6 +3318,15 @@ const DashboardMultiScale = () => {
     setDiseaseSeverity(0.5);
   }, []);
 
+  // Handle scale selection with scroll-to-panel
+  const handleScaleSelect = useCallback((scaleId) => {
+    setSelectedScale(scaleId);
+    // Scroll to parameters section after a short delay to ensure content is rendered
+    setTimeout(() => {
+      parametersRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  }, []);
+
   // Handle disease selection with auto-navigation to primary organ
   const handleDiseaseSelect = useCallback((diseaseId) => {
     setSelectedDisease(diseaseId);
