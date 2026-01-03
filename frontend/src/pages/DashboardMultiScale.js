@@ -973,8 +973,31 @@ const ClinicalFindingsPanel = ({ disease, isExpanded, onToggle, alwaysExpanded =
   
   if (!disease) return null;
 
-  const clinicalData = disease.clinicalPresentation || {};
-  const labFindings = Array.isArray(disease.laboratoryFindings) ? disease.laboratoryFindings : [];
+  // Get clinical data from multiple sources - prioritize comprehensive_model
+  const comprehensiveModel = disease.comprehensive_model || {};
+  const comprehensiveClinical = comprehensiveModel.clinicalPresentation || {};
+  const regularClinical = disease.clinicalPresentation || {};
+  
+  // Merge clinical data: comprehensive model takes priority
+  const clinicalData = {
+    symptoms: comprehensiveClinical.symptoms?.length > 0 
+      ? comprehensiveClinical.symptoms 
+      : regularClinical.symptoms || [],
+    signs: comprehensiveClinical.signs?.length > 0 
+      ? comprehensiveClinical.signs 
+      : regularClinical.signs || [],
+    labTests: comprehensiveClinical.labTests?.length > 0 
+      ? comprehensiveClinical.labTests 
+      : regularClinical.labTests || [],
+    imaging: comprehensiveClinical.imaging?.length > 0 
+      ? comprehensiveClinical.imaging 
+      : regularClinical.imaging || [],
+    treatments: comprehensiveClinical.treatments?.length > 0 
+      ? comprehensiveClinical.treatments 
+      : regularClinical.treatments || []
+  };
+  
+  const labFindings = Array.isArray(disease.laboratoryFindings) ? disease.laboratoryFindings : clinicalData.labTests || [];
   const rawImagingFindings = disease.imagingFindings || {};
   const pathophysiology = disease.pathophysiology || {};
   
