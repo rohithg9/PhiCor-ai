@@ -401,15 +401,15 @@ const DiseaseDetailPanel = ({ diseaseId, diseaseName }) => {
                             return (
                               <div key={i} className="p-2 rounded bg-purple-500/5 border border-purple-500/20">
                                 <div className="flex items-center justify-between">
-                                  <span className="font-medium text-purple-400 text-sm">{device.device || device.name || device}</span>
-                                  {device.evidence_level && <Badge variant="outline" className="text-[8px]">{device.evidence_level}</Badge>}
+                                  <span className="font-medium text-purple-400 text-sm">{deviceName}</span>
+                                  {evidence && <Badge variant="outline" className="text-[8px]">{evidence}</Badge>}
                                 </div>
-                                {device.indications && (
+                                {indications && (
                                   <p className="text-[10px] text-muted-foreground mt-1">
-                                    <span className="text-purple-300">Indications:</span> {Array.isArray(device.indications) ? device.indications.join('; ') : device.indications}
+                                    <span className="text-purple-300">Indications:</span> {indications}
                                   </p>
                                 )}
-                                {device.description && <p className="text-[10px] text-muted-foreground mt-1">{device.description}</p>}
+                                {description && <p className="text-[10px] text-muted-foreground mt-1">{description}</p>}
                               </div>
                             );
                           })}
@@ -425,20 +425,36 @@ const DiseaseDetailPanel = ({ diseaseId, diseaseName }) => {
                         </h4>
                         {disease.treatment.interventional.surgical && (
                           <div className="grid gap-2">
-                            {(disease.treatment.interventional.surgical || []).map((surg, i) => {
-                              const surgery = typeof surg === 'object' ? surg : { name: surg };
+                            {(Array.isArray(disease.treatment.interventional.surgical) 
+                              ? disease.treatment.interventional.surgical 
+                              : [disease.treatment.interventional.surgical]
+                            ).filter(Boolean).map((surg, i) => {
+                              let surgName = '';
+                              let surgIndications = '';
+                              let surgEvidence = '';
+                              let surgSuccess = '';
+                              
+                              if (typeof surg === 'string') {
+                                surgName = surg;
+                              } else if (typeof surg === 'object' && surg !== null) {
+                                surgName = surg.name || 'Unknown Procedure';
+                                surgIndications = Array.isArray(surg.indications) ? surg.indications.join('; ') : (surg.indications || '');
+                                surgEvidence = surg.evidence_level || '';
+                                surgSuccess = surg.success_rate || '';
+                              }
+                              
                               return (
                                 <div key={i} className="p-2 rounded bg-red-500/5 border border-red-500/20">
                                   <div className="flex items-center justify-between">
-                                    <span className="font-medium text-red-400 text-sm">{surgery.name}</span>
-                                    {surgery.evidence_level && <Badge variant="outline" className="text-[8px]">{surgery.evidence_level}</Badge>}
+                                    <span className="font-medium text-red-400 text-sm">{surgName}</span>
+                                    {surgEvidence && <Badge variant="outline" className="text-[8px]">{surgEvidence}</Badge>}
                                   </div>
-                                  {surgery.indications && (
+                                  {surgIndications && (
                                     <p className="text-[10px] text-muted-foreground mt-1">
-                                      <span className="text-red-300">Indications:</span> {Array.isArray(surgery.indications) ? surgery.indications.join('; ') : surgery.indications}
+                                      <span className="text-red-300">Indications:</span> {surgIndications}
                                     </p>
                                   )}
-                                  {surgery.success_rate && <span className="text-[10px] text-green-400">Success: {surgery.success_rate}</span>}
+                                  {surgSuccess && <span className="text-[10px] text-green-400">Success: {surgSuccess}</span>}
                                 </div>
                               );
                             })}
