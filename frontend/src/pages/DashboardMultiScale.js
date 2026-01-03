@@ -150,6 +150,55 @@ const ALL_SEARCHABLE_SCALES = [
   'vital_signs', 'physical_exam', 'imaging', 'lab_tests', 'ecg', 'urinalysis', 'cbc', 'renal_function'
 ];
 
+// Mapping from API disease IDs to DISEASE_MODELS keys
+// API IDs often use different naming conventions than static models
+const API_TO_DISEASE_MODEL_KEY = {
+  'cardiomyopathy_dilated': 'dilated_cardiomyopathy',
+  'cardiomyopathy_hypertrophic': 'hypertrophic_cardiomyopathy',
+  'heart_failure_hfref': 'heart_failure',
+  'heart_failure_hfpef': 'heart_failure',
+  'heart_failure': 'heart_failure',
+  'chronic_kidney_disease': 'chronic_kidney_disease',
+  'ckd': 'chronic_kidney_disease',
+  'cirrhosis': 'cirrhosis',
+  'liver_cirrhosis': 'cirrhosis',
+  'sepsis': 'sepsis',
+  'myocardial_infarction': 'acute_mi',
+  'acute_mi': 'acute_mi',
+  'hypertension': 'hypertension',
+  'copd': 'copd',
+  'atrial_fibrillation': 'atrial_fibrillation',
+  'afib': 'atrial_fibrillation',
+  // Add more mappings as needed
+};
+
+// Function to find the DISEASE_MODELS key for a given API disease ID
+const getDiseaseModelKey = (apiDiseaseId) => {
+  // First check direct mapping
+  if (API_TO_DISEASE_MODEL_KEY[apiDiseaseId]) {
+    return API_TO_DISEASE_MODEL_KEY[apiDiseaseId];
+  }
+  // Check if the key exists directly in DISEASE_MODELS
+  if (DISEASE_MODELS[apiDiseaseId]) {
+    return apiDiseaseId;
+  }
+  // Try some transformations
+  // cardiomyopathy_dilated -> dilated_cardiomyopathy
+  const parts = apiDiseaseId.split('_');
+  if (parts.length === 2) {
+    const reversed = `${parts[1]}_${parts[0]}`;
+    if (DISEASE_MODELS[reversed]) {
+      return reversed;
+    }
+  }
+  // Try removing common prefixes/suffixes
+  const cleanId = apiDiseaseId.replace(/_hfref|_hfpef|_type\d/g, '');
+  if (DISEASE_MODELS[cleanId]) {
+    return cleanId;
+  }
+  return null;
+};
+
 // Clinical Insights Component with AI
 const ClinicalInsightsPanel = ({ disease, severity }) => {
   const defaultSymptoms = [
