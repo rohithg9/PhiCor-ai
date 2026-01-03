@@ -65,6 +65,13 @@ function AppContent() {
         <Route path="/user-manual" element={<UserManual />} />
         <Route path="/manual" element={<UserManual />} />
         <Route path="/help" element={<UserManual />} />
+        
+        {/* Expert Curation System Routes */}
+        <Route path="/expert-login" element={<ExpertAuthPage />} />
+        <Route path="/expert" element={<ExpertDashboard />} />
+        <Route path="/expert/experiments" element={<ExperimentLab />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+        
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Toaster position="bottom-right" richColors />
