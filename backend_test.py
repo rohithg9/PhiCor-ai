@@ -562,7 +562,8 @@ def run_all_tests():
     backend_total = len(backend_tests)
     
     if backend_passed == backend_total:
-        print(f"\n🎉 ALL BACKEND API TESTS PASSED! PhiCore.ai Mathematical Human Body Dashboard APIs working perfectly.")
+        print(f"\n🎉 ALL BACKEND API TESTS PASSED! PhiCore.ai Dashboard APIs working perfectly.")
+        print(f"✅ Enhancement status endpoint working with Phase 1 and Phase 2 data")
         print(f"✅ Disease database stats show 509+ diseases with parameter_modifications")
         print(f"✅ Disease search functionality working with diabetes results")
         print(f"✅ Specific disease details working for Heart Failure, Type 2 Diabetes, COPD")
@@ -573,10 +574,15 @@ def run_all_tests():
         print(f"⚠️  Some minor issues detected - see failed tests above")
     else:
         print(f"\n❌ SIGNIFICANT ISSUES DETECTED! Only {backend_passed}/{backend_total} backend tests passed.")
-        print(f"🔧 Major fixes needed for PhiCore.ai Mathematical Human Body Dashboard APIs")
+        print(f"🔧 Major fixes needed for PhiCore.ai Dashboard APIs")
     
     # Detailed verification summary
     print(f"\n📋 KEY VERIFICATION POINTS:")
+    if test_results.get('enhancement_status'):
+        print(f"  ✅ Enhancement Status Endpoint verified (/api/enhancement/status with Phase 1 & 2 data)")
+    else:
+        print(f"  ❌ Enhancement Status Endpoint verification failed")
+    
     if test_results.get('disease_database_stats'):
         print(f"  ✅ Disease Database Stats API verified (509+ diseases with parameter_modifications)")
     else:
