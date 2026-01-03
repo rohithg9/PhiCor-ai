@@ -319,85 +319,158 @@ async def generate_comprehensive_model(disease_name: str, icd10: str, category: 
     
     organs = category_to_organs.get(category, ["heart", "lungs", "kidneys", "blood", "cellular"])
     
-    prompt = f"""You are a medical expert generating comprehensive clinical models for EMR integration.
+    prompt = f"""You are a senior physician and clinical expert with access to UpToDate, Harrison's Principles, medical textbooks, and clinical guidelines. Generate COMPREHENSIVE clinical data for EMR integration.
 
 Disease: {disease_name}
 ICD-10: {icd10}
 Category: {category}
 
-Return a JSON object with this EXACT structure. This data will be used to analyze patient records and correlate symptoms/signs with disease severity.
+This data will be used by physicians for clinical decision support. It MUST be medically accurate and comprehensive.
+
+Return a JSON object with this structure:
 
 {{
   "primaryOrgan": "{organs[0]}",
   "affectedOrgans": {json.dumps(organs)},
   
   "progression": [
-    {{"stage": 1, "name": "Early/Subclinical", "severity": 0.2, "description": "Initial changes", "yearsFromOnset": "0-2", "clinicalCriteria": "Criteria for this stage"}},
-    {{"stage": 2, "name": "Mild", "severity": 0.4, "description": "Early symptoms", "yearsFromOnset": "2-5", "clinicalCriteria": "Criteria for this stage"}},
-    {{"stage": 3, "name": "Moderate", "severity": 0.6, "description": "Progressive disease", "yearsFromOnset": "5-10", "clinicalCriteria": "Criteria for this stage"}},
-    {{"stage": 4, "name": "Severe/End-stage", "severity": 0.9, "description": "Advanced disease", "yearsFromOnset": ">10", "clinicalCriteria": "Criteria for this stage"}}
+    {{"stage": 1, "name": "Stage I / Early", "severity": 0.2, "description": "Subclinical or mild disease", "criteria": "Specific diagnostic criteria for this stage", "management": "Management approach for this stage"}},
+    {{"stage": 2, "name": "Stage II / Mild-Moderate", "severity": 0.4, "description": "Symptomatic disease", "criteria": "Specific criteria", "management": "Management approach"}},
+    {{"stage": 3, "name": "Stage III / Moderate-Severe", "severity": 0.7, "description": "Significant functional limitation", "criteria": "Specific criteria", "management": "Management approach"}},
+    {{"stage": 4, "name": "Stage IV / End-stage", "severity": 0.95, "description": "Refractory or terminal disease", "criteria": "Specific criteria", "management": "Palliative or advanced therapies"}}
   ],
   
   "clinicalPresentation": {{
     "symptoms": [
-      {{"name": "Symptom name", "severity_grades": [{{"grade": 1, "description": "Mild - on exertion only"}}, {{"grade": 2, "description": "Moderate - limits daily activities"}}, {{"grade": 3, "description": "Severe - at rest"}}, {{"grade": 4, "description": "Critical - constant"}}], "frequency": "Common/Uncommon/Rare", "onset": "Acute/Gradual", "progression_with_disease": "Worsens with disease stage"}},
-      // Include 5-8 symptoms with severity grades
+      // Include ALL relevant symptoms (10-15 minimum) with severity grading
+      {{"name": "Symptom 1", "description": "Description", "frequency": "Very Common (>50%) / Common (20-50%) / Uncommon (5-20%) / Rare (<5%)", "onset": "Acute/Subacute/Chronic/Insidious", "character": "Description of symptom character", "severity_grades": [
+        {{"grade": 1, "description": "Mild - minimal impact"}},
+        {{"grade": 2, "description": "Moderate - noticeable limitation"}},
+        {{"grade": 3, "description": "Severe - significant limitation"}},
+        {{"grade": 4, "description": "Very severe - disabling"}}
+      ], "red_flags": ["When this symptom indicates serious disease"], "differential": ["Other conditions with this symptom"]}}
     ],
     "signs": [
-      {{"name": "Clinical sign name", "how_to_detect": "Physical exam method", "severity_grades": [{{"grade": "Mild", "criteria": "Specific criteria"}}, {{"grade": "Moderate", "criteria": "Specific criteria"}}, {{"grade": "Severe", "criteria": "Specific criteria"}}], "sensitivity": "85%", "specificity": "70%", "associated_with_stage": "Stage 2-4"}},
-      // Include 5-10 clinical signs with detection methods and severity grades
+      // Include ALL relevant physical examination findings (10-15 minimum)
+      {{"name": "Sign 1", "category": "Vital signs / General / Cardiac / Respiratory / Abdominal / Neurological / Extremities / Skin", "how_to_detect": "Detailed examination technique", "normal_finding": "What's normal", "abnormal_finding": "What's abnormal in this disease", "severity_grades": [
+        {{"grade": "Mild", "criteria": "Specific measurement or finding"}},
+        {{"grade": "Moderate", "criteria": "Specific measurement"}},
+        {{"grade": "Severe", "criteria": "Specific measurement"}}
+      ], "sensitivity": "85%", "specificity": "70%", "positive_predictive_value": "75%"}}
     ],
     "labTests": [
-      {{"name": "Test name", "normal_range": "Normal values", "abnormal_in_disease": "Expected abnormal values", "significance": "Clinical meaning", "sensitivity": "80%", "specificity": "75%", "when_to_order": "Initial workup/Monitoring/Suspected complication"}}
+      // Include ALL relevant laboratory tests (10-15 minimum)
+      {{"name": "Test name", "category": "CBC / BMP / LFT / Cardiac markers / Inflammatory / Coagulation / Specialized", "normal_range": "Reference range with units", "mild_abnormality": "Range for mild disease", "moderate_abnormality": "Range for moderate disease", "severe_abnormality": "Range for severe disease", "diagnostic_threshold": "Value that suggests diagnosis", "prognostic_value": "What levels mean for prognosis", "monitoring_frequency": "How often to check", "interfering_factors": ["Factors that affect the test"]}}
     ],
     "imaging": [
-      {{"type": "Imaging modality", "findings": "Expected findings", "severity_correlation": "Findings correlate with disease severity", "sensitivity": "90%", "specificity": "85%", "when_to_order": "Indication"}}
-    ],
-    "treatments": [
-      {{"category": "Medications", "items": ["drug1", "drug2"], "evidence_level": "Class I/II/III", "when_to_use": "Indication"}},
-      {{"category": "Procedures", "items": ["procedure1"], "evidence_level": "Class I/II/III", "when_to_use": "Indication"}},
-      {{"category": "Lifestyle", "items": ["modification1"]}}
+      // Include ALL relevant imaging modalities (5-10)
+      {{"modality": "CT / MRI / Echo / X-ray / Nuclear / Ultrasound", "protocol": "Specific protocol (with/without contrast, etc.)", "indications": "When to order", "expected_findings": "Detailed findings in this disease", "severity_markers": "Imaging features that indicate severity", "sensitivity": "90%", "specificity": "85%", "advantages": "Why choose this modality", "limitations": "What it can't show"}}
     ]
   }},
   
+  "treatment": {{
+    "pharmacological": {{
+      "first_line": [
+        {{"drug_class": "Drug class name", "examples": ["Drug1 (dose)", "Drug2 (dose)"], "mechanism": "How it works", "evidence_level": "Class I-A / I-B / IIa / IIb / III", "contraindications": ["List"], "side_effects": ["Common side effects"], "monitoring": "What to monitor", "when_to_use": "Specific indications", "when_to_avoid": "Contraindications"}}
+      ],
+      "second_line": [
+        {{"drug_class": "Name", "examples": ["Drug (dose)"], "mechanism": "MOA", "evidence_level": "Class", "when_to_use": "If first-line fails or contraindicated"}}
+      ],
+      "adjunctive": [
+        {{"drug_class": "Name", "examples": ["Drug"], "purpose": "Why added"}}
+      ],
+      "experimental": [
+        {{"name": "Experimental therapy", "mechanism": "MOA", "current_status": "Phase II/III trials", "evidence": "Preliminary data"}}
+      ]
+    }},
+    "interventional": {{
+      "procedures": [
+        {{"name": "Procedure name", "description": "What it involves", "indications": ["Specific criteria for when to do it"], "contraindications": ["When not to do"], "success_rate": "85%", "complications": ["Risk1", "Risk2"], "evidence_level": "Class I-A", "recovery": "Recovery time and expectations"}}
+      ],
+      "surgical": [
+        {{"name": "Surgery name", "description": "Surgical approach", "indications": ["Specific criteria - include EF%, symptoms class, etc."], "timing": "Urgent/Elective/Emergent", "surgical_risk": "Low/Medium/High - STS score if applicable", "success_rate": "90%", "mortality_rate": "2%", "complications": ["List"], "post_op_care": "Recovery expectations", "long_term_outcomes": "5-year survival, etc."}}
+      ]
+    }},
+    "device_therapy": [
+      {{"device": "ICD / Pacemaker / CRT / CRT-D / LVAD / RVAD / BiVAD / TAH / ECMO / IABP", "description": "What it does", "indications": ["Specific criteria (EF <35%, NYHA III-IV, etc.)"], "contraindications": ["List"], "evidence_level": "Class I-A", "complications": ["Infection", "Lead malfunction", etc.], "battery_life": "X years", "follow_up": "Monitoring requirements", "outcomes": "Mortality reduction, symptom improvement"}}
+    ],
+    "transplant": {{
+      "indications": ["List of indications (EF, VO2max, etc.)"],
+      "contraindications": {{"absolute": ["List"], "relative": ["List"]}},
+      "listing_criteria": "UNOS/Eurotransplant criteria",
+      "waitlist_priority": "Status 1A, 1B, 2, etc. criteria",
+      "bridge_to_transplant": ["LVAD", "Inotropes", etc.],
+      "post_transplant": {{"immunosuppression": ["Drugs"], "monitoring": "Protocol", "rejection_surveillance": "Biopsy schedule", "outcomes": "1-year, 5-year survival"}}
+    }},
+    "lifestyle": [
+      {{"modification": "Diet", "specific_recommendations": "Sodium <2g, fluid restriction, etc.", "evidence": "Evidence level"}},
+      {{"modification": "Exercise", "specific_recommendations": "Cardiac rehab, specific activities", "evidence": "Evidence level"}},
+      {{"modification": "Weight", "specific_recommendations": "Target BMI, daily weights", "evidence": "Evidence level"}}
+    ],
+    "palliative": {{
+      "indications": ["When to consider palliative care"],
+      "symptom_management": ["Dyspnea management", "Pain control", etc.],
+      "hospice_criteria": ["Criteria for hospice referral"],
+      "advance_directives": "Discussion points"
+    }}
+  }},
+  
   "diagnosticCriteria": {{
-    "major": ["Major criterion 1", "Major criterion 2"],
-    "minor": ["Minor criterion 1", "Minor criterion 2"],
-    "diagnosis_rule": "Diagnosis requires X major + Y minor criteria"
+    "established_criteria": "Name of established criteria (Framingham, etc.)",
+    "major_criteria": ["Criterion 1 with specific definition", "Criterion 2"],
+    "minor_criteria": ["Criterion 1", "Criterion 2"],
+    "diagnosis_rule": "Diagnosis requires X major OR X major + Y minor",
+    "scoring_systems": [
+      {{"name": "Score name", "components": ["Component1", "Component2"], "interpretation": "Score ranges and meaning", "use_case": "When to use this score"}}
+    ]
   }},
   
-  "clinicalGuidelines": {{
-    "diagnosis": {{
-      "initial_workup": ["Step 1", "Step 2"],
-      "confirmatory_tests": ["Test 1", "Test 2"],
-      "differential_diagnosis": ["Condition 1", "Condition 2"]
-    }},
-    "treatment": {{
-      "first_line": ["Treatment 1"],
-      "second_line": ["Treatment 2"],
-      "refractory": ["Treatment for refractory cases"]
-    }},
-    "monitoring": {{
-      "frequency": "Every X months",
-      "parameters_to_monitor": ["Parameter 1", "Parameter 2"],
-      "warning_signs": ["Sign of deterioration 1"]
-    }}
-  }},
-  
-  "symptomSeverityModels": [
-    {{
-      "symptom": "Dyspnea",
-      "mathematical_model": {{
-        "name": "NYHA-Based Dyspnea Severity Model",
-        "latex": "Severity = \\\\frac{{NYHA\\\\_Class - 1}}{{3}} \\\\times 100",
-        "variables": {{"NYHA_Class": "1-4"}},
-        "interpretation": "0% = asymptomatic, 100% = symptoms at rest"
-      }}
-    }}
+  "differentialDiagnosis": [
+    {{"condition": "Condition name", "distinguishing_features": "How to differentiate", "key_tests": "Tests that help differentiate"}}
   ],
   
+  "prognosis": {{
+    "natural_history": "Course without treatment",
+    "with_treatment": "Expected outcomes with treatment",
+    "survival": {{
+      "1_year": "X%",
+      "5_year": "Y%",
+      "10_year": "Z%"
+    }},
+    "prognostic_factors": {{
+      "favorable": ["Factor1", "Factor2"],
+      "unfavorable": ["Factor1", "Factor2"]
+    }},
+    "risk_scores": [
+      {{"name": "Score name", "use": "Prediction of what", "components": ["List"], "interpretation": "Ranges"}}
+    ]
+  }},
+  
+  "monitoring": {{
+    "frequency": "Visit frequency by stage",
+    "parameters": ["What to monitor"],
+    "warning_signs": ["Signs of deterioration"],
+    "when_to_escalate": ["Criteria for intensifying treatment"],
+    "when_to_hospitalize": ["Admission criteria"]
+  }},
+  
   "modifications": {{
-    // For each organ, include ALL scales with specific parameter changes
+    // Parameter modifications for each organ system
+  }}
+}}
+
+CRITICAL REQUIREMENTS:
+1. Include AT LEAST 10 symptoms with full severity grading
+2. Include AT LEAST 10 physical examination signs with detection methods
+3. Include AT LEAST 10 laboratory tests with ranges
+4. Include ALL relevant treatments: first-line, second-line, surgical, device therapy, transplant criteria
+5. Include specific device indications (ICD, CRT, LVAD) with criteria (EF thresholds, NYHA class, etc.)
+6. Include transplant criteria if applicable
+7. Use medically accurate values from clinical guidelines (ACC/AHA, ESC, etc.)
+8. Include evidence levels for all treatments (Class I, IIa, IIb, III)
+9. Be comprehensive - this is for physician clinical decision support
+
+Return ONLY valid JSON. No markdown or explanations."""
     // Use multiplier: >1.0 for increase, <1.0 for decrease
     // Example for heart:
     "heart": {{
