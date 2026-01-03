@@ -5376,6 +5376,9 @@ async def update_expert_role(
     return {"message": f"Role updated to {new_role}"}
 
 
+# Include router - MUST be after all routes are defined
+app.include_router(api_router)
+
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
