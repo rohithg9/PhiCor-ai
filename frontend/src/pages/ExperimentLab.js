@@ -22,7 +22,7 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 export default function ExperimentLab() {
   const navigate = useNavigate();
-  const { expert, token, logout } = useExpert();
+  const { expert, token, logout, loading: authLoading } = useExpert();
   
   const [experiments, setExperiments] = useState([]);
   const [loading, setLoading] = useState(true);
