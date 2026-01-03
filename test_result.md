@@ -232,7 +232,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "PhiCore.ai Dashboard Major Refactoring Testing - Static Disease Imports Removal"
+    - "PhiCore.ai Dashboard UI Refactoring Testing - Mobile Navigation and Collapsible Panels"
   stuck_tasks:
     - "Differential Diagnosis AI Clinical Synthesis Testing"
     - "PhiCor Assistant in Dashboard Testing"
