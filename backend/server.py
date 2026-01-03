@@ -2850,13 +2850,98 @@ async def get_disease_database_stats():
         "treatment.pharmacological": {"$exists": True}
     })
     
+    # Phase 1: Basic AI enhancement count
+    phase1_enhanced = await db.diseases.count_documents({"ai_enhanced": True})
+    
+    # Phase 2: Comprehensive model count
+    phase2_enhanced = await db.diseases.count_documents({"comprehensive_model": {"$exists": True}})
+    
     return {
         "total_diseases": total_diseases,
         "ai_generated": ai_generated,
         "manually_curated": manual,
         "comprehensive_entries": comprehensive,
+        "phase1_enhanced": phase1_enhanced,
+        "phase2_comprehensive": phase2_enhanced,
         "by_category": {item["_id"]: item["count"] for item in category_counts},
-        "coverage_percentage": round((comprehensive / max(total_diseases, 1)) * 100, 1)
+        "coverage_percentage": round((comprehensive / max(total_diseases, 1)) * 100, 1),
+        "phase1_progress": round((phase1_enhanced / max(total_diseases, 1)) * 100, 1),
+        "phase2_progress": round((phase2_enhanced / max(total_diseases, 1)) * 100, 1)
+    }
+
+
+@api_router.post("/enhancement/start-phase2")
+async def start_phase2_enhancement():
+    """
+    Start Phase 2: Comprehensive disease model generation.
+    This runs in the background and generates full disease models.
+    """
+    import subprocess
+    import os
+    
+    # Check if Phase 2 is already running
+    result = subprocess.run(['pgrep', '-f', 'generate_comprehensive_models'], capture_output=True)
+    if result.returncode == 0:
+        return {"status": "already_running", "message": "Phase 2 is already running"}
+    
+    # Start Phase 2 in background
+    log_file = "/tmp/phase2_enhancement.log"
+    script_path = "/app/backend/generate_comprehensive_models.py"
+    
+    subprocess.Popen(
+        ['python', script_path],
+        stdout=open(log_file, 'w'),
+        stderr=subprocess.STDOUT,
+        cwd='/app/backend',
+        start_new_session=True
+    )
+    
+    return {
+        "status": "started",
+        "message": "Phase 2 comprehensive model generation started",
+        "log_file": log_file
+    }
+
+
+@api_router.get("/enhancement/status")
+async def get_enhancement_status():
+    """
+    Get current status of all enhancement phases.
+    """
+    import subprocess
+    
+    total_diseases = await db.diseases.count_documents({})
+    phase1_enhanced = await db.diseases.count_documents({"ai_enhanced": True})
+    phase2_enhanced = await db.diseases.count_documents({"comprehensive_model": {"$exists": True}})
+    
+    # Check if Phase 1 is running
+    phase1_running = subprocess.run(['pgrep', '-f', 'enhance_all_data'], capture_output=True).returncode == 0
+    
+    # Check if Phase 2 is running
+    phase2_running = subprocess.run(['pgrep', '-f', 'generate_comprehensive_models'], capture_output=True).returncode == 0
+    
+    # Estimate completion times
+    phase1_remaining = total_diseases - phase1_enhanced
+    phase2_remaining = total_diseases - phase2_enhanced
+    
+    return {
+        "total_diseases": total_diseases,
+        "phase1": {
+            "name": "Basic AI Enhancement",
+            "enhanced": phase1_enhanced,
+            "remaining": phase1_remaining,
+            "progress_percent": round((phase1_enhanced / max(total_diseases, 1)) * 100, 1),
+            "is_running": phase1_running,
+            "estimated_time_remaining": f"{phase1_remaining * 2.5 / 60:.0f} minutes" if phase1_running else "N/A"
+        },
+        "phase2": {
+            "name": "Comprehensive Model Generation",
+            "enhanced": phase2_enhanced,
+            "remaining": phase2_remaining,
+            "progress_percent": round((phase2_enhanced / max(total_diseases, 1)) * 100, 1),
+            "is_running": phase2_running,
+            "estimated_time_remaining": f"{phase2_remaining * 3 / 60:.0f} minutes" if phase2_running else "N/A"
+        }
     }
 
 
