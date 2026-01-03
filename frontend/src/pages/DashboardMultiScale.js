@@ -23,7 +23,7 @@ import LeftPanel from '../components/LeftPanel';
 import { ORGAN_MODELS } from '../data/organModels';
 import { BIOCHEMISTRY } from '../data/biochemistry';
 // Re-add static disease imports for comprehensive parameter modifications
-import { DISEASE_MODELS } from '../data/diseaseModels';
+import DISEASE_MODELS from '../data/diseaseModels';
 import { getCalculatorsForDisease, getCalculatorsForOrgan, CLINICAL_CALCULATORS } from '../data/clinicalCalculators';
 import LungCancerModule from '../components/LungCancerModule';
 import TreatmentGuidelinesPanel from '../components/TreatmentGuidelinesPanel';
