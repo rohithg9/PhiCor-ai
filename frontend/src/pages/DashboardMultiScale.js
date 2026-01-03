@@ -2304,6 +2304,7 @@ const DashboardMultiScale = () => {
   }, [selectedOrgan, currentOrgan, selectedScale]);
 
   // Get merged modifications: combine static disease modifications with API parameter_modifications
+  // Also maps API scale/param IDs to ORGAN_MODELS IDs
   const getMergedModifications = useCallback(() => {
     if (!selectedDisease) return null;
     
@@ -2311,26 +2312,44 @@ const DashboardMultiScale = () => {
     const apiMods = apiDiseaseData[selectedDisease] || apiDiseaseByIcd[selectedDisease];
     const staticMods = currentDisease?.modifications;
     
+    // Start with static mods as base
+    const merged = staticMods ? JSON.parse(JSON.stringify(staticMods)) : {};
+    
     if (apiMods) {
-      // API data takes precedence - merge with static if both exist
-      if (staticMods) {
-        // Deep merge: apiMods override staticMods
-        const merged = { ...staticMods };
-        Object.entries(apiMods).forEach(([organId, organMods]) => {
-          if (!merged[organId]) merged[organId] = {};
-          Object.entries(organMods).forEach(([scaleId, scaleMods]) => {
-            if (!merged[organId][scaleId]) merged[organId][scaleId] = {};
-            Object.entries(scaleMods).forEach(([paramId, paramMod]) => {
-              merged[organId][scaleId][paramId] = paramMod;
-            });
+      // Process API mods and map to ORGAN_MODELS structure
+      Object.entries(apiMods).forEach(([organId, organMods]) => {
+        if (!merged[organId]) merged[organId] = {};
+        
+        if (typeof organMods === 'object' && organMods !== null) {
+          Object.entries(organMods).forEach(([apiScaleId, scaleMods]) => {
+            // Map API scale to ORGAN_MODELS scale
+            const targetScaleId = SCALE_MAPPING[apiScaleId] || apiScaleId;
+            
+            // Also store in original scale ID for the Disease Impact Summary
+            if (!merged[organId][apiScaleId]) merged[organId][apiScaleId] = {};
+            if (!merged[organId][targetScaleId]) merged[organId][targetScaleId] = {};
+            
+            if (typeof scaleMods === 'object' && scaleMods !== null) {
+              Object.entries(scaleMods).forEach(([apiParamId, paramMod]) => {
+                // Store in original location
+                merged[organId][apiScaleId][apiParamId] = paramMod;
+                
+                // Also map to ORGAN_MODELS param ID if mapping exists
+                const organParamId = API_TO_ORGAN_PARAM[apiParamId] || apiParamId;
+                merged[organId][targetScaleId][organParamId] = paramMod;
+                
+                // Also store under original param ID in target scale
+                if (organParamId !== apiParamId) {
+                  merged[organId][targetScaleId][apiParamId] = paramMod;
+                }
+              });
+            }
           });
-        });
-        return merged;
-      }
-      return apiMods;
+        }
+      });
     }
     
-    return staticMods || null;
+    return Object.keys(merged).length > 0 ? merged : null;
   }, [selectedDisease, apiDiseaseData, apiDiseaseByIcd, currentDisease]);
 
   const mergedModifications = useMemo(() => getMergedModifications(), [getMergedModifications]);
