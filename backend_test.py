@@ -532,11 +532,12 @@ def run_all_tests():
     
     # Test results breakdown
     backend_tests = [
-        ('disease_database_stats', 'Test 1: Disease Database Stats API (509 diseases with parameter_modifications)'),
-        ('disease_search_diabetes', 'Test 2: Disease Search API (search=diabetes functionality)'),
-        ('specific_disease_details', 'Test 3: Specific Disease Detail APIs (Heart Failure, Type 2 Diabetes, COPD)'),
-        ('disease_categories', 'Test 4: Disease Categories Testing (different categories with parameter display)'),
-        ('crash_prevention', 'Test 5: Crash Prevention Verification (multiple disease selections)')
+        ('enhancement_status', 'Test 1: Enhancement Status Endpoint (/api/enhancement/status)'),
+        ('disease_database_stats', 'Test 2: Disease Database Stats API (509 diseases with parameter_modifications)'),
+        ('disease_search_diabetes', 'Test 3: Disease Search API (search=diabetes functionality)'),
+        ('specific_disease_details', 'Test 4: Specific Disease Detail APIs (Heart Failure, Type 2 Diabetes, COPD)'),
+        ('disease_categories', 'Test 5: Disease Categories Testing (different categories with parameter display)'),
+        ('crash_prevention', 'Test 6: Crash Prevention Verification (multiple disease selections)')
     ]
     
     infrastructure_tests = [
