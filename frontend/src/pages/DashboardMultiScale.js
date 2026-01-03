@@ -3377,6 +3377,17 @@ const DashboardMultiScale = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              {/* Help/Manual Button */}
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="hidden sm:flex"
+                onClick={() => window.open('/user-manual', '_blank')}
+                title="User Manual"
+              >
+                <BookOpen className="w-4 h-4" />
+              </Button>
+              
               {/* Patient Panel Toggle - Clear button */}
               <Button 
                 variant={leftPanelOpen ? "default" : "outline"} 
