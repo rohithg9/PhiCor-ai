@@ -364,7 +364,42 @@ const DiseaseDetailPanel = ({ diseaseId, diseaseName }) => {
                     <h4 className="text-xs font-semibold text-muted-foreground mb-1 flex items-center gap-1">
                       <TrendingUp className="w-3 h-3" /> Prognosis
                     </h4>
-                    <p className="text-sm">{disease.prognosis}</p>
+                    {typeof disease.prognosis === 'string' ? (
+                      <p className="text-sm">{disease.prognosis}</p>
+                    ) : typeof disease.prognosis === 'object' ? (
+                      <div className="space-y-2 text-sm">
+                        {disease.prognosis.natural_history && (
+                          <div><span className="font-medium text-muted-foreground">Natural History: </span>{disease.prognosis.natural_history}</div>
+                        )}
+                        {disease.prognosis.with_treatment && (
+                          <div><span className="font-medium text-green-600">With Treatment: </span>{disease.prognosis.with_treatment}</div>
+                        )}
+                        {disease.prognosis.survival_rates && (
+                          <div><span className="font-medium text-blue-600">Survival Rates: </span>
+                            {typeof disease.prognosis.survival_rates === 'object' 
+                              ? Object.entries(disease.prognosis.survival_rates).map(([k,v]) => `${k}: ${v}`).join(', ')
+                              : disease.prognosis.survival_rates}
+                          </div>
+                        )}
+                        {disease.prognosis.prognostic_factors && (
+                          <div><span className="font-medium text-orange-600">Prognostic Factors: </span>
+                            {Array.isArray(disease.prognosis.prognostic_factors) 
+                              ? disease.prognosis.prognostic_factors.join(', ')
+                              : disease.prognosis.prognostic_factors}
+                          </div>
+                        )}
+                        {disease.prognosis.complications && (
+                          <div><span className="font-medium text-red-600">Complications: </span>
+                            {Array.isArray(disease.prognosis.complications) 
+                              ? disease.prognosis.complications.join(', ')
+                              : disease.prognosis.complications}
+                          </div>
+                        )}
+                        {disease.prognosis.recurrence_rate && (
+                          <div><span className="font-medium text-purple-600">Recurrence Rate: </span>{disease.prognosis.recurrence_rate}</div>
+                        )}
+                      </div>
+                    ) : null}
                   </div>
                 )}
 
