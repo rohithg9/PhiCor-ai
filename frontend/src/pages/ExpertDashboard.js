@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -7,24 +7,28 @@ import { Badge } from '../components/ui/badge';
 import { ScrollArea } from '../components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Progress } from '../components/ui/progress';
+import { Slider } from '../components/ui/slider';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '../components/ui/dialog';
 import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../components/ui/collapsible';
 import { useExpert } from '../context/ExpertContext';
+import { ORGAN_MODELS } from '../data/organModels';
+import { DISEASE_MODELS } from '../data/diseaseModels';
 import { 
   Search, CheckCircle2, Clock, AlertTriangle, FileEdit, 
   LogOut, User, Stethoscope, ChevronRight, ChevronDown,
   ExternalLink, Beaker, LayoutDashboard, ListChecks,
-  Heart, Brain, Activity, Eye, BookOpen, Pill, TestTube,
+  Heart, Brain, Activity, Eye, BookOpen, Pill,
   FileText, TrendingUp, Microscope, ClipboardList, Target,
-  Shield, Users, Thermometer, Dna, Calculator
+  Shield, Thermometer, Dna, Calculator, Plus, Save,
+  MessageSquare, Link, RotateCcw
 } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-// Map specialties to disease categories/organs
+// Map specialties to disease categories
 const SPECIALTY_MAPPING = {
   "Cardiology": ["cardiovascular", "heart", "cardiac", "vascular"],
   "Pulmonology": ["respiratory", "pulmonary", "lung"],
@@ -40,26 +44,25 @@ const SPECIALTY_MAPPING = {
   "Psychiatry": ["psychiatric", "mental", "psychological"],
   "Pediatrics": ["pediatric", "congenital", "childhood"],
   "Obstetrics & Gynecology": ["obstetric", "gynecological", "pregnancy", "reproductive"],
-  "General Medicine": [], // Can see all
+  "General Medicine": [],
   "Surgery": ["surgical"],
-  "Emergency Medicine": [], // Can see all
+  "Emergency Medicine": [],
   "Critical Care": ["critical", "intensive", "acute"],
   "Radiology": [],
   "Pathology": []
 };
 
-// Clinical data sections for display
-const CLINICAL_SECTIONS = [
-  { key: 'description', label: 'Description', icon: FileText },
-  { key: 'clinical_features', label: 'Clinical Features', icon: Stethoscope },
-  { key: 'diagnostic_criteria', label: 'Diagnostic Criteria', icon: Target },
-  { key: 'epidemiology', label: 'Epidemiology', icon: Users },
-  { key: 'pathophysiology', label: 'Pathophysiology', icon: Microscope },
-  { key: 'treatment', label: 'Treatment Guidelines', icon: Pill },
-  { key: 'prognosis', label: 'Prognosis', icon: TrendingUp },
-  { key: 'severity_factors', label: 'Severity Factors', icon: Thermometer },
-  { key: 'guideline_source', label: 'Guideline Sources', icon: BookOpen },
-];
+// Organ icons
+const ORGAN_ICONS = {
+  heart: Heart,
+  brain: Brain,
+  lungs: Activity,
+  kidneys: Activity,
+  liver: Activity,
+  blood: Activity,
+  endocrine: Activity,
+  default: Activity
+};
 
 export default function ExpertDashboard() {
   const navigate = useNavigate();
@@ -73,18 +76,24 @@ export default function ExpertDashboard() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ total: 0, reviewed: 0, pending: 0, mySpecialty: 0 });
   
-  // Selected disease for review
+  // Selected disease
   const [selectedDisease, setSelectedDisease] = useState(null);
   const [diseaseData, setDiseaseData] = useState(null);
   const [loadingDisease, setLoadingDisease] = useState(false);
+  const [diseaseSeverity, setDiseaseSeverity] = useState(0.5);
   
-  // Change request dialog
+  // Selected organ/scale for parameter view
+  const [selectedOrgan, setSelectedOrgan] = useState('heart');
+  const [selectedScale, setSelectedScale] = useState(null);
+  
+  // Change request
   const [showChangeDialog, setShowChangeDialog] = useState(false);
-  const [changeTarget, setChangeTarget] = useState(null); // { section, field, currentValue }
+  const [changeTarget, setChangeTarget] = useState(null);
   const [changeRequest, setChangeRequest] = useState({
     proposedValue: '',
     sourceUrl: '',
-    reasoning: ''
+    reasoning: '',
+    notes: ''
   });
   const [submitting, setSubmitting] = useState(false);
   
@@ -94,12 +103,11 @@ export default function ExpertDashboard() {
   // Expanded sections
   const [expandedSections, setExpandedSections] = useState({});
 
-  // Check if disease matches expert's specialty
+  // Check specialty match
   const matchesSpecialty = useCallback((disease) => {
     if (!expert?.specialty) return true;
-    
     const specialtyKeywords = SPECIALTY_MAPPING[expert.specialty] || [];
-    if (specialtyKeywords.length === 0) return true; // General specialties see all
+    if (specialtyKeywords.length === 0) return true;
     
     const category = (disease.category || '').toLowerCase();
     const description = (disease.description || '').toLowerCase();
@@ -107,27 +115,22 @@ export default function ExpertDashboard() {
     const organs = (disease.affected_organs || disease.affectedOrgans || []).map(o => o.toLowerCase());
     
     return specialtyKeywords.some(keyword => 
-      category.includes(keyword) || 
-      description.includes(keyword) || 
-      name.includes(keyword) ||
-      organs.some(o => o.includes(keyword))
+      category.includes(keyword) || description.includes(keyword) || 
+      name.includes(keyword) || organs.some(o => o.includes(keyword))
     );
   }, [expert?.specialty]);
 
   // Fetch diseases
   const fetchDiseases = useCallback(async () => {
     if (!token) return;
-    
     try {
       const response = await fetch(`${BACKEND_URL}/api/experts/diseases-to-review`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      
       const data = await response.json();
       const allDiseases = data.diseases || [];
       setDiseases(allDiseases);
       
-      // Calculate stats
       const specialtyDiseases = allDiseases.filter(matchesSpecialty);
       const reviewedCount = allDiseases.filter(d => d.is_reviewed).length;
       
@@ -144,15 +147,13 @@ export default function ExpertDashboard() {
     }
   }, [token, matchesSpecialty]);
 
-  // Fetch my change requests
+  // Fetch change requests
   const fetchMyChangeRequests = useCallback(async () => {
     if (!token) return;
-    
     try {
       const response = await fetch(`${BACKEND_URL}/api/change-requests`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      
       const data = await response.json();
       setMyChangeRequests(data.change_requests || []);
     } catch (err) {
@@ -161,9 +162,7 @@ export default function ExpertDashboard() {
   }, [token]);
 
   useEffect(() => {
-    // Wait for auth to load before checking
     if (authLoading) return;
-    
     if (!token) {
       navigate('/expert-login');
       return;
@@ -175,25 +174,18 @@ export default function ExpertDashboard() {
   // Filter diseases
   useEffect(() => {
     let filtered = diseases;
-    
-    // Filter by specialty if enabled
     if (showMySpecialty && expert?.specialty) {
       filtered = filtered.filter(matchesSpecialty);
     }
-    
-    // Filter by search
     if (searchQuery) {
       filtered = filtered.filter(d => 
         d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         d.icd10?.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
-    
-    // Filter by reviewed status
     if (showReviewed !== null) {
       filtered = filtered.filter(d => d.is_reviewed === showReviewed);
     }
-    
     setFilteredDiseases(filtered);
   }, [diseases, searchQuery, showReviewed, showMySpecialty, expert?.specialty, matchesSpecialty]);
 
@@ -202,12 +194,21 @@ export default function ExpertDashboard() {
     setSelectedDisease(disease);
     setLoadingDisease(true);
     setExpandedSections({});
+    setDiseaseSeverity(0.5);
+    
+    // Set default organ based on disease
+    const affectedOrgans = disease.affected_organs || disease.affectedOrgans || [];
+    if (affectedOrgans.length > 0 && ORGAN_MODELS[affectedOrgans[0]]) {
+      setSelectedOrgan(affectedOrgans[0]);
+    } else {
+      setSelectedOrgan('heart');
+    }
+    setSelectedScale(null);
     
     try {
       const response = await fetch(`${BACKEND_URL}/api/experts/disease/${disease.id}/parameters`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      
       const data = await response.json();
       setDiseaseData(data);
     } catch (err) {
@@ -217,16 +218,78 @@ export default function ExpertDashboard() {
     }
   };
 
+  // Get merged modifications (static + API data)
+  const getMergedModifications = useMemo(() => {
+    if (!selectedDisease) return {};
+    
+    const diseaseId = selectedDisease.id;
+    const staticMods = DISEASE_MODELS[diseaseId]?.modifications || {};
+    const apiMods = diseaseData?.disease?.parameter_modifications || 
+                   diseaseData?.disease?.modifications || {};
+    
+    // Deep merge
+    const merged = { ...staticMods };
+    Object.keys(apiMods).forEach(organ => {
+      if (!merged[organ]) merged[organ] = {};
+      Object.keys(apiMods[organ] || {}).forEach(scale => {
+        if (!merged[organ][scale]) merged[organ][scale] = {};
+        Object.assign(merged[organ][scale], apiMods[organ][scale]);
+      });
+    });
+    
+    return merged;
+  }, [selectedDisease, diseaseData]);
+
+  // Calculate modified value
+  const getModifiedValue = (baseValue, mods, paramId) => {
+    if (!mods) return { value: baseValue, modified: false };
+    
+    const multiplier = mods.multiplier !== undefined ? mods.multiplier : mods.factor;
+    const absoluteValue = mods.absolute !== undefined ? mods.absolute : mods.value;
+    const changePercent = mods.change_percent;
+    const direction = mods.direction;
+    
+    // Check for "absent" parameters
+    const isAbsent = (multiplier === 0 || absoluteValue === 0) && 
+                     (mods.note?.toLowerCase().includes('absent') || 
+                      mods.note?.toLowerCase().includes('not measurable') ||
+                      mods.note?.toLowerCase().includes('loss of'));
+    
+    if (isAbsent) {
+      return { value: 'ABSENT', modified: true, note: mods.note, isAbsent: true };
+    }
+    
+    let newValue = baseValue;
+    
+    if (absoluteValue !== undefined && absoluteValue !== null && typeof absoluteValue === 'number') {
+      newValue = absoluteValue;
+    } else if (changePercent) {
+      const sign = (direction === 'decrease' || changePercent < 0) ? -1 : 1;
+      const factor = 1 + (sign * Math.abs(changePercent) / 100) * diseaseSeverity;
+      newValue = baseValue * factor;
+    } else if (multiplier !== undefined && multiplier !== null) {
+      const adjustedMultiplier = 1 + (multiplier - 1) * diseaseSeverity;
+      newValue = baseValue * adjustedMultiplier;
+    }
+    
+    const delta = baseValue !== 0 ? ((newValue - baseValue) / baseValue * 100).toFixed(1) : 0;
+    
+    return {
+      value: newValue,
+      modified: Math.abs(newValue - baseValue) > 0.01,
+      delta,
+      note: mods.note
+    };
+  };
+
   // Mark as reviewed
   const handleMarkReviewed = async () => {
     if (!selectedDisease) return;
-    
     try {
       await fetch(`${BACKEND_URL}/api/experts/disease/${selectedDisease.id}/mark-reviewed`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      
       fetchDiseases();
       setSelectedDisease(prev => ({ ...prev, is_reviewed: true }));
     } catch (err) {
@@ -234,26 +297,35 @@ export default function ExpertDashboard() {
     }
   };
 
-  // Open change dialog for any field
-  const handleRequestChange = (section, field, currentValue) => {
-    setChangeTarget({ section, field, currentValue });
+  // Open change dialog
+  const handleEditParameter = (param, organId, scaleId) => {
+    setChangeTarget({
+      type: 'parameter',
+      organId,
+      scaleId,
+      paramId: param.id,
+      paramName: param.name,
+      currentValue: param.value,
+      currentUnit: param.unit,
+      currentMods: getMergedModifications[organId]?.[scaleId]?.[param.id]
+    });
     setChangeRequest({
-      proposedValue: typeof currentValue === 'object' ? JSON.stringify(currentValue, null, 2) : String(currentValue || ''),
+      proposedValue: '',
       sourceUrl: '',
-      reasoning: ''
+      reasoning: '',
+      notes: ''
     });
     setShowChangeDialog(true);
   };
 
-  // Submit change request
+  // Submit change
   const handleSubmitChange = async () => {
     if (!changeTarget || !changeRequest.sourceUrl || !changeRequest.reasoning) {
-      alert('Please provide source URL and reasoning for the change');
+      alert('Please provide source URL and reasoning');
       return;
     }
     
     setSubmitting(true);
-    
     try {
       const response = await fetch(`${BACKEND_URL}/api/change-requests`, {
         method: 'POST',
@@ -264,30 +336,30 @@ export default function ExpertDashboard() {
         body: JSON.stringify({
           disease_id: selectedDisease.id,
           disease_name: selectedDisease.name,
-          organ_id: 'clinical_data',
-          scale_id: changeTarget.section,
+          organ_id: changeTarget.organId,
+          scale_id: changeTarget.scaleId,
           change_type: 'modification',
           parameters: [{
-            parameter_id: changeTarget.field || changeTarget.section,
-            parameter_name: changeTarget.section,
+            parameter_id: changeTarget.paramId,
+            parameter_name: changeTarget.paramName,
             current_value: changeTarget.currentValue,
             proposed_value: changeRequest.proposedValue,
-            current_unit: '',
+            current_unit: changeTarget.currentUnit || '',
             source_url: changeRequest.sourceUrl,
             reasoning: changeRequest.reasoning
           }],
-          additional_notes: `Expert change request for ${changeTarget.section}`
+          additional_notes: changeRequest.notes
         })
       });
       
-      if (!response.ok) throw new Error('Failed to submit change');
+      if (!response.ok) throw new Error('Failed to submit');
       
       setShowChangeDialog(false);
       setChangeTarget(null);
       fetchMyChangeRequests();
-      alert('Change request submitted for admin review');
+      alert('Change request submitted for admin review!');
     } catch (err) {
-      console.error('Failed to submit change:', err);
+      console.error('Failed to submit:', err);
       alert('Failed to submit change request');
     } finally {
       setSubmitting(false);
@@ -299,19 +371,11 @@ export default function ExpertDashboard() {
     navigate('/expert-login');
   };
 
-  const toggleSection = (key) => {
-    setExpandedSections(prev => ({ ...prev, [key]: !prev[key] }));
-  };
-
-  const renderValue = (value) => {
-    if (value === null || value === undefined) return <span className="text-muted-foreground italic">Not available</span>;
-    if (typeof value === 'object') {
-      return <pre className="text-xs bg-muted p-2 rounded overflow-x-auto">{JSON.stringify(value, null, 2)}</pre>;
-    }
-    return <span className="whitespace-pre-wrap">{String(value)}</span>;
-  };
-
   const progressPercent = stats.total > 0 ? (stats.reviewed / stats.total) * 100 : 0;
+  
+  // Get current organ model
+  const currentOrganModel = ORGAN_MODELS[selectedOrgan];
+  const organScales = currentOrganModel?.scales || {};
 
   return (
     <div className="min-h-screen bg-background">
@@ -349,7 +413,7 @@ export default function ExpertDashboard() {
       </header>
 
       <div className="container mx-auto px-4 py-6">
-        {/* Stats Cards */}
+        {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
           <Card>
             <CardContent className="pt-4">
@@ -362,7 +426,6 @@ export default function ExpertDashboard() {
               </div>
             </CardContent>
           </Card>
-          
           <Card>
             <CardContent className="pt-4">
               <div className="flex items-center justify-between">
@@ -374,7 +437,6 @@ export default function ExpertDashboard() {
               </div>
             </CardContent>
           </Card>
-          
           <Card>
             <CardContent className="pt-4">
               <div className="flex items-center justify-between">
@@ -386,7 +448,6 @@ export default function ExpertDashboard() {
               </div>
             </CardContent>
           </Card>
-          
           <Card>
             <CardContent className="pt-4">
               <div className="flex items-center justify-between">
@@ -398,7 +459,6 @@ export default function ExpertDashboard() {
               </div>
             </CardContent>
           </Card>
-          
           <Card>
             <CardContent className="pt-4">
               <div className="flex items-center justify-between">
@@ -418,7 +478,7 @@ export default function ExpertDashboard() {
         <Card className="mb-6">
           <CardContent className="pt-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium">Overall Review Progress</span>
+              <span className="text-sm font-medium">Review Progress</span>
               <span className="text-sm text-muted-foreground">{progressPercent.toFixed(1)}%</span>
             </div>
             <Progress value={progressPercent} className="h-2" />
@@ -426,13 +486,13 @@ export default function ExpertDashboard() {
         </Card>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Disease List */}
           <Card className="lg:col-span-1">
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Diseases to Review</CardTitle>
+              <CardTitle className="text-lg">Diseases</CardTitle>
               <CardDescription>
-                {showMySpecialty ? `Filtered by ${expert?.specialty}` : 'All diseases'}
+                {showMySpecialty ? `${expert?.specialty}` : 'All diseases'}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -440,65 +500,54 @@ export default function ExpertDashboard() {
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search diseases..."
+                    placeholder="Search..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-9"
                   />
                 </div>
-                
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1">
                   <Button
                     variant={showMySpecialty ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setShowMySpecialty(!showMySpecialty)}
                   >
                     <Stethoscope className="w-3 h-3 mr-1" />
-                    My Specialty
-                  </Button>
-                  <Button
-                    variant={showReviewed === null ? 'secondary' : 'outline'}
-                    size="sm"
-                    onClick={() => setShowReviewed(null)}
-                  >
-                    All
+                    Specialty
                   </Button>
                   <Button
                     variant={showReviewed === false ? 'secondary' : 'outline'}
                     size="sm"
-                    onClick={() => setShowReviewed(false)}
+                    onClick={() => setShowReviewed(showReviewed === false ? null : false)}
                   >
-                    <Clock className="w-3 h-3 mr-1" />
                     Pending
                   </Button>
                 </div>
               </div>
               
-              <ScrollArea className="h-[450px]">
+              <ScrollArea className="h-[500px]">
                 {loading ? (
                   <div className="text-center py-8 text-muted-foreground">Loading...</div>
-                ) : filteredDiseases.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">No diseases found</div>
                 ) : (
                   <div className="space-y-1">
                     {filteredDiseases.map(disease => (
                       <Button
                         key={disease.id}
                         variant={selectedDisease?.id === disease.id ? 'secondary' : 'ghost'}
-                        className="w-full justify-start h-auto py-2 px-3"
+                        className="w-full justify-start h-auto py-2 px-2 text-left"
                         onClick={() => handleSelectDisease(disease)}
                       >
-                        <div className="flex items-center w-full">
-                          <div className="flex-1 text-left">
-                            <div className="font-medium text-sm">{disease.name}</div>
-                            <div className="text-xs text-muted-foreground">
-                              {disease.icd10} • {disease.category}
+                        <div className="flex items-center w-full min-w-0">
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-sm truncate">{disease.name}</div>
+                            <div className="text-xs text-muted-foreground truncate">
+                              {disease.icd10}
                             </div>
                           </div>
                           {disease.is_reviewed ? (
-                            <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />
+                            <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0 ml-1" />
                           ) : (
-                            <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+                            <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 ml-1" />
                           )}
                         </div>
                       </Button>
@@ -509,27 +558,19 @@ export default function ExpertDashboard() {
             </CardContent>
           </Card>
 
-          {/* Disease Details */}
-          <Card className="lg:col-span-2">
+          {/* Disease Parameters - Like Main Dashboard */}
+          <Card className="lg:col-span-3">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle>{selectedDisease ? selectedDisease.name : 'Select a Disease'}</CardTitle>
                   <CardDescription>
-                    {selectedDisease 
-                      ? 'Review clinical information and suggest changes'
-                      : 'Choose a disease to review its clinical data'
-                    }
+                    {selectedDisease ? 'Review and modify parameters' : 'Choose a disease to view parameters'}
                   </CardDescription>
                 </div>
                 {selectedDisease && (
                   <div className="flex gap-2">
-                    {selectedDisease.is_reviewed ? (
-                      <Badge variant="outline" className="text-green-500 border-green-500">
-                        <CheckCircle2 className="w-3 h-3 mr-1" />
-                        Reviewed
-                      </Badge>
-                    ) : (
+                    {!selectedDisease.is_reviewed && (
                       <Button size="sm" onClick={handleMarkReviewed}>
                         <CheckCircle2 className="w-4 h-4 mr-2" />
                         Mark Reviewed
@@ -544,233 +585,130 @@ export default function ExpertDashboard() {
               {!selectedDisease ? (
                 <div className="text-center py-16 text-muted-foreground">
                   <Eye className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Select a disease from the list to begin review</p>
+                  <p>Select a disease to view and edit parameters</p>
                 </div>
               ) : loadingDisease ? (
-                <div className="text-center py-16 text-muted-foreground">Loading disease data...</div>
-              ) : diseaseData ? (
-                <Tabs defaultValue="clinical">
-                  <TabsList className="mb-4">
-                    <TabsTrigger value="clinical">
-                      <ClipboardList className="w-4 h-4 mr-1" />
-                      Clinical Info
-                    </TabsTrigger>
-                    <TabsTrigger value="parameters">
-                      <Calculator className="w-4 h-4 mr-1" />
-                      Parameters
-                    </TabsTrigger>
-                    <TabsTrigger value="models">
-                      <Dna className="w-4 h-4 mr-1" />
-                      Models
-                    </TabsTrigger>
-                    <TabsTrigger value="changes">
-                      <FileEdit className="w-4 h-4 mr-1" />
-                      Changes ({diseaseData.pending_changes?.length || 0})
-                    </TabsTrigger>
-                  </TabsList>
+                <div className="text-center py-16 text-muted-foreground">Loading...</div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Severity Slider */}
+                  <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
+                    <Label className="text-sm font-medium whitespace-nowrap">Disease Severity:</Label>
+                    <Slider
+                      value={[diseaseSeverity]}
+                      onValueChange={([v]) => setDiseaseSeverity(v)}
+                      min={0}
+                      max={1}
+                      step={0.1}
+                      className="flex-1"
+                    />
+                    <span className="text-sm font-mono w-12">{(diseaseSeverity * 100).toFixed(0)}%</span>
+                  </div>
                   
-                  {/* Clinical Information Tab */}
-                  <TabsContent value="clinical">
-                    <ScrollArea className="h-[400px] pr-4">
-                      <div className="space-y-3">
-                        {CLINICAL_SECTIONS.map(section => {
-                          const value = diseaseData.disease?.[section.key];
-                          const Icon = section.icon;
-                          const isExpanded = expandedSections[section.key];
+                  {/* Organ Tabs */}
+                  <div className="flex flex-wrap gap-2">
+                    {Object.entries(ORGAN_MODELS).map(([organId, organ]) => {
+                      const Icon = ORGAN_ICONS[organId] || ORGAN_ICONS.default;
+                      const hasMods = !!getMergedModifications[organId];
+                      return (
+                        <Button
+                          key={organId}
+                          variant={selectedOrgan === organId ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => { setSelectedOrgan(organId); setSelectedScale(null); }}
+                          className={hasMods ? 'border-destructive/50' : ''}
+                        >
+                          <Icon className="w-4 h-4 mr-1" />
+                          {organ.name}
+                          {hasMods && <Badge variant="destructive" className="ml-1 text-[10px] px-1">!</Badge>}
+                        </Button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Scale Tabs */}
+                  {currentOrganModel && (
+                    <div className="flex flex-wrap gap-1 border-b pb-2">
+                      {Object.entries(organScales).map(([scaleId, scale]) => {
+                        const hasMods = !!getMergedModifications[selectedOrgan]?.[scaleId];
+                        return (
+                          <Button
+                            key={scaleId}
+                            variant={selectedScale === scaleId ? 'secondary' : 'ghost'}
+                            size="sm"
+                            onClick={() => setSelectedScale(selectedScale === scaleId ? null : scaleId)}
+                          >
+                            {scale.title}
+                            {hasMods && <span className="ml-1 text-destructive">●</span>}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Parameters Grid */}
+                  <ScrollArea className="h-[400px]">
+                    {selectedScale && organScales[selectedScale] ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {organScales[selectedScale].parameters?.map(param => {
+                          const mods = getMergedModifications[selectedOrgan]?.[selectedScale]?.[param.id];
+                          const modResult = getModifiedValue(param.value, mods, param.id);
                           
                           return (
-                            <Collapsible key={section.key} open={isExpanded} onOpenChange={() => toggleSection(section.key)}>
-                              <div className="border rounded-lg">
-                                <div className="w-full p-3 flex items-center justify-between hover:bg-muted/50">
-                                  <CollapsibleTrigger className="flex items-center gap-2 flex-1">
-                                    <Icon className="w-4 h-4 text-primary" />
-                                    <span className="font-medium">{section.label}</span>
-                                    {value && <Badge variant="outline" className="text-xs">Has Data</Badge>}
-                                  </CollapsibleTrigger>
-                                  <div className="flex items-center gap-2">
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleRequestChange(section.key, section.key, value);
-                                      }}
-                                    >
-                                      <FileEdit className="w-3 h-3 mr-1" />
-                                      Edit
-                                    </Button>
-                                    <CollapsibleTrigger>
-                                      {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                                    </CollapsibleTrigger>
-                                  </div>
-                                </div>
-                                
-                                <CollapsibleContent>
-                                  <div className="p-3 pt-0 border-t">
-                                    <div className="text-sm">
-                                      {renderValue(value)}
-                                    </div>
-                                  </div>
-                                </CollapsibleContent>
+                            <div
+                              key={param.id}
+                              className={`p-3 rounded-lg border cursor-pointer hover:border-primary/50 transition-colors ${
+                                modResult.modified ? 'bg-destructive/5 border-destructive/30' : 'bg-muted/30'
+                              }`}
+                              onClick={() => handleEditParameter(param, selectedOrgan, selectedScale)}
+                            >
+                              <div className="flex items-start justify-between mb-1">
+                                <span className="text-sm font-medium">{param.name}</span>
+                                <FileEdit className="w-3 h-3 text-muted-foreground" />
                               </div>
-                            </Collapsible>
+                              
+                              <div className="flex items-baseline gap-2">
+                                {modResult.modified && !modResult.isAbsent && (
+                                  <span className="text-sm text-muted-foreground line-through">
+                                    {param.value}
+                                  </span>
+                                )}
+                                <span className={`text-lg font-mono font-bold ${
+                                  modResult.isAbsent ? 'text-purple-500' :
+                                  modResult.modified ? 'text-destructive' : ''
+                                }`}>
+                                  {modResult.isAbsent ? 'ABSENT' :
+                                   typeof modResult.value === 'number' 
+                                    ? modResult.value.toFixed(param.value % 1 === 0 ? 0 : 1)
+                                    : modResult.value}
+                                </span>
+                                {!modResult.isAbsent && (
+                                  <span className="text-xs text-muted-foreground">{param.unit}</span>
+                                )}
+                              </div>
+                              
+                              {modResult.modified && modResult.delta && !modResult.isAbsent && (
+                                <Badge variant={parseFloat(modResult.delta) > 0 ? 'destructive' : 'default'} className="text-[10px] mt-1">
+                                  {parseFloat(modResult.delta) > 0 ? '↑' : '↓'}{Math.abs(parseFloat(modResult.delta))}%
+                                </Badge>
+                              )}
+                              
+                              {modResult.note && (
+                                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{modResult.note}</p>
+                              )}
+                            </div>
                           );
                         })}
                       </div>
-                    </ScrollArea>
-                  </TabsContent>
-                  
-                  {/* Parameters Tab */}
-                  <TabsContent value="parameters">
-                    <ScrollArea className="h-[400px] pr-4">
-                      {diseaseData.disease?.parameter_modifications ? (
-                        <div className="space-y-4">
-                          {Object.entries(diseaseData.disease.parameter_modifications).map(([organId, organData]) => (
-                            <Collapsible key={organId}>
-                              <CollapsibleTrigger className="w-full p-3 bg-muted/50 rounded-lg flex items-center justify-between hover:bg-muted">
-                                <div className="flex items-center gap-2">
-                                  <Heart className="w-4 h-4 text-primary" />
-                                  <span className="font-medium capitalize">{organId}</span>
-                                </div>
-                                <ChevronRight className="w-4 h-4" />
-                              </CollapsibleTrigger>
-                              
-                              <CollapsibleContent className="mt-2 ml-4">
-                                {typeof organData === 'object' && Object.entries(organData).map(([scaleId, scaleData]) => (
-                                  <div key={scaleId} className="mb-3">
-                                    <h5 className="text-sm font-medium text-muted-foreground capitalize mb-2">{scaleId}</h5>
-                                    <div className="grid grid-cols-2 gap-2">
-                                      {typeof scaleData === 'object' && Object.entries(scaleData).map(([paramId, paramData]) => (
-                                        <div
-                                          key={paramId}
-                                          className="p-2 bg-muted/30 rounded text-sm cursor-pointer hover:bg-muted/50"
-                                          onClick={() => handleRequestChange(`${organId}.${scaleId}`, paramId, paramData)}
-                                        >
-                                          <div className="flex items-center justify-between">
-                                            <span className="capitalize">{paramId.replace(/_/g, ' ')}</span>
-                                            <FileEdit className="w-3 h-3 text-muted-foreground" />
-                                          </div>
-                                          <div className="font-mono text-xs mt-1">
-                                            {typeof paramData === 'object' 
-                                              ? `×${paramData.multiplier || 1}` 
-                                              : paramData
-                                            }
-                                          </div>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </div>
-                                ))}
-                              </CollapsibleContent>
-                            </Collapsible>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="text-center py-8 text-muted-foreground">
-                          <AlertTriangle className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                          <p>No parameter modifications found</p>
-                        </div>
-                      )}
-                    </ScrollArea>
-                  </TabsContent>
-                  
-                  {/* Mathematical Models Tab */}
-                  <TabsContent value="models">
-                    <ScrollArea className="h-[400px] pr-4">
-                      {diseaseData.disease?.comprehensive_model || diseaseData.disease?.mathematical_models_disease ? (
-                        <div className="space-y-4">
-                          {diseaseData.disease.mathematical_models_disease && (
-                            <Collapsible defaultOpen>
-                              <CollapsibleTrigger className="w-full p-3 bg-muted/50 rounded-lg flex items-center justify-between hover:bg-muted">
-                                <div className="flex items-center gap-2">
-                                  <Calculator className="w-4 h-4 text-primary" />
-                                  <span className="font-medium">Mathematical Models</span>
-                                </div>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleRequestChange('mathematical_models_disease', 'models', diseaseData.disease.mathematical_models_disease);
-                                  }}
-                                >
-                                  <FileEdit className="w-3 h-3 mr-1" />
-                                  Edit
-                                </Button>
-                              </CollapsibleTrigger>
-                              <CollapsibleContent className="mt-2 p-3 bg-muted/30 rounded-lg">
-                                {renderValue(diseaseData.disease.mathematical_models_disease)}
-                              </CollapsibleContent>
-                            </Collapsible>
-                          )}
-                          
-                          {diseaseData.disease.comprehensive_model && (
-                            <Collapsible>
-                              <CollapsibleTrigger className="w-full p-3 bg-muted/50 rounded-lg flex items-center justify-between hover:bg-muted">
-                                <div className="flex items-center gap-2">
-                                  <Dna className="w-4 h-4 text-primary" />
-                                  <span className="font-medium">Comprehensive Model</span>
-                                </div>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleRequestChange('comprehensive_model', 'model', diseaseData.disease.comprehensive_model);
-                                  }}
-                                >
-                                  <FileEdit className="w-3 h-3 mr-1" />
-                                  Edit
-                                </Button>
-                              </CollapsibleTrigger>
-                              <CollapsibleContent className="mt-2 p-3 bg-muted/30 rounded-lg">
-                                {renderValue(diseaseData.disease.comprehensive_model)}
-                              </CollapsibleContent>
-                            </Collapsible>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="text-center py-8 text-muted-foreground">
-                          <AlertTriangle className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                          <p>No mathematical models found</p>
-                        </div>
-                      )}
-                    </ScrollArea>
-                  </TabsContent>
-                  
-                  {/* Pending Changes Tab */}
-                  <TabsContent value="changes">
-                    <ScrollArea className="h-[400px]">
-                      {diseaseData.pending_changes?.length > 0 ? (
-                        <div className="space-y-3">
-                          {diseaseData.pending_changes.map(change => (
-                            <Card key={change.id}>
-                              <CardContent className="pt-4">
-                                <div className="flex items-center justify-between mb-2">
-                                  <Badge variant="outline">{change.status}</Badge>
-                                  <span className="text-xs text-muted-foreground">by {change.expert_name}</span>
-                                </div>
-                                <p className="font-medium">{change.scale_id}</p>
-                                <div className="mt-2 space-y-1">
-                                  {change.parameters.map((p, i) => (
-                                    <div key={i} className="text-sm">
-                                      <span className="font-mono">{p.parameter_name}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              </CardContent>
-                            </Card>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="text-center py-8 text-muted-foreground">
-                          No pending changes for this disease
-                        </div>
-                      )}
-                    </ScrollArea>
-                  </TabsContent>
-                </Tabs>
-              ) : null}
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <p>Select a scale above to view parameters</p>
+                        <p className="text-sm mt-2">Click on any parameter to suggest changes</p>
+                      </div>
+                    )}
+                  </ScrollArea>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -779,27 +717,24 @@ export default function ExpertDashboard() {
         <Card className="mt-6">
           <CardHeader>
             <CardTitle className="text-lg">My Change Requests</CardTitle>
-            <CardDescription>Track the status of your submitted changes</CardDescription>
           </CardHeader>
           <CardContent>
             {myChangeRequests.length === 0 ? (
-              <p className="text-center py-4 text-muted-foreground">No change requests submitted yet</p>
+              <p className="text-center py-4 text-muted-foreground">No change requests yet</p>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {myChangeRequests.slice(0, 6).map(request => (
-                  <div key={request.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                    <div className="min-w-0 flex-1">
+                  <div key={request.id} className="p-3 bg-muted/50 rounded-lg">
+                    <div className="flex items-center justify-between">
                       <p className="font-medium truncate">{request.disease_name}</p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {request.scale_id}
-                      </p>
+                      <Badge variant={
+                        request.status === 'approved' ? 'default' :
+                        request.status === 'rejected' ? 'destructive' : 'secondary'
+                      }>
+                        {request.status}
+                      </Badge>
                     </div>
-                    <Badge variant={
-                      request.status === 'approved' ? 'default' :
-                      request.status === 'rejected' ? 'destructive' : 'secondary'
-                    }>
-                      {request.status}
-                    </Badge>
+                    <p className="text-xs text-muted-foreground">{request.organ_id} / {request.scale_id}</p>
                   </div>
                 ))}
               </div>
@@ -810,81 +745,84 @@ export default function ExpertDashboard() {
 
       {/* Change Request Dialog */}
       <Dialog open={showChangeDialog} onOpenChange={setShowChangeDialog}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Propose Change</DialogTitle>
+            <DialogTitle>Propose Parameter Change</DialogTitle>
             <DialogDescription>
-              Suggest a change to {changeTarget?.section}. Please provide evidence and reasoning.
+              Submit a change for admin review
             </DialogDescription>
           </DialogHeader>
           
           {changeTarget && (
             <div className="space-y-4">
               <div className="p-3 bg-muted rounded-lg">
-                <p className="text-sm text-muted-foreground">Section</p>
-                <p className="font-medium capitalize">{changeTarget.section.replace(/_/g, ' ')}</p>
+                <p className="text-sm text-muted-foreground">Parameter</p>
+                <p className="font-medium">{changeTarget.paramName}</p>
+                <p className="text-sm">
+                  Current: <span className="font-mono">{changeTarget.currentValue}</span> {changeTarget.currentUnit}
+                </p>
+                {changeTarget.currentMods?.note && (
+                  <p className="text-xs text-muted-foreground mt-1">Note: {changeTarget.currentMods.note}</p>
+                )}
               </div>
               
               <div className="space-y-2">
-                <Label>Current Value</Label>
-                <div className="p-3 bg-muted/50 rounded-lg text-sm max-h-32 overflow-y-auto">
-                  {renderValue(changeTarget.currentValue)}
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="proposed-value">Proposed Value / Changes</Label>
-                <Textarea
-                  id="proposed-value"
+                <Label>Proposed Value</Label>
+                <Input
                   value={changeRequest.proposedValue}
                   onChange={(e) => setChangeRequest({...changeRequest, proposedValue: e.target.value})}
-                  placeholder="Enter the new value or describe the changes..."
-                  rows={6}
+                  placeholder="Enter new value or multiplier (e.g., 0.8 for 80%)"
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="source-url">
-                  <ExternalLink className="w-3 h-3 inline mr-1" />
-                  Evidence Source URL (Required)
+                <Label>
+                  <Link className="w-3 h-3 inline mr-1" />
+                  Evidence Source URL *
                 </Label>
                 <Input
-                  id="source-url"
                   value={changeRequest.sourceUrl}
                   onChange={(e) => setChangeRequest({...changeRequest, sourceUrl: e.target.value})}
-                  placeholder="https://pubmed.ncbi.nlm.nih.gov/... or guideline URL"
+                  placeholder="https://pubmed.ncbi.nlm.nih.gov/..."
                 />
-                <p className="text-xs text-muted-foreground">
-                  Link to PubMed, clinical guidelines, or other authoritative source
-                </p>
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="reasoning">Reasoning / Notes (Required)</Label>
+                <Label>Reasoning *</Label>
                 <Textarea
-                  id="reasoning"
                   value={changeRequest.reasoning}
                   onChange={(e) => setChangeRequest({...changeRequest, reasoning: e.target.value})}
-                  placeholder="Explain why this change is necessary based on the evidence..."
-                  rows={4}
+                  placeholder="Explain the clinical reasoning..."
+                  rows={3}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label>
+                  <MessageSquare className="w-3 h-3 inline mr-1" />
+                  Additional Notes
+                </Label>
+                <Textarea
+                  value={changeRequest.notes}
+                  onChange={(e) => setChangeRequest({...changeRequest, notes: e.target.value})}
+                  placeholder="Any additional context..."
+                  rows={2}
                 />
               </div>
               
               <Alert>
                 <Shield className="w-4 h-4" />
                 <AlertDescription>
-                  Your change will be submitted for admin review. Include clear evidence and reasoning to support approval.
+                  Changes require admin approval before updating the database.
                 </AlertDescription>
               </Alert>
             </div>
           )}
           
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowChangeDialog(false)}>
-              Cancel
-            </Button>
+            <Button variant="outline" onClick={() => setShowChangeDialog(false)}>Cancel</Button>
             <Button onClick={handleSubmitChange} disabled={submitting}>
-              {submitting ? 'Submitting...' : 'Submit Change Request'}
+              {submitting ? 'Submitting...' : 'Submit for Review'}
             </Button>
           </DialogFooter>
         </DialogContent>
