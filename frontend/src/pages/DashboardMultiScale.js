@@ -2373,6 +2373,17 @@ const DiseasePanel = ({
             </Badge>
           ))}
         </div>
+        
+        {/* Reset Button */}
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full mt-4 border-destructive/50 text-destructive hover:bg-destructive/10"
+          onClick={onReset}
+        >
+          <RotateCcw className="w-4 h-4 mr-2" />
+          Reset to Healthy Model
+        </Button>
       </div>
     )}
   </div>
