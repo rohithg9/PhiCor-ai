@@ -2893,14 +2893,34 @@ const DashboardMultiScale = () => {
     let newValue = baseValue;
     
     // Handle different modification formats from API and static
-    const multiplier = mods.multiplier || mods.factor;
+    // IMPORTANT: Use hasOwnProperty or explicit checks for 0 values (0 is valid for "absent" params)
+    const multiplier = mods.multiplier !== undefined ? mods.multiplier : mods.factor;
     const changePercent = mods.change_percent;
     const direction = mods.direction;
-    const absoluteValue = mods.value || mods.absolute;
+    // Check for absolute value properly - 0 is a valid value meaning "absent"
+    const absoluteValue = mods.absolute !== undefined ? mods.absolute : mods.value;
     
     // Skip if marked as 'normal', 'no_change', 'none', or direction indicates no change
     if (direction === 'normal' || direction === 'no_change' || direction === 'none' || direction === 'no change') {
       return { value: baseValue, modified: false };
+    }
+    
+    // SPECIAL CASE: Handle "absent" parameters (multiplier=0 or absolute=0 with a note containing "absent")
+    // This is critical for medical accuracy (e.g., P-waves absent in AFib)
+    const isAbsent = (multiplier === 0 || absoluteValue === 0) && 
+                     (mods.note?.toLowerCase().includes('absent') || 
+                      mods.note?.toLowerCase().includes('not measurable') ||
+                      mods.note?.toLowerCase().includes('no p wave') ||
+                      mods.note?.toLowerCase().includes('loss of'));
+    
+    if (isAbsent) {
+      return {
+        value: 'Absent',
+        modified: true,
+        note: mods.note || 'Not present in this condition',
+        delta: '-100',
+        isAbsent: true
+      };
     }
     
     if (absoluteValue !== undefined && absoluteValue !== null && typeof absoluteValue === 'number') {
