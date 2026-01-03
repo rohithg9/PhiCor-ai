@@ -581,12 +581,12 @@ export default function ExpertDashboard() {
                           return (
                             <Collapsible key={section.key} open={isExpanded} onOpenChange={() => toggleSection(section.key)}>
                               <div className="border rounded-lg">
-                                <CollapsibleTrigger className="w-full p-3 flex items-center justify-between hover:bg-muted/50">
-                                  <div className="flex items-center gap-2">
+                                <div className="w-full p-3 flex items-center justify-between hover:bg-muted/50">
+                                  <CollapsibleTrigger className="flex items-center gap-2 flex-1">
                                     <Icon className="w-4 h-4 text-primary" />
                                     <span className="font-medium">{section.label}</span>
                                     {value && <Badge variant="outline" className="text-xs">Has Data</Badge>}
-                                  </div>
+                                  </CollapsibleTrigger>
                                   <div className="flex items-center gap-2">
                                     <Button
                                       variant="ghost"
@@ -599,9 +599,11 @@ export default function ExpertDashboard() {
                                       <FileEdit className="w-3 h-3 mr-1" />
                                       Edit
                                     </Button>
-                                    {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                                    <CollapsibleTrigger>
+                                      {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                                    </CollapsibleTrigger>
                                   </div>
-                                </CollapsibleTrigger>
+                                </div>
                                 
                                 <CollapsibleContent>
                                   <div className="p-3 pt-0 border-t">
