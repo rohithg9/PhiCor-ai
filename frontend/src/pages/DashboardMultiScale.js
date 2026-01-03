@@ -2455,16 +2455,28 @@ const DashboardMultiScale = () => {
             const diseaseKey = disease.id || disease.icd10_code?.replace('.', '_');
             if (diseaseKey) {
               fullDiseaseMap[diseaseKey] = {
+                // Spread all original disease data first
+                ...disease,
+                // Then add/override specific fields
                 name: disease.name,
                 icd10: disease.icd10_code,
                 category: disease.category || 'general',
                 description: disease.definition || disease.description || disease.name,
                 definition: disease.definition,
                 primaryOrgan: disease.primaryOrgan || getPrimaryOrganFromCategory(disease.category),
-                affectedOrgans: disease.affectedOrgans || [getPrimaryOrganFromCategory(disease.category)],
+                affectedOrgans: disease.affected_organs || disease.affectedOrgans || [getPrimaryOrganFromCategory(disease.category)],
                 modifications: disease.parameter_modifications || {},
                 hasModifications: disease.parameter_modifications && Object.keys(disease.parameter_modifications).length > 0,
-                isFromAPI: true
+                isFromAPI: true,
+                // Explicitly include clinical data for clarity
+                clinical_presentation: disease.clinical_presentation || {},
+                clinicalPresentation: disease.clinical_presentation || disease.clinicalPresentation || {},
+                treatment: disease.treatment || {},
+                prognosis: disease.prognosis || {},
+                laboratory_findings: disease.laboratory_findings || [],
+                imaging_findings: disease.imaging_findings || {},
+                physical_examination: disease.physical_examination || {},
+                comprehensive_model: disease.comprehensive_model || {}
               };
             }
             
