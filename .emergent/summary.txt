@@ -1,86 +1,86 @@
 <analysis>**original_problem_statement:**
 The user's goal is to evolve PhiCore.ai into a Mathematical Human Body, a digital twin that quantifies all aspects of human health. The core requirement is to have a single, unified, and medically accurate view for over 1,900 diseases. This view must display all relevant mathematical models and parameters (from organ structure down to the cellular level), showing how they deviate from normal when a specific disease is selected.
 
-Recent user requests have focused on fixing a fundamental disconnect between different data sources (medically-curated static data vs. AI-generated data) and resolving a confusing UI that presents this fragmented data in separate, duplicative panels. The user has explicitly stated that the older, static data models are more comprehensive and must be the primary source of truth.
-
 **PRODUCT REQUIREMENTS:**
 -   A unified, non-confusing dashboard UI. There should be only one primary set of organ tabs for navigation.
 -   A single, consolidated parameter view that correctly displays modifications for any selected disease.
 -   Data accuracy is paramount. A clear data hierarchy must be enforced: Medically-curated static data () > AI-generated data (from API) > Baseline values ().
--   The Disease Impact Summary panel should remain open by default and serve as a summary that links to the full, detailed parameter panels below.
--   The knowledge base must be complete, with the background AI enhancement script running until all 1900+ diseases have comprehensive data.
+-   The Disease Impact Summary panel should remain open by default.
+-   The knowledge base must be complete, with background AI enhancement scripts running until all 1900+ diseases have comprehensive data.
 -   Disease categories in the selection panel must be logically organized.
+-   The system must eventually support EMR integration, requiring detailed clinical data (symptoms with severity, signs, labs, imaging, and treatment guidelines including surgical/device criteria).
 
 **User's preferred language**: English
 
 **what currently exists?**
-The application is a full-stack platform with a React frontend, FastAPI backend, and MongoDB. The database contains 1,977 diseases, all of which have some level of .
-
-A major refactoring has been performed to re-integrate a static, medically-curated data source () and merge it with AI-generated data from the API. This has successfully restored the comprehensive, multi-parameter modifications for diseases that were present in older builds.
-
-However, the UI remains a significant problem. It features two separate and confusing rows of organ tabs: one for general navigation and another within the Disease Impact Summary. This creates a disconnected user experience where it's unclear how the data is related. A background script () is actively running to enrich the database.
+The application is a full-stack platform (React/FastAPI/MongoDB) with a unified dashboard UI. The previous major issue of a confusing, two-panel UI has been resolved. The system now correctly displays a merged view of parameters sourced from static files and a MongoDB database, which is being continuously enriched by two background AI scripts (Phase 1 for basic data, Phase 2 for comprehensive models). Critical data flow and UI crash issues related to displaying clinical evidence, treatment, and prognosis have been fixed. However, the user has identified new, more granular issues regarding medical accuracy and UI functionality.
 
 **Last working item**:
--   **Last item agent was working:** The user is still reporting that the UI is confusing and the data is disconnected. Specifically, there are two sets of organ tabs, and it's not intuitive how the Disease Impact Summary relates to the full parameter panels below. The user has requested a single, unified UI that correctly displays data from both static and AI sources, with a clear hierarchy. The agent just received this feedback and was about to start on a plan to unify the UI.
+-   **Last item agent was working:** The user reported several new critical issues after the last set of fixes:
+    1.  **Medical Inaccuracy:** For Atrial Fibrillation, the UI incorrectly displays a P wave parameter, which should be absent.
+    2.  **UI Bug:** The right-side panel (with disease search/severity) becomes frozen and overlaps the main content, preventing interaction.
+    3.  **Feature Request:** Add Reset buttons for better usability.
+    The agent began investigating the P-wave inaccuracy, correctly modifying the underlying data models (, ), but has not yet adjusted the frontend rendering logic to display the absent state. The other issues have not been started.
 -   **Status:** IN PROGRESS
--   **Agent Testing Done:** Y (Agent verified with screenshots that data merging works, but user identified the remaining critical UX issue).
--   **Which testing method agent to use?** screenshot tool. The agent needs to verify that the UI has been consolidated into a single, intuitive view with only one set of organ tabs.
--   **User Testing Done:** N (User has just provided feedback on the current state and is waiting for the next fix).
+-   **Agent Testing Done:** N
+-   **Which testing method agent to use?** screenshot tool. The next agent must verify that: 1) The P-wave parameter is correctly shown as Absent for AFib. 2) The right-panel UI bug is resolved. 3) The new Reset buttons are present and functional.
+-   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: Unify UI and Consolidate Data Display (P0)**
-    -   **Description:** The dashboard UI is confusing due to two separate rows of organ tabs—one for main navigation and another Filter row within the Disease Impact Summary. This makes the user experience feel fragmented and disconnected. The user wants a single, cohesive interface.
-    -   **Attempted fixes:** The agent successfully merged static and AI data, which was a prerequisite. However, the UI component of the problem has not been addressed.
+-   **Issue 1: Medical Inaccuracy in ECG Display (P0)**
+    -   **Description:** For Atrial Fibrillation, the UI displays a P wave parameter, which is medically incorrect. This undermines the core requirement of data accuracy.
+    -   **Attempted fixes:** The agent updated the data models ( and ) to include parameters for P-wave absence. However, the frontend rendering logic has not been updated to correctly display this absent state.
     -   **Next debug checklist:**
-        1.  Refactor the JSX in .
-        2.  **Remove** the secondary Filter by Organ tab row that currently exists inside the Disease Impact Summary collapsible panel.
-        3.  Ensure the main organ tabs at the top of the page are the single, unambiguous way to select an organ.
-        4.  The Disease Impact Summary should simply list affected parameters, without its own duplicative organ filters. Clicking a parameter should scroll the view to its full detail in the main panel below.
-        5.  Confirm that the panel remains open by default as requested.
-    -   **Why fix this issue and what will be achieved with the fix?** This is the user's primary complaint and the main blocker to usability. Fixing it will create the intuitive, single-source-of-truth experience that is the core goal of the application.
+        1.  Locate the parameter rendering logic in .
+        2.  Implement a condition to check for absent or 0 values for parameters like .
+        3.  Instead of showing the baseline value, render the text Absent or a similar indicator.
+        4.  Verify the fix by selecting Atrial Fibrillation and taking a screenshot of the ECG parameters.
+    -   **Why fix this issue and what will be achieved with the fix?** To ensure the application's medical accuracy, which is a primary goal for the user.
     -   **Status:** IN PROGRESS
-    -   **Is recurring issue?** Y (This is a persistent UX problem).
+    -   **Is recurring issue?** N
+    -   **Should Test frontend/backend/both after fix?** Frontend
+    -   **Blocked on other issue:** None
+-   **Issue 2: Frozen/Overlapping UI Panel (P1)**
+    -   **Description:** The user provided a screenshot showing the right-side panel (with disease search and severity slider) is frozen and overlaps UI elements, blocking the ability to select a new disease.
+    -   **Attempted fixes:** None.
+    -   **Next debug checklist:**
+        1.  Examine the CSS (, ) and JSX structure of the right-side panel in .
+        2.  Reproduce the issue by selecting a disease and inspecting the element styles.
+        3.  Correct the faulty CSS causing the overlap.
+    -   **Why fix this issue and what will be achieved with the fix?** This is a critical UI bug blocking core application functionality.
+    -   **Status:** NOT STARTED
+    -   **Is recurring issue?** N
     -   **Should Test frontend/backend/both after fix?** Frontend
     -   **Blocked on other issue:** None
 
 **In progress Task List**:
--   **Task 1: Complete AI Data Enhancement (P1)**
-    -   **Where to resume:** A background script, , is running (). The agent has already removed the  limit to ensure it runs continuously. The agent should periodically monitor its progress. Last check showed **353/1977** diseases were AI-enhanced.
-    -   **What will be achieved with this?** This will fulfill the product requirement for a complete knowledge base, ensuring every disease has rich, AI-generated clinical data to supplement the core mathematical models.
+-   **Task 1: Complete AI Data Enhancement (Phases 1 & 2) (P1)**
+    -   **Where to resume:** Two background scripts,  (Phase 1) and  (Phase 2), are running to populate the MongoDB database. The agent should monitor their progress via the  endpoint.
+    -   **What will be achieved with this?** This will populate the database for all 1977 diseases with rich, medically accurate data, fulfilling a core product requirement.
     -   **Status:** IN PROGRESS
     -   **Should Test frontend/backend/both after fix?** Backend (verify DB) and Frontend (verify data appears).
     -   **Blocked on something:** None. This is a long-running background task.
 
 **Upcoming and Future Tasks**
-
 -   **Upcoming Tasks:**
-    *   **(P1) Reorganize Disease Categories:** The user reported that the disease categories in the right-hand selection panel are disorganized (e.g., neurological conditions are not correctly grouped). This needs to be investigated and the categorization logic in  needs to be fixed.
-    *   **(P2) User Verification of Patient Management System:** The user has not yet provided feedback on the Patient Management feature. The next agent should check in with the user to get feedback.
-
+    *   **(P1) Add Reset Buttons:** Implement two Reset buttons as requested: one in the right-side search panel and one in the main central display area to clear the selected disease. This will involve adding the buttons to the JSX in  and creating a  function.
+    *   **(P2) Reorganize Disease Categories:** A previously reported issue where disease categories in the right-hand panel are disorganized still needs to be addressed.
 -   **Future Tasks:**
-    *   Refactor the monolithic  file into smaller components.
-    *   Migrate  from the frontend to the MongoDB backend.
+    *   **Expert Curation Interface:** The user has requested a future feature for subject matter experts to edit the database content directly.
+    *   Refactor the monolithic  file.
+    *   Migrate  to the MongoDB backend.
     *   Real-time Electronic Medical Record (EMR) Integration.
-    *   Patient Timeline (Ω) feature.
-    *   Lab Calculator (Λ) feature.
-    *   Probability Engine (Π) feature.
-    *   Treatment Protocols (Θ) feature.
+    *   Patient Timeline (Ω), Lab Calculator (Λ), Probability Engine (Π), and Treatment Protocols (Θ) features.
 
 **Completed work in this session**
--   **Critical Data Unification:**
-    -   **Restored Static Data:** Re-imported the critical, medically-curated  file, which contains comprehensive parameter multipliers.
-    -   **Fixed Data Mismatch:** Resolved a critical bug where static model keys () did not match database IDs () by creating a mapping ().
-    -   **Implemented Data Merging:** Established a  data precedence, ensuring the most accurate data is always shown. This successfully restored the detailed, multi-parameter modifications that were missing.
--   **UI Bug Fixes:**
-    -   Fixed a mobile header overlap issue.
-    -   Resolved an initial 0 diseases loading bug by adding a loading state.
-    -   Fixed a React runtime error (Objects are not valid as a React child) in the .
--   **Backend & Data Enhancement:**
-    -   Continuously managed the  script and removed its  processing limit to ensure it completes for all 1977 diseases.
-    -   Added a  to the backend  file to resolve a deployment-related issue.
+-   **Major UI Unification:** Removed the duplicate organ filter tabs and consolidated the UI into a single, clean parameter view.
+-   **Critical Data Flow Fixes:** Resolved a major bug preventing clinical data (symptoms, signs, treatments) from being displayed by ensuring the full disease object from the API is correctly processed and passed to child components.
+-   **UI Crash Fixes:** Fixed React crashes that occurred when viewing the Prognosis and Treatment tabs by implementing more robust rendering logic for complex data objects.
+-   **Data Generation Pipeline:** Created and launched a two-phase background process to enrich the database with both basic and comprehensive AI-generated data. The AI prompt for Phase 2 was significantly improved to include detailed clinical criteria for treatments, surgery, and devices.
+-   **API for Monitoring:** Added a backend endpoint () to track the progress of the data generation scripts.
 
 **Earlier issues found/mentioned but not fixed**
--   **Issue 1: Disorganized Disease Categories:** The user reported that diseases in the right-side panel are not grouped correctly (e.g., neurological conditions appearing under Other). This is now an upcoming task.
+-   **Issue 1: Disorganized Disease Categories:** The user reported that diseases in the right-side panel are not grouped correctly. This is now an upcoming task.
 
 **Known issue recurrence from previous fork**
 -   None.
@@ -89,9 +89,9 @@ However, the UI remains a significant problem. It features two separate and conf
 
 
 **Key Technical Concepts**
--   **Hybrid Data Merging:** The core architecture now relies on merging two data sources: a primary, medically-curated static  file for modification multipliers, and a secondary, AI-generated dataset from the API for clinical findings.
--   **Data Precedence Logic:** A clear hierarchy is enforced in the  function to ensure data integrity: **Static Data > AI Data > Baseline Model**.
--   **ID and Key Mapping:** A mapping layer () was crucial to connect the different identifiers used in the database and the static data files, enabling the data merge to work.
+-   **Hybrid Data Model:** The application sources data from static files () and two tiers of AI-generated data within MongoDB ( and  fields), merging them on the frontend.
+-   **Background Data Generation:** Two long-running Python scripts run in parallel to progressively enrich the MongoDB database.
+-   **Safe UI Rendering:** Frontend components have been updated to safely render complex, nested data objects, preventing crashes from unexpected data structures.
 
 **key DB schema**
 -   **diseases:** 
@@ -100,52 +100,57 @@ However, the UI remains a significant problem. It features two separate and conf
 -   None.
 
 **All files of reference**
--   **/app/frontend/src/pages/DashboardMultiScale.js**: The most critical file. It contains the UI logic for the dashboard, data fetching, and the complex data merging strategy. This is where the UI consolidation needs to happen.
--   **/app/frontend/src/data/diseaseModels.js**: The re-instated source of truth for comprehensive, medically-curated disease parameter modifications (e.g., multipliers).
--   **/app/frontend/src/data/organModels.js**: The baseline definition of all mathematical parameters for each organ system.
--   **/app/backend/enhance_all_data.py**: The background script for AI data enrichment.
+-   **/app/frontend/src/pages/DashboardMultiScale.js**: The core dashboard component where the right-panel UI bug and Reset buttons need to be addressed. It's also where the ECG parameter rendering logic needs to be verified.
+-   **/app/frontend/src/data/organModels.js**: Defines baseline parameters. Modified for the P-wave issue.
+-   **/app/frontend/src/data/diseaseModels.js**: Static disease data. Modified for the P-wave issue.
+-   **/app/frontend/src/components/DiseaseDetailPanel.js**: Displays detailed panels; was recently fixed to prevent crashes.
 
 **Areas that need refactoring**:
--   ****: This file is monolithic and extremely complex. It handles state, data fetching, merging logic for two sources, and renders a significant portion of the UI. It is the primary cause of the confusing UX and is a top candidate for being broken down into smaller, manageable components. The existing Disease Impact Summary and the main parameter display logic should be unified.
+-    is a monolithic component and a prime candidate for being broken down into smaller, more manageable hooks and components.
 
 **key api endpoints**
--   : Fetches all diseases from MongoDB.
+-   : Fetches all disease data for the initial application load.
+-   : Custom endpoint to monitor the progress of the background data generation tasks.
 
 **Critical Info for New Agent**
--   **Primary Goal:** Your immediate priority is to fix the user's main complaint: the confusing UI. You must refactor the dashboard to have a **single, unified parameter display** with only **one set of organ navigation tabs**.
--   **Data Hierarchy is Sacred:** The user has clearly specified that the manually curated data in  is the ground truth. The data merging logic () is now correct and must be preserved. Do not regress this.
--   **Fix the UI, Don't Re-architect the Data:** The data merging is finally working. The task is now a frontend UI/UX refactoring job. Focus on simplifying the JSX in  to eliminate the duplicate organ tab rows.
--   **Background Task:** The  script is running in the background. You can let it continue while you focus on the critical frontend fixes.
+-   **Priorities:** Your immediate priorities are dictated by the user's latest feedback: **1. Fix the P-wave display inaccuracy (P0). 2. Fix the frozen right-side UI panel (P1). 3. Add the requested Reset buttons (P1).**
+-   **Medical Accuracy is Paramount:** The user is extremely focused on data correctness. The P-wave issue is a critical bug that erodes trust. Always validate data display against medical facts.
+-   **Data Flow Complexity:** Be mindful that the  object is a composite, merged on the frontend. When debugging data display, trace the flow from the initial  in  all the way to the rendering component. The last major data bug was due to an incomplete object copy during the initial load.
+-   **Background Tasks:** Two data generation scripts are running. Do not interrupt them. You can monitor their progress at the  endpoint.
 
 **documents and test reports created in this job**
--    (created but not implemented)
--    (updated)
+-   
 
 **Last 10 User Messages and any pending HUMAN messages**
--   The user is happy that more parameters are showing modifications but is still highly concerned about data accuracy and UI clarity.
--   **Key Pain Point:** The user has repeatedly pointed out the two confusing, separate rows of organ tabs.
--   **Core Request:** The user wants a **single, unified UI** that combines all data sources, with the medically-curated static data being the most accurate and taking precedence. They want one clear table/panel for parameters, not disconnected sections.
--   The user also pointed out that the disease categorization in the right-hand panel is disorganized.
--   **Final Instruction:** The agent was given explicit instructions for the path forward: Static data is the priority, merge it with AI data, and display it all in one unified, non-collapsible, easy-to-understand panel.
+1.  **User (Latest):** Reports medical inaccuracy (P-wave in AFib), a frozen UI panel on the right, and requests Reset buttons. Asks agent to continue background data generation and notes the future need for an expert curation interface.
+2.  **Agent:** Summarizes the latest fixes and confirms background tasks are running.
+3.  **User:** States that treatment info is too limited and needs to be much more comprehensive (surgical criteria, devices, etc.).
+4.  **Agent:** Acknowledges this, stops the Phase 2 script, and updates it with a more detailed AI prompt.
+5.  **User:** Reports that clinical details are still missing for some conditions and the app crashes when clicking Prognosis or Treatment buttons.
+6.  **Agent:** Provides a status update on data enhancement progress.
+7.  **User:** Instructs the agent to start Phase 2 of data generation.
+8.  **Agent:** Proposes a detailed plan for a two-phase data generation process and asks for confirmation.
+9.  **User:** Asks for clarification on the data generation timeline and confirms the approach is good.
+10. **Agent:** Explains the plan to use AI to expand the static models for all diseases.
 
 **Project Health Check:**
--   **Broken:** The core user experience is broken due to the confusing and fragmented UI, despite the underlying data being mostly correct now.
+-   **Broken:** A critical UI bug in the right-side panel blocks user interaction. A medical data inaccuracy (the P-wave issue) is present and is a high-priority concern for the user.
 -   **Mocked:** None.
 
 **3rd Party Integrations**
--   **OpenAI GPT-4o:** Uses Emergent LLM Key. Powers the  background script.
+-   **OpenAI GPT-4o:** Uses Emergent LLM Key. Powers the backend data enhancement scripts.
 -   **MongoDB:** The primary database for the application.
 
 **Testing status**
--   **Testing agent used after significant changes:** YES.
--   **Troubleshoot agent used after agent stuck in loop:** NO.
+-   **Testing agent used after significant changes:** NO
+-   **Troubleshoot agent used after agent stuck in loop:** NO
 -   **Test files created:** None.
--   **Known regressions:** A major UI/UX regression (confusing panels) persists from the move to API-driven data, which the agent is in the process of fixing by re-integrating static data and unifying the view.
+-   **Known regressions:** A new UI bug has been introduced in the right-side panel that freezes the content.
 
 **Credentials to test flow:**
 -   No authentication is required for the application.
 
 **What agent forgot to execute**
--   The agent has not yet fixed the user's primary UI complaint: the presence of two confusing rows of organ tabs. It has focused on fixing the data backend but has not yet delivered the unified UI.
--   The agent created  as a potential solution but did not implement it, instead continuing to patch the existing complex  component.
--   The agent has not addressed the user's feedback about disorganized disease categories in the right-hand panel.</analysis>
+-   The agent has not completed the fix for the P-wave display; the frontend rendering logic still needs to be adjusted and verified.
+-   The agent has not yet started fixing the frozen right-side panel UI bug.
+-   The agent has not yet implemented the Reset buttons requested by the user.</analysis>

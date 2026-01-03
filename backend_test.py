@@ -26,7 +26,7 @@ Test 5: Crash Prevention Verification
 - Test multiple disease selections from different categories
 - Verify no errors in API responses
 
-API Base URL: https://healthtwin-6.preview.emergentagent.com
+API Base URL: https://phicore-health-1.preview.emergentagent.com
 """
 
 import requests
