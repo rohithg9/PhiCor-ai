@@ -11,24 +11,55 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
 import { Alert, AlertDescription } from '../components/ui/alert';
-import { Separator } from '../components/ui/separator';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../components/ui/collapsible';
 import { useExpert } from '../context/ExpertContext';
 import { 
   Search, CheckCircle2, Clock, AlertTriangle, FileEdit, 
-  LogOut, User, Stethoscope, Building2, ChevronRight,
-  ExternalLink, Save, X, Beaker, LayoutDashboard, ListChecks,
-  Heart, Brain, Bone, Activity, Eye, Filter
+  LogOut, User, Stethoscope, ChevronRight, ChevronDown,
+  ExternalLink, Beaker, LayoutDashboard, ListChecks,
+  Heart, Brain, Activity, Eye, BookOpen, Pill, TestTube,
+  FileText, TrendingUp, Microscope, ClipboardList, Target,
+  Shield, Users, Thermometer, Dna, Calculator
 } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-const ORGAN_ICONS = {
-  heart: Heart,
-  brain: Brain,
-  lungs: Activity,
-  bones: Bone,
-  default: Activity
+// Map specialties to disease categories/organs
+const SPECIALTY_MAPPING = {
+  "Cardiology": ["cardiovascular", "heart", "cardiac", "vascular"],
+  "Pulmonology": ["respiratory", "pulmonary", "lung"],
+  "Neurology": ["neurological", "brain", "nervous", "neuro"],
+  "Gastroenterology": ["gastrointestinal", "digestive", "gi", "hepatic", "liver"],
+  "Nephrology": ["renal", "kidney", "urological"],
+  "Endocrinology": ["endocrine", "metabolic", "diabetes", "thyroid", "hormonal"],
+  "Hematology": ["hematological", "blood", "coagulation"],
+  "Oncology": ["oncological", "cancer", "neoplasm", "tumor", "malignant"],
+  "Rheumatology": ["rheumatological", "autoimmune", "arthritis", "connective"],
+  "Infectious Disease": ["infectious", "infection", "viral", "bacterial"],
+  "Dermatology": ["dermatological", "skin", "cutaneous"],
+  "Psychiatry": ["psychiatric", "mental", "psychological"],
+  "Pediatrics": ["pediatric", "congenital", "childhood"],
+  "Obstetrics & Gynecology": ["obstetric", "gynecological", "pregnancy", "reproductive"],
+  "General Medicine": [], // Can see all
+  "Surgery": ["surgical"],
+  "Emergency Medicine": [], // Can see all
+  "Critical Care": ["critical", "intensive", "acute"],
+  "Radiology": [],
+  "Pathology": []
 };
+
+// Clinical data sections for display
+const CLINICAL_SECTIONS = [
+  { key: 'description', label: 'Description', icon: FileText },
+  { key: 'clinical_features', label: 'Clinical Features', icon: Stethoscope },
+  { key: 'diagnostic_criteria', label: 'Diagnostic Criteria', icon: Target },
+  { key: 'epidemiology', label: 'Epidemiology', icon: Users },
+  { key: 'pathophysiology', label: 'Pathophysiology', icon: Microscope },
+  { key: 'treatment', label: 'Treatment Guidelines', icon: Pill },
+  { key: 'prognosis', label: 'Prognosis', icon: TrendingUp },
+  { key: 'severity_factors', label: 'Severity Factors', icon: Thermometer },
+  { key: 'guideline_source', label: 'Guideline Sources', icon: BookOpen },
+];
 
 export default function ExpertDashboard() {
   const navigate = useNavigate();
@@ -37,9 +68,10 @@ export default function ExpertDashboard() {
   const [diseases, setDiseases] = useState([]);
   const [filteredDiseases, setFilteredDiseases] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [showReviewed, setShowReviewed] = useState(null); // null = all, true = reviewed, false = pending
+  const [showReviewed, setShowReviewed] = useState(null);
+  const [showMySpecialty, setShowMySpecialty] = useState(true);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ total: 0, reviewed: 0, pending: 0 });
+  const [stats, setStats] = useState({ total: 0, reviewed: 0, pending: 0, mySpecialty: 0 });
   
   // Selected disease for review
   const [selectedDisease, setSelectedDisease] = useState(null);
@@ -48,7 +80,7 @@ export default function ExpertDashboard() {
   
   // Change request dialog
   const [showChangeDialog, setShowChangeDialog] = useState(false);
-  const [selectedParameter, setSelectedParameter] = useState(null);
+  const [changeTarget, setChangeTarget] = useState(null); // { section, field, currentValue }
   const [changeRequest, setChangeRequest] = useState({
     proposedValue: '',
     sourceUrl: '',
@@ -58,34 +90,59 @@ export default function ExpertDashboard() {
   
   // My change requests
   const [myChangeRequests, setMyChangeRequests] = useState([]);
+  
+  // Expanded sections
+  const [expandedSections, setExpandedSections] = useState({});
 
-  // Fetch diseases to review
+  // Check if disease matches expert's specialty
+  const matchesSpecialty = useCallback((disease) => {
+    if (!expert?.specialty) return true;
+    
+    const specialtyKeywords = SPECIALTY_MAPPING[expert.specialty] || [];
+    if (specialtyKeywords.length === 0) return true; // General specialties see all
+    
+    const category = (disease.category || '').toLowerCase();
+    const description = (disease.description || '').toLowerCase();
+    const name = (disease.name || '').toLowerCase();
+    const organs = (disease.affected_organs || disease.affectedOrgans || []).map(o => o.toLowerCase());
+    
+    return specialtyKeywords.some(keyword => 
+      category.includes(keyword) || 
+      description.includes(keyword) || 
+      name.includes(keyword) ||
+      organs.some(o => o.includes(keyword))
+    );
+  }, [expert?.specialty]);
+
+  // Fetch diseases
   const fetchDiseases = useCallback(async () => {
     if (!token) return;
     
     try {
-      const params = new URLSearchParams();
-      if (searchQuery) params.append('search', searchQuery);
-      if (showReviewed !== null) params.append('reviewed', showReviewed);
-      
-      const response = await fetch(`${BACKEND_URL}/api/experts/diseases-to-review?${params}`, {
+      const response = await fetch(`${BACKEND_URL}/api/experts/diseases-to-review`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
       const data = await response.json();
-      setDiseases(data.diseases || []);
-      setFilteredDiseases(data.diseases || []);
+      const allDiseases = data.diseases || [];
+      setDiseases(allDiseases);
+      
+      // Calculate stats
+      const specialtyDiseases = allDiseases.filter(matchesSpecialty);
+      const reviewedCount = allDiseases.filter(d => d.is_reviewed).length;
+      
       setStats({
-        total: data.total || 0,
-        reviewed: data.reviewed || 0,
-        pending: data.pending || 0
+        total: allDiseases.length,
+        reviewed: reviewedCount,
+        pending: allDiseases.length - reviewedCount,
+        mySpecialty: specialtyDiseases.length
       });
     } catch (err) {
       console.error('Failed to fetch diseases:', err);
     } finally {
       setLoading(false);
     }
-  }, [token, searchQuery, showReviewed]);
+  }, [token, matchesSpecialty]);
 
   // Fetch my change requests
   const fetchMyChangeRequests = useCallback(async () => {
@@ -112,10 +169,16 @@ export default function ExpertDashboard() {
     fetchMyChangeRequests();
   }, [token, navigate, fetchDiseases, fetchMyChangeRequests]);
 
-  // Filter diseases locally
+  // Filter diseases
   useEffect(() => {
     let filtered = diseases;
     
+    // Filter by specialty if enabled
+    if (showMySpecialty && expert?.specialty) {
+      filtered = filtered.filter(matchesSpecialty);
+    }
+    
+    // Filter by search
     if (searchQuery) {
       filtered = filtered.filter(d => 
         d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -123,17 +186,19 @@ export default function ExpertDashboard() {
       );
     }
     
+    // Filter by reviewed status
     if (showReviewed !== null) {
       filtered = filtered.filter(d => d.is_reviewed === showReviewed);
     }
     
     setFilteredDiseases(filtered);
-  }, [diseases, searchQuery, showReviewed]);
+  }, [diseases, searchQuery, showReviewed, showMySpecialty, expert?.specialty, matchesSpecialty]);
 
-  // Fetch disease details for review
+  // Fetch disease details
   const handleSelectDisease = async (disease) => {
     setSelectedDisease(disease);
     setLoadingDisease(true);
+    setExpandedSections({});
     
     try {
       const response = await fetch(`${BACKEND_URL}/api/experts/disease/${disease.id}/parameters`, {
@@ -149,7 +214,7 @@ export default function ExpertDashboard() {
     }
   };
 
-  // Mark disease as reviewed
+  // Mark as reviewed
   const handleMarkReviewed = async () => {
     if (!selectedDisease) return;
     
@@ -159,24 +224,18 @@ export default function ExpertDashboard() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
-      // Refresh diseases list
       fetchDiseases();
-      setSelectedDisease(null);
-      setDiseaseData(null);
+      setSelectedDisease(prev => ({ ...prev, is_reviewed: true }));
     } catch (err) {
       console.error('Failed to mark as reviewed:', err);
     }
   };
 
-  // Open parameter edit dialog
-  const handleEditParameter = (param, organId, scaleId) => {
-    setSelectedParameter({
-      ...param,
-      organId,
-      scaleId
-    });
+  // Open change dialog for any field
+  const handleRequestChange = (section, field, currentValue) => {
+    setChangeTarget({ section, field, currentValue });
     setChangeRequest({
-      proposedValue: param.value?.toString() || '',
+      proposedValue: typeof currentValue === 'object' ? JSON.stringify(currentValue, null, 2) : String(currentValue || ''),
       sourceUrl: '',
       reasoning: ''
     });
@@ -185,8 +244,8 @@ export default function ExpertDashboard() {
 
   // Submit change request
   const handleSubmitChange = async () => {
-    if (!selectedParameter || !changeRequest.sourceUrl || !changeRequest.reasoning) {
-      alert('Please provide source URL and reasoning');
+    if (!changeTarget || !changeRequest.sourceUrl || !changeRequest.reasoning) {
+      alert('Please provide source URL and reasoning for the change');
       return;
     }
     
@@ -202,28 +261,26 @@ export default function ExpertDashboard() {
         body: JSON.stringify({
           disease_id: selectedDisease.id,
           disease_name: selectedDisease.name,
-          organ_id: selectedParameter.organId,
-          scale_id: selectedParameter.scaleId,
+          organ_id: 'clinical_data',
+          scale_id: changeTarget.section,
           change_type: 'modification',
           parameters: [{
-            parameter_id: selectedParameter.id,
-            parameter_name: selectedParameter.name,
-            current_value: selectedParameter.value,
+            parameter_id: changeTarget.field || changeTarget.section,
+            parameter_name: changeTarget.section,
+            current_value: changeTarget.currentValue,
             proposed_value: changeRequest.proposedValue,
-            current_unit: selectedParameter.unit || '',
+            current_unit: '',
             source_url: changeRequest.sourceUrl,
             reasoning: changeRequest.reasoning
           }],
-          additional_notes: ''
+          additional_notes: `Expert change request for ${changeTarget.section}`
         })
       });
       
-      if (!response.ok) {
-        throw new Error('Failed to submit change');
-      }
+      if (!response.ok) throw new Error('Failed to submit change');
       
       setShowChangeDialog(false);
-      setSelectedParameter(null);
+      setChangeTarget(null);
       fetchMyChangeRequests();
       alert('Change request submitted for admin review');
     } catch (err) {
@@ -237,6 +294,18 @@ export default function ExpertDashboard() {
   const handleLogout = () => {
     logout();
     navigate('/expert-login');
+  };
+
+  const toggleSection = (key) => {
+    setExpandedSections(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const renderValue = (value) => {
+    if (value === null || value === undefined) return <span className="text-muted-foreground italic">Not available</span>;
+    if (typeof value === 'object') {
+      return <pre className="text-xs bg-muted p-2 rounded overflow-x-auto">{JSON.stringify(value, null, 2)}</pre>;
+    }
+    return <span className="whitespace-pre-wrap">{String(value)}</span>;
   };
 
   const progressPercent = stats.total > 0 ? (stats.reviewed / stats.total) * 100 : 0;
@@ -258,16 +327,16 @@ export default function ExpertDashboard() {
             {isAdmin && (
               <Button variant="outline" size="sm" onClick={() => navigate('/admin')}>
                 <LayoutDashboard className="w-4 h-4 mr-2" />
-                Admin Dashboard
+                Admin
               </Button>
             )}
             <Button variant="outline" size="sm" onClick={() => navigate('/expert/experiments')}>
               <Beaker className="w-4 h-4 mr-2" />
-              Experiment Lab
+              Lab
             </Button>
             <div className="flex items-center gap-2 px-3 py-1 bg-muted rounded-md">
               <User className="w-4 h-4" />
-              <span className="text-sm font-medium">{expert?.name}</span>
+              <span className="text-sm font-medium hidden sm:inline">{expert?.name}</span>
             </div>
             <Button variant="ghost" size="icon" onClick={handleLogout}>
               <LogOut className="w-4 h-4" />
@@ -278,15 +347,27 @@ export default function ExpertDashboard() {
 
       <div className="container mx-auto px-4 py-6">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
           <Card>
             <CardContent className="pt-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Diseases</p>
+                  <p className="text-xs text-muted-foreground">My Specialty</p>
+                  <p className="text-2xl font-bold text-primary">{stats.mySpecialty}</p>
+                </div>
+                <Stethoscope className="w-6 h-6 text-primary" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="pt-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-muted-foreground">Total</p>
                   <p className="text-2xl font-bold">{stats.total}</p>
                 </div>
-                <ListChecks className="w-8 h-8 text-muted-foreground" />
+                <ListChecks className="w-6 h-6 text-muted-foreground" />
               </div>
             </CardContent>
           </Card>
@@ -295,10 +376,10 @@ export default function ExpertDashboard() {
             <CardContent className="pt-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Reviewed</p>
+                  <p className="text-xs text-muted-foreground">Reviewed</p>
                   <p className="text-2xl font-bold text-green-500">{stats.reviewed}</p>
                 </div>
-                <CheckCircle2 className="w-8 h-8 text-green-500" />
+                <CheckCircle2 className="w-6 h-6 text-green-500" />
               </div>
             </CardContent>
           </Card>
@@ -307,10 +388,10 @@ export default function ExpertDashboard() {
             <CardContent className="pt-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Pending Review</p>
+                  <p className="text-xs text-muted-foreground">Pending</p>
                   <p className="text-2xl font-bold text-orange-500">{stats.pending}</p>
                 </div>
-                <Clock className="w-8 h-8 text-orange-500" />
+                <Clock className="w-6 h-6 text-orange-500" />
               </div>
             </CardContent>
           </Card>
@@ -319,22 +400,22 @@ export default function ExpertDashboard() {
             <CardContent className="pt-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">My Change Requests</p>
+                  <p className="text-xs text-muted-foreground">My Changes</p>
                   <p className="text-2xl font-bold text-blue-500">
                     {myChangeRequests.filter(r => r.status === 'pending').length}
                   </p>
                 </div>
-                <FileEdit className="w-8 h-8 text-blue-500" />
+                <FileEdit className="w-6 h-6 text-blue-500" />
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Progress Bar */}
+        {/* Progress */}
         <Card className="mb-6">
           <CardContent className="pt-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium">Review Progress</span>
+              <span className="text-sm font-medium">Overall Review Progress</span>
               <span className="text-sm text-muted-foreground">{progressPercent.toFixed(1)}%</span>
             </div>
             <Progress value={progressPercent} className="h-2" />
@@ -347,10 +428,11 @@ export default function ExpertDashboard() {
           <Card className="lg:col-span-1">
             <CardHeader className="pb-2">
               <CardTitle className="text-lg">Diseases to Review</CardTitle>
-              <CardDescription>Select a disease to review its parameters</CardDescription>
+              <CardDescription>
+                {showMySpecialty ? `Filtered by ${expert?.specialty}` : 'All diseases'}
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              {/* Search & Filter */}
               <div className="space-y-3 mb-4">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -362,60 +444,58 @@ export default function ExpertDashboard() {
                   />
                 </div>
                 
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <Button
-                    variant={showReviewed === null ? 'default' : 'outline'}
+                    variant={showMySpecialty ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setShowMySpecialty(!showMySpecialty)}
+                  >
+                    <Stethoscope className="w-3 h-3 mr-1" />
+                    My Specialty
+                  </Button>
+                  <Button
+                    variant={showReviewed === null ? 'secondary' : 'outline'}
                     size="sm"
                     onClick={() => setShowReviewed(null)}
                   >
                     All
                   </Button>
                   <Button
-                    variant={showReviewed === false ? 'default' : 'outline'}
+                    variant={showReviewed === false ? 'secondary' : 'outline'}
                     size="sm"
                     onClick={() => setShowReviewed(false)}
                   >
                     <Clock className="w-3 h-3 mr-1" />
                     Pending
                   </Button>
-                  <Button
-                    variant={showReviewed === true ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setShowReviewed(true)}
-                  >
-                    <CheckCircle2 className="w-3 h-3 mr-1" />
-                    Reviewed
-                  </Button>
                 </div>
               </div>
               
-              {/* Disease List */}
-              <ScrollArea className="h-[500px]">
+              <ScrollArea className="h-[450px]">
                 {loading ? (
                   <div className="text-center py-8 text-muted-foreground">Loading...</div>
                 ) : filteredDiseases.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">No diseases found</div>
                 ) : (
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     {filteredDiseases.map(disease => (
                       <Button
                         key={disease.id}
                         variant={selectedDisease?.id === disease.id ? 'secondary' : 'ghost'}
-                        className="w-full justify-start h-auto py-3"
+                        className="w-full justify-start h-auto py-2 px-3"
                         onClick={() => handleSelectDisease(disease)}
                       >
                         <div className="flex items-center w-full">
                           <div className="flex-1 text-left">
-                            <div className="font-medium">{disease.name}</div>
+                            <div className="font-medium text-sm">{disease.name}</div>
                             <div className="text-xs text-muted-foreground">
-                              {disease.icd10 && <span className="mr-2">{disease.icd10}</span>}
-                              {disease.category}
+                              {disease.icd10} • {disease.category}
                             </div>
                           </div>
                           {disease.is_reviewed ? (
-                            <CheckCircle2 className="w-4 h-4 text-green-500" />
+                            <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />
                           ) : (
-                            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                            <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
                           )}
                         </div>
                       </Button>
@@ -431,22 +511,27 @@ export default function ExpertDashboard() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>
-                    {selectedDisease ? selectedDisease.name : 'Select a Disease'}
-                  </CardTitle>
+                  <CardTitle>{selectedDisease ? selectedDisease.name : 'Select a Disease'}</CardTitle>
                   <CardDescription>
                     {selectedDisease 
-                      ? `Review and validate parameters for ${selectedDisease.name}`
-                      : 'Choose a disease from the list to review its parameters'
+                      ? 'Review clinical information and suggest changes'
+                      : 'Choose a disease to review its clinical data'
                     }
                   </CardDescription>
                 </div>
                 {selectedDisease && (
                   <div className="flex gap-2">
-                    <Button variant="outline" onClick={handleMarkReviewed}>
-                      <CheckCircle2 className="w-4 h-4 mr-2" />
-                      Mark as Reviewed
-                    </Button>
+                    {selectedDisease.is_reviewed ? (
+                      <Badge variant="outline" className="text-green-500 border-green-500">
+                        <CheckCircle2 className="w-3 h-3 mr-1" />
+                        Reviewed
+                      </Badge>
+                    ) : (
+                      <Button size="sm" onClick={handleMarkReviewed}>
+                        <CheckCircle2 className="w-4 h-4 mr-2" />
+                        Mark Reviewed
+                      </Button>
+                    )}
                   </div>
                 )}
               </div>
@@ -461,101 +546,196 @@ export default function ExpertDashboard() {
               ) : loadingDisease ? (
                 <div className="text-center py-16 text-muted-foreground">Loading disease data...</div>
               ) : diseaseData ? (
-                <Tabs defaultValue="parameters">
-                  <TabsList>
-                    <TabsTrigger value="parameters">Parameters</TabsTrigger>
-                    <TabsTrigger value="changes">Pending Changes ({diseaseData.pending_changes?.length || 0})</TabsTrigger>
+                <Tabs defaultValue="clinical">
+                  <TabsList className="mb-4">
+                    <TabsTrigger value="clinical">
+                      <ClipboardList className="w-4 h-4 mr-1" />
+                      Clinical Info
+                    </TabsTrigger>
+                    <TabsTrigger value="parameters">
+                      <Calculator className="w-4 h-4 mr-1" />
+                      Parameters
+                    </TabsTrigger>
+                    <TabsTrigger value="models">
+                      <Dna className="w-4 h-4 mr-1" />
+                      Models
+                    </TabsTrigger>
+                    <TabsTrigger value="changes">
+                      <FileEdit className="w-4 h-4 mr-1" />
+                      Changes ({diseaseData.pending_changes?.length || 0})
+                    </TabsTrigger>
                   </TabsList>
                   
-                  <TabsContent value="parameters" className="mt-4">
-                    <ScrollArea className="h-[450px] pr-4">
-                      {diseaseData.disease?.modifications ? (
-                        Object.entries(diseaseData.disease.modifications).map(([organId, organData]) => (
-                          <div key={organId} className="mb-6">
-                            <h4 className="font-semibold capitalize flex items-center gap-2 mb-3">
-                              {React.createElement(ORGAN_ICONS[organId] || ORGAN_ICONS.default, { className: "w-4 h-4" })}
-                              {organId}
-                            </h4>
-                            
-                            {Object.entries(organData).map(([scaleId, scaleData]) => (
-                              <div key={scaleId} className="ml-4 mb-4">
-                                <h5 className="text-sm font-medium text-muted-foreground capitalize mb-2">{scaleId}</h5>
+                  {/* Clinical Information Tab */}
+                  <TabsContent value="clinical">
+                    <ScrollArea className="h-[400px] pr-4">
+                      <div className="space-y-3">
+                        {CLINICAL_SECTIONS.map(section => {
+                          const value = diseaseData.disease?.[section.key];
+                          const Icon = section.icon;
+                          const isExpanded = expandedSections[section.key];
+                          
+                          return (
+                            <Collapsible key={section.key} open={isExpanded} onOpenChange={() => toggleSection(section.key)}>
+                              <div className="border rounded-lg">
+                                <CollapsibleTrigger className="w-full p-3 flex items-center justify-between hover:bg-muted/50">
+                                  <div className="flex items-center gap-2">
+                                    <Icon className="w-4 h-4 text-primary" />
+                                    <span className="font-medium">{section.label}</span>
+                                    {value && <Badge variant="outline" className="text-xs">Has Data</Badge>}
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleRequestChange(section.key, section.key, value);
+                                      }}
+                                    >
+                                      <FileEdit className="w-3 h-3 mr-1" />
+                                      Edit
+                                    </Button>
+                                    {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                                  </div>
+                                </CollapsibleTrigger>
                                 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                  {Object.entries(scaleData).map(([paramId, paramData]) => {
-                                    const evidence = diseaseData.parameter_evidence?.[paramId];
-                                    
-                                    return (
-                                      <div
-                                        key={paramId}
-                                        className="p-3 bg-muted/50 rounded-lg hover:bg-muted cursor-pointer group"
-                                        onClick={() => handleEditParameter({
-                                          id: paramId,
-                                          name: paramId.replace(/_/g, ' '),
-                                          value: paramData.value || paramData.multiplier || paramData.absolute,
-                                          unit: paramData.unit || '',
-                                          note: paramData.note || ''
-                                        }, organId, scaleId)}
-                                      >
-                                        <div className="flex items-center justify-between">
-                                          <span className="text-sm font-medium capitalize">
-                                            {paramId.replace(/_/g, ' ')}
-                                          </span>
-                                          <FileEdit className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                                        </div>
-                                        
-                                        <div className="mt-1 flex items-center gap-2">
-                                          <span className="text-lg font-mono">
-                                            {paramData.absolute !== null && paramData.absolute !== undefined
-                                              ? paramData.absolute
-                                              : paramData.multiplier !== null && paramData.multiplier !== undefined
-                                                ? `×${paramData.multiplier}`
-                                                : paramData.value || 'N/A'
-                                            }
-                                          </span>
-                                          {paramData.unit && (
-                                            <span className="text-xs text-muted-foreground">{paramData.unit}</span>
-                                          )}
-                                        </div>
-                                        
-                                        {paramData.note && (
-                                          <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{paramData.note}</p>
-                                        )}
-                                        
-                                        {evidence && (
-                                          <div className="flex items-center gap-1 mt-2">
-                                            <ExternalLink className="w-3 h-3 text-blue-500" />
-                                            <a 
-                                              href={evidence.source_url} 
-                                              target="_blank" 
-                                              rel="noopener noreferrer"
-                                              className="text-xs text-blue-500 hover:underline"
-                                              onClick={(e) => e.stopPropagation()}
-                                            >
-                                              View Source
-                                            </a>
-                                          </div>
-                                        )}
-                                      </div>
-                                    );
-                                  })}
-                                </div>
+                                <CollapsibleContent>
+                                  <div className="p-3 pt-0 border-t">
+                                    <div className="text-sm">
+                                      {renderValue(value)}
+                                    </div>
+                                  </div>
+                                </CollapsibleContent>
                               </div>
-                            ))}
-                          </div>
-                        ))
+                            </Collapsible>
+                          );
+                        })}
+                      </div>
+                    </ScrollArea>
+                  </TabsContent>
+                  
+                  {/* Parameters Tab */}
+                  <TabsContent value="parameters">
+                    <ScrollArea className="h-[400px] pr-4">
+                      {diseaseData.disease?.parameter_modifications ? (
+                        <div className="space-y-4">
+                          {Object.entries(diseaseData.disease.parameter_modifications).map(([organId, organData]) => (
+                            <Collapsible key={organId}>
+                              <CollapsibleTrigger className="w-full p-3 bg-muted/50 rounded-lg flex items-center justify-between hover:bg-muted">
+                                <div className="flex items-center gap-2">
+                                  <Heart className="w-4 h-4 text-primary" />
+                                  <span className="font-medium capitalize">{organId}</span>
+                                </div>
+                                <ChevronRight className="w-4 h-4" />
+                              </CollapsibleTrigger>
+                              
+                              <CollapsibleContent className="mt-2 ml-4">
+                                {typeof organData === 'object' && Object.entries(organData).map(([scaleId, scaleData]) => (
+                                  <div key={scaleId} className="mb-3">
+                                    <h5 className="text-sm font-medium text-muted-foreground capitalize mb-2">{scaleId}</h5>
+                                    <div className="grid grid-cols-2 gap-2">
+                                      {typeof scaleData === 'object' && Object.entries(scaleData).map(([paramId, paramData]) => (
+                                        <div
+                                          key={paramId}
+                                          className="p-2 bg-muted/30 rounded text-sm cursor-pointer hover:bg-muted/50"
+                                          onClick={() => handleRequestChange(`${organId}.${scaleId}`, paramId, paramData)}
+                                        >
+                                          <div className="flex items-center justify-between">
+                                            <span className="capitalize">{paramId.replace(/_/g, ' ')}</span>
+                                            <FileEdit className="w-3 h-3 text-muted-foreground" />
+                                          </div>
+                                          <div className="font-mono text-xs mt-1">
+                                            {typeof paramData === 'object' 
+                                              ? `×${paramData.multiplier || 1}` 
+                                              : paramData
+                                            }
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                ))}
+                              </CollapsibleContent>
+                            </Collapsible>
+                          ))}
+                        </div>
                       ) : (
                         <div className="text-center py-8 text-muted-foreground">
                           <AlertTriangle className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                          <p>No parameter modifications found for this disease.</p>
-                          <p className="text-sm">This disease may need data enhancement.</p>
+                          <p>No parameter modifications found</p>
                         </div>
                       )}
                     </ScrollArea>
                   </TabsContent>
                   
-                  <TabsContent value="changes" className="mt-4">
-                    <ScrollArea className="h-[450px]">
+                  {/* Mathematical Models Tab */}
+                  <TabsContent value="models">
+                    <ScrollArea className="h-[400px] pr-4">
+                      {diseaseData.disease?.comprehensive_model || diseaseData.disease?.mathematical_models_disease ? (
+                        <div className="space-y-4">
+                          {diseaseData.disease.mathematical_models_disease && (
+                            <Collapsible defaultOpen>
+                              <CollapsibleTrigger className="w-full p-3 bg-muted/50 rounded-lg flex items-center justify-between hover:bg-muted">
+                                <div className="flex items-center gap-2">
+                                  <Calculator className="w-4 h-4 text-primary" />
+                                  <span className="font-medium">Mathematical Models</span>
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRequestChange('mathematical_models_disease', 'models', diseaseData.disease.mathematical_models_disease);
+                                  }}
+                                >
+                                  <FileEdit className="w-3 h-3 mr-1" />
+                                  Edit
+                                </Button>
+                              </CollapsibleTrigger>
+                              <CollapsibleContent className="mt-2 p-3 bg-muted/30 rounded-lg">
+                                {renderValue(diseaseData.disease.mathematical_models_disease)}
+                              </CollapsibleContent>
+                            </Collapsible>
+                          )}
+                          
+                          {diseaseData.disease.comprehensive_model && (
+                            <Collapsible>
+                              <CollapsibleTrigger className="w-full p-3 bg-muted/50 rounded-lg flex items-center justify-between hover:bg-muted">
+                                <div className="flex items-center gap-2">
+                                  <Dna className="w-4 h-4 text-primary" />
+                                  <span className="font-medium">Comprehensive Model</span>
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRequestChange('comprehensive_model', 'model', diseaseData.disease.comprehensive_model);
+                                  }}
+                                >
+                                  <FileEdit className="w-3 h-3 mr-1" />
+                                  Edit
+                                </Button>
+                              </CollapsibleTrigger>
+                              <CollapsibleContent className="mt-2 p-3 bg-muted/30 rounded-lg">
+                                {renderValue(diseaseData.disease.comprehensive_model)}
+                              </CollapsibleContent>
+                            </Collapsible>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 text-muted-foreground">
+                          <AlertTriangle className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                          <p>No mathematical models found</p>
+                        </div>
+                      )}
+                    </ScrollArea>
+                  </TabsContent>
+                  
+                  {/* Pending Changes Tab */}
+                  <TabsContent value="changes">
+                    <ScrollArea className="h-[400px]">
                       {diseaseData.pending_changes?.length > 0 ? (
                         <div className="space-y-3">
                           {diseaseData.pending_changes.map(change => (
@@ -563,15 +743,13 @@ export default function ExpertDashboard() {
                               <CardContent className="pt-4">
                                 <div className="flex items-center justify-between mb-2">
                                   <Badge variant="outline">{change.status}</Badge>
-                                  <span className="text-xs text-muted-foreground">
-                                    by {change.expert_name}
-                                  </span>
+                                  <span className="text-xs text-muted-foreground">by {change.expert_name}</span>
                                 </div>
-                                <p className="font-medium">{change.organ_id} / {change.scale_id}</p>
+                                <p className="font-medium">{change.scale_id}</p>
                                 <div className="mt-2 space-y-1">
                                   {change.parameters.map((p, i) => (
                                     <div key={i} className="text-sm">
-                                      <span className="font-mono">{p.parameter_name}</span>: {p.current_value} → {p.proposed_value}
+                                      <span className="font-mono">{p.parameter_name}</span>
                                     </div>
                                   ))}
                                 </div>
@@ -602,13 +780,13 @@ export default function ExpertDashboard() {
             {myChangeRequests.length === 0 ? (
               <p className="text-center py-4 text-muted-foreground">No change requests submitted yet</p>
             ) : (
-              <div className="space-y-3">
-                {myChangeRequests.slice(0, 5).map(request => (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {myChangeRequests.slice(0, 6).map(request => (
                   <div key={request.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                    <div>
-                      <p className="font-medium">{request.disease_name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {request.organ_id} / {request.scale_id} • {request.parameters.length} parameter(s)
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium truncate">{request.disease_name}</p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {request.scale_id}
                       </p>
                     </div>
                     <Badge variant={
@@ -627,29 +805,36 @@ export default function ExpertDashboard() {
 
       {/* Change Request Dialog */}
       <Dialog open={showChangeDialog} onOpenChange={setShowChangeDialog}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Propose Parameter Change</DialogTitle>
+            <DialogTitle>Propose Change</DialogTitle>
             <DialogDescription>
-              Submit a change request for admin review. Please provide evidence source and reasoning.
+              Suggest a change to {changeTarget?.section}. Please provide evidence and reasoning.
             </DialogDescription>
           </DialogHeader>
           
-          {selectedParameter && (
+          {changeTarget && (
             <div className="space-y-4">
               <div className="p-3 bg-muted rounded-lg">
-                <p className="text-sm text-muted-foreground">Parameter</p>
-                <p className="font-medium capitalize">{selectedParameter.name}</p>
-                <p className="text-sm">Current Value: <span className="font-mono">{selectedParameter.value}</span></p>
+                <p className="text-sm text-muted-foreground">Section</p>
+                <p className="font-medium capitalize">{changeTarget.section.replace(/_/g, ' ')}</p>
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="proposed-value">Proposed Value</Label>
-                <Input
+                <Label>Current Value</Label>
+                <div className="p-3 bg-muted/50 rounded-lg text-sm max-h-32 overflow-y-auto">
+                  {renderValue(changeTarget.currentValue)}
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="proposed-value">Proposed Value / Changes</Label>
+                <Textarea
                   id="proposed-value"
                   value={changeRequest.proposedValue}
                   onChange={(e) => setChangeRequest({...changeRequest, proposedValue: e.target.value})}
-                  placeholder="Enter new value"
+                  placeholder="Enter the new value or describe the changes..."
+                  rows={6}
                 />
               </div>
               
@@ -662,12 +847,15 @@ export default function ExpertDashboard() {
                   id="source-url"
                   value={changeRequest.sourceUrl}
                   onChange={(e) => setChangeRequest({...changeRequest, sourceUrl: e.target.value})}
-                  placeholder="https://pubmed.ncbi.nlm.nih.gov/..."
+                  placeholder="https://pubmed.ncbi.nlm.nih.gov/... or guideline URL"
                 />
+                <p className="text-xs text-muted-foreground">
+                  Link to PubMed, clinical guidelines, or other authoritative source
+                </p>
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="reasoning">Reasoning (Required)</Label>
+                <Label htmlFor="reasoning">Reasoning / Notes (Required)</Label>
                 <Textarea
                   id="reasoning"
                   value={changeRequest.reasoning}
@@ -678,9 +866,9 @@ export default function ExpertDashboard() {
               </div>
               
               <Alert>
-                <AlertTriangle className="w-4 h-4" />
+                <Shield className="w-4 h-4" />
                 <AlertDescription>
-                  Your change will be submitted to an admin for review before being applied to the database.
+                  Your change will be submitted for admin review. Include clear evidence and reasoning to support approval.
                 </AlertDescription>
               </Alert>
             </div>
