@@ -2929,105 +2929,141 @@ const DashboardMultiScale = () => {
 
         {/* Main Content */}
         <main className={`flex-1 flex flex-col overflow-hidden pt-44 lg:pt-0`}>
-          {/* Affected Organs Summary Bar - Shows when disease is selected */}
-          {currentDisease && affectedOrgansSummary.length > 0 && (
-          <div className="border-b border-border/50 px-3 lg:px-6 py-2 bg-gradient-to-r from-destructive/5 to-orange-500/5">
-            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
-              <span className="text-[10px] text-muted-foreground uppercase tracking-wider shrink-0">Affected:</span>
-              {/* "All" button to show all organs */}
-              <motion.button
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  setParamFilterOrgan(null);
-                  setShowAllParams(false);
-                }}
-                className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs whitespace-nowrap transition-all ${
-                  paramFilterOrgan === null
-                    ? 'bg-primary/20 text-primary border border-primary/30'
-                    : 'bg-muted/30 text-muted-foreground border border-muted/30 hover:bg-muted/50'
-                }`}
-              >
-                <span>All</span>
-                <span className="min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center bg-primary/20">
-                  {allModifiedParameters.length}
-                </span>
-              </motion.button>
-              {affectedOrgansSummary.map((organ) => (
-                <motion.button
-                  key={organ.id}
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    setParamFilterOrgan(organ.id);
-                    setShowAllParams(false);
-                    // Don't change selectedOrgan - let filter work independently
-                  }}
-                  className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs whitespace-nowrap transition-all ${
-                    paramFilterOrgan === organ.id
-                      ? 'bg-primary/20 text-primary border border-primary/30'
-                      : organ.isPrimary
-                      ? 'bg-destructive/20 text-destructive border border-destructive/30 hover:bg-destructive/30'
-                      : 'bg-orange-500/10 text-orange-500 border border-orange-500/20 hover:bg-orange-500/20'
-                  }`}
-                >
-                  <span>{organ.icon}</span>
-                  <span className="hidden sm:inline">{organ.name}</span>
-                  {organ.count > 0 && (
-                    <motion.span
-                      key={organ.count}
-                      initial={{ scale: 1.5 }}
-                      animate={{ scale: 1 }}
-                      className={`min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center ${
+          
+        {/* Collapsible ALL AFFECTED PARAMETERS Summary - Shows when disease is selected */}
+        {currentDisease && allModifiedParameters.length > 0 && (
+          <Collapsible 
+            open={showAllParams} 
+            onOpenChange={setShowAllParams}
+            className="border-b border-border/50"
+          >
+            <CollapsibleTrigger asChild>
+              <button className="w-full px-3 lg:px-6 py-2 bg-gradient-to-r from-destructive/10 via-orange-500/5 to-amber-500/5 flex items-center justify-between hover:bg-destructive/15 transition-colors">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-destructive" />
+                  <span className="text-sm font-semibold text-foreground">
+                    Disease Impact Summary
+                  </span>
+                  <Badge variant="destructive" className="text-[10px]">
+                    {allModifiedParameters.length} affected parameters
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground hidden sm:inline">
+                    {showAllParams ? 'Click to collapse' : 'Click to expand'}
+                  </span>
+                  {showAllParams ? (
+                    <ChevronUp className="w-4 h-4 text-muted-foreground" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                  )}
+                </div>
+              </button>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="px-3 lg:px-6 py-3 bg-gradient-to-r from-destructive/5 via-orange-500/5 to-amber-500/5">
+                {/* Organ filter tabs */}
+                <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide mb-3 pb-2 border-b border-border/30">
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider shrink-0">Filter:</span>
+                  <button
+                    onClick={() => setParamFilterOrgan(null)}
+                    className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs whitespace-nowrap transition-all ${
+                      paramFilterOrgan === null
+                        ? 'bg-primary/20 text-primary border border-primary/30'
+                        : 'bg-muted/30 text-muted-foreground border border-muted/30 hover:bg-muted/50'
+                    }`}
+                  >
+                    <span>All</span>
+                    <span className="min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center bg-primary/20">
+                      {allModifiedParameters.length}
+                    </span>
+                  </button>
+                  {affectedOrgansSummary.map((organ) => (
+                    <button
+                      key={organ.id}
+                      onClick={() => setParamFilterOrgan(organ.id)}
+                      className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs whitespace-nowrap transition-all ${
                         paramFilterOrgan === organ.id
-                          ? 'bg-primary text-primary-foreground'
-                          : organ.isPrimary 
-                          ? 'bg-destructive text-destructive-foreground' 
-                          : 'bg-orange-500 text-white'
+                          ? 'bg-primary/20 text-primary border border-primary/30'
+                          : organ.isPrimary
+                          ? 'bg-destructive/20 text-destructive border border-destructive/30 hover:bg-destructive/30'
+                          : 'bg-orange-500/10 text-orange-500 border border-orange-500/20 hover:bg-orange-500/20'
                       }`}
                     >
-                      {organ.count}
-                    </motion.span>
-                  )}
-                </motion.button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* ALL AFFECTED PARAMETERS - Quick Summary Panel */}
-        {currentDisease && allModifiedParameters.length > 0 && (
-          <div className="border-b border-border/50 px-3 lg:px-6 py-3 bg-gradient-to-r from-destructive/5 via-orange-500/5 to-amber-500/5">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-destructive" />
-                <span className="text-sm font-semibold text-foreground">
-                  {paramFilterOrgan 
-                    ? `${ORGAN_MODELS[paramFilterOrgan]?.name || paramFilterOrgan} Parameters` 
-                    : 'All Affected Parameters'}
-                </span>
-                <Badge variant="destructive" className="text-[10px]">
-                  {filteredParameters.length} changes
-                </Badge>
+                      <span>{organ.icon}</span>
+                      {organ.count > 0 && (
+                        <span className={`min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center ${
+                          paramFilterOrgan === organ.id
+                            ? 'bg-primary text-primary-foreground'
+                            : organ.isPrimary 
+                            ? 'bg-destructive text-destructive-foreground' 
+                            : 'bg-orange-500 text-white'
+                        }`}>
+                          {organ.count}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+                {/* Parameter cards grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2">
+                  {filteredParameters.slice(0, 24).map((param, idx) => (
+                    <motion.button
+                      key={`${param.organId}-${param.id}`}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: Math.min(idx * 0.03, 0.3) }}
+                      onClick={() => {
+                        setSelectedOrgan(param.organId);
+                        setSelectedScale(param.scaleId);
+                        setShowAllParams(false); // Collapse summary and scroll to details
+                        setTimeout(() => {
+                          parametersRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 100);
+                      }}
+                      className={`p-2 rounded-lg border text-left transition-all hover:scale-[1.02] hover:shadow-md ${
+                        selectedOrgan === param.organId && selectedScale === param.scaleId
+                          ? 'ring-2 ring-primary bg-primary/10 border-primary/50'
+                          : param.isPrimary 
+                          ? 'bg-destructive/10 border-destructive/30 hover:border-destructive/50' 
+                          : 'bg-orange-500/10 border-orange-500/20 hover:border-orange-500/40'
+                      }`}
+                    >
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <span className="text-xs">{param.organIcon}</span>
+                        <span className={`text-[10px] truncate ${param.isPrimary ? 'text-destructive' : 'text-orange-500'}`}>
+                          {param.organName}
+                        </span>
+                      </div>
+                      <div className="text-xs font-medium text-foreground truncate" title={param.name}>
+                        {param.name}
+                      </div>
+                      <div className="flex items-center justify-between mt-1">
+                        <span className="text-[10px] text-muted-foreground line-through">
+                          {typeof param.baseValue === 'number' ? param.baseValue.toFixed(1) : param.baseValue}
+                        </span>
+                        <div className={`flex items-center gap-0.5 text-[10px] font-bold ${
+                          param.direction === 'increase' ? 'text-red-500' : 'text-blue-500'
+                        }`}>
+                          {param.direction === 'increase' ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                          <span>{typeof param.newValue === 'number' ? param.newValue.toFixed(1) : param.newValue}</span>
+                        </div>
+                      </div>
+                      <div className={`text-[9px] mt-0.5 ${param.direction === 'increase' ? 'text-red-400' : 'text-blue-400'}`}>
+                        {param.delta != null ? `${param.delta > 0 ? '+' : ''}${typeof param.delta === 'number' ? param.delta.toFixed(0) : param.delta}%` : ''} {param.unit}
+                      </div>
+                    </motion.button>
+                  ))}
+                </div>
+                {filteredParameters.length > 24 && (
+                  <p className="text-center text-xs text-muted-foreground mt-2">
+                    Showing first 24 of {filteredParameters.length} affected parameters. Click on a parameter to view details.
+                  </p>
+                )}
               </div>
-              {/* Expand/Collapse button */}
-              {filteredParameters.length > 6 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowAllParams(!showAllParams);
-                  }}
-                  className="text-xs h-7"
-                >
-                  {showAllParams ? (
-                    <>Show Less <ChevronUp className="w-3 h-3 ml-1" /></>
-                  ) : (
+            </CollapsibleContent>
+          </Collapsible>
+        )}
                     <>Show All <ChevronDown className="w-3 h-3 ml-1" /></>
                   )}
                 </Button>
