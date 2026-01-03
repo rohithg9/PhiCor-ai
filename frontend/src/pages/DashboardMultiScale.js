@@ -46,11 +46,17 @@ const SCALE_LEVELS = [
   // Imaging & Diagnostics
   { id: 'imaging', name: 'Imaging', fullName: 'Imaging Parameters', icon: '📷', description: 'CT, MRI, Ultrasound' },
   { id: 'ecg', name: 'ECG', fullName: 'ECG / Electrocardiogram', icon: '💓', description: 'Heart electrical activity' },
+  // Clinical examination
+  { id: 'vital_signs', name: 'Vitals', fullName: 'Vital Signs', icon: '❤️', description: 'BP, HR, Temp, RR' },
+  { id: 'physical_exam', name: 'Physical', fullName: 'Physical Examination', icon: '🩺', description: 'Clinical findings' },
   // Cellular/Molecular scales
   { id: 'dna', name: 'DNA', fullName: 'DNA & Genetics', icon: '🧬', description: 'Genetic markers' },
   { id: 'gene_expression', name: 'Gene Expr', fullName: 'Gene Expression', icon: '📊', description: 'mRNA & proteins' },
   { id: 'metabolism', name: 'Metabolism', fullName: 'Metabolism', icon: '⚗️', description: 'ATP, redox' },
   { id: 'cell_cycle', name: 'Cell Cycle', fullName: 'Cell Cycle', icon: '🔄', description: 'Proliferation' },
+  // Additional clinical scales from API
+  { id: 'cbc', name: 'CBC', fullName: 'Complete Blood Count', icon: '🩸', description: 'Blood cell counts' },
+  { id: 'renal_function', name: 'Renal', fullName: 'Renal Function', icon: '🫘', description: 'Kidney function tests' },
 ];
 
 // Clinical Insights Component with AI
