@@ -2818,6 +2818,7 @@ const DashboardMultiScale = () => {
                 showClinicalPanel={showClinicalPanel}
                 onToggleClinicalPanel={handleToggleClinicalPanel}
                 isMobile
+                isLoading={isLoadingDiseases}
               />
             </SheetContent>
           </Sheet>
