@@ -473,38 +473,10 @@ CRITICAL REQUIREMENTS:
 Return ONLY valid JSON. No markdown or explanations."""
 
     try:
-      "description": "Composite score combining symptoms, signs, and lab values",
-      "evidence": "novel",
-      "variables": {{"w_1": "0.3", "w_2": "0.3", "w_3": "0.4"}}
-    }},
-    {{
-      "id": "progression_rate",
-      "name": "Disease Progression Rate",
-      "latex": "\\\\frac{{dS}}{{dt}} = k \\\\cdot S \\\\cdot (1 - \\\\frac{{S}}{{S_{{max}}}})",
-      "description": "Logistic model for disease progression over time",
-      "evidence": "novel"
-    }}
-  ]
-}}
-
-REQUIREMENTS:
-1. Include modifications for ALL organs: {', '.join(organs)}
-2. For each organ, include at least: geometry, pressures, physiology, cellular, lab_tests
-3. Use medically accurate multiplier values (typical ranges: 0.3-3.0)
-4. Include relevant genetic factors for this specific disease
-5. Add 2-3 novel equations for disease severity and progression modeling
-6. CRITICAL: Include detailed symptoms WITH severity grades (Grade 1-4)
-7. CRITICAL: Include clinical signs WITH detection methods and severity criteria
-8. Include diagnostic criteria with major/minor criteria
-9. Include clinical guidelines for diagnosis, treatment, and monitoring
-10. Include symptom-severity mathematical models for EMR correlation
-11. Return ONLY valid JSON, no markdown or explanations"""
-
-    try:
         llm = LlmChat(
             api_key=EMERGENT_LLM_KEY,
             session_id=f"comprehensive_{disease_name[:15]}_{datetime.now().strftime('%H%M%S')}",
-            system_message="You are a medical expert. Return only valid JSON with comprehensive disease models."
+            system_message="You are a senior clinical expert. Return only valid, comprehensive JSON disease models."
         ).with_model("openai", "gpt-4o")
         
         user_msg = UserMessage(text=prompt)
