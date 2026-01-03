@@ -66,19 +66,20 @@ const PARAM_ID_MAPPING = {
   'ef': ['echo_ef', 'ejection_fraction', 'lvef', 'ef', 'lv_ejection_fraction'],
   'cardiac_output': ['cardiac_output', 'co', 'cardiac_output_l_min'],
   'cardiac_index': ['cardiac_index', 'ci'],
-  'heart_rate': ['heart_rate', 'hr', 'resting_hr', 'pulse_rate', 'resting_heart_rate'],
+  'heart_rate': ['heart_rate', 'hr', 'resting_hr', 'pulse_rate', 'resting_heart_rate', 'rate'],
   'stroke_volume': ['stroke_volume', 'sv'],
   'e_a_ratio': ['e_a_ratio', 'mitral_e_a_ratio'],
   'e_e_prime': ['e_e_prime', 'e_e_ratio', 'mitral_e_e_prime'],
   'gls': ['gls', 'global_longitudinal_strain', 'lv_gls'],
   'tapse': ['tapse', 'rv_tapse'],
-  // Heart Geometry mappings  
-  'lv_edv': ['lv_edv', 'lv_volume_diastole', 'lv_end_diastolic_volume', 'lvedv'],
+  // Heart Geometry mappings - map to size/dimension params
+  'lv_edv': ['lv_edv', 'lv_volume_diastole', 'lv_end_diastolic_volume', 'lvedv', 'lv_size', 'left_ventricular_size'],
   'lv_esv': ['lv_esv', 'lv_volume_systole', 'lv_end_systolic_volume', 'lvesv'],
   'lv_mass': ['lv_mass', 'lv_weight', 'lv_mass_index'],
   'lv_wall_thickness': ['lv_wall_thickness', 'lv_thickness', 'ivs_thickness', 'lv_posterior_wall'],
-  'rv_edv': ['rv_edv', 'rv_end_diastolic_volume'],
-  'la_diameter': ['la_diameter', 'la_size', 'left_atrium_diameter'],
+  'rv_edv': ['rv_edv', 'rv_end_diastolic_volume', 'rv_size'],
+  'rv_esv': ['rv_esv', 'rv_end_systolic_volume'],
+  'la_diameter': ['la_diameter', 'la_size', 'left_atrium_diameter', 'la_volume'],
   // Pressure mappings
   'systolic_bp': ['systolic_bp', 'sbp', 'systolic_blood_pressure'],
   'diastolic_bp': ['diastolic_bp', 'dbp', 'diastolic_blood_pressure'],
@@ -125,11 +126,11 @@ Object.entries(PARAM_ID_MAPPING).forEach(([organParam, apiParams]) => {
   });
 });
 
-// Map API scales to ORGAN_MODELS scales
+// Map API scales to ORGAN_MODELS scales - search in ALL these locations
 const SCALE_MAPPING = {
   'vital_signs': 'physiology',
   'physical_exam': 'physiology',
-  'imaging': 'physiology', // Many imaging params like EF belong in physiology
+  'imaging': 'geometry', // Imaging often has geometry data like LV size
   'ecg': 'ecg',
   'lab_tests': 'lab_tests',
   'urinalysis': 'urinalysis',
@@ -142,6 +143,12 @@ const SCALE_MAPPING = {
   'structure': 'structure',
   'cellular': 'cellular',
 };
+
+// Extended scale search - always search in ALL these scales for any parameter
+const ALL_SEARCHABLE_SCALES = [
+  'geometry', 'physiology', 'pressures', 'structure', 'cellular',
+  'vital_signs', 'physical_exam', 'imaging', 'lab_tests', 'ecg', 'urinalysis', 'cbc', 'renal_function'
+];
 
 // Clinical Insights Component with AI
 const ClinicalInsightsPanel = ({ disease, severity }) => {
