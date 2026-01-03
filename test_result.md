@@ -668,3 +668,15 @@ agent_communication:
       - working: true
         agent: "main"
         comment: "✅ AI ENHANCEMENT RUNNING: Created /app/backend/enhance_all_data.py script that uses LlmChat with GPT-4o-mini to generate comprehensive parameter_modifications for diseases (<50 params) and effect_profiles for drugs. Script running in background, processing batches of 10. Example: Atrial Fibrillation enhanced from 17 params to 67 params with comprehensive heart, blood, brain, cellular data. Currently 29+ diseases enhanced. Script will also enhance 115 drugs with pharmacological effect profiles."
+
+  - task: "Static Disease Imports Removal and API-Only Data Source"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/DashboardMultiScale.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Refactored DashboardMultiScale.js to remove all static disease imports and use only API data from MongoDB as single source of truth. Removed ~700 lines of code including all transformer functions and MERGED_DISEASE_MODELS. Now displays 1974 diseases from the API."
