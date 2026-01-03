@@ -297,87 +297,175 @@ const DiseaseDetailPanel = ({ diseaseId, diseaseName }) => {
           </TabsContent>
 
           <TabsContent value="treatment" className="mt-3">
-            <ScrollArea className="h-[200px]">
-              <div className="space-y-3">
+            <ScrollArea className="h-[300px]">
+              <div className="space-y-4">
                 {disease.treatment && (
                   <>
-                    {disease.treatment.first_line && (
-                      <div>
-                        <h4 className="text-xs font-semibold text-green-600 mb-1 flex items-center gap-1">
-                          <Pill className="w-3 h-3" /> First-Line Treatment
+                    {/* Pharmacological Section */}
+                    {(disease.treatment.pharmacological || disease.treatment.first_line) && (
+                      <div className="space-y-2">
+                        <h4 className="text-xs font-bold text-green-500 uppercase tracking-wider flex items-center gap-1">
+                          <Pill className="w-3 h-3" /> Pharmacological Therapy
                         </h4>
-                        <div className="flex flex-wrap gap-1">
-                          {Array.isArray(disease.treatment.first_line) ? disease.treatment.first_line.map((tx, i) => (
-                            <Badge key={i} className="text-xs bg-green-500/10 text-green-600 border-green-500/30">
-                              {typeof tx === 'object' ? (tx.name || tx.drug || JSON.stringify(tx)) : tx}
-                            </Badge>
-                          )) : typeof disease.treatment.first_line === 'object' 
-                            ? <Badge className="text-xs bg-green-500/10 text-green-600 border-green-500/30">{JSON.stringify(disease.treatment.first_line)}</Badge>
-                            : <Badge className="text-xs bg-green-500/10 text-green-600 border-green-500/30">{disease.treatment.first_line}</Badge>}
+                        
+                        {/* First Line */}
+                        {(disease.treatment.pharmacological?.first_line || disease.treatment.first_line) && (
+                          <div className="p-2 rounded bg-green-500/5 border border-green-500/20">
+                            <span className="text-[10px] text-green-400 font-semibold">First-Line:</span>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {(disease.treatment.pharmacological?.first_line || disease.treatment.first_line || []).map((tx, i) => {
+                                const item = typeof tx === 'object' ? tx : { drug_class: tx };
+                                return (
+                                  <div key={i} className="text-xs p-1.5 bg-green-500/10 rounded border border-green-500/30">
+                                    <span className="font-medium text-green-400">{item.drug_class || item.name || item}</span>
+                                    {item.examples && <span className="text-green-300 ml-1">({item.examples.join(', ')})</span>}
+                                    {item.evidence_level && <Badge variant="outline" className="ml-1 text-[8px]">{item.evidence_level}</Badge>}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Second Line */}
+                        {(disease.treatment.pharmacological?.second_line || disease.treatment.second_line) && (
+                          <div className="p-2 rounded bg-yellow-500/5 border border-yellow-500/20">
+                            <span className="text-[10px] text-yellow-400 font-semibold">Second-Line:</span>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {(disease.treatment.pharmacological?.second_line || disease.treatment.second_line || []).map((tx, i) => {
+                                const item = typeof tx === 'object' ? tx : { drug_class: tx };
+                                return (
+                                  <div key={i} className="text-xs p-1.5 bg-yellow-500/10 rounded border border-yellow-500/30">
+                                    <span className="font-medium text-yellow-400">{item.drug_class || item.name || item}</span>
+                                    {item.examples && <span className="text-yellow-300 ml-1">({item.examples.join(', ')})</span>}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Device Therapy */}
+                    {(disease.treatment.device_therapy || disease.treatment.devices) && (
+                      <div className="space-y-2">
+                        <h4 className="text-xs font-bold text-purple-500 uppercase tracking-wider flex items-center gap-1">
+                          ⚡ Device Therapy
+                        </h4>
+                        <div className="grid gap-2">
+                          {(disease.treatment.device_therapy || disease.treatment.devices || []).map((dev, i) => {
+                            const device = typeof dev === 'object' ? dev : { device: dev };
+                            return (
+                              <div key={i} className="p-2 rounded bg-purple-500/5 border border-purple-500/20">
+                                <div className="flex items-center justify-between">
+                                  <span className="font-medium text-purple-400 text-sm">{device.device || device.name || device}</span>
+                                  {device.evidence_level && <Badge variant="outline" className="text-[8px]">{device.evidence_level}</Badge>}
+                                </div>
+                                {device.indications && (
+                                  <p className="text-[10px] text-muted-foreground mt-1">
+                                    <span className="text-purple-300">Indications:</span> {Array.isArray(device.indications) ? device.indications.join('; ') : device.indications}
+                                  </p>
+                                )}
+                                {device.description && <p className="text-[10px] text-muted-foreground mt-1">{device.description}</p>}
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     )}
 
-                    {disease.treatment.second_line && (
-                      <div>
-                        <h4 className="text-xs font-semibold text-yellow-600 mb-1 flex items-center gap-1">
-                          <Pill className="w-3 h-3" /> Second-Line Treatment
+                    {/* Surgical / Interventional */}
+                    {disease.treatment.interventional && (
+                      <div className="space-y-2">
+                        <h4 className="text-xs font-bold text-red-500 uppercase tracking-wider flex items-center gap-1">
+                          🔪 Surgical & Interventional
                         </h4>
-                        <div className="flex flex-wrap gap-1">
-                          {Array.isArray(disease.treatment.second_line) ? disease.treatment.second_line.map((tx, i) => (
-                            <Badge key={i} className="text-xs bg-yellow-500/10 text-yellow-600 border-yellow-500/30">
-                              {typeof tx === 'object' ? (tx.name || tx.drug || JSON.stringify(tx)) : tx}
-                            </Badge>
-                          )) : typeof disease.treatment.second_line === 'object'
-                            ? <Badge className="text-xs bg-yellow-500/10 text-yellow-600 border-yellow-500/30">{JSON.stringify(disease.treatment.second_line)}</Badge>
-                            : <Badge className="text-xs bg-yellow-500/10 text-yellow-600 border-yellow-500/30">{disease.treatment.second_line}</Badge>}
+                        {disease.treatment.interventional.surgical && (
+                          <div className="grid gap-2">
+                            {(disease.treatment.interventional.surgical || []).map((surg, i) => {
+                              const surgery = typeof surg === 'object' ? surg : { name: surg };
+                              return (
+                                <div key={i} className="p-2 rounded bg-red-500/5 border border-red-500/20">
+                                  <div className="flex items-center justify-between">
+                                    <span className="font-medium text-red-400 text-sm">{surgery.name}</span>
+                                    {surgery.evidence_level && <Badge variant="outline" className="text-[8px]">{surgery.evidence_level}</Badge>}
+                                  </div>
+                                  {surgery.indications && (
+                                    <p className="text-[10px] text-muted-foreground mt-1">
+                                      <span className="text-red-300">Indications:</span> {Array.isArray(surgery.indications) ? surgery.indications.join('; ') : surgery.indications}
+                                    </p>
+                                  )}
+                                  {surgery.success_rate && <span className="text-[10px] text-green-400">Success: {surgery.success_rate}</span>}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Transplant */}
+                    {disease.treatment.transplant && (
+                      <div className="space-y-2">
+                        <h4 className="text-xs font-bold text-pink-500 uppercase tracking-wider flex items-center gap-1">
+                          🫀 Transplant Criteria
+                        </h4>
+                        <div className="p-2 rounded bg-pink-500/5 border border-pink-500/20 space-y-2">
+                          {disease.treatment.transplant.indications && (
+                            <div>
+                              <span className="text-[10px] text-pink-400 font-semibold">Indications:</span>
+                              <ul className="text-[10px] text-muted-foreground mt-1 space-y-0.5">
+                                {(Array.isArray(disease.treatment.transplant.indications) 
+                                  ? disease.treatment.transplant.indications 
+                                  : [disease.treatment.transplant.indications]
+                                ).map((ind, i) => <li key={i}>• {ind}</li>)}
+                              </ul>
+                            </div>
+                          )}
+                          {disease.treatment.transplant.contraindications && (
+                            <div>
+                              <span className="text-[10px] text-red-400 font-semibold">Contraindications:</span>
+                              <ul className="text-[10px] text-muted-foreground mt-1 space-y-0.5">
+                                {disease.treatment.transplant.contraindications.absolute && 
+                                  disease.treatment.transplant.contraindications.absolute.map((c, i) => 
+                                    <li key={i} className="text-red-300">• (Absolute) {c}</li>
+                                  )}
+                                {disease.treatment.transplant.contraindications.relative && 
+                                  disease.treatment.transplant.contraindications.relative.map((c, i) => 
+                                    <li key={i} className="text-yellow-300">• (Relative) {c}</li>
+                                  )}
+                              </ul>
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
 
+                    {/* Lifestyle */}
                     {disease.treatment.lifestyle && (
-                      <div>
-                        <h4 className="text-xs font-semibold text-blue-600 mb-1 flex items-center gap-1">
+                      <div className="space-y-2">
+                        <h4 className="text-xs font-bold text-blue-500 uppercase tracking-wider flex items-center gap-1">
                           <Heart className="w-3 h-3" /> Lifestyle Modifications
                         </h4>
                         <div className="flex flex-wrap gap-1">
-                          {Array.isArray(disease.treatment.lifestyle) ? disease.treatment.lifestyle.map((mod, i) => (
-                            <Badge key={i} variant="outline" className="text-xs">
-                              {typeof mod === 'object' ? (mod.name || mod.intervention || JSON.stringify(mod)) : mod}
-                            </Badge>
-                          )) : typeof disease.treatment.lifestyle === 'string' 
-                            ? <Badge variant="outline" className="text-xs">{disease.treatment.lifestyle}</Badge>
-                            : null}
+                          {(Array.isArray(disease.treatment.lifestyle) ? disease.treatment.lifestyle : [disease.treatment.lifestyle]).map((mod, i) => {
+                            const item = typeof mod === 'object' ? mod : { modification: mod };
+                            return (
+                              <div key={i} className="text-xs p-1.5 bg-blue-500/10 rounded border border-blue-500/30">
+                                <span className="font-medium text-blue-400">{item.modification || item.name || item}</span>
+                                {item.specific_recommendations && <span className="text-blue-300 ml-1">- {item.specific_recommendations}</span>}
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     )}
-
-                    {disease.treatment.devices && (
-                      <div>
-                        <h4 className="text-xs font-semibold text-purple-600 mb-1">Device Therapy</h4>
-                        <div className="flex flex-wrap gap-1">
-                          {Array.isArray(disease.treatment.devices) ? disease.treatment.devices.map((dev, i) => (
-                            <Badge key={i} className="text-xs bg-purple-500/10 text-purple-600 border-purple-500/30">
-                              {typeof dev === 'object' ? (dev.name || JSON.stringify(dev)) : dev}
-                            </Badge>
-                          )) : typeof disease.treatment.devices === 'string'
-                            ? <Badge className="text-xs bg-purple-500/10 text-purple-600 border-purple-500/30">{disease.treatment.devices}</Badge>
-                            : null}
-                        </div>
-                      </div>
-                    )}
-
-                    {disease.treatment.pharmacological && (
-                      <div>
-                        <h4 className="text-xs font-semibold text-pink-600 mb-1 flex items-center gap-1">
-                          <Pill className="w-3 h-3" /> Pharmacological
-                        </h4>
-                        <div className="flex flex-wrap gap-1">
-                          {Array.isArray(disease.treatment.pharmacological) ? disease.treatment.pharmacological.map((drug, i) => (
-                            <Badge key={i} className="text-xs bg-pink-500/10 text-pink-600 border-pink-500/30">
-                              {typeof drug === 'object' ? (drug.name || drug.drug || JSON.stringify(drug)) : drug}
-                            </Badge>
-                          )) : typeof disease.treatment.pharmacological === 'string'
+                  </>
+                )}
+              </div>
+            </ScrollArea>
+          </TabsContent>
                             ? <Badge className="text-xs bg-pink-500/10 text-pink-600 border-pink-500/30">{disease.treatment.pharmacological}</Badge>
                             : null}
                         </div>
