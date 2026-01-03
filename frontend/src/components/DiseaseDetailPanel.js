@@ -465,18 +465,6 @@ const DiseaseDetailPanel = ({ diseaseId, diseaseName }) => {
                 )}
               </div>
             </ScrollArea>
-          </TabsContent>
-                            ? <Badge className="text-xs bg-pink-500/10 text-pink-600 border-pink-500/30">{disease.treatment.pharmacological}</Badge>
-                            : null}
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-            </ScrollArea>
-          </TabsContent>
-
           <TabsContent value="prognosis" className="mt-3">
             <ScrollArea className="h-[200px]">
               <div className="space-y-3">
