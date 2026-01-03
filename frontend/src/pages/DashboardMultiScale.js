@@ -2347,20 +2347,25 @@ const DashboardMultiScale = () => {
     }
   }, [selectedOrgan, currentOrgan, selectedScale]);
 
-  // Get merged modifications: combine static disease modifications with API parameter_modifications
-  // Also maps API scale/param IDs to ORGAN_MODELS IDs
+  // Get merged modifications: combine static DISEASE_MODELS with API parameter_modifications
+  // Priority: Static DISEASE_MODELS have comprehensive multipliers, API adds clinical data
   const getMergedModifications = useCallback(() => {
     if (!selectedDisease) return null;
     
+    // Check for static disease modifications from DISEASE_MODELS first
+    // These have comprehensive parameter multipliers for all organs
+    const staticDisease = DISEASE_MODELS[selectedDisease];
+    const staticMods = staticDisease?.modifications || currentDisease?.modifications;
+    
     // Check if we have API data for this disease (try by ID first, then by ICD-10 code)
     const apiMods = apiDiseaseData[selectedDisease] || apiDiseaseByIcd[selectedDisease];
-    const staticMods = currentDisease?.modifications;
     
-    // Start with static mods as base
+    // Start with static mods as base - these have the comprehensive multipliers!
     const merged = staticMods ? JSON.parse(JSON.stringify(staticMods)) : {};
     
     if (apiMods) {
-      // Process API mods and map to ORGAN_MODELS structure
+      // Process API mods and ADD to the merged modifications
+      // API data adds clinical findings but static mods have the main multipliers
       Object.entries(apiMods).forEach(([organId, organMods]) => {
         if (!merged[organId]) merged[organId] = {};
         
@@ -2369,22 +2374,22 @@ const DashboardMultiScale = () => {
             // Map API scale to ORGAN_MODELS scale
             const targetScaleId = SCALE_MAPPING[apiScaleId] || apiScaleId;
             
-            // Also store in original scale ID for the Disease Impact Summary
+            // Initialize scales if not present
             if (!merged[organId][apiScaleId]) merged[organId][apiScaleId] = {};
             if (!merged[organId][targetScaleId]) merged[organId][targetScaleId] = {};
             
             if (typeof scaleMods === 'object' && scaleMods !== null) {
               Object.entries(scaleMods).forEach(([apiParamId, paramMod]) => {
-                // Store in original location
-                merged[organId][apiScaleId][apiParamId] = paramMod;
+                // Only add if not already present from static mods
+                // Static mods take priority for main parameters
+                if (!merged[organId][apiScaleId][apiParamId]) {
+                  merged[organId][apiScaleId][apiParamId] = paramMod;
+                }
                 
                 // Also map to ORGAN_MODELS param ID if mapping exists
                 const organParamId = API_TO_ORGAN_PARAM[apiParamId] || apiParamId;
-                merged[organId][targetScaleId][organParamId] = paramMod;
-                
-                // Also store under original param ID in target scale
-                if (organParamId !== apiParamId) {
-                  merged[organId][targetScaleId][apiParamId] = paramMod;
+                if (!merged[organId][targetScaleId][organParamId]) {
+                  merged[organId][targetScaleId][organParamId] = paramMod;
                 }
               });
             }
