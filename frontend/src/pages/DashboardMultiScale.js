@@ -2418,9 +2418,12 @@ const DashboardMultiScale = () => {
   const getMergedModifications = useCallback(() => {
     if (!selectedDisease) return null;
     
+    // Find the DISEASE_MODELS key for this disease
+    const diseaseModelKey = getDiseaseModelKey(selectedDisease);
+    
     // Check for static disease modifications from DISEASE_MODELS first
     // These have comprehensive parameter multipliers for all organs
-    const staticDisease = DISEASE_MODELS[selectedDisease];
+    const staticDisease = diseaseModelKey ? DISEASE_MODELS[diseaseModelKey] : null;
     const staticMods = staticDisease?.modifications || currentDisease?.modifications;
     
     // Check if we have API data for this disease (try by ID first, then by ICD-10 code)
