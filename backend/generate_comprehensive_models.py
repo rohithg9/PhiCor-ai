@@ -471,53 +471,8 @@ CRITICAL REQUIREMENTS:
 9. Be comprehensive - this is for physician clinical decision support
 
 Return ONLY valid JSON. No markdown or explanations."""
-    // Use multiplier: >1.0 for increase, <1.0 for decrease
-    // Example for heart:
-    "heart": {{
-      "geometry": {{
-        "lv_edv": {{"multiplier": 1.2, "absolute": null, "note": "Dilation"}},
-        "lv_wall_thickness": {{"multiplier": 0.9, "absolute": null, "note": "Thinning"}}
-      }},
-      "pressures": {{
-        "lv_edp": {{"multiplier": 1.5, "absolute": null, "note": "Elevated filling pressure"}}
-      }},
-      "physiology": {{
-        "ef": {{"multiplier": 0.7, "absolute": null, "note": "Reduced systolic function"}}
-      }},
-      "cellular": {{
-        "calcium_transient": {{"multiplier": 0.8, "absolute": null, "note": "Impaired calcium handling"}}
-      }},
-      "lab_tests": {{
-        "bnp": {{"multiplier": 3.0, "absolute": null, "note": "Elevated natriuretic peptide"}}
-      }}
-    }},
-    // Include similar structure for: {', '.join(organs)}
-  }},
-  
-  "geneticFactors": {{
-    "genes": ["relevant_gene1", "relevant_gene2"],
-    "snps": ["rs12345", "rs67890"],
-    "heritability": 0.4,
-    "penetrance": "Variable/High/Low",
-    "inheritance_pattern": "Autosomal dominant/recessive/X-linked/Polygenic"
-  }},
-  
-  "riskFactors": {{
-    "modifiable": ["Risk factor 1", "Risk factor 2"],
-    "non_modifiable": ["Age", "Family history", "Genetics"],
-    "protective": ["Protective factor 1"]
-  }},
-  
-  "complications": [
-    {{"name": "Complication 1", "risk": "20%", "prevention": "How to prevent", "early_signs": ["Sign 1"]}},
-    {{"name": "Complication 2", "risk": "10%", "prevention": "How to prevent", "early_signs": ["Sign 1"]}}
-  ],
-  
-  "novelEquations": [
-    {{
-      "id": "disease_severity_score",
-      "name": "Disease Severity Score",
-      "latex": "Severity = w_1 \\\\cdot Symptoms + w_2 \\\\cdot Signs + w_3 \\\\cdot Labs",
+
+    try:
       "description": "Composite score combining symptoms, signs, and lab values",
       "evidence": "novel",
       "variables": {{"w_1": "0.3", "w_2": "0.3", "w_3": "0.4"}}
