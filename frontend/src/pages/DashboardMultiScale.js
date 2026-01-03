@@ -62,28 +62,59 @@ const SCALE_LEVELS = [
 // Mapping between ORGAN_MODELS parameter IDs and API parameter IDs
 // This allows API modifications to apply to ORGAN_MODELS parameters
 const PARAM_ID_MAPPING = {
-  // Physiology scale mappings
-  'ef': ['echo_ef', 'ejection_fraction', 'lvef', 'ef'],
-  'cardiac_output': ['cardiac_output', 'co'],
+  // Heart Physiology mappings
+  'ef': ['echo_ef', 'ejection_fraction', 'lvef', 'ef', 'lv_ejection_fraction'],
+  'cardiac_output': ['cardiac_output', 'co', 'cardiac_output_l_min'],
   'cardiac_index': ['cardiac_index', 'ci'],
-  'heart_rate': ['heart_rate', 'hr', 'resting_hr', 'pulse_rate'],
+  'heart_rate': ['heart_rate', 'hr', 'resting_hr', 'pulse_rate', 'resting_heart_rate'],
   'stroke_volume': ['stroke_volume', 'sv'],
-  // Geometry mappings  
-  'lv_edv': ['lv_edv', 'lv_volume_diastole', 'lv_end_diastolic_volume'],
-  'lv_esv': ['lv_esv', 'lv_volume_systole', 'lv_end_systolic_volume'],
-  'lv_mass': ['lv_mass', 'lv_weight'],
-  'lv_wall_thickness': ['lv_wall_thickness', 'lv_thickness', 'ivs_thickness'],
+  'e_a_ratio': ['e_a_ratio', 'mitral_e_a_ratio'],
+  'e_e_prime': ['e_e_prime', 'e_e_ratio', 'mitral_e_e_prime'],
+  'gls': ['gls', 'global_longitudinal_strain', 'lv_gls'],
+  'tapse': ['tapse', 'rv_tapse'],
+  // Heart Geometry mappings  
+  'lv_edv': ['lv_edv', 'lv_volume_diastole', 'lv_end_diastolic_volume', 'lvedv'],
+  'lv_esv': ['lv_esv', 'lv_volume_systole', 'lv_end_systolic_volume', 'lvesv'],
+  'lv_mass': ['lv_mass', 'lv_weight', 'lv_mass_index'],
+  'lv_wall_thickness': ['lv_wall_thickness', 'lv_thickness', 'ivs_thickness', 'lv_posterior_wall'],
+  'rv_edv': ['rv_edv', 'rv_end_diastolic_volume'],
+  'la_diameter': ['la_diameter', 'la_size', 'left_atrium_diameter'],
   // Pressure mappings
   'systolic_bp': ['systolic_bp', 'sbp', 'systolic_blood_pressure'],
   'diastolic_bp': ['diastolic_bp', 'dbp', 'diastolic_blood_pressure'],
   'map': ['map', 'mean_arterial_pressure'],
   'jvp': ['jvp', 'jvp_height', 'jugular_venous_pressure'],
+  'lv_systolic_pressure': ['lv_systolic_pressure', 'lvsp'],
+  'lv_end_diastolic_pressure': ['lv_end_diastolic_pressure', 'lvedp', 'pcwp'],
+  'pulmonary_artery_pressure': ['pulmonary_artery_pressure', 'pa_pressure', 'mean_pap'],
+  // ECG mappings
+  'pr_interval': ['pr_interval'],
+  'qrs_duration': ['qrs_duration'],
+  'qt_interval': ['qt_interval', 'qtc'],
   // Lab test mappings
   'bnp': ['bnp', 'brain_natriuretic_peptide'],
   'nt_probnp': ['nt_probnp', 'ntprobnp', 'nt_pro_bnp'],
-  'troponin_i': ['troponin_i', 'troponin', 'tni'],
+  'troponin_i': ['troponin_i', 'troponin', 'tni', 'hs_troponin'],
+  'troponin_t': ['troponin_t', 'tnt', 'hs_troponin_t'],
   'creatinine': ['creatinine', 'cr', 'serum_creatinine'],
   'hemoglobin': ['hemoglobin', 'hb', 'hgb'],
+  'crp': ['crp', 'c_reactive_protein', 'hs_crp', 'high_sensitivity_crp'],
+  'sodium': ['sodium', 'na', 'serum_sodium'],
+  'potassium': ['potassium', 'k', 'serum_potassium'],
+  // Lung physiology
+  'respiratory_rate': ['respiratory_rate', 'rr'],
+  'spo2': ['spo2', 'oxygen_saturation', 'o2_sat'],
+  'fev1': ['fev1'],
+  'fvc': ['fvc', 'forced_vital_capacity'],
+  'fev1_fvc': ['fev1_fvc', 'fev1_fvc_ratio'],
+  // Kidney function
+  'gfr': ['gfr', 'egfr', 'estimated_gfr'],
+  'bun': ['bun', 'blood_urea_nitrogen'],
+  // Blood
+  'wbc': ['wbc', 'white_blood_cells', 'leukocytes'],
+  'rbc': ['rbc', 'red_blood_cells', 'erythrocytes'],
+  'platelets': ['platelets', 'plt', 'platelet_count'],
+  'hematocrit': ['hematocrit', 'hct'],
 };
 
 // Reverse mapping: API param ID -> ORGAN_MODELS param ID
@@ -104,6 +135,12 @@ const SCALE_MAPPING = {
   'urinalysis': 'urinalysis',
   'cbc': 'lab_tests',
   'renal_function': 'lab_tests',
+  // Also map the reverse for API data that uses ORGAN_MODELS scale names
+  'physiology': 'physiology',
+  'geometry': 'geometry',
+  'pressures': 'pressures',
+  'structure': 'structure',
+  'cellular': 'cellular',
 };
 
 // Clinical Insights Component with AI
