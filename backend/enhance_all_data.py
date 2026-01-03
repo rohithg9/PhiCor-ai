@@ -10,6 +10,10 @@ import json
 from motor.motor_asyncio import AsyncIOMotorClient
 from datetime import datetime, timezone
 import time
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Configuration
 MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
