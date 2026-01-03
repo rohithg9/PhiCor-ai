@@ -1172,15 +1172,56 @@ const ClinicalFindingsPanel = ({ disease, isExpanded, onToggle, alwaysExpanded =
                     Clinical Examination Signs
                   </div>
                   {signs.length > 0 ? (
-                    <div className="grid gap-2">
-                      {signs.map((sign, i) => (
-                        <div key={i} className="flex items-start gap-2 p-2 rounded-lg bg-green-500/5 border border-green-500/20">
-                          <div className="w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                            <Check className="w-3 h-3 text-green-400" />
+                    <div className="space-y-2">
+                      {signs.map((sign, i) => {
+                        // Handle both string format and object format
+                        const isObject = typeof sign === 'object' && sign !== null;
+                        const signName = isObject ? sign.name : sign;
+                        const howToDetect = isObject ? sign.how_to_detect : null;
+                        const severityGrades = isObject ? sign.severity_grades : null;
+                        const sensitivity = isObject ? sign.sensitivity : null;
+                        const specificity = isObject ? sign.specificity : null;
+                        
+                        return (
+                          <div key={i} className="p-3 rounded-lg bg-green-500/5 border border-green-500/20">
+                            <div className="flex items-start gap-2">
+                              <div className="w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center shrink-0 mt-0.5">
+                                <Check className="w-3 h-3 text-green-400" />
+                              </div>
+                              <div className="flex-1">
+                                <span className="text-sm font-medium">{signName}</span>
+                                {howToDetect && (
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    <span className="text-green-400">How to detect:</span> {howToDetect}
+                                  </p>
+                                )}
+                                {severityGrades && severityGrades.length > 0 && (
+                                  <div className="mt-2 space-y-1">
+                                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Severity Grades:</span>
+                                    <div className="flex flex-wrap gap-1">
+                                      {severityGrades.map((grade, gi) => (
+                                        <Badge key={gi} variant="outline" className={`text-[9px] ${
+                                          gi === 0 ? 'border-green-500/50 text-green-400' :
+                                          gi === 1 ? 'border-yellow-500/50 text-yellow-400' :
+                                          'border-red-500/50 text-red-400'
+                                        }`}>
+                                          {grade.grade}: {grade.criteria || grade.description}
+                                        </Badge>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                                {(sensitivity || specificity) && (
+                                  <div className="flex gap-3 mt-2 text-[10px]">
+                                    {sensitivity && <span className="text-blue-400">Sensitivity: {sensitivity}</span>}
+                                    {specificity && <span className="text-purple-400">Specificity: {specificity}</span>}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
                           </div>
-                          <span className="text-sm">{sign}</span>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   ) : (
                     <p className="text-sm text-muted-foreground italic">No clinical signs data available</p>
