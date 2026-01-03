@@ -2329,10 +2329,27 @@ const DashboardMultiScale = () => {
   
   const currentOrgan = ORGAN_MODELS[selectedOrgan];
   const currentScale = currentOrgan?.[selectedScale];
-  // Look up disease from API data only
+  
+  // Look up disease from BOTH static DISEASE_MODELS and API data
+  // Static DISEASE_MODELS have comprehensive modifications, API has clinical data
   const currentDisease = useMemo(() => {
     if (!selectedDisease) return null;
-    return apiDiseases[selectedDisease] || null;
+    
+    // First check static DISEASE_MODELS for comprehensive modifications
+    const staticDisease = DISEASE_MODELS[selectedDisease];
+    const apiDisease = apiDiseases[selectedDisease];
+    
+    if (staticDisease && apiDisease) {
+      // Merge both - static has the modifications, API has updated info
+      return {
+        ...staticDisease,
+        ...apiDisease,
+        // Ensure static modifications are preserved!
+        modifications: staticDisease.modifications || apiDisease.modifications
+      };
+    }
+    
+    return staticDisease || apiDisease || null;
   }, [selectedDisease, apiDiseases]);
 
   // Auto-select first available scale when organ changes
