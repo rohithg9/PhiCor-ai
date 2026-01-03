@@ -3659,7 +3659,13 @@ const DashboardMultiScale = () => {
                                 {param.name}
                               </span>
                               <div className="flex items-center gap-1">
-                                {mod.modified && (
+                                {mod.isAbsent && (
+                                  <Badge variant="destructive" className="text-[10px] shrink-0 bg-purple-600/80">
+                                    <X className="w-2 h-2 mr-1" />
+                                    Absent
+                                  </Badge>
+                                )}
+                                {mod.modified && !mod.isAbsent && (
                                   <Badge variant="destructive" className="text-[10px] shrink-0">
                                     <AlertTriangle className="w-2 h-2 mr-1" />
                                     Abnormal
@@ -3676,23 +3682,36 @@ const DashboardMultiScale = () => {
                             </div>
                             
                             <div className="flex items-baseline gap-2 flex-wrap">
-                              {mod.modified && (
+                              {mod.modified && !mod.isAbsent && (
                                 <span className="text-base md:text-lg font-mono text-muted-foreground/60 line-through">
                                   {param.value}
                                 </span>
                               )}
-                              <motion.span 
-                                key={mod.value}
-                                initial={mod.modified ? { scale: 1.2, color: '#ef4444' } : false}
-                                animate={{ scale: 1 }}
-                                className={`text-xl md:text-2xl font-mono font-bold ${mod.modified ? 'text-destructive' : ''}`}
-                              >
-                                {mod.value != null && typeof mod.value === 'number' 
-                                  ? mod.value.toFixed(param.value % 1 === 0 ? 0 : 1)
-                                  : mod.value ?? 'N/A'}
-                              </motion.span>
-                              <span className="text-xs md:text-sm text-muted-foreground">{param.unit}</span>
-                              {mod.modified && mod.delta && (
+                              {mod.isAbsent ? (
+                                <motion.span 
+                                  key="absent"
+                                  initial={{ scale: 1.2, color: '#a855f7' }}
+                                  animate={{ scale: 1 }}
+                                  className="text-xl md:text-2xl font-bold text-purple-500"
+                                >
+                                  ABSENT
+                                </motion.span>
+                              ) : (
+                                <motion.span 
+                                  key={mod.value}
+                                  initial={mod.modified ? { scale: 1.2, color: '#ef4444' } : false}
+                                  animate={{ scale: 1 }}
+                                  className={`text-xl md:text-2xl font-mono font-bold ${mod.modified ? 'text-destructive' : ''}`}
+                                >
+                                  {mod.value != null && typeof mod.value === 'number' 
+                                    ? mod.value.toFixed(param.value % 1 === 0 ? 0 : 1)
+                                    : mod.value ?? 'N/A'}
+                                </motion.span>
+                              )}
+                              {!mod.isAbsent && (
+                                <span className="text-xs md:text-sm text-muted-foreground">{param.unit}</span>
+                              )}
+                              {mod.modified && mod.delta && !mod.isAbsent && (
                                 <motion.span 
                                   initial={{ scale: 1.3 }}
                                   animate={{ scale: 1 }}
