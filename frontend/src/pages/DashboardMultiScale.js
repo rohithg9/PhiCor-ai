@@ -2593,12 +2593,12 @@ const DashboardMultiScale = () => {
     
     // Auto-navigate to primary affected organ
     if (diseaseId) {
-      const disease = MERGED_DISEASE_MODELS[diseaseId];
+      const disease = apiDiseases[diseaseId];
       if (disease?.primaryOrgan && ORGAN_MODELS[disease.primaryOrgan]) {
         setSelectedOrgan(disease.primaryOrgan);
       }
     }
-  }, []);
+  }, [apiDiseases]);
 
   const handleOrganSelect = useCallback((organId) => {
     setSelectedOrgan(organId);
