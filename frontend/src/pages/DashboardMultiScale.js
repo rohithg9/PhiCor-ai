@@ -1337,7 +1337,8 @@ const DiseasePanel = ({
   onChangeSeverity,
   showClinicalPanel,
   onToggleClinicalPanel,
-  isMobile = false 
+  isMobile = false,
+  isLoading = false
 }) => {
   const [expandedCategory, setExpandedCategory] = React.useState(null);
   const [searchQuery, setSearchQuery] = React.useState('');
