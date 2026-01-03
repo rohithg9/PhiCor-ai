@@ -319,7 +319,7 @@ export default function ExpertDashboard() {
       <header className="border-b bg-card/50 sticky top-0 z-50 backdrop-blur">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <h1 className="text-xl font-bold">PhiCore Expert Portal</h1>
+            <h1 className="text-xl font-bold">PhiCor Expert Portal</h1>
             <Badge variant="outline" className="hidden md:flex">
               <Stethoscope className="w-3 h-3 mr-1" />
               {expert?.specialty}

@@ -169,7 +169,7 @@ export default function AdminDashboard() {
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Shield className="w-6 h-6 text-primary" />
-            <h1 className="text-xl font-bold">PhiCore Admin Dashboard</h1>
+            <h1 className="text-xl font-bold">PhiCor Admin Dashboard</h1>
             <Badge variant={isSuperAdmin ? 'default' : 'secondary'}>
               {isSuperAdmin ? 'Super Admin' : 'Admin'}
             </Badge>

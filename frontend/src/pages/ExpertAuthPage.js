@@ -148,7 +148,7 @@ export default function ExpertAuthPage() {
           <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
             <Shield className="w-8 h-8 text-primary" />
           </div>
-          <CardTitle className="text-2xl">PhiCore Expert Portal</CardTitle>
+          <CardTitle className="text-2xl">PhiCor Expert Portal</CardTitle>
           <CardDescription>
             Access the Expert Curation System to review and validate medical data
           </CardDescription>
@@ -306,7 +306,7 @@ export default function ExpertAuthPage() {
           
           <div className="mt-6 text-center text-sm text-muted-foreground">
             <p>By registering, you agree to participate in the</p>
-            <p className="font-medium text-primary">PhiCore Medical Data Curation Program</p>
+            <p className="font-medium text-primary">PhiCor Medical Data Curation Program</p>
           </div>
         </CardContent>
       </Card>

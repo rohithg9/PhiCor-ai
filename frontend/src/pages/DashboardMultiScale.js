@@ -1531,7 +1531,7 @@ const OrganSidebar = ({
             <span className="text-xl font-serif text-indigo-400">Φ</span>
           </div>
           <div>
-            <h1 className="font-bold text-sm bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">PhiCore.ai</h1>
+            <h1 className="font-bold text-sm bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">PhiCor.ai</h1>
             <p className="text-[10px] text-muted-foreground">Digital Physiology</p>
           </div>
         </div>
