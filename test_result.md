@@ -682,3 +682,15 @@ agent_communication:
       - working: "NA"
         agent: "main"
         comment: "Refactored DashboardMultiScale.js to remove all static disease imports and use only API data from MongoDB as single source of truth. Removed ~700 lines of code including all transformer functions and MERGED_DISEASE_MODELS. Now displays 1974 diseases from the API."
+
+  - task: "Major UI Refactoring - Mobile Navigation and Simplified Layout"
+    implemented: true
+    working: "pending_test"
+    file: "/app/frontend/src/pages/DashboardMultiScale.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "1) Added mobile FeatureNav with PhiCor logo and Greek symbols (Φ, Δ, ρ) for navigation. 2) Simplified affected parameters panel into a collapsible section to avoid duplicate organ tabs. 3) Increased mobile padding to pt-44 to account for new header height. 4) All ORGAN_MODELS parameters are now visible (Geometry, Pressures, Structure, Physiology, Cellular). 5) When disease is selected, affected parameters show in collapsible summary."
