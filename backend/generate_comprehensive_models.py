@@ -589,15 +589,11 @@ async def run_phase2_generation(batch_size=5, start_from=0, max_diseases=None):
         # Rate limiting (GPT-4o has lower rate limits)
         await asyncio.sleep(2.0)
     
-    # Save remaining batch
-    if batch_models:
-        print(f"\n  📁 Saving final batch of {len(batch_models)} models...")
-        append_to_disease_models_file(batch_models)
-    
     print(f"\n{'=' * 70}")
     print(f"PHASE 2 COMPLETE")
     print(f"Generated: {generated}")
     print(f"Failed: {failed}")
+    print(f"All comprehensive models saved to MongoDB")
     print(f"Completed at: {datetime.now().isoformat()}")
     print(f"{'=' * 70}")
     
