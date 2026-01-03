@@ -11,35 +11,38 @@
 
 ## Test Cases
 
-### 1. P-Wave Medical Accuracy Fix ✅ PASSED
-- Select "Atrial Fibrillation" from disease panel
-- Navigate to ECG / Electrocardiogram tab
-- **VERIFY**: P Wave Present shows "ABSENT" (not "1 binary") ✅ CONFIRMED
-- **VERIFY**: P Waves shows "ABSENT" (not "1 present") ✅ CONFIRMED
-- **VERIFY**: P Wave Axis shows "ABSENT" with note "Not measurable - no P waves" ✅ CONFIRMED
-- **VERIFY**: P Wave Duration shows "ABSENT" ✅ CONFIRMED
-- **VERIFY**: P Wave Amplitude shows "ABSENT" ✅ CONFIRMED
-- **VERIFY**: Purple "Absent" badge appears on absent parameters ✅ CONFIRMED
+### 1. Expert Login Page ⏳ TESTING
+- Navigate to /expert-login
+- Verify "PhiCore Expert Portal" title
+- Verify Login/Register tabs
+- Verify Email and Password fields for login
+- Verify "Sign In" button
 
-### 2. Right-Side Panel NOT Frozen ✅ PASSED
-- Panel is scrollable and interactive
-- Search input accepts text and shows results
-- Disease categories expand/collapse properly
-- Disease selection works from the panel
-- Severity slider is functional
+### 2. Expert Registration Flow ⏳ TESTING
+- Click on "Register" tab
+- Fill in registration form with test data
+- Select specialty: "Neurology"
+- Click "Create Expert Account"
+- Verify redirect to Expert Dashboard
 
-### 3. Reset Buttons ✅ PASSED
-- "Reset to Healthy Model" button visible in Disease Impact Summary section
-- "Reset to Healthy Model" button visible in right-side panel (when disease selected)
-- Clicking Reset clears the selected disease
-- UI returns to healthy baseline model after reset
-- "Clear" button in top banner also works
+### 3. Expert Dashboard Features ⏳ TESTING
+- Verify header shows "PhiCore Expert Portal"
+- Verify user name is displayed
+- Verify stats cards (Total Diseases, Reviewed, Pending Review, My Change Requests)
+- Verify progress bar for review progress
+- Verify disease list on the left
+- Verify disease details panel on the right
+- Test searching for a disease
+- Test clicking on a disease to view parameters
 
-### 4. Disease Impact Summary ✅ PASSED
-- Shows correct count of affected parameters (e.g., "92 affected parameters")
-- Parameters grouped by organ system
-- Heart marked as PRIMARY for AFib
-- Summary text shows "Total: X affected parameters across Y organs"
+### 4. Super Admin Login ⏳ TESTING
+- Login with admin@phicore.ai / admin123
+- Verify redirect to Admin Dashboard (/admin)
+- Verify Admin Dashboard shows:
+  - Total Experts count
+  - Diseases Reviewed stats
+  - Pending Changes
+  - Recent Activity log
 
 ## Incorporate User Feedback
 - User requested: P-wave display accuracy for AFib ✅ (DONE) - Now shows "ABSENT"
