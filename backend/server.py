@@ -4448,6 +4448,933 @@ Return ONLY valid JSON, no explanation."""
 # Include router
 app.include_router(api_router)
 
+# ============== EXPERT CURATION SYSTEM ==============
+
+# Medical Specialties
+MEDICAL_SPECIALTIES = [
+    "Cardiology", "Pulmonology", "Neurology", "Gastroenterology", "Nephrology",
+    "Endocrinology", "Hematology", "Oncology", "Rheumatology", "Infectious Disease",
+    "Dermatology", "Psychiatry", "Pediatrics", "Obstetrics & Gynecology", "General Medicine",
+    "Surgery", "Emergency Medicine", "Critical Care", "Radiology", "Pathology"
+]
+
+# Expert User Model
+class ExpertCreate(BaseModel):
+    email: EmailStr
+    password: str
+    name: str
+    specialty: str
+    credentials: str = ""  # MD, PhD, etc.
+    institution: str = ""
+    role: str = "expert"  # "expert", "admin", "super_admin"
+
+class ExpertResponse(BaseModel):
+    id: str
+    email: str
+    name: str
+    specialty: str
+    credentials: str
+    institution: str
+    role: str
+    created_at: str
+    diseases_reviewed: int = 0
+    pending_changes: int = 0
+
+class ExpertLoginResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    expert: ExpertResponse
+
+# Change Request Models
+class ParameterChangeRequest(BaseModel):
+    parameter_id: str
+    parameter_name: str
+    current_value: Any
+    proposed_value: Any
+    current_unit: str = ""
+    source_url: str  # Required - evidence source
+    reasoning: str  # Required - why this change
+    
+class ChangeRequestCreate(BaseModel):
+    disease_id: str
+    disease_name: str
+    organ_id: str
+    scale_id: str
+    change_type: str = "modification"  # "modification", "addition", "deletion"
+    parameters: List[ParameterChangeRequest]
+    additional_notes: str = ""
+
+class ChangeRequestResponse(BaseModel):
+    id: str
+    expert_id: str
+    expert_name: str
+    expert_specialty: str
+    disease_id: str
+    disease_name: str
+    organ_id: str
+    scale_id: str
+    change_type: str
+    parameters: List[Dict[str, Any]]
+    additional_notes: str
+    status: str  # "pending", "approved", "rejected"
+    created_at: str
+    reviewed_at: Optional[str] = None
+    reviewed_by: Optional[str] = None
+    reviewer_notes: Optional[str] = None
+
+# Audit Log Model
+class AuditLogEntry(BaseModel):
+    id: str
+    action: str  # "change_requested", "change_approved", "change_rejected", "disease_reviewed"
+    expert_id: str
+    expert_name: str
+    target_type: str  # "disease", "parameter", "change_request"
+    target_id: str
+    target_name: str
+    details: Dict[str, Any] = {}
+    timestamp: str
+
+# Experiment Models
+class ExperimentPatient(BaseModel):
+    name: str
+    age: int
+    sex: str
+    weight: float
+    height: float
+    medical_history: List[str] = []
+    current_conditions: List[str] = []  # Disease IDs
+    medications: List[str] = []
+
+class ExperimentCreate(BaseModel):
+    name: str
+    description: str = ""
+    patient: ExperimentPatient
+    test_diseases: List[str] = []  # Disease IDs to test against
+    severity_levels: Dict[str, float] = {}  # Disease ID -> severity (0-1)
+
+class ExperimentResponse(BaseModel):
+    id: str
+    expert_id: str
+    expert_name: str
+    name: str
+    description: str
+    patient: Dict[str, Any]
+    test_diseases: List[str]
+    severity_levels: Dict[str, float]
+    results: Dict[str, Any] = {}
+    created_at: str
+    updated_at: str
+
+# ============== EXPERT AUTH HELPERS ==============
+
+async def get_current_expert(credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict:
+    """Validate expert JWT token and return expert data"""
+    try:
+        token = credentials.credentials
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        expert_id = payload.get("sub")
+        role = payload.get("role", "expert")
+        
+        if not expert_id:
+            raise HTTPException(status_code=401, detail="Invalid token")
+        
+        expert = await db.experts.find_one({"id": expert_id}, {"_id": 0})
+        if not expert:
+            raise HTTPException(status_code=401, detail="Expert not found")
+        
+        return expert
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+async def require_admin(expert: dict = Depends(get_current_expert)) -> dict:
+    """Require admin or super_admin role"""
+    if expert.get("role") not in ["admin", "super_admin"]:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return expert
+
+async def require_super_admin(expert: dict = Depends(get_current_expert)) -> dict:
+    """Require super_admin role"""
+    if expert.get("role") != "super_admin":
+        raise HTTPException(status_code=403, detail="Super admin access required")
+    return expert
+
+# ============== EXPERT API ROUTES ==============
+
+@api_router.post("/experts/register", response_model=ExpertLoginResponse)
+async def register_expert(expert_data: ExpertCreate):
+    """Register a new expert (admin only in production, open for now)"""
+    # Check if email already exists
+    existing = await db.experts.find_one({"email": expert_data.email})
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    # Validate specialty
+    if expert_data.specialty not in MEDICAL_SPECIALTIES:
+        raise HTTPException(status_code=400, detail=f"Invalid specialty. Must be one of: {MEDICAL_SPECIALTIES}")
+    
+    # Hash password
+    hashed_password = bcrypt.hashpw(expert_data.password.encode('utf-8'), bcrypt.gensalt())
+    
+    # Create expert document
+    expert_id = str(uuid.uuid4())
+    expert = {
+        "id": expert_id,
+        "email": expert_data.email,
+        "password_hash": hashed_password.decode('utf-8'),
+        "name": expert_data.name,
+        "specialty": expert_data.specialty,
+        "credentials": expert_data.credentials,
+        "institution": expert_data.institution,
+        "role": expert_data.role if expert_data.role in ["expert", "admin", "super_admin"] else "expert",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "diseases_reviewed": 0,
+        "pending_changes": 0,
+        "last_login": None
+    }
+    
+    await db.experts.insert_one(expert)
+    
+    # Generate JWT token
+    token_payload = {
+        "sub": expert_id,
+        "email": expert_data.email,
+        "role": expert["role"],
+        "exp": datetime.now(timezone.utc) + timedelta(hours=JWT_EXPIRATION_HOURS)
+    }
+    token = jwt.encode(token_payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+    
+    # Log audit
+    await db.audit_logs.insert_one({
+        "id": str(uuid.uuid4()),
+        "action": "expert_registered",
+        "expert_id": expert_id,
+        "expert_name": expert_data.name,
+        "target_type": "expert",
+        "target_id": expert_id,
+        "target_name": expert_data.name,
+        "details": {"specialty": expert_data.specialty, "role": expert["role"]},
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    })
+    
+    return ExpertLoginResponse(
+        access_token=token,
+        expert=ExpertResponse(
+            id=expert_id,
+            email=expert_data.email,
+            name=expert_data.name,
+            specialty=expert_data.specialty,
+            credentials=expert_data.credentials,
+            institution=expert_data.institution,
+            role=expert["role"],
+            created_at=expert["created_at"],
+            diseases_reviewed=0,
+            pending_changes=0
+        )
+    )
+
+@api_router.post("/experts/login", response_model=ExpertLoginResponse)
+async def login_expert(login_data: UserLogin):
+    """Login for experts"""
+    expert = await db.experts.find_one({"email": login_data.email})
+    if not expert:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    if not bcrypt.checkpw(login_data.password.encode('utf-8'), expert["password_hash"].encode('utf-8')):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    # Update last login
+    await db.experts.update_one(
+        {"id": expert["id"]},
+        {"$set": {"last_login": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    # Generate JWT token
+    token_payload = {
+        "sub": expert["id"],
+        "email": expert["email"],
+        "role": expert.get("role", "expert"),
+        "exp": datetime.now(timezone.utc) + timedelta(hours=JWT_EXPIRATION_HOURS)
+    }
+    token = jwt.encode(token_payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+    
+    return ExpertLoginResponse(
+        access_token=token,
+        expert=ExpertResponse(
+            id=expert["id"],
+            email=expert["email"],
+            name=expert["name"],
+            specialty=expert.get("specialty", ""),
+            credentials=expert.get("credentials", ""),
+            institution=expert.get("institution", ""),
+            role=expert.get("role", "expert"),
+            created_at=expert["created_at"],
+            diseases_reviewed=expert.get("diseases_reviewed", 0),
+            pending_changes=expert.get("pending_changes", 0)
+        )
+    )
+
+@api_router.get("/experts/me", response_model=ExpertResponse)
+async def get_current_expert_profile(expert: dict = Depends(get_current_expert)):
+    """Get current expert's profile"""
+    # Count pending changes
+    pending_count = await db.change_requests.count_documents({
+        "expert_id": expert["id"],
+        "status": "pending"
+    })
+    
+    return ExpertResponse(
+        id=expert["id"],
+        email=expert["email"],
+        name=expert["name"],
+        specialty=expert.get("specialty", ""),
+        credentials=expert.get("credentials", ""),
+        institution=expert.get("institution", ""),
+        role=expert.get("role", "expert"),
+        created_at=expert["created_at"],
+        diseases_reviewed=expert.get("diseases_reviewed", 0),
+        pending_changes=pending_count
+    )
+
+@api_router.get("/experts/specialties")
+async def get_medical_specialties():
+    """Get list of medical specialties"""
+    return {"specialties": MEDICAL_SPECIALTIES}
+
+@api_router.get("/experts/diseases-to-review")
+async def get_diseases_to_review(
+    specialty: Optional[str] = None,
+    search: Optional[str] = None,
+    reviewed: Optional[bool] = None,
+    expert: dict = Depends(get_current_expert)
+):
+    """Get list of diseases for expert to review"""
+    # Get all diseases
+    diseases = await db.diseases.find({}, {"_id": 0}).to_list(10000)
+    
+    # Get expert's review status
+    reviews = await db.disease_reviews.find(
+        {"expert_id": expert["id"]},
+        {"_id": 0}
+    ).to_list(10000)
+    reviewed_ids = {r["disease_id"] for r in reviews}
+    
+    result = []
+    for disease in diseases:
+        # Filter by search
+        if search:
+            if search.lower() not in disease.get("name", "").lower():
+                continue
+        
+        # Determine if disease matches specialty (based on primary organ or category)
+        disease_specialty = disease.get("specialty", disease.get("category", "General Medicine"))
+        
+        is_reviewed = disease["id"] in reviewed_ids
+        
+        # Filter by reviewed status
+        if reviewed is not None:
+            if reviewed and not is_reviewed:
+                continue
+            if not reviewed and is_reviewed:
+                continue
+        
+        result.append({
+            "id": disease["id"],
+            "name": disease.get("name", ""),
+            "icd10": disease.get("icd10", ""),
+            "category": disease.get("category", ""),
+            "specialty": disease_specialty,
+            "is_reviewed": is_reviewed,
+            "last_reviewed": next((r["reviewed_at"] for r in reviews if r["disease_id"] == disease["id"]), None),
+            "affected_organs": disease.get("affectedOrgans", [])
+        })
+    
+    # Sort alphabetically
+    result.sort(key=lambda x: x["name"])
+    
+    # Count stats
+    total = len(result)
+    reviewed_count = sum(1 for d in result if d["is_reviewed"])
+    
+    return {
+        "diseases": result,
+        "total": total,
+        "reviewed": reviewed_count,
+        "pending": total - reviewed_count
+    }
+
+@api_router.get("/experts/disease/{disease_id}/parameters")
+async def get_disease_parameters_for_review(
+    disease_id: str,
+    expert: dict = Depends(get_current_expert)
+):
+    """Get all parameters for a disease for expert review"""
+    disease = await db.diseases.find_one({"id": disease_id}, {"_id": 0})
+    if not disease:
+        raise HTTPException(status_code=404, detail="Disease not found")
+    
+    # Get any pending changes for this disease
+    pending_changes = await db.change_requests.find({
+        "disease_id": disease_id,
+        "status": "pending"
+    }, {"_id": 0}).to_list(100)
+    
+    # Get parameter sources/evidence
+    param_evidence = await db.parameter_evidence.find({
+        "disease_id": disease_id
+    }, {"_id": 0}).to_list(1000)
+    evidence_map = {e["parameter_id"]: e for e in param_evidence}
+    
+    return {
+        "disease": disease,
+        "pending_changes": pending_changes,
+        "parameter_evidence": evidence_map
+    }
+
+@api_router.post("/experts/disease/{disease_id}/mark-reviewed")
+async def mark_disease_reviewed(
+    disease_id: str,
+    expert: dict = Depends(get_current_expert)
+):
+    """Mark a disease as reviewed by this expert"""
+    disease = await db.diseases.find_one({"id": disease_id}, {"_id": 0})
+    if not disease:
+        raise HTTPException(status_code=404, detail="Disease not found")
+    
+    review_record = {
+        "id": str(uuid.uuid4()),
+        "disease_id": disease_id,
+        "disease_name": disease.get("name", ""),
+        "expert_id": expert["id"],
+        "expert_name": expert["name"],
+        "reviewed_at": datetime.now(timezone.utc).isoformat(),
+        "notes": ""
+    }
+    
+    # Upsert review record
+    await db.disease_reviews.update_one(
+        {"disease_id": disease_id, "expert_id": expert["id"]},
+        {"$set": review_record},
+        upsert=True
+    )
+    
+    # Update expert's review count
+    await db.experts.update_one(
+        {"id": expert["id"]},
+        {"$inc": {"diseases_reviewed": 1}}
+    )
+    
+    # Audit log
+    await db.audit_logs.insert_one({
+        "id": str(uuid.uuid4()),
+        "action": "disease_reviewed",
+        "expert_id": expert["id"],
+        "expert_name": expert["name"],
+        "target_type": "disease",
+        "target_id": disease_id,
+        "target_name": disease.get("name", ""),
+        "details": {},
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    })
+    
+    return {"message": "Disease marked as reviewed", "review": review_record}
+
+# ============== CHANGE REQUEST ROUTES ==============
+
+@api_router.post("/change-requests", response_model=ChangeRequestResponse)
+async def create_change_request(
+    change_data: ChangeRequestCreate,
+    expert: dict = Depends(get_current_expert)
+):
+    """Submit a change request for review"""
+    request_id = str(uuid.uuid4())
+    
+    change_request = {
+        "id": request_id,
+        "expert_id": expert["id"],
+        "expert_name": expert["name"],
+        "expert_specialty": expert.get("specialty", ""),
+        "disease_id": change_data.disease_id,
+        "disease_name": change_data.disease_name,
+        "organ_id": change_data.organ_id,
+        "scale_id": change_data.scale_id,
+        "change_type": change_data.change_type,
+        "parameters": [p.dict() for p in change_data.parameters],
+        "additional_notes": change_data.additional_notes,
+        "status": "pending",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "reviewed_at": None,
+        "reviewed_by": None,
+        "reviewer_notes": None
+    }
+    
+    await db.change_requests.insert_one(change_request)
+    
+    # Update expert's pending count
+    await db.experts.update_one(
+        {"id": expert["id"]},
+        {"$inc": {"pending_changes": 1}}
+    )
+    
+    # Audit log
+    await db.audit_logs.insert_one({
+        "id": str(uuid.uuid4()),
+        "action": "change_requested",
+        "expert_id": expert["id"],
+        "expert_name": expert["name"],
+        "target_type": "change_request",
+        "target_id": request_id,
+        "target_name": f"{change_data.disease_name} - {change_data.organ_id}/{change_data.scale_id}",
+        "details": {"change_type": change_data.change_type, "parameter_count": len(change_data.parameters)},
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    })
+    
+    return ChangeRequestResponse(**change_request)
+
+@api_router.get("/change-requests")
+async def get_change_requests(
+    status: Optional[str] = None,
+    disease_id: Optional[str] = None,
+    expert: dict = Depends(get_current_expert)
+):
+    """Get change requests (all for admin, own for experts)"""
+    query = {}
+    
+    # Non-admins can only see their own requests
+    if expert.get("role") not in ["admin", "super_admin"]:
+        query["expert_id"] = expert["id"]
+    
+    if status:
+        query["status"] = status
+    if disease_id:
+        query["disease_id"] = disease_id
+    
+    requests = await db.change_requests.find(query, {"_id": 0}).to_list(1000)
+    
+    # Sort by created_at descending
+    requests.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+    
+    return {
+        "change_requests": requests,
+        "total": len(requests),
+        "pending": sum(1 for r in requests if r.get("status") == "pending"),
+        "approved": sum(1 for r in requests if r.get("status") == "approved"),
+        "rejected": sum(1 for r in requests if r.get("status") == "rejected")
+    }
+
+@api_router.post("/change-requests/{request_id}/approve")
+async def approve_change_request(
+    request_id: str,
+    reviewer_notes: str = "",
+    admin: dict = Depends(require_admin)
+):
+    """Approve a change request and apply changes to the database"""
+    change_request = await db.change_requests.find_one({"id": request_id}, {"_id": 0})
+    if not change_request:
+        raise HTTPException(status_code=404, detail="Change request not found")
+    
+    if change_request["status"] != "pending":
+        raise HTTPException(status_code=400, detail="Change request already processed")
+    
+    # Apply the changes to the disease in the database
+    disease = await db.diseases.find_one({"id": change_request["disease_id"]})
+    if disease:
+        # Build update query based on change type and parameters
+        updates = {}
+        for param_change in change_request["parameters"]:
+            # Update the modifications in the disease document
+            param_path = f"modifications.{change_request['organ_id']}.{change_request['scale_id']}.{param_change['parameter_id']}"
+            updates[param_path] = {
+                "value": param_change["proposed_value"],
+                "source_url": param_change["source_url"],
+                "reasoning": param_change["reasoning"],
+                "updated_by": change_request["expert_id"],
+                "updated_at": datetime.now(timezone.utc).isoformat(),
+                "approved_by": admin["id"]
+            }
+            
+            # Also store parameter evidence separately
+            await db.parameter_evidence.update_one(
+                {
+                    "disease_id": change_request["disease_id"],
+                    "parameter_id": param_change["parameter_id"]
+                },
+                {
+                    "$set": {
+                        "disease_id": change_request["disease_id"],
+                        "parameter_id": param_change["parameter_id"],
+                        "parameter_name": param_change["parameter_name"],
+                        "value": param_change["proposed_value"],
+                        "source_url": param_change["source_url"],
+                        "reasoning": param_change["reasoning"],
+                        "updated_by": change_request["expert_id"],
+                        "updated_by_name": change_request["expert_name"],
+                        "updated_at": datetime.now(timezone.utc).isoformat(),
+                        "approved_by": admin["id"],
+                        "approved_by_name": admin["name"]
+                    }
+                },
+                upsert=True
+            )
+        
+        if updates:
+            await db.diseases.update_one(
+                {"id": change_request["disease_id"]},
+                {"$set": updates}
+            )
+    
+    # Update change request status
+    await db.change_requests.update_one(
+        {"id": request_id},
+        {
+            "$set": {
+                "status": "approved",
+                "reviewed_at": datetime.now(timezone.utc).isoformat(),
+                "reviewed_by": admin["id"],
+                "reviewer_name": admin["name"],
+                "reviewer_notes": reviewer_notes
+            }
+        }
+    )
+    
+    # Update expert's pending count
+    await db.experts.update_one(
+        {"id": change_request["expert_id"]},
+        {"$inc": {"pending_changes": -1}}
+    )
+    
+    # Audit log
+    await db.audit_logs.insert_one({
+        "id": str(uuid.uuid4()),
+        "action": "change_approved",
+        "expert_id": admin["id"],
+        "expert_name": admin["name"],
+        "target_type": "change_request",
+        "target_id": request_id,
+        "target_name": f"{change_request['disease_name']}",
+        "details": {
+            "original_expert": change_request["expert_name"],
+            "parameter_count": len(change_request["parameters"])
+        },
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    })
+    
+    return {"message": "Change request approved and applied", "request_id": request_id}
+
+@api_router.post("/change-requests/{request_id}/reject")
+async def reject_change_request(
+    request_id: str,
+    reviewer_notes: str = "",
+    admin: dict = Depends(require_admin)
+):
+    """Reject a change request"""
+    change_request = await db.change_requests.find_one({"id": request_id}, {"_id": 0})
+    if not change_request:
+        raise HTTPException(status_code=404, detail="Change request not found")
+    
+    if change_request["status"] != "pending":
+        raise HTTPException(status_code=400, detail="Change request already processed")
+    
+    # Update change request status
+    await db.change_requests.update_one(
+        {"id": request_id},
+        {
+            "$set": {
+                "status": "rejected",
+                "reviewed_at": datetime.now(timezone.utc).isoformat(),
+                "reviewed_by": admin["id"],
+                "reviewer_name": admin["name"],
+                "reviewer_notes": reviewer_notes
+            }
+        }
+    )
+    
+    # Update expert's pending count
+    await db.experts.update_one(
+        {"id": change_request["expert_id"]},
+        {"$inc": {"pending_changes": -1}}
+    )
+    
+    # Audit log
+    await db.audit_logs.insert_one({
+        "id": str(uuid.uuid4()),
+        "action": "change_rejected",
+        "expert_id": admin["id"],
+        "expert_name": admin["name"],
+        "target_type": "change_request",
+        "target_id": request_id,
+        "target_name": f"{change_request['disease_name']}",
+        "details": {
+            "original_expert": change_request["expert_name"],
+            "reason": reviewer_notes
+        },
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    })
+    
+    return {"message": "Change request rejected", "request_id": request_id}
+
+# ============== EXPERIMENT LAB ROUTES ==============
+
+@api_router.post("/experiments")
+async def create_experiment(
+    exp_data: ExperimentCreate,
+    expert: dict = Depends(get_current_expert)
+):
+    """Create a new patient experiment"""
+    exp_id = str(uuid.uuid4())
+    now = datetime.now(timezone.utc).isoformat()
+    
+    experiment = {
+        "id": exp_id,
+        "expert_id": expert["id"],
+        "expert_name": expert["name"],
+        "name": exp_data.name,
+        "description": exp_data.description,
+        "patient": exp_data.patient.dict(),
+        "test_diseases": exp_data.test_diseases,
+        "severity_levels": exp_data.severity_levels,
+        "results": {},
+        "created_at": now,
+        "updated_at": now
+    }
+    
+    await db.experiments.insert_one(experiment)
+    
+    # Audit log
+    await db.audit_logs.insert_one({
+        "id": str(uuid.uuid4()),
+        "action": "experiment_created",
+        "expert_id": expert["id"],
+        "expert_name": expert["name"],
+        "target_type": "experiment",
+        "target_id": exp_id,
+        "target_name": exp_data.name,
+        "details": {"disease_count": len(exp_data.test_diseases)},
+        "timestamp": now
+    })
+    
+    return {"id": exp_id, **experiment}
+
+@api_router.get("/experiments")
+async def get_experiments(
+    expert: dict = Depends(get_current_expert)
+):
+    """Get experiments (all for admin, own for experts)"""
+    query = {}
+    if expert.get("role") not in ["admin", "super_admin"]:
+        query["expert_id"] = expert["id"]
+    
+    experiments = await db.experiments.find(query, {"_id": 0}).to_list(1000)
+    experiments.sort(key=lambda x: x.get("updated_at", ""), reverse=True)
+    
+    return {"experiments": experiments, "total": len(experiments)}
+
+@api_router.get("/experiments/{exp_id}")
+async def get_experiment(
+    exp_id: str,
+    expert: dict = Depends(get_current_expert)
+):
+    """Get a specific experiment"""
+    experiment = await db.experiments.find_one({"id": exp_id}, {"_id": 0})
+    if not experiment:
+        raise HTTPException(status_code=404, detail="Experiment not found")
+    
+    # Check access
+    if expert.get("role") not in ["admin", "super_admin"] and experiment["expert_id"] != expert["id"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    return experiment
+
+@api_router.post("/experiments/{exp_id}/run")
+async def run_experiment(
+    exp_id: str,
+    expert: dict = Depends(get_current_expert)
+):
+    """Run the experiment and calculate parameter changes"""
+    experiment = await db.experiments.find_one({"id": exp_id}, {"_id": 0})
+    if not experiment:
+        raise HTTPException(status_code=404, detail="Experiment not found")
+    
+    # Get diseases for testing
+    disease_ids = experiment.get("test_diseases", [])
+    diseases = await db.diseases.find({"id": {"$in": disease_ids}}, {"_id": 0}).to_list(100)
+    
+    # Calculate combined effects
+    results = {
+        "patient_baseline": experiment["patient"],
+        "disease_effects": {},
+        "combined_parameters": {},
+        "warnings": [],
+        "calculated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    for disease in diseases:
+        disease_id = disease["id"]
+        severity = experiment.get("severity_levels", {}).get(disease_id, 0.5)
+        
+        results["disease_effects"][disease_id] = {
+            "name": disease.get("name", ""),
+            "severity": severity,
+            "modifications": disease.get("modifications", {}),
+            "comprehensive_model": disease.get("comprehensive_model", {})
+        }
+    
+    # Update experiment with results
+    await db.experiments.update_one(
+        {"id": exp_id},
+        {
+            "$set": {
+                "results": results,
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }
+        }
+    )
+    
+    return {"message": "Experiment run completed", "results": results}
+
+@api_router.delete("/experiments/{exp_id}")
+async def delete_experiment(
+    exp_id: str,
+    expert: dict = Depends(get_current_expert)
+):
+    """Delete an experiment"""
+    experiment = await db.experiments.find_one({"id": exp_id}, {"_id": 0})
+    if not experiment:
+        raise HTTPException(status_code=404, detail="Experiment not found")
+    
+    # Check access
+    if expert.get("role") not in ["admin", "super_admin"] and experiment["expert_id"] != expert["id"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    await db.experiments.delete_one({"id": exp_id})
+    
+    return {"message": "Experiment deleted"}
+
+# ============== SUPER ADMIN DASHBOARD ROUTES ==============
+
+@api_router.get("/admin/dashboard")
+async def get_admin_dashboard(admin: dict = Depends(require_admin)):
+    """Get admin dashboard statistics"""
+    # Expert stats
+    experts = await db.experts.find({}, {"_id": 0, "password_hash": 0}).to_list(1000)
+    total_experts = len(experts)
+    active_experts = sum(1 for e in experts if e.get("last_login"))
+    
+    # Disease stats
+    total_diseases = await db.diseases.count_documents({})
+    reviewed_diseases = await db.disease_reviews.distinct("disease_id")
+    
+    # Change request stats
+    pending_changes = await db.change_requests.count_documents({"status": "pending"})
+    approved_changes = await db.change_requests.count_documents({"status": "approved"})
+    rejected_changes = await db.change_requests.count_documents({"status": "rejected"})
+    
+    # Experiment stats
+    total_experiments = await db.experiments.count_documents({})
+    
+    # Recent activity
+    recent_logs = await db.audit_logs.find(
+        {},
+        {"_id": 0}
+    ).sort("timestamp", -1).limit(50).to_list(50)
+    
+    return {
+        "experts": {
+            "total": total_experts,
+            "active": active_experts,
+            "by_specialty": {},
+            "list": experts
+        },
+        "diseases": {
+            "total": total_diseases,
+            "reviewed": len(reviewed_diseases),
+            "pending_review": total_diseases - len(reviewed_diseases)
+        },
+        "change_requests": {
+            "pending": pending_changes,
+            "approved": approved_changes,
+            "rejected": rejected_changes,
+            "total": pending_changes + approved_changes + rejected_changes
+        },
+        "experiments": {
+            "total": total_experiments
+        },
+        "recent_activity": recent_logs
+    }
+
+@api_router.get("/admin/audit-logs")
+async def get_audit_logs(
+    action: Optional[str] = None,
+    expert_id: Optional[str] = None,
+    limit: int = 100,
+    admin: dict = Depends(require_admin)
+):
+    """Get audit logs"""
+    query = {}
+    if action:
+        query["action"] = action
+    if expert_id:
+        query["expert_id"] = expert_id
+    
+    logs = await db.audit_logs.find(query, {"_id": 0}).sort("timestamp", -1).limit(limit).to_list(limit)
+    
+    return {"logs": logs, "total": len(logs)}
+
+@api_router.get("/admin/experts")
+async def get_all_experts(admin: dict = Depends(require_admin)):
+    """Get all experts with their stats"""
+    experts = await db.experts.find({}, {"_id": 0, "password_hash": 0}).to_list(1000)
+    
+    # Enrich with stats
+    for expert in experts:
+        expert["pending_changes"] = await db.change_requests.count_documents({
+            "expert_id": expert["id"],
+            "status": "pending"
+        })
+        expert["total_changes"] = await db.change_requests.count_documents({
+            "expert_id": expert["id"]
+        })
+        expert["experiments_count"] = await db.experiments.count_documents({
+            "expert_id": expert["id"]
+        })
+    
+    return {"experts": experts}
+
+@api_router.put("/admin/experts/{expert_id}/role")
+async def update_expert_role(
+    expert_id: str,
+    new_role: str,
+    admin: dict = Depends(require_super_admin)
+):
+    """Update an expert's role (super admin only)"""
+    if new_role not in ["expert", "admin", "super_admin"]:
+        raise HTTPException(status_code=400, detail="Invalid role")
+    
+    result = await db.experts.update_one(
+        {"id": expert_id},
+        {"$set": {"role": new_role}}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Expert not found")
+    
+    # Audit log
+    await db.audit_logs.insert_one({
+        "id": str(uuid.uuid4()),
+        "action": "role_updated",
+        "expert_id": admin["id"],
+        "expert_name": admin["name"],
+        "target_type": "expert",
+        "target_id": expert_id,
+        "target_name": "",
+        "details": {"new_role": new_role},
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    })
+    
+    return {"message": f"Role updated to {new_role}"}
+
+
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
