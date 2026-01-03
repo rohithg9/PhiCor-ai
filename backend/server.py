@@ -4446,7 +4446,8 @@ Return ONLY valid JSON, no explanation."""
         raise HTTPException(status_code=500, detail=f"Extraction failed: {str(e)}")
 
 # Include router
-app.include_router(api_router)
+# NOTE: Router must be included AFTER all routes are defined
+# app.include_router(api_router)  # Moved to end of file
 
 # ============== EXPERT CURATION SYSTEM ==============
 
