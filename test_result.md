@@ -45,27 +45,35 @@
   - Recent Activity log
 
 ## Incorporate User Feedback
-- User requested: P-wave display accuracy for AFib ✅ (DONE) - Now shows "ABSENT"
-- User requested: Fix frozen right panel ✅ (VERIFIED NOT FROZEN)
-- User requested: Add Reset buttons ✅ (DONE) - Added in Disease Impact Summary and right panel
+- User requested: Test Expert Login Page functionality ⏳ (IN PROGRESS)
+- User requested: Test Expert Registration Flow ⏳ (IN PROGRESS)  
+- User requested: Test Expert Dashboard Features ⏳ (IN PROGRESS)
+- User requested: Test Super Admin Login and Admin Dashboard ⏳ (IN PROGRESS)
 
 ## Technical Implementation Details
 
-### P-Wave Fix
-- Modified `getModifiedValue` function in DashboardMultiScale.js
-- Added detection for "absent" parameters (multiplier=0 or absolute=0 with absence notes)
-- Returns `{ value: 'Absent', modified: true, isAbsent: true }` for absent parameters
-- Modified parameter rendering to show "ABSENT" text with purple styling
+### Expert Authentication System
+- ExpertAuthPage.js handles login/registration
+- ExpertContext.js manages authentication state
+- Uses localStorage for token persistence
+- Supports role-based routing (expert vs admin)
 
-### Reset Buttons
-- Added `onReset` prop to DiseasePanel component
-- Added "Reset to Healthy Model" button in DiseasePanel (right panel)
-- Added "Reset to Healthy Model" button in Disease Impact Summary section
-- Both buttons call `resetDisease` function
+### Expert Dashboard
+- ExpertDashboard.js shows disease review interface
+- Displays stats cards and progress tracking
+- Allows disease parameter review and change requests
+- Integrates with backend APIs for data fetching
+
+### Admin Dashboard  
+- AdminDashboard.js for admin/super_admin users
+- Shows system-wide statistics and pending changes
+- Allows approval/rejection of expert change requests
+- Displays audit logs and expert management
 
 ## Previous Agent Notes
-- Background script enhance_all_data.py is running (Phase 1)
-- UI unification changes successfully implemented and verified
+- Expert Curation System implementation completed
+- Authentication flows and role-based access implemented
+- UI components using shadcn/ui library
 
 ## Backend API Testing Results (January 3, 2026)
 
