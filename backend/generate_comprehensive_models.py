@@ -319,39 +319,82 @@ async def generate_comprehensive_model(disease_name: str, icd10: str, category: 
     
     organs = category_to_organs.get(category, ["heart", "lungs", "kidneys", "blood", "cellular"])
     
-    prompt = f"""You are a medical expert. Generate a COMPREHENSIVE disease model for:
+    prompt = f"""You are a medical expert generating comprehensive clinical models for EMR integration.
 
 Disease: {disease_name}
 ICD-10: {icd10}
 Category: {category}
 
-Return a JSON object with this EXACT structure:
+Return a JSON object with this EXACT structure. This data will be used to analyze patient records and correlate symptoms/signs with disease severity.
 
 {{
   "primaryOrgan": "{organs[0]}",
   "affectedOrgans": {json.dumps(organs)},
   
   "progression": [
-    {{"stage": 1, "name": "Early/Subclinical", "severity": 0.2, "description": "Initial changes", "yearsFromOnset": "0-2"}},
-    {{"stage": 2, "name": "Mild", "severity": 0.4, "description": "Early symptoms", "yearsFromOnset": "2-5"}},
-    {{"stage": 3, "name": "Moderate", "severity": 0.6, "description": "Progressive disease", "yearsFromOnset": "5-10"}},
-    {{"stage": 4, "name": "Severe/End-stage", "severity": 0.9, "description": "Advanced disease", "yearsFromOnset": ">10"}}
+    {{"stage": 1, "name": "Early/Subclinical", "severity": 0.2, "description": "Initial changes", "yearsFromOnset": "0-2", "clinicalCriteria": "Criteria for this stage"}},
+    {{"stage": 2, "name": "Mild", "severity": 0.4, "description": "Early symptoms", "yearsFromOnset": "2-5", "clinicalCriteria": "Criteria for this stage"}},
+    {{"stage": 3, "name": "Moderate", "severity": 0.6, "description": "Progressive disease", "yearsFromOnset": "5-10", "clinicalCriteria": "Criteria for this stage"}},
+    {{"stage": 4, "name": "Severe/End-stage", "severity": 0.9, "description": "Advanced disease", "yearsFromOnset": ">10", "clinicalCriteria": "Criteria for this stage"}}
   ],
   
   "clinicalPresentation": {{
-    "symptoms": ["symptom1", "symptom2", "symptom3", "symptom4", "symptom5"],
+    "symptoms": [
+      {{"name": "Symptom name", "severity_grades": [{{"grade": 1, "description": "Mild - on exertion only"}}, {{"grade": 2, "description": "Moderate - limits daily activities"}}, {{"grade": 3, "description": "Severe - at rest"}}, {{"grade": 4, "description": "Critical - constant"}}], "frequency": "Common/Uncommon/Rare", "onset": "Acute/Gradual", "progression_with_disease": "Worsens with disease stage"}},
+      // Include 5-8 symptoms with severity grades
+    ],
+    "signs": [
+      {{"name": "Clinical sign name", "how_to_detect": "Physical exam method", "severity_grades": [{{"grade": "Mild", "criteria": "Specific criteria"}}, {{"grade": "Moderate", "criteria": "Specific criteria"}}, {{"grade": "Severe", "criteria": "Specific criteria"}}], "sensitivity": "85%", "specificity": "70%", "associated_with_stage": "Stage 2-4"}},
+      // Include 5-10 clinical signs with detection methods and severity grades
+    ],
     "labTests": [
-      {{"name": "Test1", "value": "Abnormal value", "significance": "Clinical meaning"}}
+      {{"name": "Test name", "normal_range": "Normal values", "abnormal_in_disease": "Expected abnormal values", "significance": "Clinical meaning", "sensitivity": "80%", "specificity": "75%", "when_to_order": "Initial workup/Monitoring/Suspected complication"}}
     ],
     "imaging": [
-      {{"type": "Imaging modality", "findings": "Expected findings"}}
+      {{"type": "Imaging modality", "findings": "Expected findings", "severity_correlation": "Findings correlate with disease severity", "sensitivity": "90%", "specificity": "85%", "when_to_order": "Indication"}}
     ],
     "treatments": [
-      {{"category": "Medications", "items": ["drug1", "drug2"]}},
-      {{"category": "Procedures", "items": ["procedure1"]}},
+      {{"category": "Medications", "items": ["drug1", "drug2"], "evidence_level": "Class I/II/III", "when_to_use": "Indication"}},
+      {{"category": "Procedures", "items": ["procedure1"], "evidence_level": "Class I/II/III", "when_to_use": "Indication"}},
       {{"category": "Lifestyle", "items": ["modification1"]}}
     ]
   }},
+  
+  "diagnosticCriteria": {{
+    "major": ["Major criterion 1", "Major criterion 2"],
+    "minor": ["Minor criterion 1", "Minor criterion 2"],
+    "diagnosis_rule": "Diagnosis requires X major + Y minor criteria"
+  }},
+  
+  "clinicalGuidelines": {{
+    "diagnosis": {{
+      "initial_workup": ["Step 1", "Step 2"],
+      "confirmatory_tests": ["Test 1", "Test 2"],
+      "differential_diagnosis": ["Condition 1", "Condition 2"]
+    }},
+    "treatment": {{
+      "first_line": ["Treatment 1"],
+      "second_line": ["Treatment 2"],
+      "refractory": ["Treatment for refractory cases"]
+    }},
+    "monitoring": {{
+      "frequency": "Every X months",
+      "parameters_to_monitor": ["Parameter 1", "Parameter 2"],
+      "warning_signs": ["Sign of deterioration 1"]
+    }}
+  }},
+  
+  "symptomSeverityModels": [
+    {{
+      "symptom": "Dyspnea",
+      "mathematical_model": {{
+        "name": "NYHA-Based Dyspnea Severity Model",
+        "latex": "Severity = \\\\frac{{NYHA\\\\_Class - 1}}{{3}} \\\\times 100",
+        "variables": {{"NYHA_Class": "1-4"}},
+        "interpretation": "0% = asymptomatic, 100% = symptoms at rest"
+      }}
+    }}
+  ],
   
   "modifications": {{
     // For each organ, include ALL scales with specific parameter changes
