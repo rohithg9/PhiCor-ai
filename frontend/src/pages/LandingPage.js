@@ -101,6 +101,7 @@ const LandingPage = () => {
     { id: 'how-it-works', label: 'How It Works' },
     { id: 'platform-features', label: 'Clinical Tools' },
     { id: 'advantages', label: 'Advantages' },
+    { id: 'user-manual', label: 'User Manual', isRoute: true, route: '/user-manual' },
     { id: 'contact', label: 'Contact', isEmail: true },
   ];
 
