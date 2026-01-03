@@ -86,7 +86,7 @@ export default function AdminDashboard() {
     }
     fetchDashboard();
     fetchPendingChanges();
-  }, [token, navigate, fetchDashboard, fetchPendingChanges]);
+  }, [token, authLoading, navigate, fetchDashboard, fetchPendingChanges]);
 
   const handleReviewChange = (change) => {
     setSelectedChange(change);
