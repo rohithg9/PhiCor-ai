@@ -161,13 +161,16 @@ export default function ExpertDashboard() {
   }, [token]);
 
   useEffect(() => {
+    // Wait for auth to load before checking
+    if (authLoading) return;
+    
     if (!token) {
       navigate('/expert-login');
       return;
     }
     fetchDiseases();
     fetchMyChangeRequests();
-  }, [token, navigate, fetchDiseases, fetchMyChangeRequests]);
+  }, [token, authLoading, navigate, fetchDiseases, fetchMyChangeRequests]);
 
   // Filter diseases
   useEffect(() => {
