@@ -973,32 +973,48 @@ const ClinicalFindingsPanel = ({ disease, isExpanded, onToggle, alwaysExpanded =
   
   if (!disease) return null;
 
-  // Get clinical data from multiple sources - prioritize comprehensive_model
+  // Get clinical data from multiple sources - check ALL possible locations
   const comprehensiveModel = disease.comprehensive_model || {};
   const comprehensiveClinical = comprehensiveModel.clinicalPresentation || {};
-  const regularClinical = disease.clinicalPresentation || {};
   
-  // Merge clinical data: comprehensive model takes priority
+  // Check both naming conventions: clinicalPresentation and clinical_presentation
+  const regularClinical = disease.clinicalPresentation || disease.clinical_presentation || {};
+  
+  // Merge clinical data: prefer detailed data (from clinical_presentation) over simple strings
   const clinicalData = {
-    symptoms: comprehensiveClinical.symptoms?.length > 0 
-      ? comprehensiveClinical.symptoms 
-      : regularClinical.symptoms || [],
-    signs: comprehensiveClinical.signs?.length > 0 
-      ? comprehensiveClinical.signs 
-      : regularClinical.signs || [],
-    labTests: comprehensiveClinical.labTests?.length > 0 
-      ? comprehensiveClinical.labTests 
-      : regularClinical.labTests || [],
-    imaging: comprehensiveClinical.imaging?.length > 0 
-      ? comprehensiveClinical.imaging 
-      : regularClinical.imaging || [],
-    treatments: comprehensiveClinical.treatments?.length > 0 
-      ? comprehensiveClinical.treatments 
-      : regularClinical.treatments || []
+    symptoms: regularClinical.symptoms?.length > 0 
+      ? regularClinical.symptoms 
+      : comprehensiveClinical.symptoms || [],
+    signs: regularClinical.signs?.length > 0 
+      ? regularClinical.signs 
+      : comprehensiveClinical.signs || [],
+    labTests: regularClinical.labTests?.length > 0 
+      ? regularClinical.labTests 
+      : comprehensiveClinical.labTests || regularClinical.lab_tests || [],
+    imaging: regularClinical.imaging?.length > 0 
+      ? regularClinical.imaging 
+      : comprehensiveClinical.imaging || [],
+    treatments: regularClinical.treatments?.length > 0 
+      ? regularClinical.treatments 
+      : comprehensiveClinical.treatments || []
   };
   
-  const labFindings = Array.isArray(disease.laboratoryFindings) ? disease.laboratoryFindings : clinicalData.labTests || [];
-  const rawImagingFindings = disease.imagingFindings || {};
+  // Also check disease.physical_examination for signs
+  const physicalExam = disease.physical_examination || {};
+  if (clinicalData.signs.length === 0 && Object.keys(physicalExam).length > 0) {
+    // Convert physical_examination object to signs array
+    clinicalData.signs = Object.entries(physicalExam).map(([key, value]) => {
+      if (typeof value === 'object' && value !== null) {
+        return { name: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()), ...value };
+      }
+      return { name: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()), finding: value };
+    });
+  }
+  
+  const labFindings = Array.isArray(disease.laboratoryFindings) 
+    ? disease.laboratoryFindings 
+    : (Array.isArray(disease.laboratory_findings) ? disease.laboratory_findings : clinicalData.labTests || []);
+  const rawImagingFindings = disease.imagingFindings || disease.imaging_findings || {};
   const pathophysiology = disease.pathophysiology || {};
   
   // Safely extract text from complex objects
