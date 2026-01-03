@@ -1607,6 +1607,7 @@ const DiseasePanel = ({
   onChangeSeverity,
   showClinicalPanel,
   onToggleClinicalPanel,
+  onReset,
   isMobile = false,
   isLoading = false
 }) => {
