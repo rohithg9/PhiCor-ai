@@ -16,7 +16,7 @@ const ORGAN_ICONS = {
   adrenal: "🔺",    // Triangle for adrenal
   lymph: "💧",      // Droplet for lymphatic
   muscle: "💪",     // Muscle
-  skin: "🧬",       // DNA/skin layers
+  skin: "🧴",       // Skin/skincare
   eye: "👁️",       // Eye
   stomach: "🫃",    // Stomach area
   intestines: "🔄", // Coiled
