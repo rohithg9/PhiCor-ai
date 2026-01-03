@@ -4,12 +4,17 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "./components/ui/sonner";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
+import { ExpertProvider } from "./context/ExpertContext";
 import LandingPage from "./pages/LandingPage";
 import AuthPage from "./pages/AuthPage";
 import Dashboard from "./pages/DashboardMultiScale";
 import DifferentialPage from "./pages/DifferentialPage";
 import DrugsPage from "./pages/DrugsPage";
 import UserManual from "./pages/UserManual";
+import ExpertAuthPage from "./pages/ExpertAuthPage";
+import ExpertDashboard from "./pages/ExpertDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
+import ExperimentLab from "./pages/ExperimentLab";
 
 // Protected route wrapper
 const ProtectedRoute = ({ children }) => {
