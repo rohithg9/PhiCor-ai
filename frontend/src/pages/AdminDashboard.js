@@ -77,6 +77,9 @@ export default function AdminDashboard() {
   }, [token]);
 
   useEffect(() => {
+    // Wait for auth to load before checking
+    if (authLoading) return;
+    
     if (!token) {
       navigate('/expert-login');
       return;
