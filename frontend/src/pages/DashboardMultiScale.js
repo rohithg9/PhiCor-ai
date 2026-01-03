@@ -1148,15 +1148,57 @@ const ClinicalFindingsPanel = ({ disease, isExpanded, onToggle, alwaysExpanded =
                     Patient-Reported Symptoms
                   </div>
                   {symptoms.length > 0 ? (
-                    <div className="grid gap-2">
-                      {symptoms.map((symptom, i) => (
-                        <div key={i} className="flex items-start gap-2 p-2 rounded-lg bg-orange-500/5 border border-orange-500/20">
-                          <div className="w-5 h-5 rounded-full bg-orange-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                            <span className="text-[10px] font-bold text-orange-400">{i + 1}</span>
+                    <div className="space-y-2">
+                      {symptoms.map((symptom, i) => {
+                        // Handle both string format and object format with severity grades
+                        const isObject = typeof symptom === 'object' && symptom !== null;
+                        const symptomName = isObject ? symptom.name : symptom;
+                        const severityGrades = isObject ? symptom.severity_grades : null;
+                        const frequency = isObject ? symptom.frequency : null;
+                        const onset = isObject ? symptom.onset : null;
+                        const progression = isObject ? symptom.progression_with_disease : null;
+                        
+                        return (
+                          <div key={i} className="p-3 rounded-lg bg-orange-500/5 border border-orange-500/20">
+                            <div className="flex items-start gap-2">
+                              <div className="w-5 h-5 rounded-full bg-orange-500/20 flex items-center justify-center shrink-0 mt-0.5">
+                                <span className="text-[10px] font-bold text-orange-400">{i + 1}</span>
+                              </div>
+                              <div className="flex-1">
+                                <span className="text-sm font-medium">{symptomName}</span>
+                                {(frequency || onset) && (
+                                  <div className="flex gap-3 mt-1 text-[10px]">
+                                    {frequency && <Badge variant="outline" className="text-[9px] border-orange-500/30 text-orange-400">{frequency}</Badge>}
+                                    {onset && <Badge variant="outline" className="text-[9px] border-blue-500/30 text-blue-400">Onset: {onset}</Badge>}
+                                  </div>
+                                )}
+                                {severityGrades && severityGrades.length > 0 && (
+                                  <div className="mt-2 space-y-1">
+                                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Severity Grades:</span>
+                                    <div className="grid grid-cols-2 gap-1">
+                                      {severityGrades.map((grade, gi) => (
+                                        <div key={gi} className={`text-[9px] px-2 py-1 rounded border ${
+                                          gi === 0 ? 'border-green-500/30 bg-green-500/5 text-green-400' :
+                                          gi === 1 ? 'border-yellow-500/30 bg-yellow-500/5 text-yellow-400' :
+                                          gi === 2 ? 'border-orange-500/30 bg-orange-500/5 text-orange-400' :
+                                          'border-red-500/30 bg-red-500/5 text-red-400'
+                                        }`}>
+                                          <span className="font-bold">Grade {grade.grade}:</span> {grade.description}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                                {progression && (
+                                  <p className="text-[10px] text-muted-foreground mt-1 italic">
+                                    📈 {progression}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
                           </div>
-                          <span className="text-sm">{symptom}</span>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   ) : (
                     <p className="text-sm text-muted-foreground italic">No symptoms data available</p>
