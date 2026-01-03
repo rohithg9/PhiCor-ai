@@ -419,16 +419,73 @@ def test_crash_prevention():
         print(f"    ❌ Crash prevention concerns: {success_rate:.1%} success rate")
         return False
 
+def test_enhancement_status_endpoint():
+    """Test Enhancement Status Endpoint (Review Request)"""
+    print("\n🔄 TEST: ENHANCEMENT STATUS ENDPOINT")
+    print("=" * 50)
+    print("Testing requirements from review request:")
+    print("- Test enhancement status endpoint: /api/enhancement/status")
+    print("- Should return progress data for Phase 1 and Phase 2 enhancement processes")
+    
+    try:
+        response = requests.get(f"{BACKEND_URL}/api/enhancement/status", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            
+            print(f"✅ Enhancement status endpoint accessible")
+            
+            # Check for Phase 1 and Phase 2 data
+            phase1_data = data.get('phase1', {})
+            phase2_data = data.get('phase2', {})
+            
+            if phase1_data:
+                print(f"  ✅ Phase 1 enhancement data present")
+                phase1_progress = phase1_data.get('progress', 0)
+                phase1_status = phase1_data.get('status', 'unknown')
+                print(f"    📊 Phase 1 Progress: {phase1_progress}%")
+                print(f"    📊 Phase 1 Status: {phase1_status}")
+            else:
+                print(f"  ⚠️ Phase 1 enhancement data missing")
+            
+            if phase2_data:
+                print(f"  ✅ Phase 2 enhancement data present")
+                phase2_progress = phase2_data.get('progress', 0)
+                phase2_status = phase2_data.get('status', 'unknown')
+                print(f"    📊 Phase 2 Progress: {phase2_progress}%")
+                print(f"    📊 Phase 2 Status: {phase2_status}")
+            else:
+                print(f"  ⚠️ Phase 2 enhancement data missing")
+            
+            # Check overall structure
+            if phase1_data or phase2_data:
+                print(f"  ✅ Enhancement status endpoint working correctly ✓")
+                return True
+            else:
+                print(f"  ❌ Enhancement status endpoint missing required data")
+                return False
+        else:
+            print(f"❌ Enhancement status endpoint failed: {response.status_code}")
+            if response.status_code == 404:
+                print(f"  ℹ️ Endpoint may not be implemented yet")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing enhancement status endpoint: {e}")
+        return False
+
 def run_all_tests():
     """Run all PhiCore.ai Mathematical Human Body Dashboard tests"""
-    print("🧪 PHICORE.AI MATHEMATICAL HUMAN BODY DASHBOARD TESTING")
+    print("🧪 PHICORE.AI DASHBOARD TESTING - CRITICAL FIXES VERIFICATION")
     print("=" * 80)
     print("Testing specific requirements from review request:")
-    print("1. Disease Database Stats API - verify 509 diseases with parameter_modifications")
-    print("2. Disease Search API - search=diabetes functionality")
-    print("3. Specific Disease Detail APIs - Heart Failure, Type 2 Diabetes, COPD")
-    print("4. Disease Categories Testing - different categories with parameter display")
-    print("5. Crash Prevention Verification - multiple disease selections")
+    print("1. Enhancement Status Endpoint - /api/enhancement/status")
+    print("2. Disease Database Stats API - verify 509 diseases with parameter_modifications")
+    print("3. Disease Search API - search=diabetes functionality")
+    print("4. Specific Disease Detail APIs - Heart Failure, Type 2 Diabetes, COPD")
+    print("5. Disease Categories Testing - different categories with parameter display")
+    print("6. Crash Prevention Verification - multiple disease selections")
+    print("=" * 80)
+    print("NOTE: Frontend tests (P-Wave accuracy, Reset buttons, Panel interactivity)")
+    print("      are not tested here as this is backend-only testing.")
     print("=" * 80)
     
     test_results = {}
