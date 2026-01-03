@@ -25,7 +25,9 @@ import {
   Activity,
   Brain,
   Calculator,
-  Pill
+  Pill,
+  BookOpen,
+  HelpCircle
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 
