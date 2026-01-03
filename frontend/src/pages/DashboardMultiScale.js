@@ -2115,6 +2115,7 @@ const DashboardMultiScale = () => {
   const [apiDiseaseData, setApiDiseaseData] = useState({}); // Store parameter_modifications from API
   const [apiDiseaseByIcd, setApiDiseaseByIcd] = useState({}); // Also map by ICD-10 code
   const [apiDiseases, setApiDiseases] = useState({}); // Full disease data from API
+  const [isLoadingDiseases, setIsLoadingDiseases] = useState(true); // Loading state for initial fetch
   
   // Ref for scrolling to parameters section
   const parametersRef = useRef(null);
