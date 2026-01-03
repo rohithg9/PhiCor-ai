@@ -2159,6 +2159,7 @@ const DashboardMultiScale = () => {
   // Fetch disease parameter_modifications from API
   useEffect(() => {
     const fetchDiseaseParams = async () => {
+      setIsLoadingDiseases(true);
       try {
         const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
         // Fetch all diseases with parameter_modifications (limit increased to get all)
@@ -2203,6 +2204,8 @@ const DashboardMultiScale = () => {
         }
       } catch (error) {
         console.error('Failed to fetch disease params:', error);
+      } finally {
+        setIsLoadingDiseases(false);
       }
     };
     fetchDiseaseParams();
