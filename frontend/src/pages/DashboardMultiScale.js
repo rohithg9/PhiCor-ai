@@ -3266,7 +3266,8 @@ const DashboardMultiScale = () => {
                       onClick={() => {
                         setSelectedOrgan(param.organId);
                         setSelectedScale(param.scaleId);
-                        setShowAllParams(false); // Collapse summary and scroll to details
+                        // Keep Disease Impact Summary OPEN - don't collapse
+                        // Scroll to parameters section smoothly
                         setTimeout(() => {
                           parametersRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                         }, 100);
