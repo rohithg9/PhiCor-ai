@@ -43,9 +43,10 @@ const SCALE_LEVELS = [
   // Lab tests & biomarkers
   { id: 'lab_tests', name: 'Lab Tests', fullName: 'Laboratory Tests', icon: '🧪', description: 'Blood tests, biomarkers' },
   { id: 'urinalysis', name: 'Urinalysis', fullName: 'Urinalysis', icon: '💧', description: 'Urine analysis' },
-  // Imaging
+  // Imaging & Diagnostics
   { id: 'imaging', name: 'Imaging', fullName: 'Imaging Parameters', icon: '📷', description: 'CT, MRI, Ultrasound' },
-  // Cellular/Molecular for cross-cutting organ
+  { id: 'ecg', name: 'ECG', fullName: 'ECG / Electrocardiogram', icon: '💓', description: 'Heart electrical activity' },
+  // Cellular/Molecular scales
   { id: 'dna', name: 'DNA', fullName: 'DNA & Genetics', icon: '🧬', description: 'Genetic markers' },
   { id: 'gene_expression', name: 'Gene Expr', fullName: 'Gene Expression', icon: '📊', description: 'mRNA & proteins' },
   { id: 'metabolism', name: 'Metabolism', fullName: 'Metabolism', icon: '⚗️', description: 'ATP, redox' },
