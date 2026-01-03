@@ -106,6 +106,7 @@
 ## Known Issues
 - Frontend admin login form has authentication flow issue (backend API works correctly)
 - Minor: Admin login redirects to expert dashboard instead of admin dashboard directly
+- **CRITICAL (January 3, 2026)**: Frontend expert authentication flow completely broken - users cannot access Expert Dashboard despite valid backend authentication. Registration form works, backend APIs return valid tokens, but frontend fails to redirect to dashboard, blocking all Expert Curation System functionality.
 
 ## Testing Agent Verification (January 3, 2026)
 
