@@ -22,7 +22,7 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const { expert, token, logout, isSuperAdmin } = useExpert();
+  const { expert, token, logout, isSuperAdmin, loading: authLoading } = useExpert();
   
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
