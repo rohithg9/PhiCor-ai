@@ -20,25 +20,9 @@ import { Input } from '../components/ui/input';
 import { FeatureTutorial, TutorialButton, useTutorial } from '../components/FeatureTutorial';
 import LeftPanel from '../components/LeftPanel';
 import { ORGAN_MODELS } from '../data/organModels';
-import { DISEASE_MODELS } from '../data/diseaseModels';
 import { BIOCHEMISTRY } from '../data/biochemistry';
-import { ALL_CARDIAC_DISEASES, CARDIAC_CATEGORIES, getNovelEquations } from '../data/cardiacDiseasesIndex';
-import { ALL_RESPIRATORY_DISEASES } from '../data/respiratoryDiseasesIndex';
-import { ALL_RENAL_DISEASES, RENAL_CATEGORIES } from '../data/renalDiseasesIndex';
-import { ALL_NEUROLOGICAL_DISEASES, NEUROLOGICAL_CATEGORIES } from '../data/neurologicalDiseasesIndex';
-import { ALL_HEPATIC_DISEASES, HEPATIC_CATEGORIES } from '../data/hepaticDiseasesIndex';
-import { ALL_METABOLIC_DISEASES, METABOLIC_CATEGORIES } from '../data/metabolicDiseasesIndex';
-import { ALL_HEMATOLOGICAL_DISEASES, HEMATOLOGICAL_CATEGORIES } from '../data/hematologicalDiseasesIndex';
-import { ALL_ONCOLOGY_DISEASES, ONCOLOGY_CATEGORIES } from '../data/oncologyDiseasesIndex';
-import { ALL_CONGENITAL_DISEASES, CONGENITAL_CATEGORIES } from '../data/congenitalDiseasesIndex';
-import { ALL_AUTOIMMUNE_DISEASES, AUTOIMMUNE_CATEGORIES } from '../data/autoimmuneDiseasesIndex';
-import { ALL_INFECTIOUS_DISEASES, INFECTIOUS_CATEGORIES } from '../data/infectiousDiseasesIndex';
-import { ALL_GI_DISEASES, GI_CATEGORIES } from '../data/giDiseasesIndex';
-import { ALL_DERMATOLOGICAL_DISEASES, DERMATOLOGICAL_CATEGORIES } from '../data/dermatologicalDiseasesIndex';
-import { ALL_PSYCHIATRIC_DISEASES, PSYCHIATRIC_CATEGORIES } from '../data/psychiatricDiseasesIndex';
-import { ALL_PEDIATRIC_DISEASES, PEDIATRIC_CATEGORIES } from '../data/pediatricDiseasesIndex';
-import { ALL_OBGYN_DISEASES, OBGYN_CATEGORIES } from '../data/obgynDiseasesIndex';
-import { enhanceDiseaseWithTemplates, generateModifications } from '../data/diseaseTemplates';
+// NOTE: Static disease imports have been removed - all disease data now comes from the API
+// This eliminates duplicate entries and ensures a single source of truth from MongoDB
 import { getCalculatorsForDisease, getCalculatorsForOrgan, CLINICAL_CALCULATORS } from '../data/clinicalCalculators';
 import LungCancerModule from '../components/LungCancerModule';
 import TreatmentGuidelinesPanel from '../components/TreatmentGuidelinesPanel';
