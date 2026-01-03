@@ -465,6 +465,8 @@ const DiseaseDetailPanel = ({ diseaseId, diseaseName }) => {
                 )}
               </div>
             </ScrollArea>
+          </TabsContent>
+
           <TabsContent value="prognosis" className="mt-3">
             <ScrollArea className="h-[200px]">
               <div className="space-y-3">
