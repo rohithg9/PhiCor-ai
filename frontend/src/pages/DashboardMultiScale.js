@@ -3269,6 +3269,7 @@ const DashboardMultiScale = () => {
                 onChangeSeverity={setDiseaseSeverity}
                 showClinicalPanel={showClinicalPanel}
                 onToggleClinicalPanel={handleToggleClinicalPanel}
+                onReset={resetDisease}
                 isMobile
                 isLoading={isLoadingDiseases}
               />
