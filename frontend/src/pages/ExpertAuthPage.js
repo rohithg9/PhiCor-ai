@@ -64,10 +64,16 @@ export default function ExpertAuthPage() {
         body: JSON.stringify({ email: loginEmail, password: loginPassword })
       });
       
-      const data = await response.json();
+      const text = await response.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        throw new Error('Server error. Please try again.');
+      }
       
       if (!response.ok) {
-        throw new Error(data.detail || 'Login failed');
+        throw new Error(data.detail || 'Invalid email or password');
       }
       
       // Use context login function to set state properly
@@ -80,7 +86,7 @@ export default function ExpertAuthPage() {
         navigate('/expert');
       }
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
     }
