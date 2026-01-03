@@ -3481,13 +3481,24 @@ const DashboardMultiScale = () => {
                 </div>
                 
                 {/* Total Summary */}
-                <div className="mt-4 pt-3 border-t border-border/30 flex items-center justify-between">
-                  <p className="text-xs text-muted-foreground">
-                    Total: {allModifiedParameters.length} affected parameters across {affectedOrgansSummary.length} organ{affectedOrgansSummary.length !== 1 ? 's' : ''}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground">
-                    Click organ header or parameter to view full details below
-                  </p>
+                <div className="mt-4 pt-3 border-t border-border/30 flex items-center justify-between flex-wrap gap-3">
+                  <div>
+                    <p className="text-xs text-muted-foreground">
+                      Total: {allModifiedParameters.length} affected parameters across {affectedOrgansSummary.length} organ{affectedOrgansSummary.length !== 1 ? 's' : ''}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground">
+                      Click organ header or parameter to view full details below
+                    </p>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={resetDisease}
+                    className="border-destructive/40 text-destructive hover:bg-destructive/10"
+                  >
+                    <RotateCcw className="w-3 h-3 mr-2" />
+                    Reset to Healthy Model
+                  </Button>
                 </div>
               </div>
             </CollapsibleContent>
