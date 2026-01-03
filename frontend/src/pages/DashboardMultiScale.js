@@ -129,7 +129,7 @@ Object.entries(PARAM_ID_MAPPING).forEach(([organParam, apiParams]) => {
 const SCALE_MAPPING = {
   'vital_signs': 'physiology',
   'physical_exam': 'physiology',
-  'imaging': 'imaging',
+  'imaging': 'physiology', // Many imaging params like EF belong in physiology
   'ecg': 'ecg',
   'lab_tests': 'lab_tests',
   'urinalysis': 'urinalysis',
