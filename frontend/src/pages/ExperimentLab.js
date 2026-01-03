@@ -92,7 +92,7 @@ export default function ExperimentLab() {
     }
     fetchExperiments();
     fetchDiseases();
-  }, [token, navigate, fetchExperiments, fetchDiseases]);
+  }, [token, authLoading, navigate, fetchExperiments, fetchDiseases]);
 
   // Create new experiment
   const handleCreateExperiment = async () => {
