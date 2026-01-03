@@ -57,6 +57,9 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
+        <Route path="/user-manual" element={<UserManual />} />
+        <Route path="/manual" element={<UserManual />} />
+        <Route path="/help" element={<UserManual />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Toaster position="bottom-right" richColors />
