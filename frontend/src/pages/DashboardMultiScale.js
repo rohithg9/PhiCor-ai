@@ -2893,7 +2893,7 @@ const DashboardMultiScale = () => {
         </AnimatePresence>
 
         {/* Main Content */}
-        <main className={`flex-1 flex flex-col overflow-hidden pt-32 lg:pt-0`}>
+        <main className={`flex-1 flex flex-col overflow-hidden pt-36 lg:pt-0`}>
           {/* Affected Organs Summary Bar - Shows when disease is selected */}
           {currentDisease && affectedOrgansSummary.length > 0 && (
           <div className="border-b border-border/50 px-3 lg:px-6 py-2 bg-gradient-to-r from-destructive/5 to-orange-500/5">
