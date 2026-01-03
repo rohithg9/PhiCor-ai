@@ -70,9 +70,8 @@ export default function ExpertAuthPage() {
         throw new Error(data.detail || 'Login failed');
       }
       
-      // Store token and expert data
-      localStorage.setItem('expert_token', data.access_token);
-      localStorage.setItem('expert_data', JSON.stringify(data.expert));
+      // Use context login function to set state properly
+      login(data.access_token, data.expert);
       
       // Redirect based on role
       if (data.expert.role === 'super_admin' || data.expert.role === 'admin') {
