@@ -189,13 +189,16 @@ const LandingPage = () => {
               {navItems.map((item) => (
                 <button
                   key={item.id}
-                  onClick={() => scrollToSection(item.id)}
+                  onClick={() => item.isRoute ? navigate(item.route) : scrollToSection(item.id)}
                   className={`px-4 py-2 text-sm transition-colors rounded-lg hover:bg-white/5 ${
                     item.isEmail 
                       ? 'text-indigo-400 hover:text-indigo-300' 
+                      : item.isRoute
+                      ? 'text-primary hover:text-primary/80 flex items-center gap-1'
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
+                  {item.isRoute && <BookOpen className="w-3.5 h-3.5" />}
                   {item.label}
                 </button>
               ))}
