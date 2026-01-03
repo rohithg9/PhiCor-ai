@@ -171,3 +171,5 @@ status_history:
 agent_communication:
   - agent: "testing"
   - message: "✅ TESTING MOSTLY COMPLETE - Expert Curation System is largely functional. Expert registration, dashboard, and all backend APIs working perfectly. 1977 diseases available for expert review. Minor frontend admin login issue identified - backend works but frontend form needs investigation. System ready for expert use with admin functionality accessible via backend APIs."
+  - agent: "testing"
+  - message: "❌ CRITICAL AUTHENTICATION ISSUE FOUND - January 3, 2026 Testing Update: Frontend authentication flow is broken. Expert registration form works correctly and backend APIs (login/register) return valid tokens, but frontend fails to redirect to dashboard after login/registration. Users get stuck on login page even with valid credentials. This blocks access to all Expert Dashboard features including clinical information review, change requests, and specialty filtering. Backend is fully functional - issue is in frontend authentication state management."
