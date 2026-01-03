@@ -274,16 +274,24 @@ const LandingPage = () => {
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      scrollToSection(item.id);
+                      if (item.isRoute) {
+                        navigate(item.route);
+                        setMobileMenuOpen(false);
+                      } else {
+                        scrollToSection(item.id);
+                      }
                     }}
                     style={{ touchAction: 'manipulation' }}
                     className={`w-full text-left px-4 py-4 text-base font-medium transition-all rounded-xl active:scale-95 cursor-pointer select-none flex items-center gap-3 ${
                       item.isEmail 
                         ? 'text-indigo-400 bg-indigo-500/10 border border-indigo-500/20' 
+                        : item.isRoute
+                        ? 'text-primary bg-primary/10 border border-primary/20'
                         : 'text-foreground bg-white/5 hover:bg-white/10 active:bg-white/15'
                     }`}
                   >
                     {item.isEmail && <Mail className="w-5 h-5" />}
+                    {item.isRoute && <BookOpen className="w-5 h-5" />}
                     {item.label}
                   </button>
                 ))}
