@@ -1082,6 +1082,20 @@ export const DISEASE_MODELS = {
         },
         structure: {
           atrial_fibrosis: { multiplier: 2.0, absolute: null, note: "Substrate for AF" },
+        },
+        ecg: {
+          p_wave: { multiplier: 0, absolute: 0, note: "ABSENT - replaced by fibrillatory waves" },
+          p_waves: { multiplier: 0, absolute: 0, note: "ABSENT in atrial fibrillation" },
+          p_wave_axis: { multiplier: 0, absolute: null, note: "Not measurable - no P waves" },
+          p_wave_duration: { multiplier: 0, absolute: 0, note: "No P waves present" },
+          p_wave_amplitude: { multiplier: 0, absolute: 0, note: "No P waves present" },
+          sinus_rhythm: { multiplier: 0, absolute: 0, note: "Loss of sinus rhythm" },
+          fibrillatory_waves: { multiplier: 1, absolute: 1, note: "PRESENT - characteristic of AFib" },
+          irregular_rhythm: { multiplier: 1, absolute: 1, note: "Irregularly irregular R-R intervals" },
+          rr_interval: { multiplier: 1.2, absolute: null, note: "Variable (irregularly irregular)" },
+          ventricular_rate: { multiplier: 1.4, absolute: null, note: "Often rapid if uncontrolled" },
+          atrial_rate: { multiplier: 5.0, absolute: 450, note: "300-600 bpm (fibrillatory activity)" },
+          pr_interval: { multiplier: 0, absolute: null, note: "Not measurable - no P waves" },
         }
       },
       brain: {
