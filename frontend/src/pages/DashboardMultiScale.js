@@ -1588,7 +1588,16 @@ const DiseasePanel = ({
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
             Find Condition
           </h3>
-          <Badge variant="outline" className="text-[10px]">{diseases.length} diseases</Badge>
+          <Badge variant="outline" className="text-[10px]">
+            {isLoading ? (
+              <span className="flex items-center gap-1">
+                <Loader2 className="w-3 h-3 animate-spin" />
+                Loading...
+              </span>
+            ) : (
+              `${diseases.length} diseases`
+            )}
+          </Badge>
         </div>
         
         {/* Search Input */}
