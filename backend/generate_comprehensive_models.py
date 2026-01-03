@@ -582,12 +582,9 @@ async def run_phase2_generation(batch_size=5, start_from=0, max_diseases=None):
             failed += 1
             print(f"  ✗ Generation failed")
         
-        # Save batch to file every 20 models
-        if len(batch_models) >= 20:
-            print(f"\n  📁 Saving batch of {len(batch_models)} models to diseaseModels.js...")
-            if append_to_disease_models_file(batch_models):
-                print(f"  ✓ Batch saved successfully")
-            batch_models = {}
+        # Progress reporting every 20 models
+        if generated > 0 and generated % 20 == 0:
+            print(f"\n  📊 Progress: {generated} comprehensive models saved to MongoDB")
         
         # Rate limiting (GPT-4o has lower rate limits)
         await asyncio.sleep(2.0)
