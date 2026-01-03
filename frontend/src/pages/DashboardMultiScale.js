@@ -59,6 +59,53 @@ const SCALE_LEVELS = [
   { id: 'renal_function', name: 'Renal', fullName: 'Renal Function', icon: '🫘', description: 'Kidney function tests' },
 ];
 
+// Mapping between ORGAN_MODELS parameter IDs and API parameter IDs
+// This allows API modifications to apply to ORGAN_MODELS parameters
+const PARAM_ID_MAPPING = {
+  // Physiology scale mappings
+  'ef': ['echo_ef', 'ejection_fraction', 'lvef', 'ef'],
+  'cardiac_output': ['cardiac_output', 'co'],
+  'cardiac_index': ['cardiac_index', 'ci'],
+  'heart_rate': ['heart_rate', 'hr', 'resting_hr', 'pulse_rate'],
+  'stroke_volume': ['stroke_volume', 'sv'],
+  // Geometry mappings  
+  'lv_edv': ['lv_edv', 'lv_volume_diastole', 'lv_end_diastolic_volume'],
+  'lv_esv': ['lv_esv', 'lv_volume_systole', 'lv_end_systolic_volume'],
+  'lv_mass': ['lv_mass', 'lv_weight'],
+  'lv_wall_thickness': ['lv_wall_thickness', 'lv_thickness', 'ivs_thickness'],
+  // Pressure mappings
+  'systolic_bp': ['systolic_bp', 'sbp', 'systolic_blood_pressure'],
+  'diastolic_bp': ['diastolic_bp', 'dbp', 'diastolic_blood_pressure'],
+  'map': ['map', 'mean_arterial_pressure'],
+  'jvp': ['jvp', 'jvp_height', 'jugular_venous_pressure'],
+  // Lab test mappings
+  'bnp': ['bnp', 'brain_natriuretic_peptide'],
+  'nt_probnp': ['nt_probnp', 'ntprobnp', 'nt_pro_bnp'],
+  'troponin_i': ['troponin_i', 'troponin', 'tni'],
+  'creatinine': ['creatinine', 'cr', 'serum_creatinine'],
+  'hemoglobin': ['hemoglobin', 'hb', 'hgb'],
+};
+
+// Reverse mapping: API param ID -> ORGAN_MODELS param ID
+const API_TO_ORGAN_PARAM = {};
+Object.entries(PARAM_ID_MAPPING).forEach(([organParam, apiParams]) => {
+  apiParams.forEach(apiParam => {
+    API_TO_ORGAN_PARAM[apiParam] = organParam;
+  });
+});
+
+// Map API scales to ORGAN_MODELS scales
+const SCALE_MAPPING = {
+  'vital_signs': 'physiology',
+  'physical_exam': 'physiology',
+  'imaging': 'imaging',
+  'ecg': 'ecg',
+  'lab_tests': 'lab_tests',
+  'urinalysis': 'urinalysis',
+  'cbc': 'lab_tests',
+  'renal_function': 'lab_tests',
+};
+
 // Clinical Insights Component with AI
 const ClinicalInsightsPanel = ({ disease, severity }) => {
   const defaultSymptoms = [
