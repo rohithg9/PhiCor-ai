@@ -1792,25 +1792,25 @@ const DiseasePanel = ({
       else if (['oncology', 'oncological'].includes(cat) || icd10.startsWith('C')) {
         groups.other.subcategories.oncology.diseases.push([id, disease]);
       }
-      // Rheumatological/Musculoskeletal
-      else if (['rheumatological', 'musculoskeletal'].includes(cat) || icd10.startsWith('M')) {
+      // Rheumatological/Musculoskeletal/Autoimmune
+      else if (['rheumatological', 'musculoskeletal', 'autoimmune'].includes(cat) || icd10.startsWith('M')) {
         groups.other.subcategories.rheumatological.diseases.push([id, disease]);
       }
       // Dermatological
-      else if (cat === 'dermatological' || icd10.startsWith('L')) {
+      else if (['dermatological', 'dermatology'].includes(cat) || icd10.startsWith('L')) {
         groups.other.subcategories.dermatological.diseases.push([id, disease]);
       }
       // Ophthalmology/ENT
-      else if (['ophthalmology', 'otolaryngology'].includes(cat) || icd10.startsWith('H')) {
+      else if (['ophthalmology', 'otolaryngology', 'ent'].includes(cat) || icd10.startsWith('H')) {
         groups.other.subcategories.ophthalmology.diseases.push([id, disease]);
       }
       // Obstetrics/Gynecology
-      else if (['obstetrics', 'gynecology', 'neonatology'].includes(cat) || 
+      else if (['obstetrics', 'gynecology', 'obgyn', 'neonatology'].includes(cat) || 
                icd10.startsWith('O') || icd10.startsWith('P')) {
         groups.other.subcategories.obstetrics.diseases.push([id, disease]);
       }
-      // Pediatric
-      else if (cat === 'pediatric' || icd10.startsWith('Q')) {
+      // Pediatric/Congenital/Genetic
+      else if (['pediatric', 'congenital', 'genetic', 'geriatric'].includes(cat) || icd10.startsWith('Q')) {
         groups.other.subcategories.pediatric.diseases.push([id, disease]);
       }
       // Psychiatric
