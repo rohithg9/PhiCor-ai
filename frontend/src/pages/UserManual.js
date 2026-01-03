@@ -20,8 +20,8 @@ const UserManual = () => {
       icon: Home,
       content: [
         {
-          title: 'Welcome to PhiCore.ai',
-          description: 'PhiCore.ai is a Mathematical Human Body platform that quantifies disease states through comprehensive clinical parameters. The platform allows you to explore how diseases affect different organ systems with measurable, evidence-based data.',
+          title: 'Welcome to PhiCor.ai',
+          description: 'PhiCor.ai is a Mathematical Human Body platform that quantifies disease states through comprehensive clinical parameters. The platform allows you to explore how diseases affect different organ systems with measurable, evidence-based data.',
           steps: [
             'Navigate to the Dashboard from the home page',
             'Use the "Find Condition" panel to search for diseases',
@@ -249,7 +249,7 @@ const UserManual = () => {
             <div className="flex items-center gap-4">
               <Link to="/" className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
                 <Home className="w-5 h-5" />
-                <span className="font-semibold">PhiCore.ai</span>
+                <span className="font-semibold">PhiCor.ai</span>
               </Link>
               <ChevronRight className="w-4 h-4 text-muted-foreground" />
               <div className="flex items-center gap-2">
@@ -279,7 +279,7 @@ const UserManual = () => {
               <span className="text-sm font-medium">Complete User Guide</span>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              PhiCore.ai User Manual
+              PhiCor.ai User Manual
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Learn how to use the Mathematical Human Body platform to explore diseases, 
@@ -464,7 +464,7 @@ const UserManual = () => {
       <footer className="py-8 border-t border-border bg-muted/30">
         <div className="container mx-auto px-4 text-center">
           <p className="text-sm text-muted-foreground">
-            PhiCore.ai - Mathematical Human Body Platform
+            PhiCor.ai - Mathematical Human Body Platform
           </p>
           <div className="flex justify-center gap-4 mt-4">
             <Link to="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">
