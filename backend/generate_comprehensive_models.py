@@ -425,15 +425,35 @@ Return a JSON object with this EXACT structure. This data will be used to analyz
     "genes": ["relevant_gene1", "relevant_gene2"],
     "snps": ["rs12345", "rs67890"],
     "heritability": 0.4,
-    "penetrance": "Variable/High/Low"
+    "penetrance": "Variable/High/Low",
+    "inheritance_pattern": "Autosomal dominant/recessive/X-linked/Polygenic"
   }},
+  
+  "riskFactors": {{
+    "modifiable": ["Risk factor 1", "Risk factor 2"],
+    "non_modifiable": ["Age", "Family history", "Genetics"],
+    "protective": ["Protective factor 1"]
+  }},
+  
+  "complications": [
+    {{"name": "Complication 1", "risk": "20%", "prevention": "How to prevent", "early_signs": ["Sign 1"]}},
+    {{"name": "Complication 2", "risk": "10%", "prevention": "How to prevent", "early_signs": ["Sign 1"]}}
+  ],
   
   "novelEquations": [
     {{
-      "id": "disease_specific_eq",
-      "name": "Disease-Specific Equation",
-      "latex": "Y = f(x)",
-      "description": "Mathematical model for this disease",
+      "id": "disease_severity_score",
+      "name": "Disease Severity Score",
+      "latex": "Severity = w_1 \\\\cdot Symptoms + w_2 \\\\cdot Signs + w_3 \\\\cdot Labs",
+      "description": "Composite score combining symptoms, signs, and lab values",
+      "evidence": "novel",
+      "variables": {{"w_1": "0.3", "w_2": "0.3", "w_3": "0.4"}}
+    }},
+    {{
+      "id": "progression_rate",
+      "name": "Disease Progression Rate",
+      "latex": "\\\\frac{{dS}}{{dt}} = k \\\\cdot S \\\\cdot (1 - \\\\frac{{S}}{{S_{{max}}}})",
+      "description": "Logistic model for disease progression over time",
       "evidence": "novel"
     }}
   ]
