@@ -404,17 +404,17 @@ async def main():
     print(f"LLM Available: {HAS_LLM}")
     print(f"API Key Present: {bool(EMERGENT_LLM_KEY)}")
     
-    # Enhance diseases (process in batches, can be resumed)
+    # Enhance ALL diseases (no limit)
     disease_enhanced, disease_skipped, disease_failed = await enhance_all_diseases(
         batch_size=10,
-        max_diseases=100,  # Start with 100, can increase
-        min_params=50
+        max_diseases=None,  # Process ALL diseases
+        min_params=30  # Lower threshold to enhance more diseases
     )
     
-    # Enhance drugs
+    # Enhance ALL drugs
     drug_enhanced, drug_failed = await enhance_all_drugs(
         batch_size=10,
-        max_drugs=50  # Start with 50
+        max_drugs=None  # Process ALL drugs
     )
     
     print("\n" + "=" * 60)
