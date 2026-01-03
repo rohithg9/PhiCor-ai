@@ -16,6 +16,7 @@ import { Slider } from '../components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Badge } from '../components/ui/badge';
 import { Sheet, SheetContent, SheetTrigger } from '../components/ui/sheet';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../components/ui/collapsible';
 import { Input } from '../components/ui/input';
 import { FeatureTutorial, TutorialButton, useTutorial } from '../components/FeatureTutorial';
 import LeftPanel from '../components/LeftPanel';
