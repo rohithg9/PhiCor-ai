@@ -2723,7 +2723,7 @@ const DashboardMultiScale = () => {
   const handleDiseaseSelect = useCallback((diseaseId) => {
     setSelectedDisease(diseaseId);
     setParamFilterOrgan(null); // Reset filter when disease changes
-    setShowAllParams(false); // Collapse params when disease changes
+    // Keep showAllParams true so affected parameters section stays OPEN
     
     // Auto-navigate to primary affected organ
     if (diseaseId) {
