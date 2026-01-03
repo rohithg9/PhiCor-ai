@@ -1085,7 +1085,6 @@ export const DISEASE_MODELS = {
         },
         ecg: {
           p_wave: { multiplier: 0, absolute: 0, note: "ABSENT - replaced by fibrillatory waves" },
-          p_waves: { multiplier: 0, absolute: 0, note: "ABSENT in atrial fibrillation" },
           p_wave_axis: { multiplier: 0, absolute: null, note: "Not measurable - no P waves" },
           p_wave_duration: { multiplier: 0, absolute: 0, note: "No P waves present" },
           p_wave_amplitude: { multiplier: 0, absolute: 0, note: "No P waves present" },
