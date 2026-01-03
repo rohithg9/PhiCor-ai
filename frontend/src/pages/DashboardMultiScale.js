@@ -2122,7 +2122,7 @@ const DashboardMultiScale = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showClinicalPanel, setShowClinicalPanel] = useState(false);
   const [paramFilterOrgan, setParamFilterOrgan] = useState(null); // Filter affected params by organ
-  const [showAllParams, setShowAllParams] = useState(false); // Expand to show all params
+  const [showAllParams, setShowAllParams] = useState(true); // Start OPEN by default
   const [apiDiseaseData, setApiDiseaseData] = useState({}); // Store parameter_modifications from API
   const [apiDiseaseByIcd, setApiDiseaseByIcd] = useState({}); // Also map by ICD-10 code
   const [apiDiseases, setApiDiseases] = useState({}); // Full disease data from API
