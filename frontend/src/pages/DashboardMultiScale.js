@@ -2209,31 +2209,17 @@ const DashboardMultiScale = () => {
 
   const organs = useMemo(() => Object.entries(ORGAN_MODELS), []);
   
-  // Merge static disease models with API diseases
+  // All diseases now come from the API (single source of truth from MongoDB)
   const diseases = useMemo(() => {
-    const merged = { ...MERGED_DISEASE_MODELS };
-    // Add API diseases that aren't in static models
-    Object.entries(apiDiseases).forEach(([key, disease]) => {
-      if (!merged[key]) {
-        merged[key] = disease;
-      } else {
-        // Merge API data into existing entry (API takes precedence for modifications)
-        merged[key] = {
-          ...merged[key],
-          modifications: disease.modifications || merged[key].modifications,
-          hasModifications: disease.hasModifications || merged[key].hasModifications
-        };
-      }
-    });
-    return Object.entries(merged);
+    return Object.entries(apiDiseases);
   }, [apiDiseases]);
   
   const currentOrgan = ORGAN_MODELS[selectedOrgan];
   const currentScale = currentOrgan?.[selectedScale];
-  // Look up disease from merged sources - try static first, then API
+  // Look up disease from API data only
   const currentDisease = useMemo(() => {
     if (!selectedDisease) return null;
-    return MERGED_DISEASE_MODELS[selectedDisease] || apiDiseases[selectedDisease] || null;
+    return apiDiseases[selectedDisease] || null;
   }, [selectedDisease, apiDiseases]);
 
   // Auto-select first available scale when organ changes
