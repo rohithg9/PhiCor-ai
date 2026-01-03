@@ -124,9 +124,8 @@ export default function ExpertAuthPage() {
         throw new Error(data.detail || 'Registration failed');
       }
       
-      // Store token and expert data
-      localStorage.setItem('expert_token', data.access_token);
-      localStorage.setItem('expert_data', JSON.stringify(data.expert));
+      // Use context login function to set state properly
+      login(data.access_token, data.expert);
       
       navigate('/expert');
     } catch (err) {
