@@ -313,13 +313,32 @@ const DiseaseDetailPanel = ({ diseaseId, diseaseName }) => {
                           <div className="p-2 rounded bg-green-500/5 border border-green-500/20">
                             <span className="text-[10px] text-green-400 font-semibold">First-Line:</span>
                             <div className="flex flex-wrap gap-1 mt-1">
-                              {(disease.treatment.pharmacological?.first_line || disease.treatment.first_line || []).map((tx, i) => {
-                                const item = typeof tx === 'object' ? tx : { drug_class: tx };
+                              {(Array.isArray(disease.treatment.pharmacological?.first_line || disease.treatment.first_line) 
+                                ? (disease.treatment.pharmacological?.first_line || disease.treatment.first_line)
+                                : [disease.treatment.pharmacological?.first_line || disease.treatment.first_line]
+                              ).map((tx, i) => {
+                                // Extract display name from various formats
+                                let displayName = '';
+                                let details = '';
+                                let evidence = '';
+                                
+                                if (typeof tx === 'string') {
+                                  displayName = tx;
+                                } else if (typeof tx === 'object' && tx !== null) {
+                                  displayName = tx.drug_class || tx.drug || tx.name || tx.class || 'Unknown';
+                                  if (tx.examples && Array.isArray(tx.examples)) {
+                                    details = tx.examples.join(', ');
+                                  } else if (tx.dose) {
+                                    details = tx.dose;
+                                  }
+                                  evidence = tx.evidence_level || '';
+                                }
+                                
                                 return (
                                   <div key={i} className="text-xs p-1.5 bg-green-500/10 rounded border border-green-500/30">
-                                    <span className="font-medium text-green-400">{item.drug_class || item.name || item}</span>
-                                    {item.examples && <span className="text-green-300 ml-1">({item.examples.join(', ')})</span>}
-                                    {item.evidence_level && <Badge variant="outline" className="ml-1 text-[8px]">{item.evidence_level}</Badge>}
+                                    <span className="font-medium text-green-400">{displayName}</span>
+                                    {details && <span className="text-green-300 ml-1">({details})</span>}
+                                    {evidence && <Badge variant="outline" className="ml-1 text-[8px]">{evidence}</Badge>}
                                   </div>
                                 );
                               })}
@@ -332,12 +351,19 @@ const DiseaseDetailPanel = ({ diseaseId, diseaseName }) => {
                           <div className="p-2 rounded bg-yellow-500/5 border border-yellow-500/20">
                             <span className="text-[10px] text-yellow-400 font-semibold">Second-Line:</span>
                             <div className="flex flex-wrap gap-1 mt-1">
-                              {(disease.treatment.pharmacological?.second_line || disease.treatment.second_line || []).map((tx, i) => {
-                                const item = typeof tx === 'object' ? tx : { drug_class: tx };
+                              {(Array.isArray(disease.treatment.pharmacological?.second_line || disease.treatment.second_line)
+                                ? (disease.treatment.pharmacological?.second_line || disease.treatment.second_line)
+                                : [disease.treatment.pharmacological?.second_line || disease.treatment.second_line]
+                              ).map((tx, i) => {
+                                let displayName = '';
+                                if (typeof tx === 'string') {
+                                  displayName = tx;
+                                } else if (typeof tx === 'object' && tx !== null) {
+                                  displayName = tx.drug_class || tx.drug || tx.name || tx.class || 'Unknown';
+                                }
                                 return (
                                   <div key={i} className="text-xs p-1.5 bg-yellow-500/10 rounded border border-yellow-500/30">
-                                    <span className="font-medium text-yellow-400">{item.drug_class || item.name || item}</span>
-                                    {item.examples && <span className="text-yellow-300 ml-1">({item.examples.join(', ')})</span>}
+                                    <span className="font-medium text-yellow-400">{displayName}</span>
                                   </div>
                                 );
                               })}
@@ -354,8 +380,24 @@ const DiseaseDetailPanel = ({ diseaseId, diseaseName }) => {
                           ⚡ Device Therapy
                         </h4>
                         <div className="grid gap-2">
-                          {(disease.treatment.device_therapy || disease.treatment.devices || []).map((dev, i) => {
-                            const device = typeof dev === 'object' ? dev : { device: dev };
+                          {(Array.isArray(disease.treatment.device_therapy || disease.treatment.devices)
+                            ? (disease.treatment.device_therapy || disease.treatment.devices)
+                            : [disease.treatment.device_therapy || disease.treatment.devices]
+                          ).filter(Boolean).map((dev, i) => {
+                            let deviceName = '';
+                            let description = '';
+                            let indications = '';
+                            let evidence = '';
+                            
+                            if (typeof dev === 'string') {
+                              deviceName = dev;
+                            } else if (typeof dev === 'object' && dev !== null) {
+                              deviceName = dev.device || dev.name || 'Unknown Device';
+                              description = dev.description || '';
+                              indications = Array.isArray(dev.indications) ? dev.indications.join('; ') : (dev.indications || '');
+                              evidence = dev.evidence_level || '';
+                            }
+                            
                             return (
                               <div key={i} className="p-2 rounded bg-purple-500/5 border border-purple-500/20">
                                 <div className="flex items-center justify-between">
