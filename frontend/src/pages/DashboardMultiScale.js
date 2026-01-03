@@ -22,8 +22,8 @@ import { FeatureTutorial, TutorialButton, useTutorial } from '../components/Feat
 import LeftPanel from '../components/LeftPanel';
 import { ORGAN_MODELS } from '../data/organModels';
 import { BIOCHEMISTRY } from '../data/biochemistry';
-// NOTE: Static disease imports have been removed - all disease data now comes from the API
-// This eliminates duplicate entries and ensures a single source of truth from MongoDB
+// Re-add static disease imports for comprehensive parameter modifications
+import { DISEASE_MODELS } from '../data/diseaseModels';
 import { getCalculatorsForDisease, getCalculatorsForOrgan, CLINICAL_CALCULATORS } from '../data/clinicalCalculators';
 import LungCancerModule from '../components/LungCancerModule';
 import TreatmentGuidelinesPanel from '../components/TreatmentGuidelinesPanel';
