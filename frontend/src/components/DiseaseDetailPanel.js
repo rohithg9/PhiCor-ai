@@ -308,8 +308,12 @@ const DiseaseDetailPanel = ({ diseaseId, diseaseName }) => {
                         </h4>
                         <div className="flex flex-wrap gap-1">
                           {Array.isArray(disease.treatment.first_line) ? disease.treatment.first_line.map((tx, i) => (
-                            <Badge key={i} className="text-xs bg-green-500/10 text-green-600 border-green-500/30">{tx}</Badge>
-                          )) : <Badge className="text-xs bg-green-500/10 text-green-600 border-green-500/30">{disease.treatment.first_line}</Badge>}
+                            <Badge key={i} className="text-xs bg-green-500/10 text-green-600 border-green-500/30">
+                              {typeof tx === 'object' ? (tx.name || tx.drug || JSON.stringify(tx)) : tx}
+                            </Badge>
+                          )) : typeof disease.treatment.first_line === 'object' 
+                            ? <Badge className="text-xs bg-green-500/10 text-green-600 border-green-500/30">{JSON.stringify(disease.treatment.first_line)}</Badge>
+                            : <Badge className="text-xs bg-green-500/10 text-green-600 border-green-500/30">{disease.treatment.first_line}</Badge>}
                         </div>
                       </div>
                     )}
@@ -321,8 +325,12 @@ const DiseaseDetailPanel = ({ diseaseId, diseaseName }) => {
                         </h4>
                         <div className="flex flex-wrap gap-1">
                           {Array.isArray(disease.treatment.second_line) ? disease.treatment.second_line.map((tx, i) => (
-                            <Badge key={i} className="text-xs bg-yellow-500/10 text-yellow-600 border-yellow-500/30">{tx}</Badge>
-                          )) : <Badge className="text-xs bg-yellow-500/10 text-yellow-600 border-yellow-500/30">{disease.treatment.second_line}</Badge>}
+                            <Badge key={i} className="text-xs bg-yellow-500/10 text-yellow-600 border-yellow-500/30">
+                              {typeof tx === 'object' ? (tx.name || tx.drug || JSON.stringify(tx)) : tx}
+                            </Badge>
+                          )) : typeof disease.treatment.second_line === 'object'
+                            ? <Badge className="text-xs bg-yellow-500/10 text-yellow-600 border-yellow-500/30">{JSON.stringify(disease.treatment.second_line)}</Badge>
+                            : <Badge className="text-xs bg-yellow-500/10 text-yellow-600 border-yellow-500/30">{disease.treatment.second_line}</Badge>}
                         </div>
                       </div>
                     )}
@@ -333,9 +341,13 @@ const DiseaseDetailPanel = ({ diseaseId, diseaseName }) => {
                           <Heart className="w-3 h-3" /> Lifestyle Modifications
                         </h4>
                         <div className="flex flex-wrap gap-1">
-                          {disease.treatment.lifestyle.map((mod, i) => (
-                            <Badge key={i} variant="outline" className="text-xs">{mod}</Badge>
-                          ))}
+                          {Array.isArray(disease.treatment.lifestyle) ? disease.treatment.lifestyle.map((mod, i) => (
+                            <Badge key={i} variant="outline" className="text-xs">
+                              {typeof mod === 'object' ? (mod.name || mod.intervention || JSON.stringify(mod)) : mod}
+                            </Badge>
+                          )) : typeof disease.treatment.lifestyle === 'string' 
+                            ? <Badge variant="outline" className="text-xs">{disease.treatment.lifestyle}</Badge>
+                            : null}
                         </div>
                       </div>
                     )}
@@ -344,9 +356,30 @@ const DiseaseDetailPanel = ({ diseaseId, diseaseName }) => {
                       <div>
                         <h4 className="text-xs font-semibold text-purple-600 mb-1">Device Therapy</h4>
                         <div className="flex flex-wrap gap-1">
-                          {disease.treatment.devices.map((dev, i) => (
-                            <Badge key={i} className="text-xs bg-purple-500/10 text-purple-600 border-purple-500/30">{dev}</Badge>
-                          ))}
+                          {Array.isArray(disease.treatment.devices) ? disease.treatment.devices.map((dev, i) => (
+                            <Badge key={i} className="text-xs bg-purple-500/10 text-purple-600 border-purple-500/30">
+                              {typeof dev === 'object' ? (dev.name || JSON.stringify(dev)) : dev}
+                            </Badge>
+                          )) : typeof disease.treatment.devices === 'string'
+                            ? <Badge className="text-xs bg-purple-500/10 text-purple-600 border-purple-500/30">{disease.treatment.devices}</Badge>
+                            : null}
+                        </div>
+                      </div>
+                    )}
+
+                    {disease.treatment.pharmacological && (
+                      <div>
+                        <h4 className="text-xs font-semibold text-pink-600 mb-1 flex items-center gap-1">
+                          <Pill className="w-3 h-3" /> Pharmacological
+                        </h4>
+                        <div className="flex flex-wrap gap-1">
+                          {Array.isArray(disease.treatment.pharmacological) ? disease.treatment.pharmacological.map((drug, i) => (
+                            <Badge key={i} className="text-xs bg-pink-500/10 text-pink-600 border-pink-500/30">
+                              {typeof drug === 'object' ? (drug.name || drug.drug || JSON.stringify(drug)) : drug}
+                            </Badge>
+                          )) : typeof disease.treatment.pharmacological === 'string'
+                            ? <Badge className="text-xs bg-pink-500/10 text-pink-600 border-pink-500/30">{disease.treatment.pharmacological}</Badge>
+                            : null}
                         </div>
                       </div>
                     )}
