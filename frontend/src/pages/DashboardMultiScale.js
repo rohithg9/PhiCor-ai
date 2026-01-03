@@ -2650,30 +2650,18 @@ const DashboardMultiScale = () => {
   }, [mergedModifications, allModifiedParameters]);
 
   // Calculate modified parameters based on disease
-  // Enhanced to search across multiple scale mappings and param ID variations
+  // Enhanced to search across ALL scales and param ID variations
   const getModifiedValue = useCallback((organId, scaleId, paramId, baseValue) => {
     if (!mergedModifications) return { value: baseValue, modified: false };
     
-    // Try to find modifications - search in multiple locations
+    // Try to find modifications - search in ALL possible locations
     let mods = null;
     
     // Get all possible API param IDs for this ORGAN_MODELS param
     const possibleParamIds = PARAM_ID_MAPPING[paramId] ? [paramId, ...PARAM_ID_MAPPING[paramId]] : [paramId];
     
-    // Get all possible API scales that could contain this data
-    const possibleScales = [scaleId];
-    Object.entries(SCALE_MAPPING).forEach(([apiScale, organScale]) => {
-      if (organScale === scaleId && !possibleScales.includes(apiScale)) {
-        possibleScales.push(apiScale);
-      }
-    });
-    // Also add common scales that might contain the param
-    ['vital_signs', 'physical_exam', 'imaging', 'lab_tests', 'ecg', 'physiology', 'geometry', 'pressures'].forEach(s => {
-      if (!possibleScales.includes(s)) possibleScales.push(s);
-    });
-    
-    // Search for modifications in all possible locations
-    for (const tryScaleId of possibleScales) {
+    // Search in ALL scales for this organ
+    for (const tryScaleId of ALL_SEARCHABLE_SCALES) {
       for (const tryParamId of possibleParamIds) {
         mods = mergedModifications?.[organId]?.[tryScaleId]?.[tryParamId];
         if (mods) break;
@@ -2683,8 +2671,11 @@ const DashboardMultiScale = () => {
     
     // Also try 'cellular' organ for cellular-level parameters
     if (!mods && ['dna', 'gene_expression', 'metabolism', 'cell_cycle'].includes(scaleId)) {
-      for (const tryParamId of possibleParamIds) {
-        mods = mergedModifications?.['cellular']?.[scaleId]?.[tryParamId];
+      for (const tryScaleId of ALL_SEARCHABLE_SCALES) {
+        for (const tryParamId of possibleParamIds) {
+          mods = mergedModifications?.['cellular']?.[tryScaleId]?.[tryParamId];
+          if (mods) break;
+        }
         if (mods) break;
       }
     }
@@ -2705,8 +2696,26 @@ const DashboardMultiScale = () => {
     }
     
     if (absoluteValue !== undefined && absoluteValue !== null && typeof absoluteValue === 'number') {
-      // Direct value from API
-      newValue = absoluteValue;
+      // Direct value from API - use it directly or scale it
+      // For geometry params (volumes), we might need to scale from mm to mL
+      if (paramId.includes('edv') || paramId.includes('esv') || paramId.includes('volume')) {
+        // If API gives a size in mm, convert roughly to volume (mL)
+        // This is an approximation: volume ≈ (size)^3 / 1000 for spherical approximation
+        if (mods.unit === 'mm') {
+          // Use change_percent instead
+          if (changePercent) {
+            const sign = (direction === 'decrease' || changePercent < 0) ? -1 : 1;
+            const factor = 1 + (sign * Math.abs(changePercent) / 100) * diseaseSeverity;
+            newValue = baseValue * factor;
+          } else {
+            newValue = baseValue * (1 + 0.25 * diseaseSeverity); // Default 25% change
+          }
+        } else {
+          newValue = absoluteValue;
+        }
+      } else {
+        newValue = absoluteValue;
+      }
     } else if (changePercent !== undefined && changePercent !== null && changePercent !== 0) {
       // Percentage change from API (e.g., change_percent: 50, direction: "decrease")
       // Handle both positive and negative change_percent values
