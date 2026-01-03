@@ -521,8 +521,14 @@ export const ORGAN_MODELS = {
         { id: "qtc_interval", name: "QTc Interval", value: 420, unit: "ms", range: [350, 450], evidence: "established" },
         { id: "qt_interval", name: "QT Interval", value: 380, unit: "ms", range: [350, 440], evidence: "established" },
         
-        // === AXIS & MORPHOLOGY ===
+        // === P WAVE ===
+        { id: "p_wave", name: "P Wave Present", value: 1, unit: "binary", range: [0, 1], evidence: "established", description: "1=Present, 0=Absent" },
+        { id: "p_waves", name: "P Waves", value: 1, unit: "present", range: [0, 1], evidence: "established" },
         { id: "p_wave_axis", name: "P Wave Axis", value: 60, unit: "degrees", range: [0, 75], evidence: "established" },
+        { id: "p_wave_duration", name: "P Wave Duration", value: 100, unit: "ms", range: [80, 120], evidence: "established" },
+        { id: "p_wave_amplitude", name: "P Wave Amplitude", value: 0.15, unit: "mV", range: [0.1, 0.25], evidence: "established" },
+        
+        // === QRS & AXIS ===
         { id: "qrs_axis", name: "QRS Axis", value: 60, unit: "degrees", range: [-30, 90], evidence: "established" },
         { id: "t_wave_axis", name: "T Wave Axis", value: 45, unit: "degrees", range: [15, 75], evidence: "established" },
         
@@ -538,6 +544,9 @@ export const ORGAN_MODELS = {
         { id: "sinus_rhythm", name: "Sinus Rhythm Present", value: 1, unit: "binary", range: [0, 1], evidence: "established" },
         { id: "atrial_rate", name: "Atrial Rate", value: 70, unit: "bpm", range: [60, 100], evidence: "established" },
         { id: "ventricular_rate", name: "Ventricular Rate", value: 70, unit: "bpm", range: [60, 100], evidence: "established" },
+        { id: "rr_interval", name: "RR Interval", value: 857, unit: "ms", range: [600, 1000], evidence: "established" },
+        { id: "fibrillatory_waves", name: "Fibrillatory Waves", value: 0, unit: "binary", range: [0, 1], evidence: "established", description: "1=Present (AFib), 0=Absent" },
+        { id: "irregular_rhythm", name: "Irregular Rhythm", value: 0, unit: "binary", range: [0, 1], evidence: "established" },
       ],
       equations: [
         {
