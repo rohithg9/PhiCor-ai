@@ -85,7 +85,9 @@ function App() {
       <BrowserRouter>
         <ThemeProvider>
           <AuthProvider>
-            <AppContent />
+            <ExpertProvider>
+              <AppContent />
+            </ExpertProvider>
           </AuthProvider>
         </ThemeProvider>
       </BrowserRouter>
