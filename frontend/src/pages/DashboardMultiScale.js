@@ -2775,13 +2775,48 @@ const DashboardMultiScale = () => {
 
       {/* Mobile Header - Fixed at top with proper z-index */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-background border-b border-border/50">
+        {/* Mobile FeatureNav - Compact version */}
+        <div className="flex items-center justify-between px-3 py-2 bg-background/95 backdrop-blur-sm border-b border-border/30">
+          <div 
+            className="cursor-pointer"
+            onClick={() => window.location.href = '/'}
+          >
+            <span className="text-lg font-bold">
+              Phi<span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">Cor</span>
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            {[
+              { symbol: 'Φ', path: '/dashboard', color: 'from-indigo-500 to-purple-500' },
+              { symbol: 'Δ', path: '/differential', color: 'from-emerald-500 to-teal-500' },
+              { symbol: 'ρ', path: '/drugs', color: 'from-rose-500 to-pink-500' }
+            ].map((item) => (
+              <button
+                key={item.path}
+                onClick={() => window.location.href = item.path}
+                className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all ${
+                  window.location.pathname === item.path
+                    ? `bg-gradient-to-br ${item.color} shadow-lg`
+                    : 'bg-muted/50'
+                }`}
+              >
+                <span className={`font-serif font-bold text-lg ${
+                  window.location.pathname === item.path ? 'text-white' : 'text-muted-foreground'
+                }`}>
+                  {item.symbol}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+        
         {/* Main Mobile Header Bar */}
-        <div className="h-14 flex items-center justify-between px-3 gap-2 border-b border-border/30">
+        <div className="h-12 flex items-center justify-between px-3 gap-2 border-b border-border/30">
           {/* Left Panel Slide-in */}
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="shrink-0">
-                <User className="w-5 h-5" />
+              <Button variant="ghost" size="icon" className="shrink-0 h-9 w-9">
+                <User className="w-4 h-4" />
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-80 p-4 z-[60]">
@@ -2796,15 +2831,15 @@ const DashboardMultiScale = () => {
 
           {/* Current Organ/View Info */}
           <div className="flex-1 flex items-center justify-center gap-2 min-w-0">
-            <span className="text-lg">{currentOrgan?.icon}</span>
+            <span className="text-base">{currentOrgan?.icon}</span>
             <span className="font-medium text-sm truncate">{currentOrgan?.name}</span>
           </div>
           
           {/* Disease Search */}
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className={selectedDisease ? 'text-destructive' : ''}>
-                <Stethoscope className="w-5 h-5" />
+              <Button variant="ghost" size="icon" className={`h-9 w-9 ${selectedDisease ? 'text-destructive' : ''}`}>
+                <Stethoscope className="w-4 h-4" />
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-80 p-0 flex flex-col z-[60]">
