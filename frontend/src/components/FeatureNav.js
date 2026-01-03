@@ -6,7 +6,7 @@ import { Moon, Sun, Settings } from 'lucide-react';
 /**
  * Greek Symbol Navigation Component
  * 
- * Φ (Phi) - PhiCore Engine (Dashboard)
+ * Φ (Phi) - PhiCor Engine (Dashboard)
  * Δ (Delta) - Differential Diagnosis
  * Σ (Sigma) - Medical Scribe
  * 

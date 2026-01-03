@@ -781,7 +781,7 @@ const TreatmentGuidelinesPanel = ({ diseaseId }) => {
                         <div>
                           <div className="text-sm font-medium text-amber-400">Novel Equations</div>
                           <p className="text-xs text-gray-400 mt-1">
-                            PhiCore.ai includes novel mathematical models derived from first principles
+                            PhiCor.ai includes novel mathematical models derived from first principles
                             that extend beyond traditional clinical formulas.
                           </p>
                         </div>
