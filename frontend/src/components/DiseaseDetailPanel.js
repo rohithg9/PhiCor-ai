@@ -369,34 +369,74 @@ const DiseaseDetailPanel = ({ diseaseId, diseaseName }) => {
                     ) : typeof disease.prognosis === 'object' ? (
                       <div className="space-y-2 text-sm">
                         {disease.prognosis.natural_history && (
-                          <div><span className="font-medium text-muted-foreground">Natural History: </span>{disease.prognosis.natural_history}</div>
+                          <div><span className="font-medium text-muted-foreground">Natural History: </span>
+                            {typeof disease.prognosis.natural_history === 'object' 
+                              ? JSON.stringify(disease.prognosis.natural_history)
+                              : disease.prognosis.natural_history}
+                          </div>
                         )}
                         {disease.prognosis.with_treatment && (
-                          <div><span className="font-medium text-green-600">With Treatment: </span>{disease.prognosis.with_treatment}</div>
+                          <div><span className="font-medium text-green-600">With Treatment: </span>
+                            {typeof disease.prognosis.with_treatment === 'object'
+                              ? JSON.stringify(disease.prognosis.with_treatment)
+                              : disease.prognosis.with_treatment}
+                          </div>
                         )}
                         {disease.prognosis.survival_rates && (
                           <div><span className="font-medium text-blue-600">Survival Rates: </span>
                             {typeof disease.prognosis.survival_rates === 'object' 
-                              ? Object.entries(disease.prognosis.survival_rates).map(([k,v]) => `${k}: ${v}`).join(', ')
+                              ? Object.entries(disease.prognosis.survival_rates).map(([k,v]) => 
+                                  `${k}: ${typeof v === 'object' ? JSON.stringify(v) : v}`
+                                ).join(', ')
                               : disease.prognosis.survival_rates}
                           </div>
                         )}
                         {disease.prognosis.prognostic_factors && (
                           <div><span className="font-medium text-orange-600">Prognostic Factors: </span>
                             {Array.isArray(disease.prognosis.prognostic_factors) 
-                              ? disease.prognosis.prognostic_factors.join(', ')
+                              ? disease.prognosis.prognostic_factors.map(f => 
+                                  typeof f === 'object' ? (f.name || JSON.stringify(f)) : f
+                                ).join(', ')
+                              : typeof disease.prognosis.prognostic_factors === 'object'
+                              ? JSON.stringify(disease.prognosis.prognostic_factors)
                               : disease.prognosis.prognostic_factors}
+                          </div>
+                        )}
+                        {disease.prognosis.favorable && (
+                          <div><span className="font-medium text-green-600">Favorable Factors: </span>
+                            {Array.isArray(disease.prognosis.favorable) 
+                              ? disease.prognosis.favorable.join(', ')
+                              : typeof disease.prognosis.favorable === 'object'
+                              ? JSON.stringify(disease.prognosis.favorable)
+                              : disease.prognosis.favorable}
+                          </div>
+                        )}
+                        {disease.prognosis.unfavorable && (
+                          <div><span className="font-medium text-red-600">Unfavorable Factors: </span>
+                            {Array.isArray(disease.prognosis.unfavorable) 
+                              ? disease.prognosis.unfavorable.join(', ')
+                              : typeof disease.prognosis.unfavorable === 'object'
+                              ? JSON.stringify(disease.prognosis.unfavorable)
+                              : disease.prognosis.unfavorable}
                           </div>
                         )}
                         {disease.prognosis.complications && (
                           <div><span className="font-medium text-red-600">Complications: </span>
                             {Array.isArray(disease.prognosis.complications) 
-                              ? disease.prognosis.complications.join(', ')
+                              ? disease.prognosis.complications.map(c => 
+                                  typeof c === 'object' ? (c.name || JSON.stringify(c)) : c
+                                ).join(', ')
+                              : typeof disease.prognosis.complications === 'object'
+                              ? JSON.stringify(disease.prognosis.complications)
                               : disease.prognosis.complications}
                           </div>
                         )}
                         {disease.prognosis.recurrence_rate && (
-                          <div><span className="font-medium text-purple-600">Recurrence Rate: </span>{disease.prognosis.recurrence_rate}</div>
+                          <div><span className="font-medium text-purple-600">Recurrence Rate: </span>
+                            {typeof disease.prognosis.recurrence_rate === 'object'
+                              ? JSON.stringify(disease.prognosis.recurrence_rate)
+                              : disease.prognosis.recurrence_rate}
+                          </div>
                         )}
                       </div>
                     ) : null}
