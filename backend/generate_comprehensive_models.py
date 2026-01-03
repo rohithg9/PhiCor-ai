@@ -464,8 +464,13 @@ REQUIREMENTS:
 2. For each organ, include at least: geometry, pressures, physiology, cellular, lab_tests
 3. Use medically accurate multiplier values (typical ranges: 0.3-3.0)
 4. Include relevant genetic factors for this specific disease
-5. Add 1-2 novel equations specific to this disease pathophysiology
-6. Return ONLY valid JSON, no markdown or explanations"""
+5. Add 2-3 novel equations for disease severity and progression modeling
+6. CRITICAL: Include detailed symptoms WITH severity grades (Grade 1-4)
+7. CRITICAL: Include clinical signs WITH detection methods and severity criteria
+8. Include diagnostic criteria with major/minor criteria
+9. Include clinical guidelines for diagnosis, treatment, and monitoring
+10. Include symptom-severity mathematical models for EMR correlation
+11. Return ONLY valid JSON, no markdown or explanations"""
 
     try:
         llm = LlmChat(
