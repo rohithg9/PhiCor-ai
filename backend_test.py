@@ -503,6 +503,7 @@ def run_all_tests():
     
     # PHICORE.AI MATHEMATICAL HUMAN BODY DASHBOARD TESTS
     if test_results['backend_health']:
+        test_results['enhancement_status'] = test_enhancement_status_endpoint()
         test_results['disease_database_stats'] = test_disease_database_stats()
         test_results['disease_search_diabetes'] = test_disease_search_diabetes()
         test_results['specific_disease_details'] = test_specific_disease_details()
@@ -511,6 +512,7 @@ def run_all_tests():
     else:
         # Set all tests to False if backend is not accessible
         test_results.update({
+            'enhancement_status': False,
             'disease_database_stats': False,
             'disease_search_diabetes': False,
             'specific_disease_details': False,
