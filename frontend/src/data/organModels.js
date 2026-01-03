@@ -521,9 +521,8 @@ export const ORGAN_MODELS = {
         { id: "qtc_interval", name: "QTc Interval", value: 420, unit: "ms", range: [350, 450], evidence: "established" },
         { id: "qt_interval", name: "QT Interval", value: 380, unit: "ms", range: [350, 440], evidence: "established" },
         
-        // === P WAVE ===
-        { id: "p_wave", name: "P Wave Present", value: 1, unit: "binary", range: [0, 1], evidence: "established", description: "1=Present, 0=Absent" },
-        { id: "p_waves", name: "P Waves", value: 1, unit: "present", range: [0, 1], evidence: "established" },
+        // === P WAVE (consolidated - removed duplicate p_waves) ===
+        { id: "p_wave", name: "P Wave Status", value: 1, unit: "present/absent", range: [0, 1], evidence: "established", description: "1=Present, 0=Absent (absent in AFib)" },
         { id: "p_wave_axis", name: "P Wave Axis", value: 60, unit: "degrees", range: [0, 75], evidence: "established" },
         { id: "p_wave_duration", name: "P Wave Duration", value: 100, unit: "ms", range: [80, 120], evidence: "established" },
         { id: "p_wave_amplitude", name: "P Wave Amplitude", value: 0.15, unit: "mV", range: [0.1, 0.25], evidence: "established" },
