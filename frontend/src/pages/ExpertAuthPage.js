@@ -21,9 +21,21 @@ const SPECIALTIES = [
 
 export default function ExpertAuthPage() {
   const navigate = useNavigate();
+  const { login, isAuthenticated, isAdmin } = useExpert();
   const [activeTab, setActiveTab] = useState('login');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      if (isAdmin) {
+        navigate('/admin');
+      } else {
+        navigate('/expert');
+      }
+    }
+  }, [isAuthenticated, isAdmin, navigate]);
   
   // Login form
   const [loginEmail, setLoginEmail] = useState('');
