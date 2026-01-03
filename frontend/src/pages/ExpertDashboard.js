@@ -63,7 +63,7 @@ const CLINICAL_SECTIONS = [
 
 export default function ExpertDashboard() {
   const navigate = useNavigate();
-  const { expert, token, logout, isAdmin } = useExpert();
+  const { expert, token, logout, isAdmin, loading: authLoading } = useExpert();
   
   const [diseases, setDiseases] = useState([]);
   const [filteredDiseases, setFilteredDiseases] = useState([]);
