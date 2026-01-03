@@ -2650,42 +2650,35 @@ const DashboardMultiScale = () => {
     // Try to find modifications - search in multiple locations
     let mods = null;
     
-    // 1. Direct lookup
-    mods = mergedModifications?.[organId]?.[scaleId]?.[paramId];
+    // Get all possible API param IDs for this ORGAN_MODELS param
+    const possibleParamIds = PARAM_ID_MAPPING[paramId] ? [paramId, ...PARAM_ID_MAPPING[paramId]] : [paramId];
     
-    // 2. Try with API param ID mapping (if ORGAN_MODELS param ID doesn't match)
-    if (!mods && PARAM_ID_MAPPING[paramId]) {
-      for (const apiParamId of PARAM_ID_MAPPING[paramId]) {
-        mods = mergedModifications?.[organId]?.[scaleId]?.[apiParamId];
-        if (mods) break;
-        
-        // Also try in mapped scales
-        for (const [apiScale, organScale] of Object.entries(SCALE_MAPPING)) {
-          if (organScale === scaleId) {
-            mods = mergedModifications?.[organId]?.[apiScale]?.[apiParamId];
-            if (mods) break;
-          }
-        }
+    // Get all possible API scales that could contain this data
+    const possibleScales = [scaleId];
+    Object.entries(SCALE_MAPPING).forEach(([apiScale, organScale]) => {
+      if (organScale === scaleId && !possibleScales.includes(apiScale)) {
+        possibleScales.push(apiScale);
+      }
+    });
+    // Also add common scales that might contain the param
+    ['vital_signs', 'physical_exam', 'imaging', 'lab_tests', 'ecg', 'physiology', 'geometry', 'pressures'].forEach(s => {
+      if (!possibleScales.includes(s)) possibleScales.push(s);
+    });
+    
+    // Search for modifications in all possible locations
+    for (const tryScaleId of possibleScales) {
+      for (const tryParamId of possibleParamIds) {
+        mods = mergedModifications?.[organId]?.[tryScaleId]?.[tryParamId];
         if (mods) break;
       }
+      if (mods) break;
     }
     
-    // 3. Try in all API scales that map to this ORGAN_MODELS scale
-    if (!mods) {
-      for (const [apiScale, organScale] of Object.entries(SCALE_MAPPING)) {
-        if (organScale === scaleId) {
-          mods = mergedModifications?.[organId]?.[apiScale]?.[paramId];
-          if (mods) break;
-          
-          // Also try mapped param IDs
-          if (PARAM_ID_MAPPING[paramId]) {
-            for (const apiParamId of PARAM_ID_MAPPING[paramId]) {
-              mods = mergedModifications?.[organId]?.[apiScale]?.[apiParamId];
-              if (mods) break;
-            }
-          }
-          if (mods) break;
-        }
+    // Also try 'cellular' organ for cellular-level parameters
+    if (!mods && ['dna', 'gene_expression', 'metabolism', 'cell_cycle'].includes(scaleId)) {
+      for (const tryParamId of possibleParamIds) {
+        mods = mergedModifications?.['cellular']?.[scaleId]?.[tryParamId];
+        if (mods) break;
       }
     }
     
@@ -2699,24 +2692,31 @@ const DashboardMultiScale = () => {
     const direction = mods.direction;
     const absoluteValue = mods.value || mods.absolute;
     
-    // Skip if marked as 'normal'
-    if (direction === 'normal') return { value: baseValue, modified: false };
+    // Skip if marked as 'normal', 'no_change', 'none', or direction indicates no change
+    if (direction === 'normal' || direction === 'no_change' || direction === 'none' || direction === 'no change') {
+      return { value: baseValue, modified: false };
+    }
     
-    if (absoluteValue !== undefined && absoluteValue !== null) {
+    if (absoluteValue !== undefined && absoluteValue !== null && typeof absoluteValue === 'number') {
       // Direct value from API
       newValue = absoluteValue;
-    } else if (changePercent !== undefined && changePercent !== null) {
+    } else if (changePercent !== undefined && changePercent !== null && changePercent !== 0) {
       // Percentage change from API (e.g., change_percent: 50, direction: "decrease")
-      const sign = direction === 'decrease' ? -1 : 1;
-      const factor = 1 + (sign * Math.abs(changePercent) / 100) * diseaseSeverity;
+      // Handle both positive and negative change_percent values
+      let percentChange = Math.abs(changePercent);
+      const sign = (direction === 'decrease' || changePercent < 0) ? -1 : 1;
+      const factor = 1 + (sign * percentChange / 100) * diseaseSeverity;
       newValue = baseValue * factor;
-    } else if (multiplier) {
+    } else if (multiplier && multiplier !== 1) {
       const factor = 1 + (multiplier - 1) * diseaseSeverity;
       newValue = baseValue * factor;
     } else if (direction === 'increase') {
       newValue = baseValue * (1 + 0.3 * diseaseSeverity); // Default 30% increase
     } else if (direction === 'decrease') {
       newValue = baseValue * (1 - 0.3 * diseaseSeverity); // Default 30% decrease
+    } else {
+      // No clear modification pattern
+      return { value: baseValue, modified: false };
     }
     
     // Calculate delta safely - handle edge cases
@@ -2729,6 +2729,9 @@ const DashboardMultiScale = () => {
     
     // Ensure delta is a valid number
     if (isNaN(delta) || !isFinite(delta)) delta = 0;
+    
+    // Only mark as modified if there's an actual change
+    if (Math.abs(delta) < 0.5) return { value: baseValue, modified: false };
     
     return { 
       value: newValue, 
