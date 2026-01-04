@@ -1014,6 +1014,95 @@ export default function AdminDashboard() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Guideline Review Dialog */}
+      <Dialog open={showGuidelineDialog} onOpenChange={setShowGuidelineDialog}>
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-blue-500" />
+              Guideline Update Alert
+            </DialogTitle>
+            <DialogDescription>
+              Review this potential guideline update
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedGuideline && (
+            <div className="space-y-4">
+              <div className="p-4 bg-blue-500/10 rounded-lg border border-blue-500/30">
+                <div className="flex items-center gap-2 mb-2">
+                  <Badge variant="outline">{selectedGuideline.guideline_source}</Badge>
+                  <Badge variant="secondary">{new Date(selectedGuideline.created_at).toLocaleDateString()}</Badge>
+                </div>
+                <p className="font-medium text-lg">{selectedGuideline.disease_name}</p>
+              </div>
+
+              <div>
+                <Label className="text-muted-foreground">Summary</Label>
+                <p className="text-sm mt-1">{selectedGuideline.summary}</p>
+              </div>
+
+              {selectedGuideline.details && (
+                <div>
+                  <Label className="text-muted-foreground">Details</Label>
+                  <p className="text-sm mt-1">{selectedGuideline.details}</p>
+                </div>
+              )}
+
+              {selectedGuideline.url && (
+                <a 
+                  href={selectedGuideline.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-sm text-blue-500 hover:underline"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  View Source Document
+                </a>
+              )}
+
+              <div className="space-y-2">
+                <Label>Review Notes (Optional)</Label>
+                <Textarea 
+                  value={reviewNotes}
+                  onChange={(e) => setReviewNotes(e.target.value)}
+                  placeholder="Add notes about your review decision..."
+                  rows={2}
+                />
+              </div>
+
+              <Alert>
+                <AlertTriangle className="w-4 h-4" />
+                <AlertDescription>
+                  If this guideline update is relevant, consider creating a change request in the Expert Dashboard to update the disease parameters accordingly.
+                </AlertDescription>
+              </Alert>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowGuidelineDialog(false)}>
+              Cancel
+            </Button>
+            <Button 
+              variant="secondary" 
+              onClick={() => handleReviewGuideline('dismissed')} 
+              disabled={processing}
+            >
+              <XCircle className="w-4 h-4 mr-2" />
+              Dismiss
+            </Button>
+            <Button 
+              onClick={() => handleReviewGuideline('reviewed')} 
+              disabled={processing}
+            >
+              <CheckCircle2 className="w-4 h-4 mr-2" />
+              Mark Reviewed
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
