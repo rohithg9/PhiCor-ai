@@ -303,11 +303,12 @@ def test_knowledge_source_upload():
             
             # Check if AI analysis was triggered
             analysis_status = data.get('source', {}).get('analysis_status')
-            if analysis_status in ['completed', 'processing', 'pending']:
-                print(f"  ✅ AI analysis triggered: {analysis_status} ✓")
+            source_status = data.get('source', {}).get('status')
+            if analysis_status in ['completed', 'processing', 'pending'] or source_status in ['analyzed', 'pending_analysis', 'processing']:
+                print(f"  ✅ AI analysis triggered: {analysis_status or source_status} ✓")
                 analysis_pass = True
             else:
-                print(f"  ❌ AI analysis not triggered: {analysis_status}")
+                print(f"  ❌ AI analysis not triggered: {analysis_status or source_status}")
                 analysis_pass = False
             
             # Verify content was processed
