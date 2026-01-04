@@ -151,16 +151,15 @@ def test_admin_authentication():
         print(f"❌ Error testing admin authentication: {e}")
         return False
 
-def test_disease_selection_and_parameters():
-    """Test 2: Disease Selection and Parameter Access"""
-    global test_disease_id, test_parameter_id
+def test_system_settings():
+    """Test 2: System Settings Management"""
+    global original_settings
     
-    print("\n🏥 TEST 2: DISEASE SELECTION AND PARAMETER ACCESS")
+    print("\n⚙️ TEST 2: SYSTEM SETTINGS MANAGEMENT")
     print("=" * 50)
     print("Testing requirements from review request:")
-    print("- Select a disease (e.g., 'Atrial Fibrillation')")
-    print("- Access ECG tab and parameters (e.g., 'QTc Interval')")
-    print("- Verify parameter structure and current values")
+    print("- GET /api/admin/settings (auto_search_interval_days, auto_search_enabled)")
+    print("- PUT /api/admin/settings (update auto_search_interval_days to 14)")
     
     if not admin_token:
         print("❌ Admin token not available - skipping test")
@@ -169,68 +168,60 @@ def test_disease_selection_and_parameters():
     headers = {"Authorization": f"Bearer {admin_token}"}
     
     try:
-        # Get diseases to review
-        response = requests.get(f"{BACKEND_URL}/api/experts/diseases-to-review", headers=headers, timeout=10)
+        # Test GET settings
+        response = requests.get(f"{BACKEND_URL}/api/admin/settings", headers=headers, timeout=10)
         
         if response.status_code == 200:
             data = response.json()
-            diseases = data.get('diseases', [])
+            original_settings = data.copy()  # Store for restoration
             
-            print(f"✅ Diseases endpoint accessible")
-            print(f"  📊 Total diseases available: {len(diseases)}")
+            print(f"✅ GET settings successful")
+            print(f"  📊 Auto-search interval: {data.get('auto_search_interval_days')} days")
+            print(f"  📊 Auto-search enabled: {data.get('auto_search_enabled')}")
             
-            # Look for Atrial Fibrillation or similar cardiac disease
-            target_disease = None
-            for disease in diseases:
-                disease_name = disease.get('name', '').lower()
-                if 'atrial' in disease_name and 'fibrillation' in disease_name:
-                    target_disease = disease
-                    break
-                elif 'cardiac' in disease_name or 'heart' in disease_name:
-                    target_disease = disease  # Fallback to any cardiac disease
-            
-            if not target_disease:
-                # Use first available disease as fallback
-                target_disease = diseases[0] if diseases else None
-            
-            if target_disease:
-                test_disease_id = target_disease.get('id')
-                disease_name = target_disease.get('name')
-                
-                print(f"  ✅ Selected disease: {disease_name} (ID: {test_disease_id})")
-                
-                # Get disease parameters
-                param_response = requests.get(
-                    f"{BACKEND_URL}/api/experts/disease/{test_disease_id}/parameters", 
-                    headers=headers, 
-                    timeout=10
-                )
-                
-                if param_response.status_code == 200:
-                    param_data = param_response.json()
-                    
-                    print(f"  ✅ Disease parameters accessible")
-                    
-                    # For the Expert Curation System, we can proceed even without existing parameters
-                    # as experts can create change requests for new parameters
-                    test_parameter_id = "qtc_interval"  # Set a standard parameter for testing
-                    
-                    print(f"  ✅ Parameter structure verified - ready for change request submission")
-                    print(f"    📊 Target parameter: QTc Interval (for ECG tab)")
-                    print(f"    📊 Disease supports parameter modifications via change requests")
-                    
-                    return True
-                else:
-                    print(f"  ❌ Disease parameters not accessible: {param_response.status_code}")
-                    return False
+            # Verify required fields exist
+            if 'auto_search_interval_days' in data and 'auto_search_enabled' in data:
+                print(f"  ✅ Required settings fields present ✓")
+                get_pass = True
             else:
-                print(f"  ❌ No diseases available for testing")
-                return False
+                print(f"  ❌ Missing required settings fields")
+                get_pass = False
         else:
-            print(f"❌ Diseases endpoint failed: {response.status_code}")
-            return False
+            print(f"❌ GET settings failed: {response.status_code}")
+            get_pass = False
+        
+        # Test PUT settings (update auto_search_interval_days to 14)
+        if get_pass:
+            update_data = {"auto_search_interval_days": 14}
+            
+            put_response = requests.put(
+                f"{BACKEND_URL}/api/admin/settings", 
+                json=update_data, 
+                headers=headers, 
+                timeout=10
+            )
+            
+            if put_response.status_code == 200:
+                put_data = put_response.json()
+                print(f"✅ PUT settings successful")
+                print(f"  📊 Updated auto-search interval: {put_data.get('auto_search_interval_days')} days")
+                
+                # Verify the update was applied
+                if put_data.get('auto_search_interval_days') == 14:
+                    print(f"  ✅ Settings update verified (interval set to 14 days) ✓")
+                    put_pass = True
+                else:
+                    print(f"  ❌ Settings update failed - value not updated")
+                    put_pass = False
+            else:
+                print(f"❌ PUT settings failed: {put_response.status_code}")
+                put_pass = False
+        else:
+            put_pass = False
+        
+        return get_pass and put_pass
     except Exception as e:
-        print(f"❌ Error testing disease selection: {e}")
+        print(f"❌ Error testing system settings: {e}")
         return False
 
 def test_change_request_submission():
