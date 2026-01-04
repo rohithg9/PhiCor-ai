@@ -260,6 +260,27 @@ export default function ExpertDashboard() {
   
   // Expanded sections
   const [expandedSections, setExpandedSections] = useState({});
+  
+  // Knowledge Bank state
+  const [knowledgeSources, setKnowledgeSources] = useState([]);
+  const [knowledgeSuggestions, setKnowledgeSuggestions] = useState([]);
+  const [knowledgeTimeline, setKnowledgeTimeline] = useState([]);
+  const [knowledgeStats, setKnowledgeStats] = useState({ sources: 0, pending: 0, approved: 0 });
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [uploadForm, setUploadForm] = useState({
+    source_type: 'url',
+    title: '',
+    url: '',
+    content: '',
+    description: '',
+    tags: '',
+    disease_id: '',
+    disease_name: ''
+  });
+  const [uploadFile, setUploadFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [systemSettings, setSystemSettings] = useState({ auto_search_interval_days: 30, auto_search_enabled: true });
+  const [triggeringSearch, setTriggeringSearch] = useState(false);
 
   // Check specialty match
   const matchesSpecialty = useCallback((disease) => {
