@@ -683,11 +683,32 @@ export default function ExpertDashboard() {
             <Button 
               variant="ghost" 
               size="sm" 
+              className={`rounded-b-none border-b-2 ${activeView === 'baselines' ? 'border-primary bg-primary/5' : 'border-transparent'}`}
+              onClick={() => setActiveView('baselines')}
+            >
+              <HeartPulse className="w-4 h-4 mr-2" />
+              Baselines
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
               className={`rounded-b-none border-b-2 ${activeView === 'diseases' ? 'border-primary bg-primary/5' : 'border-transparent'}`}
               onClick={() => setActiveView('diseases')}
             >
               <Stethoscope className="w-4 h-4 mr-2" />
               Diseases
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className={`rounded-b-none border-b-2 ${activeView === 'references' ? 'border-primary bg-primary/5' : 'border-transparent'}`}
+              onClick={() => setActiveView('references')}
+            >
+              <FileJson className="w-4 h-4 mr-2" />
+              References
+              {stats.references > 0 && (
+                <Badge variant="secondary" className="ml-1 text-xs px-1.5">{stats.references}</Badge>
+              )}
             </Button>
             <Button 
               variant="ghost" 
