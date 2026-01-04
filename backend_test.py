@@ -205,14 +205,15 @@ def test_system_settings():
         
         if response.status_code == 200:
             data = response.json()
-            original_settings = data.copy()  # Store for restoration
+            settings = data.get('settings', {})
+            original_settings = settings.copy()  # Store for restoration
             
             print(f"✅ GET settings successful")
-            print(f"  📊 Auto-search interval: {data.get('auto_search_interval_days')} days")
-            print(f"  📊 Auto-search enabled: {data.get('auto_search_enabled')}")
+            print(f"  📊 Auto-search interval: {settings.get('auto_search_interval_days')} days")
+            print(f"  📊 Auto-search enabled: {settings.get('auto_search_enabled')}")
             
             # Verify required fields exist
-            if 'auto_search_interval_days' in data and 'auto_search_enabled' in data:
+            if 'auto_search_interval_days' in settings and 'auto_search_enabled' in settings:
                 print(f"  ✅ Required settings fields present ✓")
                 get_pass = True
             else:
