@@ -16,6 +16,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../componen
 import { useExpert } from '../context/ExpertContext';
 import { ORGAN_MODELS } from '../data/organModels';
 import { DISEASE_MODELS } from '../data/diseaseModels';
+import UserManagementView from '../components/expert/UserManagementView';
 import { 
   Search, CheckCircle2, Clock, AlertTriangle, FileEdit, 
   LogOut, User, Stethoscope, ChevronRight, ChevronDown,
@@ -24,7 +25,7 @@ import {
   FileText, TrendingUp, Microscope, ClipboardList, Target,
   Shield, Thermometer, Dna, Calculator, Plus, Save,
   MessageSquare, Link, RotateCcw, FileCheck, XCircle, ArrowRight,
-  Bell, Zap, RefreshCw, History, Filter, Trash2, Play, HeartPulse, FileJson
+  Bell, Zap, RefreshCw, History, Filter, Trash2, Play, HeartPulse, FileJson, Users
 } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
