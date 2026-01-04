@@ -32,7 +32,7 @@ Test 5: Change Application Verification
 - Check database updates with new parameter values
 - Verify audit logs are updated
 
-API Base URL: https://bodydigi.preview.emergentagent.com
+API Base URL: https://mathbody.preview.emergentagent.com
 """
 
 import requests
