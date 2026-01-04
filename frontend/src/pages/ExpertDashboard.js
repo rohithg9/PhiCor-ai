@@ -2586,6 +2586,18 @@ export default function ExpertDashboard() {
             </Card>
           </div>
         )}
+
+        {/* Users Management View - Admin Only */}
+        {activeView === 'users' && isAdmin && (
+          <UserManagementView
+            experts={allExperts}
+            currentUserId={expert?.id}
+            onCreateExpert={handleCreateExpert}
+            onUpdateExpert={handleUpdateExpert}
+            onDeleteExpert={handleDeleteExpert}
+            onResetPassword={handleResetPassword}
+          />
+        )}
       </div>
 
       {/* Upload Knowledge Dialog */}
