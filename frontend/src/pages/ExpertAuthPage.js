@@ -29,13 +29,10 @@ export default function ExpertAuthPage() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      if (isAdmin) {
-        navigate('/admin');
-      } else {
-        navigate('/expert');
-      }
+      // Always go to unified expert dashboard
+      navigate('/expert');
     }
-  }, [isAuthenticated, isAdmin, navigate]);
+  }, [isAuthenticated, navigate]);
   
   // Login form
   const [loginEmail, setLoginEmail] = useState('');
