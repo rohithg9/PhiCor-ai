@@ -682,7 +682,7 @@ export default function AdminDashboard() {
                 <div className="text-center py-8 text-muted-foreground">
                   <Bell className="w-10 h-10 mx-auto mb-2 opacity-50" />
                   <p className="text-sm">No pending guideline updates</p>
-                  <p className="text-xs">Click "Check Now" to scan for new guidelines</p>
+                  <p className="text-xs">Click &quot;Check Now&quot; to scan for new guidelines</p>
                 </div>
               ) : (
                 <div className="space-y-2">
