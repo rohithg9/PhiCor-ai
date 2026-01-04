@@ -1514,7 +1514,15 @@ export default function ExpertDashboard() {
                           key={organId}
                           variant={selectedOrgan === organId ? 'default' : 'outline'}
                           size="sm"
-                          onClick={() => { setSelectedOrgan(organId); setSelectedScale(null); }}
+                          onClick={() => { 
+                            setSelectedOrgan(organId); 
+                            // Auto-select first scale with modifications, or first available scale
+                            const organModel = ORGAN_MODELS[organId];
+                            const organMods = getMergedModifications[organId] || {};
+                            const firstModifiedScale = SCALE_LEVELS.find(s => organModel?.[s.id] && organMods[s.id]);
+                            const firstAvailableScale = SCALE_LEVELS.find(s => organModel?.[s.id]);
+                            setSelectedScale(firstModifiedScale?.id || firstAvailableScale?.id || null);
+                          }}
                           className={hasMods ? 'border-destructive/50' : ''}
                         >
                           <Icon className="w-4 h-4 mr-1" />
