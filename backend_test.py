@@ -132,6 +132,10 @@ def test_admin_authentication():
     print("- Admin login with admin@phicor.ai / admin123")
     print("- Verify admin access and role-based permissions")
     
+    # First, try to create admin expert if it doesn't exist
+    print("\n  🔧 Ensuring admin expert exists...")
+    create_admin_expert()
+    
     try:
         # Test admin login
         login_data = {
