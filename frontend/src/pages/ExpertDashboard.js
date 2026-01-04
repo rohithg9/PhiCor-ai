@@ -1094,59 +1094,6 @@ export default function ExpertDashboard() {
                       </div>
                     )}
                   </ScrollArea>
-                                  )}
-                                  <FileEdit className="w-3 h-3 text-muted-foreground group-hover:text-primary transition-colors" />
-                                </div>
-                              </div>
-                              
-                              <div className="flex items-baseline gap-2 flex-wrap">
-                                {modResult.modified && !modResult.isAbsent && (
-                                  <span className="text-base font-mono text-muted-foreground/60 line-through">
-                                    {param.value}
-                                  </span>
-                                )}
-                                <span className={`text-2xl font-mono font-bold ${
-                                  modResult.isAbsent ? 'text-purple-500' :
-                                  modResult.modified ? 'text-destructive' : ''
-                                }`}>
-                                  {modResult.isAbsent ? 'ABSENT' :
-                                   typeof modResult.value === 'number' 
-                                    ? modResult.value.toFixed(param.value % 1 === 0 ? 0 : 1)
-                                    : modResult.value}
-                                </span>
-                                {!modResult.isAbsent && (
-                                  <span className="text-sm text-muted-foreground">{param.unit}</span>
-                                )}
-                              </div>
-                              
-                              {modResult.modified && modResult.delta && !modResult.isAbsent && (
-                                <div className={`inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded mt-2 ${
-                                  parseFloat(modResult.delta) > 0 
-                                    ? 'bg-destructive/20 text-destructive' 
-                                    : 'bg-green-500/20 text-green-500'
-                                }`}>
-                                  {parseFloat(modResult.delta) > 0 ? '↑' : '↓'}{Math.abs(parseFloat(modResult.delta))}%
-                                </div>
-                              )}
-                              
-                              {/* Parameter description/source */}
-                              {param.source && (
-                                <p className="text-[10px] text-muted-foreground mt-2 line-clamp-1">{param.source}</p>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                      </div>
-                    ) : (
-                      <div className="text-center py-12 text-muted-foreground">
-                        <Eye className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                        <p className="text-lg font-medium mb-2">Select a Scale</p>
-                        <p className="text-sm">Choose a scale tab above to view and edit parameters</p>
-                        <p className="text-xs mt-4 text-primary">Click any parameter to suggest changes with source links</p>
-                      </div>
-                    )}
-                  </ScrollArea>
                 </div>
               )}
             </CardContent>
