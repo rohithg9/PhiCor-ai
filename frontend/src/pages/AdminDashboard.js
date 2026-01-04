@@ -17,7 +17,7 @@ import {
   Users, FileCheck, FileX, Clock, Activity, CheckCircle2, XCircle,
   Shield, LogOut, User, ChevronRight, ExternalLink, Beaker,
   BarChart3, TrendingUp, AlertTriangle, RefreshCw, Eye, History,
-  Search, Filter, ArrowRight, ArrowDown, ArrowUp
+  Search, Filter, ArrowRight, ArrowDown, ArrowUp, Bell, BookOpen, Zap
 } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -39,6 +39,13 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('pending');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  
+  // Guideline monitoring state
+  const [guidelineNotifications, setGuidelineNotifications] = useState([]);
+  const [guidelineStatus, setGuidelineStatus] = useState(null);
+  const [checkingGuidelines, setCheckingGuidelines] = useState(false);
+  const [selectedGuideline, setSelectedGuideline] = useState(null);
+  const [showGuidelineDialog, setShowGuidelineDialog] = useState(false);
 
   // Fetch dashboard data
   const fetchDashboard = useCallback(async () => {
