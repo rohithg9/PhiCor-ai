@@ -116,7 +116,7 @@ def test_admin_authentication():
         if response.status_code == 200:
             data = response.json()
             admin_token = data.get("access_token")
-            admin_user_data = data.get("user")
+            admin_user_data = data.get("expert")
             
             print(f"✅ Admin login successful")
             print(f"  📊 User ID: {admin_user_data.get('id')}")
