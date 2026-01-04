@@ -23,7 +23,8 @@ import {
   Heart, Brain, Activity, Eye, BookOpen, Pill,
   FileText, TrendingUp, Microscope, ClipboardList, Target,
   Shield, Thermometer, Dna, Calculator, Plus, Save,
-  MessageSquare, Link, RotateCcw
+  MessageSquare, Link, RotateCcw, FileCheck, XCircle, ArrowRight,
+  Bell, Zap, RefreshCw, History, Filter, Trash2, Play, HeartPulse, FileJson
 } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
