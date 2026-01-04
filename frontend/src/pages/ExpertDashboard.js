@@ -243,6 +243,10 @@ export default function ExpertDashboard() {
   const [pendingChanges, setPendingChanges] = useState([]);
   const [historyChanges, setHistoryChanges] = useState([]);
   
+  // Edit change request state
+  const [editingChange, setEditingChange] = useState(null);
+  const [editFormData, setEditFormData] = useState({ parameters: [], additional_notes: '' });
+  
   // Guideline monitoring
   const [guidelineNotifications, setGuidelineNotifications] = useState([]);
   const [checkingGuidelines, setCheckingGuidelines] = useState(false);
