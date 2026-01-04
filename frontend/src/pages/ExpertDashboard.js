@@ -761,6 +761,49 @@ export default function ExpertDashboard() {
                 <div className="text-center py-16 text-muted-foreground">Loading...</div>
               ) : (
                 <div className="space-y-4">
+                  {/* Disease Info & Clinical Summary */}
+                  {diseaseData?.comprehensive_model?.clinicalPresentation && (
+                    <div className="p-4 bg-muted/30 rounded-lg border">
+                      <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                        <Stethoscope className="w-4 h-4 text-primary" />
+                        Clinical Presentation
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        {/* Symptoms */}
+                        {diseaseData.comprehensive_model.clinicalPresentation.symptoms?.length > 0 && (
+                          <div>
+                            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Symptoms</p>
+                            <div className="flex flex-wrap gap-1">
+                              {diseaseData.comprehensive_model.clinicalPresentation.symptoms.slice(0, 6).map((s, i) => (
+                                <Badge key={i} variant="outline" className="text-xs">
+                                  {typeof s === 'object' ? s.name : s}
+                                </Badge>
+                              ))}
+                              {diseaseData.comprehensive_model.clinicalPresentation.symptoms.length > 6 && (
+                                <Badge variant="secondary" className="text-xs">
+                                  +{diseaseData.comprehensive_model.clinicalPresentation.symptoms.length - 6} more
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        {/* Signs */}
+                        {diseaseData.comprehensive_model.clinicalPresentation.signs?.length > 0 && (
+                          <div>
+                            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Signs</p>
+                            <div className="flex flex-wrap gap-1">
+                              {diseaseData.comprehensive_model.clinicalPresentation.signs.slice(0, 6).map((s, i) => (
+                                <Badge key={i} variant="outline" className="text-xs bg-blue-500/10">
+                                  {typeof s === 'object' ? s.name : s}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Severity Slider */}
                   <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
                     <Label className="text-sm font-medium whitespace-nowrap">Disease Severity:</Label>
