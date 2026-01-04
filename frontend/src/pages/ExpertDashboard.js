@@ -384,6 +384,154 @@ export default function ExpertDashboard() {
     }
   }, [token]);
 
+  // Fetch knowledge bank data
+  const fetchKnowledgeData = useCallback(async () => {
+    if (!token || !isAdmin) return;
+    try {
+      // Fetch sources
+      const sourcesRes = await fetch(`${BACKEND_URL}/api/admin/knowledge/sources`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const sourcesData = await sourcesRes.json();
+      setKnowledgeSources(sourcesData.sources || []);
+
+      // Fetch pending suggestions
+      const suggestionsRes = await fetch(`${BACKEND_URL}/api/admin/knowledge/suggestions?status=pending`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const suggestionsData = await suggestionsRes.json();
+      setKnowledgeSuggestions(suggestionsData.suggestions || []);
+
+      // Fetch timeline
+      const timelineRes = await fetch(`${BACKEND_URL}/api/admin/knowledge/timeline?limit=50`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const timelineData = await timelineRes.json();
+      setKnowledgeTimeline(timelineData.timeline || []);
+
+      // Fetch settings
+      const settingsRes = await fetch(`${BACKEND_URL}/api/admin/settings`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const settingsData = await settingsRes.json();
+      setSystemSettings(settingsData.settings || { auto_search_interval_days: 30 });
+
+      // Calculate stats
+      setKnowledgeStats({
+        sources: sourcesData.sources?.length || 0,
+        pending: suggestionsData.suggestions?.length || 0,
+        approved: 0 // Would need another API call
+      });
+    } catch (err) {
+      console.error('Failed to fetch knowledge data:', err);
+    }
+  }, [token, isAdmin]);
+
+  // Upload knowledge source
+  const handleUploadKnowledge = async () => {
+    if (!uploadForm.title) return;
+    setUploading(true);
+    
+    try {
+      const formData = new FormData();
+      formData.append('source_type', uploadForm.source_type);
+      formData.append('title', uploadForm.title);
+      formData.append('url', uploadForm.url || '');
+      formData.append('content', uploadForm.content || '');
+      formData.append('description', uploadForm.description || '');
+      formData.append('tags', uploadForm.tags || '');
+      formData.append('disease_id', uploadForm.disease_id || '');
+      formData.append('disease_name', uploadForm.disease_name || '');
+      
+      if (uploadFile) {
+        formData.append('file', uploadFile);
+      }
+
+      const response = await fetch(`${BACKEND_URL}/api/admin/knowledge/upload`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+      });
+
+      if (response.ok) {
+        setShowUploadDialog(false);
+        setUploadForm({
+          source_type: 'url',
+          title: '',
+          url: '',
+          content: '',
+          description: '',
+          tags: '',
+          disease_id: '',
+          disease_name: ''
+        });
+        setUploadFile(null);
+        fetchKnowledgeData();
+      }
+    } catch (err) {
+      console.error('Failed to upload:', err);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Approve/Reject knowledge suggestion
+  const handleApproveKnowledgeSuggestion = async (suggestionId) => {
+    try {
+      await fetch(`${BACKEND_URL}/api/admin/knowledge/suggestions/${suggestionId}/approve`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      });
+      fetchKnowledgeData();
+    } catch (err) {
+      console.error('Failed to approve suggestion:', err);
+    }
+  };
+
+  const handleRejectKnowledgeSuggestion = async (suggestionId) => {
+    try {
+      await fetch(`${BACKEND_URL}/api/admin/knowledge/suggestions/${suggestionId}/reject`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      });
+      fetchKnowledgeData();
+    } catch (err) {
+      console.error('Failed to reject suggestion:', err);
+    }
+  };
+
+  // Trigger AI auto-search
+  const handleTriggerAutoSearch = async () => {
+    setTriggeringSearch(true);
+    try {
+      await fetch(`${BACKEND_URL}/api/admin/knowledge/trigger-auto-search`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      fetchKnowledgeData();
+    } catch (err) {
+      console.error('Failed to trigger auto-search:', err);
+    } finally {
+      setTriggeringSearch(false);
+    }
+  };
+
+  // Update system settings
+  const handleUpdateSettings = async (updates) => {
+    try {
+      await fetch(`${BACKEND_URL}/api/admin/settings`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates)
+      });
+      fetchKnowledgeData();
+    } catch (err) {
+      console.error('Failed to update settings:', err);
+    }
+  };
+
   // Check for new guidelines
   const handleCheckGuidelines = async () => {
     setCheckingGuidelines(true);
