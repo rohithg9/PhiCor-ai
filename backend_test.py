@@ -296,7 +296,7 @@ def test_change_request_submission():
     print("- Source URL: https://pubmed.gov/example")
     print("- Reasoning: 'Updated based on 2024 ESC guidelines'")
     
-    if not admin_token or not test_disease_id or not test_parameter_id:
+    if not admin_token or not test_disease_id:
         print("❌ Prerequisites not met - skipping test")
         return False
     
@@ -306,16 +306,19 @@ def test_change_request_submission():
         # Create change request data as specified in review
         change_request_data = {
             "disease_id": test_disease_id,
+            "disease_name": "Atrial Fibrillation",  # Required field
             "organ_id": "heart",  # Assuming cardiac parameter
             "scale_id": "ecg",    # Assuming ECG scale
             "reasoning": "Updated based on 2024 ESC guidelines",
             "source_url": "https://pubmed.gov/example",
             "parameters": [
                 {
-                    "parameter_id": test_parameter_id,
+                    "parameter_id": "qtc_interval",
+                    "parameter_name": "QTc Interval",  # Required field
                     "current_value": "450",  # Assuming current value
                     "proposed_value": "500", # As specified in review
                     "unit": "ms",
+                    "source_url": "https://pubmed.gov/example",  # Required field
                     "reasoning": "Updated based on 2024 ESC guidelines for QTc interval prolongation thresholds"
                 }
             ]
