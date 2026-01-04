@@ -536,6 +536,96 @@ export default function ExpertDashboard() {
     }
   };
 
+  // Fetch all experts for user management
+  const fetchAllExperts = useCallback(async () => {
+    if (!token || !isAdmin) return;
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/admin/experts`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      setAllExperts(data.experts || []);
+    } catch (err) {
+      console.error('Failed to fetch experts:', err);
+    }
+  }, [token, isAdmin]);
+
+  // Create new expert
+  const handleCreateExpert = async (formData) => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/admin/experts`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      if (response.ok) {
+        fetchAllExperts();
+      } else {
+        const error = await response.json();
+        alert(error.detail || 'Failed to create expert');
+      }
+    } catch (err) {
+      console.error('Failed to create expert:', err);
+    }
+  };
+
+  // Update expert
+  const handleUpdateExpert = async (expertId, updates) => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/admin/experts/${expertId}`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates)
+      });
+      if (response.ok) {
+        fetchAllExperts();
+      } else {
+        const error = await response.json();
+        alert(error.detail || 'Failed to update expert');
+      }
+    } catch (err) {
+      console.error('Failed to update expert:', err);
+    }
+  };
+
+  // Delete/Deactivate expert
+  const handleDeleteExpert = async (expertId) => {
+    if (!window.confirm('Are you sure you want to deactivate this user?')) return;
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/admin/experts/${expertId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        fetchAllExperts();
+      } else {
+        const error = await response.json();
+        alert(error.detail || 'Failed to deactivate expert');
+      }
+    } catch (err) {
+      console.error('Failed to delete expert:', err);
+    }
+  };
+
+  // Reset expert password
+  const handleResetPassword = async (expertId, newPassword) => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/admin/experts/${expertId}/reset-password`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ new_password: newPassword })
+      });
+      if (response.ok) {
+        alert('Password reset successfully');
+      } else {
+        const error = await response.json();
+        alert(error.detail || 'Failed to reset password');
+      }
+    } catch (err) {
+      console.error('Failed to reset password:', err);
+    }
+  };
+
   // Check for new guidelines
   const handleCheckGuidelines = async () => {
     setCheckingGuidelines(true);
