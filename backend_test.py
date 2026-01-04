@@ -1,36 +1,37 @@
 #!/usr/bin/env python3
 """
-Backend Testing for PhiCore Expert Curation System
-Testing comprehensive change request workflow as requested in review:
+Backend Testing for PhiCor.ai Knowledge Bank System
+Testing comprehensive Knowledge Bank APIs as requested in review:
 
-PHICORE EXPERT CURATION SYSTEM TESTING:
+PHICOR.AI KNOWLEDGE BANK SYSTEM TESTING:
 
-Test 1: Expert Authentication
+Test 1: Admin Authentication
 - Admin login with admin@phicor.ai / admin123
-- Verify expert access and role-based permissions
+- Verify admin access and role-based permissions
 
-Test 2: Disease Selection and Parameter Access
-- Select a disease (e.g., "Atrial Fibrillation")
-- Access ECG tab and parameters (e.g., "QTc Interval")
-- Verify parameter structure and current values
+Test 2: System Settings Management
+- GET /api/admin/settings (auto_search_interval_days, auto_search_enabled)
+- PUT /api/admin/settings (update auto_search_interval_days to 14)
 
-Test 3: Change Request Submission
-- Submit change request with:
-  - Proposed value: 500
-  - Source URL: https://pubmed.gov/example
-  - Reasoning: "Updated based on 2024 ESC guidelines"
-- Verify change request is created
+Test 3: Knowledge Source Upload
+- POST /api/admin/knowledge/upload (Text source with Atrial Fibrillation content)
+- Verify AI analysis triggers and processes content
 
-Test 4: Admin Review Workflow
-- Get pending change requests
-- Review change request details
-- Verify visual diff data (original vs proposed values)
-- Test approve/reject functionality
+Test 4: Knowledge Sources Retrieval
+- GET /api/admin/knowledge/sources
+- Verify uploaded source appears in list
 
-Test 5: Change Application Verification
-- Verify approved changes appear in history
-- Check database updates with new parameter values
-- Verify audit logs are updated
+Test 5: Knowledge Suggestions Review
+- GET /api/admin/knowledge/suggestions?status=pending
+- Verify AI-generated suggestions from analysis
+
+Test 6: Knowledge Timeline
+- GET /api/admin/knowledge/timeline
+- Verify activity history is tracked
+
+Test 7: Suggestion Approval Workflow
+- POST /api/admin/knowledge/suggestions/{suggestion_id}/approve
+- Verify suggestion approval process
 
 API Base URL: https://mathbody.preview.emergentagent.com
 """
