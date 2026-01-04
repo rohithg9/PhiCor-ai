@@ -25,7 +25,7 @@ import {
   FileText, TrendingUp, Microscope, ClipboardList, Target,
   Shield, Thermometer, Dna, Calculator, Plus, Save,
   MessageSquare, Link, RotateCcw, FileCheck, XCircle, ArrowRight,
-  Bell, Zap, RefreshCw, History, Filter, Trash2, Play, HeartPulse, FileJson, Users
+  Bell, Zap, RefreshCw, History, Filter, Trash2, Play, HeartPulse, FileJson, Users, Pencil
 } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
