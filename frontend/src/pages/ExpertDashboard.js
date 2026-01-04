@@ -918,7 +918,7 @@ export default function ExpertDashboard() {
           </CardContent>
         </Card>
       </div>
-      </>
+      </div>
       )}
 
       {/* Changes View */}
