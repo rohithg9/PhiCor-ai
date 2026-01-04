@@ -593,17 +593,20 @@ def test_suggestion_approval():
     except Exception as e:
         print(f"❌ Error testing suggestion approval: {e}")
         return False
-    """Run all PhiCore Expert Curation System tests"""
-    print("🧪 PHICORE EXPERT CURATION SYSTEM TESTING - CHANGE REQUEST WORKFLOW")
+def run_all_tests():
+    """Run all PhiCor.ai Knowledge Bank System tests"""
+    print("🧪 PHICOR.AI KNOWLEDGE BANK SYSTEM TESTING")
     print("=" * 80)
     print("Testing specific requirements from review request:")
-    print("1. Expert Authentication - Admin login with admin@phicor.ai / admin123")
-    print("2. Disease Selection and Parameter Access - Atrial Fibrillation, ECG, QTc Interval")
-    print("3. Change Request Submission - Proposed value: 500, ESC guidelines reasoning")
-    print("4. Admin Review Workflow - Pending tab, visual diff, approve/reject")
-    print("5. Change Application Verification - History tab, database updates, audit logs")
+    print("1. Admin Authentication - Admin login with admin@phicor.ai / admin123")
+    print("2. System Settings Management - GET/PUT /api/admin/settings")
+    print("3. Knowledge Source Upload - POST /api/admin/knowledge/upload")
+    print("4. Knowledge Sources Retrieval - GET /api/admin/knowledge/sources")
+    print("5. Knowledge Suggestions Review - GET /api/admin/knowledge/suggestions")
+    print("6. Knowledge Timeline - GET /api/admin/knowledge/timeline")
+    print("7. Suggestion Approval Workflow - POST /api/admin/knowledge/suggestions/{id}/approve")
     print("=" * 80)
-    print("NOTE: This tests the complete change request workflow end-to-end")
+    print("NOTE: This tests the complete Knowledge Bank workflow end-to-end")
     print("=" * 80)
     
     test_results = {}
@@ -619,26 +622,30 @@ def test_suggestion_approval():
     else:
         test_results['backend_health'] = False
     
-    # EXPERT CURATION SYSTEM TESTS
+    # KNOWLEDGE BANK SYSTEM TESTS
     if test_results['backend_health']:
         test_results['admin_authentication'] = test_admin_authentication()
-        test_results['disease_selection'] = test_disease_selection_and_parameters()
-        test_results['change_request_submission'] = test_change_request_submission()
-        test_results['admin_review_workflow'] = test_admin_review_workflow()
-        test_results['change_application_verification'] = test_change_application_verification()
+        test_results['system_settings'] = test_system_settings()
+        test_results['knowledge_upload'] = test_knowledge_source_upload()
+        test_results['knowledge_sources'] = test_knowledge_sources_retrieval()
+        test_results['knowledge_suggestions'] = test_knowledge_suggestions()
+        test_results['knowledge_timeline'] = test_knowledge_timeline()
+        test_results['suggestion_approval'] = test_suggestion_approval()
     else:
         # Set all tests to False if backend is not accessible
         test_results.update({
             'admin_authentication': False,
-            'disease_selection': False,
-            'change_request_submission': False,
-            'admin_review_workflow': False,
-            'change_application_verification': False
+            'system_settings': False,
+            'knowledge_upload': False,
+            'knowledge_sources': False,
+            'knowledge_suggestions': False,
+            'knowledge_timeline': False,
+            'suggestion_approval': False
         })
     
     # Summary
     print("\n" + "=" * 80)
-    print("🏁 PHICORE EXPERT CURATION SYSTEM TEST SUMMARY")
+    print("🏁 PHICOR.AI KNOWLEDGE BANK SYSTEM TEST SUMMARY")
     print("=" * 80)
     
     passed_tests = sum(1 for result in test_results.values() if result)
@@ -648,11 +655,13 @@ def test_suggestion_approval():
     
     # Test results breakdown
     workflow_tests = [
-        ('admin_authentication', 'Test 1: Expert Authentication (admin@phicor.ai / admin123)'),
-        ('disease_selection', 'Test 2: Disease Selection and Parameter Access (Atrial Fibrillation, ECG, QTc)'),
-        ('change_request_submission', 'Test 3: Change Request Submission (value: 500, ESC guidelines)'),
-        ('admin_review_workflow', 'Test 4: Admin Review Workflow (pending tab, visual diff, approve)'),
-        ('change_application_verification', 'Test 5: Change Application Verification (history, database, audit)')
+        ('admin_authentication', 'Test 1: Admin Authentication (admin@phicor.ai / admin123)'),
+        ('system_settings', 'Test 2: System Settings Management (GET/PUT /api/admin/settings)'),
+        ('knowledge_upload', 'Test 3: Knowledge Source Upload (POST /api/admin/knowledge/upload)'),
+        ('knowledge_sources', 'Test 4: Knowledge Sources Retrieval (GET /api/admin/knowledge/sources)'),
+        ('knowledge_suggestions', 'Test 5: Knowledge Suggestions Review (GET /api/admin/knowledge/suggestions)'),
+        ('knowledge_timeline', 'Test 6: Knowledge Timeline (GET /api/admin/knowledge/timeline)'),
+        ('suggestion_approval', 'Test 7: Suggestion Approval Workflow (POST approve)')
     ]
     
     infrastructure_tests = [
@@ -660,7 +669,7 @@ def test_suggestion_approval():
         ('backend_health', 'Backend Health Check')
     ]
     
-    print(f"\n📊 CHANGE REQUEST WORKFLOW TESTS:")
+    print(f"\n📊 KNOWLEDGE BANK WORKFLOW TESTS:")
     for test_key, test_name in workflow_tests:
         if test_key in test_results:
             status = "✅ PASS" if test_results[test_key] else "❌ FAIL"
@@ -677,47 +686,59 @@ def test_suggestion_approval():
     workflow_total = len(workflow_tests)
     
     if workflow_passed == workflow_total:
-        print(f"\n🎉 ALL CHANGE REQUEST WORKFLOW TESTS PASSED!")
-        print(f"✅ Expert authentication working with admin credentials")
-        print(f"✅ Disease selection and parameter access functional")
-        print(f"✅ Change request submission working (proposed value: 500)")
-        print(f"✅ Admin review workflow functional (pending tab, visual diff, approve)")
-        print(f"✅ Change application verification successful (history, database, audit)")
-        print(f"\n🔄 COMPLETE CHANGE REQUEST WORKFLOW VERIFIED:")
-        print(f"   Expert → Submit Change → Admin Review → Approve → Database Update → History")
+        print(f"\n🎉 ALL KNOWLEDGE BANK WORKFLOW TESTS PASSED!")
+        print(f"✅ Admin authentication working with admin credentials")
+        print(f"✅ System settings management functional")
+        print(f"✅ Knowledge source upload working with AI analysis")
+        print(f"✅ Knowledge sources retrieval functional")
+        print(f"✅ Knowledge suggestions review working")
+        print(f"✅ Knowledge timeline tracking activities")
+        print(f"✅ Suggestion approval workflow functional")
+        print(f"\n🔄 COMPLETE KNOWLEDGE BANK WORKFLOW VERIFIED:")
+        print(f"   Upload → AI Analysis → Suggestions → Review → Approve → Timeline")
     elif workflow_passed >= workflow_total * 0.75:
         print(f"\n✅ MOSTLY SUCCESSFUL! {workflow_passed}/{workflow_total} workflow tests passed.")
         print(f"⚠️  Some minor issues detected - see failed tests above")
     else:
         print(f"\n❌ SIGNIFICANT ISSUES DETECTED! Only {workflow_passed}/{workflow_total} workflow tests passed.")
-        print(f"🔧 Major fixes needed for Expert Curation System workflow")
+        print(f"🔧 Major fixes needed for Knowledge Bank System workflow")
     
     # Detailed verification summary
     print(f"\n📋 KEY WORKFLOW VERIFICATION POINTS:")
     if test_results.get('admin_authentication'):
-        print(f"  ✅ Admin authentication verified (admin@phicor.ai with expert access)")
+        print(f"  ✅ Admin authentication verified (admin@phicor.ai with admin access)")
     else:
         print(f"  ❌ Admin authentication failed")
     
-    if test_results.get('disease_selection'):
-        print(f"  ✅ Disease selection verified (Atrial Fibrillation, ECG parameters)")
+    if test_results.get('system_settings'):
+        print(f"  ✅ System settings verified (auto_search_interval_days, auto_search_enabled)")
     else:
-        print(f"  ❌ Disease selection failed")
+        print(f"  ❌ System settings failed")
     
-    if test_results.get('change_request_submission'):
-        print(f"  ✅ Change request submission verified (proposed value: 500, ESC guidelines)")
+    if test_results.get('knowledge_upload'):
+        print(f"  ✅ Knowledge upload verified (Atrial Fibrillation content with AI analysis)")
     else:
-        print(f"  ❌ Change request submission failed")
+        print(f"  ❌ Knowledge upload failed")
     
-    if test_results.get('admin_review_workflow'):
-        print(f"  ✅ Admin review workflow verified (pending tab, visual diff, approve)")
+    if test_results.get('knowledge_sources'):
+        print(f"  ✅ Knowledge sources retrieval verified")
     else:
-        print(f"  ❌ Admin review workflow failed")
+        print(f"  ❌ Knowledge sources retrieval failed")
     
-    if test_results.get('change_application_verification'):
-        print(f"  ✅ Change application verified (history tab, database updates, audit logs)")
+    if test_results.get('knowledge_suggestions'):
+        print(f"  ✅ Knowledge suggestions verified (AI-generated from analysis)")
     else:
-        print(f"  ❌ Change application verification failed")
+        print(f"  ❌ Knowledge suggestions failed")
+    
+    if test_results.get('knowledge_timeline'):
+        print(f"  ✅ Knowledge timeline verified (activity history tracking)")
+    else:
+        print(f"  ❌ Knowledge timeline failed")
+    
+    if test_results.get('suggestion_approval'):
+        print(f"  ✅ Suggestion approval verified (approve workflow functional)")
+    else:
+        print(f"  ❌ Suggestion approval failed")
     
     return test_results
 
