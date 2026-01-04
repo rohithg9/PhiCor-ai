@@ -5605,6 +5605,774 @@ async def get_guideline_monitoring_status(admin: dict = Depends(require_admin)):
     }
 
 
+# ============== KNOWLEDGE BANK SYSTEM ==============
+
+# Knowledge Bank Pydantic Models
+class KnowledgeSourceCreate(BaseModel):
+    disease_id: Optional[str] = None
+    disease_name: Optional[str] = None
+    source_type: str  # 'document', 'url', 'text'
+    title: str
+    url: Optional[str] = None
+    content: Optional[str] = None  # For text input
+    description: Optional[str] = None
+    tags: List[str] = []
+
+class KnowledgeSuggestionApproval(BaseModel):
+    reviewer_notes: Optional[str] = None
+
+class SystemSettingsUpdate(BaseModel):
+    auto_search_interval_days: Optional[int] = None
+    auto_search_enabled: Optional[bool] = None
+    ai_analysis_model: Optional[str] = None
+
+# Knowledge Bank AI Analysis Function
+async def analyze_knowledge_source_with_ai(source_id: str, content: str, disease_name: Optional[str] = None):
+    """Analyze content with AI to extract medical parameter updates and clinical changes"""
+    try:
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        
+        EMERGENT_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
+        if not EMERGENT_KEY:
+            logger.warning("EMERGENT_LLM_KEY not found, skipping AI analysis")
+            return None
+        
+        chat = LlmChat(
+            api_key=EMERGENT_KEY,
+            session_id=f"knowledge-analysis-{source_id}",
+            system_message="""You are a medical knowledge extraction expert for PhiCor.ai, a digital twin platform.
+Your task is to analyze medical documents and extract structured updates for physiological parameters, clinical guidelines, and disease-specific modifications.
+
+For each piece of content, extract:
+1. Parameter changes (with current vs proposed values, units, normal ranges)
+2. Clinical guideline updates (staging systems, treatment protocols)
+3. Evidence quality (established, novel, emerging)
+4. Source reliability assessment
+
+Output MUST be valid JSON with this structure:
+{
+    "summary": "Brief summary of the content",
+    "relevance_score": 0-100,
+    "suggested_changes": [
+        {
+            "change_type": "parameter_update|guideline_update|clinical_info|staging_update",
+            "target": "organ.scale.parameter_id or guideline_name",
+            "current_value": "if known",
+            "proposed_value": "new value",
+            "unit": "unit if applicable",
+            "evidence_level": "established|novel|emerging",
+            "confidence": 0-100,
+            "reasoning": "Why this change is recommended",
+            "source_quote": "Relevant quote from the document"
+        }
+    ],
+    "affected_diseases": ["list of disease names that might be affected"],
+    "key_findings": ["list of important medical findings"],
+    "warnings": ["any concerns or contradictions noted"]
+}"""
+        ).with_model("openai", "gpt-4o")
+        
+        analysis_prompt = f"""Analyze the following medical content and extract all relevant parameter updates, clinical changes, and guideline modifications.
+
+{"Disease Context: " + disease_name if disease_name else "General medical content - identify all affected diseases."}
+
+Content to analyze:
+---
+{content[:15000]}  
+---
+
+Extract ALL relevant medical information that could update our system's parameters, guidelines, or clinical data. Be thorough and precise with values and units."""
+
+        response = await chat.send_message(UserMessage(text=analysis_prompt))
+        
+        # Parse the JSON response
+        import json
+        import re
+        
+        # Try to extract JSON from response
+        json_match = re.search(r'\{[\s\S]*\}', response)
+        if json_match:
+            analysis_result = json.loads(json_match.group())
+            return analysis_result
+        else:
+            logger.warning(f"Could not parse AI response as JSON: {response[:500]}")
+            return {
+                "summary": response[:500],
+                "relevance_score": 50,
+                "suggested_changes": [],
+                "affected_diseases": [],
+                "key_findings": [response[:200]],
+                "warnings": ["AI response was not in expected JSON format"]
+            }
+            
+    except Exception as e:
+        logger.error(f"AI analysis failed: {str(e)}")
+        return None
+
+# Knowledge Bank API Endpoints
+
+@api_router.post("/admin/knowledge/upload")
+async def upload_knowledge_source(
+    source_type: str = Form(...),
+    title: str = Form(...),
+    disease_id: Optional[str] = Form(None),
+    disease_name: Optional[str] = Form(None),
+    url: Optional[str] = Form(None),
+    content: Optional[str] = Form(None),
+    description: Optional[str] = Form(None),
+    tags: str = Form(""),  # Comma-separated tags
+    file: Optional[UploadFile] = File(None),
+    admin: dict = Depends(require_admin)
+):
+    """Upload a knowledge source (document, URL, or text) for AI analysis"""
+    import gridfs
+    from motor.motor_asyncio import AsyncIOMotorGridFSBucket
+    
+    source_id = str(uuid.uuid4())
+    file_id = None
+    extracted_content = content or ""
+    
+    # Handle file upload
+    if file and source_type == 'document':
+        # Store file in GridFS
+        fs = AsyncIOMotorGridFSBucket(db)
+        file_content = await file.read()
+        
+        # Store in GridFS
+        file_id = await fs.upload_from_stream(
+            file.filename,
+            file_content,
+            metadata={
+                "source_id": source_id,
+                "content_type": file.content_type,
+                "uploaded_by": admin["id"]
+            }
+        )
+        file_id = str(file_id)
+        
+        # Extract text from PDF if possible
+        if file.content_type == 'application/pdf':
+            try:
+                import io
+                import PyPDF2
+                pdf_reader = PyPDF2.PdfReader(io.BytesIO(file_content))
+                extracted_content = ""
+                for page in pdf_reader.pages:
+                    extracted_content += page.extract_text() + "\n"
+            except Exception as e:
+                logger.warning(f"PDF text extraction failed: {e}")
+                extracted_content = f"[PDF file: {file.filename}]"
+        else:
+            # Try to decode as text
+            try:
+                extracted_content = file_content.decode('utf-8')
+            except:
+                extracted_content = f"[Binary file: {file.filename}]"
+    
+    # Handle URL - fetch content
+    if source_type == 'url' and url:
+        try:
+            import httpx
+            async with httpx.AsyncClient() as client:
+                response = await client.get(url, timeout=30.0, follow_redirects=True)
+                if response.status_code == 200:
+                    # Basic HTML text extraction
+                    from html.parser import HTMLParser
+                    class TextExtractor(HTMLParser):
+                        def __init__(self):
+                            super().__init__()
+                            self.text = []
+                        def handle_data(self, data):
+                            self.text.append(data.strip())
+                    
+                    parser = TextExtractor()
+                    parser.feed(response.text)
+                    extracted_content = ' '.join(filter(None, parser.text))[:20000]
+        except Exception as e:
+            logger.warning(f"URL fetch failed: {e}")
+            extracted_content = f"[URL: {url} - Content fetch failed]"
+    
+    # Parse tags
+    tag_list = [t.strip() for t in tags.split(',') if t.strip()] if tags else []
+    
+    # Create knowledge source record
+    knowledge_source = {
+        "id": source_id,
+        "disease_id": disease_id,
+        "disease_name": disease_name,
+        "source_type": source_type,
+        "title": title,
+        "url": url,
+        "file_id": file_id,
+        "file_name": file.filename if file else None,
+        "content_preview": extracted_content[:500] if extracted_content else None,
+        "full_content": extracted_content,
+        "description": description,
+        "tags": tag_list,
+        "status": "pending_analysis",
+        "uploaded_by": admin["id"],
+        "uploaded_by_name": admin["name"],
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "analysis_result": None,
+        "suggestions_generated": False
+    }
+    
+    await db.knowledge_sources.insert_one(knowledge_source)
+    
+    # Create timeline entry
+    await db.knowledge_timeline.insert_one({
+        "id": str(uuid.uuid4()),
+        "source_id": source_id,
+        "disease_id": disease_id,
+        "action": "source_uploaded",
+        "actor_id": admin["id"],
+        "actor_name": admin["name"],
+        "details": {"title": title, "source_type": source_type},
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    })
+    
+    # Trigger async AI analysis
+    try:
+        analysis_result = await analyze_knowledge_source_with_ai(
+            source_id, 
+            extracted_content, 
+            disease_name
+        )
+        
+        if analysis_result:
+            # Update source with analysis
+            await db.knowledge_sources.update_one(
+                {"id": source_id},
+                {
+                    "$set": {
+                        "status": "analyzed",
+                        "analysis_result": analysis_result,
+                        "analyzed_at": datetime.now(timezone.utc).isoformat()
+                    }
+                }
+            )
+            
+            # Create suggestions from analysis
+            suggestions_created = 0
+            for change in analysis_result.get("suggested_changes", []):
+                suggestion_id = str(uuid.uuid4())
+                suggestion = {
+                    "id": suggestion_id,
+                    "source_id": source_id,
+                    "disease_id": disease_id,
+                    "disease_name": disease_name or (analysis_result.get("affected_diseases", [None])[0] if analysis_result.get("affected_diseases") else None),
+                    "change_type": change.get("change_type", "parameter_update"),
+                    "target": change.get("target", "unknown"),
+                    "current_value": change.get("current_value"),
+                    "proposed_value": change.get("proposed_value"),
+                    "unit": change.get("unit"),
+                    "evidence_level": change.get("evidence_level", "novel"),
+                    "confidence": change.get("confidence", 50),
+                    "reasoning": change.get("reasoning", ""),
+                    "source_quote": change.get("source_quote", ""),
+                    "status": "pending",
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                    "reviewed_at": None,
+                    "reviewed_by": None,
+                    "reviewer_notes": None
+                }
+                await db.knowledge_suggestions.insert_one(suggestion)
+                suggestions_created += 1
+            
+            # Update source
+            await db.knowledge_sources.update_one(
+                {"id": source_id},
+                {"$set": {"suggestions_generated": True, "suggestions_count": suggestions_created}}
+            )
+            
+            # Timeline entry for analysis
+            await db.knowledge_timeline.insert_one({
+                "id": str(uuid.uuid4()),
+                "source_id": source_id,
+                "disease_id": disease_id,
+                "action": "ai_analysis_completed",
+                "actor_id": "system",
+                "actor_name": "AI Analysis Engine",
+                "details": {
+                    "suggestions_count": suggestions_created,
+                    "relevance_score": analysis_result.get("relevance_score", 0),
+                    "summary": analysis_result.get("summary", "")[:200]
+                },
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            })
+    except Exception as e:
+        logger.error(f"AI analysis failed for source {source_id}: {e}")
+        await db.knowledge_sources.update_one(
+            {"id": source_id},
+            {"$set": {"status": "analysis_failed", "analysis_error": str(e)}}
+        )
+    
+    # Remove full_content from response to reduce payload
+    knowledge_source.pop("full_content", None)
+    knowledge_source.pop("_id", None)
+    
+    return {
+        "message": "Knowledge source uploaded and analysis initiated",
+        "source": knowledge_source
+    }
+
+@api_router.get("/admin/knowledge/sources")
+async def get_knowledge_sources(
+    disease_id: Optional[str] = None,
+    status: Optional[str] = None,
+    source_type: Optional[str] = None,
+    limit: int = 100,
+    admin: dict = Depends(require_admin)
+):
+    """Get all knowledge sources with optional filtering"""
+    query = {}
+    if disease_id:
+        query["disease_id"] = disease_id
+    if status:
+        query["status"] = status
+    if source_type:
+        query["source_type"] = source_type
+    
+    sources = await db.knowledge_sources.find(
+        query, 
+        {"_id": 0, "full_content": 0}  # Exclude large content field
+    ).sort("created_at", -1).to_list(limit)
+    
+    return {
+        "sources": sources,
+        "total": len(sources)
+    }
+
+@api_router.get("/admin/knowledge/sources/{source_id}")
+async def get_knowledge_source_detail(source_id: str, admin: dict = Depends(require_admin)):
+    """Get detailed information about a knowledge source"""
+    source = await db.knowledge_sources.find_one({"id": source_id}, {"_id": 0})
+    if not source:
+        raise HTTPException(status_code=404, detail="Knowledge source not found")
+    
+    # Get related suggestions
+    suggestions = await db.knowledge_suggestions.find(
+        {"source_id": source_id}, {"_id": 0}
+    ).to_list(100)
+    
+    # Get timeline entries
+    timeline = await db.knowledge_timeline.find(
+        {"source_id": source_id}, {"_id": 0}
+    ).sort("timestamp", -1).to_list(50)
+    
+    return {
+        "source": source,
+        "suggestions": suggestions,
+        "timeline": timeline
+    }
+
+@api_router.get("/admin/knowledge/suggestions")
+async def get_knowledge_suggestions(
+    status: str = "pending",
+    disease_id: Optional[str] = None,
+    limit: int = 100,
+    admin: dict = Depends(require_admin)
+):
+    """Get knowledge suggestions awaiting review"""
+    query = {"status": status}
+    if disease_id:
+        query["disease_id"] = disease_id
+    
+    suggestions = await db.knowledge_suggestions.find(
+        query, {"_id": 0}
+    ).sort("created_at", -1).to_list(limit)
+    
+    # Group by disease for better organization
+    by_disease = {}
+    for s in suggestions:
+        disease = s.get("disease_name") or "General"
+        if disease not in by_disease:
+            by_disease[disease] = []
+        by_disease[disease].append(s)
+    
+    return {
+        "suggestions": suggestions,
+        "by_disease": by_disease,
+        "total": len(suggestions)
+    }
+
+@api_router.post("/admin/knowledge/suggestions/{suggestion_id}/approve")
+async def approve_knowledge_suggestion(
+    suggestion_id: str,
+    approval: KnowledgeSuggestionApproval = None,
+    admin: dict = Depends(require_admin)
+):
+    """Approve a knowledge suggestion and apply changes"""
+    suggestion = await db.knowledge_suggestions.find_one({"id": suggestion_id}, {"_id": 0})
+    if not suggestion:
+        raise HTTPException(status_code=404, detail="Suggestion not found")
+    
+    if suggestion["status"] != "pending":
+        raise HTTPException(status_code=400, detail="Suggestion already processed")
+    
+    # Apply the change to the disease if applicable
+    if suggestion.get("disease_id") and suggestion.get("target"):
+        disease = await db.diseases.find_one({"id": suggestion["disease_id"]})
+        if disease:
+            # Parse target (e.g., "heart.ecg.qrs_duration")
+            target_parts = suggestion["target"].split(".")
+            if len(target_parts) >= 2:
+                # Update modifications
+                update_path = f"modifications.{'.'.join(target_parts)}"
+                await db.diseases.update_one(
+                    {"id": suggestion["disease_id"]},
+                    {
+                        "$set": {
+                            update_path: {
+                                "value": suggestion.get("proposed_value"),
+                                "unit": suggestion.get("unit"),
+                                "source": "knowledge_bank",
+                                "evidence_level": suggestion.get("evidence_level"),
+                                "updated_at": datetime.now(timezone.utc).isoformat(),
+                                "approved_by": admin["id"]
+                            }
+                        }
+                    }
+                )
+    
+    # Update suggestion status
+    await db.knowledge_suggestions.update_one(
+        {"id": suggestion_id},
+        {
+            "$set": {
+                "status": "approved",
+                "reviewed_at": datetime.now(timezone.utc).isoformat(),
+                "reviewed_by": admin["id"],
+                "reviewer_name": admin["name"],
+                "reviewer_notes": approval.reviewer_notes if approval else None
+            }
+        }
+    )
+    
+    # Timeline entry
+    await db.knowledge_timeline.insert_one({
+        "id": str(uuid.uuid4()),
+        "source_id": suggestion.get("source_id"),
+        "disease_id": suggestion.get("disease_id"),
+        "action": "suggestion_approved",
+        "actor_id": admin["id"],
+        "actor_name": admin["name"],
+        "details": {
+            "suggestion_id": suggestion_id,
+            "target": suggestion.get("target"),
+            "proposed_value": suggestion.get("proposed_value")
+        },
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    })
+    
+    return {"message": "Suggestion approved and changes applied", "suggestion_id": suggestion_id}
+
+@api_router.post("/admin/knowledge/suggestions/{suggestion_id}/reject")
+async def reject_knowledge_suggestion(
+    suggestion_id: str,
+    approval: KnowledgeSuggestionApproval = None,
+    admin: dict = Depends(require_admin)
+):
+    """Reject a knowledge suggestion"""
+    suggestion = await db.knowledge_suggestions.find_one({"id": suggestion_id}, {"_id": 0})
+    if not suggestion:
+        raise HTTPException(status_code=404, detail="Suggestion not found")
+    
+    if suggestion["status"] != "pending":
+        raise HTTPException(status_code=400, detail="Suggestion already processed")
+    
+    # Update suggestion status
+    await db.knowledge_suggestions.update_one(
+        {"id": suggestion_id},
+        {
+            "$set": {
+                "status": "rejected",
+                "reviewed_at": datetime.now(timezone.utc).isoformat(),
+                "reviewed_by": admin["id"],
+                "reviewer_name": admin["name"],
+                "reviewer_notes": approval.reviewer_notes if approval else None
+            }
+        }
+    )
+    
+    # Timeline entry
+    await db.knowledge_timeline.insert_one({
+        "id": str(uuid.uuid4()),
+        "source_id": suggestion.get("source_id"),
+        "disease_id": suggestion.get("disease_id"),
+        "action": "suggestion_rejected",
+        "actor_id": admin["id"],
+        "actor_name": admin["name"],
+        "details": {
+            "suggestion_id": suggestion_id,
+            "reason": approval.reviewer_notes if approval else "No reason provided"
+        },
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    })
+    
+    return {"message": "Suggestion rejected", "suggestion_id": suggestion_id}
+
+@api_router.get("/admin/knowledge/timeline")
+async def get_knowledge_timeline(
+    disease_id: Optional[str] = None,
+    source_id: Optional[str] = None,
+    limit: int = 100,
+    admin: dict = Depends(require_admin)
+):
+    """Get knowledge bank activity timeline"""
+    query = {}
+    if disease_id:
+        query["disease_id"] = disease_id
+    if source_id:
+        query["source_id"] = source_id
+    
+    timeline = await db.knowledge_timeline.find(
+        query, {"_id": 0}
+    ).sort("timestamp", -1).to_list(limit)
+    
+    return {
+        "timeline": timeline,
+        "total": len(timeline)
+    }
+
+@api_router.get("/admin/knowledge/disease/{disease_id}")
+async def get_disease_knowledge(disease_id: str, admin: dict = Depends(require_admin)):
+    """Get all knowledge bank data for a specific disease"""
+    # Get knowledge sources for this disease
+    sources = await db.knowledge_sources.find(
+        {"disease_id": disease_id}, 
+        {"_id": 0, "full_content": 0}
+    ).sort("created_at", -1).to_list(100)
+    
+    # Get suggestions for this disease
+    pending_suggestions = await db.knowledge_suggestions.find(
+        {"disease_id": disease_id, "status": "pending"}, {"_id": 0}
+    ).to_list(100)
+    
+    approved_suggestions = await db.knowledge_suggestions.find(
+        {"disease_id": disease_id, "status": "approved"}, {"_id": 0}
+    ).to_list(100)
+    
+    rejected_suggestions = await db.knowledge_suggestions.find(
+        {"disease_id": disease_id, "status": "rejected"}, {"_id": 0}
+    ).to_list(100)
+    
+    # Get timeline for this disease
+    timeline = await db.knowledge_timeline.find(
+        {"disease_id": disease_id}, {"_id": 0}
+    ).sort("timestamp", -1).to_list(50)
+    
+    return {
+        "disease_id": disease_id,
+        "sources": sources,
+        "pending_suggestions": pending_suggestions,
+        "approved_suggestions": approved_suggestions,
+        "rejected_suggestions": rejected_suggestions,
+        "timeline": timeline,
+        "stats": {
+            "total_sources": len(sources),
+            "pending_count": len(pending_suggestions),
+            "approved_count": len(approved_suggestions),
+            "rejected_count": len(rejected_suggestions)
+        }
+    }
+
+@api_router.get("/admin/settings")
+async def get_system_settings(admin: dict = Depends(require_admin)):
+    """Get system settings including auto-search configuration"""
+    settings = await db.system_settings.find_one({"id": "global"}, {"_id": 0})
+    
+    if not settings:
+        # Create default settings
+        settings = {
+            "id": "global",
+            "auto_search_enabled": True,
+            "auto_search_interval_days": 30,
+            "ai_analysis_model": "gpt-4o",
+            "last_auto_search": None,
+            "next_auto_search": None,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.system_settings.insert_one(settings)
+    
+    return {"settings": settings}
+
+@api_router.put("/admin/settings")
+async def update_system_settings(
+    updates: SystemSettingsUpdate,
+    admin: dict = Depends(require_admin)
+):
+    """Update system settings"""
+    update_dict = {}
+    if updates.auto_search_interval_days is not None:
+        update_dict["auto_search_interval_days"] = updates.auto_search_interval_days
+    if updates.auto_search_enabled is not None:
+        update_dict["auto_search_enabled"] = updates.auto_search_enabled
+    if updates.ai_analysis_model is not None:
+        update_dict["ai_analysis_model"] = updates.ai_analysis_model
+    
+    update_dict["updated_at"] = datetime.now(timezone.utc).isoformat()
+    update_dict["updated_by"] = admin["id"]
+    
+    await db.system_settings.update_one(
+        {"id": "global"},
+        {"$set": update_dict},
+        upsert=True
+    )
+    
+    # Timeline entry
+    await db.knowledge_timeline.insert_one({
+        "id": str(uuid.uuid4()),
+        "source_id": None,
+        "disease_id": None,
+        "action": "settings_updated",
+        "actor_id": admin["id"],
+        "actor_name": admin["name"],
+        "details": update_dict,
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    })
+    
+    return {"message": "Settings updated", "updates": update_dict}
+
+@api_router.post("/admin/knowledge/trigger-auto-search")
+async def trigger_auto_search(admin: dict = Depends(require_admin)):
+    """Manually trigger the AI auto-search for guideline updates"""
+    try:
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        
+        EMERGENT_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
+        if not EMERGENT_KEY:
+            raise HTTPException(status_code=500, detail="EMERGENT_LLM_KEY not configured")
+        
+        # Get a sample of diseases to search for updates
+        diseases = await db.diseases.find(
+            {}, 
+            {"_id": 0, "id": 1, "name": 1, "category": 1}
+        ).limit(20).to_list(20)
+        
+        disease_names = [d["name"] for d in diseases]
+        
+        chat = LlmChat(
+            api_key=EMERGENT_KEY,
+            session_id=f"auto-search-{datetime.now().timestamp()}",
+            system_message="""You are a medical guidelines researcher. Search your knowledge for the latest medical guideline updates, clinical recommendations, and parameter changes for the specified diseases.
+
+Output MUST be valid JSON with this structure:
+{
+    "search_date": "YYYY-MM-DD",
+    "findings": [
+        {
+            "disease_name": "disease name",
+            "guideline_source": "e.g., ACC/AHA 2024, ESC 2024, WHO",
+            "update_type": "parameter_change|staging_update|treatment_protocol|diagnostic_criteria",
+            "summary": "Brief description of the update",
+            "details": "Detailed information",
+            "recommendation": "What should be updated in the system",
+            "confidence": 0-100,
+            "source_url": "URL if available"
+        }
+    ],
+    "no_updates_for": ["list of diseases with no recent updates found"]
+}"""
+        ).with_model("openai", "gpt-4o")
+        
+        search_prompt = f"""Search for the latest medical guideline updates (2023-2024) for these diseases:
+
+{', '.join(disease_names[:10])}
+
+Focus on:
+1. New staging systems or classifications
+2. Updated diagnostic criteria
+3. Changed parameter thresholds
+4. New treatment protocols
+5. Revised risk scores
+
+Report any significant updates that should be incorporated into a medical knowledge system."""
+
+        response = await chat.send_message(UserMessage(text=search_prompt))
+        
+        # Parse response
+        import json
+        import re
+        
+        json_match = re.search(r'\{[\s\S]*\}', response)
+        if json_match:
+            findings = json.loads(json_match.group())
+        else:
+            findings = {"findings": [], "error": "Could not parse AI response"}
+        
+        # Create suggestions from findings
+        suggestions_created = 0
+        for finding in findings.get("findings", []):
+            # Find matching disease
+            matching_disease = next(
+                (d for d in diseases if d["name"].lower() == finding.get("disease_name", "").lower()),
+                None
+            )
+            
+            suggestion_id = str(uuid.uuid4())
+            suggestion = {
+                "id": suggestion_id,
+                "source_id": "auto_search",
+                "disease_id": matching_disease["id"] if matching_disease else None,
+                "disease_name": finding.get("disease_name"),
+                "change_type": finding.get("update_type", "guideline_update"),
+                "target": finding.get("guideline_source", "general"),
+                "current_value": None,
+                "proposed_value": finding.get("recommendation"),
+                "unit": None,
+                "evidence_level": "emerging",
+                "confidence": finding.get("confidence", 50),
+                "reasoning": finding.get("summary"),
+                "source_quote": finding.get("details"),
+                "source_url": finding.get("source_url"),
+                "status": "pending",
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "is_auto_search": True
+            }
+            await db.knowledge_suggestions.insert_one(suggestion)
+            suggestions_created += 1
+        
+        # Update settings with last search time
+        await db.system_settings.update_one(
+            {"id": "global"},
+            {
+                "$set": {
+                    "last_auto_search": datetime.now(timezone.utc).isoformat(),
+                    "last_auto_search_results": suggestions_created
+                }
+            },
+            upsert=True
+        )
+        
+        # Timeline entry
+        await db.knowledge_timeline.insert_one({
+            "id": str(uuid.uuid4()),
+            "source_id": "auto_search",
+            "disease_id": None,
+            "action": "auto_search_completed",
+            "actor_id": admin["id"],
+            "actor_name": admin["name"],
+            "details": {
+                "diseases_searched": len(disease_names),
+                "suggestions_created": suggestions_created
+            },
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        })
+        
+        return {
+            "message": "Auto-search completed",
+            "diseases_searched": len(disease_names),
+            "suggestions_created": suggestions_created,
+            "findings": findings.get("findings", [])[:5]  # Return first 5 findings
+        }
+        
+    except Exception as e:
+        logger.error(f"Auto-search failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Auto-search failed: {str(e)}")
+
+
 # Include router - MUST be after all routes are defined
 app.include_router(api_router)
 
