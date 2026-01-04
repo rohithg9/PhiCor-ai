@@ -110,12 +110,18 @@ export default function AdminDashboard() {
     }
     fetchDashboard();
     fetchPendingChanges();
-  }, [token, authLoading, navigate, fetchDashboard, fetchPendingChanges]);
+    fetchHistoryChanges();
+  }, [token, authLoading, navigate, fetchDashboard, fetchPendingChanges, fetchHistoryChanges]);
 
   const handleReviewChange = (change) => {
     setSelectedChange(change);
     setReviewNotes('');
     setShowReviewDialog(true);
+  };
+
+  const handleViewHistory = (change) => {
+    setSelectedChange(change);
+    setShowHistoryDialog(true);
   };
 
   const handleApprove = async () => {
