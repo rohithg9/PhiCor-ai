@@ -102,6 +102,7 @@ const LandingPage = () => {
     { id: 'platform-features', label: 'Clinical Tools' },
     { id: 'advantages', label: 'Advantages' },
     { id: 'user-manual', label: 'User Manual', isRoute: true, route: '/user-manual' },
+    { id: 'expert-login', label: 'Expert Login', isRoute: true, route: '/expert-login' },
     { id: 'contact', label: 'Contact', isEmail: true },
   ];
 
