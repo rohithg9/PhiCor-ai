@@ -107,6 +107,88 @@ export default function AdminDashboard() {
     }
   }, [token]);
 
+  // Fetch guideline notifications
+  const fetchGuidelineNotifications = useCallback(async () => {
+    if (!token) return;
+    
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/admin/guideline-notifications`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      const data = await response.json();
+      setGuidelineNotifications(data.notifications || []);
+    } catch (err) {
+      console.error('Failed to fetch guideline notifications:', err);
+    }
+  }, [token]);
+
+  // Fetch guideline monitoring status
+  const fetchGuidelineStatus = useCallback(async () => {
+    if (!token) return;
+    
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/admin/guideline-monitoring-status`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      const data = await response.json();
+      setGuidelineStatus(data);
+    } catch (err) {
+      console.error('Failed to fetch guideline status:', err);
+    }
+  }, [token]);
+
+  // Check for new guidelines
+  const handleCheckGuidelines = async () => {
+    setCheckingGuidelines(true);
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/admin/check-guidelines`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      const data = await response.json();
+      alert(`Guideline check completed!\nDiseases checked: ${data.diseases_checked}\nNew notifications: ${data.notifications_created}`);
+      fetchGuidelineNotifications();
+      fetchGuidelineStatus();
+    } catch (err) {
+      console.error('Failed to check guidelines:', err);
+      alert('Failed to check guidelines');
+    } finally {
+      setCheckingGuidelines(false);
+    }
+  };
+
+  // Review guideline notification
+  const handleReviewGuideline = async (action) => {
+    if (!selectedGuideline) return;
+    setProcessing(true);
+    
+    try {
+      const response = await fetch(
+        `${BACKEND_URL}/api/admin/guideline-notifications/${selectedGuideline.id}/review?action=${action}&notes=${encodeURIComponent(reviewNotes)}`,
+        {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        }
+      );
+      
+      if (!response.ok) throw new Error('Failed to review');
+      
+      setShowGuidelineDialog(false);
+      setSelectedGuideline(null);
+      setReviewNotes('');
+      fetchGuidelineNotifications();
+      fetchGuidelineStatus();
+    } catch (err) {
+      console.error('Failed to review guideline:', err);
+      alert('Failed to review guideline notification');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
   useEffect(() => {
     // Wait for auth to load before checking
     if (authLoading) return;
@@ -118,7 +200,9 @@ export default function AdminDashboard() {
     fetchDashboard();
     fetchPendingChanges();
     fetchHistoryChanges();
-  }, [token, authLoading, navigate, fetchDashboard, fetchPendingChanges, fetchHistoryChanges]);
+    fetchGuidelineNotifications();
+    fetchGuidelineStatus();
+  }, [token, authLoading, navigate, fetchDashboard, fetchPendingChanges, fetchHistoryChanges, fetchGuidelineNotifications, fetchGuidelineStatus]);
 
   const handleReviewChange = (change) => {
     setSelectedChange(change);
