@@ -570,32 +570,42 @@ def test_scheduler_status():
         # Check supervisor backend logs for APScheduler messages
         import subprocess
         
-        # Get recent backend logs
-        result = subprocess.run(
-            ["tail", "-n", "100", "/var/log/supervisor/backend.out.log"],
-            capture_output=True,
-            text=True,
-            timeout=10
-        )
+        # Get recent backend logs from both stdout and stderr
+        log_files = [
+            "/var/log/supervisor/backend.out.log",
+            "/var/log/supervisor/backend.err.log"
+        ]
         
-        if result.returncode == 0:
-            logs = result.stdout
-            
+        all_logs = ""
+        for log_file in log_files:
+            try:
+                result = subprocess.run(
+                    ["tail", "-n", "100", log_file],
+                    capture_output=True,
+                    text=True,
+                    timeout=10
+                )
+                if result.returncode == 0:
+                    all_logs += result.stdout + "\n"
+            except Exception as e:
+                print(f"  ⚠️ Could not read {log_file}: {e}")
+        
+        if all_logs:
             print(f"✅ Backend logs retrieved successfully")
             
             # Look for APScheduler startup messages
             scheduler_keywords = [
-                "scheduler",
-                "APScheduler",
+                "scheduler started",
+                "apscheduler.scheduler",
                 "auto-search",
-                "auto_search_job",
-                "Scheduler started",
-                "Guideline Auto-Search"
+                "guideline auto-search",
+                "adding job",
+                "scheduler has been shut down"
             ]
             
             found_keywords = []
             for keyword in scheduler_keywords:
-                if keyword.lower() in logs.lower():
+                if keyword.lower() in all_logs.lower():
                     found_keywords.append(keyword)
             
             if found_keywords:
@@ -603,7 +613,7 @@ def test_scheduler_status():
                 print(f"    📊 Keywords found: {found_keywords}")
                 
                 # Look for specific startup message
-                if "scheduler started" in logs.lower() or "apscheduler" in logs.lower():
+                if "scheduler started" in all_logs.lower():
                     print(f"  ✅ APScheduler startup confirmed ✓")
                     startup_pass = True
                 else:
@@ -611,20 +621,28 @@ def test_scheduler_status():
                     startup_pass = True  # Don't fail for this
                 
                 # Look for auto-search job
-                if "auto-search" in logs.lower() or "auto_search_job" in logs.lower():
+                if "auto-search" in all_logs.lower() or "guideline auto-search" in all_logs.lower():
                     print(f"  ✅ Auto-search job configuration confirmed ✓")
                     job_pass = True
                 else:
                     print(f"  ⚠️ Auto-search job not explicitly mentioned")
                     job_pass = True  # Don't fail for this
                 
-                return startup_pass and job_pass
+                # Look for job scheduling
+                if "adding job" in all_logs.lower():
+                    print(f"  ✅ Job scheduling confirmed ✓")
+                    schedule_pass = True
+                else:
+                    print(f"  ⚠️ Job scheduling not confirmed")
+                    schedule_pass = True  # Don't fail for this
+                
+                return startup_pass and job_pass and schedule_pass
             else:
                 print(f"  ⚠️ No scheduler-related log entries found")
                 print(f"  ℹ️ This may indicate scheduler is not running or logs are not verbose enough")
                 return False
         else:
-            print(f"❌ Failed to retrieve backend logs: {result.stderr}")
+            print(f"❌ Failed to retrieve backend logs")
             return False
     except subprocess.TimeoutExpired:
         print(f"❌ Timeout retrieving backend logs")
