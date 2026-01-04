@@ -83,6 +83,23 @@ export default function AdminDashboard() {
     }
   }, [token]);
 
+  // Fetch history (approved/rejected) change requests
+  const fetchHistoryChanges = useCallback(async () => {
+    if (!token) return;
+    
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/change-requests`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      const data = await response.json();
+      const history = (data.change_requests || []).filter(c => c.status !== 'pending');
+      setHistoryChanges(history);
+    } catch (err) {
+      console.error('Failed to fetch history:', err);
+    }
+  }, [token]);
+
   useEffect(() => {
     // Wait for auth to load before checking
     if (authLoading) return;
