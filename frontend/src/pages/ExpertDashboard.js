@@ -918,6 +918,284 @@ export default function ExpertDashboard() {
           </CardContent>
         </Card>
       </div>
+          </>
+        )}
+
+        {/* Changes View */}
+        {activeView === 'changes' && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Pending Changes */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-orange-500" />
+                    Pending Review
+                  </CardTitle>
+                  <CardDescription>Changes awaiting approval</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-[400px]">
+                    {pendingChanges.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <CheckCircle2 className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                        <p>No pending changes</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {pendingChanges.map(change => (
+                          <Card key={change.id} className="border-l-4 border-l-orange-500">
+                            <CardContent className="pt-4">
+                              <div className="flex items-start justify-between mb-2">
+                                <div>
+                                  <p className="font-medium">{change.disease_name}</p>
+                                  <p className="text-sm text-muted-foreground">{change.organ_id} / {change.scale_id}</p>
+                                  <p className="text-xs text-muted-foreground">by {change.expert_name}</p>
+                                </div>
+                              </div>
+                              <div className="p-2 bg-muted rounded text-sm mb-3">
+                                {change.parameters?.map((p, i) => (
+                                  <div key={i} className="flex items-center gap-2">
+                                    <span className="font-mono text-xs">{p.parameter_name}:</span>
+                                    <span className="text-red-500 line-through">{p.current_value}</span>
+                                    <ArrowRight className="w-3 h-3" />
+                                    <span className="text-green-500 font-medium">{p.proposed_value}</span>
+                                  </div>
+                                ))}
+                              </div>
+                              <div className="flex gap-2">
+                                <Button size="sm" onClick={() => handleApproveChange(change.id)}>
+                                  <CheckCircle2 className="w-3 h-3 mr-1" />
+                                  Approve
+                                </Button>
+                                <Button size="sm" variant="destructive" onClick={() => handleRejectChange(change.id)}>
+                                  <XCircle className="w-3 h-3 mr-1" />
+                                  Reject
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+
+              {/* History */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <History className="w-5 h-5" />
+                    History
+                  </CardTitle>
+                  <CardDescription>Past change requests</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-[400px]">
+                    {historyChanges.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <History className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                        <p>No history yet</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {historyChanges.map(change => (
+                          <div 
+                            key={change.id} 
+                            className={`p-3 rounded-lg border-l-4 ${
+                              change.status === 'approved' ? 'border-l-green-500 bg-green-500/5' : 'border-l-red-500 bg-red-500/5'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              {change.status === 'approved' ? (
+                                <CheckCircle2 className="w-4 h-4 text-green-500" />
+                              ) : (
+                                <XCircle className="w-4 h-4 text-red-500" />
+                              )}
+                              <span className="font-medium text-sm">{change.disease_name}</span>
+                              <Badge variant={change.status === 'approved' ? 'default' : 'destructive'} className="text-xs">
+                                {change.status}
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {change.expert_name} • {new Date(change.reviewed_at || change.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )}
+
+        {/* Guidelines View */}
+        {activeView === 'guidelines' && (
+          <div className="space-y-6">
+            <Card className="border-blue-500/30">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <BookOpen className="w-5 h-5 text-blue-500" />
+                      AI Guideline Monitoring
+                    </CardTitle>
+                    <CardDescription>Automatic detection of medical guideline updates</CardDescription>
+                  </div>
+                  <Button onClick={handleCheckGuidelines} disabled={checkingGuidelines}>
+                    {checkingGuidelines ? (
+                      <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Zap className="w-4 h-4 mr-2" />
+                    )}
+                    Check for Updates
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="h-[400px]">
+                  {guidelineNotifications.length === 0 ? (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <Bell className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                      <p className="text-lg font-medium mb-2">No Guideline Updates</p>
+                      <p className="text-sm">Click &quot;Check for Updates&quot; to scan for new medical guidelines</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {guidelineNotifications.map(notification => (
+                        <Card key={notification.id} className="border-l-4 border-l-blue-500">
+                          <CardContent className="pt-4">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Badge variant="outline">{notification.guideline_source}</Badge>
+                              <Badge variant={notification.status === 'pending' ? 'secondary' : 'default'}>
+                                {notification.status}
+                              </Badge>
+                            </div>
+                            <p className="font-medium">{notification.disease_name}</p>
+                            <p className="text-sm text-muted-foreground mt-1">{notification.summary}</p>
+                            {notification.url && (
+                              <a href={notification.url} target="_blank" rel="noopener noreferrer" 
+                                 className="text-sm text-blue-500 hover:underline flex items-center gap-1 mt-2">
+                                <ExternalLink className="w-3 h-3" />
+                                View Source
+                              </a>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Lab View */}
+        {activeView === 'lab' && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Experiments List */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg">My Experiments</CardTitle>
+                  <Button size="sm" onClick={() => setShowNewExperiment(true)}>
+                    <Plus className="w-4 h-4 mr-1" />
+                    New
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="h-[400px]">
+                  {experiments.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-purple-500/10 flex items-center justify-center">
+                        <Beaker className="w-8 h-8 text-purple-500" />
+                      </div>
+                      <p className="font-medium mb-1">No experiments yet</p>
+                      <p className="text-sm mb-4">Create your first virtual patient test</p>
+                      <Button size="sm" onClick={() => setShowNewExperiment(true)} className="bg-purple-600 hover:bg-purple-700">
+                        <Plus className="w-4 h-4 mr-1" />
+                        Create Experiment
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {experiments.map(exp => (
+                        <div
+                          key={exp.id}
+                          className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                            selectedExperiment?.id === exp.id ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'
+                          }`}
+                          onClick={() => setSelectedExperiment(exp)}
+                        >
+                          <p className="font-medium">{exp.name}</p>
+                          <p className="text-sm text-muted-foreground">{exp.test_diseases?.length || 0} diseases</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </ScrollArea>
+              </CardContent>
+            </Card>
+
+            {/* Experiment Details */}
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle>{selectedExperiment ? selectedExperiment.name : 'Select an Experiment'}</CardTitle>
+                <CardDescription>
+                  {selectedExperiment ? selectedExperiment.description || 'No description' : 'Choose an experiment to view details'}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {!selectedExperiment ? (
+                  <div className="text-center py-16 text-muted-foreground">
+                    <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-purple-500/10 flex items-center justify-center">
+                      <Beaker className="w-10 h-10 text-purple-500" />
+                    </div>
+                    <p className="text-lg font-medium mb-2">No Experiment Selected</p>
+                    <p className="text-sm mb-6">Select an experiment or create a new one</p>
+                    <Button onClick={() => setShowNewExperiment(true)} className="bg-purple-600 hover:bg-purple-700">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create New Experiment
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="p-4 bg-muted/50 rounded-lg">
+                        <p className="text-sm text-muted-foreground">Patient</p>
+                        <p className="font-medium">{selectedExperiment.patient?.name || 'N/A'}</p>
+                      </div>
+                      <div className="p-4 bg-muted/50 rounded-lg">
+                        <p className="text-sm text-muted-foreground">Age</p>
+                        <p className="font-medium">{selectedExperiment.patient?.age || 'N/A'} years</p>
+                      </div>
+                      <div className="p-4 bg-muted/50 rounded-lg">
+                        <p className="text-sm text-muted-foreground">Sex</p>
+                        <p className="font-medium">{selectedExperiment.patient?.sex || 'N/A'}</p>
+                      </div>
+                      <div className="p-4 bg-muted/50 rounded-lg">
+                        <p className="text-sm text-muted-foreground">Diseases</p>
+                        <p className="font-medium">{selectedExperiment.test_diseases?.length || 0}</p>
+                      </div>
+                    </div>
+                    {selectedExperiment.results && (
+                      <div className="p-4 bg-muted rounded-lg">
+                        <p className="text-sm font-medium mb-2">Results</p>
+                        <pre className="text-xs overflow-auto">{JSON.stringify(selectedExperiment.results, null, 2)}</pre>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </div>
 
       {/* Change Request Dialog */}
       <Dialog open={showChangeDialog} onOpenChange={setShowChangeDialog}>
