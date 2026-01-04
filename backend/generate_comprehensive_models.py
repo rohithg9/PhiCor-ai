@@ -472,34 +472,45 @@ CRITICAL REQUIREMENTS:
 
 Return ONLY valid JSON. No markdown or explanations."""
 
-    try:
-        llm = LlmChat(
-            api_key=EMERGENT_LLM_KEY,
-            session_id=f"comprehensive_{disease_name[:15]}_{datetime.now().strftime('%H%M%S')}",
-            system_message="You are a senior clinical expert. Return only valid, comprehensive JSON disease models."
-        ).with_model("openai", "gpt-4o")
-        
-        user_msg = UserMessage(text=prompt)
-        response = await llm.send_message(user_msg)
-        
-        # Clean response
-        content = response.strip()
-        if content.startswith('```'):
-            lines = content.split('\n')
-            content = '\n'.join(lines[1:-1] if lines[-1] == '```' else lines[1:])
-            if content.startswith('json'):
-                content = content[4:]
-        content = content.strip()
-        
-        model = json.loads(content)
-        return model
-        
-    except json.JSONDecodeError as e:
-        print(f"  JSON parse error: {str(e)[:50]}")
-        return None
-    except Exception as e:
-        print(f"  AI error: {str(e)[:50]}")
-        return None
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            llm = LlmChat(
+                api_key=EMERGENT_LLM_KEY,
+                session_id=f"comprehensive_{disease_name[:15]}_{datetime.now().strftime('%H%M%S')}_{attempt}",
+                system_message="You are a senior clinical expert. Return only valid, comprehensive JSON disease models."
+            ).with_model("openai", "gpt-4o-mini")  # Use mini for better rate limits
+            
+            user_msg = UserMessage(text=prompt)
+            response = await llm.send_message(user_msg)
+            
+            # Clean response
+            content = response.strip()
+            if content.startswith('```'):
+                lines = content.split('\n')
+                content = '\n'.join(lines[1:-1] if lines[-1] == '```' else lines[1:])
+                if content.startswith('json'):
+                    content = content[4:]
+            content = content.strip()
+            
+            model = json.loads(content)
+            return model
+            
+        except json.JSONDecodeError as e:
+            print(f"  JSON parse error: {str(e)[:50]}")
+            if attempt < max_retries - 1:
+                await asyncio.sleep(2 ** attempt)  # Exponential backoff
+                continue
+            return None
+        except Exception as e:
+            error_msg = str(e)[:50]
+            print(f"  AI error (attempt {attempt+1}/{max_retries}): {error_msg}")
+            if attempt < max_retries - 1:
+                await asyncio.sleep(2 ** (attempt + 1))  # Exponential backoff
+                continue
+            return None
+    
+    return None
 
 
 def read_existing_disease_models():
