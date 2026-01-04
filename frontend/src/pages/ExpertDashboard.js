@@ -53,6 +53,106 @@ const SPECIALTY_MAPPING = {
   "Pathology": []
 };
 
+// Keywords to identify NON-DISEASE items (lab tests, parameters, guidelines, treatments)
+const NON_DISEASE_PATTERNS = [
+  // Lab tests and parameters
+  /^[A-Z]{2,5}$/,  // ABG, ALP, ALT, ANA, etc.
+  /^[0-9]+-?(hr|min|MWT|OH|ASA)/i,  // 6MWT, 24h, 2-hr, 5-ASA
+  /antibodies?$/i,
+  /^(anti-|Anti-)/,
+  /test$/i,
+  /ratio$/i,
+  /level$/i,
+  /index$/i,
+  /score$/i,
+  /criteria$/i,
+  /classification$/i,
+  /guidelines?$/i,
+  /duration$/i,
+  /protocol$/i,
+  /induction$/i,
+  /regimen$/i,
+  /therapy$/i,
+  /inhibitors?$/i,
+  /blockers?$/i,
+  /stimulation$/i,
+  /measurement$/i,
+  /assessment$/i,
+  /evaluation$/i,
+  /calculation$/i,
+  /formula$/i,
+  /algorithm$/i,
+  /staging$/i,
+  /grading$/i,
+  /Rule$/,
+  /^ACR\//,
+  /^EULAR/,
+  /^AASM/,
+  /^ACOG/,
+  /^WHO /,
+  /^TNM /,
+  /^Wells /,
+  /^CHADS/,
+  /^HAS-BLED/,
+  /^CHA2DS2/,
+];
+
+// Specific non-disease item names
+const NON_DISEASE_NAMES = new Set([
+  'ABG', 'ALP', 'ALT', 'ANA', 'ANCA', 'ACTH', 'ABI',
+  '6MWT', '6-Minute Walk Distance and Desaturation',
+  '1-hr post-glucose', '2-hr post-glucose',
+  '17-OHP', '1mg overnight DST',
+  '21-hydroxylase antibodies',
+  '24h urinary free cortisol', '24h urine catecholamines',
+  '24h urine metanephrines', '24h urine uric acid',
+  '25-OH Vitamin D', '3HP (INH/Rifapentine)',
+  '5-ASA', '5-ASA (Mesalamine)', '7+3 Induction',
+  'AAA Growth Rate', 'AAA Rupture Risk (Laplace)',
+  'ACE inhibitors', 'ACEi/ARB', 'ACEi/ARB or CCB or Thiazide',
+  'ACTH stimulation test', 'ADT backbone', 'ADT duration with radiation',
+  'ADT intensification (mCSPC)', 'ALK rearrangement',
+]);
+
+// Function to check if an item is a disease vs reference/parameter
+const isDiseaseItem = (item) => {
+  const name = item.name || '';
+  
+  // Check against explicit non-disease names
+  if (NON_DISEASE_NAMES.has(name)) return false;
+  
+  // Check against patterns
+  for (const pattern of NON_DISEASE_PATTERNS) {
+    if (pattern.test(name)) return false;
+  }
+  
+  // Items containing certain keywords are likely not diseases
+  const lowerName = name.toLowerCase();
+  const nonDiseaseKeywords = [
+    'criteria', 'guidelines', 'classification', 'scoring',
+    'test', 'assay', 'measurement', 'formula', 'equation',
+    'therapy', 'treatment', 'regimen', 'protocol', 'induction',
+    'inhibitor', 'blocker', 'agonist', 'antagonist',
+    'antibody', 'antibodies', 'antigen',
+    'ratio', 'index', 'score', 'scale', 'staging',
+    'duration', 'interval', 'rate', 'velocity',
+  ];
+  
+  if (nonDiseaseKeywords.some(kw => lowerName.includes(kw))) {
+    // Exception: actual disease names that contain these words
+    const diseaseExceptions = ['disease', 'syndrome', 'disorder', 'cancer', 'carcinoma', 
+      'lymphoma', 'leukemia', 'infection', 'infarction', 'failure', 'deficiency',
+      'fibrillation', 'hypertension', 'hypotension', 'stenosis', 'insufficiency',
+      'thrombosis', 'embolism', 'anemia', 'itis', 'osis', 'pathy'];
+    if (diseaseExceptions.some(exc => lowerName.includes(exc))) {
+      return true;
+    }
+    return false;
+  }
+  
+  return true;
+};
+
 // Organ icons
 const ORGAN_ICONS = {
   heart: Heart,
