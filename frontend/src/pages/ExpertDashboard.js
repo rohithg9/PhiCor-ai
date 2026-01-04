@@ -1030,6 +1030,18 @@ export default function ExpertDashboard() {
                 )}
               </Button>
             )}
+            {isAdmin && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className={`rounded-b-none border-b-2 ${activeView === 'users' ? 'border-primary bg-primary/5' : 'border-transparent'}`}
+                onClick={() => setActiveView('users')}
+              >
+                <Users className="w-4 h-4 mr-2" />
+                Users
+                <Badge variant="secondary" className="ml-1 text-xs px-1.5">{allExperts.length}</Badge>
+              </Button>
+            )}
           </div>
         </div>
       </header>
