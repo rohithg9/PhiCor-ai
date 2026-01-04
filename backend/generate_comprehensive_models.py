@@ -479,9 +479,36 @@ Return ONLY valid JSON. No markdown or explanations."""
                 api_key=EMERGENT_LLM_KEY,
                 session_id=f"comprehensive_{disease_name[:15]}_{datetime.now().strftime('%H%M%S')}_{attempt}",
                 system_message="You are a senior clinical expert. Return only valid, comprehensive JSON disease models."
-            ).with_model("openai", "gpt-4o-mini")  # Use mini for better rate limits
+            ).with_model("openai", "gpt-4o-mini")
             
-            user_msg = UserMessage(text=prompt)
+            # Use simplified prompt on later retries
+            if attempt >= 2:
+                simplified_prompt = f"""Generate a simplified JSON model for: {disease_name} ({category})
+
+Return JSON with these fields:
+{{
+  "clinicalPresentation": {{
+    "symptoms": [{{"name": "symptom", "severity_range": "mild to severe", "frequency": "common"}}],
+    "signs": [{{"name": "sign", "detection_method": "exam", "sensitivity": "high"}}]
+  }},
+  "diagnosticWorkup": {{
+    "laboratory": [{{"test": "test name", "purpose": "why"}}],
+    "imaging": [{{"modality": "CT/MRI/etc", "purpose": "why"}}]
+  }},
+  "treatment": {{
+    "first_line": [{{"drug_class": "name", "examples": ["drug"]}}]
+  }},
+  "prognosis": {{
+    "natural_history": "description",
+    "with_treatment": "expected outcome"
+  }}
+}}
+
+Include at least 5 symptoms, 3 signs, 5 lab tests, 2 imaging. Return ONLY valid JSON."""
+                user_msg = UserMessage(text=simplified_prompt)
+            else:
+                user_msg = UserMessage(text=prompt)
+            
             response = await llm.send_message(user_msg)
             
             # Clean response
