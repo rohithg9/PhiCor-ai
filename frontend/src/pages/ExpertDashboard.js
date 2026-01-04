@@ -673,6 +673,71 @@ export default function ExpertDashboard() {
     }
   };
 
+  // Edit a pending change request
+  const handleEditChange = (change) => {
+    setEditingChange(change);
+    setEditFormData({
+      disease_id: change.disease_id,
+      disease_name: change.disease_name,
+      organ_id: change.organ_id,
+      scale_id: change.scale_id,
+      change_type: change.change_type,
+      parameters: change.parameters || [],
+      additional_notes: change.additional_notes || ''
+    });
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingChange) return;
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/change-requests/${editingChange.id}`, {
+        method: 'PUT',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(editFormData)
+      });
+      if (response.ok) {
+        setEditingChange(null);
+        setEditFormData({ parameters: [], additional_notes: '' });
+        fetchAllChanges();
+        fetchMyChangeRequests();
+      } else {
+        const error = await response.json();
+        alert(error.detail || 'Failed to save changes');
+      }
+    } catch (err) {
+      console.error('Failed to save edit:', err);
+      alert('Failed to save changes');
+    }
+  };
+
+  const handleWithdrawChange = async (changeId) => {
+    if (!window.confirm('Are you sure you want to withdraw this change request?')) return;
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/change-requests/${changeId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        fetchAllChanges();
+        fetchMyChangeRequests();
+      } else {
+        const error = await response.json();
+        alert(error.detail || 'Failed to withdraw');
+      }
+    } catch (err) {
+      console.error('Failed to withdraw:', err);
+    }
+  };
+
+  const updateEditParameter = (index, field, value) => {
+    const newParams = [...editFormData.parameters];
+    newParams[index] = { ...newParams[index], [field]: value };
+    setEditFormData({ ...editFormData, parameters: newParams });
+  };
+
   useEffect(() => {
     if (authLoading) return;
     if (!token) {
