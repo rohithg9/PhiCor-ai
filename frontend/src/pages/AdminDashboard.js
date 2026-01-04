@@ -9,13 +9,15 @@ import { Progress } from '../components/ui/progress';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '../components/ui/dialog';
 import { Textarea } from '../components/ui/textarea';
 import { Label } from '../components/ui/label';
+import { Input } from '../components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { useExpert } from '../context/ExpertContext';
 import { 
   Users, FileCheck, FileX, Clock, Activity, CheckCircle2, XCircle,
   Shield, LogOut, User, ChevronRight, ExternalLink, Beaker,
-  BarChart3, TrendingUp, AlertTriangle, RefreshCw, Eye
+  BarChart3, TrendingUp, AlertTriangle, RefreshCw, Eye, History,
+  Search, Filter, ArrowRight, ArrowDown, ArrowUp
 } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -27,11 +29,16 @@ export default function AdminDashboard() {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [pendingChanges, setPendingChanges] = useState([]);
+  const [historyChanges, setHistoryChanges] = useState([]);
   const [selectedChange, setSelectedChange] = useState(null);
   const [showReviewDialog, setShowReviewDialog] = useState(false);
+  const [showHistoryDialog, setShowHistoryDialog] = useState(false);
   const [reviewNotes, setReviewNotes] = useState('');
   const [processing, setProcessing] = useState(false);
   const [auditLogs, setAuditLogs] = useState([]);
+  const [activeTab, setActiveTab] = useState('pending');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
 
   // Fetch dashboard data
   const fetchDashboard = useCallback(async () => {
