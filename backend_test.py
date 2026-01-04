@@ -1,39 +1,43 @@
 #!/usr/bin/env python3
 """
-Backend Testing for PhiCor.ai Knowledge Bank System
-Testing comprehensive Knowledge Bank APIs as requested in review:
+Backend Testing for PhiCor.ai User Management System
+Testing comprehensive User Management APIs as requested in review:
 
-PHICOR.AI KNOWLEDGE BANK SYSTEM TESTING:
+PHICOR.AI USER MANAGEMENT SYSTEM TESTING:
 
 Test 1: Admin Authentication
 - Admin login with admin@phicor.ai / admin123
 - Verify admin access and role-based permissions
 
-Test 2: System Settings Management
-- GET /api/admin/settings (auto_search_interval_days, auto_search_enabled)
-- PUT /api/admin/settings (update auto_search_interval_days to 14)
+Test 2: Get All Experts
+- GET /api/admin/experts
+- Should return list of all experts with stats (pending_changes, total_changes, experiments_count)
 
-Test 3: Knowledge Source Upload
-- POST /api/admin/knowledge/upload (Text source with Atrial Fibrillation content)
-- Verify AI analysis triggers and processes content
+Test 3: Create New Expert
+- POST /api/admin/experts
+- Body: {"name": "Dr. New Expert", "email": "newexpert@test.com", "password": "test123", "role": "expert", "specialty": "Cardiology", "institution": "Test Medical Center"}
+- Should create expert and return the new expert data
 
-Test 4: Knowledge Sources Retrieval
-- GET /api/admin/knowledge/sources
-- Verify uploaded source appears in list
+Test 4: Update Expert
+- PUT /api/admin/experts/{expert_id}
+- Use the ID from step 3
+- Body: {"name": "Dr. Updated Expert", "specialty": "Neurology"}
+- Should update the expert
 
-Test 5: Knowledge Suggestions Review
-- GET /api/admin/knowledge/suggestions?status=pending
-- Verify AI-generated suggestions from analysis
+Test 5: Reset Expert Password
+- POST /api/admin/experts/{expert_id}/reset-password
+- Body: {"new_password": "newpassword123"}
+- Should reset the password
 
-Test 6: Knowledge Timeline
-- GET /api/admin/knowledge/timeline
-- Verify activity history is tracked
+Test 6: Deactivate Expert
+- DELETE /api/admin/experts/{expert_id}
+- Should soft-delete (deactivate) the expert
 
-Test 7: Suggestion Approval Workflow
-- POST /api/admin/knowledge/suggestions/{suggestion_id}/approve
-- Verify suggestion approval process
+Test 7: Verify Scheduler Status
+- Check backend logs to confirm APScheduler is running with the auto-search job
 
 API Base URL: https://mathbody.preview.emergentagent.com
+All APIs require Authorization: Bearer {token} header
 """
 
 import requests
