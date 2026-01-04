@@ -921,6 +921,20 @@ export default function ExpertDashboard() {
               <Beaker className="w-4 h-4 mr-2" />
               Lab
             </Button>
+            {isAdmin && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className={`rounded-b-none border-b-2 ${activeView === 'knowledge' ? 'border-primary bg-primary/5' : 'border-transparent'}`}
+                onClick={() => setActiveView('knowledge')}
+              >
+                <Dna className="w-4 h-4 mr-2" />
+                Knowledge
+                {knowledgeStats.pending > 0 && (
+                  <Badge variant="destructive" className="ml-1 text-xs px-1.5">{knowledgeStats.pending}</Badge>
+                )}
+              </Button>
+            )}
           </div>
         </div>
       </header>
