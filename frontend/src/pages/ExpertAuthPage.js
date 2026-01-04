@@ -158,10 +158,18 @@ export default function ExpertAuthPage() {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
       <Card className="w-full max-w-lg">
         <CardHeader className="text-center">
-          <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-            <Shield className="w-8 h-8 text-primary" />
+          {/* PhiCor Logo - matching website style */}
+          <div className="flex flex-col items-center mb-4">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                <span className="text-white font-serif text-2xl font-bold">Φ</span>
+              </div>
+              <h1 className="text-3xl font-bold tracking-tight">
+                Phi<span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">Cor</span>
+              </h1>
+            </div>
           </div>
-          <CardTitle className="text-2xl">PhiCor Expert Portal</CardTitle>
+          <CardTitle className="text-xl">Expert Portal</CardTitle>
           <CardDescription>
             Access the Expert Curation System to review and validate medical data
           </CardDescription>
