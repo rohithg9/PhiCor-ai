@@ -282,6 +282,9 @@ export default function ExpertDashboard() {
   const [uploading, setUploading] = useState(false);
   const [systemSettings, setSystemSettings] = useState({ auto_search_interval_days: 30, auto_search_enabled: true });
   const [triggeringSearch, setTriggeringSearch] = useState(false);
+  
+  // User Management state
+  const [allExperts, setAllExperts] = useState([]);
 
   // Check specialty match
   const matchesSpecialty = useCallback((disease) => {
