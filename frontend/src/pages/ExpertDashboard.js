@@ -582,9 +582,9 @@ export default function ExpertDashboard() {
       <div className="container mx-auto px-4 py-6">
         {/* Diseases View */}
         {activeView === 'diseases' && (
-          <>
+          <div className="space-y-6">
             {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               <Card>
                 <CardContent className="pt-4">
                   <div className="flex items-center justify-between">
