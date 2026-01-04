@@ -336,7 +336,7 @@ export default function ExperimentLab() {
                   <CardDescription>
                     {selectedExperiment 
                       ? selectedExperiment.description || 'No description'
-                      : 'Choose an experiment to view details and run simulations'
+                      : 'Select an experiment from the list or create a new one to get started'
                     }
                   </CardDescription>
                 </div>
