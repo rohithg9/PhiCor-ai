@@ -408,9 +408,13 @@ export default function ExpertDashboard() {
     fetchExperiments();
   }, [token, authLoading, navigate, fetchDiseases, fetchMyChangeRequests, fetchAllChanges, fetchGuidelines, fetchExperiments]);
 
-  // Filter diseases
+  // Filter diseases - now separating actual diseases from references
   useEffect(() => {
-    let filtered = diseases;
+    // First, separate diseases from references
+    const actualDiseases = diseases.filter(isDiseaseItem);
+    const referenceItems = diseases.filter(d => !isDiseaseItem(d));
+    
+    let filtered = actualDiseases;
     if (showMySpecialty && expert?.specialty) {
       filtered = filtered.filter(matchesSpecialty);
     }
@@ -424,7 +428,38 @@ export default function ExpertDashboard() {
       filtered = filtered.filter(d => d.is_reviewed === showReviewed);
     }
     setFilteredDiseases(filtered);
+    
+    // Update stats to reflect only actual diseases
+    const specialtyDiseases = actualDiseases.filter(matchesSpecialty);
+    const reviewedCount = actualDiseases.filter(d => d.is_reviewed).length;
+    setStats({
+      total: actualDiseases.length,
+      reviewed: reviewedCount,
+      pending: actualDiseases.length - reviewedCount,
+      mySpecialty: specialtyDiseases.length,
+      references: referenceItems.length
+    });
   }, [diseases, searchQuery, showReviewed, showMySpecialty, expert?.specialty, matchesSpecialty]);
+  
+  // Get filtered reference items
+  const filteredReferences = useMemo(() => {
+    const referenceItems = diseases.filter(d => !isDiseaseItem(d));
+    if (!referencesSearch) return referenceItems;
+    return referenceItems.filter(d => 
+      d.name.toLowerCase().includes(referencesSearch.toLowerCase())
+    );
+  }, [diseases, referencesSearch]);
+  
+  // Get filtered baseline parameters
+  const filteredBaselinesParams = useMemo(() => {
+    if (!baselinesScale || !ORGAN_MODELS[baselinesOrgan]?.[baselinesScale]) return [];
+    const params = ORGAN_MODELS[baselinesOrgan][baselinesScale].parameters || [];
+    if (!baselinesSearch) return params;
+    return params.filter(p => 
+      p.name.toLowerCase().includes(baselinesSearch.toLowerCase()) ||
+      p.id.toLowerCase().includes(baselinesSearch.toLowerCase())
+    );
+  }, [baselinesOrgan, baselinesScale, baselinesSearch]);
 
   // Fetch disease details
   const handleSelectDisease = async (disease) => {
