@@ -125,7 +125,7 @@ def test_admin_authentication():
             
             # Test token validity by getting profile
             headers = {"Authorization": f"Bearer {admin_token}"}
-            profile_response = requests.get(f"{BACKEND_URL}/api/auth/me", headers=headers, timeout=10)
+            profile_response = requests.get(f"{BACKEND_URL}/api/experts/me", headers=headers, timeout=10)
             
             if profile_response.status_code == 200:
                 print(f"  ✅ Token validation successful ✓")
