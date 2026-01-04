@@ -57,6 +57,7 @@ const SPECIALTY_MAPPING = {
 const NON_DISEASE_PATTERNS = [
   // Lab tests and parameters
   /^[A-Z]{2,5}$/,  // ABG, ALP, ALT, ANA, etc.
+  /^[A-Z]{2,5}\s?[-–]\s?/,  // ABG - PaCO2, etc.
   /^[0-9]+-?(hr|min|MWT|OH|ASA)/i,  // 6MWT, 24h, 2-hr, 5-ASA
   /antibodies?$/i,
   /^(anti-|Anti-)/,
@@ -95,11 +96,20 @@ const NON_DISEASE_PATTERNS = [
   /^CHADS/,
   /^HAS-BLED/,
   /^CHA2DS2/,
+  /^PaCO2$/i,
+  /^PaO2$/i,
+  /^pH$/i,
+  /\(t\(/,  // Translocations like APL (t(15;17))
+  /^ARNI\s/i,  // ARNI (Sacubitril/Valsartan)
+  /Valsartan/i,
+  /Sacubitril/i,
 ];
 
 // Specific non-disease item names
 const NON_DISEASE_NAMES = new Set([
   'ABG', 'ALP', 'ALT', 'ANA', 'ANCA', 'ACTH', 'ABI',
+  'ABG - PaCO2', 'ABG - PaO2', 'ABG - pH', 'ABG PaO2',
+  'ANA, anti-dsDNA',
   '6MWT', '6-Minute Walk Distance and Desaturation',
   '1-hr post-glucose', '2-hr post-glucose',
   '17-OHP', '1mg overnight DST',
@@ -112,6 +122,7 @@ const NON_DISEASE_NAMES = new Set([
   'ACE inhibitors', 'ACEi/ARB', 'ACEi/ARB or CCB or Thiazide',
   'ACTH stimulation test', 'ADT backbone', 'ADT duration with radiation',
   'ADT intensification (mCSPC)', 'ALK rearrangement',
+  'APL (t(15;17))', 'ARNI (Sacubitril/Valsartan)',
 ]);
 
 // Function to check if an item is a disease vs reference/parameter
