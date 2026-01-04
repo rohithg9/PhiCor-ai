@@ -111,7 +111,7 @@ def test_admin_authentication():
             "password": ADMIN_PASSWORD
         }
         
-        response = requests.post(f"{BACKEND_URL}/api/auth/login", json=login_data, timeout=10)
+        response = requests.post(f"{BACKEND_URL}/api/experts/login", json=login_data, timeout=10)
         
         if response.status_code == 200:
             data = response.json()
