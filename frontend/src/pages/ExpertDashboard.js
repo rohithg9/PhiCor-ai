@@ -866,7 +866,7 @@ export default function ExpertDashboard() {
                   )}
 
                   {/* Parameters Grid */}
-                  <ScrollArea className="h-[450px]">
+                  <ScrollArea className="h-[500px]">
                     {selectedScale && currentScale ? (
                       <div>
                         <div className="flex items-center justify-between mb-4">
@@ -874,37 +874,64 @@ export default function ExpertDashboard() {
                             <span>{SCALE_LEVELS.find(s => s.id === selectedScale)?.icon}</span>
                             {SCALE_LEVELS.find(s => s.id === selectedScale)?.fullName || selectedScale}
                           </h4>
-                          <Badge variant="outline" className="text-xs">
-                            {currentScale.parameters?.length || 0} parameters
-                          </Badge>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs">
+                              {currentScale.parameters?.length || 0} parameters
+                            </Badge>
+                            <Badge variant="secondary" className="text-xs">
+                              Click any to review
+                            </Badge>
+                          </div>
                         </div>
+                        
+                        {/* Legend */}
+                        <div className="flex flex-wrap gap-3 mb-4 p-2 bg-muted/30 rounded-lg text-xs">
+                          <div className="flex items-center gap-1">
+                            <div className="w-3 h-3 rounded bg-green-500/20 border border-green-500/50"></div>
+                            <span>Normal baseline</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <div className="w-3 h-3 rounded bg-destructive/20 border border-destructive/50"></div>
+                            <span>Disease modified</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Badge variant="outline" className="text-[9px] px-1 py-0">AI</Badge>
+                            <span>AI-generated source</span>
+                          </div>
+                        </div>
+                        
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                         {currentScale.parameters?.map(param => {
                           const mods = getMergedModifications[selectedOrgan]?.[selectedScale]?.[param.id];
                           const modResult = getModifiedValue(param.value, mods, param.id);
+                          const isModified = modResult.modified;
                           
                           return (
                             <div
                               key={param.id}
                               className={`p-4 rounded-lg border cursor-pointer transition-all hover:scale-[1.02] hover:shadow-lg hover:border-primary/50 relative overflow-hidden group ${
-                                modResult.modified ? 'bg-gradient-to-br from-destructive/10 to-orange-500/10 border-destructive/30' : 'bg-card/50 border-border/50'
+                                isModified 
+                                  ? 'bg-gradient-to-br from-destructive/10 to-orange-500/10 border-destructive/30' 
+                                  : 'bg-gradient-to-br from-green-500/5 to-emerald-500/5 border-green-500/20'
                               }`}
                               onClick={() => handleEditParameter(param, selectedOrgan, selectedScale)}
                             >
                               {/* Click hint overlay */}
-                              <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <div className="absolute top-2 right-2 bg-primary text-primary-foreground text-[10px] px-2 py-0.5 rounded opacity-0 group-hover:opacity-100">
-                                  Click to suggest change
+                                  Click to review/suggest change
                                 </div>
                               </div>
                               
-                              {/* Abnormal indicator stripe */}
-                              {modResult.modified && (
-                                <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-destructive to-orange-500" />
-                              )}
+                              {/* Status indicator stripe */}
+                              <div className={`absolute top-0 left-0 w-1 h-full ${
+                                isModified 
+                                  ? 'bg-gradient-to-b from-destructive to-orange-500' 
+                                  : 'bg-gradient-to-b from-green-500 to-emerald-500'
+                              }`} />
                               
                               <div className="flex items-start justify-between mb-2">
-                                <span className={`text-sm leading-tight ${modResult.modified ? 'text-destructive font-medium' : 'text-muted-foreground'}`}>
+                                <span className={`text-sm leading-tight font-medium ${isModified ? 'text-destructive' : 'text-foreground'}`}>
                                   {param.name}
                                 </span>
                                 <div className="flex items-center gap-1">
@@ -913,11 +940,160 @@ export default function ExpertDashboard() {
                                       Absent
                                     </Badge>
                                   )}
-                                  {modResult.modified && !modResult.isAbsent && (
+                                  {isModified && !modResult.isAbsent && (
                                     <Badge variant="destructive" className="text-[10px] shrink-0">
                                       <AlertTriangle className="w-2 h-2 mr-1" />
-                                      Abnormal
+                                      Modified
                                     </Badge>
+                                  )}
+                                  {!isModified && (
+                                    <Badge variant="outline" className="text-[10px] shrink-0 border-green-500/50 text-green-600">
+                                      Baseline
+                                    </Badge>
+                                  )}
+                                  <FileEdit className="w-3 h-3 text-muted-foreground group-hover:text-primary transition-colors" />
+                                </div>
+                              </div>
+                              
+                              {/* Values */}
+                              <div className="flex items-baseline gap-2 flex-wrap mb-2">
+                                {isModified && !modResult.isAbsent && (
+                                  <span className="text-base font-mono text-muted-foreground/60 line-through">
+                                    {param.value}
+                                  </span>
+                                )}
+                                <span className={`text-2xl font-mono font-bold ${
+                                  modResult.isAbsent ? 'text-purple-500' :
+                                  isModified ? 'text-destructive' : 'text-green-600'
+                                }`}>
+                                  {modResult.isAbsent ? 'ABSENT' :
+                                   typeof modResult.value === 'number' 
+                                    ? modResult.value.toFixed(param.value % 1 === 0 ? 0 : 1)
+                                    : modResult.value}
+                                </span>
+                                {!modResult.isAbsent && (
+                                  <span className="text-sm text-muted-foreground">{param.unit}</span>
+                                )}
+                              </div>
+                              
+                              {/* Normal Range */}
+                              {param.range && (
+                                <div className="text-[10px] text-muted-foreground mb-1">
+                                  Normal range: {param.range[0]} - {param.range[1]} {param.unit}
+                                </div>
+                              )}
+                              
+                              {/* Change indicator */}
+                              {isModified && modResult.delta && !modResult.isAbsent && (
+                                <div className={`inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded ${
+                                  parseFloat(modResult.delta) > 0 
+                                    ? 'bg-destructive/20 text-destructive' 
+                                    : 'bg-blue-500/20 text-blue-500'
+                                }`}>
+                                  {parseFloat(modResult.delta) > 0 ? '↑' : '↓'}{Math.abs(parseFloat(modResult.delta))}% from baseline
+                                </div>
+                              )}
+                              
+                              {/* Source/Evidence */}
+                              <div className="mt-2 pt-2 border-t border-border/30">
+                                <div className="flex items-center gap-1 text-[10px]">
+                                  {param.evidence === 'established' ? (
+                                    <Badge variant="outline" className="text-[9px] px-1 py-0 border-green-500/50 text-green-600">
+                                      Established
+                                    </Badge>
+                                  ) : param.evidence === 'novel' ? (
+                                    <Badge variant="outline" className="text-[9px] px-1 py-0 border-blue-500/50 text-blue-600">
+                                      Novel
+                                    </Badge>
+                                  ) : (
+                                    <Badge variant="outline" className="text-[9px] px-1 py-0">
+                                      AI
+                                    </Badge>
+                                  )}
+                                  <span className="text-muted-foreground truncate">
+                                    {param.source || (selectedDisease && diseaseData?.guideline_source) || 'PhiCor AI Model'}
+                                  </span>
+                                </div>
+                                {mods?.note && (
+                                  <p className="text-[10px] text-muted-foreground mt-1 italic line-clamp-1">
+                                    Note: {mods.note}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      
+                      {/* Mathematical Equations Section */}
+                      {currentScale.equations && currentScale.equations.length > 0 && (
+                        <div className="mt-6 pt-4 border-t">
+                          <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                            <Calculator className="w-4 h-4 text-primary" />
+                            Mathematical Equations
+                          </h4>
+                          <div className="space-y-3">
+                            {currentScale.equations.map(eq => (
+                              <div 
+                                key={eq.id} 
+                                className="p-3 bg-muted/30 rounded-lg border cursor-pointer hover:border-primary/50"
+                                onClick={() => handleEditParameter({...eq, isEquation: true, value: eq.latex}, selectedOrgan, selectedScale)}
+                              >
+                                <div className="flex items-start justify-between mb-2">
+                                  <span className="font-medium text-sm">{eq.name}</span>
+                                  <div className="flex items-center gap-1">
+                                    {eq.evidence === 'established' ? (
+                                      <Badge variant="outline" className="text-[9px] px-1 border-green-500/50 text-green-600">
+                                        Established
+                                      </Badge>
+                                    ) : (
+                                      <Badge variant="outline" className="text-[9px] px-1 border-blue-500/50 text-blue-600">
+                                        Novel
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="font-mono text-xs bg-background/50 p-2 rounded overflow-x-auto">
+                                  {eq.latex}
+                                </div>
+                                <p className="text-xs text-muted-foreground mt-2">{eq.description}</p>
+                                {eq.source && (
+                                  <p className="text-[10px] text-muted-foreground mt-1">
+                                    Source: {eq.source}
+                                  </p>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12 text-muted-foreground">
+                        <Eye className="w-16 h-16 mx-auto mb-4 opacity-30" />
+                        <p className="text-lg font-medium mb-2">Select a Scale</p>
+                        <p className="text-sm">Choose a scale tab above to view ALL parameters</p>
+                        <div className="mt-4 p-4 bg-muted/30 rounded-lg text-left max-w-md mx-auto">
+                          <p className="text-xs font-medium mb-2">As an expert, you can review:</p>
+                          <ul className="text-xs space-y-1">
+                            <li className="flex items-center gap-2">
+                              <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                              Normal baseline parameters (from medical literature)
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <div className="w-2 h-2 rounded-full bg-destructive"></div>
+                              Disease-modified values (AI-generated)
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <Calculator className="w-3 h-3" />
+                              Mathematical equations & models
+                            </li>
+                          </ul>
+                          <p className="text-xs mt-3 text-primary">Click any parameter to suggest corrections with evidence sources</p>
+                        </div>
+                      </div>
+                    )}
+                  </ScrollArea>
                                   )}
                                   <FileEdit className="w-3 h-3 text-muted-foreground group-hover:text-primary transition-colors" />
                                 </div>
