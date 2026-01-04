@@ -1947,34 +1947,58 @@ export default function ExpertDashboard() {
                     ) : (
                       <div className="space-y-3">
                         {pendingChanges.map(change => (
-                          <Card key={change.id} className="border-l-4 border-l-orange-500">
+                          <Card key={change.id} className={`border-l-4 ${change.expert_id === expert?.id ? 'border-l-blue-500' : 'border-l-orange-500'}`}>
                             <CardContent className="pt-4">
                               <div className="flex items-start justify-between mb-2">
                                 <div>
                                   <p className="font-medium">{change.disease_name}</p>
                                   <p className="text-sm text-muted-foreground">{change.organ_id} / {change.scale_id}</p>
-                                  <p className="text-xs text-muted-foreground">by {change.expert_name}</p>
+                                  <p className="text-xs text-muted-foreground">
+                                    by {change.expert_name}
+                                    {change.expert_id === expert?.id && <Badge variant="outline" className="ml-2 text-xs">You</Badge>}
+                                  </p>
                                 </div>
                               </div>
                               <div className="p-2 bg-muted rounded text-sm mb-3">
                                 {change.parameters?.map((p, i) => (
-                                  <div key={i} className="flex items-center gap-2">
+                                  <div key={i} className="flex items-center gap-2 flex-wrap">
                                     <span className="font-mono text-xs">{p.parameter_name}:</span>
                                     <span className="text-red-500 line-through">{p.current_value}</span>
                                     <ArrowRight className="w-3 h-3" />
                                     <span className="text-green-500 font-medium">{p.proposed_value}</span>
                                   </div>
                                 ))}
+                                {change.additional_notes && (
+                                  <p className="text-xs text-muted-foreground mt-2 italic">Note: {change.additional_notes}</p>
+                                )}
                               </div>
-                              <div className="flex gap-2">
-                                <Button size="sm" onClick={() => handleApproveChange(change.id)}>
-                                  <CheckCircle2 className="w-3 h-3 mr-1" />
-                                  Approve
-                                </Button>
-                                <Button size="sm" variant="destructive" onClick={() => handleRejectChange(change.id)}>
-                                  <XCircle className="w-3 h-3 mr-1" />
-                                  Reject
-                                </Button>
+                              <div className="flex gap-2 flex-wrap">
+                                {/* Admin actions */}
+                                {isAdmin && (
+                                  <>
+                                    <Button size="sm" onClick={() => handleApproveChange(change.id)}>
+                                      <CheckCircle2 className="w-3 h-3 mr-1" />
+                                      Approve
+                                    </Button>
+                                    <Button size="sm" variant="destructive" onClick={() => handleRejectChange(change.id)}>
+                                      <XCircle className="w-3 h-3 mr-1" />
+                                      Reject
+                                    </Button>
+                                  </>
+                                )}
+                                {/* Owner actions - Edit & Withdraw */}
+                                {change.expert_id === expert?.id && (
+                                  <>
+                                    <Button size="sm" variant="outline" onClick={() => handleEditChange(change)}>
+                                      <Pencil className="w-3 h-3 mr-1" />
+                                      Edit
+                                    </Button>
+                                    <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-600" onClick={() => handleWithdrawChange(change.id)}>
+                                      <Trash2 className="w-3 h-3 mr-1" />
+                                      Withdraw
+                                    </Button>
+                                  </>
+                                )}
                               </div>
                             </CardContent>
                           </Card>
