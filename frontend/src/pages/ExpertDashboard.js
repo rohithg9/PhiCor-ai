@@ -1410,6 +1410,15 @@ export default function ExpertDashboard() {
                     ))}
                   </div>
                 )}
+                
+                {/* Mobile scroll hint */}
+                {selectedDisease && (
+                  <div className="lg:hidden mt-3 p-2 bg-primary/10 rounded-lg text-center animate-pulse">
+                    <p className="text-xs text-primary font-medium">
+                      ↓ Scroll down to view {selectedDisease.name} parameters
+                    </p>
+                  </div>
+                )}
               </ScrollArea>
             </CardContent>
           </Card>
