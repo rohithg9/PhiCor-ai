@@ -55,17 +55,31 @@ export default function ExpertAuthPage() {
     setError('');
     
     try {
-      const response = await fetch(`${BACKEND_URL}/api/experts/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: loginEmail, password: loginPassword })
+      const loginPayload = JSON.stringify({ 
+        email: loginEmail.trim(), 
+        password: loginPassword 
       });
       
-      const text = await response.text();
+      const response = await fetch(`${BACKEND_URL}/api/experts/login`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: loginPayload,
+        cache: 'no-cache'
+      });
+      
+      // Clone response before reading to avoid body lock issues
+      const responseClone = response.clone();
+      
       let data;
       try {
-        data = JSON.parse(text);
-      } catch {
+        data = await response.json();
+      } catch (parseError) {
+        // If JSON parse fails, try text
+        const text = await responseClone.text();
+        console.error('Login response parse error:', text);
         throw new Error('Server error. Please try again.');
       }
       
@@ -79,7 +93,13 @@ export default function ExpertAuthPage() {
       // Always redirect to unified dashboard
       navigate('/expert');
     } catch (err) {
-      setError(err.message || 'Login failed. Please check your credentials.');
+      console.error('Login error:', err);
+      // Handle fetch errors specifically
+      if (err.name === 'TypeError' && err.message.includes('fetch')) {
+        setError('Network error. Please check your connection and try again.');
+      } else {
+        setError(err.message || 'Login failed. Please check your credentials.');
+      }
     } finally {
       setLoading(false);
     }
