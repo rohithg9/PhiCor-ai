@@ -1626,6 +1626,179 @@ export default function ExpertDashboard() {
           </div>
         )}
 
+        {/* References View - Tests, Guidelines, Protocols, etc. */}
+        {activeView === 'references' && (
+          <div className="space-y-6">
+            {/* Header */}
+            <Card className="border-purple-500/30">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <FileJson className="w-5 h-5 text-purple-500" />
+                      Reference Items
+                    </CardTitle>
+                    <CardDescription>Lab tests, scoring systems, guidelines, and treatment protocols</CardDescription>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-purple-500">
+                      {filteredReferences.length}
+                    </p>
+                    <p className="text-xs text-muted-foreground">Reference Items</p>
+                  </div>
+                </div>
+              </CardHeader>
+            </Card>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Reference List */}
+              <Card className="lg:col-span-1">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg">Items</CardTitle>
+                  <CardDescription>Tests, scores, and protocols</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="relative mb-4">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search references..."
+                      value={referencesSearch}
+                      onChange={(e) => setReferencesSearch(e.target.value)}
+                      className="pl-9"
+                    />
+                  </div>
+                  <ScrollArea className="h-[500px]">
+                    <div className="space-y-1">
+                      {filteredReferences.map(ref => (
+                        <Button
+                          key={ref.id}
+                          variant={selectedReference?.id === ref.id ? 'secondary' : 'ghost'}
+                          className="w-full justify-start h-auto py-2 px-2 text-left"
+                          onClick={() => setSelectedReference(ref)}
+                        >
+                          <div className="flex items-center w-full min-w-0">
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium text-sm truncate">{ref.name}</div>
+                              <div className="text-xs text-muted-foreground truncate">
+                                {ref.category || 'General'}
+                              </div>
+                            </div>
+                            <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 ml-1" />
+                          </div>
+                        </Button>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+
+              {/* Reference Details */}
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                  <CardTitle>{selectedReference ? selectedReference.name : 'Select a Reference'}</CardTitle>
+                  <CardDescription>
+                    {selectedReference ? `Category: ${selectedReference.category || 'General'}` : 'Choose an item to view details'}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {!selectedReference ? (
+                    <div className="text-center py-16 text-muted-foreground">
+                      <FileJson className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>Select a reference item to view details</p>
+                      <p className="text-sm mt-2">Browse lab tests, scoring systems, and protocols</p>
+                    </div>
+                  ) : (
+                    <ScrollArea className="h-[500px]">
+                      <div className="space-y-4">
+                        {/* Basic Info */}
+                        <div className="p-4 bg-muted/30 rounded-lg">
+                          <h4 className="text-sm font-semibold mb-2">Information</h4>
+                          <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div>
+                              <p className="text-xs text-muted-foreground">Category</p>
+                              <p className="font-medium">{selectedReference.category || 'General'}</p>
+                            </div>
+                            {selectedReference.icd10 && (
+                              <div>
+                                <p className="text-xs text-muted-foreground">ICD-10</p>
+                                <p className="font-medium">{selectedReference.icd10}</p>
+                              </div>
+                            )}
+                          </div>
+                          {selectedReference.description && (
+                            <div className="mt-3">
+                              <p className="text-xs text-muted-foreground">Description</p>
+                              <p className="text-sm mt-1">{selectedReference.description}</p>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Clinical Presentation if available */}
+                        {selectedReference.clinical_presentation && (
+                          <div className="p-4 bg-purple-500/5 rounded-lg border border-purple-500/20">
+                            <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                              <Stethoscope className="w-4 h-4 text-purple-500" />
+                              Clinical Details
+                            </h4>
+                            <div className="text-sm space-y-2">
+                              {selectedReference.clinical_presentation.interpretation && (
+                                <div>
+                                  <p className="text-xs text-muted-foreground">Interpretation</p>
+                                  <p>{selectedReference.clinical_presentation.interpretation}</p>
+                                </div>
+                              )}
+                              {selectedReference.clinical_presentation.clinical_significance && (
+                                <div>
+                                  <p className="text-xs text-muted-foreground">Clinical Significance</p>
+                                  <p>{selectedReference.clinical_presentation.clinical_significance}</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Source Info */}
+                        {selectedReference.guideline_source && (
+                          <div className="p-4 bg-blue-500/5 rounded-lg border border-blue-500/20">
+                            <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
+                              <BookOpen className="w-4 h-4 text-blue-500" />
+                              Source
+                            </h4>
+                            <p className="text-sm">{selectedReference.guideline_source}</p>
+                          </div>
+                        )}
+
+                        {/* Suggest Edit Button */}
+                        <Button 
+                          className="w-full"
+                          variant="outline"
+                          onClick={() => {
+                            setChangeTarget({
+                              type: 'reference',
+                              referenceId: selectedReference.id,
+                              referenceName: selectedReference.name,
+                            });
+                            setChangeRequest({
+                              proposedValue: '',
+                              sourceUrl: '',
+                              reasoning: '',
+                              notes: ''
+                            });
+                            setShowChangeDialog(true);
+                          }}
+                        >
+                          <FileEdit className="w-4 h-4 mr-2" />
+                          Suggest Changes to This Reference
+                        </Button>
+                      </div>
+                    </ScrollArea>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )}
+
         {/* Guidelines View */}
         {activeView === 'guidelines' && (
           <div className="space-y-6">
