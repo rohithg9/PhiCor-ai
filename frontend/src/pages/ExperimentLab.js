@@ -277,9 +277,15 @@ export default function ExperimentLab() {
                   <div className="text-center py-8 text-muted-foreground">Loading...</div>
                 ) : experiments.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
-                    <Beaker className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>No experiments yet</p>
-                    <p className="text-sm">Create your first virtual patient test case</p>
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-purple-500/10 flex items-center justify-center">
+                      <Beaker className="w-8 h-8 text-purple-500" />
+                    </div>
+                    <p className="font-medium mb-1">No experiments yet</p>
+                    <p className="text-sm mb-4">Create your first virtual patient test case</p>
+                    <Button size="sm" onClick={() => setShowNewExperiment(true)} className="bg-purple-600 hover:bg-purple-700">
+                      <Plus className="w-4 h-4 mr-1" />
+                      Create Experiment
+                    </Button>
                   </div>
                 ) : (
                   <div className="space-y-2">
