@@ -64,6 +64,21 @@ const ORGAN_ICONS = {
   default: Activity
 };
 
+// Scale levels - same as main dashboard
+const SCALE_LEVELS = [
+  { id: 'geometry', name: 'Geometry', fullName: 'Geometry & Dimensions', icon: '📐', description: 'Shape, size, volumes' },
+  { id: 'pressures', name: 'Pressures', fullName: 'Pressures & Gradients', icon: '📊', description: 'Forces and flows' },
+  { id: 'structure', name: 'Structure', fullName: 'Structure & Tissue', icon: '🔬', description: 'Tissue composition' },
+  { id: 'physiology', name: 'Physiology', fullName: 'Physiology & Function', icon: '⚡', description: 'Functional measures' },
+  { id: 'cellular', name: 'Cellular', fullName: 'Cellular & Molecular', icon: '🧬', description: 'Cell-level processes' },
+  { id: 'lab_tests', name: 'Lab Tests', fullName: 'Laboratory Tests', icon: '🧪', description: 'Blood tests, biomarkers' },
+  { id: 'urinalysis', name: 'Urinalysis', fullName: 'Urinalysis', icon: '💧', description: 'Urine analysis' },
+  { id: 'imaging', name: 'Imaging', fullName: 'Imaging Parameters', icon: '📷', description: 'CT, MRI, Ultrasound' },
+  { id: 'ecg', name: 'ECG', fullName: 'ECG / Electrocardiogram', icon: '💓', description: 'Heart electrical activity' },
+  { id: 'vital_signs', name: 'Vitals', fullName: 'Vital Signs', icon: '❤️', description: 'BP, HR, Temp, RR' },
+  { id: 'physical_exam', name: 'Physical', fullName: 'Physical Examination', icon: '🩺', description: 'Clinical findings' },
+];
+
 export default function ExpertDashboard() {
   const navigate = useNavigate();
   const { expert, token, logout, isAdmin, loading: authLoading } = useExpert();
