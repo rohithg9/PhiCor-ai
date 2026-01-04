@@ -396,40 +396,80 @@ export default function ExpertDashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
+      {/* Simplified Header */}
       <header className="border-b bg-card/50 sticky top-0 z-50 backdrop-blur">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <h1 className="text-xl font-bold">PhiCor Expert Portal</h1>
-            <Badge variant="outline" className="hidden md:flex">
-              <Stethoscope className="w-3 h-3 mr-1" />
-              {expert?.specialty}
-            </Badge>
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                <Activity className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-lg font-bold">PhiCor.ai</h1>
+                <p className="text-xs text-muted-foreground hidden sm:block">Medical Parameter Intelligence</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-muted rounded-full">
+                <User className="w-4 h-4" />
+                <span className="text-sm font-medium">{expert?.name}</span>
+              </div>
+              <Button variant="ghost" size="icon" onClick={handleLogout} title="Logout">
+                <LogOut className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
           
-          <div className="flex items-center gap-3">
-            {isAdmin && (
-              <Button variant="outline" size="sm" onClick={() => navigate('/admin')}>
-                <LayoutDashboard className="w-4 h-4 mr-2" />
-                Admin
-              </Button>
-            )}
-            <Button variant="outline" size="sm" onClick={() => navigate('/expert/experiments')}>
+          {/* Navigation Tabs */}
+          <div className="flex items-center gap-1 mt-3 -mb-3 overflow-x-auto">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className={`rounded-b-none border-b-2 ${activeView === 'diseases' ? 'border-primary bg-primary/5' : 'border-transparent'}`}
+              onClick={() => setActiveView('diseases')}
+            >
+              <Stethoscope className="w-4 h-4 mr-2" />
+              Diseases
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className={`rounded-b-none border-b-2 ${activeView === 'changes' ? 'border-primary bg-primary/5' : 'border-transparent'}`}
+              onClick={() => setActiveView('changes')}
+            >
+              <FileCheck className="w-4 h-4 mr-2" />
+              Changes
+              {pendingChanges.length > 0 && (
+                <Badge variant="destructive" className="ml-1 text-xs px-1.5">{pendingChanges.length}</Badge>
+              )}
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className={`rounded-b-none border-b-2 ${activeView === 'guidelines' ? 'border-primary bg-primary/5' : 'border-transparent'}`}
+              onClick={() => setActiveView('guidelines')}
+            >
+              <BookOpen className="w-4 h-4 mr-2" />
+              Guidelines
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className={`rounded-b-none border-b-2 ${activeView === 'lab' ? 'border-primary bg-primary/5' : 'border-transparent'}`}
+              onClick={() => setActiveView('lab')}
+            >
               <Beaker className="w-4 h-4 mr-2" />
               Lab
-            </Button>
-            <div className="flex items-center gap-2 px-3 py-1 bg-muted rounded-md">
-              <User className="w-4 h-4" />
-              <span className="text-sm font-medium hidden sm:inline">{expert?.name}</span>
-            </div>
-            <Button variant="ghost" size="icon" onClick={handleLogout}>
-              <LogOut className="w-4 h-4" />
             </Button>
           </div>
         </div>
       </header>
 
       <div className="container mx-auto px-4 py-6">
+        {/* Diseases View */}
+        {activeView === 'diseases' && (
+          <>
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
           <Card>
