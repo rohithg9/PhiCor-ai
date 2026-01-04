@@ -618,6 +618,112 @@ export default function AdminDashboard() {
           </Card>
         </div>
 
+        {/* Guideline Monitoring Card */}
+        <Card className="mt-6 border-blue-500/30">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <BookOpen className="w-5 h-5 text-blue-500" />
+                  AI Guideline Monitoring
+                </CardTitle>
+                <CardDescription>Track updates to medical guidelines and protocols</CardDescription>
+              </div>
+              <div className="flex items-center gap-2">
+                {guidelineStatus?.pending_notifications > 0 && (
+                  <Badge variant="destructive" className="animate-pulse">
+                    {guidelineStatus.pending_notifications} new
+                  </Badge>
+                )}
+                {isSuperAdmin && (
+                  <Button 
+                    size="sm" 
+                    onClick={handleCheckGuidelines}
+                    disabled={checkingGuidelines}
+                  >
+                    {checkingGuidelines ? (
+                      <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Zap className="w-4 h-4 mr-2" />
+                    )}
+                    Check Now
+                  </Button>
+                )}
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {/* Status Overview */}
+            <div className="grid grid-cols-3 gap-4 mb-4">
+              <div className="p-3 bg-orange-500/10 rounded-lg text-center">
+                <p className="text-2xl font-bold text-orange-500">{guidelineStatus?.pending_notifications || 0}</p>
+                <p className="text-xs text-muted-foreground">Pending Review</p>
+              </div>
+              <div className="p-3 bg-green-500/10 rounded-lg text-center">
+                <p className="text-2xl font-bold text-green-500">{guidelineStatus?.reviewed_notifications || 0}</p>
+                <p className="text-xs text-muted-foreground">Reviewed</p>
+              </div>
+              <div className="p-3 bg-muted rounded-lg text-center">
+                <p className="text-2xl font-bold">{guidelineStatus?.dismissed_notifications || 0}</p>
+                <p className="text-xs text-muted-foreground">Dismissed</p>
+              </div>
+            </div>
+
+            {/* Last Check Info */}
+            {guidelineStatus?.last_check && (
+              <p className="text-xs text-muted-foreground mb-4">
+                Last checked: {new Date(guidelineStatus.last_check).toLocaleString()}
+              </p>
+            )}
+
+            {/* Notifications List */}
+            <ScrollArea className="h-[200px]">
+              {guidelineNotifications.filter(n => n.status === 'pending').length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Bell className="w-10 h-10 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">No pending guideline updates</p>
+                  <p className="text-xs">Click "Check Now" to scan for new guidelines</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {guidelineNotifications.filter(n => n.status === 'pending').map(notification => (
+                    <Card 
+                      key={notification.id} 
+                      className="cursor-pointer hover:border-blue-500/50 border-l-4 border-l-blue-500"
+                      onClick={() => {
+                        setSelectedGuideline(notification);
+                        setReviewNotes('');
+                        setShowGuidelineDialog(true);
+                      }}
+                    >
+                      <CardContent className="py-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <Bell className="w-4 h-4 text-blue-500" />
+                              <span className="font-medium text-sm">{notification.disease_name}</span>
+                              <Badge variant="outline" className="text-xs">
+                                {notification.guideline_source}
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                              {notification.summary}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {new Date(notification.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </ScrollArea>
+          </CardContent>
+        </Card>
+
         {/* Experts List */}
         <Card className="mt-6">
           <CardHeader>
