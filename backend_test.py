@@ -236,11 +236,12 @@ def test_system_settings():
             
             if put_response.status_code == 200:
                 put_data = put_response.json()
+                put_settings = put_data.get('settings', {})
                 print(f"✅ PUT settings successful")
-                print(f"  📊 Updated auto-search interval: {put_data.get('auto_search_interval_days')} days")
+                print(f"  📊 Updated auto-search interval: {put_settings.get('auto_search_interval_days')} days")
                 
                 # Verify the update was applied
-                if put_data.get('auto_search_interval_days') == 14:
+                if put_settings.get('auto_search_interval_days') == 14:
                     print(f"  ✅ Settings update verified (interval set to 14 days) ✓")
                     put_pass = True
                 else:
