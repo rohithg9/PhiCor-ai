@@ -866,9 +866,19 @@ export default function ExpertDashboard() {
                   )}
 
                   {/* Parameters Grid */}
-                  <ScrollArea className="h-[400px]">
+                  <ScrollArea className="h-[450px]">
                     {selectedScale && currentScale ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                      <div>
+                        <div className="flex items-center justify-between mb-4">
+                          <h4 className="text-sm font-semibold flex items-center gap-2">
+                            <span>{SCALE_LEVELS.find(s => s.id === selectedScale)?.icon}</span>
+                            {SCALE_LEVELS.find(s => s.id === selectedScale)?.fullName || selectedScale}
+                          </h4>
+                          <Badge variant="outline" className="text-xs">
+                            {currentScale.parameters?.length || 0} parameters
+                          </Badge>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                         {currentScale.parameters?.map(param => {
                           const mods = getMergedModifications[selectedOrgan]?.[selectedScale]?.[param.id];
                           const modResult = getModifiedValue(param.value, mods, param.id);
@@ -876,23 +886,50 @@ export default function ExpertDashboard() {
                           return (
                             <div
                               key={param.id}
-                              className={`p-3 rounded-lg border cursor-pointer hover:border-primary/50 transition-colors ${
-                                modResult.modified ? 'bg-destructive/5 border-destructive/30' : 'bg-muted/30'
+                              className={`p-4 rounded-lg border cursor-pointer transition-all hover:scale-[1.02] hover:shadow-lg hover:border-primary/50 relative overflow-hidden group ${
+                                modResult.modified ? 'bg-gradient-to-br from-destructive/10 to-orange-500/10 border-destructive/30' : 'bg-card/50 border-border/50'
                               }`}
                               onClick={() => handleEditParameter(param, selectedOrgan, selectedScale)}
                             >
-                              <div className="flex items-start justify-between mb-1">
-                                <span className="text-sm font-medium">{param.name}</span>
-                                <FileEdit className="w-3 h-3 text-muted-foreground" />
+                              {/* Click hint overlay */}
+                              <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <div className="absolute top-2 right-2 bg-primary text-primary-foreground text-[10px] px-2 py-0.5 rounded opacity-0 group-hover:opacity-100">
+                                  Click to suggest change
+                                </div>
                               </div>
                               
-                              <div className="flex items-baseline gap-2">
+                              {/* Abnormal indicator stripe */}
+                              {modResult.modified && (
+                                <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-destructive to-orange-500" />
+                              )}
+                              
+                              <div className="flex items-start justify-between mb-2">
+                                <span className={`text-sm leading-tight ${modResult.modified ? 'text-destructive font-medium' : 'text-muted-foreground'}`}>
+                                  {param.name}
+                                </span>
+                                <div className="flex items-center gap-1">
+                                  {modResult.isAbsent && (
+                                    <Badge variant="destructive" className="text-[10px] shrink-0 bg-purple-600/80">
+                                      Absent
+                                    </Badge>
+                                  )}
+                                  {modResult.modified && !modResult.isAbsent && (
+                                    <Badge variant="destructive" className="text-[10px] shrink-0">
+                                      <AlertTriangle className="w-2 h-2 mr-1" />
+                                      Abnormal
+                                    </Badge>
+                                  )}
+                                  <FileEdit className="w-3 h-3 text-muted-foreground group-hover:text-primary transition-colors" />
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-baseline gap-2 flex-wrap">
                                 {modResult.modified && !modResult.isAbsent && (
-                                  <span className="text-sm text-muted-foreground line-through">
+                                  <span className="text-base font-mono text-muted-foreground/60 line-through">
                                     {param.value}
                                   </span>
                                 )}
-                                <span className={`text-lg font-mono font-bold ${
+                                <span className={`text-2xl font-mono font-bold ${
                                   modResult.isAbsent ? 'text-purple-500' :
                                   modResult.modified ? 'text-destructive' : ''
                                 }`}>
@@ -902,27 +939,35 @@ export default function ExpertDashboard() {
                                     : modResult.value}
                                 </span>
                                 {!modResult.isAbsent && (
-                                  <span className="text-xs text-muted-foreground">{param.unit}</span>
+                                  <span className="text-sm text-muted-foreground">{param.unit}</span>
                                 )}
                               </div>
                               
                               {modResult.modified && modResult.delta && !modResult.isAbsent && (
-                                <Badge variant={parseFloat(modResult.delta) > 0 ? 'destructive' : 'default'} className="text-[10px] mt-1">
+                                <div className={`inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded mt-2 ${
+                                  parseFloat(modResult.delta) > 0 
+                                    ? 'bg-destructive/20 text-destructive' 
+                                    : 'bg-green-500/20 text-green-500'
+                                }`}>
                                   {parseFloat(modResult.delta) > 0 ? '↑' : '↓'}{Math.abs(parseFloat(modResult.delta))}%
-                                </Badge>
+                                </div>
                               )}
                               
-                              {modResult.note && (
-                                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{modResult.note}</p>
+                              {/* Parameter description/source */}
+                              {param.source && (
+                                <p className="text-[10px] text-muted-foreground mt-2 line-clamp-1">{param.source}</p>
                               )}
                             </div>
                           );
                         })}
                       </div>
+                      </div>
                     ) : (
-                      <div className="text-center py-8 text-muted-foreground">
-                        <p>Select a scale above to view parameters</p>
-                        <p className="text-sm mt-2">Click on any parameter to suggest changes</p>
+                      <div className="text-center py-12 text-muted-foreground">
+                        <Eye className="w-16 h-16 mx-auto mb-4 opacity-30" />
+                        <p className="text-lg font-medium mb-2">Select a Scale</p>
+                        <p className="text-sm">Choose a scale tab above to view and edit parameters</p>
+                        <p className="text-xs mt-4 text-primary">Click any parameter to suggest changes with source links</p>
                       </div>
                     )}
                   </ScrollArea>
