@@ -5376,6 +5376,235 @@ async def update_expert_role(
     return {"message": f"Role updated to {new_role}"}
 
 
+# ============== GUIDELINE MONITORING ==============
+
+class GuidelineNotification(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    disease_id: str
+    disease_name: str
+    guideline_source: str  # e.g., "ACC/AHA", "ESC", "WHO"
+    summary: str
+    details: str
+    url: Optional[str] = None
+    status: str = "pending"  # pending, reviewed, dismissed
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    reviewed_by: Optional[str] = None
+    reviewed_at: Optional[str] = None
+
+
+@api_router.get("/admin/guideline-notifications")
+async def get_guideline_notifications(
+    status: Optional[str] = None,
+    admin: dict = Depends(require_admin)
+):
+    """Get guideline update notifications for admin review"""
+    query = {}
+    if status:
+        query["status"] = status
+    
+    notifications = await db.guideline_notifications.find(query, {"_id": 0}).sort("created_at", -1).to_list(100)
+    
+    pending_count = await db.guideline_notifications.count_documents({"status": "pending"})
+    reviewed_count = await db.guideline_notifications.count_documents({"status": "reviewed"})
+    
+    return {
+        "notifications": notifications,
+        "total": len(notifications),
+        "pending": pending_count,
+        "reviewed": reviewed_count
+    }
+
+
+@api_router.post("/admin/guideline-notifications/{notification_id}/review")
+async def review_guideline_notification(
+    notification_id: str,
+    action: str,  # "reviewed" or "dismissed"
+    notes: str = "",
+    admin: dict = Depends(require_admin)
+):
+    """Mark a guideline notification as reviewed or dismissed"""
+    if action not in ["reviewed", "dismissed"]:
+        raise HTTPException(status_code=400, detail="Invalid action")
+    
+    notification = await db.guideline_notifications.find_one({"id": notification_id})
+    if not notification:
+        raise HTTPException(status_code=404, detail="Notification not found")
+    
+    await db.guideline_notifications.update_one(
+        {"id": notification_id},
+        {
+            "$set": {
+                "status": action,
+                "reviewed_by": admin["id"],
+                "reviewed_at": datetime.now(timezone.utc).isoformat(),
+                "review_notes": notes
+            }
+        }
+    )
+    
+    # Audit log
+    await db.audit_logs.insert_one({
+        "id": str(uuid.uuid4()),
+        "action": f"guideline_{action}",
+        "expert_id": admin["id"],
+        "expert_name": admin["name"],
+        "target_type": "guideline_notification",
+        "target_id": notification_id,
+        "target_name": notification.get("disease_name", ""),
+        "details": {"source": notification.get("guideline_source"), "notes": notes},
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    })
+    
+    return {"message": f"Notification {action}", "id": notification_id}
+
+
+@api_router.post("/admin/check-guidelines")
+async def trigger_guideline_check(
+    admin: dict = Depends(require_super_admin)
+):
+    """Manually trigger a check for new medical guidelines (Super Admin only)"""
+    from emergentintegrations.llm.chat import ChatConfig, chat
+    
+    try:
+        llm_key = os.environ.get('EMERGENT_LLM_KEY')
+        if not llm_key:
+            raise HTTPException(status_code=500, detail="LLM key not configured")
+        
+        # Get a sample of diseases to check for guideline updates
+        diseases = await db.diseases.find(
+            {},
+            {"id": 1, "name": 1, "category": 1, "guideline_source": 1, "updated_at": 1, "_id": 0}
+        ).limit(50).to_list(50)
+        
+        if not diseases:
+            return {"message": "No diseases to check", "notifications_created": 0}
+        
+        # Create prompt to check for recent guideline updates
+        disease_names = [d.get("name") for d in diseases[:20]]
+        
+        prompt = f"""You are a medical guideline monitoring assistant. Check if there are any recent (2024-2025) major clinical guideline updates for the following diseases:
+
+{', '.join(disease_names)}
+
+For each disease where you find a recent guideline update, provide:
+1. Disease name
+2. Guideline source (e.g., ACC/AHA, ESC, WHO, NICE)
+3. Brief summary of the key changes (1-2 sentences)
+4. URL to the guideline if available
+
+Format your response as JSON array:
+[
+  {{"disease": "Disease Name", "source": "Guideline Source", "summary": "Key changes...", "url": "https://..."}}
+]
+
+If no updates found, return: []
+Only include diseases with ACTUAL recent guideline updates. Do not make up information."""
+
+        config = ChatConfig(
+            api_key=llm_key,
+            model="gpt-4o",
+            max_output_tokens=2000
+        )
+        
+        response = await chat(config=config, prompt=prompt)
+        
+        # Parse response
+        import json
+        import re
+        
+        # Extract JSON from response
+        json_match = re.search(r'\[.*\]', response, re.DOTALL)
+        if not json_match:
+            return {"message": "No guideline updates found", "notifications_created": 0}
+        
+        try:
+            updates = json.loads(json_match.group())
+        except json.JSONDecodeError:
+            return {"message": "Failed to parse guideline response", "notifications_created": 0}
+        
+        # Create notifications for found updates
+        notifications_created = 0
+        for update in updates:
+            disease_name = update.get("disease", "")
+            
+            # Find matching disease
+            disease = await db.diseases.find_one(
+                {"name": {"$regex": disease_name, "$options": "i"}},
+                {"id": 1, "name": 1, "_id": 0}
+            )
+            
+            if disease:
+                # Check if notification already exists
+                existing = await db.guideline_notifications.find_one({
+                    "disease_id": disease["id"],
+                    "guideline_source": update.get("source", ""),
+                    "status": "pending"
+                })
+                
+                if not existing:
+                    notification = {
+                        "id": str(uuid.uuid4()),
+                        "disease_id": disease["id"],
+                        "disease_name": disease["name"],
+                        "guideline_source": update.get("source", "Unknown"),
+                        "summary": update.get("summary", ""),
+                        "details": f"Potential guideline update detected for {disease['name']}",
+                        "url": update.get("url"),
+                        "status": "pending",
+                        "created_at": datetime.now(timezone.utc).isoformat()
+                    }
+                    
+                    await db.guideline_notifications.insert_one(notification)
+                    notifications_created += 1
+        
+        # Audit log
+        await db.audit_logs.insert_one({
+            "id": str(uuid.uuid4()),
+            "action": "guideline_check_triggered",
+            "expert_id": admin["id"],
+            "expert_name": admin["name"],
+            "target_type": "system",
+            "target_id": "guideline_monitoring",
+            "target_name": "Manual Guideline Check",
+            "details": {"diseases_checked": len(diseases), "notifications_created": notifications_created},
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        })
+        
+        return {
+            "message": f"Guideline check completed",
+            "diseases_checked": len(diseases),
+            "notifications_created": notifications_created
+        }
+        
+    except Exception as e:
+        logger.error(f"Guideline check failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Guideline check failed: {str(e)}")
+
+
+@api_router.get("/admin/guideline-monitoring-status")
+async def get_guideline_monitoring_status(admin: dict = Depends(require_admin)):
+    """Get the status of guideline monitoring system"""
+    pending = await db.guideline_notifications.count_documents({"status": "pending"})
+    reviewed = await db.guideline_notifications.count_documents({"status": "reviewed"})
+    dismissed = await db.guideline_notifications.count_documents({"status": "dismissed"})
+    
+    # Get last check time from audit logs
+    last_check = await db.audit_logs.find_one(
+        {"action": "guideline_check_triggered"},
+        {"_id": 0, "timestamp": 1}
+    )
+    
+    return {
+        "status": "active",
+        "check_interval_days": 30,
+        "pending_notifications": pending,
+        "reviewed_notifications": reviewed,
+        "dismissed_notifications": dismissed,
+        "last_check": last_check.get("timestamp") if last_check else None,
+        "next_check_recommended": "Manual trigger available"
+    }
+
+
 # Include router - MUST be after all routes are defined
 app.include_router(api_router)
 
