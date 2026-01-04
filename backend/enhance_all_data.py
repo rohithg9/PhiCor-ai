@@ -237,11 +237,23 @@ async def enhance_all_diseases(batch_size=20, max_diseases=None, min_params=50):
     print("DISEASE PARAMETER ENHANCEMENT")
     print("=" * 60)
     
-    # Find diseases that need enhancement (less than min_params parameters)
-    all_diseases = await db.diseases.find({}, {'_id': 0, 'id': 1, 'name': 1, 'icd10_code': 1, 'icd10': 1, 'category': 1, 'parameter_modifications': 1}).to_list(None)
+    # Find diseases that need enhancement:
+    # 1. ai_enhanced is None/null (never processed)
+    # 2. OR has less than min_params parameters
+    all_diseases = await db.diseases.find({}, {'_id': 0, 'id': 1, 'name': 1, 'icd10_code': 1, 'icd10': 1, 'category': 1, 'parameter_modifications': 1, 'ai_enhanced': 1}).to_list(None)
     
     diseases_to_enhance = []
     for d in all_diseases:
+        # Check if never AI enhanced
+        if d.get('ai_enhanced') is None or d.get('ai_enhanced') == False:
+            diseases_to_enhance.append({
+                **d,
+                'current_param_count': 0,
+                'reason': 'not_ai_enhanced'
+            })
+            continue
+            
+        # Check parameter count
         params = d.get('parameter_modifications', {})
         param_count = 0
         for organ, scales in params.items():
@@ -253,11 +265,14 @@ async def enhance_all_diseases(batch_size=20, max_diseases=None, min_params=50):
         if param_count < min_params:
             diseases_to_enhance.append({
                 **d,
-                'current_param_count': param_count
+                'current_param_count': param_count,
+                'reason': 'low_params'
             })
     
     print(f"Total diseases: {len(all_diseases)}")
-    print(f"Diseases needing enhancement (<{min_params} params): {len(diseases_to_enhance)}")
+    print(f"Diseases needing enhancement: {len(diseases_to_enhance)}")
+    print(f"  - Not AI enhanced: {len([d for d in diseases_to_enhance if d.get('reason') == 'not_ai_enhanced'])}")
+    print(f"  - Low params (<{min_params}): {len([d for d in diseases_to_enhance if d.get('reason') == 'low_params'])}")
     
     if max_diseases:
         diseases_to_enhance = diseases_to_enhance[:max_diseases]
