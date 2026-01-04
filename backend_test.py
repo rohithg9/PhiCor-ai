@@ -516,7 +516,7 @@ def test_knowledge_timeline():
                     print(f"      - Action: {activity.get('action')}")
                     print(f"      - Timestamp: {activity.get('timestamp')}")
                     print(f"      - User: {activity.get('user_name')}")
-                    print(f"      - Details: {activity.get('details', '')[:50]}...")
+                    print(f"      - Details: {str(activity.get('details', ''))[:50]}...")
                 
                 activities_found = True
             else:
