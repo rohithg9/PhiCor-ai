@@ -244,6 +244,8 @@ status_history:
 agent_communication:
   - agent: "testing"
   - message: "✅ TESTING MOSTLY COMPLETE - Expert Curation System is largely functional. Expert registration, dashboard, and all backend APIs working perfectly. 1977 diseases available for expert review. Minor frontend admin login issue identified - backend works but frontend form needs investigation. System ready for expert use with admin functionality accessible via backend APIs."
+  - agent: "main"
+  - message: "✅ SCALE TABS FIX COMPLETED (January 4, 2026) - Fixed missing scale tabs on Expert Dashboard. Issue was that ExpertDashboard.js was looking for currentOrganModel?.scales which didn't exist - the scales (geometry, pressures, structure, etc.) are direct properties of each organ in ORGAN_MODELS. Fix: Added SCALE_LEVELS array and updated logic to check currentOrganModel?.[scale.id] instead. Scale tabs now display correctly: Geometry, Pressures, Structure, Physiology, Cellular, Lab Tests, Imaging, ECG, Vitals, Physical. Parameters grid shows disease modifications with original values, modified values, and percentage changes."
   - agent: "testing"
   - message: "❌ CRITICAL AUTHENTICATION ISSUE FOUND - January 3, 2026 Testing Update: Frontend authentication flow is broken. Expert registration form works correctly and backend APIs (login/register) return valid tokens, but frontend fails to redirect to dashboard after login/registration. Users get stuck on login page even with valid credentials. This blocks access to all Expert Dashboard features including clinical information review, change requests, and specialty filtering. Backend is fully functional - issue is in frontend authentication state management in ExpertContext/ExpertDashboard components."
   - agent: "testing"
