@@ -2605,6 +2605,45 @@ async def seed_comprehensive_disease_database():
     }
 
 
+@api_router.post("/diseases-db/import-full")
+async def import_full_disease_database():
+    """
+    Import the full disease database from exported JSON file.
+    This loads all 1977 diseases with AI-generated data.
+    """
+    import json as json_module
+    
+    try:
+        # Load from exported file
+        with open('/app/backend/data/exported_diseases.json', 'r') as f:
+            diseases = json_module.load(f)
+        
+        if not diseases:
+            return {"message": "No diseases in export file", "count": 0}
+        
+        # Clear existing and insert all
+        await db.diseases.delete_many({})
+        
+        # Insert in batches of 100
+        batch_size = 100
+        inserted = 0
+        for i in range(0, len(diseases), batch_size):
+            batch = diseases[i:i+batch_size]
+            await db.diseases.insert_many(batch)
+            inserted += len(batch)
+        
+        total = await db.diseases.count_documents({})
+        
+        return {
+            "message": f"Successfully imported {inserted} diseases",
+            "total_in_database": total
+        }
+    except FileNotFoundError:
+        return {"message": "Export file not found. Run export first.", "count": 0}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Import failed: {str(e)}")
+
+
 # ============== PARAMETER MODIFICATION GENERATION ==============
 
 class ParameterModificationRequest(BaseModel):
