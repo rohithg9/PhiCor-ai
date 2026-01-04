@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, status, UploadFile, File, Form
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, status, UploadFile, File, Form, Body
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -16,6 +16,9 @@ from scipy.integrate import odeint
 import numpy as np
 import tempfile
 import base64
+from contextlib import asynccontextmanager
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.interval import IntervalTrigger
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -32,8 +35,184 @@ if not JWT_SECRET:
 JWT_ALGORITHM = 'HS256'
 JWT_EXPIRATION_HOURS = 24
 
-# Create the main app
-app = FastAPI(title="The Mathematical Human API", version="1.0.0")
+# Initialize scheduler
+scheduler = AsyncIOScheduler()
+
+# Scheduled task for auto-search
+async def scheduled_auto_search():
+    """Background task to search for guideline updates"""
+    try:
+        logger.info("Running scheduled auto-search for guideline updates...")
+        
+        # Check if auto-search is enabled
+        settings = await db.system_settings.find_one({"id": "global"})
+        if not settings or not settings.get("auto_search_enabled", True):
+            logger.info("Auto-search is disabled, skipping...")
+            return
+        
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        import json
+        import re
+        
+        EMERGENT_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
+        if not EMERGENT_KEY:
+            logger.warning("EMERGENT_LLM_KEY not found, skipping auto-search")
+            return
+        
+        # Get sample diseases to search
+        diseases = await db.diseases.find(
+            {}, 
+            {"_id": 0, "id": 1, "name": 1, "category": 1}
+        ).limit(20).to_list(20)
+        
+        if not diseases:
+            logger.info("No diseases found for auto-search")
+            return
+        
+        disease_names = [d["name"] for d in diseases]
+        
+        chat = LlmChat(
+            api_key=EMERGENT_KEY,
+            session_id=f"scheduled-search-{datetime.now().timestamp()}",
+            system_message="""You are a medical guidelines researcher. Search your knowledge for the latest medical guideline updates, clinical recommendations, and parameter changes for the specified diseases.
+
+Output MUST be valid JSON with this structure:
+{
+    "search_date": "YYYY-MM-DD",
+    "findings": [
+        {
+            "disease_name": "disease name",
+            "guideline_source": "e.g., ACC/AHA 2024, ESC 2024, WHO",
+            "update_type": "parameter_change|staging_update|treatment_protocol|diagnostic_criteria",
+            "summary": "Brief description of the update",
+            "details": "Detailed information",
+            "recommendation": "What should be updated in the system",
+            "confidence": 0-100,
+            "source_url": "URL if available"
+        }
+    ],
+    "no_updates_for": ["list of diseases with no recent updates found"]
+}"""
+        ).with_model("openai", "gpt-4o")
+        
+        search_prompt = f"""Search for the latest medical guideline updates (2023-2024) for these diseases:
+
+{', '.join(disease_names[:10])}
+
+Focus on:
+1. New staging systems or classifications
+2. Updated diagnostic criteria
+3. Changed parameter thresholds
+4. New treatment protocols
+5. Revised risk scores
+
+Report any significant updates that should be incorporated into a medical knowledge system."""
+
+        response = await chat.send_message(UserMessage(text=search_prompt))
+        
+        # Parse response
+        json_match = re.search(r'\{[\s\S]*\}', response)
+        if json_match:
+            findings = json.loads(json_match.group())
+        else:
+            findings = {"findings": []}
+        
+        # Create suggestions from findings
+        suggestions_created = 0
+        for finding in findings.get("findings", []):
+            matching_disease = next(
+                (d for d in diseases if d["name"].lower() == finding.get("disease_name", "").lower()),
+                None
+            )
+            
+            suggestion_id = str(uuid.uuid4())
+            suggestion = {
+                "id": suggestion_id,
+                "source_id": "scheduled_auto_search",
+                "disease_id": matching_disease["id"] if matching_disease else None,
+                "disease_name": finding.get("disease_name"),
+                "change_type": finding.get("update_type", "guideline_update"),
+                "target": finding.get("guideline_source", "general"),
+                "current_value": None,
+                "proposed_value": finding.get("recommendation"),
+                "unit": None,
+                "evidence_level": "emerging",
+                "confidence": finding.get("confidence", 50),
+                "reasoning": finding.get("summary"),
+                "source_quote": finding.get("details"),
+                "source_url": finding.get("source_url"),
+                "status": "pending",
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "is_auto_search": True,
+                "is_scheduled": True
+            }
+            await db.knowledge_suggestions.insert_one(suggestion)
+            suggestions_created += 1
+        
+        # Update settings
+        await db.system_settings.update_one(
+            {"id": "global"},
+            {
+                "$set": {
+                    "last_auto_search": datetime.now(timezone.utc).isoformat(),
+                    "last_auto_search_results": suggestions_created
+                }
+            },
+            upsert=True
+        )
+        
+        # Timeline entry
+        await db.knowledge_timeline.insert_one({
+            "id": str(uuid.uuid4()),
+            "source_id": "scheduled_auto_search",
+            "disease_id": None,
+            "action": "scheduled_auto_search_completed",
+            "actor_id": "system",
+            "actor_name": "Scheduled Task",
+            "details": {
+                "diseases_searched": len(disease_names),
+                "suggestions_created": suggestions_created
+            },
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        })
+        
+        logger.info(f"Scheduled auto-search completed: {suggestions_created} suggestions created")
+        
+    except Exception as e:
+        logger.error(f"Scheduled auto-search failed: {str(e)}")
+
+# Lifespan context manager for startup/shutdown
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    logger.info("Starting up PhiCor.ai server...")
+    
+    # Get auto-search interval from settings
+    settings = await db.system_settings.find_one({"id": "global"})
+    interval_days = 30
+    if settings:
+        interval_days = settings.get("auto_search_interval_days", 30)
+    
+    # Add scheduled job for auto-search
+    scheduler.add_job(
+        scheduled_auto_search,
+        IntervalTrigger(days=interval_days),
+        id="auto_search_job",
+        name="Guideline Auto-Search",
+        replace_existing=True
+    )
+    scheduler.start()
+    logger.info(f"Scheduler started with auto-search every {interval_days} days")
+    
+    yield
+    
+    # Shutdown
+    scheduler.shutdown()
+    client.close()
+    logger.info("Server shutdown complete")
+
+# Create the main app with lifespan
+app = FastAPI(title="The Mathematical Human API", version="1.0.0", lifespan=lifespan)
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
