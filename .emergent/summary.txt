@@ -1,86 +1,93 @@
 <analysis>**original_problem_statement:**
-The user's goal is to evolve PhiCore.ai into a Mathematical Human Body, a digital twin that quantifies all aspects of human health. The core requirement is to have a single, unified, and medically accurate view for over 1,900 diseases. This view must display all relevant mathematical models and parameters (from organ structure down to the cellular level), showing how they deviate from normal when a specific disease is selected.
+The user's goal is to evolve PhiCor.ai into a Mathematical Human Body, a digital twin that quantifies all aspects of human health. The core requirement is to have a single, unified, and medically accurate view for over 1,900 diseases.
+
+Recent efforts focused on fixing critical medical inaccuracies (e.g., the P-wave in Atrial Fibrillation) and building a comprehensive Expert Curation System. This system will allow multiple subject matter experts to log in, review AI-generated disease data, suggest edits, and run experiments on virtual patients. A super admin will oversee this process, approve changes, and monitor activity. The entire system must have a robust audit trail to ensure data integrity for future clinical use. The background AI scripts must continue running to populate data for all 1900+ diseases. The product name was corrected from PhiCore to PhiCor.
 
 **PRODUCT REQUIREMENTS:**
--   A unified, non-confusing dashboard UI. There should be only one primary set of organ tabs for navigation.
--   A single, consolidated parameter view that correctly displays modifications for any selected disease.
--   Data accuracy is paramount. A clear data hierarchy must be enforced: Medically-curated static data () > AI-generated data (from API) > Baseline values ().
--   The Disease Impact Summary panel should remain open by default.
--   The knowledge base must be complete, with background AI enhancement scripts running until all 1900+ diseases have comprehensive data.
--   Disease categories in the selection panel must be logically organized.
--   The system must eventually support EMR integration, requiring detailed clinical data (symptoms with severity, signs, labs, imaging, and treatment guidelines including surgical/device criteria).
+-   **Expert Curation System:**
+    -   Secure login for different user roles (Expert, Admin, Super Admin).
+    -   Experts can view all parameters for diseases within their specialty, similar to the main dashboard.
+    -   Experts can suggest changes/additions to any data point (parameters, clinical info, guidelines), providing a source and reasoning.
+    -   Suggested changes go into a review queue for a Super Admin to approve or reject.
+    -   Upon approval, the backend updates the main database.
+    -   A full audit log tracks all change requests and approvals (who, what, when).
+-   **AI-Powered Quality Assurance:**
+    -   A background AI process should search for new medical guidelines every 30 days and notify the Super Admin of potential updates.
+-   **Experimentation Lab:**
+    -   A sandboxed environment for experts and admins to create virtual patient test cases and run experiments against the mathematical models.
+-   **Data Accuracy & UI:**
+    -   All data presented must be medically accurate.
+    -   Disease categories must be logically organized.
+    -   The UI for both the main dashboard and the expert portal must be clean and functional.
 
 **User's preferred language**: English
 
 **what currently exists?**
-The application is a full-stack platform (React/FastAPI/MongoDB) with a unified dashboard UI. The previous major issue of a confusing, two-panel UI has been resolved. The system now correctly displays a merged view of parameters sourced from static files and a MongoDB database, which is being continuously enriched by two background AI scripts (Phase 1 for basic data, Phase 2 for comprehensive models). Critical data flow and UI crash issues related to displaying clinical evidence, treatment, and prognosis have been fixed. However, the user has identified new, more granular issues regarding medical accuracy and UI functionality.
+The application is a full-stack platform (React/FastAPI/MongoDB). Critical medical data display issues (like the P-Wave in AFib) and UI bugs (frozen panel, duplicate parameters) have been resolved. The main dashboard features reorganized disease categories and correct branding (PhiCor).
+
+A comprehensive Expert Curation System has been built and is partially functional. This includes:
+-   **Backend:** FastAPI endpoints and Pydantic models for user management (), , and .
+-   **Frontend:** A complete set of React pages for  (Login/Register), , , and .
+-   **Authentication:** A working JWT-based authentication flow using React Context, allowing experts and admins to log in and access their respective dashboards.
+-   **Data Enhancement:** Two background Python scripts (, ) are actively running to populate the MongoDB  collection with AI-generated data.
 
 **Last working item**:
--   **Last item agent was working:** The user reported several new critical issues after the last set of fixes:
-    1.  **Medical Inaccuracy:** For Atrial Fibrillation, the UI incorrectly displays a P wave parameter, which should be absent.
-    2.  **UI Bug:** The right-side panel (with disease search/severity) becomes frozen and overlaps the main content, preventing interaction.
-    3.  **Feature Request:** Add Reset buttons for better usability.
-    The agent began investigating the P-wave inaccuracy, correctly modifying the underlying data models (, ), but has not yet adjusted the frontend rendering logic to display the absent state. The other issues have not been started.
+-   **Last item agent was working:** The user provided screenshots showing the new Expert Dashboard. While the overall layout was approved, they pointed out that the scale tabs (e.g., Geometry, Function, ECG) are missing below the organ tabs when a disease is selected. The agent was about to investigate and fix this UI discrepancy to make the expert view match the main dashboard's functionality.
 -   **Status:** IN PROGRESS
 -   **Agent Testing Done:** N
--   **Which testing method agent to use?** screenshot tool. The next agent must verify that: 1) The P-wave parameter is correctly shown as Absent for AFib. 2) The right-panel UI bug is resolved. 3) The new Reset buttons are present and functional.
+-   **Which testing method agent to use?** screenshot tool. The agent needs to log in as an expert, select a disease, and take a screenshot of the Expert Dashboard to confirm the scale tabs are now visible and functional below the organ tabs.
 -   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: Medical Inaccuracy in ECG Display (P0)**
-    -   **Description:** For Atrial Fibrillation, the UI displays a P wave parameter, which is medically incorrect. This undermines the core requirement of data accuracy.
-    -   **Attempted fixes:** The agent updated the data models ( and ) to include parameters for P-wave absence. However, the frontend rendering logic has not been updated to correctly display this absent state.
+-   **Issue 1: Missing Scale Tabs on Expert Dashboard (P0)**
+    -   **Description:** When an expert selects a disease on the Expert Dashboard, the secondary scale tabs (e.g., 'Geometry', 'Function', 'ECG') that should appear below the organ tabs are not being rendered. This prevents experts from navigating through the detailed parameter scales, blocking the core review workflow.
+    -   **Attempted fixes:** None. This was the last identified issue.
     -   **Next debug checklist:**
-        1.  Locate the parameter rendering logic in .
-        2.  Implement a condition to check for absent or 0 values for parameters like .
-        3.  Instead of showing the baseline value, render the text Absent or a similar indicator.
-        4.  Verify the fix by selecting Atrial Fibrillation and taking a screenshot of the ECG parameters.
-    -   **Why fix this issue and what will be achieved with the fix?** To ensure the application's medical accuracy, which is a primary goal for the user.
+        1.  Examine .
+        2.  Compare its rendering logic with  to identify why the scale tabs component is not being displayed.
+        3.  Ensure the necessary state (like ) and props are being passed correctly to render the scale tabs when a disease is active.
+        4.  Implement the fix to render the scale tabs.
+    -   **Why fix this issue and what will be achieved with the fix?** This is a critical UI bug blocking the primary function of the Expert Curation System. Fixing it will allow experts to perform detailed reviews of all parameters.
     -   **Status:** IN PROGRESS
-    -   **Is recurring issue?** N
-    -   **Should Test frontend/backend/both after fix?** Frontend
-    -   **Blocked on other issue:** None
--   **Issue 2: Frozen/Overlapping UI Panel (P1)**
-    -   **Description:** The user provided a screenshot showing the right-side panel (with disease search and severity slider) is frozen and overlaps UI elements, blocking the ability to select a new disease.
-    -   **Attempted fixes:** None.
-    -   **Next debug checklist:**
-        1.  Examine the CSS (, ) and JSX structure of the right-side panel in .
-        2.  Reproduce the issue by selecting a disease and inspecting the element styles.
-        3.  Correct the faulty CSS causing the overlap.
-    -   **Why fix this issue and what will be achieved with the fix?** This is a critical UI bug blocking core application functionality.
-    -   **Status:** NOT STARTED
     -   **Is recurring issue?** N
     -   **Should Test frontend/backend/both after fix?** Frontend
     -   **Blocked on other issue:** None
 
 **In progress Task List**:
 -   **Task 1: Complete AI Data Enhancement (Phases 1 & 2) (P1)**
-    -   **Where to resume:** Two background scripts,  (Phase 1) and  (Phase 2), are running to populate the MongoDB database. The agent should monitor their progress via the  endpoint.
-    -   **What will be achieved with this?** This will populate the database for all 1977 diseases with rich, medically accurate data, fulfilling a core product requirement.
+    -   **Where to resume:** The two background scripts,  (Phase 1) and  (Phase 2), are running. The agent should periodically monitor their status using the  endpoint to ensure they continue running to completion.
+    -   **What will be achieved with this?** This will populate the database for all 1977 diseases with rich, medically accurate data, fulfilling a core product requirement and providing the content for experts to review.
     -   **Status:** IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?** Backend (verify DB) and Frontend (verify data appears).
+    -   **Should Test frontend/backend/both after fix?** N/A (Monitoring task)
     -   **Blocked on something:** None. This is a long-running background task.
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks:**
-    *   **(P1) Add Reset Buttons:** Implement two Reset buttons as requested: one in the right-side search panel and one in the main central display area to clear the selected disease. This will involve adding the buttons to the JSX in  and creating a  function.
-    *   **(P2) Reorganize Disease Categories:** A previously reported issue where disease categories in the right-hand panel are disorganized still needs to be addressed.
+    -   **(P1) Implement Full Change Request Workflow:** The UI and backend stubs exist, but the full logic for an admin to approve/reject a change request and have it update the master database needs to be implemented. This includes creating the UI for admins to view diffs of the suggested changes.
+    -   **(P2) AI-Powered Guideline Monitoring:** Implement the background AI process that searches for new medical guidelines every 30 days and creates notifications/tasks for the Super Admin.
 -   **Future Tasks:**
-    *   **Expert Curation Interface:** The user has requested a future feature for subject matter experts to edit the database content directly.
-    *   Refactor the monolithic  file.
-    *   Migrate  to the MongoDB backend.
-    *   Real-time Electronic Medical Record (EMR) Integration.
-    *   Patient Timeline (Ω), Lab Calculator (Λ), Probability Engine (Π), and Treatment Protocols (Θ) features.
+    -   Refactor  and  into smaller components.
+    -   Migrate static  data to a MongoDB collection.
+    -   Real-time Electronic Medical Record (EMR) Integration.
+    -   Build out the user-facing Ω, Λ, Π, Θ features (Timeline, Lab Calculator, etc.).
+    -   Allow non-expert users to use a simplified version of the Experiment Lab.
 
 **Completed work in this session**
--   **Major UI Unification:** Removed the duplicate organ filter tabs and consolidated the UI into a single, clean parameter view.
--   **Critical Data Flow Fixes:** Resolved a major bug preventing clinical data (symptoms, signs, treatments) from being displayed by ensuring the full disease object from the API is correctly processed and passed to child components.
--   **UI Crash Fixes:** Fixed React crashes that occurred when viewing the Prognosis and Treatment tabs by implementing more robust rendering logic for complex data objects.
--   **Data Generation Pipeline:** Created and launched a two-phase background process to enrich the database with both basic and comprehensive AI-generated data. The AI prompt for Phase 2 was significantly improved to include detailed clinical criteria for treatments, surgery, and devices.
--   **API for Monitoring:** Added a backend endpoint () to track the progress of the data generation scripts.
+-   **Critical Fix:** Fixed the medical inaccuracy where the P wave was incorrectly displayed for Atrial Fibrillation. The UI now correctly shows ABSENT.
+-   **Critical Fix:** Removed duplicate P-wave parameters from the ECG display.
+-   **Feature:** Implemented Reset buttons on the main dashboard to clear the selected disease.
+-   **Bug Fix:** Verified that the previously frozen right-side disease selection panel is now interactive.
+-   **Major Feature:** Built the foundation of the Expert Curation System:
+    -   Created backend APIs and DB models for Experts, Admins, Change Requests, and Audit Logs.
+    -   Developed frontend pages: , , , .
+    -   Fixed and verified the authentication flow, allowing users to register, log in, and access protected routes based on their role.
+    -   Enhanced the Expert Dashboard to display a full parameter view similar to the main dashboard.
+-   **UI Improvement:** Reorganized disease categories on the main dashboard for better usability.
+-   **Branding:** Updated all instances of PhiCore to the correct brand name PhiCor.
+-   **Task Management:** Successfully monitored and restarted the two background data enhancement scripts.
 
 **Earlier issues found/mentioned but not fixed**
--   **Issue 1: Disorganized Disease Categories:** The user reported that diseases in the right-side panel are not grouped correctly. This is now an upcoming task.
+-   None. All previously mentioned issues have either been fixed or are now tracked in the current pending/upcoming lists.
 
 **Known issue recurrence from previous fork**
 -   None.
@@ -89,68 +96,84 @@ The application is a full-stack platform (React/FastAPI/MongoDB) with a unified 
 
 
 **Key Technical Concepts**
--   **Hybrid Data Model:** The application sources data from static files () and two tiers of AI-generated data within MongoDB ( and  fields), merging them on the frontend.
--   **Background Data Generation:** Two long-running Python scripts run in parallel to progressively enrich the MongoDB database.
--   **Safe UI Rendering:** Frontend components have been updated to safely render complex, nested data objects, preventing crashes from unexpected data structures.
+-   **Hybrid Data Model:** Merges static JS models with AI-generated MongoDB data on the frontend.
+-   **Background Data Generation:** Long-running Python scripts populate the database.
+-   **Expert Curation System:** A new sub-application with role-based access control (RBAC) for data quality assurance.
+-   **JWT Authentication:** Used for securing the expert and admin portals.
+-   **Audit Trail:** Backend models and logic to log all significant actions (registrations, change requests, approvals).
 
 **key DB schema**
 -   **diseases:** 
+-   **experts:**  (NEW)
+-   **change_requests:**  (NEW)
+-   **audit_logs:**  (NEW)
+-   **experiments:**  (NEW)
 
 **changes in tech stack**
 -   None.
 
 **All files of reference**
--   **/app/frontend/src/pages/DashboardMultiScale.js**: The core dashboard component where the right-panel UI bug and Reset buttons need to be addressed. It's also where the ECG parameter rendering logic needs to be verified.
--   **/app/frontend/src/data/organModels.js**: Defines baseline parameters. Modified for the P-wave issue.
--   **/app/frontend/src/data/diseaseModels.js**: Static disease data. Modified for the P-wave issue.
--   **/app/frontend/src/components/DiseaseDetailPanel.js**: Displays detailed panels; was recently fixed to prevent crashes.
+-   **/app/frontend/src/pages/ExpertDashboard.js**: Primary file for the next task. Needs to be modified to render the scale tabs.
+-   **/app/frontend/src/pages/DashboardMultiScale.js**: Reference file for the correct implementation of the organ and scale tabs.
+-   **/app/backend/server.py**: Contains all backend logic, including the new Expert Curation System APIs.
+-   **/app/frontend/src/context/ExpertContext.js**: Manages the authentication state for the expert portal.
+-   **/app/frontend/src/pages/ExpertAuthPage.js**: The login page, which now correctly uses the auth context.
 
 **Areas that need refactoring**:
--    is a monolithic component and a prime candidate for being broken down into smaller, more manageable hooks and components.
+-    remains a large, monolithic component.
+-    is growing in complexity and could benefit from being broken down into smaller components (e.g., ParameterEditor, ChangeRequestForm).
 
 **key api endpoints**
--   : Fetches all disease data for the initial application load.
--   : Custom endpoint to monitor the progress of the background data generation tasks.
+-   : Monitors background data generation.
+-   : Registers a new expert.
+-   : Authenticates an expert or admin.
+-   : Fetches the current logged-in user's data.
+-   : Fetches diseases for review, filterable by specialty.
+-   : Submits a new change request.
+-   : Fetches overview stats for the admin dashboard.
+-   : Fetches all change requests awaiting review.
+-   : Approves a change.
+-   : Rejects a change.
 
 **Critical Info for New Agent**
--   **Priorities:** Your immediate priorities are dictated by the user's latest feedback: **1. Fix the P-wave display inaccuracy (P0). 2. Fix the frozen right-side UI panel (P1). 3. Add the requested Reset buttons (P1).**
--   **Medical Accuracy is Paramount:** The user is extremely focused on data correctness. The P-wave issue is a critical bug that erodes trust. Always validate data display against medical facts.
--   **Data Flow Complexity:** Be mindful that the  object is a composite, merged on the frontend. When debugging data display, trace the flow from the initial  in  all the way to the rendering component. The last major data bug was due to an incomplete object copy during the initial load.
--   **Background Tasks:** Two data generation scripts are running. Do not interrupt them. You can monitor their progress at the  endpoint.
+-   **Immediate Priority:** Your first task is to fix the missing scale tabs on the  page. This is a critical blocker for the user. Use  as a reference for the correct implementation.
+-   **Background Scripts:** The two data enhancement scripts are running and are essential for the project's success. Monitor their progress via the  endpoint and restart them if they stop, but do not interrupt their work.
+-   **Authentication:** The expert portal uses JWT authentication. The token and user data are stored in  and managed by . All protected pages now correctly check for the auth state before rendering.
+-   **User Focus:** The user is highly focused on achieving medical accuracy. The Expert Curation System is the primary tool for this, so its functionality and usability are paramount.
 
 **documents and test reports created in this job**
--   
+-    was updated to reflect successful testing of the expert portal's authentication flow.
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User (Latest):** Reports medical inaccuracy (P-wave in AFib), a frozen UI panel on the right, and requests Reset buttons. Asks agent to continue background data generation and notes the future need for an expert curation interface.
-2.  **Agent:** Summarizes the latest fixes and confirms background tasks are running.
-3.  **User:** States that treatment info is too limited and needs to be much more comprehensive (surgical criteria, devices, etc.).
-4.  **Agent:** Acknowledges this, stops the Phase 2 script, and updates it with a more detailed AI prompt.
-5.  **User:** Reports that clinical details are still missing for some conditions and the app crashes when clicking Prognosis or Treatment buttons.
-6.  **Agent:** Provides a status update on data enhancement progress.
-7.  **User:** Instructs the agent to start Phase 2 of data generation.
-8.  **Agent:** Proposes a detailed plan for a two-phase data generation process and asks for confirmation.
-9.  **User:** Asks for clarification on the data generation timeline and confirms the approach is good.
-10. **Agent:** Explains the plan to use AI to expand the static models for all diseases.
+1.  **User (Latest):** Provides screenshots of the working Expert Dashboard but notes the scale tabs (ECG, etc.) are missing below the organ tabs.
+2.  **Agent:** Confirms the Expert Dashboard is functional and matches the main dashboard's parameter view, then asks the user to test.
+3.  **User:** Asks how the disease data update is progressing and clarifies that the expert login should lead to a full parameter dashboard for editing.
+4.  **Agent:** Reports progress on Phase 1 & 2 scripts and starts updating the Expert Dashboard to a full parameter view.
+5.  **User:** States they will proceed with the three tasks the agent proposed (monitor progress, reorganize categories, and test the expert workflow).
+6.  **Agent:** Reports progress of enhancement scripts and proposes to work on three tasks.
+7.  **User:** Says to continue and asks about the progress of Phase 1 & 2.
+8.  **Agent:** Confirms branding is updated to PhiCor and asks what to do next.
+9.  **User:** Responds Yes to the agent's question about updating the branding from PhiCore to PhiCor.
+10. **Agent:** Reports enhancement progress and asks if it should update branding, add features, or monitor progress.
 
 **Project Health Check:**
--   **Broken:** A critical UI bug in the right-side panel blocks user interaction. A medical data inaccuracy (the P-wave issue) is present and is a high-priority concern for the user.
+-   **Broken:** The Expert Dashboard UI is missing the scale tabs, which is a P0 bug blocking the core review workflow.
 -   **Mocked:** None.
 
 **3rd Party Integrations**
--   **OpenAI GPT-4o:** Uses Emergent LLM Key. Powers the backend data enhancement scripts.
--   **MongoDB:** The primary database for the application.
+-   **OpenAI GPT-4o:** Uses Emergent LLM Key. Powers the two backend data enhancement scripts (, ).
+-   **MongoDB:** The primary database for storing disease models, expert accounts, change requests, and audit logs.
 
 **Testing status**
--   **Testing agent used after significant changes:** NO
--   **Troubleshoot agent used after agent stuck in loop:** NO
+-   **Testing agent used after significant changes:** YES. The testing agent was used multiple times to diagnose and verify the authentication flow and core functionality of the Expert Curation System.
+-   **Troubleshoot agent used after agent stuck in loop:** NO.
 -   **Test files created:** None.
--   **Known regressions:** A new UI bug has been introduced in the right-side panel that freezes the content.
+-   **Known regressions:** The new Expert Dashboard has a UI bug where it doesn't show the scale tabs.
 
 **Credentials to test flow:**
--   No authentication is required for the application.
+-   **Role:** Super Admin
+-   **Email:** 
+-   **Password:** 
 
 **What agent forgot to execute**
--   The agent has not completed the fix for the P-wave display; the frontend rendering logic still needs to be adjusted and verified.
--   The agent has not yet started fixing the frozen right-side panel UI bug.
--   The agent has not yet implemented the Reset buttons requested by the user.</analysis>
+-   The agent did not fix the missing scale tabs on the Expert Dashboard, which was the final piece of feedback from the user in this session.</analysis>

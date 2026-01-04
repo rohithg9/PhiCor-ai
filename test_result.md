@@ -99,7 +99,7 @@
 - **VERIFY**: Admin functionality and change request management ✅ CONFIRMED
 
 ### Backend Infrastructure ✅ PASSED
-- **Backend URL**: https://phicore-health-1.preview.emergentagent.com
+- **Backend URL**: https://bodydigi.preview.emergentagent.com
 - **Health Check**: Backend accessible and responding ✅ CONFIRMED
 - **API Endpoints**: All expert system endpoints functional ✅ CONFIRMED
 
@@ -112,7 +112,7 @@
 
 ### Expert Curation System Testing ✅ MOSTLY PASSED
 
-**Test Environment**: https://phicore-health-1.preview.emergentagent.com/expert-login
+**Test Environment**: https://bodydigi.preview.emergentagent.com/expert-login
 **Testing Agent**: Automated Playwright Testing
 **Test Date**: January 3, 2026
 
@@ -169,7 +169,7 @@
 **MAJOR UPDATE**: Authentication issues have been RESOLVED! All core functionality now working.
 
 #### Test Results Summary (January 3, 2026 - 9:48 PM)
-**Test Environment**: https://phicore-health-1.preview.emergentagent.com/expert-login
+**Test Environment**: https://bodydigi.preview.emergentagent.com/expert-login
 **Testing Agent**: Automated Playwright Testing
 **Status**: ✅ AUTHENTICATION FIXED - SYSTEM FULLY FUNCTIONAL
 
