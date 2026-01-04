@@ -2452,6 +2452,27 @@ const DashboardMultiScale = () => {
   useEffect(() => {
     const fetchDiseaseParams = async () => {
       setIsLoadingDiseases(true);
+      
+      // Try to load from cache first for instant display
+      const cachedData = localStorage.getItem('phicor_dashboard_diseases');
+      const cacheTime = localStorage.getItem('phicor_dashboard_diseases_time');
+      const cacheAge = cacheTime ? Date.now() - parseInt(cacheTime) : Infinity;
+      
+      // Use cache if less than 10 minutes old
+      if (cachedData && cacheAge < 10 * 60 * 1000) {
+        try {
+          const cached = JSON.parse(cachedData);
+          setApiDiseaseData(cached.diseaseMap || {});
+          setApiDiseaseByIcd(cached.icdMap || {});
+          setApiDiseases(cached.fullDiseaseMap || {});
+          console.log(`Loaded ${Object.keys(cached.fullDiseaseMap || {}).length} diseases from cache`);
+          setIsLoadingDiseases(false);
+        } catch (e) {
+          console.error('Cache parse error:', e);
+        }
+      }
+      
+      // Fetch fresh data
       try {
         const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
         // Fetch all diseases with parameter_modifications (limit increased to get all)
@@ -2501,10 +2522,19 @@ const DashboardMultiScale = () => {
               }
             }
           });
+          
+          // Save to cache
+          localStorage.setItem('phicor_dashboard_diseases', JSON.stringify({
+            diseaseMap, icdMap, fullDiseaseMap
+          }));
+          localStorage.setItem('phicor_dashboard_diseases_time', Date.now().toString());
+          
           setApiDiseaseData(diseaseMap);
           setApiDiseaseByIcd(icdMap);
           setApiDiseases(fullDiseaseMap);
           console.log(`Loaded ${Object.keys(fullDiseaseMap).length} diseases from API, ${Object.keys(diseaseMap).length} with parameter_modifications`);
+        } else {
+          console.error('API error:', response.status, response.statusText);
         }
       } catch (error) {
         console.error('Failed to fetch disease params:', error);
