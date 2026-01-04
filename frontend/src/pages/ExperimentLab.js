@@ -351,9 +351,15 @@ export default function ExperimentLab() {
             <CardContent>
               {!selectedExperiment ? (
                 <div className="text-center py-16 text-muted-foreground">
-                  <Activity className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Select an experiment from the list</p>
-                  <p className="text-sm">or create a new one to get started</p>
+                  <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-purple-500/10 flex items-center justify-center">
+                    <Beaker className="w-10 h-10 text-purple-500" />
+                  </div>
+                  <p className="text-lg font-medium mb-2">No Experiment Selected</p>
+                  <p className="text-sm mb-6">Select an experiment from the list or create a new one to get started</p>
+                  <Button onClick={() => setShowNewExperiment(true)} className="bg-purple-600 hover:bg-purple-700">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create New Experiment
+                  </Button>
                 </div>
               ) : (
                 <Tabs defaultValue="patient">
