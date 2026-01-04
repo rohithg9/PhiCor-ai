@@ -5552,9 +5552,8 @@ async def create_expert(
     if expert_data.role not in ["expert", "admin", "super_admin"]:
         raise HTTPException(status_code=400, detail="Invalid role")
     
-    # Hash password
-    import hashlib
-    password_hash = hashlib.sha256(expert_data.password.encode()).hexdigest()
+    # Hash password using bcrypt (same as registration endpoint)
+    password_hash = bcrypt.hashpw(expert_data.password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     
     # Create expert
     new_expert = {
