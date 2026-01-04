@@ -583,13 +583,13 @@ export default function ExpertDashboard() {
         {/* Diseases View */}
         {activeView === 'diseases' && (
           <>
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-          <Card>
-            <CardContent className="pt-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-muted-foreground">My Specialty</p>
+            {/* Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+              <Card>
+                <CardContent className="pt-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-muted-foreground">My Specialty</p>
                   <p className="text-2xl font-bold text-primary">{stats.mySpecialty}</p>
                 </div>
                 <Stethoscope className="w-6 h-6 text-primary" />
