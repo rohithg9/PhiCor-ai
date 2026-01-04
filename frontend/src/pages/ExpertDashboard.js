@@ -390,7 +390,9 @@ export default function ExpertDashboard() {
   
   // Get current organ model
   const currentOrganModel = ORGAN_MODELS[selectedOrgan];
-  const organScales = currentOrganModel?.scales || {};
+  
+  // Get current scale data (scales are direct properties of organ model, not in a "scales" object)
+  const currentScale = currentOrganModel?.[selectedScale];
 
   return (
     <div className="min-h-screen bg-background">
