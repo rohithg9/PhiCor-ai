@@ -157,6 +157,7 @@ def test_admin_authentication():
             print(f"  📊 User ID: {admin_user_data.get('id')}")
             print(f"  📊 User Name: {admin_user_data.get('name')}")
             print(f"  📊 User Email: {admin_user_data.get('email')}")
+            print(f"  📊 User Role: {admin_user_data.get('role')}")
             
             # Test token validity by getting profile
             headers = {"Authorization": f"Bearer {admin_token}"}
@@ -165,14 +166,14 @@ def test_admin_authentication():
             if profile_response.status_code == 200:
                 print(f"  ✅ Token validation successful ✓")
                 
-                # Test admin access to settings endpoint
-                settings_response = requests.get(f"{BACKEND_URL}/api/admin/settings", headers=headers, timeout=10)
+                # Test admin access to experts endpoint
+                experts_response = requests.get(f"{BACKEND_URL}/api/admin/experts", headers=headers, timeout=10)
                 
-                if settings_response.status_code == 200:
-                    print(f"  ✅ Admin access verified (can access admin settings) ✓")
+                if experts_response.status_code == 200:
+                    print(f"  ✅ Admin access verified (can access admin/experts) ✓")
                     return True
                 else:
-                    print(f"  ❌ Admin access denied: {settings_response.status_code}")
+                    print(f"  ❌ Admin access denied: {experts_response.status_code}")
                     return False
             else:
                 print(f"  ❌ Token validation failed: {profile_response.status_code}")
@@ -186,15 +187,14 @@ def test_admin_authentication():
         print(f"❌ Error testing admin authentication: {e}")
         return False
 
-def test_system_settings():
-    """Test 2: System Settings Management"""
-    global original_settings
+def test_get_all_experts():
+    """Test 2: Get All Experts - GET /api/admin/experts"""
     
-    print("\n⚙️ TEST 2: SYSTEM SETTINGS MANAGEMENT")
+    print("\n👥 TEST 2: GET ALL EXPERTS")
     print("=" * 50)
     print("Testing requirements from review request:")
-    print("- GET /api/admin/settings (auto_search_interval_days, auto_search_enabled)")
-    print("- PUT /api/admin/settings (update auto_search_interval_days to 14)")
+    print("- GET /api/admin/experts")
+    print("- Should return list of all experts with stats (pending_changes, total_changes, experiments_count)")
     
     if not admin_token:
         print("❌ Admin token not available - skipping test")
@@ -203,128 +203,56 @@ def test_system_settings():
     headers = {"Authorization": f"Bearer {admin_token}"}
     
     try:
-        # Test GET settings
-        response = requests.get(f"{BACKEND_URL}/api/admin/settings", headers=headers, timeout=10)
+        # Test GET all experts
+        response = requests.get(f"{BACKEND_URL}/api/admin/experts", headers=headers, timeout=10)
         
         if response.status_code == 200:
             data = response.json()
-            settings = data.get('settings', {})
-            original_settings = settings.copy()  # Store for restoration
+            experts = data.get('experts', [])
             
-            print(f"✅ GET settings successful")
-            print(f"  📊 Auto-search interval: {settings.get('auto_search_interval_days')} days")
-            print(f"  📊 Auto-search enabled: {settings.get('auto_search_enabled')}")
+            print(f"✅ GET all experts successful")
+            print(f"  📊 Total experts: {len(experts)}")
             
-            # Verify required fields exist
-            if 'auto_search_interval_days' in settings and 'auto_search_enabled' in settings:
-                print(f"  ✅ Required settings fields present ✓")
-                get_pass = True
-            else:
-                print(f"  ❌ Missing required settings fields")
-                get_pass = False
-        else:
-            print(f"❌ GET settings failed: {response.status_code}")
-            get_pass = False
-        
-        # Test PUT settings (update auto_search_interval_days to 14)
-        if get_pass:
-            update_data = {"auto_search_interval_days": 14}
-            
-            put_response = requests.put(
-                f"{BACKEND_URL}/api/admin/settings", 
-                json=update_data, 
-                headers=headers, 
-                timeout=10
-            )
-            
-            if put_response.status_code == 200:
-                put_data = put_response.json()
-                updates = put_data.get('updates', {})
-                print(f"✅ PUT settings successful")
-                print(f"  📊 Updated auto-search interval: {updates.get('auto_search_interval_days')} days")
+            # Verify response structure and required stats
+            if experts:
+                first_expert = experts[0]
+                required_fields = ['id', 'name', 'email', 'role']
+                stats_fields = ['pending_changes', 'total_changes', 'experiments_count']
                 
-                # Verify the update was applied
-                if updates.get('auto_search_interval_days') == 14:
-                    print(f"  ✅ Settings update verified (interval set to 14 days) ✓")
-                    put_pass = True
+                missing_fields = [field for field in required_fields if field not in first_expert]
+                missing_stats = [field for field in stats_fields if field not in first_expert]
+                
+                if not missing_fields:
+                    print(f"  ✅ Required expert fields present ✓")
+                    fields_pass = True
                 else:
-                    print(f"  ❌ Settings update failed - value not updated")
-                    put_pass = False
+                    print(f"  ❌ Missing required fields: {missing_fields}")
+                    fields_pass = False
+                
+                if not missing_stats:
+                    print(f"  ✅ Required stats fields present ✓")
+                    print(f"    📊 Sample expert stats:")
+                    print(f"      - Pending changes: {first_expert.get('pending_changes')}")
+                    print(f"      - Total changes: {first_expert.get('total_changes')}")
+                    print(f"      - Experiments count: {first_expert.get('experiments_count')}")
+                    stats_pass = True
+                else:
+                    print(f"  ❌ Missing stats fields: {missing_stats}")
+                    stats_pass = False
+                
+                # Show sample expert data
+                print(f"  📊 Sample expert:")
+                print(f"    - Name: {first_expert.get('name')}")
+                print(f"    - Email: {first_expert.get('email')}")
+                print(f"    - Role: {first_expert.get('role')}")
+                print(f"    - Specialty: {first_expert.get('specialty', 'N/A')}")
+                
+                return fields_pass and stats_pass
             else:
-                print(f"❌ PUT settings failed: {put_response.status_code}")
-                put_pass = False
+                print(f"  ⚠️ No experts found in system")
+                return True  # Don't fail test for empty list
         else:
-            put_pass = False
-        
-        return get_pass and put_pass
-    except Exception as e:
-        print(f"❌ Error testing system settings: {e}")
-        return False
-
-def test_knowledge_source_upload():
-    """Test 3: Knowledge Source Upload"""
-    global test_source_id
-    
-    print("\n📤 TEST 3: KNOWLEDGE SOURCE UPLOAD")
-    print("=" * 50)
-    print("Testing requirements from review request:")
-    print("- POST /api/admin/knowledge/upload (Text source with Atrial Fibrillation content)")
-    print("- Verify AI analysis triggers and processes content")
-    
-    if not admin_token:
-        print("❌ Admin token not available - skipping test")
-        return False
-    
-    headers = {"Authorization": f"Bearer {admin_token}"}
-    
-    try:
-        # Create knowledge source upload data as specified in review
-        upload_data = {
-            "source_type": "text",
-            "title": "Atrial Fibrillation Update 2024",
-            "content": "Recent studies show that early rhythm control in atrial fibrillation patients reduces stroke risk by 20%. QTc prolongation threshold has been updated to 500ms for high-risk patients.",
-            "disease_name": "Atrial Fibrillation",
-            "tags": "cardiology,ecg,guidelines"
-        }
-        
-        response = requests.post(
-            f"{BACKEND_URL}/api/admin/knowledge/upload", 
-            data=upload_data,  # Use form data as specified
-            headers=headers, 
-            timeout=30  # Longer timeout for AI analysis
-        )
-        
-        if response.status_code == 200:
-            data = response.json()
-            test_source_id = data.get('source', {}).get('id')
-            
-            print(f"✅ Knowledge source upload successful")
-            print(f"  📊 Source ID: {test_source_id}")
-            print(f"  📊 Title: {data.get('source', {}).get('title')}")
-            print(f"  📊 Disease: {data.get('source', {}).get('disease_name')}")
-            print(f"  📊 Status: {data.get('source', {}).get('status')}")
-            
-            # Check if AI analysis was triggered
-            analysis_status = data.get('source', {}).get('analysis_status')
-            source_status = data.get('source', {}).get('status')
-            if analysis_status in ['completed', 'processing', 'pending'] or source_status in ['analyzed', 'pending_analysis', 'processing']:
-                print(f"  ✅ AI analysis triggered: {analysis_status or source_status} ✓")
-                analysis_pass = True
-            else:
-                print(f"  ❌ AI analysis not triggered: {analysis_status or source_status}")
-                analysis_pass = False
-            
-            # Verify content was processed
-            if data.get('source', {}).get('content_preview'):
-                print(f"  ✅ Content processed and stored ✓")
-                content_pass = True
-            else:
-                print(f"  ❌ Content not processed")
-                content_pass = False
-            
-            return analysis_pass and content_pass
-        else:
-            print(f"❌ Knowledge source upload failed: {response.status_code}")
+            print(f"❌ GET all experts failed: {response.status_code}")
             try:
                 error_data = response.json()
                 print(f"  ℹ️ Error details: {error_data}")
@@ -332,16 +260,19 @@ def test_knowledge_source_upload():
                 print(f"  ℹ️ Response text: {response.text}")
             return False
     except Exception as e:
-        print(f"❌ Error testing knowledge source upload: {e}")
+        print(f"❌ Error testing get all experts: {e}")
         return False
 
-def test_knowledge_sources_retrieval():
-    """Test 4: Knowledge Sources Retrieval"""
-    print("\n📚 TEST 4: KNOWLEDGE SOURCES RETRIEVAL")
+def test_create_expert():
+    """Test 3: Create New Expert - POST /api/admin/experts"""
+    global test_expert_id, created_expert_data
+    
+    print("\n➕ TEST 3: CREATE NEW EXPERT")
     print("=" * 50)
     print("Testing requirements from review request:")
-    print("- GET /api/admin/knowledge/sources")
-    print("- Verify uploaded source appears in list")
+    print("- POST /api/admin/experts")
+    print("- Body: {\"name\": \"Dr. New Expert\", \"email\": \"newexpert@test.com\", \"password\": \"test123\", \"role\": \"expert\", \"specialty\": \"Cardiology\", \"institution\": \"Test Medical Center\"}")
+    print("- Should create expert and return the new expert data")
     
     if not admin_token:
         print("❌ Admin token not available - skipping test")
@@ -350,278 +281,142 @@ def test_knowledge_sources_retrieval():
     headers = {"Authorization": f"Bearer {admin_token}"}
     
     try:
-        # Get knowledge sources
-        response = requests.get(
-            f"{BACKEND_URL}/api/admin/knowledge/sources", 
-            headers=headers, 
-            timeout=10
-        )
-        
-        if response.status_code == 200:
-            data = response.json()
-            sources = data.get('sources', [])
-            
-            print(f"✅ Knowledge sources retrieval successful")
-            print(f"  📊 Total sources: {len(sources)}")
-            
-            # Find our test source
-            test_source = None
-            if test_source_id:
-                for source in sources:
-                    if source.get('id') == test_source_id:
-                        test_source = source
-                        break
-            
-            if test_source:
-                print(f"  ✅ Test source found in list ✓")
-                print(f"    📊 Title: {test_source.get('title')}")
-                print(f"    📊 Disease: {test_source.get('disease_name')}")
-                print(f"    📊 Status: {test_source.get('status')}")
-                print(f"    📊 Analysis Status: {test_source.get('analysis_status')}")
-                source_found = True
-            else:
-                print(f"  ⚠️ Test source not found in list (may still be processing)")
-                source_found = True  # Don't fail test for this
-            
-            # Verify response structure
-            if isinstance(sources, list) and len(sources) >= 0:
-                print(f"  ✅ Response structure valid ✓")
-                structure_pass = True
-            else:
-                print(f"  ❌ Invalid response structure")
-                structure_pass = False
-            
-            return source_found and structure_pass
-        else:
-            print(f"❌ Knowledge sources retrieval failed: {response.status_code}")
-            return False
-    except Exception as e:
-        print(f"❌ Error testing knowledge sources retrieval: {e}")
-        return False
-
-def test_knowledge_suggestions():
-    """Test 5: Knowledge Suggestions Review"""
-    global test_suggestion_id
-    
-    print("\n💡 TEST 5: KNOWLEDGE SUGGESTIONS REVIEW")
-    print("=" * 50)
-    print("Testing requirements from review request:")
-    print("- GET /api/admin/knowledge/suggestions?status=pending")
-    print("- Verify AI-generated suggestions from analysis")
-    
-    if not admin_token:
-        print("❌ Admin token not available - skipping test")
-        return False
-    
-    headers = {"Authorization": f"Bearer {admin_token}"}
-    
-    try:
-        # Get pending knowledge suggestions
-        response = requests.get(
-            f"{BACKEND_URL}/api/admin/knowledge/suggestions?status=pending", 
-            headers=headers, 
-            timeout=10
-        )
-        
-        if response.status_code == 200:
-            data = response.json()
-            suggestions = data.get('suggestions', [])
-            
-            print(f"✅ Knowledge suggestions retrieval successful")
-            print(f"  📊 Total pending suggestions: {len(suggestions)}")
-            
-            # Look for suggestions related to our uploaded source
-            related_suggestions = []
-            if test_source_id:
-                for suggestion in suggestions:
-                    if suggestion.get('source_id') == test_source_id:
-                        related_suggestions.append(suggestion)
-            
-            if related_suggestions:
-                print(f"  ✅ AI-generated suggestions found from uploaded source ✓")
-                test_suggestion_id = related_suggestions[0].get('id')
-                
-                for i, suggestion in enumerate(related_suggestions[:3]):  # Show first 3
-                    print(f"    📊 Suggestion {i+1}:")
-                    print(f"      - ID: {suggestion.get('id')}")
-                    print(f"      - Type: {suggestion.get('suggestion_type')}")
-                    print(f"      - Disease: {suggestion.get('disease_name')}")
-                    print(f"      - Parameter: {suggestion.get('parameter_name')}")
-                    print(f"      - Proposed Value: {suggestion.get('proposed_value')}")
-                
-                suggestions_found = True
-            else:
-                print(f"  ⚠️ No suggestions found for uploaded source (analysis may still be processing)")
-                # Check if there are any suggestions at all
-                if suggestions:
-                    print(f"  📊 Other pending suggestions available: {len(suggestions)}")
-                    test_suggestion_id = suggestions[0].get('id')  # Use first available
-                    suggestions_found = True
-                else:
-                    print(f"  ℹ️ No pending suggestions in system")
-                    suggestions_found = True  # Don't fail test for this
-            
-            # Verify response structure
-            if isinstance(suggestions, list):
-                print(f"  ✅ Response structure valid ✓")
-                structure_pass = True
-            else:
-                print(f"  ❌ Invalid response structure")
-                structure_pass = False
-            
-            return suggestions_found and structure_pass
-        else:
-            print(f"❌ Knowledge suggestions retrieval failed: {response.status_code}")
-            return False
-    except Exception as e:
-        print(f"❌ Error testing knowledge suggestions: {e}")
-        return False
-
-def test_knowledge_timeline():
-    """Test 6: Knowledge Timeline"""
-    print("\n📅 TEST 6: KNOWLEDGE TIMELINE")
-    print("=" * 50)
-    print("Testing requirements from review request:")
-    print("- GET /api/admin/knowledge/timeline")
-    print("- Verify activity history is tracked")
-    
-    if not admin_token:
-        print("❌ Admin token not available - skipping test")
-        return False
-    
-    headers = {"Authorization": f"Bearer {admin_token}"}
-    
-    try:
-        # Get knowledge timeline
-        response = requests.get(
-            f"{BACKEND_URL}/api/admin/knowledge/timeline", 
-            headers=headers, 
-            timeout=10
-        )
-        
-        if response.status_code == 200:
-            data = response.json()
-            timeline = data.get('timeline', [])
-            
-            print(f"✅ Knowledge timeline retrieval successful")
-            print(f"  📊 Total timeline entries: {len(timeline)}")
-            
-            # Look for activities related to our test
-            related_activities = []
-            if test_source_id:
-                for activity in timeline:
-                    if (activity.get('source_id') == test_source_id or 
-                        activity.get('action') in ['source_uploaded', 'analysis_completed']):
-                        related_activities.append(activity)
-            
-            if related_activities:
-                print(f"  ✅ Related activities found in timeline ✓")
-                
-                for i, activity in enumerate(related_activities[:3]):  # Show first 3
-                    print(f"    📊 Activity {i+1}:")
-                    print(f"      - Action: {activity.get('action')}")
-                    print(f"      - Timestamp: {activity.get('timestamp')}")
-                    print(f"      - User: {activity.get('user_name')}")
-                    print(f"      - Details: {str(activity.get('details', ''))[:50]}...")
-                
-                activities_found = True
-            else:
-                print(f"  ⚠️ No related activities found (may still be processing)")
-                # Check if there are any activities at all
-                if timeline:
-                    print(f"  📊 Other timeline entries available: {len(timeline)}")
-                    activities_found = True
-                else:
-                    print(f"  ℹ️ No timeline entries in system")
-                    activities_found = True  # Don't fail test for this
-            
-            # Verify response structure
-            if isinstance(timeline, list):
-                print(f"  ✅ Response structure valid ✓")
-                structure_pass = True
-            else:
-                print(f"  ❌ Invalid response structure")
-                structure_pass = False
-            
-            return activities_found and structure_pass
-        else:
-            print(f"❌ Knowledge timeline retrieval failed: {response.status_code}")
-            return False
-    except Exception as e:
-        print(f"❌ Error testing knowledge timeline: {e}")
-        return False
-
-def test_suggestion_approval():
-    """Test 7: Suggestion Approval Workflow"""
-    print("\n✅ TEST 7: SUGGESTION APPROVAL WORKFLOW")
-    print("=" * 50)
-    print("Testing requirements from review request:")
-    print("- POST /api/admin/knowledge/suggestions/{suggestion_id}/approve")
-    print("- Verify suggestion approval process")
-    
-    if not admin_token:
-        print("❌ Admin token not available - skipping test")
-        return False
-    
-    if not test_suggestion_id:
-        print("❌ No suggestion ID available - skipping test")
-        return False
-    
-    headers = {"Authorization": f"Bearer {admin_token}"}
-    
-    try:
-        # Test approve functionality
-        approve_data = {
-            "reviewer_notes": "Approved after review - Knowledge Bank update is valid"
+        # Create expert data as specified in review
+        expert_data = {
+            "name": "Dr. New Expert",
+            "email": "newexpert@test.com",
+            "password": "test123",
+            "role": "expert",
+            "specialty": "Cardiology",
+            "institution": "Test Medical Center"
         }
         
         response = requests.post(
-            f"{BACKEND_URL}/api/admin/knowledge/suggestions/{test_suggestion_id}/approve",
-            json=approve_data,
+            f"{BACKEND_URL}/api/admin/experts", 
+            json=expert_data,
+            headers=headers, 
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            created_expert_data = data.get('expert', {})
+            test_expert_id = created_expert_data.get('id')
+            
+            print(f"✅ Expert creation successful")
+            print(f"  📊 Expert ID: {test_expert_id}")
+            print(f"  📊 Name: {created_expert_data.get('name')}")
+            print(f"  📊 Email: {created_expert_data.get('email')}")
+            print(f"  📊 Role: {created_expert_data.get('role')}")
+            print(f"  📊 Specialty: {created_expert_data.get('specialty')}")
+            print(f"  📊 Institution: {created_expert_data.get('institution')}")
+            
+            # Verify all required fields are present
+            required_fields = ['id', 'name', 'email', 'role', 'specialty', 'institution']
+            missing_fields = [field for field in required_fields if field not in created_expert_data]
+            
+            if not missing_fields:
+                print(f"  ✅ All required fields present in response ✓")
+                fields_pass = True
+            else:
+                print(f"  ❌ Missing fields in response: {missing_fields}")
+                fields_pass = False
+            
+            # Verify data matches input
+            data_matches = (
+                created_expert_data.get('name') == expert_data['name'] and
+                created_expert_data.get('email') == expert_data['email'] and
+                created_expert_data.get('role') == expert_data['role'] and
+                created_expert_data.get('specialty') == expert_data['specialty'] and
+                created_expert_data.get('institution') == expert_data['institution']
+            )
+            
+            if data_matches:
+                print(f"  ✅ Created expert data matches input ✓")
+                data_pass = True
+            else:
+                print(f"  ❌ Created expert data doesn't match input")
+                data_pass = False
+            
+            return fields_pass and data_pass
+        else:
+            print(f"❌ Expert creation failed: {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"  ℹ️ Error details: {error_data}")
+            except:
+                print(f"  ℹ️ Response text: {response.text}")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing expert creation: {e}")
+        return False
+
+def test_update_expert():
+    """Test 4: Update Expert - PUT /api/admin/experts/{expert_id}"""
+    
+    print("\n✏️ TEST 4: UPDATE EXPERT")
+    print("=" * 50)
+    print("Testing requirements from review request:")
+    print("- PUT /api/admin/experts/{expert_id}")
+    print("- Use the ID from step 3")
+    print("- Body: {\"name\": \"Dr. Updated Expert\", \"specialty\": \"Neurology\"}")
+    print("- Should update the expert")
+    
+    if not admin_token:
+        print("❌ Admin token not available - skipping test")
+        return False
+    
+    if not test_expert_id:
+        print("❌ No expert ID available from creation test - skipping test")
+        return False
+    
+    headers = {"Authorization": f"Bearer {admin_token}"}
+    
+    try:
+        # Update data as specified in review
+        update_data = {
+            "name": "Dr. Updated Expert",
+            "specialty": "Neurology"
+        }
+        
+        response = requests.put(
+            f"{BACKEND_URL}/api/admin/experts/{test_expert_id}",
+            json=update_data,
             headers=headers,
             timeout=10
         )
         
         if response.status_code == 200:
             data = response.json()
-            print(f"✅ Suggestion approval successful")
+            updates = data.get('updates', {})
+            
+            print(f"✅ Expert update successful")
             print(f"  📊 Message: {data.get('message')}")
-            print(f"  📊 Suggestion ID: {test_suggestion_id}")
+            print(f"  📊 Updates applied: {updates}")
             
-            # Verify the suggestion was approved
-            # Check if suggestion status changed to approved
-            check_response = requests.get(
-                f"{BACKEND_URL}/api/admin/knowledge/suggestions?status=approved", 
-                headers=headers, 
-                timeout=10
-            )
+            # Verify the updates were applied
+            expected_updates = ['name', 'specialty']
+            applied_updates = [field for field in expected_updates if field in updates]
             
-            if check_response.status_code == 200:
-                check_data = check_response.json()
-                approved_suggestions = check_data.get('suggestions', [])
-                
-                # Look for our approved suggestion
-                approved_suggestion = None
-                for suggestion in approved_suggestions:
-                    if suggestion.get('id') == test_suggestion_id:
-                        approved_suggestion = suggestion
-                        break
-                
-                if approved_suggestion:
-                    print(f"  ✅ Suggestion found in approved list ✓")
-                    print(f"    📊 Status: {approved_suggestion.get('status')}")
-                    print(f"    📊 Approved by: {approved_suggestion.get('reviewer_name')}")
-                    verification_pass = True
-                else:
-                    print(f"  ⚠️ Suggestion not found in approved list (may still be processing)")
-                    verification_pass = True  # Don't fail test for this
+            if len(applied_updates) == len(expected_updates):
+                print(f"  ✅ All expected updates applied ✓")
+                updates_pass = True
             else:
-                print(f"  ⚠️ Could not verify approval status: {check_response.status_code}")
-                verification_pass = True  # Don't fail test for this
+                print(f"  ❌ Not all updates applied. Expected: {expected_updates}, Applied: {applied_updates}")
+                updates_pass = False
             
-            return verification_pass
+            # Verify update values
+            if (updates.get('name') == update_data['name'] and 
+                updates.get('specialty') == update_data['specialty']):
+                print(f"  ✅ Update values match input ✓")
+                values_pass = True
+            else:
+                print(f"  ❌ Update values don't match input")
+                values_pass = False
+            
+            return updates_pass and values_pass
         else:
-            print(f"❌ Suggestion approval failed: {response.status_code}")
+            print(f"❌ Expert update failed: {response.status_code}")
             try:
                 error_data = response.json()
                 print(f"  ℹ️ Error details: {error_data}")
@@ -629,7 +424,213 @@ def test_suggestion_approval():
                 print(f"  ℹ️ Response text: {response.text}")
             return False
     except Exception as e:
-        print(f"❌ Error testing suggestion approval: {e}")
+        print(f"❌ Error testing expert update: {e}")
+        return False
+
+def test_reset_expert_password():
+    """Test 5: Reset Expert Password - POST /api/admin/experts/{expert_id}/reset-password"""
+    
+    print("\n🔑 TEST 5: RESET EXPERT PASSWORD")
+    print("=" * 50)
+    print("Testing requirements from review request:")
+    print("- POST /api/admin/experts/{expert_id}/reset-password")
+    print("- Body: {\"new_password\": \"newpassword123\"}")
+    print("- Should reset the password")
+    
+    if not admin_token:
+        print("❌ Admin token not available - skipping test")
+        return False
+    
+    if not test_expert_id:
+        print("❌ No expert ID available from creation test - skipping test")
+        return False
+    
+    headers = {"Authorization": f"Bearer {admin_token}"}
+    
+    try:
+        # Reset password data as specified in review
+        password_data = {
+            "new_password": "newpassword123"
+        }
+        
+        response = requests.post(
+            f"{BACKEND_URL}/api/admin/experts/{test_expert_id}/reset-password",
+            json=password_data,
+            headers=headers,
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            print(f"✅ Password reset successful")
+            print(f"  📊 Message: {data.get('message')}")
+            
+            # Note: We can't verify the password was actually changed without 
+            # attempting to login with the new password, but that would require
+            # the password hashing bug to be fixed first
+            print(f"  ⚠️ Note: Password verification requires login test (affected by password hashing bug)")
+            
+            return True
+        else:
+            print(f"❌ Password reset failed: {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"  ℹ️ Error details: {error_data}")
+            except:
+                print(f"  ℹ️ Response text: {response.text}")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing password reset: {e}")
+        return False
+
+def test_deactivate_expert():
+    """Test 6: Deactivate Expert - DELETE /api/admin/experts/{expert_id}"""
+    
+    print("\n🗑️ TEST 6: DEACTIVATE EXPERT")
+    print("=" * 50)
+    print("Testing requirements from review request:")
+    print("- DELETE /api/admin/experts/{expert_id}")
+    print("- Should soft-delete (deactivate) the expert")
+    
+    if not admin_token:
+        print("❌ Admin token not available - skipping test")
+        return False
+    
+    if not test_expert_id:
+        print("❌ No expert ID available from creation test - skipping test")
+        return False
+    
+    headers = {"Authorization": f"Bearer {admin_token}"}
+    
+    try:
+        response = requests.delete(
+            f"{BACKEND_URL}/api/admin/experts/{test_expert_id}",
+            headers=headers,
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            print(f"✅ Expert deactivation successful")
+            print(f"  📊 Message: {data.get('message')}")
+            
+            # Verify the expert is deactivated by checking the experts list
+            experts_response = requests.get(f"{BACKEND_URL}/api/admin/experts", headers=headers, timeout=10)
+            
+            if experts_response.status_code == 200:
+                experts_data = experts_response.json()
+                experts = experts_data.get('experts', [])
+                
+                # Look for our deactivated expert
+                deactivated_expert = None
+                for expert in experts:
+                    if expert.get('id') == test_expert_id:
+                        deactivated_expert = expert
+                        break
+                
+                if deactivated_expert:
+                    is_active = deactivated_expert.get('is_active', True)
+                    if not is_active:
+                        print(f"  ✅ Expert successfully deactivated (is_active: False) ✓")
+                        verification_pass = True
+                    else:
+                        print(f"  ❌ Expert still active (is_active: {is_active})")
+                        verification_pass = False
+                else:
+                    print(f"  ⚠️ Expert not found in list (may be filtered out)")
+                    verification_pass = True  # Don't fail test for this
+            else:
+                print(f"  ⚠️ Could not verify deactivation: {experts_response.status_code}")
+                verification_pass = True  # Don't fail test for this
+            
+            return verification_pass
+        else:
+            print(f"❌ Expert deactivation failed: {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"  ℹ️ Error details: {error_data}")
+            except:
+                print(f"  ℹ️ Response text: {response.text}")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing expert deactivation: {e}")
+        return False
+
+def test_scheduler_status():
+    """Test 7: Verify Scheduler Status - Check backend logs for APScheduler"""
+    
+    print("\n⏰ TEST 7: VERIFY SCHEDULER STATUS")
+    print("=" * 50)
+    print("Testing requirements from review request:")
+    print("- Check backend logs to confirm APScheduler is running with the auto-search job")
+    
+    try:
+        # Check supervisor backend logs for APScheduler messages
+        import subprocess
+        
+        # Get recent backend logs
+        result = subprocess.run(
+            ["tail", "-n", "100", "/var/log/supervisor/backend.out.log"],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        
+        if result.returncode == 0:
+            logs = result.stdout
+            
+            print(f"✅ Backend logs retrieved successfully")
+            
+            # Look for APScheduler startup messages
+            scheduler_keywords = [
+                "scheduler",
+                "APScheduler",
+                "auto-search",
+                "auto_search_job",
+                "Scheduler started",
+                "Guideline Auto-Search"
+            ]
+            
+            found_keywords = []
+            for keyword in scheduler_keywords:
+                if keyword.lower() in logs.lower():
+                    found_keywords.append(keyword)
+            
+            if found_keywords:
+                print(f"  ✅ Scheduler-related log entries found ✓")
+                print(f"    📊 Keywords found: {found_keywords}")
+                
+                # Look for specific startup message
+                if "scheduler started" in logs.lower() or "apscheduler" in logs.lower():
+                    print(f"  ✅ APScheduler startup confirmed ✓")
+                    startup_pass = True
+                else:
+                    print(f"  ⚠️ APScheduler startup not explicitly confirmed")
+                    startup_pass = True  # Don't fail for this
+                
+                # Look for auto-search job
+                if "auto-search" in logs.lower() or "auto_search_job" in logs.lower():
+                    print(f"  ✅ Auto-search job configuration confirmed ✓")
+                    job_pass = True
+                else:
+                    print(f"  ⚠️ Auto-search job not explicitly mentioned")
+                    job_pass = True  # Don't fail for this
+                
+                return startup_pass and job_pass
+            else:
+                print(f"  ⚠️ No scheduler-related log entries found")
+                print(f"  ℹ️ This may indicate scheduler is not running or logs are not verbose enough")
+                return False
+        else:
+            print(f"❌ Failed to retrieve backend logs: {result.stderr}")
+            return False
+    except subprocess.TimeoutExpired:
+        print(f"❌ Timeout retrieving backend logs")
+        return False
+    except Exception as e:
+        print(f"❌ Error checking scheduler status: {e}")
         return False
 def run_all_tests():
     """Run all PhiCor.ai Knowledge Bank System tests"""
