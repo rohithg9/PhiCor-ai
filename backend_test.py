@@ -224,90 +224,69 @@ def test_system_settings():
         print(f"❌ Error testing system settings: {e}")
         return False
 
-def test_change_request_submission():
-    """Test 3: Change Request Submission"""
-    global test_change_request_id
+def test_knowledge_source_upload():
+    """Test 3: Knowledge Source Upload"""
+    global test_source_id
     
-    print("\n📝 TEST 3: CHANGE REQUEST SUBMISSION")
+    print("\n📤 TEST 3: KNOWLEDGE SOURCE UPLOAD")
     print("=" * 50)
     print("Testing requirements from review request:")
-    print("- Submit change request with proposed value: 500")
-    print("- Source URL: https://pubmed.gov/example")
-    print("- Reasoning: 'Updated based on 2024 ESC guidelines'")
+    print("- POST /api/admin/knowledge/upload (Text source with Atrial Fibrillation content)")
+    print("- Verify AI analysis triggers and processes content")
     
-    if not admin_token or not test_disease_id:
-        print("❌ Prerequisites not met - skipping test")
+    if not admin_token:
+        print("❌ Admin token not available - skipping test")
         return False
     
     headers = {"Authorization": f"Bearer {admin_token}"}
     
     try:
-        # Create change request data as specified in review
-        change_request_data = {
-            "disease_id": test_disease_id,
-            "disease_name": "Atrial Fibrillation",  # Required field
-            "organ_id": "heart",  # Assuming cardiac parameter
-            "scale_id": "ecg",    # Assuming ECG scale
-            "reasoning": "Updated based on 2024 ESC guidelines",
-            "source_url": "https://pubmed.gov/example",
-            "parameters": [
-                {
-                    "parameter_id": "qtc_interval",
-                    "parameter_name": "QTc Interval",  # Required field
-                    "current_value": "450",  # Assuming current value
-                    "proposed_value": "500", # As specified in review
-                    "unit": "ms",
-                    "source_url": "https://pubmed.gov/example",  # Required field
-                    "reasoning": "Updated based on 2024 ESC guidelines for QTc interval prolongation thresholds"
-                }
-            ]
+        # Create knowledge source upload data as specified in review
+        upload_data = {
+            "source_type": "text",
+            "title": "Atrial Fibrillation Update 2024",
+            "content": "Recent studies show that early rhythm control in atrial fibrillation patients reduces stroke risk by 20%. QTc prolongation threshold has been updated to 500ms for high-risk patients.",
+            "disease_name": "Atrial Fibrillation",
+            "tags": "cardiology,ecg,guidelines"
         }
         
         response = requests.post(
-            f"{BACKEND_URL}/api/change-requests", 
-            json=change_request_data, 
+            f"{BACKEND_URL}/api/admin/knowledge/upload", 
+            data=upload_data,  # Use form data as specified
             headers=headers, 
-            timeout=10
+            timeout=30  # Longer timeout for AI analysis
         )
         
         if response.status_code == 200:
             data = response.json()
-            test_change_request_id = data.get('id')
+            test_source_id = data.get('source', {}).get('id')
             
-            print(f"✅ Change request submitted successfully")
-            print(f"  📊 Request ID: {test_change_request_id}")
-            print(f"  📊 Disease ID: {data.get('disease_id')}")
-            print(f"  📊 Expert ID: {data.get('expert_id')}")
-            print(f"  📊 Status: {data.get('status')}")
-            print(f"  📊 Proposed value: 500")
-            print(f"  📊 Source URL: https://pubmed.gov/example")
-            print(f"  📊 Reasoning: Updated based on 2024 ESC guidelines")
+            print(f"✅ Knowledge source upload successful")
+            print(f"  📊 Source ID: {test_source_id}")
+            print(f"  📊 Title: {data.get('source', {}).get('title')}")
+            print(f"  📊 Disease: {data.get('source', {}).get('disease_name')}")
+            print(f"  📊 Status: {data.get('source', {}).get('status')}")
             
-            # Verify the change request was created with correct data
-            if data.get('status') == 'pending':
-                print(f"  ✅ Change request status is 'pending' ✓")
-                status_pass = True
+            # Check if AI analysis was triggered
+            analysis_status = data.get('source', {}).get('analysis_status')
+            if analysis_status in ['completed', 'processing', 'pending']:
+                print(f"  ✅ AI analysis triggered: {analysis_status} ✓")
+                analysis_pass = True
             else:
-                print(f"  ❌ Unexpected status: {data.get('status')}")
-                status_pass = False
+                print(f"  ❌ AI analysis not triggered: {analysis_status}")
+                analysis_pass = False
             
-            # Check parameters
-            parameters = data.get('parameters', [])
-            if parameters and len(parameters) > 0:
-                param = parameters[0]
-                if param.get('proposed_value') == "500":
-                    print(f"  ✅ Proposed value correctly set to 500 ✓")
-                    value_pass = True
-                else:
-                    print(f"  ❌ Proposed value mismatch: {param.get('proposed_value')}")
-                    value_pass = False
+            # Verify content was processed
+            if data.get('source', {}).get('content_preview'):
+                print(f"  ✅ Content processed and stored ✓")
+                content_pass = True
             else:
-                print(f"  ❌ No parameters in change request")
-                value_pass = False
+                print(f"  ❌ Content not processed")
+                content_pass = False
             
-            return status_pass and value_pass
+            return analysis_pass and content_pass
         else:
-            print(f"❌ Change request submission failed: {response.status_code}")
+            print(f"❌ Knowledge source upload failed: {response.status_code}")
             try:
                 error_data = response.json()
                 print(f"  ℹ️ Error details: {error_data}")
@@ -315,7 +294,7 @@ def test_change_request_submission():
                 print(f"  ℹ️ Response text: {response.text}")
             return False
     except Exception as e:
-        print(f"❌ Error testing change request submission: {e}")
+        print(f"❌ Error testing knowledge source upload: {e}")
         return False
 
 def test_admin_review_workflow():
