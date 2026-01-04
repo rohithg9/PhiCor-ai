@@ -139,6 +139,7 @@ export default function AdminDashboard() {
       setShowReviewDialog(false);
       setSelectedChange(null);
       fetchPendingChanges();
+      fetchHistoryChanges();
       fetchDashboard();
     } catch (err) {
       console.error('Failed to approve:', err);
