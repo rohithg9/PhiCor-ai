@@ -681,7 +681,8 @@ export default function ExpertDashboard() {
     fetchGuidelines();
     fetchExperiments();
     fetchKnowledgeData();
-  }, [token, authLoading, navigate, fetchDiseases, fetchMyChangeRequests, fetchAllChanges, fetchGuidelines, fetchExperiments, fetchKnowledgeData]);
+    fetchAllExperts();
+  }, [token, authLoading, navigate, fetchDiseases, fetchMyChangeRequests, fetchAllChanges, fetchGuidelines, fetchExperiments, fetchKnowledgeData, fetchAllExperts]);
 
   // Filter diseases - now separating actual diseases from references
   useEffect(() => {
