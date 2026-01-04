@@ -84,6 +84,10 @@ export default function ExpertDashboard() {
   const navigate = useNavigate();
   const { expert, token, logout, isAdmin, loading: authLoading } = useExpert();
   
+  // Main navigation state
+  const [activeView, setActiveView] = useState('diseases');
+  
+  // Diseases state
   const [diseases, setDiseases] = useState([]);
   const [filteredDiseases, setFilteredDiseases] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -113,8 +117,26 @@ export default function ExpertDashboard() {
   });
   const [submitting, setSubmitting] = useState(false);
   
-  // My change requests
+  // My change requests & all change requests
   const [myChangeRequests, setMyChangeRequests] = useState([]);
+  const [pendingChanges, setPendingChanges] = useState([]);
+  const [historyChanges, setHistoryChanges] = useState([]);
+  
+  // Guideline monitoring
+  const [guidelineNotifications, setGuidelineNotifications] = useState([]);
+  const [checkingGuidelines, setCheckingGuidelines] = useState(false);
+  
+  // Experiment Lab state
+  const [experiments, setExperiments] = useState([]);
+  const [selectedExperiment, setSelectedExperiment] = useState(null);
+  const [showNewExperiment, setShowNewExperiment] = useState(false);
+  const [newExperiment, setNewExperiment] = useState({
+    name: '',
+    description: '',
+    patient: { name: 'Test Patient', age: 45, sex: 'Male', weight: 70 },
+    test_diseases: [],
+    severity_levels: {}
+  });
   
   // Expanded sections
   const [expandedSections, setExpandedSections] = useState({});
