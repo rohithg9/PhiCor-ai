@@ -94,6 +94,34 @@ def test_backend_health():
 
 # Old test functions removed - replaced with Expert Curation System specific tests
 
+def create_admin_expert():
+    """Create admin expert if it doesn't exist"""
+    try:
+        # Try to register admin expert
+        expert_data = {
+            "email": ADMIN_EMAIL,
+            "password": ADMIN_PASSWORD,
+            "name": "Admin User",
+            "specialty": "Administration",
+            "role": "admin"
+        }
+        
+        response = requests.post(f"{BACKEND_URL}/api/experts/register", json=expert_data, timeout=10)
+        
+        if response.status_code == 200:
+            print(f"✅ Admin expert created successfully")
+            return True
+        elif response.status_code == 400:
+            # Expert might already exist
+            print(f"ℹ️ Admin expert may already exist")
+            return True
+        else:
+            print(f"❌ Failed to create admin expert: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"❌ Error creating admin expert: {e}")
+        return False
+
 def test_admin_authentication():
     """Test 1: Admin Authentication - Admin login with admin@phicor.ai / admin123"""
     global admin_token, admin_user_data
