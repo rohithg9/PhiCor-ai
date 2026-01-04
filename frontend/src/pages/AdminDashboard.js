@@ -604,18 +604,24 @@ export default function AdminDashboard() {
               <div className="p-4 bg-muted rounded-lg">
                 <p className="text-sm font-medium mb-3">Proposed Changes</p>
                 {selectedChange.parameters.map((param, i) => (
-                  <div key={i} className="mb-4 last:mb-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-mono text-sm">{param.parameter_name}</span>
+                  <div key={i} className="mb-4 last:mb-0 p-3 bg-background rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="font-mono text-sm font-bold">{param.parameter_name}</span>
+                      <Badge variant="outline" className="text-xs">
+                        {selectedChange.organ_id} / {selectedChange.scale_id}
+                      </Badge>
                     </div>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="text-muted-foreground">Current: </span>
-                        <span className="font-medium">{param.current_value}</span>
+                    
+                    {/* Visual Diff */}
+                    <div className="flex items-center gap-3 p-2 bg-muted/50 rounded mb-2">
+                      <div className="flex-1 p-2 bg-red-500/10 rounded border border-red-500/20">
+                        <p className="text-xs text-red-500 mb-1">Current Value</p>
+                        <p className="font-mono text-sm line-through text-red-400">{param.current_value}</p>
                       </div>
-                      <div>
-                        <span className="text-muted-foreground">Proposed: </span>
-                        <span className="font-medium text-primary">{param.proposed_value}</span>
+                      <ArrowRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                      <div className="flex-1 p-2 bg-green-500/10 rounded border border-green-500/20">
+                        <p className="text-xs text-green-500 mb-1">Proposed Value</p>
+                        <p className="font-mono text-sm font-bold text-green-500">{param.proposed_value}</p>
                       </div>
                     </div>
                     
