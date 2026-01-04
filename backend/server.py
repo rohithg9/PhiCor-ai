@@ -5687,8 +5687,8 @@ async def reset_expert_password(
     if not expert:
         raise HTTPException(status_code=404, detail="Expert not found")
     
-    import hashlib
-    password_hash = hashlib.sha256(new_password.encode()).hexdigest()
+    # Hash password using bcrypt (same as registration endpoint)
+    password_hash = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     
     await db.experts.update_one(
         {"id": expert_id},
