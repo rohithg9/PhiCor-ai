@@ -76,12 +76,8 @@ export default function ExpertAuthPage() {
       // Use context login function to set state properly
       login(data.access_token, data.expert);
       
-      // Redirect based on role
-      if (data.expert.role === 'super_admin' || data.expert.role === 'admin') {
-        navigate('/admin');
-      } else {
-        navigate('/expert');
-      }
+      // Always redirect to unified dashboard
+      navigate('/expert');
     } catch (err) {
       setError(err.message || 'Login failed. Please check your credentials.');
     } finally {
