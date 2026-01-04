@@ -1495,7 +1495,21 @@ export default function ExpertDashboard() {
               
               <ScrollArea className="h-[500px]">
                 {loading ? (
-                  <div className="text-center py-8 text-muted-foreground">Loading...</div>
+                  <div className="text-center py-8 text-muted-foreground">
+                    <RefreshCw className="w-6 h-6 mx-auto mb-2 animate-spin" />
+                    Loading diseases...
+                  </div>
+                ) : filteredDiseases.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <AlertTriangle className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                    <p className="mb-2">{diseases.length === 0 ? 'No diseases loaded' : 'No matching diseases'}</p>
+                    {diseases.length === 0 && (
+                      <Button size="sm" variant="outline" onClick={fetchDiseases}>
+                        <RefreshCw className="w-3 h-3 mr-1" />
+                        Retry
+                      </Button>
+                    )}
+                  </div>
                 ) : (
                   <div className="space-y-1">
                     {filteredDiseases.map(disease => (
