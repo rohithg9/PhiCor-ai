@@ -199,6 +199,93 @@ export default function ExpertDashboard() {
     }
   }, [token]);
 
+  // Fetch all pending changes (for admin view)
+  const fetchAllChanges = useCallback(async () => {
+    if (!token) return;
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/change-requests`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      const all = data.change_requests || [];
+      setPendingChanges(all.filter(c => c.status === 'pending'));
+      setHistoryChanges(all.filter(c => c.status !== 'pending'));
+    } catch (err) {
+      console.error('Failed to fetch changes:', err);
+    }
+  }, [token]);
+
+  // Fetch guideline notifications
+  const fetchGuidelines = useCallback(async () => {
+    if (!token) return;
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/admin/guideline-notifications`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      setGuidelineNotifications(data.notifications || []);
+    } catch (err) {
+      console.error('Failed to fetch guidelines:', err);
+    }
+  }, [token]);
+
+  // Fetch experiments
+  const fetchExperiments = useCallback(async () => {
+    if (!token) return;
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/experiments`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      setExperiments(data.experiments || []);
+    } catch (err) {
+      console.error('Failed to fetch experiments:', err);
+    }
+  }, [token]);
+
+  // Check for new guidelines
+  const handleCheckGuidelines = async () => {
+    setCheckingGuidelines(true);
+    try {
+      await fetch(`${BACKEND_URL}/api/admin/check-guidelines`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      fetchGuidelines();
+    } catch (err) {
+      console.error('Failed to check guidelines:', err);
+    } finally {
+      setCheckingGuidelines(false);
+    }
+  };
+
+  // Approve/Reject change request
+  const handleApproveChange = async (changeId) => {
+    try {
+      await fetch(`${BACKEND_URL}/api/change-requests/${changeId}/approve`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      fetchAllChanges();
+      fetchMyChangeRequests();
+    } catch (err) {
+      console.error('Failed to approve:', err);
+    }
+  };
+
+  const handleRejectChange = async (changeId) => {
+    try {
+      await fetch(`${BACKEND_URL}/api/change-requests/${changeId}/reject`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      fetchAllChanges();
+      fetchMyChangeRequests();
+    } catch (err) {
+      console.error('Failed to reject:', err);
+    }
+  };
+
   useEffect(() => {
     if (authLoading) return;
     if (!token) {
@@ -207,7 +294,10 @@ export default function ExpertDashboard() {
     }
     fetchDiseases();
     fetchMyChangeRequests();
-  }, [token, authLoading, navigate, fetchDiseases, fetchMyChangeRequests]);
+    fetchAllChanges();
+    fetchGuidelines();
+    fetchExperiments();
+  }, [token, authLoading, navigate, fetchDiseases, fetchMyChangeRequests, fetchAllChanges, fetchGuidelines, fetchExperiments]);
 
   // Filter diseases
   useEffect(() => {
