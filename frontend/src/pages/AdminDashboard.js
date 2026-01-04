@@ -678,6 +678,139 @@ export default function AdminDashboard() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* History View Dialog */}
+      <Dialog open={showHistoryDialog} onOpenChange={setShowHistoryDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {selectedChange?.status === 'approved' ? (
+                <CheckCircle2 className="w-5 h-5 text-green-500" />
+              ) : (
+                <XCircle className="w-5 h-5 text-red-500" />
+              )}
+              Change Request - {selectedChange?.status?.toUpperCase()}
+            </DialogTitle>
+            <DialogDescription>
+              Viewing historical change request details
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedChange && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Disease</p>
+                  <p className="font-medium">{selectedChange.disease_name}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Submitted by</p>
+                  <p className="font-medium">{selectedChange.expert_name}</p>
+                  <p className="text-xs text-muted-foreground">{selectedChange.expert_specialty}</p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Reviewed by</p>
+                  <p className="font-medium">{selectedChange.reviewer_name || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Reviewed at</p>
+                  <p className="font-medium">
+                    {selectedChange.reviewed_at 
+                      ? new Date(selectedChange.reviewed_at).toLocaleString() 
+                      : 'N/A'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Diff View */}
+              <div className="p-4 bg-muted rounded-lg">
+                <p className="text-sm font-medium mb-3">Changes {selectedChange.status === 'approved' ? 'Applied' : 'Proposed'}</p>
+                {selectedChange.parameters?.map((param, i) => (
+                  <div key={i} className="mb-4 last:mb-0 p-3 bg-background rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="font-mono text-sm font-bold">{param.parameter_name}</span>
+                      <Badge variant="outline" className="text-xs">
+                        {selectedChange.organ_id} / {selectedChange.scale_id}
+                      </Badge>
+                    </div>
+                    
+                    {/* Visual Diff */}
+                    <div className="flex items-center gap-3 p-2 bg-muted/50 rounded">
+                      <div className="flex-1 p-2 bg-red-500/10 rounded border border-red-500/20">
+                        <p className="text-xs text-red-500 mb-1">Original</p>
+                        <p className="font-mono text-sm line-through text-red-400">{param.current_value}</p>
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                      <div className="flex-1 p-2 bg-green-500/10 rounded border border-green-500/20">
+                        <p className="text-xs text-green-500 mb-1">
+                          {selectedChange.status === 'approved' ? 'Applied' : 'Proposed'}
+                        </p>
+                        <p className="font-mono text-sm font-bold text-green-500">{param.proposed_value}</p>
+                      </div>
+                    </div>
+                    
+                    {param.source_url && (
+                      <div className="mt-2">
+                        <a 
+                          href={param.source_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-sm text-blue-500 hover:underline flex items-center gap-1"
+                        >
+                          <ExternalLink className="w-3 h-3" />
+                          View Evidence Source
+                        </a>
+                      </div>
+                    )}
+                    
+                    {param.reasoning && (
+                      <div className="mt-2 p-2 bg-muted rounded text-sm">
+                        <p className="text-muted-foreground text-xs mb-1">Reasoning:</p>
+                        <p>{param.reasoning}</p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Reviewer Notes */}
+              {selectedChange.reviewer_notes && (
+                <div className="p-3 bg-muted rounded-lg">
+                  <p className="text-sm font-medium mb-1">Reviewer Notes</p>
+                  <p className="text-sm text-muted-foreground">{selectedChange.reviewer_notes}</p>
+                </div>
+              )}
+
+              {selectedChange.status === 'rejected' && (
+                <Alert variant="destructive">
+                  <XCircle className="w-4 h-4" />
+                  <AlertDescription>
+                    This change request was rejected. The proposed changes were not applied to the database.
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {selectedChange.status === 'approved' && (
+                <Alert>
+                  <CheckCircle2 className="w-4 h-4" />
+                  <AlertDescription>
+                    This change was approved and applied to the main database.
+                  </AlertDescription>
+                </Alert>
+              )}
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowHistoryDialog(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
