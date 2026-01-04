@@ -5143,6 +5143,96 @@ async def get_change_requests(
         "rejected": sum(1 for r in requests if r.get("status") == "rejected")
     }
 
+@api_router.put("/change-requests/{request_id}")
+async def update_change_request(
+    request_id: str,
+    change_data: ChangeRequestCreate,
+    expert: dict = Depends(get_current_expert)
+):
+    """Update a pending change request (only by the original submitter before approval)"""
+    change_request = await db.change_requests.find_one({"id": request_id}, {"_id": 0})
+    if not change_request:
+        raise HTTPException(status_code=404, detail="Change request not found")
+    
+    # Only the original submitter can edit
+    if change_request["expert_id"] != expert["id"]:
+        raise HTTPException(status_code=403, detail="You can only edit your own change requests")
+    
+    # Can only edit pending requests
+    if change_request["status"] != "pending":
+        raise HTTPException(status_code=400, detail="Cannot edit a change request that has already been reviewed")
+    
+    # Update the change request
+    update_data = {
+        "parameters": [p.dict() for p in change_data.parameters],
+        "additional_notes": change_data.additional_notes,
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.change_requests.update_one(
+        {"id": request_id},
+        {"$set": update_data}
+    )
+    
+    # Audit log
+    await db.audit_logs.insert_one({
+        "id": str(uuid.uuid4()),
+        "action": "change_request_edited",
+        "expert_id": expert["id"],
+        "expert_name": expert["name"],
+        "target_type": "change_request",
+        "target_id": request_id,
+        "target_name": f"{change_request['disease_name']} - {change_request['organ_id']}/{change_request['scale_id']}",
+        "details": {"parameter_count": len(change_data.parameters)},
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    })
+    
+    # Return updated request
+    updated = await db.change_requests.find_one({"id": request_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/change-requests/{request_id}")
+async def delete_change_request(
+    request_id: str,
+    expert: dict = Depends(get_current_expert)
+):
+    """Delete/withdraw a pending change request (only by the original submitter)"""
+    change_request = await db.change_requests.find_one({"id": request_id}, {"_id": 0})
+    if not change_request:
+        raise HTTPException(status_code=404, detail="Change request not found")
+    
+    # Only the original submitter can delete
+    if change_request["expert_id"] != expert["id"]:
+        raise HTTPException(status_code=403, detail="You can only withdraw your own change requests")
+    
+    # Can only delete pending requests
+    if change_request["status"] != "pending":
+        raise HTTPException(status_code=400, detail="Cannot withdraw a change request that has already been reviewed")
+    
+    # Delete the request
+    await db.change_requests.delete_one({"id": request_id})
+    
+    # Update expert's pending count
+    await db.experts.update_one(
+        {"id": expert["id"]},
+        {"$inc": {"pending_changes": -1}}
+    )
+    
+    # Audit log
+    await db.audit_logs.insert_one({
+        "id": str(uuid.uuid4()),
+        "action": "change_request_withdrawn",
+        "expert_id": expert["id"],
+        "expert_name": expert["name"],
+        "target_type": "change_request",
+        "target_id": request_id,
+        "target_name": f"{change_request['disease_name']} - {change_request['organ_id']}/{change_request['scale_id']}",
+        "details": {},
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    })
+    
+    return {"message": "Change request withdrawn successfully"}
+
 @api_router.post("/change-requests/{request_id}/approve")
 async def approve_change_request(
     request_id: str,
