@@ -2937,6 +2937,89 @@ export default function ExpertDashboard() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Edit Change Request Dialog */}
+      <Dialog open={!!editingChange} onOpenChange={(open) => !open && setEditingChange(null)}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Pencil className="w-5 h-5" />
+              Edit Change Request
+            </DialogTitle>
+            <DialogDescription>
+              Update your pending change request before it's reviewed
+            </DialogDescription>
+          </DialogHeader>
+          
+          {editingChange && (
+            <div className="space-y-4">
+              <div className="p-3 bg-muted rounded-lg">
+                <p className="font-medium">{editingChange.disease_name}</p>
+                <p className="text-sm text-muted-foreground">{editingChange.organ_id} / {editingChange.scale_id}</p>
+              </div>
+              
+              {/* Edit each parameter */}
+              {editFormData.parameters?.map((param, index) => (
+                <Card key={index} className="p-3">
+                  <p className="font-medium text-sm mb-2">{param.parameter_name}</p>
+                  <div className="space-y-2">
+                    <div>
+                      <Label className="text-xs">Current Value</Label>
+                      <p className="text-sm font-mono text-muted-foreground">{param.current_value}</p>
+                    </div>
+                    <div>
+                      <Label className="text-xs">Proposed Value</Label>
+                      <Input
+                        value={param.proposed_value || ''}
+                        onChange={(e) => updateEditParameter(index, 'proposed_value', e.target.value)}
+                        placeholder="Enter new value"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Source URL</Label>
+                      <Input
+                        value={param.source_url || ''}
+                        onChange={(e) => updateEditParameter(index, 'source_url', e.target.value)}
+                        placeholder="https://..."
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Reasoning</Label>
+                      <Textarea
+                        value={param.reasoning || ''}
+                        onChange={(e) => updateEditParameter(index, 'reasoning', e.target.value)}
+                        placeholder="Clinical reasoning..."
+                        rows={2}
+                      />
+                    </div>
+                  </div>
+                </Card>
+              ))}
+              
+              <div className="space-y-2">
+                <Label>
+                  <MessageSquare className="w-3 h-3 inline mr-1" />
+                  Additional Notes
+                </Label>
+                <Textarea
+                  value={editFormData.additional_notes || ''}
+                  onChange={(e) => setEditFormData({...editFormData, additional_notes: e.target.value})}
+                  placeholder="Any additional context..."
+                  rows={2}
+                />
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingChange(null)}>Cancel</Button>
+            <Button onClick={handleSaveEdit}>
+              <Save className="w-4 h-4 mr-2" />
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
