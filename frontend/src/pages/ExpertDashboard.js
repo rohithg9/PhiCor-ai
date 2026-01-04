@@ -934,12 +934,15 @@ export default function ExpertDashboard() {
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                <Activity className="w-5 h-5 text-primary" />
+              {/* PhiCor Logo - matching website style */}
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                <span className="text-white font-serif text-xl font-bold">Φ</span>
               </div>
               <div>
-                <h1 className="text-lg font-bold">PhiCor.ai</h1>
-                <p className="text-xs text-muted-foreground hidden sm:block">Medical Parameter Intelligence</p>
+                <h1 className="text-lg font-bold tracking-tight">
+                  Phi<span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">Cor</span>
+                </h1>
+                <p className="text-xs text-muted-foreground hidden sm:block">Expert Curation System</p>
               </div>
             </div>
             
