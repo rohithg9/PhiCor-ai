@@ -310,13 +310,52 @@ export default function ExpertDashboard() {
   // Fetch diseases
   const fetchDiseases = useCallback(async () => {
     if (!token) return;
+    
+    // Try to load from cache first for instant display
+    const cachedDiseases = localStorage.getItem('phicor_diseases_cache');
+    const cacheTimestamp = localStorage.getItem('phicor_diseases_cache_time');
+    const cacheAge = cacheTimestamp ? Date.now() - parseInt(cacheTimestamp) : Infinity;
+    
+    // Use cache if less than 5 minutes old
+    if (cachedDiseases && cacheAge < 5 * 60 * 1000) {
+      try {
+        const cached = JSON.parse(cachedDiseases);
+        setDiseases(cached);
+        const specialtyDiseases = cached.filter(matchesSpecialty);
+        const reviewedCount = cached.filter(d => d.is_reviewed).length;
+        setStats({
+          total: cached.length,
+          reviewed: reviewedCount,
+          pending: cached.length - reviewedCount,
+          mySpecialty: specialtyDiseases.length
+        });
+        setLoading(false);
+        console.log('Loaded diseases from cache:', cached.length);
+      } catch (e) {
+        console.error('Cache parse error:', e);
+      }
+    }
+    
+    // Fetch fresh data in background
     try {
       const response = await fetch(`${BACKEND_URL}/api/experts/diseases-to-review`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
+      
+      if (!response.ok) {
+        console.error('Diseases API error:', response.status, response.statusText);
+        return;
+      }
+      
       const data = await response.json();
       const allDiseases = data.diseases || [];
+      
+      // Update state
       setDiseases(allDiseases);
+      
+      // Cache the results
+      localStorage.setItem('phicor_diseases_cache', JSON.stringify(allDiseases));
+      localStorage.setItem('phicor_diseases_cache_time', Date.now().toString());
       
       const specialtyDiseases = allDiseases.filter(matchesSpecialty);
       const reviewedCount = allDiseases.filter(d => d.is_reviewed).length;
@@ -327,6 +366,7 @@ export default function ExpertDashboard() {
         pending: allDiseases.length - reviewedCount,
         mySpecialty: specialtyDiseases.length
       });
+      console.log('Fetched fresh diseases:', allDiseases.length);
     } catch (err) {
       console.error('Failed to fetch diseases:', err);
     } finally {
