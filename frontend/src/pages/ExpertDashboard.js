@@ -643,19 +643,25 @@ export default function ExpertDashboard() {
                     })}
                   </div>
 
-                  {/* Scale Tabs */}
+                  {/* Scale Tabs - iterate through SCALE_LEVELS and check if organ has data for each scale */}
                   {currentOrganModel && (
                     <div className="flex flex-wrap gap-1 border-b pb-2">
-                      {Object.entries(organScales).map(([scaleId, scale]) => {
-                        const hasMods = !!getMergedModifications[selectedOrgan]?.[scaleId];
+                      {SCALE_LEVELS.map((scale) => {
+                        const hasData = currentOrganModel?.[scale.id];
+                        const hasMods = !!getMergedModifications[selectedOrgan]?.[scale.id];
+                        
+                        if (!hasData) return null; // Only show scales that have data for this organ
+                        
                         return (
                           <Button
-                            key={scaleId}
-                            variant={selectedScale === scaleId ? 'secondary' : 'ghost'}
+                            key={scale.id}
+                            variant={selectedScale === scale.id ? 'secondary' : 'ghost'}
                             size="sm"
-                            onClick={() => setSelectedScale(selectedScale === scaleId ? null : scaleId)}
+                            onClick={() => setSelectedScale(selectedScale === scale.id ? null : scale.id)}
+                            className={hasMods ? 'border-destructive/50' : ''}
                           >
-                            {scale.title}
+                            <span className="mr-1">{scale.icon}</span>
+                            {scale.name}
                             {hasMods && <span className="ml-1 text-destructive">●</span>}
                           </Button>
                         );
@@ -665,9 +671,9 @@ export default function ExpertDashboard() {
 
                   {/* Parameters Grid */}
                   <ScrollArea className="h-[400px]">
-                    {selectedScale && organScales[selectedScale] ? (
+                    {selectedScale && currentScale ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {organScales[selectedScale].parameters?.map(param => {
+                        {currentScale.parameters?.map(param => {
                           const mods = getMergedModifications[selectedOrgan]?.[selectedScale]?.[param.id];
                           const modResult = getModifiedValue(param.value, mods, param.id);
                           
