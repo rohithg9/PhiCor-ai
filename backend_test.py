@@ -46,6 +46,17 @@ from typing import Dict, List, Any, Optional
 FRONTEND_ENV_PATH = "/app/frontend/.env"
 BACKEND_URL = None
 
+# Test credentials from review request
+ADMIN_EMAIL = "admin@phicor.ai"
+ADMIN_PASSWORD = "admin123"
+
+# Global variables for test state
+admin_token = None
+admin_expert_data = None
+test_disease_id = None
+test_parameter_id = None
+test_change_request_id = None
+
 def get_backend_url():
     """Extract backend URL from frontend .env file"""
     global BACKEND_URL
