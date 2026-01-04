@@ -1763,27 +1763,45 @@ export default function ExpertDashboard() {
                       )}
                       </div>
                     ) : (
-                      <div className="text-center py-12 text-muted-foreground">
-                        <Eye className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                        <p className="text-lg font-medium mb-2">Select a Scale</p>
-                        <p className="text-sm">Choose a scale tab above to view ALL parameters</p>
-                        <div className="mt-4 p-4 bg-muted/30 rounded-lg text-left max-w-md mx-auto">
+                      <div className="text-center py-8 text-muted-foreground">
+                        <Eye className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                        <p className="text-base font-medium mb-2">Select a Scale Above</p>
+                        <p className="text-sm mb-4">Tap any scale tab (Lab Tests, ECG, Vitals, etc.) to view parameters</p>
+                        
+                        {/* Quick access buttons for scales with modifications */}
+                        {selectedOrgan && getMergedModifications[selectedOrgan] && (
+                          <div className="mt-4 p-3 bg-destructive/10 rounded-lg border border-destructive/20">
+                            <p className="text-xs font-medium text-destructive mb-2">⚡ Quick Access - Modified Scales:</p>
+                            <div className="flex flex-wrap gap-2 justify-center">
+                              {SCALE_LEVELS.filter(s => 
+                                currentOrganModel?.[s.id] && getMergedModifications[selectedOrgan]?.[s.id]
+                              ).map(scale => (
+                                <Button
+                                  key={scale.id}
+                                  size="sm"
+                                  variant="outline"
+                                  className="border-destructive/50 text-destructive hover:bg-destructive/10"
+                                  onClick={() => setSelectedScale(scale.id)}
+                                >
+                                  {scale.icon} {scale.name}
+                                </Button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        <div className="mt-4 p-3 bg-muted/30 rounded-lg text-left max-w-sm mx-auto">
                           <p className="text-xs font-medium mb-2">As an expert, you can review:</p>
                           <ul className="text-xs space-y-1">
                             <li className="flex items-center gap-2">
                               <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                              Normal baseline parameters (from medical literature)
+                              Normal baseline parameters
                             </li>
                             <li className="flex items-center gap-2">
                               <div className="w-2 h-2 rounded-full bg-destructive"></div>
-                              Disease-modified values (AI-generated)
-                            </li>
-                            <li className="flex items-center gap-2">
-                              <Calculator className="w-3 h-3" />
-                              Mathematical equations & models
+                              Disease-modified values
                             </li>
                           </ul>
-                          <p className="text-xs mt-3 text-primary">Click any parameter to suggest corrections with evidence sources</p>
                         </div>
                       </div>
                     )}
