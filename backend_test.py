@@ -36,7 +36,7 @@ Test 6: Deactivate Expert
 Test 7: Verify Scheduler Status
 - Check backend logs to confirm APScheduler is running with the auto-search job
 
-API Base URL: https://mathbody.preview.emergentagent.com
+API Base URL: https://healthtwin-7.preview.emergentagent.com
 All APIs require Authorization: Bearer {token} header
 """
 
