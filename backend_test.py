@@ -95,14 +95,14 @@ def test_backend_health():
 # Old test functions removed - replaced with Expert Curation System specific tests
 
 def test_admin_authentication():
-    """Test 1: Expert Authentication - Admin login with admin@phicor.ai / admin123"""
-    global admin_token, admin_expert_data
+    """Test 1: Admin Authentication - Admin login with admin@phicor.ai / admin123"""
+    global admin_token, admin_user_data
     
     print("\n🔐 TEST 1: ADMIN AUTHENTICATION")
     print("=" * 50)
     print("Testing requirements from review request:")
     print("- Admin login with admin@phicor.ai / admin123")
-    print("- Verify expert access and role-based permissions")
+    print("- Verify admin access and role-based permissions")
     
     try:
         # Test admin login
@@ -111,39 +111,37 @@ def test_admin_authentication():
             "password": ADMIN_PASSWORD
         }
         
-        response = requests.post(f"{BACKEND_URL}/api/experts/login", json=login_data, timeout=10)
+        response = requests.post(f"{BACKEND_URL}/api/auth/login", json=login_data, timeout=10)
         
         if response.status_code == 200:
             data = response.json()
             admin_token = data.get("access_token")
-            admin_expert_data = data.get("expert")
+            admin_user_data = data.get("user")
             
             print(f"✅ Admin login successful")
-            print(f"  📊 Expert ID: {admin_expert_data.get('id')}")
-            print(f"  📊 Expert Name: {admin_expert_data.get('name')}")
-            print(f"  📊 Expert Role: {admin_expert_data.get('role')}")
-            print(f"  📊 Expert Specialty: {admin_expert_data.get('specialty')}")
-            
-            # Verify admin role
-            if admin_expert_data.get('role') in ['admin', 'super_admin']:
-                print(f"  ✅ Admin role verified: {admin_expert_data.get('role')} ✓")
-                role_pass = True
-            else:
-                print(f"  ❌ Admin role not found: {admin_expert_data.get('role')}")
-                role_pass = False
+            print(f"  📊 User ID: {admin_user_data.get('id')}")
+            print(f"  📊 User Name: {admin_user_data.get('name')}")
+            print(f"  📊 User Email: {admin_user_data.get('email')}")
             
             # Test token validity by getting profile
             headers = {"Authorization": f"Bearer {admin_token}"}
-            profile_response = requests.get(f"{BACKEND_URL}/api/experts/me", headers=headers, timeout=10)
+            profile_response = requests.get(f"{BACKEND_URL}/api/auth/me", headers=headers, timeout=10)
             
             if profile_response.status_code == 200:
                 print(f"  ✅ Token validation successful ✓")
-                token_pass = True
+                
+                # Test admin access to settings endpoint
+                settings_response = requests.get(f"{BACKEND_URL}/api/admin/settings", headers=headers, timeout=10)
+                
+                if settings_response.status_code == 200:
+                    print(f"  ✅ Admin access verified (can access admin settings) ✓")
+                    return True
+                else:
+                    print(f"  ❌ Admin access denied: {settings_response.status_code}")
+                    return False
             else:
                 print(f"  ❌ Token validation failed: {profile_response.status_code}")
-                token_pass = False
-            
-            return role_pass and token_pass
+                return False
         else:
             print(f"❌ Admin login failed: {response.status_code}")
             if response.status_code == 401:
