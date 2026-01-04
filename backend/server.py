@@ -5342,6 +5342,196 @@ async def get_all_experts(admin: dict = Depends(require_admin)):
     
     return {"experts": experts}
 
+class ExpertCreate(BaseModel):
+    name: str
+    email: str
+    password: str
+    role: str = "expert"  # expert, admin, super_admin
+    specialty: Optional[str] = None
+    institution: Optional[str] = None
+
+class ExpertUpdate(BaseModel):
+    name: Optional[str] = None
+    email: Optional[str] = None
+    role: Optional[str] = None
+    specialty: Optional[str] = None
+    institution: Optional[str] = None
+    is_active: Optional[bool] = None
+
+@api_router.post("/admin/experts")
+async def create_expert(
+    expert_data: ExpertCreate,
+    admin: dict = Depends(require_super_admin)
+):
+    """Create a new expert (super admin only)"""
+    # Check if email already exists
+    existing = await db.experts.find_one({"email": expert_data.email})
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    # Validate role
+    if expert_data.role not in ["expert", "admin", "super_admin"]:
+        raise HTTPException(status_code=400, detail="Invalid role")
+    
+    # Hash password
+    import hashlib
+    password_hash = hashlib.sha256(expert_data.password.encode()).hexdigest()
+    
+    # Create expert
+    new_expert = {
+        "id": str(uuid.uuid4()),
+        "name": expert_data.name,
+        "email": expert_data.email,
+        "password_hash": password_hash,
+        "role": expert_data.role,
+        "specialty": expert_data.specialty,
+        "institution": expert_data.institution,
+        "is_active": True,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_by": admin["id"]
+    }
+    
+    await db.experts.insert_one(new_expert)
+    
+    # Audit log
+    await db.audit_logs.insert_one({
+        "id": str(uuid.uuid4()),
+        "action": "expert_created",
+        "expert_id": admin["id"],
+        "expert_name": admin["name"],
+        "target_type": "expert",
+        "target_id": new_expert["id"],
+        "target_name": new_expert["name"],
+        "details": {"email": expert_data.email, "role": expert_data.role},
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    })
+    
+    # Remove password hash from response
+    new_expert.pop("password_hash", None)
+    new_expert.pop("_id", None)
+    
+    return {"message": "Expert created successfully", "expert": new_expert}
+
+@api_router.put("/admin/experts/{expert_id}")
+async def update_expert(
+    expert_id: str,
+    updates: ExpertUpdate,
+    admin: dict = Depends(require_super_admin)
+):
+    """Update an expert's details (super admin only)"""
+    expert = await db.experts.find_one({"id": expert_id})
+    if not expert:
+        raise HTTPException(status_code=404, detail="Expert not found")
+    
+    # Build update dict
+    update_dict = {}
+    if updates.name is not None:
+        update_dict["name"] = updates.name
+    if updates.email is not None:
+        # Check if email is taken by another user
+        existing = await db.experts.find_one({"email": updates.email, "id": {"$ne": expert_id}})
+        if existing:
+            raise HTTPException(status_code=400, detail="Email already in use")
+        update_dict["email"] = updates.email
+    if updates.role is not None:
+        if updates.role not in ["expert", "admin", "super_admin"]:
+            raise HTTPException(status_code=400, detail="Invalid role")
+        update_dict["role"] = updates.role
+    if updates.specialty is not None:
+        update_dict["specialty"] = updates.specialty
+    if updates.institution is not None:
+        update_dict["institution"] = updates.institution
+    if updates.is_active is not None:
+        update_dict["is_active"] = updates.is_active
+    
+    if update_dict:
+        update_dict["updated_at"] = datetime.now(timezone.utc).isoformat()
+        await db.experts.update_one({"id": expert_id}, {"$set": update_dict})
+        
+        # Audit log
+        await db.audit_logs.insert_one({
+            "id": str(uuid.uuid4()),
+            "action": "expert_updated",
+            "expert_id": admin["id"],
+            "expert_name": admin["name"],
+            "target_type": "expert",
+            "target_id": expert_id,
+            "target_name": expert["name"],
+            "details": update_dict,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        })
+    
+    return {"message": "Expert updated successfully", "updates": update_dict}
+
+@api_router.delete("/admin/experts/{expert_id}")
+async def delete_expert(
+    expert_id: str,
+    admin: dict = Depends(require_super_admin)
+):
+    """Deactivate an expert (super admin only) - soft delete"""
+    expert = await db.experts.find_one({"id": expert_id})
+    if not expert:
+        raise HTTPException(status_code=404, detail="Expert not found")
+    
+    # Don't allow deleting yourself
+    if expert_id == admin["id"]:
+        raise HTTPException(status_code=400, detail="Cannot delete your own account")
+    
+    # Soft delete - just deactivate
+    await db.experts.update_one(
+        {"id": expert_id},
+        {"$set": {"is_active": False, "deactivated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    # Audit log
+    await db.audit_logs.insert_one({
+        "id": str(uuid.uuid4()),
+        "action": "expert_deactivated",
+        "expert_id": admin["id"],
+        "expert_name": admin["name"],
+        "target_type": "expert",
+        "target_id": expert_id,
+        "target_name": expert["name"],
+        "details": {},
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    })
+    
+    return {"message": "Expert deactivated successfully"}
+
+@api_router.post("/admin/experts/{expert_id}/reset-password")
+async def reset_expert_password(
+    expert_id: str,
+    new_password: str = Body(..., embed=True),
+    admin: dict = Depends(require_super_admin)
+):
+    """Reset an expert's password (super admin only)"""
+    expert = await db.experts.find_one({"id": expert_id})
+    if not expert:
+        raise HTTPException(status_code=404, detail="Expert not found")
+    
+    import hashlib
+    password_hash = hashlib.sha256(new_password.encode()).hexdigest()
+    
+    await db.experts.update_one(
+        {"id": expert_id},
+        {"$set": {"password_hash": password_hash, "password_reset_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    # Audit log
+    await db.audit_logs.insert_one({
+        "id": str(uuid.uuid4()),
+        "action": "password_reset",
+        "expert_id": admin["id"],
+        "expert_name": admin["name"],
+        "target_type": "expert",
+        "target_id": expert_id,
+        "target_name": expert["name"],
+        "details": {},
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    })
+    
+    return {"message": "Password reset successfully"}
+
 @api_router.put("/admin/experts/{expert_id}/role")
 async def update_expert_role(
     expert_id: str,
