@@ -53,10 +53,10 @@ ADMIN_PASSWORD = "admin123"
 
 # Global variables for test state
 admin_token = None
-admin_expert_data = None
-test_disease_id = None
-test_parameter_id = None
-test_change_request_id = None
+admin_user_data = None
+test_source_id = None
+test_suggestion_id = None
+original_settings = None
 
 def get_backend_url():
     """Extract backend URL from frontend .env file"""
