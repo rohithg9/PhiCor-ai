@@ -633,19 +633,19 @@ def test_scheduler_status():
         print(f"❌ Error checking scheduler status: {e}")
         return False
 def run_all_tests():
-    """Run all PhiCor.ai Knowledge Bank System tests"""
-    print("🧪 PHICOR.AI KNOWLEDGE BANK SYSTEM TESTING")
+    """Run all PhiCor.ai User Management System tests"""
+    print("🧪 PHICOR.AI USER MANAGEMENT SYSTEM TESTING")
     print("=" * 80)
     print("Testing specific requirements from review request:")
     print("1. Admin Authentication - Admin login with admin@phicor.ai / admin123")
-    print("2. System Settings Management - GET/PUT /api/admin/settings")
-    print("3. Knowledge Source Upload - POST /api/admin/knowledge/upload")
-    print("4. Knowledge Sources Retrieval - GET /api/admin/knowledge/sources")
-    print("5. Knowledge Suggestions Review - GET /api/admin/knowledge/suggestions")
-    print("6. Knowledge Timeline - GET /api/admin/knowledge/timeline")
-    print("7. Suggestion Approval Workflow - POST /api/admin/knowledge/suggestions/{id}/approve")
+    print("2. Get All Experts - GET /api/admin/experts (with stats)")
+    print("3. Create New Expert - POST /api/admin/experts")
+    print("4. Update Expert - PUT /api/admin/experts/{expert_id}")
+    print("5. Reset Expert Password - POST /api/admin/experts/{expert_id}/reset-password")
+    print("6. Deactivate Expert - DELETE /api/admin/experts/{expert_id}")
+    print("7. Verify Scheduler Status - Check APScheduler is running")
     print("=" * 80)
-    print("NOTE: This tests the complete Knowledge Bank workflow end-to-end")
+    print("NOTE: This tests the complete User Management workflow end-to-end")
     print("=" * 80)
     
     test_results = {}
@@ -661,30 +661,30 @@ def run_all_tests():
     else:
         test_results['backend_health'] = False
     
-    # KNOWLEDGE BANK SYSTEM TESTS
+    # USER MANAGEMENT SYSTEM TESTS
     if test_results['backend_health']:
         test_results['admin_authentication'] = test_admin_authentication()
-        test_results['system_settings'] = test_system_settings()
-        test_results['knowledge_upload'] = test_knowledge_source_upload()
-        test_results['knowledge_sources'] = test_knowledge_sources_retrieval()
-        test_results['knowledge_suggestions'] = test_knowledge_suggestions()
-        test_results['knowledge_timeline'] = test_knowledge_timeline()
-        test_results['suggestion_approval'] = test_suggestion_approval()
+        test_results['get_all_experts'] = test_get_all_experts()
+        test_results['create_expert'] = test_create_expert()
+        test_results['update_expert'] = test_update_expert()
+        test_results['reset_password'] = test_reset_expert_password()
+        test_results['deactivate_expert'] = test_deactivate_expert()
+        test_results['scheduler_status'] = test_scheduler_status()
     else:
         # Set all tests to False if backend is not accessible
         test_results.update({
             'admin_authentication': False,
-            'system_settings': False,
-            'knowledge_upload': False,
-            'knowledge_sources': False,
-            'knowledge_suggestions': False,
-            'knowledge_timeline': False,
-            'suggestion_approval': False
+            'get_all_experts': False,
+            'create_expert': False,
+            'update_expert': False,
+            'reset_password': False,
+            'deactivate_expert': False,
+            'scheduler_status': False
         })
     
     # Summary
     print("\n" + "=" * 80)
-    print("🏁 PHICOR.AI KNOWLEDGE BANK SYSTEM TEST SUMMARY")
+    print("🏁 PHICOR.AI USER MANAGEMENT SYSTEM TEST SUMMARY")
     print("=" * 80)
     
     passed_tests = sum(1 for result in test_results.values() if result)
@@ -695,12 +695,12 @@ def run_all_tests():
     # Test results breakdown
     workflow_tests = [
         ('admin_authentication', 'Test 1: Admin Authentication (admin@phicor.ai / admin123)'),
-        ('system_settings', 'Test 2: System Settings Management (GET/PUT /api/admin/settings)'),
-        ('knowledge_upload', 'Test 3: Knowledge Source Upload (POST /api/admin/knowledge/upload)'),
-        ('knowledge_sources', 'Test 4: Knowledge Sources Retrieval (GET /api/admin/knowledge/sources)'),
-        ('knowledge_suggestions', 'Test 5: Knowledge Suggestions Review (GET /api/admin/knowledge/suggestions)'),
-        ('knowledge_timeline', 'Test 6: Knowledge Timeline (GET /api/admin/knowledge/timeline)'),
-        ('suggestion_approval', 'Test 7: Suggestion Approval Workflow (POST approve)')
+        ('get_all_experts', 'Test 2: Get All Experts (GET /api/admin/experts)'),
+        ('create_expert', 'Test 3: Create New Expert (POST /api/admin/experts)'),
+        ('update_expert', 'Test 4: Update Expert (PUT /api/admin/experts/{id})'),
+        ('reset_password', 'Test 5: Reset Expert Password (POST reset-password)'),
+        ('deactivate_expert', 'Test 6: Deactivate Expert (DELETE /api/admin/experts/{id})'),
+        ('scheduler_status', 'Test 7: Verify Scheduler Status (APScheduler)')
     ]
     
     infrastructure_tests = [
@@ -708,7 +708,7 @@ def run_all_tests():
         ('backend_health', 'Backend Health Check')
     ]
     
-    print(f"\n📊 KNOWLEDGE BANK WORKFLOW TESTS:")
+    print(f"\n📊 USER MANAGEMENT WORKFLOW TESTS:")
     for test_key, test_name in workflow_tests:
         if test_key in test_results:
             status = "✅ PASS" if test_results[test_key] else "❌ FAIL"
@@ -725,22 +725,38 @@ def run_all_tests():
     workflow_total = len(workflow_tests)
     
     if workflow_passed == workflow_total:
-        print(f"\n🎉 ALL KNOWLEDGE BANK WORKFLOW TESTS PASSED!")
+        print(f"\n🎉 ALL USER MANAGEMENT WORKFLOW TESTS PASSED!")
         print(f"✅ Admin authentication working with admin credentials")
-        print(f"✅ System settings management functional")
-        print(f"✅ Knowledge source upload working with AI analysis")
-        print(f"✅ Knowledge sources retrieval functional")
-        print(f"✅ Knowledge suggestions review working")
-        print(f"✅ Knowledge timeline tracking activities")
-        print(f"✅ Suggestion approval workflow functional")
-        print(f"\n🔄 COMPLETE KNOWLEDGE BANK WORKFLOW VERIFIED:")
-        print(f"   Upload → AI Analysis → Suggestions → Review → Approve → Timeline")
+        print(f"✅ Expert listing with stats functional")
+        print(f"✅ Expert creation working")
+        print(f"✅ Expert updates functional")
+        print(f"✅ Password reset working")
+        print(f"✅ Expert deactivation functional")
+        print(f"✅ Scheduler status verified")
+        print(f"\n🔄 COMPLETE USER MANAGEMENT WORKFLOW VERIFIED:")
+        print(f"   Login → List → Create → Update → Reset Password → Deactivate")
     elif workflow_passed >= workflow_total * 0.75:
         print(f"\n✅ MOSTLY SUCCESSFUL! {workflow_passed}/{workflow_total} workflow tests passed.")
         print(f"⚠️  Some minor issues detected - see failed tests above")
     else:
         print(f"\n❌ SIGNIFICANT ISSUES DETECTED! Only {workflow_passed}/{workflow_total} workflow tests passed.")
-        print(f"🔧 Major fixes needed for Knowledge Bank System workflow")
+        print(f"🔧 Major fixes needed for User Management System workflow")
+    
+    # Critical Issues Detection
+    print(f"\n🚨 CRITICAL ISSUES DETECTED:")
+    if not test_results.get('admin_authentication'):
+        print(f"  ❌ CRITICAL: Admin authentication failed - cannot access admin endpoints")
+    
+    if not test_results.get('create_expert'):
+        print(f"  ❌ CRITICAL: Expert creation failed - core functionality broken")
+    
+    # Password hashing bug detection
+    print(f"\n⚠️ KNOWN ISSUES:")
+    print(f"  🐛 PASSWORD HASHING BUG: Admin endpoints use hashlib.sha256 but login uses bcrypt")
+    print(f"     - This means experts created via admin endpoints cannot login")
+    print(f"     - Expert registration endpoint uses bcrypt (correct)")
+    print(f"     - Admin creation/password reset endpoints use hashlib.sha256 (incorrect)")
+    print(f"     - FIX: Update admin endpoints to use bcrypt consistently")
     
     # Detailed verification summary
     print(f"\n📋 KEY WORKFLOW VERIFICATION POINTS:")
@@ -749,35 +765,35 @@ def run_all_tests():
     else:
         print(f"  ❌ Admin authentication failed")
     
-    if test_results.get('system_settings'):
-        print(f"  ✅ System settings verified (auto_search_interval_days, auto_search_enabled)")
+    if test_results.get('get_all_experts'):
+        print(f"  ✅ Expert listing verified (with pending_changes, total_changes, experiments_count)")
     else:
-        print(f"  ❌ System settings failed")
+        print(f"  ❌ Expert listing failed")
     
-    if test_results.get('knowledge_upload'):
-        print(f"  ✅ Knowledge upload verified (Atrial Fibrillation content with AI analysis)")
+    if test_results.get('create_expert'):
+        print(f"  ✅ Expert creation verified (Dr. New Expert with Cardiology specialty)")
     else:
-        print(f"  ❌ Knowledge upload failed")
+        print(f"  ❌ Expert creation failed")
     
-    if test_results.get('knowledge_sources'):
-        print(f"  ✅ Knowledge sources retrieval verified")
+    if test_results.get('update_expert'):
+        print(f"  ✅ Expert update verified (name and specialty changes)")
     else:
-        print(f"  ❌ Knowledge sources retrieval failed")
+        print(f"  ❌ Expert update failed")
     
-    if test_results.get('knowledge_suggestions'):
-        print(f"  ✅ Knowledge suggestions verified (AI-generated from analysis)")
+    if test_results.get('reset_password'):
+        print(f"  ✅ Password reset verified (newpassword123)")
     else:
-        print(f"  ❌ Knowledge suggestions failed")
+        print(f"  ❌ Password reset failed")
     
-    if test_results.get('knowledge_timeline'):
-        print(f"  ✅ Knowledge timeline verified (activity history tracking)")
+    if test_results.get('deactivate_expert'):
+        print(f"  ✅ Expert deactivation verified (soft delete)")
     else:
-        print(f"  ❌ Knowledge timeline failed")
+        print(f"  ❌ Expert deactivation failed")
     
-    if test_results.get('suggestion_approval'):
-        print(f"  ✅ Suggestion approval verified (approve workflow functional)")
+    if test_results.get('scheduler_status'):
+        print(f"  ✅ Scheduler status verified (APScheduler running)")
     else:
-        print(f"  ❌ Suggestion approval failed")
+        print(f"  ❌ Scheduler status failed")
     
     return test_results
 
