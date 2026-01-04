@@ -185,7 +185,16 @@ export default function ExpertDashboard() {
   const { expert, token, logout, isAdmin, loading: authLoading } = useExpert();
   
   // Main navigation state
-  const [activeView, setActiveView] = useState('diseases');
+  const [activeView, setActiveView] = useState('baselines');
+  
+  // Baselines view state (for reviewing normal parameters)
+  const [baselinesOrgan, setBaselinesOrgan] = useState('heart');
+  const [baselinesScale, setBaselinesScale] = useState(null);
+  const [baselinesSearch, setBaselinesSearch] = useState('');
+  
+  // References view state (for non-disease items like tests, guidelines)
+  const [referencesSearch, setReferencesSearch] = useState('');
+  const [selectedReference, setSelectedReference] = useState(null);
   
   // Diseases state
   const [diseases, setDiseases] = useState([]);
