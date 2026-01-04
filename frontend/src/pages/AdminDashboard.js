@@ -312,63 +312,178 @@ export default function AdminDashboard() {
         </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Pending Change Requests */}
+          {/* Change Requests with Tabs */}
           <Card className="lg:col-span-2">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-orange-500" />
-                    Pending Change Requests
+                    <FileCheck className="w-5 h-5 text-primary" />
+                    Change Requests
                   </CardTitle>
-                  <CardDescription>Review and approve expert submissions</CardDescription>
+                  <CardDescription>Review, approve, or reject expert submissions</CardDescription>
                 </div>
-                <Badge variant="secondary">{pendingChanges.length} pending</Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary" className="bg-orange-500/10 text-orange-500">
+                    {pendingChanges.length} pending
+                  </Badge>
+                  <Badge variant="secondary" className="bg-green-500/10 text-green-500">
+                    {historyChanges.filter(c => c.status === 'approved').length} approved
+                  </Badge>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[400px]">
-                {pendingChanges.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <CheckCircle2 className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>No pending change requests</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {pendingChanges.map(change => (
-                      <Card key={change.id} className="cursor-pointer hover:border-primary/50" onClick={() => handleReviewChange(change)}>
-                        <CardContent className="pt-4">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <p className="font-medium">{change.disease_name}</p>
-                              <p className="text-sm text-muted-foreground">
-                                {change.organ_id} / {change.scale_id}
-                              </p>
-                              <div className="flex items-center gap-2 mt-2">
-                                <Badge variant="outline">{change.expert_specialty}</Badge>
-                                <span className="text-xs text-muted-foreground">
-                                  by {change.expert_name}
-                                </span>
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="mb-4">
+                  <TabsTrigger value="pending" className="flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    Pending ({pendingChanges.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="history" className="flex items-center gap-2">
+                    <History className="w-4 h-4" />
+                    History ({historyChanges.length})
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="pending">
+                  <ScrollArea className="h-[350px]">
+                    {pendingChanges.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <CheckCircle2 className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                        <p>No pending change requests</p>
+                        <p className="text-sm">All caught up! 🎉</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {pendingChanges.map(change => (
+                          <Card key={change.id} className="cursor-pointer hover:border-orange-500/50 border-l-4 border-l-orange-500" onClick={() => handleReviewChange(change)}>
+                            <CardContent className="pt-4">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <p className="font-medium">{change.disease_name}</p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {change.organ_id} / {change.scale_id}
+                                  </p>
+                                  <div className="flex items-center gap-2 mt-2">
+                                    <Badge variant="outline">{change.expert_specialty}</Badge>
+                                    <span className="text-xs text-muted-foreground">
+                                      by {change.expert_name}
+                                    </span>
+                                  </div>
+                                </div>
+                                <Button size="sm" variant="outline">
+                                  Review
+                                  <ChevronRight className="w-4 h-4 ml-1" />
+                                </Button>
                               </div>
-                            </div>
-                            <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                          </div>
-                          
-                          <div className="mt-3 p-2 bg-muted/50 rounded text-sm">
-                            {change.parameters.map((p, i) => (
-                              <div key={i}>
-                                <span className="font-mono">{p.parameter_name}</span>: 
-                                <span className="text-muted-foreground"> {p.current_value}</span>
-                                <span className="text-primary"> → {p.proposed_value}</span>
+                              
+                              <div className="mt-3 p-2 bg-muted/50 rounded text-sm">
+                                {change.parameters.map((p, i) => (
+                                  <div key={i} className="flex items-center gap-2">
+                                    <span className="font-mono text-xs bg-background px-1 rounded">{p.parameter_name}</span>
+                                    <span className="text-red-500 line-through">{p.current_value}</span>
+                                    <ArrowRight className="w-3 h-3" />
+                                    <span className="text-green-500 font-medium">{p.proposed_value}</span>
+                                  </div>
+                                ))}
                               </div>
-                            ))}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </ScrollArea>
+                </TabsContent>
+
+                <TabsContent value="history">
+                  {/* Search and Filter */}
+                  <div className="flex gap-2 mb-4">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input 
+                        placeholder="Search by disease or expert..." 
+                        className="pl-9"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                    </div>
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                      <SelectTrigger className="w-[130px]">
+                        <Filter className="w-4 h-4 mr-2" />
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All</SelectItem>
+                        <SelectItem value="approved">Approved</SelectItem>
+                        <SelectItem value="rejected">Rejected</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                )}
-              </ScrollArea>
+
+                  <ScrollArea className="h-[300px]">
+                    {historyChanges
+                      .filter(c => {
+                        const matchesSearch = searchTerm === '' || 
+                          c.disease_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          c.expert_name?.toLowerCase().includes(searchTerm.toLowerCase());
+                        const matchesStatus = statusFilter === 'all' || c.status === statusFilter;
+                        return matchesSearch && matchesStatus;
+                      })
+                      .length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <History className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                        <p>No history found</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {historyChanges
+                          .filter(c => {
+                            const matchesSearch = searchTerm === '' || 
+                              c.disease_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                              c.expert_name?.toLowerCase().includes(searchTerm.toLowerCase());
+                            const matchesStatus = statusFilter === 'all' || c.status === statusFilter;
+                            return matchesSearch && matchesStatus;
+                          })
+                          .map(change => (
+                          <Card 
+                            key={change.id} 
+                            className={`cursor-pointer hover:border-primary/50 border-l-4 ${
+                              change.status === 'approved' ? 'border-l-green-500' : 'border-l-red-500'
+                            }`}
+                            onClick={() => handleViewHistory(change)}
+                          >
+                            <CardContent className="py-3">
+                              <div className="flex items-center justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2">
+                                    {change.status === 'approved' ? (
+                                      <CheckCircle2 className="w-4 h-4 text-green-500" />
+                                    ) : (
+                                      <XCircle className="w-4 h-4 text-red-500" />
+                                    )}
+                                    <span className="font-medium text-sm">{change.disease_name}</span>
+                                    <Badge variant={change.status === 'approved' ? 'default' : 'destructive'} className="text-xs">
+                                      {change.status}
+                                    </Badge>
+                                  </div>
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    Submitted by {change.expert_name} • Reviewed by {change.reviewer_name || 'N/A'}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {change.reviewed_at ? new Date(change.reviewed_at).toLocaleString() : 'N/A'}
+                                  </p>
+                                </div>
+                                <Eye className="w-4 h-4 text-muted-foreground" />
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </ScrollArea>
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
 
