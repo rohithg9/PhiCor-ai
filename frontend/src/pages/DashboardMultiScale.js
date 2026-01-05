@@ -1502,30 +1502,24 @@ const ClinicalFindingsPanel = ({ disease, isExpanded, onToggle, alwaysExpanded =
 
               {/* EQUATIONS TAB */}
               {activeTab === 'equations' && (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
                     <Brain className="w-4 h-4 text-amber-400" />
                     Mathematical Models & Equations
                   </div>
-                  {equations.length > 0 ? (
+                  
+                  {/* Established Equations */}
+                  {equations.length > 0 && (
                     <div className="space-y-3">
+                      <h5 className="text-xs text-muted-foreground uppercase tracking-wider">Established Models</h5>
                       {equations.map((eq, i) => (
                         <div 
                           key={i} 
-                          className={`p-3 rounded-lg border ${
-                            eq.isNovel 
-                              ? 'bg-amber-500/10 border-amber-500/30' 
-                              : 'bg-card/50 border-border/50'
-                          }`}
+                          className="p-3 rounded-lg border bg-card/50 border-border/50"
                         >
                           <div className="flex items-center justify-between mb-2">
                             <span className="font-medium text-sm">{eq.name}</span>
-                            <Badge 
-                              variant={eq.isNovel ? 'default' : 'outline'} 
-                              className={`text-[10px] ${eq.isNovel ? 'bg-amber-500/20 text-amber-400' : ''}`}
-                            >
-                              {eq.isNovel ? 'Novel' : 'Established'}
-                            </Badge>
+                            <Badge variant="outline" className="text-[10px]">Established</Badge>
                           </div>
                           {eq.latex && (
                             <div className="bg-black/20 rounded p-2 my-2 overflow-x-auto">
@@ -1536,8 +1530,144 @@ const ClinicalFindingsPanel = ({ disease, isExpanded, onToggle, alwaysExpanded =
                         </div>
                       ))}
                     </div>
-                  ) : (
+                  )}
+                  
+                  {/* Novel Equations from comprehensive_model */}
+                  {novelEquations.length > 0 && (
+                    <div className="space-y-3">
+                      <h5 className="text-xs text-amber-400 uppercase tracking-wider flex items-center gap-1">
+                        <Lightbulb className="w-3 h-3" /> Novel / PhiCor Equations
+                      </h5>
+                      {novelEquations.map((eq, i) => (
+                        <div 
+                          key={i} 
+                          className="p-3 rounded-lg border bg-amber-500/10 border-amber-500/30"
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium text-sm">{eq.name}</span>
+                            <Badge className="text-[10px] bg-amber-500/20 text-amber-400">Novel</Badge>
+                          </div>
+                          {eq.latex && (
+                            <div className="bg-black/20 rounded p-2 my-2 overflow-x-auto">
+                              <BlockMath math={eq.latex} />
+                            </div>
+                          )}
+                          <p className="text-xs text-muted-foreground">{eq.description}</p>
+                          {eq.variables && (
+                            <div className="mt-2 text-[10px] text-muted-foreground">
+                              <span className="font-semibold">Variables: </span>
+                              {Object.entries(eq.variables).map(([k, v], vi) => (
+                                <span key={k}>{vi > 0 && ', '}{k}: {v}</span>
+                              ))}
+                            </div>
+                          )}
+                          {eq.evidence && (
+                            <div className="mt-1 text-[10px] text-amber-400/70 flex items-center gap-1">
+                              <BookOpen className="w-3 h-3" /> {eq.evidence}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {equations.length === 0 && novelEquations.length === 0 && (
                     <p className="text-sm text-muted-foreground italic">No mathematical models available for this condition</p>
+                  )}
+                </div>
+              )}
+
+              {/* GENETICS TAB */}
+              {activeTab === 'genetics' && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
+                    <Atom className="w-4 h-4 text-purple-400" />
+                    Genetic & Hereditary Factors
+                  </div>
+                  
+                  {geneticFactors ? (
+                    <>
+                      {/* Heritability & Penetrance */}
+                      {(geneticFactors.heritability || geneticFactors.penetrance) && (
+                        <div className="grid grid-cols-2 gap-3">
+                          {geneticFactors.heritability && (
+                            <div className="p-3 rounded-lg bg-purple-500/10 border border-purple-500/30">
+                              <span className="text-[10px] text-purple-400 uppercase tracking-wider">Heritability</span>
+                              <p className="text-lg font-bold text-purple-300 mt-1">{geneticFactors.heritability}</p>
+                            </div>
+                          )}
+                          {geneticFactors.penetrance && (
+                            <div className="p-3 rounded-lg bg-indigo-500/10 border border-indigo-500/30">
+                              <span className="text-[10px] text-indigo-400 uppercase tracking-wider">Penetrance</span>
+                              <p className="text-lg font-bold text-indigo-300 mt-1">{geneticFactors.penetrance}</p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Associated Genes */}
+                      {geneticFactors.genes && geneticFactors.genes.length > 0 && (
+                        <div className="p-3 rounded-lg bg-card/50 border border-border/50">
+                          <h5 className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1">
+                            🧬 Associated Genes
+                          </h5>
+                          <div className="space-y-2">
+                            {geneticFactors.genes.map((gene, i) => (
+                              <div key={i} className="p-2 rounded bg-purple-500/5 border border-purple-500/20">
+                                <div className="flex items-center justify-between">
+                                  <span className="font-mono font-medium text-sm text-purple-300">
+                                    {typeof gene === 'string' ? gene : gene.name || gene.gene}
+                                  </span>
+                                  {gene.function && (
+                                    <Badge variant="outline" className="text-[9px] border-purple-500/30 text-purple-400">
+                                      {gene.function}
+                                    </Badge>
+                                  )}
+                                </div>
+                                {gene.role && (
+                                  <p className="text-xs text-muted-foreground mt-1">{gene.role}</p>
+                                )}
+                                {gene.mutations && (
+                                  <p className="text-[10px] text-orange-400 mt-1">
+                                    Mutations: {Array.isArray(gene.mutations) ? gene.mutations.join(', ') : gene.mutations}
+                                  </p>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* SNPs (Single Nucleotide Polymorphisms) */}
+                      {geneticFactors.snps && geneticFactors.snps.length > 0 && (
+                        <div className="p-3 rounded-lg bg-card/50 border border-border/50">
+                          <h5 className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1">
+                            🔬 Risk SNPs
+                          </h5>
+                          <div className="flex flex-wrap gap-2">
+                            {geneticFactors.snps.map((snp, i) => (
+                              <Badge 
+                                key={i} 
+                                variant="outline" 
+                                className="text-xs font-mono border-cyan-500/30 text-cyan-400"
+                              >
+                                {typeof snp === 'string' ? snp : snp.rsid || snp.id || snp.name}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Inheritance Pattern */}
+                      {geneticFactors.inheritance && (
+                        <div className="p-2 rounded bg-background/50">
+                          <span className="text-[10px] text-muted-foreground">Inheritance Pattern: </span>
+                          <span className="text-xs font-medium">{geneticFactors.inheritance}</span>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-sm text-muted-foreground italic">No genetic data available for this condition</p>
                   )}
                 </div>
               )}
