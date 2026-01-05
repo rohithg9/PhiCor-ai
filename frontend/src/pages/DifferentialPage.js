@@ -1265,7 +1265,7 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                   <div className="space-y-3">
                     {differentialResults.map((diagnosis, idx) => (
                       <div
-                        key={diagnosis.icd10 || idx}
+                        key={diagnosis.icd10 || diagnosis.icdCode || idx}
                         className={`rounded-xl border overflow-hidden transition-all ${isDark ? 'bg-gray-800/50 border-gray-700 hover:border-emerald-500/50' : 'bg-white border-gray-200 hover:border-emerald-500'}`}
                       >
                         <div
@@ -1273,21 +1273,35 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                           onClick={() => setExpandedDisease(expandedDisease === idx ? null : idx)}
                         >
                           <div className="flex items-center gap-3">
-                            <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${getProbabilityColor(diagnosis.probabilityScore)} flex items-center justify-center text-white font-bold text-sm`}>
+                            <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${getProbabilityColor(diagnosis.probabilityScore || diagnosis.probability * 100)} flex items-center justify-center text-white font-bold text-sm`}>
                               {idx + 1}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className={`font-medium truncate ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                                {diagnosis.diseaseName}
-                              </p>
+                              <div className="flex items-center gap-2">
+                                <p className={`font-medium truncate ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                  {diagnosis.diseaseName}
+                                </p>
+                                {/* Role badge from PhiCor Analysis */}
+                                {diagnosis.role && (
+                                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
+                                    diagnosis.role === 'Primary' 
+                                      ? 'bg-emerald-500/20 text-emerald-400' 
+                                      : diagnosis.role === 'Secondary'
+                                        ? 'bg-blue-500/20 text-blue-400'
+                                        : 'bg-amber-500/20 text-amber-400'
+                                  }`}>
+                                    {diagnosis.role}
+                                  </span>
+                                )}
+                              </div>
                               <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-                                {diagnosis.icd10}
+                                {diagnosis.icd10 || diagnosis.icdCode}
                               </p>
                             </div>
                             <div className="flex items-center gap-2">
                               <div className="text-right">
                                 <div className={`text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                                  {Math.round(diagnosis.probabilityScore * 10) / 10}%
+                                  {Math.round((diagnosis.probabilityScore || diagnosis.probability * 100) * 10) / 10}%
                                 </div>
                               </div>
                               {expandedDisease === idx ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -1297,8 +1311,8 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                           {/* Probability bar */}
                           <div className={`mt-3 h-2 rounded-full ${isDark ? 'bg-gray-700' : 'bg-gray-200'} overflow-hidden`}>
                             <div 
-                              className={`h-full bg-gradient-to-r ${getProbabilityColor(diagnosis.probabilityScore)} transition-all`}
-                              style={{ width: `${Math.min(100, Math.round(diagnosis.probabilityScore))}%` }}
+                              className={`h-full bg-gradient-to-r ${getProbabilityColor(diagnosis.probabilityScore || diagnosis.probability * 100)} transition-all`}
+                              style={{ width: `${Math.min(100, Math.round(diagnosis.probabilityScore || diagnosis.probability * 100))}%` }}
                             />
                           </div>
                         </div>
@@ -1306,7 +1320,40 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                         {/* Expanded details */}
                         {expandedDisease === idx && (
                           <div className={`p-4 border-t ${isDark ? 'border-gray-700 bg-gray-800/30' : 'border-gray-200 bg-gray-50'}`}>
-                            {/* Clinical Reasoning */}
+                            {/* PhiCor Matching Parameters */}
+                            {diagnosis.matchingParameters?.length > 0 && (
+                              <div className="mb-4">
+                                <h4 className="text-xs font-semibold text-emerald-400 uppercase mb-2 flex items-center gap-1">
+                                  <CheckCircle className="w-3 h-3" /> Matching Parameters
+                                </h4>
+                                <div className="flex flex-wrap gap-1">
+                                  {diagnosis.matchingParameters.map((param, i) => (
+                                    <span key={i} className={`text-xs px-2 py-1 rounded-full ${isDark ? 'bg-emerald-900/30 text-emerald-400' : 'bg-emerald-100 text-emerald-700'}`}>
+                                      {param}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {/* PhiCor Missing Features */}
+                            {diagnosis.missingFeatures?.length > 0 && (
+                              <div className="mb-4">
+                                <h4 className="text-xs font-semibold text-amber-400 uppercase mb-2 flex items-center gap-1">
+                                  <AlertTriangle className="w-3 h-3" /> Missing/Contradictory Features
+                                </h4>
+                                <div className="flex flex-wrap gap-1">
+                                  {diagnosis.missingFeatures.map((feature, i) => (
+                                    <span key={i} className={`text-xs px-2 py-1 rounded-full ${isDark ? 'bg-amber-900/30 text-amber-400' : 'bg-amber-100 text-amber-700'}`}>
+                                      {feature}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {/* Clinical Reasoning (for non-PhiCor results) */}
+                            {!diagnosis.matchingParameters && (
                             <div className="mb-4">
                               <h4 className="text-xs font-semibold text-emerald-400 uppercase mb-2 flex items-center gap-1">
                                 <Brain className="w-3 h-3" /> Clinical Reasoning
