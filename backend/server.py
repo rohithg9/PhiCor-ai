@@ -6990,20 +6990,32 @@ class ExtractedFinding(BaseModel):
     severity: float = 0  # 0-3
     type: str = "lab"  # lab, symptom, vital, imaging
     original_text: str = ""
+    organ_system: str = ""
+    physiologic_implication: str = ""
 
-class ClinicalInterpretationResponse(BaseModel):
+class DifferentialDiagnosis(BaseModel):
+    name: str
+    probability: float
+    role: str  # Primary, Secondary, Complication
+    matching_parameters: List[str]
+    missing_features: List[str]
+    icd_code: Optional[str] = None
+
+class PhiCorAnalysisResponse(BaseModel):
     success: bool
     findings: List[Dict[str, Any]]
     symptoms: List[str]
+    syndromes: List[str]
+    differentials: List[Dict[str, Any]]
+    synthesis: Dict[str, Any]
     summary: str
     confidence: float
 
-@api_router.post("/clinical/interpret", response_model=ClinicalInterpretationResponse)
+@api_router.post("/clinical/interpret")
 async def interpret_clinical_text(request: ClinicalTextRequest):
     """
-    AI-powered clinical text interpretation.
-    Extracts structured findings from free-text clinical notes, EMR data, or documents.
-    Handles abbreviations, regional terminology, and various unit systems.
+    PhiCor Analysis: Physiology-first, organ-system-aware clinical reasoning engine.
+    Extracts findings, maps to pathophysiology, and generates calibrated differential diagnoses.
     """
     try:
         from emergentintegrations.llm.chat import LlmChat, UserMessage
@@ -7015,44 +7027,109 @@ async def interpret_clinical_text(request: ClinicalTextRequest):
         # Determine unit system based on region
         unit_system = "SI" if request.region in ["UK", "EU", "IN", "ASIA"] else "conventional"
         
-        prompt = f"""You are a clinical data extraction expert. Analyze the following clinical text and extract ALL clinical findings in a structured format.
+        # PhiCor comprehensive clinical reasoning prompt
+        system_prompt = """You are PhiCor.ai, a physiology-first, organ-system-aware clinical reasoning engine.
 
-CLINICAL TEXT:
+You have access to:
+- Normal reference parameters for every organ and system
+- Structural, physiological, biochemical, and genetic models
+- Disease models describing how ~1900 diseases alter these parameters across severities
+
+Your task is to identify abnormal parameters, map them to pathophysiologic mechanisms, and infer the most plausible differential diagnoses using multifactorial reasoning.
+
+Your goal is clinical plausibility, calibration, and internal consistency, not maximal recall."""
+
+        prompt = f"""CLINICAL CASE:
 {request.text}
 
 REGIONAL CONTEXT: {request.region} (use {unit_system} units)
 
-Extract and return a JSON object with:
-1. "findings": Array of lab values, vital signs, and imaging findings. Each should have:
-   - "parameter_id": standardized ID (e.g., "creatinine", "glucose", "heart_rate", "troponin")
-   - "name": human readable name
-   - "value": numeric value (if available)
-   - "unit": the unit of measurement
-   - "direction": "increase", "decrease", or "normal"
-   - "severity": 0-3 scale (0=normal, 1=mild, 2=moderate, 3=severe)
-   - "type": "lab", "vital", or "imaging"
-   - "original_text": the original text snippet
+Perform a complete PhiCor Analysis following these steps:
 
-2. "symptoms": Array of symptom strings detected (e.g., ["chest pain", "dyspnea", "fatigue"])
+STEP 1 — ABNORMAL PARAMETER DETECTION
+Systematically evaluate every provided parameter. For each abnormal parameter:
+- Identify direction (↑ / ↓ / qualitative change)
+- Identify organ system(s) involved
+- Identify underlying physiologic process affected
 
-3. "summary": Brief clinical summary (1-2 sentences)
+STEP 2 — ORGAN-SYSTEM & PATHOPHYSIOLOGY MAPPING
+Aggregate abnormalities into organ-level dysfunction clusters:
+- Cardiac systolic vs diastolic dysfunction
+- Renal filtration vs tubular dysfunction
+- Hepatic synthetic vs congestive dysfunction
+- Pulmonary gas exchange vs vascular pathology
+- Hematologic production vs consumption
+- Metabolic and endocrine dysregulation
 
-4. "confidence": 0-1 confidence score
+STEP 3 — SYNDROME IDENTIFICATION
+From organ clusters, infer dominant clinical syndromes (e.g., Acute decompensated heart failure, Systemic inflammatory response, Multiorgan congestion)
+
+STEP 4 — DISEASE MODEL MATCHING (MULTIFACTORIAL)
+Compare expected parameter deviations by severity, match patterns not isolated values. Weight by:
+- Number of matching abnormalities
+- Severity concordance
+- Temporal plausibility
+- Organ-system coherence
+
+STEP 5 — CAUSE VS CONSEQUENCE SEPARATION
+Classify disease roles as: Primary etiology, Secondary contributor, or Downstream complication
+
+STEP 6 — PROBABILITY CALIBRATION RULES
+- Maximum probability for any diagnosis: ≤80%
+- Only one diagnosis may exceed 70%
+- Most diagnoses should cluster 30-60%
+- Avoid identical probabilities
+
+Return a JSON object with this EXACT structure:
+{{
+  "findings": [
+    {{
+      "parameter_id": "creatinine",
+      "name": "Creatinine",
+      "value": 2.5,
+      "unit": "mg/dL",
+      "direction": "increase",
+      "severity": 2,
+      "type": "lab",
+      "organ_system": "renal",
+      "physiologic_implication": "Decreased glomerular filtration"
+    }}
+  ],
+  "symptoms": ["dyspnea", "fatigue", "edema"],
+  "syndromes": [
+    "Acute decompensated heart failure with cardiorenal syndrome",
+    "Volume overload state"
+  ],
+  "differentials": [
+    {{
+      "name": "Heart Failure with Reduced Ejection Fraction",
+      "probability": 72,
+      "role": "Primary",
+      "matching_parameters": ["EF 25%", "BNP elevated", "cardiomegaly"],
+      "missing_features": ["known CAD history"],
+      "icd_code": "I50.2"
+    }}
+  ],
+  "synthesis": {{
+    "primary_diagnosis": "Most likely unifying diagnosis",
+    "key_alternative": "Most important competing diagnosis",
+    "discriminating_tests": ["Tests needed to differentiate"]
+  }},
+  "summary": "Brief clinical summary",
+  "confidence": 0.75
+}}
 
 IMPORTANT:
-- Interpret abbreviations: SOB=shortness of breath, CP=chest pain, HTN=hypertension, DM=diabetes, CKD=chronic kidney disease, MI=myocardial infarction, etc.
-- Handle regional terminology: "fall" can mean a fall event, "raised" means elevated
-- Convert values to {unit_system} units if needed
-- Mark findings as abnormal based on clinical context (e.g., "raised creatinine" is abnormal)
-- If a value is explicitly described as "raised", "elevated", "high", "low", etc., set the direction accordingly
-- For "creatinine kinase" interpret as "creatine kinase" (CK)
-
-Return ONLY valid JSON, no markdown or explanation."""
+- Interpret ALL abbreviations (SOB, CP, HTN, DM, CKD, MI, EF, BNP, etc.)
+- Convert all values to {unit_system} units
+- Be conservative with probabilities
+- Do not recommend treatments
+- Return ONLY valid JSON"""
 
         llm = LlmChat(
             api_key=llm_key,
-            session_id=f"clinical_interpret_{datetime.now().strftime('%H%M%S')}",
-            system_message="You are a clinical data extraction expert. Return only valid JSON."
+            session_id=f"phicor_analysis_{datetime.now().strftime('%H%M%S')}",
+            system_message=system_prompt
         ).with_model("openai", "gpt-4o")
         
         response = await llm.send_message(UserMessage(text=prompt))
@@ -7070,14 +7147,29 @@ Return ONLY valid JSON, no markdown or explanation."""
         try:
             result = json.loads(content)
         except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse AI response: {e}")
+            logger.error(f"Failed to parse PhiCor response: {e}")
             logger.error(f"Response content: {content[:500]}")
-            return ClinicalInterpretationResponse(
-                success=False,
-                findings=[],
-                symptoms=[],
-                summary="Failed to interpret clinical text",
-                confidence=0
+            return {
+                "success": False,
+                "findings": [],
+                "symptoms": [],
+                "syndromes": [],
+                "differentials": [],
+                "synthesis": {},
+                "summary": "Failed to interpret clinical text",
+                "confidence": 0
+            }
+        
+        return {
+            "success": True,
+            "findings": result.get("findings", []),
+            "symptoms": result.get("symptoms", []),
+            "syndromes": result.get("syndromes", []),
+            "differentials": result.get("differentials", []),
+            "synthesis": result.get("synthesis", {}),
+            "summary": result.get("summary", ""),
+            "confidence": result.get("confidence", 0.5)
+        }
             )
         
         return ClinicalInterpretationResponse(
