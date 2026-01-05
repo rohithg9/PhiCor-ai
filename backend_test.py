@@ -1,40 +1,33 @@
 #!/usr/bin/env python3
 """
-Backend Testing for PhiCor.ai User Management System
-Testing comprehensive User Management APIs as requested in review:
+Backend Testing for PhiCor.ai Dashboard Data Display Features
+Testing specific requirements from review request:
 
-PHICOR.AI USER MANAGEMENT SYSTEM TESTING:
+PHICOR.AI DASHBOARD TESTING:
 
 Test 1: Admin Authentication
 - Admin login with admin@phicor.ai / admin123
-- Verify admin access and role-based permissions
+- Verify admin access and token validity
 
-Test 2: Get All Experts
-- GET /api/admin/experts
-- Should return list of all experts with stats (pending_changes, total_changes, experiments_count)
+Test 2: Disease Data API
+- Call GET /api/diseases-db?include_params=true&search=heart%20failure&limit=1
+- Verify response contains: comprehensive_model, epidemiology, pathophysiology, parameter_modifications, treatment, prognosis
+- Verify comprehensive_model has: geneticFactors, novelEquations, progression, clinicalPresentation
 
-Test 3: Create New Expert
-- POST /api/admin/experts
-- Body: {"name": "Dr. New Expert", "email": "newexpert@test.com", "password": "test123", "role": "expert", "specialty": "Cardiology", "institution": "Test Medical Center"}
-- Should create expert and return the new expert data
+Test 3: Heart Failure Disease Search
+- Search for "Heart Failure with Reduced Ejection Fraction (HFrEF)" disease
+- Verify disease loads with 104+ affected parameters
+- Verify comprehensive model data structure
 
-Test 4: Update Expert
-- PUT /api/admin/experts/{expert_id}
-- Use the ID from step 3
-- Body: {"name": "Dr. Updated Expert", "specialty": "Neurology"}
-- Should update the expert
+Test 4: Clinical Evidence Data Structure
+- Verify disease data contains required fields for Clinical Evidence tabs:
+  - Overview: epidemiology, pathophysiology, prognosis
+  - Genetics: geneticFactors data
+  - Math Models: novelEquations from comprehensive_model
 
-Test 5: Reset Expert Password
-- POST /api/admin/experts/{expert_id}/reset-password
-- Body: {"new_password": "newpassword123"}
-- Should reset the password
-
-Test 6: Deactivate Expert
-- DELETE /api/admin/experts/{expert_id}
-- Should soft-delete (deactivate) the expert
-
-Test 7: Verify Scheduler Status
-- Check backend logs to confirm APScheduler is running with the auto-search job
+Test 5: Disease Progression Data
+- Verify disease progression timeline data exists
+- Verify stages 1-4 structure (Early/Subclinical → Mild → Moderate → Severe/End-stage)
 
 API Base URL: https://ailabdata.preview.emergentagent.com
 All APIs require Authorization: Bearer {token} header
