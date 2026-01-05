@@ -7155,7 +7155,7 @@ CRITICAL INSTRUCTIONS:
         llm = LlmChat(
             api_key=llm_key,
             session_id=f"phicor_analysis_{datetime.now().strftime('%H%M%S')}",
-            system_message="You are PhiCor, an expert clinical reasoning AI. Provide comprehensive differential diagnosis with detailed reasoning and evidence-based management guidance. Always respond with valid JSON only."
+            system_message="You are PhiCor, an expert clinical reasoning AI. Provide comprehensive differential diagnosis with detailed reasoning and evidence-based management guidance. Always respond with valid JSON only. IMPORTANT: Ensure all JSON is properly closed with matching brackets."
         ).with_model("openai", "gpt-4o")
         
         response = await llm.send_message(UserMessage(text=analysis_prompt))
@@ -7170,10 +7170,56 @@ CRITICAL INSTRUCTIONS:
         content = content.strip()
         
         import json
+        import re
+        
+        # Try to fix common JSON issues
+        def try_fix_json(json_str):
+            """Attempt to fix common JSON formatting issues"""
+            # Try to parse as-is first
+            try:
+                return json.loads(json_str)
+            except json.JSONDecodeError:
+                pass
+            
+            # Try to fix truncated strings by finding incomplete strings and closing them
+            fixed = json_str
+            
+            # Count open braces and brackets to find missing closures
+            open_braces = fixed.count('{') - fixed.count('}')
+            open_brackets = fixed.count('[') - fixed.count(']')
+            
+            # Try to close unclosed strings (common issue)
+            # Find last unclosed string
+            in_string = False
+            last_quote_pos = -1
+            for i, char in enumerate(fixed):
+                if char == '"' and (i == 0 or fixed[i-1] != '\\'):
+                    in_string = not in_string
+                    if in_string:
+                        last_quote_pos = i
+            
+            if in_string:
+                # Close the unclosed string
+                fixed = fixed + '"'
+            
+            # Add missing closing brackets/braces
+            fixed = fixed + ']' * open_brackets + '}' * open_braces
+            
+            try:
+                return json.loads(fixed)
+            except json.JSONDecodeError:
+                # Last resort: try to extract just the patient_summary and differentials
+                return None
+        
+        analysis = None
         try:
             analysis = json.loads(content)
         except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse analysis response: {e}")
+            logger.warning(f"Initial JSON parse failed: {e}, attempting fix...")
+            analysis = try_fix_json(content)
+            
+        if not analysis:
+            logger.error(f"Failed to parse analysis response after fixes")
             logger.error(f"Raw response: {content[:500]}")
             return {
                 "success": False,
