@@ -867,13 +867,77 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                           <Target className="w-4 h-4" />
                           Dominant Clinical Syndrome(s)
                         </h4>
-                        <ul className="space-y-1">
+                        <div className="space-y-3">
                           {(phicorResults.dominant_syndromes || phicorResults.syndromes || []).map((syndrome, idx) => (
-                            <li key={idx} className={`text-sm font-medium ${isDark ? 'text-purple-200' : 'text-purple-700'}`}>
-                              • {syndrome}
-                            </li>
+                            <div key={idx} className={`p-3 rounded-lg ${isDark ? 'bg-purple-900/30' : 'bg-purple-100/50'}`}>
+                              <p className={`text-sm font-medium ${isDark ? 'text-purple-200' : 'text-purple-800'}`}>
+                                {typeof syndrome === 'object' ? syndrome.syndrome : syndrome}
+                              </p>
+                              {syndrome.key_features?.length > 0 && (
+                                <div className="mt-2 flex flex-wrap gap-1">
+                                  {syndrome.key_features.map((feature, i) => (
+                                    <span key={i} className={`text-xs px-2 py-0.5 rounded-full ${isDark ? 'bg-purple-800 text-purple-200' : 'bg-purple-200 text-purple-800'}`}>
+                                      {feature}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                              {syndrome.pathophysiologic_rationale && (
+                                <p className={`text-xs mt-2 italic ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>
+                                  {syndrome.pathophysiologic_rationale}
+                                </p>
+                              )}
+                            </div>
                           ))}
-                        </ul>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Clinical Findings with Normal Ranges */}
+                    {phicorResults && phicorResults.findings?.length > 0 && (
+                      <div className={`mt-3 p-4 rounded-xl border ${isDark ? 'bg-gray-800/50 border-gray-700' : 'bg-gray-50 border-gray-200'}`}>
+                        <h4 className={`text-sm font-semibold flex items-center gap-2 mb-3 ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>
+                          <Activity className="w-4 h-4" />
+                          Clinical Findings
+                        </h4>
+                        <div className="space-y-2">
+                          {phicorResults.findings.slice(0, 8).map((finding, idx) => (
+                            <div key={idx} className={`flex items-center justify-between p-2 rounded-lg ${
+                              finding.status === 'elevated' || finding.status === 'high' 
+                                ? isDark ? 'bg-red-900/20' : 'bg-red-50'
+                                : finding.status === 'low' || finding.status === 'decreased'
+                                  ? isDark ? 'bg-blue-900/20' : 'bg-blue-50'
+                                  : isDark ? 'bg-gray-700/30' : 'bg-white'
+                            }`}>
+                              <div className="flex items-center gap-2">
+                                {finding.direction === 'increase' ? (
+                                  <TrendingUp className="w-4 h-4 text-red-500" />
+                                ) : finding.direction === 'decrease' ? (
+                                  <TrendingDown className="w-4 h-4 text-blue-500" />
+                                ) : (
+                                  <Minus className="w-4 h-4 text-gray-400" />
+                                )}
+                                <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                  {finding.name}
+                                </span>
+                              </div>
+                              <div className="text-right">
+                                <span className={`text-sm font-bold ${
+                                  finding.status === 'elevated' || finding.status === 'high' ? 'text-red-500'
+                                    : finding.status === 'low' || finding.status === 'decreased' ? 'text-blue-500'
+                                      : isDark ? 'text-green-400' : 'text-green-600'
+                                }`}>
+                                  {finding.value} {finding.unit}
+                                </span>
+                                {finding.normal_range && (
+                                  <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                                    Normal: {finding.normal_range}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     )}
                     
@@ -884,10 +948,28 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                           <AlertTriangle className="w-4 h-4" />
                           Safety Considerations
                         </h4>
-                        <ul className="space-y-1">
+                        <ul className="space-y-2">
                           {phicorResults.safety_alerts.map((alert, idx) => (
-                            <li key={idx} className={`text-sm ${isDark ? 'text-amber-200' : 'text-amber-700'}`}>
-                              • {alert}
+                            <li key={idx} className={`p-2 rounded-lg ${isDark ? 'bg-amber-900/30' : 'bg-amber-100/50'}`}>
+                              {typeof alert === 'object' ? (
+                                <div>
+                                  <span className={`text-sm font-medium ${isDark ? 'text-amber-200' : 'text-amber-800'}`}>
+                                    {alert.alert_type}: {alert.parameter}
+                                  </span>
+                                  <p className={`text-xs ${isDark ? 'text-amber-300' : 'text-amber-700'}`}>
+                                    {alert.message}
+                                  </p>
+                                  {alert.recommended_action && (
+                                    <p className={`text-xs mt-1 italic ${isDark ? 'text-amber-400' : 'text-amber-600'}`}>
+                                      → {alert.recommended_action}
+                                    </p>
+                                  )}
+                                </div>
+                              ) : (
+                                <span className={`text-sm ${isDark ? 'text-amber-200' : 'text-amber-700'}`}>
+                                  • {alert}
+                                </span>
+                              )}
                             </li>
                           ))}
                         </ul>
