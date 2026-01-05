@@ -759,6 +759,45 @@ def test_phicor_clinical_analysis():
                 print(f"  ❌ Analysis failed (success: false)")
                 success_pass = False
             
+            # Check patient_summary (NEW requirement)
+            patient_summary = data.get('patient_summary', {})
+            if patient_summary:
+                print(f"  ✅ Patient summary present ✓")
+                # Check required patient summary fields
+                ps_fields = ['age', 'sex', 'chief_complaint', 'relevant_history']
+                ps_present = []
+                for field in ps_fields:
+                    if field in patient_summary and patient_summary[field]:
+                        ps_present.append(field)
+                print(f"    📊 Patient summary fields: {ps_present}")
+                patient_summary_pass = True
+            else:
+                print(f"  ❌ Patient summary missing")
+                patient_summary_pass = False
+            
+            # Check clinical_findings (NEW comprehensive structure)
+            clinical_findings = data.get('clinical_findings', {})
+            if clinical_findings:
+                print(f"  ✅ Clinical findings structure present ✓")
+                # Check for vital_signs, laboratory_values, symptoms arrays
+                cf_sections = ['vital_signs', 'laboratory_values', 'symptoms']
+                cf_present = []
+                for section in cf_sections:
+                    if section in clinical_findings and clinical_findings[section]:
+                        cf_present.append(section)
+                        items = clinical_findings[section]
+                        print(f"    📊 {section}: {len(items)} items")
+                        # Show sample item structure
+                        if items and isinstance(items, list) and len(items) > 0:
+                            sample = items[0]
+                            if isinstance(sample, dict):
+                                print(f"      Sample keys: {list(sample.keys())}")
+                print(f"    📊 Clinical findings sections: {cf_present}")
+                clinical_findings_pass = True
+            else:
+                print(f"  ❌ Clinical findings structure missing")
+                clinical_findings_pass = False
+            
             # Check dominant_syndromes
             dominant_syndromes = data.get('dominant_syndromes', [])
             if dominant_syndromes:
