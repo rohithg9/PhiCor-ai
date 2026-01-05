@@ -266,15 +266,18 @@ const DifferentialPage = () => {
     }, 500);
   }, [abnormalFindings, clinicalText]);
   
+  // Track if PhiCor analysis is active to prevent race conditions
+  const [phicorActive, setPhicorActive] = useState(false);
+  
   // Auto-run diagnosis when findings change - but only if PhiCor hasn't provided results
   useEffect(() => {
-    // Skip if we have PhiCor differentials already (check both phicorResults and current differentials)
+    // Skip if we have PhiCor differentials already
     if (phicorResults?.differentials?.length > 0) {
       return;
     }
     
-    // Also skip if differentialResults already have phicor items (prevents race condition)
-    if (differentialResults.some(d => d.id?.startsWith('phicor-diff-'))) {
+    // Skip if PhiCor analysis is currently running
+    if (phicorActive) {
       return;
     }
     
@@ -283,7 +286,7 @@ const DifferentialPage = () => {
     } else {
       setDifferentialResults([]);
     }
-  }, [abnormalFindings, runDiagnosis, phicorResults, differentialResults]);
+  }, [abnormalFindings, runDiagnosis, phicorResults, phicorActive]);
   
   // Analyze clinical text - with PhiCor Analysis
   const handleAnalyzeText = async () => {
