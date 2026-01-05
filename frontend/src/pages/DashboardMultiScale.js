@@ -2706,17 +2706,27 @@ const DashboardMultiScale = () => {
     const fetchDiseaseParams = async () => {
       setIsLoadingDiseases(true);
       
-      // Fetch data - browser HTTP cache will make subsequent fetches instant
-      // if the data was pre-loaded from landing page
+      // Check for pre-loaded cache from landing page first (in-memory via window)
+      const cache = window.__PHICOR_DISEASES_CACHE__;
+      if (cache && cache.diseases?.length > 0 && Date.now() - cache.timestamp < 10 * 60 * 1000) {
+        console.log(`✅ Using pre-loaded cache: ${cache.diseases.length} diseases (instant load)`);
+        processDiseaseData(cache.diseases);
+        setIsLoadingDiseases(false);
+        return;
+      }
+      
+      // Fetch fresh data if no valid cache
       try {
         const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
-        // Using force-cache to leverage browser HTTP caching from landing page preload
-        const response = await fetch(`${backendUrl}/api/diseases-db?include_params=true&limit=2500`, {
-          cache: 'force-cache'
-        });
+        const response = await fetch(`${backendUrl}/api/diseases-db?include_params=true&limit=2500`);
         if (response.ok) {
           const data = await response.json();
           processDiseaseData(data.diseases || []);
+          // Store in window cache for future use
+          window.__PHICOR_DISEASES_CACHE__ = {
+            timestamp: Date.now(),
+            diseases: data.diseases || []
+          };
         }
       } catch (error) {
         console.error('Error fetching diseases:', error);
