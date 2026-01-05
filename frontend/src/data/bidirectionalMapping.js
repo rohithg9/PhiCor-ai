@@ -677,69 +677,76 @@ export const searchBySymptomOrFinding = (query, type = 'all') => {
  */
 const LAB_PATTERNS = {
   // Complete Blood Count
-  hemoglobin: /(?:hemoglobin|hgb|hb)\s*[:=]?\s*([\d.]+)\s*(g\/dl|g\/l)?/i,
-  wbc: /(?:wbc|white\s*blood\s*cells?|leukocytes?)\s*[:=]?\s*([\d.]+)\s*(?:×?\s*10\^?[39]|k)?/i,
-  platelets: /(?:platelets?|plt)\s*[:=]?\s*([\d.]+)\s*(?:×?\s*10\^?[39]|k)?/i,
-  hematocrit: /(?:hematocrit|hct)\s*[:=]?\s*([\d.]+)\s*%?/i,
-  mcv: /(?:mcv)\s*[:=]?\s*([\d.]+)\s*(?:fl)?/i,
+  hemoglobin: /(?:hemoglobin|hgb|hb)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(g\/dl|g\/l)?/i,
+  wbc: /(?:wbc|white\s*blood\s*cells?|leukocytes?)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:×?\s*10\^?[39]|k)?/i,
+  platelets: /(?:platelets?|plt)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:×?\s*10\^?[39]|k)?/i,
+  hematocrit: /(?:hematocrit|hct)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*%?/i,
+  mcv: /(?:mcv)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:fl)?/i,
   
-  // Metabolic Panel
-  glucose: /(?:glucose|blood\s*sugar|bs|fbs)\s*[:=]?\s*([\d.]+)\s*(?:mg\/dl|mmol\/l)?/i,
-  creatinine: /(?:creatinine|cr)\s*[:=]?\s*([\d.]+)\s*(?:mg\/dl)?/i,
-  bun: /(?:bun|blood\s*urea\s*nitrogen)\s*[:=]?\s*([\d.]+)\s*(?:mg\/dl)?/i,
-  sodium: /(?:sodium|na\+?)\s*[:=]?\s*([\d.]+)\s*(?:meq\/l|mmol\/l)?/i,
-  potassium: /(?:potassium|k\+?)\s*[:=]?\s*([\d.]+)\s*(?:meq\/l|mmol\/l)?/i,
-  chloride: /(?:chloride|cl)\s*[:=]?\s*([\d.]+)\s*(?:meq\/l|mmol\/l)?/i,
-  bicarbonate: /(?:bicarbonate|hco3|co2)\s*[:=]?\s*([\d.]+)\s*(?:meq\/l|mmol\/l)?/i,
-  calcium: /(?:calcium|ca)\s*[:=]?\s*([\d.]+)\s*(?:mg\/dl)?/i,
+  // Metabolic Panel - enhanced patterns to catch natural language
+  glucose: /(?:glucose|blood\s*sugar|bs|fbs)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:mg\/dl|mmol\/l)?/i,
+  creatinine: /(?:creatinine|cr)(?:\s+(?:raised|elevated|high|low|increased|decreased))?\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:mg\/dl|mmol|umol)?/i,
+  bun: /(?:bun|blood\s*urea\s*nitrogen|urea)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:mg\/dl|mmol)?/i,
+  sodium: /(?:sodium|na\+?)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:meq\/l|mmol\/l)?/i,
+  potassium: /(?:potassium|k\+?)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:meq\/l|mmol\/l)?/i,
+  chloride: /(?:chloride|cl)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:meq\/l|mmol\/l)?/i,
+  bicarbonate: /(?:bicarbonate|hco3|co2)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:meq\/l|mmol\/l)?/i,
+  calcium: /(?:calcium|ca)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:mg\/dl)?/i,
   
   // Liver Function
-  ast: /(?:ast|sgot|aspartate\s*aminotransferase)\s*[:=]?\s*([\d.]+)\s*(?:u\/l|iu\/l)?/i,
-  alt: /(?:alt|sgpt|alanine\s*aminotransferase)\s*[:=]?\s*([\d.]+)\s*(?:u\/l|iu\/l)?/i,
-  alp: /(?:alp|alkaline\s*phosphatase)\s*[:=]?\s*([\d.]+)\s*(?:u\/l|iu\/l)?/i,
-  bilirubin: /(?:total\s*bilirubin|bilirubin|tbili)\s*[:=]?\s*([\d.]+)\s*(?:mg\/dl)?/i,
-  albumin: /(?:albumin|alb)\s*[:=]?\s*([\d.]+)\s*(?:g\/dl)?/i,
+  ast: /(?:ast|sgot|aspartate\s*aminotransferase)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:u\/l|iu\/l)?/i,
+  alt: /(?:alt|sgpt|alanine\s*aminotransferase)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:u\/l|iu\/l)?/i,
+  alp: /(?:alp|alkaline\s*phosphatase)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:u\/l|iu\/l)?/i,
+  bilirubin: /(?:total\s*bilirubin|bilirubin|tbili)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:mg\/dl)?/i,
+  albumin: /(?:albumin|alb)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:g\/dl)?/i,
   
-  // Cardiac
-  troponin: /(?:troponin|trop\s*[it])\s*[:=]?\s*([\d.]+)\s*(?:ng\/ml)?/i,
-  bnp: /(?:bnp|brain\s*natriuretic\s*peptide)\s*[:=]?\s*([\d.]+)\s*(?:pg\/ml)?/i,
-  ck: /(?:ck|cpk|creatine\s*kinase)\s*[:=]?\s*([\d.]+)\s*(?:u\/l)?/i,
+  // Cardiac markers - enhanced to catch "creatinine kinase" typo and natural language
+  troponin: /(?:troponin|trop\s*[it])\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:ng\/ml)?/i,
+  bnp: /(?:bnp|brain\s*natriuretic\s*peptide|nt-?pro\s*bnp)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:pg\/ml)?/i,
+  ck: /(?:ck|cpk|creatine?\s*kinase)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:u\/l)?/i,
   
   // Inflammatory
-  crp: /(?:crp|c-reactive\s*protein)\s*[:=]?\s*([\d.]+)\s*(?:mg\/l|mg\/dl)?/i,
-  esr: /(?:esr|sed\s*rate|erythrocyte\s*sedimentation)\s*[:=]?\s*([\d.]+)\s*(?:mm\/hr)?/i,
-  procalcitonin: /(?:procalcitonin|pct)\s*[:=]?\s*([\d.]+)\s*(?:ng\/ml)?/i,
+  crp: /(?:crp|c-reactive\s*protein)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:mg\/l|mg\/dl)?/i,
+  esr: /(?:esr|sed\s*rate|erythrocyte\s*sedimentation)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:mm\/hr)?/i,
+  procalcitonin: /(?:procalcitonin|pct)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:ng\/ml)?/i,
   
   // Coagulation
-  pt: /(?:pt|prothrombin\s*time)\s*[:=]?\s*([\d.]+)\s*(?:sec|seconds)?/i,
-  inr: /(?:inr)\s*[:=]?\s*([\d.]+)/i,
-  ptt: /(?:ptt|aptt|activated\s*partial)\s*[:=]?\s*([\d.]+)\s*(?:sec|seconds)?/i,
-  d_dimer: /(?:d-?dimer)\s*[:=]?\s*([\d.]+)\s*(?:μg\/ml|ng\/ml)?/i,
+  pt: /(?:pt|prothrombin\s*time)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:sec|seconds)?/i,
+  inr: /(?:inr)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)/i,
+  ptt: /(?:ptt|aptt|activated\s*partial)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:sec|seconds)?/i,
+  d_dimer: /(?:d-?dimer)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:μg\/ml|ng\/ml)?/i,
   
   // Thyroid
-  tsh: /(?:tsh|thyroid\s*stimulating)\s*[:=]?\s*([\d.]+)\s*(?:miu\/l)?/i,
-  t4: /(?:free\s*t4|ft4|thyroxine)\s*[:=]?\s*([\d.]+)\s*(?:ng\/dl)?/i,
-  t3: /(?:free\s*t3|ft3|triiodothyronine)\s*[:=]?\s*([\d.]+)\s*(?:pg\/ml)?/i,
+  tsh: /(?:tsh|thyroid\s*stimulating)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:miu\/l)?/i,
+  t4: /(?:free\s*t4|ft4|thyroxine)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:ng\/dl)?/i,
+  t3: /(?:free\s*t3|ft3|triiodothyronine)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:pg\/ml)?/i,
   
   // Diabetes
-  hba1c: /(?:hba1c|a1c|glycated\s*hemoglobin)\s*[:=]?\s*([\d.]+)\s*%?/i,
+  hba1c: /(?:hba1c|a1c|glycated\s*hemoglobin)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*%?/i,
   
   // Lipids
-  cholesterol: /(?:total\s*cholesterol|cholesterol)\s*[:=]?\s*([\d.]+)\s*(?:mg\/dl)?/i,
-  ldl: /(?:ldl|ldl-c)\s*[:=]?\s*([\d.]+)\s*(?:mg\/dl)?/i,
-  hdl: /(?:hdl|hdl-c)\s*[:=]?\s*([\d.]+)\s*(?:mg\/dl)?/i,
-  triglycerides: /(?:triglycerides?|tg)\s*[:=]?\s*([\d.]+)\s*(?:mg\/dl)?/i,
+  cholesterol: /(?:total\s*cholesterol|cholesterol)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:mg\/dl)?/i,
+  ldl: /(?:ldl|ldl-c)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:mg\/dl)?/i,
+  hdl: /(?:hdl|hdl-c)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:mg\/dl)?/i,
+  triglycerides: /(?:triglycerides?|tg)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:mg\/dl)?/i,
   
   // Kidney
-  gfr: /(?:gfr|egfr|glomerular\s*filtration)\s*[:=]?\s*([\d.]+)\s*(?:ml\/min)?/i,
-  urine_protein: /(?:urine\s*protein|proteinuria)\s*[:=]?\s*([\d.]+)\s*(?:mg\/dl|g)?/i,
+  gfr: /(?:gfr|egfr|glomerular\s*filtration)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:ml\/min)?/i,
+  urine_protein: /(?:urine\s*protein|proteinuria)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:mg\/dl|g)?/i,
   
   // ABG
-  ph: /(?:ph|arterial\s*ph)\s*[:=]?\s*([\d.]+)/i,
-  pco2: /(?:pco2|paco2)\s*[:=]?\s*([\d.]+)\s*(?:mmhg)?/i,
-  po2: /(?:po2|pao2)\s*[:=]?\s*([\d.]+)\s*(?:mmhg)?/i,
-  o2sat: /(?:o2\s*sat|spo2|oxygen\s*saturation)\s*[:=]?\s*([\d.]+)\s*%?/i,
-  lactate: /(?:lactate|lactic\s*acid)\s*[:=]?\s*([\d.]+)\s*(?:mmol\/l)?/i,
+  ph: /(?:ph|arterial\s*ph)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)/i,
+  pco2: /(?:pco2|paco2)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:mmhg)?/i,
+  po2: /(?:po2|pao2)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:mmhg)?/i,
+  o2sat: /(?:o2\s*sat|spo2|oxygen\s*saturation)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*%?/i,
+  lactate: /(?:lactate|lactic\s*acid)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:mmol\/l)?/i,
+  
+  // Vital Signs - commonly mentioned in clinical text
+  heart_rate: /(?:heart\s*rate|hr|pulse|heart\s*beat)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:bpm|beats?\s*per\s*min(?:ute)?)?/i,
+  systolic_bp: /(?:systolic|sbp|bp\s*sys)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:mmhg)?/i,
+  diastolic_bp: /(?:diastolic|dbp|bp\s*dia)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:mmhg)?/i,
+  temperature: /(?:temp(?:erature)?|fever)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:°?[cf]|degrees)?/i,
+  respiratory_rate: /(?:resp(?:iratory)?\s*rate|rr|breathing\s*rate)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)/i,
 };
 
 /**
