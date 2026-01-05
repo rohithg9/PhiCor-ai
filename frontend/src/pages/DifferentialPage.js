@@ -1377,6 +1377,7 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                                 )}
                               </div>
                             </div>
+                            )}
                             
                             {/* Matched findings */}
                             {diagnosis.matchedParams?.length > 0 && (
