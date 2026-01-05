@@ -768,7 +768,7 @@ def test_phicor_clinical_analysis():
             
             # Check findings (extracted lab values, vitals, etc.)
             findings = data.get('findings', [])
-            if findings:
+            if len(findings) > 0:
                 print(f"  ✅ Clinical findings extracted: {len(findings)} items")
                 # Show sample findings
                 for i, finding in enumerate(findings[:3]):
