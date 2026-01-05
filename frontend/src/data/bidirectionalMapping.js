@@ -785,10 +785,16 @@ export const NORMAL_RANGES = {
   po2: { min: 80, max: 100, unit: 'mmHg' },
   o2sat: { min: 95, max: 100, unit: '%' },
   lactate: { min: 0.5, max: 2.0, unit: 'mmol/L' },
+  // Vital Signs
+  heart_rate: { min: 60, max: 100, unit: 'bpm' },
+  systolic_bp: { min: 90, max: 120, unit: 'mmHg' },
+  diastolic_bp: { min: 60, max: 80, unit: 'mmHg' },
+  temperature: { min: 36.1, max: 37.2, unit: '°C' },
+  respiratory_rate: { min: 12, max: 20, unit: '/min' },
 };
 
 /**
- * Symptom keywords for extraction
+ * Symptom keywords for extraction - expanded list
  */
 const SYMPTOM_KEYWORDS = [
   'fever', 'chills', 'fatigue', 'weakness', 'malaise', 'weight loss', 'weight gain',
@@ -802,6 +808,13 @@ const SYMPTOM_KEYWORDS = [
   'numbness', 'tingling', 'weakness', 'paralysis', 'tremor', 'seizure',
   'blurred vision', 'diplopia', 'photophobia',
   'anxiety', 'depression', 'insomnia',
+  // Additional symptoms for elderly/trauma
+  'fall', 'falls', 'hip pain', 'sore hip', 'sore left hip', 'sore right hip',
+  'irregular heartbeat', 'irregular heart beat', 'arrhythmia', 'atrial fibrillation',
+  'tachycardia', 'bradycardia', 'palpitation',
+  'acute kidney injury', 'aki', 'renal failure', 'kidney failure',
+  'rhabdomyolysis', 'muscle breakdown',
+  'fracture', 'broken bone', 'hip fracture',
 ];
 
 // Mapping of common ICD codes to disease names (for imaging findings fallback)
