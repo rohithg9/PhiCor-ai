@@ -734,14 +734,19 @@ const LungCancerModule = () => {
   };
 
   const getStageGroup = () => {
+    // TNM 8th Edition Stage Grouping
     if (mStage.startsWith('M1')) return mStage === 'M1c' ? 'IVB' : 'IVA';
     if (nStage === 'N3') return 'IIIC';
     if (nStage === 'N2') return tStage.startsWith('T4') ? 'IIIB' : 'IIIA';
     if (nStage === 'N1') return 'IIB';
+    // N0, M0 cases - early stage
+    if (tStage === 'T1a') return 'IA1';
+    if (tStage === 'T1b') return 'IA2';
+    if (tStage === 'T1c') return 'IA3';
     if (tStage === 'T2a') return 'IB';
     if (tStage === 'T2b') return 'IIA';
     if (tStage === 'T3' || tStage === 'T4') return 'IIB';
-    return 'IA';
+    return 'IA1'; // Default
   };
 
   const tabs = [
