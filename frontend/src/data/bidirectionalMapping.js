@@ -773,6 +773,7 @@ export const NORMAL_RANGES = {
   albumin: { min: 3.5, max: 5.0, unit: 'g/dL' },
   troponin: { min: 0, max: 0.04, unit: 'ng/mL' },
   bnp: { min: 0, max: 100, unit: 'pg/mL' },
+  ck: { min: 30, max: 200, unit: 'U/L' },  // Creatine Kinase normal range
   crp: { min: 0, max: 10, unit: 'mg/L' },
   esr: { min: 0, max: 20, unit: 'mm/hr' },
   inr: { min: 0.9, max: 1.1, unit: '' },
