@@ -2477,20 +2477,42 @@ const DashboardMultiScale = () => {
                 category: disease.category || 'general',
                 description: disease.definition || disease.description || disease.name,
                 definition: disease.definition,
-                primaryOrgan: disease.primaryOrgan || getPrimaryOrganFromCategory(disease.category),
-                affectedOrgans: disease.affected_organs || disease.affectedOrgans || [getPrimaryOrganFromCategory(disease.category)],
-                modifications: disease.parameter_modifications || {},
+                primaryOrgan: disease.primaryOrgan || disease.comprehensive_model?.primaryOrgan || getPrimaryOrganFromCategory(disease.category),
+                affectedOrgans: disease.affected_organs || disease.affectedOrgans || disease.comprehensive_model?.affectedOrgans || [getPrimaryOrganFromCategory(disease.category)],
+                modifications: disease.parameter_modifications || disease.comprehensive_model?.modifications || {},
                 hasModifications: disease.parameter_modifications && Object.keys(disease.parameter_modifications).length > 0,
                 isFromAPI: true,
-                // Explicitly include clinical data for clarity
+                // Clinical presentation - check multiple sources
                 clinical_presentation: disease.clinical_presentation || {},
-                clinicalPresentation: disease.clinical_presentation || disease.clinicalPresentation || {},
-                treatment: disease.treatment || {},
-                prognosis: disease.prognosis || {},
+                clinicalPresentation: disease.clinical_presentation || disease.clinicalPresentation || disease.comprehensive_model?.clinicalPresentation || {},
+                clinical_features: disease.clinical_features || {},
+                // Treatment data
+                treatment: disease.treatment || disease.comprehensive_model?.treatment || {},
+                // Prognosis
+                prognosis: disease.prognosis || disease.comprehensive_model?.prognosis || '',
+                pathophysiology: disease.pathophysiology || '',
+                // Lab and imaging findings
                 laboratory_findings: disease.laboratory_findings || [],
                 imaging_findings: disease.imaging_findings || {},
                 physical_examination: disease.physical_examination || {},
-                comprehensive_model: disease.comprehensive_model || {}
+                diagnostic_criteria: disease.diagnostic_criteria || {},
+                // Comprehensive model and its key sub-fields
+                comprehensive_model: disease.comprehensive_model || {},
+                // Extract key fields from comprehensive_model for easy access
+                geneticFactors: disease.comprehensive_model?.geneticFactors || disease.geneticFactors || null,
+                novelEquations: disease.comprehensive_model?.novelEquations || disease.novelEquations || [],
+                progression: disease.comprehensive_model?.progression || disease.progression || disease.nyha_classification || [],
+                // Epidemiology and other metadata
+                epidemiology: disease.epidemiology || {},
+                synonyms: disease.synonyms || [],
+                guideline_source: disease.guideline_source || '',
+                // Severity tracking
+                severity: disease.severity || disease.comprehensive_model?.severity || {},
+                // Mathematical models
+                mathematical_models_disease: disease.mathematical_models_disease || [],
+                has_equations: disease.has_equations || false,
+                has_genetics: disease.has_genetics || false,
+                has_progression: disease.has_progression || false
               };
             }
             
