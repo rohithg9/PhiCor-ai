@@ -690,6 +690,7 @@ def run_all_tests():
     print("3. Heart Failure Disease Search - Verify HFrEF with 104+ parameters")
     print("4. Clinical Evidence Data Structure - Verify tab data fields")
     print("5. Disease Progression Data - Verify timeline stages structure")
+    print("6. New Knowledge Endpoint - Test GET /api/knowledge/disease/{disease_id}")
     print("=" * 80)
     print("NOTE: This tests the backend data for PhiCor.ai dashboard features")
     print("=" * 80)
@@ -714,6 +715,7 @@ def run_all_tests():
         test_results['heart_failure_search'] = test_heart_failure_disease_search()
         test_results['clinical_evidence_data'] = test_clinical_evidence_data_structure()
         test_results['disease_progression_data'] = test_disease_progression_data()
+        test_results['new_knowledge_endpoint'] = test_new_knowledge_endpoint()
     else:
         # Set all tests to False if backend is not accessible
         test_results.update({
@@ -721,7 +723,8 @@ def run_all_tests():
             'disease_data_api': False,
             'heart_failure_search': False,
             'clinical_evidence_data': False,
-            'disease_progression_data': False
+            'disease_progression_data': False,
+            'new_knowledge_endpoint': False
         })
     
     # Summary
@@ -740,7 +743,8 @@ def run_all_tests():
         ('disease_data_api', 'Test 2: Disease Data API (GET /api/diseases-db)'),
         ('heart_failure_search', 'Test 3: Heart Failure Disease Search (HFrEF with 104+ params)'),
         ('clinical_evidence_data', 'Test 4: Clinical Evidence Data Structure (tabs data)'),
-        ('disease_progression_data', 'Test 5: Disease Progression Data (timeline stages)')
+        ('disease_progression_data', 'Test 5: Disease Progression Data (timeline stages)'),
+        ('new_knowledge_endpoint', 'Test 6: New Knowledge Endpoint (GET /api/knowledge/disease/{disease_id})')
     ]
     
     infrastructure_tests = [
@@ -771,8 +775,9 @@ def run_all_tests():
         print(f"✅ Heart Failure search returning proper disease data")
         print(f"✅ Clinical Evidence data structure verified")
         print(f"✅ Disease Progression data structure verified")
+        print(f"✅ New Knowledge Endpoint functional for dashboard Knowledge tab")
         print(f"\n🔄 COMPLETE DASHBOARD DATA WORKFLOW VERIFIED:")
-        print(f"   Login → Search Diseases → Get Comprehensive Data → Clinical Evidence → Progression")
+        print(f"   Login → Search Diseases → Get Comprehensive Data → Clinical Evidence → Progression → Knowledge")
     elif dashboard_passed >= dashboard_total * 0.75:
         print(f"\n✅ MOSTLY SUCCESSFUL! {dashboard_passed}/{dashboard_total} dashboard tests passed.")
         print(f"⚠️  Some minor issues detected - see failed tests above")
@@ -792,6 +797,9 @@ def run_all_tests():
     
     if not test_results.get('heart_failure_search'):
         critical_issues.append("❌ CRITICAL: Heart Failure search failed - specific disease data not accessible")
+    
+    if not test_results.get('new_knowledge_endpoint'):
+        critical_issues.append("❌ CRITICAL: New Knowledge Endpoint failed - dashboard Knowledge tab won't work")
     
     if critical_issues:
         for issue in critical_issues:
@@ -826,12 +834,18 @@ def run_all_tests():
     else:
         print(f"  ❌ Disease Progression data failed")
     
+    if test_results.get('new_knowledge_endpoint'):
+        print(f"  ✅ New Knowledge Endpoint verified (disease_id, sources, approved_updates, stats)")
+    else:
+        print(f"  ❌ New Knowledge Endpoint failed")
+    
     # Frontend Integration Notes
     print(f"\n📱 FRONTEND INTEGRATION NOTES:")
     print(f"  ℹ️ Backend data structure supports the following frontend features:")
     print(f"    - Dashboard Disease Display (Heart organ → HFrEF selection)")
-    print(f"    - Clinical Evidence Panel Tabs (Overview, Genetics, Math Models)")
+    print(f"    - Clinical Evidence Panel Tabs (Overview, Genetics, Math Models, Knowledge)")
     print(f"    - Disease Progression Timeline (stages 1-4)")
+    print(f"    - Knowledge Tab (sources, approved updates, stats)")
     print(f"  ⚠️ Frontend testing not performed (backend testing only)")
     print(f"  🔗 Frontend should use REACT_APP_BACKEND_URL for API calls")
     
