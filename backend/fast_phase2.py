@@ -89,9 +89,12 @@ async def process_disease(db, disease: dict, worker_id: int) -> bool:
     disease_id = disease.get('id')
     category = disease.get('category', 'general')
     
-    # Skip if already has model
-    if disease.get('comprehensive_model'):
-        return True
+    # Check if model is already complete (has all 5 sections)
+    existing_model = disease.get('comprehensive_model')
+    if existing_model and isinstance(existing_model, dict):
+        required_sections = ['clinicalPresentation', 'diagnosticWorkup', 'treatment', 'prognosis', 'monitoring']
+        if all(section in existing_model for section in required_sections):
+            return True  # Skip if already complete
     
     print(f"  [W{worker_id}] Processing: {name[:40]}...")
     
