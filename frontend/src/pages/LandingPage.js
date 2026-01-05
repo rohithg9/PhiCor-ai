@@ -61,6 +61,27 @@ const LandingPage = () => {
     fetchStats();
   }, []);
 
+  // Pre-load diseases in background for faster dashboard loading
+  useEffect(() => {
+    const preloadDiseases = async () => {
+      try {
+        const API_URL = process.env.REACT_APP_BACKEND_URL || '';
+        // Fetch diseases in background (will be cached by browser)
+        const response = await fetch(`${API_URL}/api/diseases-db?include_params=true&limit=2500`);
+        if (response.ok) {
+          const data = await response.json();
+          // Store count for quick reference
+          console.log(`Pre-loaded ${data.diseases?.length || 0} diseases for faster dashboard access`);
+        }
+      } catch (error) {
+        console.log('Disease pre-loading skipped');
+      }
+    };
+    // Delay pre-loading to not block initial render
+    const timer = setTimeout(preloadDiseases, 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
   // Track scroll for sticky nav
   useEffect(() => {
     const handleScroll = () => {
