@@ -7179,35 +7179,71 @@ CRITICAL INSTRUCTIONS:
             except json.JSONDecodeError:
                 pass
             
-            # Try to fix truncated strings by finding incomplete strings and closing them
             fixed = json_str
             
-            # Count open braces and brackets to find missing closures
+            # Fix 1: Remove trailing commas before closing brackets
+            fixed = re.sub(r',(\s*[\]\}])', r'\1', fixed)
+            
+            # Fix 2: Add missing commas between elements
+            fixed = re.sub(r'"\s*\n\s*"', '",\n"', fixed)
+            fixed = re.sub(r'"\s*\n\s*\{', '",\n{', fixed)
+            fixed = re.sub(r'\}\s*\n\s*\{', '},\n{', fixed)
+            fixed = re.sub(r'\]\s*\n\s*"', '],\n"', fixed)
+            
+            # Try again after fixes
+            try:
+                return json.loads(fixed)
+            except json.JSONDecodeError:
+                pass
+            
+            # Fix 3: Handle truncated strings and missing closures
+            # Count open braces and brackets
             open_braces = fixed.count('{') - fixed.count('}')
             open_brackets = fixed.count('[') - fixed.count(']')
             
-            # Try to close unclosed strings (common issue)
-            # Find last unclosed string
+            # Check for unclosed strings
             in_string = False
-            last_quote_pos = -1
             for i, char in enumerate(fixed):
                 if char == '"' and (i == 0 or fixed[i-1] != '\\'):
                     in_string = not in_string
-                    if in_string:
-                        last_quote_pos = i
             
             if in_string:
-                # Close the unclosed string
                 fixed = fixed + '"'
             
             # Add missing closing brackets/braces
-            fixed = fixed + ']' * open_brackets + '}' * open_braces
+            fixed = fixed + ']' * max(0, open_brackets) + '}' * max(0, open_braces)
             
             try:
                 return json.loads(fixed)
             except json.JSONDecodeError:
-                # Last resort: try to extract just the patient_summary and differentials
-                return None
+                pass
+                
+            # Fix 4: Try to extract partial JSON by finding valid structure
+            # Find the last valid closing brace
+            depth_brace = 0
+            depth_bracket = 0
+            last_valid = -1
+            in_str = False
+            
+            for i, char in enumerate(fixed):
+                if char == '"' and (i == 0 or fixed[i-1] != '\\'):
+                    in_str = not in_str
+                if not in_str:
+                    if char == '{': depth_brace += 1
+                    elif char == '}': 
+                        depth_brace -= 1
+                        if depth_brace == 0 and depth_bracket == 0:
+                            last_valid = i
+                    elif char == '[': depth_bracket += 1
+                    elif char == ']': depth_bracket -= 1
+            
+            if last_valid > 0:
+                try:
+                    return json.loads(fixed[:last_valid+1])
+                except json.JSONDecodeError:
+                    pass
+            
+            return None
         
         analysis = None
         try:
