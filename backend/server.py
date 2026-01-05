@@ -2644,6 +2644,59 @@ async def import_full_disease_database():
         raise HTTPException(status_code=500, detail=f"Import failed: {str(e)}")
 
 
+@api_router.post("/experts/import-full")
+async def import_full_experts_database():
+    """
+    Import experts, knowledge sources, knowledge suggestions, and system settings from exported JSON file.
+    This is needed to sync production database with preview database.
+    """
+    import json as json_module
+    
+    try:
+        # Load from exported file
+        with open('/app/backend/data/exported_experts.json', 'r') as f:
+            data = json_module.load(f)
+        
+        results = {}
+        
+        # Import experts
+        if data.get('experts'):
+            await db.experts.delete_many({})
+            await db.experts.insert_many(data['experts'])
+            results['experts'] = len(data['experts'])
+        
+        # Import knowledge sources
+        if data.get('knowledge_sources'):
+            await db.knowledge_sources.delete_many({})
+            await db.knowledge_sources.insert_many(data['knowledge_sources'])
+            results['knowledge_sources'] = len(data['knowledge_sources'])
+        
+        # Import knowledge suggestions
+        if data.get('knowledge_suggestions'):
+            await db.knowledge_suggestions.delete_many({})
+            await db.knowledge_suggestions.insert_many(data['knowledge_suggestions'])
+            results['knowledge_suggestions'] = len(data['knowledge_suggestions'])
+        
+        # Import system settings
+        if data.get('system_settings'):
+            for setting in data['system_settings']:
+                await db.system_settings.update_one(
+                    {"id": setting.get("id", "global")},
+                    {"$set": setting},
+                    upsert=True
+                )
+            results['system_settings'] = len(data['system_settings'])
+        
+        return {
+            "message": "Successfully imported expert data",
+            "imported": results
+        }
+    except FileNotFoundError:
+        return {"message": "Export file not found. Run export first on preview.", "imported": {}}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Import failed: {str(e)}")
+
+
 # ============== PARAMETER MODIFICATION GENERATION ==============
 
 class ParameterModificationRequest(BaseModel):
