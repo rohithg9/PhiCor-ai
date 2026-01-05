@@ -7180,44 +7180,8 @@ FINAL QUALITY CHECK:
 - Output would not mislead a clinician
 
 Convert all values to {unit_system} units. Return ONLY valid JSON."""
-- Avoid identical probabilities
 
-Return a JSON object with this EXACT structure:
-{{
-  "findings": [
-    {{
-      "parameter_id": "creatinine",
-      "name": "Creatinine",
-      "value": 2.5,
-      "unit": "mg/dL",
-      "direction": "increase",
-      "severity": 2,
-      "type": "lab",
-      "organ_system": "renal",
-      "physiologic_implication": "Decreased glomerular filtration"
-    }}
-  ],
-  "symptoms": ["dyspnea", "fatigue", "edema"],
-  "syndromes": [
-    "Acute decompensated heart failure with cardiorenal syndrome",
-    "Volume overload state"
-  ],
-  "differentials": [
-    {{
-      "name": "Heart Failure with Reduced Ejection Fraction",
-      "probability": 72,
-      "role": "Primary",
-      "matching_parameters": ["EF 25%", "BNP elevated", "cardiomegaly"],
-      "missing_features": ["known CAD history"],
-      "icd_code": "I50.2"
-    }}
-  ],
-  "synthesis": {{
-    "primary_diagnosis": "Most likely unifying diagnosis",
-    "key_alternative": "Most important competing diagnosis",
-    "discriminating_tests": ["Tests needed to differentiate"]
-  }},
-  "summary": "Brief clinical summary",
+        llm = LlmChat(
   "confidence": 0.75
 }}
 
