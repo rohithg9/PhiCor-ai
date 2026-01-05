@@ -742,15 +742,42 @@ const DifferentialPage = () => {
                 {/* Clinical Text Tab */}
                 {activeTab === 'clinical' && (
                   <div className="space-y-4">
+                    {/* AI interpretation toggle and region indicator */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={useAI}
+                            onChange={(e) => setUseAI(e.target.checked)}
+                            className="w-4 h-4 rounded border-gray-300 text-emerald-500 focus:ring-emerald-500"
+                          />
+                          <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                            <Brain className="w-4 h-4 inline mr-1 text-emerald-500" />
+                            AI Interpretation
+                          </span>
+                        </label>
+                        {useAI && (
+                          <span className={`text-xs px-2 py-0.5 rounded-full ${isDark ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-100 text-emerald-700'}`}>
+                            Handles abbreviations, regional terminology & units
+                          </span>
+                        )}
+                      </div>
+                      <span className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                        Units: {isSI ? 'SI (Metric)' : 'Conventional (US)'}
+                      </span>
+                    </div>
+                    
                     <textarea
                       value={clinicalText}
                       onChange={(e) => setClinicalText(e.target.value)}
-                      placeholder="Paste clinical notes, lab results, or patient history here...
+                      placeholder={`Paste clinical notes, lab results, or patient history here...
 
-Example:
-65-year-old male presenting with chest pain and shortness of breath.
-Labs: WBC 12.5, Creatinine 1.8, Troponin elevated.
-PMH: Hypertension, Type 2 Diabetes"
+Example (any format works with AI):
+65 y/o M c/o CP and SOB x2 days
+Labs: WBC 12.5k, Cr 1.8${isSI ? ' (159 μmol/L)' : ''}, Trop elevated
+PMH: HTN, T2DM, CKD stage 3
+Echo: EF 35%, dilated LV, MR 2+`}
                       className={`w-full h-48 p-4 rounded-xl border resize-none ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400'}`}
                     />
                     <div className="flex gap-3">
@@ -759,8 +786,17 @@ PMH: Hypertension, Type 2 Diabetes"
                         className="bg-emerald-500 hover:bg-emerald-600 text-white"
                         disabled={!clinicalText.trim() || isAnalyzing}
                       >
-                        <Search className="w-4 h-4 mr-2" />
-                        Analyze Text
+                        {isAnalyzing ? (
+                          <>
+                            <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            Analyzing...
+                          </>
+                        ) : (
+                          <>
+                            {useAI ? <Brain className="w-4 h-4 mr-2" /> : <Search className="w-4 h-4 mr-2" />}
+                            {useAI ? 'AI Analyze' : 'Analyze Text'}
+                          </>
+                        )}
                       </Button>
                       <Button
                         variant="outline"
