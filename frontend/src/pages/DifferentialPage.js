@@ -400,7 +400,8 @@ const DifferentialPage = () => {
         setAbnormalFindings(prev => {
           const updated = [...prev, ...newFindings];
           // Only run local diagnosis if PhiCor didn't provide differentials
-          if (!usePhiCor || !phicorResults?.differentials?.length) {
+          // Use result directly instead of state (which is async)
+          if (!usePhiCor || !result?.differentials?.length) {
             setTimeout(() => {
               runDiagnosis(updated);
             }, 100);
