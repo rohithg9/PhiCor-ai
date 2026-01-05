@@ -946,7 +946,7 @@ def run_all_tests():
     
     # Summary
     print("\n" + "=" * 80)
-    print("🏁 PHICOR.AI DASHBOARD DATA DISPLAY TEST SUMMARY")
+    print("🏁 PHICOR.AI BACKEND TEST SUMMARY")
     print("=" * 80)
     
     passed_tests = sum(1 for result in test_results.values() if result)
@@ -955,13 +955,14 @@ def run_all_tests():
     print(f"\n📊 OVERALL RESULTS: {passed_tests}/{total_tests} tests passed")
     
     # Test results breakdown
-    dashboard_tests = [
+    backend_tests = [
         ('admin_authentication', 'Test 1: Admin Authentication (admin@phicor.ai / admin123)'),
         ('disease_data_api', 'Test 2: Disease Data API (GET /api/diseases-db)'),
         ('heart_failure_search', 'Test 3: Heart Failure Disease Search (HFrEF with 104+ params)'),
         ('clinical_evidence_data', 'Test 4: Clinical Evidence Data Structure (tabs data)'),
         ('disease_progression_data', 'Test 5: Disease Progression Data (timeline stages)'),
-        ('new_knowledge_endpoint', 'Test 6: New Knowledge Endpoint (GET /api/knowledge/disease/{disease_id})')
+        ('new_knowledge_endpoint', 'Test 6: New Knowledge Endpoint (GET /api/knowledge/disease/{disease_id})'),
+        ('phicor_clinical_analysis', 'Test 7: PhiCor Clinical Analysis (POST /api/clinical/interpret)')
     ]
     
     infrastructure_tests = [
