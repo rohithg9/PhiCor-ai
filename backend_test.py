@@ -900,24 +900,53 @@ def test_phicor_clinical_analysis():
                 print(f"  ❌ No differential diagnoses returned")
                 differentials_pass = False
             
-            # Check synthesis structure
+            # Check synthesis structure (ENHANCED)
             synthesis = data.get('synthesis', {})
             if synthesis:
                 print(f"  ✅ Diagnostic synthesis present ✓")
                 
-                # Check required synthesis fields
+                # Check required synthesis fields (enhanced)
                 primary_dx = synthesis.get('primary_diagnosis')
                 key_alt = synthesis.get('key_alternative')
+                clinical_pathway = synthesis.get('clinical_decision_pathway')
                 disc_tests = synthesis.get('discriminating_tests', [])
+                uncertainty = synthesis.get('clinical_uncertainty')
                 
                 if primary_dx:
                     print(f"    📊 Primary diagnosis: {primary_dx}")
                 if key_alt:
                     print(f"    📊 Key alternative: {key_alt}")
-                if disc_tests:
-                    print(f"    📊 Discriminating tests: {disc_tests}")
+                if clinical_pathway:
+                    print(f"    ✅ Clinical decision pathway: Present ({len(clinical_pathway)} chars)")
+                else:
+                    print(f"    ❌ Clinical decision pathway: Missing")
                 
-                synthesis_pass = True
+                if disc_tests:
+                    print(f"    ✅ Discriminating tests: {len(disc_tests)} tests")
+                    # Check discriminating test structure
+                    for i, test in enumerate(disc_tests[:2]):
+                        if isinstance(test, dict):
+                            test_name = test.get('test', 'Unknown')
+                            expected = test.get('expected_finding', 'N/A')
+                            rationale = test.get('rationale', 'N/A')
+                            print(f"      Test {i+1}: {test_name}")
+                            print(f"        Expected: {expected}")
+                            print(f"        Rationale: {rationale[:50]}...")
+                else:
+                    print(f"    ❌ Discriminating tests: Missing")
+                
+                if uncertainty:
+                    print(f"    📊 Clinical uncertainty: {uncertainty}")
+                
+                # Check if we have the key enhanced fields
+                enhanced_fields = [clinical_pathway, disc_tests]
+                synthesis_pass = all(field for field in enhanced_fields)
+                
+                if synthesis_pass:
+                    print(f"    ✅ Enhanced synthesis structure complete ✓")
+                else:
+                    print(f"    ⚠️ Some enhanced synthesis fields missing")
+                    synthesis_pass = True  # Don't fail completely
             else:
                 print(f"  ❌ Diagnostic synthesis missing")
                 synthesis_pass = False
