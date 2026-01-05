@@ -1056,18 +1056,19 @@ def run_all_tests():
     else:
         print(f"  ❌ Disease Progression data failed")
     
-    if test_results.get('new_knowledge_endpoint'):
-        print(f"  ✅ New Knowledge Endpoint verified (disease_id, sources, approved_updates, stats)")
+    if test_results.get('phicor_clinical_analysis'):
+        print(f"  ✅ PhiCor Clinical Analysis verified (POST /api/clinical/interpret with two-phase architecture)")
     else:
-        print(f"  ❌ New Knowledge Endpoint failed")
+        print(f"  ❌ PhiCor Clinical Analysis failed")
     
     # Frontend Integration Notes
     print(f"\n📱 FRONTEND INTEGRATION NOTES:")
-    print(f"  ℹ️ Backend data structure supports the following frontend features:")
+    print(f"  ℹ️ Backend APIs support the following frontend features:")
     print(f"    - Dashboard Disease Display (Heart organ → HFrEF selection)")
     print(f"    - Clinical Evidence Panel Tabs (Overview, Genetics, Math Models, Knowledge)")
     print(f"    - Disease Progression Timeline (stages 1-4)")
     print(f"    - Knowledge Tab (sources, approved updates, stats)")
+    print(f"    - PhiCor Clinical Analysis (/differential page with Clinical Text tab)")
     print(f"  ⚠️ Frontend testing not performed (backend testing only)")
     print(f"  🔗 Frontend should use REACT_APP_BACKEND_URL for API calls")
     
