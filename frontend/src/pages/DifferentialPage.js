@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
+import { useRegion } from '../context/RegionContext';
 import FeatureNav from '../components/FeatureNav';
 import TestPatientPanel from '../components/TestPatientPanel';
 import ClinicalCalculatorPanel from '../components/ClinicalCalculatorPanel';
@@ -26,6 +27,7 @@ import {
 } from '../data/bidirectionalMapping';
 import { ORGAN_MODELS } from '../data/organModels';
 import { CLINICAL_CALCULATORS, searchCalculators, getCalculatorsForDisease, getCalculatorById } from '../data/clinicalCalculators';
+import { getNormalRange, checkAbnormality } from '../data/regionalUnits';
 
 // Build comprehensive normal ranges from organ models
 const buildAllNormalRanges = () => {
