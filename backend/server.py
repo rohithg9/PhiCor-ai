@@ -7008,14 +7008,16 @@ class PhiCorAnalysisResponse(BaseModel):
     syndromes: List[str]
     differentials: List[Dict[str, Any]]
     synthesis: Dict[str, Any]
+    management: List[Dict[str, Any]]
+    safety_alerts: List[str]
     summary: str
     confidence: float
 
 @api_router.post("/clinical/interpret")
 async def interpret_clinical_text(request: ClinicalTextRequest):
     """
-    PhiCor Analysis: Physiology-first, organ-system-aware clinical reasoning engine.
-    Extracts findings, maps to pathophysiology, and generates calibrated differential diagnoses.
+    PhiCor Analysis: Physiology-first clinical decision support system.
+    Analyzes abnormalities, infers differential diagnoses, and surfaces management considerations.
     """
     try:
         from emergentintegrations.llm.chat import LlmChat, UserMessage
@@ -7027,57 +7029,157 @@ async def interpret_clinical_text(request: ClinicalTextRequest):
         # Determine unit system based on region
         unit_system = "SI" if request.region in ["UK", "EU", "IN", "ASIA"] else "conventional"
         
-        # PhiCor comprehensive clinical reasoning prompt
-        system_prompt = """You are PhiCor.ai, a physiology-first, organ-system-aware clinical reasoning engine.
+        # PhiCor comprehensive clinical reasoning + management guidance prompt
+        system_prompt = """You are PhiCor.ai, a physiology-first clinical decision support system.
 
 You have access to:
-- Normal reference parameters for every organ and system
-- Structural, physiological, biochemical, and genetic models
-- Disease models describing how ~1900 diseases alter these parameters across severities
+- Normal structural, physiological, biochemical, and genetic parameters for all organ systems
+- Disease models (~1900 conditions) describing how these parameters deviate by disease type and severity
+- A clinical knowledge bank containing guideline-based diagnostic and management information
 
-Your task is to identify abnormal parameters, map them to pathophysiologic mechanisms, and infer the most plausible differential diagnoses using multifactorial reasoning.
+Your role is to analyze abnormalities, infer the most plausible differential diagnoses, and surface relevant management considerations in a safe, calibrated, non-prescriptive manner.
 
-Your goal is clinical plausibility, calibration, and internal consistency, not maximal recall."""
+You are not a diagnostic authority and do not issue medical orders."""
 
         prompt = f"""CLINICAL CASE:
 {request.text}
 
 REGIONAL CONTEXT: {request.region} (use {unit_system} units)
 
-Perform a complete PhiCor Analysis following these steps:
+Perform a complete PhiCor Analysis following these 8 steps:
 
-STEP 1 — ABNORMAL PARAMETER DETECTION
-Systematically evaluate every provided parameter. For each abnormal parameter:
-- Identify direction (↑ / ↓ / qualitative change)
-- Identify organ system(s) involved
-- Identify underlying physiologic process affected
+STEP 1 — ABNORMAL PARAMETER EXTRACTION (MANDATORY)
+Systematically evaluate every provided parameter. For each abnormality:
+- Identify direction and magnitude
+- Assign organ system(s)
+- Identify physiologic process involved
+Do not infer disease at this stage.
 
-STEP 2 — ORGAN-SYSTEM & PATHOPHYSIOLOGY MAPPING
-Aggregate abnormalities into organ-level dysfunction clusters:
+STEP 2 — ORGAN SYSTEM & SYNDROME SYNTHESIS
+Group abnormalities into coherent organ-system dysfunctions:
 - Cardiac systolic vs diastolic dysfunction
+- Volume overload vs hypovolemia
 - Renal filtration vs tubular dysfunction
-- Hepatic synthetic vs congestive dysfunction
+- Hepatic congestion vs intrinsic injury
 - Pulmonary gas exchange vs vascular pathology
-- Hematologic production vs consumption
-- Metabolic and endocrine dysregulation
+Then infer dominant clinical syndromes.
 
-STEP 3 — SYNDROME IDENTIFICATION
-From organ clusters, infer dominant clinical syndromes (e.g., Acute decompensated heart failure, Systemic inflammatory response, Multiorgan congestion)
+STEP 3 — MULTIFACTORIAL DISEASE MATCHING
+For each disease model:
+- Compare expected parameter deviations (pattern + severity)
+- Evaluate how many abnormalities are explained
+- Penalize contradictions and missing anchors
+Diseases explaining the largest coherent cluster of abnormalities rank higher.
 
-STEP 4 — DISEASE MODEL MATCHING (MULTIFACTORIAL)
-Compare expected parameter deviations by severity, match patterns not isolated values. Weight by:
-- Number of matching abnormalities
-- Severity concordance
-- Temporal plausibility
-- Organ-system coherence
+STEP 4 — ANCHOR & SUPPRESSION RULES (STRICT)
+Each diagnosis must meet minimum anchor criteria.
+Hard-suppress diagnoses when:
+- Required pathognomonic features are absent
+- Epidemiology is implausible
+- Only 1-2 weak abnormalities match
+Rare or catastrophic diagnoses require strong, specific evidence.
 
-STEP 5 — CAUSE VS CONSEQUENCE SEPARATION
-Classify disease roles as: Primary etiology, Secondary contributor, or Downstream complication
+STEP 5 — CAUSE vs CONSEQUENCE vs TRIGGER
+Explicitly classify each condition as:
+- Primary diagnosis
+- Precipitating factor
+- Secondary complication
+- Important rule-out
+Do not label complications as primary diagnoses.
 
-STEP 6 — PROBABILITY CALIBRATION RULES
+STEP 6 — PROBABILITY CALIBRATION
 - Maximum probability for any diagnosis: ≤80%
 - Only one diagnosis may exceed 70%
-- Most diagnoses should cluster 30-60%
+- Most diagnoses should fall between 25-60%
+- Probability must reflect uncertainty
+Avoid assigning identical probabilities to multiple conditions.
+
+STEP 7 — MANAGEMENT & TREATMENT CONTEXTUALIZATION
+For each diagnosis, surface management considerations using:
+- Present information as guideline-aligned considerations
+- Do not issue prescriptive treatment orders
+- Use language like "Guidelines typically recommend...", "Management may involve...", "Treatment selection depends on clinical context..."
+Purpose: Clinical context, educational value, decision support - NOT autonomous decision-making.
+
+STEP 8 — SAFETY ALERTS ("DO NOT MISS")
+Surface time-critical considerations when appropriate.
+- Frame as considerations, not diagnoses
+- Explain why they matter
+- Do not override primary diagnosis
+Example: "Important to consider: possible ischemic trigger contributing to heart failure exacerbation."
+
+Return a JSON object with this EXACT structure:
+{{
+  "findings": [
+    {{
+      "parameter_id": "ejection_fraction",
+      "name": "Ejection Fraction",
+      "value": 28,
+      "unit": "%",
+      "direction": "decrease",
+      "severity": 3,
+      "type": "clinical",
+      "organ_system": "cardiac",
+      "physiologic_implication": "Reduced systolic function indicating myocardial contractile impairment"
+    }}
+  ],
+  "symptoms": ["dyspnea", "orthopnea", "fatigue"],
+  "syndromes": [
+    "Acute decompensated heart failure with cardiorenal syndrome",
+    "Volume overload state with pulmonary congestion"
+  ],
+  "differentials": [
+    {{
+      "name": "Heart Failure with Reduced Ejection Fraction (HFrEF)",
+      "probability": 72,
+      "role": "Primary",
+      "matching_parameters": ["EF 28%", "BNP elevated", "cardiomegaly", "pulmonary edema"],
+      "missing_features": ["known CAD history confirmation"],
+      "icd_code": "I50.2"
+    }},
+    {{
+      "name": "Acute Coronary Syndrome",
+      "probability": 45,
+      "role": "Precipitating",
+      "matching_parameters": ["troponin elevated", "prior MI history"],
+      "missing_features": ["acute ECG changes", "chest pain"],
+      "icd_code": "I21.9"
+    }}
+  ],
+  "management": [
+    {{
+      "diagnosis": "HFrEF",
+      "approaches": [
+        "Guidelines typically recommend IV diuretics for acute volume overload",
+        "Guideline-directed medical therapy (GDMT) includes ACEi/ARB/ARNI, beta-blockers, MRA",
+        "Consideration of device therapy (ICD, CRT) based on EF and QRS duration"
+      ],
+      "monitoring": ["Daily weights", "I/O balance", "Renal function", "Electrolytes"],
+      "cautions": ["Monitor for cardiorenal syndrome with aggressive diuresis"],
+      "source": "ACC/AHA Heart Failure Guidelines"
+    }}
+  ],
+  "safety_alerts": [
+    "Important to consider: elevated troponin may indicate acute ischemic trigger - evaluate for ACS",
+    "Cardiorenal syndrome present - monitor renal function closely with diuresis"
+  ],
+  "synthesis": {{
+    "primary_diagnosis": "Acute decompensated HFrEF, likely ischemic etiology, with cardiorenal syndrome",
+    "key_alternative": "Acute coronary syndrome as precipitating trigger",
+    "discriminating_tests": ["Serial troponins", "ECG", "Coronary angiography if ACS suspected"]
+  }},
+  "summary": "72-year-old male with acute decompensated heart failure (HFrEF) with EF 28%, complicated by cardiorenal syndrome. Elevated troponin warrants evaluation for ischemic trigger.",
+  "confidence": 0.75
+}}
+
+FINAL QUALITY CHECK:
+- No rare disease without anchors
+- No more than one diagnosis >70%
+- Management content is non-prescriptive
+- Complications are not mislabeled as primary
+- Output would not mislead a clinician
+
+Convert all values to {unit_system} units. Return ONLY valid JSON."""
 - Avoid identical probabilities
 
 Return a JSON object with this EXACT structure:
