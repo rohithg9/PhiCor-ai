@@ -1197,6 +1197,111 @@ const ClinicalFindingsPanel = ({ disease, isExpanded, onToggle, alwaysExpanded =
 
             {/* Tab Content */}
             <div className="p-4 max-h-[50vh] md:max-h-[400px] overflow-y-auto overscroll-contain touch-pan-y">
+              {/* OVERVIEW TAB */}
+              {activeTab === 'overview' && (
+                <div className="space-y-4">
+                  {/* Description */}
+                  <div>
+                    <p className="text-sm text-muted-foreground">{disease.description}</p>
+                  </div>
+
+                  {/* Epidemiology Section */}
+                  {Object.keys(epidemiologyData).length > 0 && (
+                    <div className="p-3 rounded-lg bg-blue-500/5 border border-blue-500/20">
+                      <h4 className="text-xs font-semibold text-blue-400 mb-2 flex items-center gap-2">
+                        <Users className="w-3.5 h-3.5" /> Epidemiology
+                      </h4>
+                      <div className="grid grid-cols-2 gap-2">
+                        {epidemiologyData.prevalence && (
+                          <div className="p-2 bg-background/50 rounded">
+                            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Prevalence</span>
+                            <p className="text-xs font-medium mt-0.5">{epidemiologyData.prevalence}</p>
+                          </div>
+                        )}
+                        {epidemiologyData.incidence && (
+                          <div className="p-2 bg-background/50 rounded">
+                            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Incidence</span>
+                            <p className="text-xs font-medium mt-0.5">{epidemiologyData.incidence}</p>
+                          </div>
+                        )}
+                        {epidemiologyData.mortality && (
+                          <div className="p-2 bg-background/50 rounded col-span-2">
+                            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Mortality</span>
+                            <p className="text-xs font-medium mt-0.5">{epidemiologyData.mortality}</p>
+                          </div>
+                        )}
+                      </div>
+                      {epidemiologyData.risk_factors && epidemiologyData.risk_factors.length > 0 && (
+                        <div className="mt-2">
+                          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Risk Factors</span>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {epidemiologyData.risk_factors.map((rf, i) => (
+                              <Badge key={i} variant="outline" className="text-[9px] border-blue-500/30 text-blue-400">
+                                {rf}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Pathophysiology Section */}
+                  {pathophysiologyText && (
+                    <div className="p-3 rounded-lg bg-purple-500/5 border border-purple-500/20">
+                      <h4 className="text-xs font-semibold text-purple-400 mb-2 flex items-center gap-2">
+                        <Microscope className="w-3.5 h-3.5" /> Pathophysiology
+                      </h4>
+                      <p className="text-sm text-muted-foreground">{pathophysiologyText}</p>
+                    </div>
+                  )}
+
+                  {/* Prognosis Section */}
+                  {prognosisData && (
+                    <div className="p-3 rounded-lg bg-green-500/5 border border-green-500/20">
+                      <h4 className="text-xs font-semibold text-green-400 mb-2 flex items-center gap-2">
+                        <TrendingUp className="w-3.5 h-3.5" /> Prognosis
+                      </h4>
+                      <p className="text-sm text-muted-foreground">
+                        {typeof prognosisData === 'string' ? prognosisData : prognosisData.description || JSON.stringify(prognosisData)}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Disease Progression Stages */}
+                  {progressionData && progressionData.length > 0 && (
+                    <div className="p-3 rounded-lg bg-amber-500/5 border border-amber-500/20">
+                      <h4 className="text-xs font-semibold text-amber-400 mb-3 flex items-center gap-2">
+                        <Clock className="w-3.5 h-3.5" /> Disease Progression Stages
+                      </h4>
+                      <div className="space-y-2">
+                        {progressionData.map((stage, i) => (
+                          <div key={i} className="flex items-start gap-3 p-2 rounded bg-background/50">
+                            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                              stage.severity < 0.3 ? 'bg-green-500/20 text-green-400' :
+                              stage.severity < 0.6 ? 'bg-yellow-500/20 text-yellow-400' :
+                              stage.severity < 0.8 ? 'bg-orange-500/20 text-orange-400' :
+                              'bg-red-500/20 text-red-400'
+                            }`}>
+                              {stage.stage || i + 1}
+                            </div>
+                            <div className="flex-1">
+                              <span className="font-medium text-sm">{stage.name}</span>
+                              <p className="text-xs text-muted-foreground mt-0.5">{stage.description}</p>
+                              {stage.yearsFromOnset && (
+                                <span className="text-[10px] text-muted-foreground">
+                                  Onset: {stage.yearsFromOnset}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* SYMPTOMS TAB */}
               {activeTab === 'symptoms' && (
                 <div className="space-y-3">
