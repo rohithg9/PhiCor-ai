@@ -2706,41 +2706,17 @@ const DashboardMultiScale = () => {
     const fetchDiseaseParams = async () => {
       setIsLoadingDiseases(true);
       
-      // Check for pre-loaded cache from landing page first
-      try {
-        const cachedData = sessionStorage.getItem('phicor_diseases_cache');
-        if (cachedData) {
-          const cache = JSON.parse(cachedData);
-          // Check if cache is less than 5 minutes old
-          if (cache.timestamp && Date.now() - cache.timestamp < 5 * 60 * 1000 && cache.diseases?.length > 0) {
-            console.log(`✅ Using pre-loaded cache: ${cache.diseases.length} diseases`);
-            processDiseaseData(cache.diseases);
-            setIsLoadingDiseases(false);
-            return; // Don't fetch again, use cache
-          }
-        }
-      } catch (cacheError) {
-        console.log('Cache read failed, fetching fresh data');
-      }
-      
-      // Fetch fresh data if no valid cache
+      // Fetch data - browser HTTP cache will make subsequent fetches instant
+      // if the data was pre-loaded from landing page
       try {
         const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
-        // Fetch all diseases with parameter_modifications (limit increased to get all)
-        const response = await fetch(`${backendUrl}/api/diseases-db?include_params=true&limit=2500`);
+        // Using force-cache to leverage browser HTTP caching from landing page preload
+        const response = await fetch(`${backendUrl}/api/diseases-db?include_params=true&limit=2500`, {
+          cache: 'force-cache'
+        });
         if (response.ok) {
           const data = await response.json();
           processDiseaseData(data.diseases || []);
-          
-          // Update the cache
-          try {
-            sessionStorage.setItem('phicor_diseases_cache', JSON.stringify({
-              timestamp: Date.now(),
-              diseases: data.diseases || []
-            }));
-          } catch (e) {
-            // Ignore storage errors
-          }
         }
       } catch (error) {
         console.error('Error fetching diseases:', error);
