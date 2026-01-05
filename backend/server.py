@@ -7016,9 +7016,9 @@ class PhiCorAnalysisResponse(BaseModel):
 @api_router.post("/clinical/interpret")
 async def interpret_clinical_text(request: ClinicalTextRequest):
     """
-    PhiCor Analysis: Two-Phase Clinical Reasoning Engine.
-    Phase A: AI extracts structured findings from clinical text (understanding context, abbreviations, terminology)
-    Phase B: PhiCor Engine matches findings against our disease database (NOT AI-generated diagnoses)
+    PhiCor Analysis: Comprehensive AI-Powered Clinical Reasoning Engine.
+    Uses advanced clinical reasoning to analyze patient data and generate differential diagnoses
+    with full reasoning, abnormal vs normal comparisons, and management guidance.
     """
     try:
         from emergentintegrations.llm.chat import LlmChat, UserMessage
@@ -7031,57 +7031,136 @@ async def interpret_clinical_text(request: ClinicalTextRequest):
         unit_system = "SI" if request.region in ["UK", "EU", "IN", "ASIA"] else "conventional"
         
         # ============================================================
-        # PHASE A: AI EXTRACTION ONLY (No diagnosis generation)
-        # Purpose: Understand clinical text, abbreviations, terminology
+        # COMPREHENSIVE AI CLINICAL ANALYSIS
+        # Full clinical reasoning with detailed differential diagnosis
         # ============================================================
         
-        extraction_prompt = f"""You are a clinical text parser. Your ONLY job is to extract structured findings from clinical notes.
+        analysis_prompt = f"""You are PhiCor, an expert clinical reasoning AI assistant. Analyze the following clinical presentation and provide comprehensive differential diagnosis with detailed reasoning.
 
-DO NOT generate diagnoses. DO NOT suggest diseases. ONLY extract what is explicitly stated.
-
-CLINICAL TEXT:
+CLINICAL PRESENTATION:
 {request.text}
 
 REGIONAL CONTEXT: {request.region} (use {unit_system} units)
 
-Extract and return a JSON object with ONLY these fields:
+Provide a comprehensive clinical analysis in JSON format with these exact fields:
+
 {{
-  "patient_demographics": {{
+  "patient_summary": {{
     "age": <number or null>,
     "sex": "<M/F or null>",
-    "relevant_history": ["list of PMH items"]
+    "chief_complaint": "primary presenting complaint",
+    "relevant_history": ["PMH item 1", "PMH item 2"]
   }},
-  "vital_signs": [
-    {{"name": "Heart Rate", "value": 98, "unit": "bpm", "status": "elevated"}}
+  
+  "clinical_findings": {{
+    "vital_signs": [
+      {{"name": "Heart Rate", "value": 108, "unit": "bpm", "normal_range": "60-100", "status": "elevated", "clinical_significance": "Tachycardia suggesting stress response or compensation"}}
+    ],
+    "laboratory_values": [
+      {{"name": "WBC", "parameter_id": "wbc", "value": 15000, "unit": "/μL", "normal_range": "4000-11000", "status": "elevated", "clinical_significance": "Leukocytosis suggesting infection or inflammation"}}
+    ],
+    "imaging_findings": [
+      {{"modality": "CXR", "finding": "bilateral infiltrates", "clinical_significance": "Consistent with pneumonia or pulmonary edema"}}
+    ],
+    "symptoms": [
+      {{"name": "dyspnea", "severity": "moderate", "duration": "acute", "aggravating_factors": "exertion", "clinical_significance": "Respiratory distress"}}
+    ],
+    "physical_exam": [
+      {{"finding": "crackles bilateral bases", "location": "lungs", "clinical_significance": "Suggests fluid or infiltrates in alveoli"}}
+    ]
+  }},
+  
+  "dominant_clinical_syndromes": [
+    {{
+      "syndrome": "Acute Respiratory Syndrome with Systemic Inflammation",
+      "key_features": ["fever", "tachypnea", "leukocytosis", "hypoxemia"],
+      "pathophysiologic_rationale": "The combination of fever, elevated WBC, and respiratory symptoms suggests an infectious etiology with systemic inflammatory response"
+    }}
   ],
-  "laboratory_values": [
-    {{"name": "Creatinine", "parameter_id": "creatinine", "value": 2.1, "unit": "mg/dL", "status": "elevated", "organ_system": "renal"}}
+  
+  "differential_diagnosis": [
+    {{
+      "rank": 1,
+      "diagnosis": "Community-Acquired Pneumonia",
+      "icd10": "J18.9",
+      "probability": 75,
+      "role": "Primary",
+      "supporting_findings": ["fever", "cough", "leukocytosis", "hypoxemia"],
+      "clinical_reasoning": "Classic presentation with productive cough, fever, and respiratory distress. Elevated WBC supports bacterial etiology. Most common cause of this presentation in community setting.",
+      "key_discriminating_features": ["consolidation on imaging", "productive cough", "focal breath sounds"],
+      "against_diagnosis": ["absence of typical risk factors if any"],
+      "anchor_criteria_met": true
+    }}
   ],
-  "imaging_findings": [
-    {{"modality": "CXR", "finding": "bilateral pleural effusions", "location": "chest"}}
+  
+  "diagnostic_synthesis": {{
+    "most_likely_diagnosis": "Community-Acquired Pneumonia",
+    "key_alternative": "Heart Failure with Pulmonary Edema",
+    "clinical_decision_pathway": "Given the acute presentation with fever and leukocytosis, infectious etiology is most likely. However, cardiac causes should be ruled out given the hypoxemia.",
+    "discriminating_tests": [
+      {{"test": "Chest X-Ray", "expected_finding": "Lobar consolidation or infiltrates", "rationale": "To differentiate pneumonia from pulmonary edema"}},
+      {{"test": "Procalcitonin", "expected_finding": "Elevated >0.25 ng/mL", "rationale": "Supports bacterial infection"}},
+      {{"test": "BNP/NT-proBNP", "expected_finding": "Normal or mildly elevated", "rationale": "To exclude heart failure"}}
+    ],
+    "confidence_level": 0.75,
+    "clinical_uncertainty": "Cannot fully exclude mixed etiology (infection precipitating heart failure)"
+  }},
+  
+  "management_considerations": [
+    {{
+      "diagnosis": "Community-Acquired Pneumonia",
+      "immediate_actions": ["Supplemental oxygen to maintain SpO2 >92%", "IV access", "Blood cultures x2 before antibiotics"],
+      "recommended_investigations": ["CBC with differential", "BMP", "Chest X-Ray PA and lateral", "Blood cultures", "Sputum culture if productive"],
+      "treatment_approach": ["Empiric antibiotics per local guidelines", "Supportive care", "Respiratory support as needed"],
+      "monitoring_parameters": ["SpO2", "Respiratory rate", "Temperature", "WBC trend"],
+      "disposition_considerations": "Consider ICU if meeting severe pneumonia criteria (CURB-65 ≥3 or PSI Class IV-V)",
+      "evidence_grade": "A",
+      "guideline_source": "IDSA/ATS Guidelines"
+    }}
   ],
-  "symptoms": ["dyspnea", "orthopnea", "fatigue"],
-  "physical_exam": ["bilateral LE edema", "JVD", "S3 gallop"],
-  "dominant_syndrome_hint": "Brief description of the dominant clinical picture based on findings"
+  
+  "safety_alerts": [
+    {{
+      "alert_type": "critical_value",
+      "parameter": "SpO2",
+      "message": "Hypoxemia present - ensure adequate oxygenation",
+      "recommended_action": "Titrate supplemental O2 to maintain SpO2 >92%"
+    }}
+  ],
+  
+  "clinical_pearls": [
+    "In elderly patients, pneumonia may present atypically without fever",
+    "Always consider aspiration pneumonia in patients with dysphagia or altered consciousness",
+    "Obtain respiratory pathogen panel if viral etiology suspected"
+  ],
+  
+  "follow_up_questions": [
+    "Recent sick contacts or travel history?",
+    "Vaccination status (pneumococcal, influenza)?",
+    "Recent hospitalization or antibiotic use (for resistance patterns)?"
+  ]
 }}
 
-IMPORTANT RULES:
-- Interpret ALL abbreviations (SOB=shortness of breath, CP=chest pain, HTN=hypertension, T2DM=type 2 diabetes, etc.)
-- Convert units to {unit_system} system
-- parameter_id should be lowercase with underscores (e.g., "bnp", "ejection_fraction", "creatinine")
-- Only extract what is EXPLICITLY stated or can be directly inferred
-- DO NOT diagnose - just describe findings
-- Return ONLY valid JSON"""
+CRITICAL INSTRUCTIONS:
+1. Generate 15-20 differential diagnoses ranked by probability
+2. For EACH vital sign and lab value, provide normal ranges and clinical significance
+3. Provide detailed clinical reasoning for each diagnosis
+4. Include specific ICD-10 codes
+5. Be comprehensive but clinically focused
+6. Interpret ALL abbreviations (SOB, CP, HTN, T2DM, BNP, EF, etc.)
+7. Consider both common and important "can't miss" diagnoses
+8. Provide actionable management guidance
+9. Return ONLY valid JSON - no markdown, no explanation text"""
 
         llm = LlmChat(
             api_key=llm_key,
-            session_id=f"phicor_extract_{datetime.now().strftime('%H%M%S')}",
-            system_message="You are a clinical text extraction assistant. Extract findings only, do not diagnose."
+            session_id=f"phicor_analysis_{datetime.now().strftime('%H%M%S')}",
+            system_message="You are PhiCor, an expert clinical reasoning AI. Provide comprehensive differential diagnosis with detailed reasoning and evidence-based management guidance. Always respond with valid JSON only."
         ).with_model("openai", "gpt-4o")
         
-        response = await llm.send_message(UserMessage(text=extraction_prompt))
+        response = await llm.send_message(UserMessage(text=analysis_prompt))
         
-        # Parse AI extraction response
+        # Parse AI response
         content = response.strip()
         if content.startswith('```'):
             lines = content.split('\n')
@@ -7092,32 +7171,118 @@ IMPORTANT RULES:
         
         import json
         try:
-            extracted = json.loads(content)
+            analysis = json.loads(content)
         except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse extraction response: {e}")
+            logger.error(f"Failed to parse analysis response: {e}")
+            logger.error(f"Raw response: {content[:500]}")
             return {
                 "success": False,
-                "dominant_syndromes": [],
-                "findings": [],
-                "symptoms": [],
-                "differentials": [],
-                "management": [],
-                "safety_alerts": [],
-                "synthesis": {},
-                "summary": "Failed to extract clinical findings",
-                "confidence": 0
+                "error": "Failed to parse clinical analysis",
+                "raw_response": content[:1000]
             }
         
         # ============================================================
-        # PHASE B: PHICOR ENGINE - Match against OUR disease database
-        # This uses our Phase 1 & 2 data, NOT AI-generated diagnoses
+        # FORMAT RESPONSE for frontend
         # ============================================================
         
-        # Get all diseases with comprehensive models from our database
-        diseases = await db.diseases.find(
-            {'comprehensive_model': {'$exists': True, '$ne': None}},
-            {'_id': 0, 'id': 1, 'name': 1, 'category': 1, 'icd10': 1, 'comprehensive_model': 1, 'parameter_modifications': 1}
-        ).to_list(None)
+        clinical_findings = analysis.get('clinical_findings', {})
+        differentials = analysis.get('differential_diagnosis', [])
+        synthesis = analysis.get('diagnostic_synthesis', {})
+        
+        # Build findings list with normal ranges
+        findings = []
+        for vital in clinical_findings.get('vital_signs', []):
+            findings.append({
+                'parameter_id': vital.get('name', '').lower().replace(' ', '_'),
+                'name': vital.get('name'),
+                'value': vital.get('value'),
+                'unit': vital.get('unit'),
+                'normal_range': vital.get('normal_range'),
+                'status': vital.get('status'),
+                'direction': 'increase' if vital.get('status') in ['elevated', 'high'] else 'decrease' if vital.get('status') in ['decreased', 'low'] else 'normal',
+                'clinical_significance': vital.get('clinical_significance'),
+                'type': 'vital'
+            })
+        
+        for lab in clinical_findings.get('laboratory_values', []):
+            findings.append({
+                'parameter_id': lab.get('parameter_id', lab.get('name', '').lower().replace(' ', '_')),
+                'name': lab.get('name'),
+                'value': lab.get('value'),
+                'unit': lab.get('unit'),
+                'normal_range': lab.get('normal_range'),
+                'status': lab.get('status'),
+                'direction': 'increase' if lab.get('status') in ['elevated', 'high'] else 'decrease' if lab.get('status') in ['decreased', 'low'] else 'normal',
+                'clinical_significance': lab.get('clinical_significance'),
+                'type': 'lab'
+            })
+        
+        # Build symptoms list with details
+        symptoms = []
+        for symptom in clinical_findings.get('symptoms', []):
+            if isinstance(symptom, dict):
+                symptoms.append(symptom)
+            else:
+                symptoms.append({'name': symptom})
+        
+        # Build differential list for frontend
+        formatted_differentials = []
+        for diff in differentials:
+            formatted_differentials.append({
+                'rank': diff.get('rank', 0),
+                'name': diff.get('diagnosis'),
+                'icd_code': diff.get('icd10', ''),
+                'probability': diff.get('probability', 0),
+                'role': diff.get('role', 'Secondary'),
+                'supporting_findings': diff.get('supporting_findings', []),
+                'clinical_reasoning': diff.get('clinical_reasoning', ''),
+                'key_discriminating_features': diff.get('key_discriminating_features', []),
+                'against_diagnosis': diff.get('against_diagnosis', []),
+                'anchor_criteria_met': diff.get('anchor_criteria_met', True)
+            })
+        
+        # Build dominant syndromes
+        dominant_syndromes = []
+        for syndrome in analysis.get('dominant_clinical_syndromes', []):
+            if isinstance(syndrome, dict):
+                dominant_syndromes.append({
+                    'syndrome': syndrome.get('syndrome'),
+                    'key_features': syndrome.get('key_features', []),
+                    'pathophysiologic_rationale': syndrome.get('pathophysiologic_rationale', '')
+                })
+            else:
+                dominant_syndromes.append({'syndrome': syndrome})
+        
+        # Build formatted synthesis
+        formatted_synthesis = {
+            'primary_diagnosis': synthesis.get('most_likely_diagnosis'),
+            'key_alternative': synthesis.get('key_alternative'),
+            'clinical_decision_pathway': synthesis.get('clinical_decision_pathway'),
+            'discriminating_tests': synthesis.get('discriminating_tests', []),
+            'confidence_level': synthesis.get('confidence_level', 0.5),
+            'clinical_uncertainty': synthesis.get('clinical_uncertainty')
+        }
+        
+        return {
+            "success": True,
+            "patient_summary": analysis.get('patient_summary', {}),
+            "clinical_findings": clinical_findings,
+            "findings": findings,
+            "symptoms": symptoms,
+            "dominant_syndromes": dominant_syndromes,
+            "differentials": formatted_differentials,
+            "synthesis": formatted_synthesis,
+            "management": analysis.get('management_considerations', []),
+            "safety_alerts": analysis.get('safety_alerts', []),
+            "clinical_pearls": analysis.get('clinical_pearls', []),
+            "follow_up_questions": analysis.get('follow_up_questions', []),
+            "confidence": synthesis.get('confidence_level', 0.5),
+            "summary": f"Comprehensive analysis completed with {len(formatted_differentials)} differential diagnoses"
+        }
+        
+    except Exception as e:
+        logger.error(f"PhiCor Analysis failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
         
         # Extract patient age for demographic filtering
         patient_age = extracted.get('patient_demographics', {}).get('age')
