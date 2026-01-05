@@ -266,14 +266,19 @@ const DifferentialPage = () => {
     }, 500);
   }, [abnormalFindings, clinicalText]);
   
-  // Auto-run diagnosis when findings change
+  // Auto-run diagnosis when findings change - but only if PhiCor hasn't provided results
   useEffect(() => {
+    // Skip if we have PhiCor differentials already
+    if (phicorResults?.differentials?.length > 0) {
+      return;
+    }
+    
     if (abnormalFindings.length > 0 || clinicalText.trim()) {
       runDiagnosis();
     } else {
       setDifferentialResults([]);
     }
-  }, [abnormalFindings, runDiagnosis]);
+  }, [abnormalFindings, runDiagnosis, phicorResults]);
   
   // Analyze clinical text - with PhiCor Analysis
   const handleAnalyzeText = async () => {
