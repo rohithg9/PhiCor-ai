@@ -321,7 +321,7 @@ const DifferentialPage = () => {
         });
         
         if (response.ok) {
-          const result = await response.json();
+          result = await response.json();
           console.log('PhiCor Analysis result:', result);
           
           // Store full PhiCor results for display
