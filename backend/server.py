@@ -6674,6 +6674,31 @@ async def get_disease_knowledge(disease_id: str, admin: dict = Depends(require_a
         }
     }
 
+@api_router.get("/knowledge/disease/{disease_id}")
+async def get_disease_knowledge_public(disease_id: str):
+    """Get knowledge bank data for a specific disease (public endpoint for dashboard)"""
+    # Get knowledge sources for this disease (approved/analyzed only)
+    sources = await db.knowledge_sources.find(
+        {"$or": [{"disease_id": disease_id}, {"disease_name": {"$regex": disease_id, "$options": "i"}}]}, 
+        {"_id": 0, "full_content": 0}
+    ).sort("created_at", -1).to_list(50)
+    
+    # Get approved suggestions for this disease
+    approved_suggestions = await db.knowledge_suggestions.find(
+        {"$or": [{"disease_id": disease_id}, {"disease_name": {"$regex": disease_id, "$options": "i"}}], "status": "approved"}, 
+        {"_id": 0}
+    ).to_list(50)
+    
+    return {
+        "disease_id": disease_id,
+        "sources": sources,
+        "approved_updates": approved_suggestions,
+        "stats": {
+            "total_sources": len(sources),
+            "approved_updates": len(approved_suggestions)
+        }
+    }
+
 @api_router.get("/admin/settings")
 async def get_system_settings(admin: dict = Depends(require_admin)):
     """Get system settings including auto-search configuration"""
