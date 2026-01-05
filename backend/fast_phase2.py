@@ -150,19 +150,17 @@ async def main():
     client = AsyncIOMotorClient(MONGO_URL)
     db = client[DB_NAME]
     
-    # Get diseases without comprehensive_model
-    diseases = await db.diseases.find(
-        {'comprehensive_model': {'$exists': False}},
+    # Get diseases without comprehensive_model or with incomplete model
+    all_diseases = await db.diseases.find(
+        {'$or': [
+            {'comprehensive_model': {'$exists': False}},
+            {'comprehensive_model': None},
+            {'comprehensive_model': {}},
+            {'comprehensive_model': ''},
+            {'comprehensive_model.clinicalPresentation': {'$exists': False}}
+        ]},
         {'_id': 0}
     ).to_list(None)
-    
-    # Also get ones with empty model
-    diseases_empty = await db.diseases.find(
-        {'comprehensive_model': {}},
-        {'_id': 0}
-    ).to_list(None)
-    
-    all_diseases = diseases + diseases_empty
     total = len(all_diseases)
     
     print(f"Found {total} diseases to process")
