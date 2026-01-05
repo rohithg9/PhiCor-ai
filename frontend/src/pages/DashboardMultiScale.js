@@ -4263,8 +4263,8 @@ const DashboardMultiScale = () => {
                                   animate={{ scale: 1 }}
                                   className={`text-xs md:text-sm font-bold px-1.5 py-0.5 rounded ${
                                     parseFloat(mod.delta) > 0 
-                                      ? 'bg-destructive/20 text-destructive' 
-                                      : 'bg-green-500/20 text-green-500'
+                                      ? 'bg-red-500/20 text-red-400' 
+                                      : 'bg-blue-500/20 text-blue-400'
                                   }`}
                                 >
                                   {parseFloat(mod.delta) > 0 ? '↑' : '↓'}{Math.abs(parseFloat(mod.delta))}%
