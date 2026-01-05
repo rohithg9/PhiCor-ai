@@ -970,8 +970,8 @@ def run_all_tests():
         ('backend_health', 'Backend Health Check')
     ]
     
-    print(f"\n📊 DASHBOARD DATA TESTS:")
-    for test_key, test_name in dashboard_tests:
+    print(f"\n📊 BACKEND API TESTS:")
+    for test_key, test_name in backend_tests:
         if test_key in test_results:
             status = "✅ PASS" if test_results[test_key] else "❌ FAIL"
             print(f"  {status} - {test_name}")
@@ -982,26 +982,27 @@ def run_all_tests():
             status = "✅ PASS" if test_results[test_key] else "❌ FAIL"
             print(f"  {status} - {test_name}")
     
-    # Calculate dashboard test success rate
-    dashboard_passed = sum(1 for test_key, _ in dashboard_tests if test_results.get(test_key, False))
-    dashboard_total = len(dashboard_tests)
+    # Calculate backend test success rate
+    backend_passed = sum(1 for test_key, _ in backend_tests if test_results.get(test_key, False))
+    backend_total = len(backend_tests)
     
-    if dashboard_passed == dashboard_total:
-        print(f"\n🎉 ALL DASHBOARD DATA TESTS PASSED!")
+    if backend_passed == backend_total:
+        print(f"\n🎉 ALL BACKEND TESTS PASSED!")
         print(f"✅ Admin authentication working with admin credentials")
         print(f"✅ Disease Data API functional with comprehensive data")
         print(f"✅ Heart Failure search returning proper disease data")
         print(f"✅ Clinical Evidence data structure verified")
         print(f"✅ Disease Progression data structure verified")
         print(f"✅ New Knowledge Endpoint functional for dashboard Knowledge tab")
-        print(f"\n🔄 COMPLETE DASHBOARD DATA WORKFLOW VERIFIED:")
-        print(f"   Login → Search Diseases → Get Comprehensive Data → Clinical Evidence → Progression → Knowledge")
-    elif dashboard_passed >= dashboard_total * 0.75:
-        print(f"\n✅ MOSTLY SUCCESSFUL! {dashboard_passed}/{dashboard_total} dashboard tests passed.")
+        print(f"✅ PhiCor Clinical Analysis working end-to-end")
+        print(f"\n🔄 COMPLETE BACKEND WORKFLOW VERIFIED:")
+        print(f"   Login → Search Diseases → Get Comprehensive Data → Clinical Evidence → Progression → Knowledge → Clinical Analysis")
+    elif backend_passed >= backend_total * 0.75:
+        print(f"\n✅ MOSTLY SUCCESSFUL! {backend_passed}/{backend_total} backend tests passed.")
         print(f"⚠️  Some minor issues detected - see failed tests above")
     else:
-        print(f"\n❌ SIGNIFICANT ISSUES DETECTED! Only {dashboard_passed}/{dashboard_total} dashboard tests passed.")
-        print(f"🔧 Major fixes needed for Dashboard Data Display features")
+        print(f"\n❌ SIGNIFICANT ISSUES DETECTED! Only {backend_passed}/{backend_total} backend tests passed.")
+        print(f"🔧 Major fixes needed for Backend API features")
     
     # Critical Issues Detection
     print(f"\n🚨 CRITICAL ISSUES DETECTED:")
