@@ -275,22 +275,23 @@ const DifferentialPage = () => {
     }
   }, [abnormalFindings, runDiagnosis]);
   
-  // Analyze clinical text - with AI interpretation option
+  // Analyze clinical text - with PhiCor Analysis
   const handleAnalyzeText = async () => {
     if (!clinicalText.trim()) return;
     
     setIsAnalyzing(true);
+    setPhicorResults(null);
     
     try {
       let findings = [];
       let symptoms = [];
       
-      if (useAI) {
-        // Use AI-powered interpretation
+      if (usePhiCor) {
+        // Use PhiCor Analysis - comprehensive physiology-first reasoning
         const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
         const unitSystem = isSI ? 'SI' : 'conventional';
         
-        console.log(`Using AI interpretation (Region: ${region}, Units: ${unitSystem})`);
+        console.log(`Using PhiCor Analysis (Region: ${region}, Units: ${unitSystem})`);
         
         const response = await fetch(`${backendUrl}/api/clinical/interpret`, {
           method: 'POST',
@@ -304,12 +305,17 @@ const DifferentialPage = () => {
         
         if (response.ok) {
           const result = await response.json();
-          console.log('AI interpretation result:', result);
+          console.log('PhiCor Analysis result:', result);
+          
+          // Store full PhiCor results for display
+          if (result.success) {
+            setPhicorResults(result);
+          }
           
           if (result.success && result.findings?.length > 0) {
             findings = result.findings.map((f, idx) => ({
-              id: `ai-${Date.now()}-${idx}`,
-              organ: f.organ || 'unknown',
+              id: `phicor-${Date.now()}-${idx}`,
+              organ: f.organ_system || f.organ || 'unknown',
               parameterId: f.parameter_id,
               parameterName: f.name || f.parameter_id,
               value: f.value || '',
@@ -318,9 +324,10 @@ const DifferentialPage = () => {
               severity: f.severity || 1,
               deviation: '',
               normalRange: '',
-              source: 'ai-interpretation',
+              source: 'phicor-analysis',
               originalText: f.original_text || '',
               type: f.type || 'lab',
+              physiologicImplication: f.physiologic_implication || '',
             }));
           }
           
@@ -337,13 +344,29 @@ const DifferentialPage = () => {
               severity: 'moderate',
               deviation: '',
               normalRange: '',
-              source: 'ai-interpretation',
+              source: 'phicor-analysis',
               type: 'symptom',
             }));
           }
+          
+          // If PhiCor returned differentials, use those directly instead of local calculation
+          if (result.differentials?.length > 0) {
+            const phicorDifferentials = result.differentials.map((d, idx) => ({
+              id: `phicor-diff-${idx}`,
+              diseaseId: d.icd_code || d.name.toLowerCase().replace(/\s+/g, '_'),
+              diseaseName: d.name,
+              probability: d.probability / 100, // Convert to 0-1 scale
+              role: d.role,
+              matchingParameters: d.matching_parameters || [],
+              missingFeatures: d.missing_features || [],
+              icdCode: d.icd_code,
+            }));
+            
+            // Set PhiCor differentials directly
+            setDifferentialResults(phicorDifferentials);
+          }
         } else {
-          console.warn('AI interpretation failed, falling back to regex parsing');
-          // Fall back to regex parsing
+          console.warn('PhiCor Analysis failed, falling back to regex parsing');
           const parsed = parseClinicalText(clinicalText);
           findings = parsed.findings || [];
         }
@@ -371,19 +394,23 @@ const DifferentialPage = () => {
           source: f.source || 'clinical-text',
           diseases: f.diseases || [],
           type: f.type || 'lab',
+          physiologicImplication: f.physiologicImplication || '',
         }));
         
         setAbnormalFindings(prev => {
           const updated = [...prev, ...newFindings];
-          // Trigger diagnosis after state update
-          setTimeout(() => {
-            runDiagnosis(updated);
-          }, 100);
+          // Only run local diagnosis if PhiCor didn't provide differentials
+          if (!usePhiCor || !phicorResults?.differentials?.length) {
+            setTimeout(() => {
+              runDiagnosis(updated);
+            }, 100);
+          }
           return updated;
         });
+        setIsAnalyzing(false);
       } else {
         setIsAnalyzing(false);
-        alert('No clinical findings detected. Try adding specific findings like "dilated ventricle", "pulmonary congestion", "pleural effusion", or lab values like "BNP 500".');
+        alert('No clinical findings detected. Try adding more specific clinical details.');
       }
     } catch (error) {
       console.error('Error analyzing clinical text:', error);
