@@ -1056,6 +1056,11 @@ def run_all_tests():
     else:
         print(f"  ❌ Disease Progression data failed")
     
+    if test_results.get('new_knowledge_endpoint'):
+        print(f"  ✅ New Knowledge Endpoint verified (disease_id, sources, approved_updates, stats)")
+    else:
+        print(f"  ❌ New Knowledge Endpoint failed")
+    
     if test_results.get('phicor_clinical_analysis'):
         print(f"  ✅ PhiCor Clinical Analysis verified (POST /api/clinical/interpret with two-phase architecture)")
     else:
