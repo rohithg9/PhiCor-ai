@@ -454,6 +454,7 @@ const TreatmentPanel = ({ stage, biomarkers, onBiomarkerChange }) => {
   const [showBiomarkers, setShowBiomarkers] = useState(false);
 
   const getRecommendation = () => {
+    // Stage IV - Metastatic
     if (stage.startsWith('IV')) {
       if (biomarkers.EGFR) return TREATMENT_GUIDELINES.metastatic.withDriverMutations.EGFR;
       if (biomarkers.ALK) return TREATMENT_GUIDELINES.metastatic.withDriverMutations.ALK;
@@ -461,12 +462,22 @@ const TreatmentPanel = ({ stage, biomarkers, onBiomarkerChange }) => {
       if (biomarkers.PDL1 >= 1) return TREATMENT_GUIDELINES.metastatic.withoutDriverMutations.pdl1Low;
       return TREATMENT_GUIDELINES.metastatic.withoutDriverMutations.pdl1Negative;
     }
+    // Stage III - Locally Advanced
     if (stage.startsWith('III')) {
+      if (stage === 'IIIC' || stage === 'IIIB') {
+        return TREATMENT_GUIDELINES.locallyAdvanced.stageIIIB_unresectable.treatment;
+      }
       return TREATMENT_GUIDELINES.locallyAdvanced.stageIIIA_resectable.option1;
     }
+    // Stage II
     if (stage.startsWith('II')) {
       return TREATMENT_GUIDELINES.earlyStage.stageII.treatment;
     }
+    // Stage IB
+    if (stage === 'IB') {
+      return TREATMENT_GUIDELINES.earlyStage.stageIB.surgery;
+    }
+    // Stage IA (IA1, IA2, IA3)
     return TREATMENT_GUIDELINES.earlyStage.stageIA.surgery;
   };
 
