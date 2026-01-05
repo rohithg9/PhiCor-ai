@@ -852,6 +852,23 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                       </div>
                     )}
                     
+                    {/* Safety Alerts - "Do Not Miss" */}
+                    {phicorResults && phicorResults.safety_alerts?.length > 0 && (
+                      <div className={`mt-3 p-4 rounded-xl border ${isDark ? 'bg-red-900/20 border-red-800' : 'bg-red-50 border-red-200'}`}>
+                        <h4 className={`text-sm font-semibold flex items-center gap-2 mb-2 ${isDark ? 'text-red-300' : 'text-red-700'}`}>
+                          <AlertTriangle className="w-4 h-4" />
+                          ⚠️ Do Not Miss
+                        </h4>
+                        <ul className="space-y-1">
+                          {phicorResults.safety_alerts.map((alert, idx) => (
+                            <li key={idx} className={`text-sm ${isDark ? 'text-red-200' : 'text-red-700'}`}>
+                              • {alert}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
                     {phicorResults && phicorResults.synthesis && (
                       <div className={`mt-3 p-4 rounded-xl border ${isDark ? 'bg-blue-900/20 border-blue-800' : 'bg-blue-50 border-blue-200'}`}>
                         <h4 className={`text-sm font-semibold flex items-center gap-2 mb-2 ${isDark ? 'text-blue-300' : 'text-blue-800'}`}>
@@ -875,6 +892,52 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                             </p>
                           )}
                         </div>
+                      </div>
+                    )}
+                    
+                    {/* Management Considerations */}
+                    {phicorResults && phicorResults.management?.length > 0 && (
+                      <div className={`mt-3 p-4 rounded-xl border ${isDark ? 'bg-emerald-900/20 border-emerald-800' : 'bg-emerald-50 border-emerald-200'}`}>
+                        <h4 className={`text-sm font-semibold flex items-center gap-2 mb-3 ${isDark ? 'text-emerald-300' : 'text-emerald-800'}`}>
+                          <Stethoscope className="w-4 h-4" />
+                          Management Considerations
+                        </h4>
+                        <div className="space-y-4">
+                          {phicorResults.management.map((mgmt, idx) => (
+                            <div key={idx} className={`p-3 rounded-lg ${isDark ? 'bg-emerald-900/30' : 'bg-emerald-100/50'}`}>
+                              <p className={`font-medium text-sm mb-2 ${isDark ? 'text-emerald-200' : 'text-emerald-800'}`}>
+                                {mgmt.diagnosis}
+                              </p>
+                              {mgmt.approaches?.length > 0 && (
+                                <ul className="space-y-1 mb-2">
+                                  {mgmt.approaches.map((approach, i) => (
+                                    <li key={i} className={`text-xs ${isDark ? 'text-emerald-300' : 'text-emerald-700'}`}>
+                                      • {approach}
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+                              {mgmt.monitoring?.length > 0 && (
+                                <p className={`text-xs ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>
+                                  <strong>Monitor:</strong> {mgmt.monitoring.join(', ')}
+                                </p>
+                              )}
+                              {mgmt.cautions?.length > 0 && (
+                                <p className={`text-xs mt-1 ${isDark ? 'text-amber-400' : 'text-amber-600'}`}>
+                                  <strong>⚠️ Caution:</strong> {mgmt.cautions.join(', ')}
+                                </p>
+                              )}
+                              {mgmt.source && (
+                                <p className={`text-[10px] mt-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                                  Source: {mgmt.source}
+                                </p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                        <p className={`text-[10px] mt-2 ${isDark ? 'text-gray-500' : 'text-gray-400'} italic`}>
+                          Management information is for clinical context and education. All treatment decisions require clinician judgment.
+                        </p>
                       </div>
                     )}
                   </div>
