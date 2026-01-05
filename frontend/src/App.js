@@ -85,11 +85,13 @@ function App() {
     <div className="App">
       <BrowserRouter>
         <ThemeProvider>
-          <AuthProvider>
-            <ExpertProvider>
-              <AppContent />
-            </ExpertProvider>
-          </AuthProvider>
+          <RegionProvider>
+            <AuthProvider>
+              <ExpertProvider>
+                <AppContent />
+              </ExpertProvider>
+            </AuthProvider>
+          </RegionProvider>
         </ThemeProvider>
       </BrowserRouter>
     </div>
