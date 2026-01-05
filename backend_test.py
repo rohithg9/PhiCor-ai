@@ -717,10 +717,10 @@ def test_phicor_clinical_analysis():
             print(f"✅ PhiCor Clinical Analysis successful")
             print(f"  📊 Response status: {response.status_code}")
             
-            # Check required fields from review request
+            # Check required fields from NEW comprehensive review request
             required_fields = [
-                'success', 'dominant_syndromes', 'findings', 'symptoms', 
-                'differentials', 'synthesis', 'management', 'safety_alerts'
+                'success', 'patient_summary', 'clinical_findings', 'findings',
+                'dominant_syndromes', 'differentials', 'synthesis', 'management', 'safety_alerts'
             ]
             missing_fields = []
             present_fields = []
