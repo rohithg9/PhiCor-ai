@@ -3264,7 +3264,7 @@ const DashboardMultiScale = () => {
             newValue: typeof newValue === 'number' ? newValue : (newValue === 'present' ? 1 : 0),
             unit,
             delta,
-            direction: delta >= 0 ? 'increase' : 'decrease',
+            direction: direction || (delta >= 0 ? 'increase' : 'decrease'),
             note: mod.note || mod.evidence || '',
             isPrimary: currentDisease?.primaryOrgan === organId,
             abnormal: mod.abnormal || Math.abs(delta) > 10
