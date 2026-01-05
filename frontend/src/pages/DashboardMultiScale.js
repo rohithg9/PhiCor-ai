@@ -3419,12 +3419,18 @@ const DashboardMultiScale = () => {
       return { value: baseValue, modified: false };
     }
     
-    // Calculate delta safely - handle edge cases
+    // Calculate delta safely - prefer API-provided change_percent over calculated delta
     let delta = 0;
-    if (baseValue !== 0 && !isNaN(baseValue) && isFinite(baseValue)) {
+    if (changePercent !== undefined && changePercent !== null) {
+      // Use the API-provided change_percent directly
+      const sign = (direction === 'decrease' || changePercent < 0) ? -1 : 1;
+      delta = sign * Math.abs(changePercent);
+    } else if (baseValue !== 0 && !isNaN(baseValue) && isFinite(baseValue) && newValue !== absoluteValue) {
+      // Only calculate delta if we modified baseValue (not using absolute value directly)
       delta = ((newValue - baseValue) / baseValue * 100);
-    } else if (newValue !== 0) {
-      delta = newValue > 0 ? 100 : -100;
+    } else if (newValue !== 0 && absoluteValue !== undefined) {
+      // For absolute values, don't show percentage change - show the actual value
+      delta = 0; // Will show actual value instead of % change
     }
     
     // Ensure delta is a valid number
