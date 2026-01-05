@@ -135,6 +135,9 @@ const FeatureNav = ({ showTitle = true, compact = false }) => {
           
           {/* Right side controls */}
           <div className="flex items-center gap-2">
+            {/* Region selector */}
+            <RegionSelector compact={compact} />
+            
             {/* Theme toggle */}
             <button
               onClick={toggleTheme}
