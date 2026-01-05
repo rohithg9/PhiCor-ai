@@ -841,7 +841,7 @@ def test_phicor_clinical_analysis():
                 print(f"  ⚠️ No symptoms identified")
                 symptoms_pass = True  # Don't fail for this
             
-            # Check differentials (CRITICAL - must come from database)
+            # Check differentials (ENHANCED - must have comprehensive structure)
             differentials = data.get('differentials', [])
             if differentials:
                 print(f"  ✅ Differential diagnoses: {len(differentials)} conditions")
@@ -854,27 +854,48 @@ def test_phicor_clinical_analysis():
                     print(f"    ⚠️ Only {len(differentials)} conditions (expected 10+)")
                     diff_count_pass = True  # Don't fail for this
                 
-                # Check for Community-Acquired Pneumonia as expected
-                pneumonia_found = False
-                for diff in differentials:
-                    name = diff.get('name', '').lower()
-                    if 'pneumonia' in name and 'community' in name:
-                        pneumonia_found = True
-                        print(f"    ✅ Community-Acquired Pneumonia found as expected ✓")
-                        break
+                # Check comprehensive differential structure
+                if differentials:
+                    sample_diff = differentials[0]
+                    required_diff_fields = ['rank', 'name', 'icd_code', 'probability', 'role', 'clinical_reasoning']
+                    optional_diff_fields = ['supporting_findings', 'key_discriminating_features', 'against_diagnosis']
+                    
+                    diff_fields_present = []
+                    for field in required_diff_fields + optional_diff_fields:
+                        if field in sample_diff and sample_diff[field]:
+                            diff_fields_present.append(field)
+                    
+                    print(f"    📊 Differential fields present: {diff_fields_present}")
+                    
+                    # Check for clinical reasoning (critical new requirement)
+                    if 'clinical_reasoning' in sample_diff and sample_diff['clinical_reasoning']:
+                        print(f"    ✅ Clinical reasoning present (detailed text) ✓")
+                        reasoning_pass = True
+                    else:
+                        print(f"    ❌ Clinical reasoning missing")
+                        reasoning_pass = False
+                    
+                    # Check for ICD codes
+                    icd_count = sum(1 for d in differentials if d.get('icd_code'))
+                    print(f"    📊 Diagnoses with ICD codes: {icd_count}/{len(differentials)}")
+                    
+                    # Check for role badges (Primary/Alternative)
+                    role_count = sum(1 for d in differentials if d.get('role'))
+                    print(f"    📊 Diagnoses with role badges: {role_count}/{len(differentials)}")
                 
-                if not pneumonia_found:
-                    print(f"    ⚠️ Community-Acquired Pneumonia not found (expected based on symptoms)")
-                
-                # Show top 3 diagnoses
-                print(f"    📊 Top diagnoses:")
+                # Show top 3 diagnoses with enhanced info
+                print(f"    📊 Top diagnoses (enhanced):")
                 for i, diff in enumerate(differentials[:3]):
                     name = diff.get('name', 'Unknown')
                     prob = diff.get('probability', 0)
                     role = diff.get('role', 'Unknown')
-                    print(f"      {i+1}. {name} ({prob}%, {role})")
+                    icd = diff.get('icd_code', 'N/A')
+                    reasoning = diff.get('clinical_reasoning', '')
+                    print(f"      {i+1}. {name} ({prob}%, {role}, ICD: {icd})")
+                    if reasoning:
+                        print(f"         Reasoning: {reasoning[:100]}...")
                 
-                differentials_pass = True
+                differentials_pass = True and reasoning_pass
             else:
                 print(f"  ❌ No differential diagnoses returned")
                 differentials_pass = False
