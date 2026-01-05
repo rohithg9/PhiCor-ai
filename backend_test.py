@@ -923,7 +923,7 @@ def run_all_tests():
     else:
         test_results['backend_health'] = False
     
-    # DASHBOARD DATA TESTS
+    # BACKEND API TESTS
     if test_results['backend_health']:
         test_results['admin_authentication'] = test_admin_authentication()
         test_results['disease_data_api'] = test_disease_data_api()
@@ -931,6 +931,7 @@ def run_all_tests():
         test_results['clinical_evidence_data'] = test_clinical_evidence_data_structure()
         test_results['disease_progression_data'] = test_disease_progression_data()
         test_results['new_knowledge_endpoint'] = test_new_knowledge_endpoint()
+        test_results['phicor_clinical_analysis'] = test_phicor_clinical_analysis()
     else:
         # Set all tests to False if backend is not accessible
         test_results.update({
@@ -939,7 +940,8 @@ def run_all_tests():
             'heart_failure_search': False,
             'clinical_evidence_data': False,
             'disease_progression_data': False,
-            'new_knowledge_endpoint': False
+            'new_knowledge_endpoint': False,
+            'phicor_clinical_analysis': False
         })
     
     # Summary
