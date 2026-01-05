@@ -3257,6 +3257,28 @@ const DashboardMultiScale = () => {
     const findings = [];
     const processedParams = new Set(allModifiedParameters.map(p => `${p.organId}.${p.scaleId}.${p.id}`));
     
+    // Normalize parameter names to detect duplicates (e.g., "platelet_count" -> "platelets")
+    const normalizeParamId = (id) => {
+      const normalizations = {
+        'platelet_count': 'platelets',
+        'wbc_count': 'wbc',
+        'rbc_count': 'rbc',
+        'systolic_blood_pressure': 'systolic_bp',
+        'diastolic_blood_pressure': 'diastolic_bp',
+        'ejection_fraction': 'lvef',
+        'ef': 'lvef',
+        'left_ventricular_ef': 'lvef',
+        'hemoglobin_level': 'hemoglobin',
+        'hgb': 'hemoglobin',
+        'hematocrit_level': 'hematocrit',
+        'hct': 'hematocrit',
+      };
+      return normalizations[id.toLowerCase()] || id.toLowerCase();
+    };
+    
+    // Track normalized param names to prevent duplicates
+    const seenNormalizedParams = new Set();
+    
     // Recursively extract parameters from nested structures
     const extractParams = (obj, path, organId, scaleId) => {
       if (!obj || typeof obj !== 'object') return;
@@ -3266,28 +3288,34 @@ const DashboardMultiScale = () => {
           (obj.value !== undefined && typeof obj.value !== 'object')) {
         const paramId = path[path.length - 1] || 'unknown';
         const key = `${organId}.${scaleId}.${paramId}`;
+        const normalizedKey = `${organId}.${scaleId}.${normalizeParamId(paramId)}`;
         
-        if (!processedParams.has(key) && obj.direction !== 'normal') {
-          const name = path.map(w => 
-            w.split('_').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ')
-          ).join(' - ');
-          
-          findings.push({
-            id: paramId,
-            name: name,
-            organId,
-            scaleId,
-            value: obj.value,
-            unit: obj.unit,
-            changePercent: obj.change_percent,
-            direction: obj.direction,
-            evidence: obj.evidence || obj.note || obj.description,
-            category: scaleId === 'dna' ? 'Genetic' : 
-                     scaleId === 'gene_expression' ? 'Expression' :
-                     scaleId === 'metabolism' ? 'Metabolic' :
-                     scaleId === 'cell_cycle' ? 'Cell Cycle' : 'Molecular'
-          });
+        // Skip if we've already processed this parameter (either exact or normalized)
+        if (processedParams.has(key) || seenNormalizedParams.has(normalizedKey) || obj.direction === 'normal') {
+          return;
         }
+        
+        seenNormalizedParams.add(normalizedKey);
+        
+        const name = path.map(w => 
+          w.split('_').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ')
+        ).join(' - ');
+        
+        findings.push({
+          id: paramId,
+          name: name,
+          organId,
+          scaleId,
+          value: obj.value,
+          unit: obj.unit,
+          changePercent: obj.change_percent,
+          direction: obj.direction,
+          evidence: obj.evidence || obj.note || obj.description,
+          category: scaleId === 'dna' ? 'Genetic' : 
+                   scaleId === 'gene_expression' ? 'Expression' :
+                   scaleId === 'metabolism' ? 'Metabolic' :
+                   scaleId === 'cell_cycle' ? 'Cell Cycle' : 'Molecular'
+        });
       } else {
         // Recurse into nested objects
         Object.entries(obj).forEach(([key, val]) => {
