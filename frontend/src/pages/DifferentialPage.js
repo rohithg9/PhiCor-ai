@@ -982,29 +982,64 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                           <Sparkles className="w-4 h-4" />
                           Diagnostic Synthesis
                         </h4>
-                        <div className="space-y-2 text-sm">
-                          {phicorResults.synthesis.primary_diagnosis && (
-                            <p className={isDark ? 'text-blue-200' : 'text-blue-700'}>
-                              <strong>Most Likely:</strong> {phicorResults.synthesis.primary_diagnosis}
-                            </p>
+                        <div className="space-y-3 text-sm">
+                          <div className="flex gap-4 flex-wrap">
+                            {phicorResults.synthesis.primary_diagnosis && (
+                              <div className={`flex-1 min-w-[200px] p-3 rounded-lg ${isDark ? 'bg-emerald-900/30' : 'bg-emerald-100/50'}`}>
+                                <p className={`text-xs ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>Most Likely</p>
+                                <p className={`font-semibold ${isDark ? 'text-emerald-200' : 'text-emerald-800'}`}>
+                                  {phicorResults.synthesis.primary_diagnosis}
+                                </p>
+                              </div>
+                            )}
+                            {phicorResults.synthesis.key_alternative && (
+                              <div className={`flex-1 min-w-[200px] p-3 rounded-lg ${isDark ? 'bg-blue-900/30' : 'bg-blue-100/50'}`}>
+                                <p className={`text-xs ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>Key Alternative</p>
+                                <p className={`font-semibold ${isDark ? 'text-blue-200' : 'text-blue-800'}`}>
+                                  {phicorResults.synthesis.key_alternative}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                          
+                          {phicorResults.synthesis.clinical_decision_pathway && (
+                            <div className={`p-3 rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-white'}`}>
+                              <p className={`text-xs font-medium mb-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Clinical Decision Pathway</p>
+                              <p className={isDark ? 'text-gray-200' : 'text-gray-700'}>
+                                {phicorResults.synthesis.clinical_decision_pathway}
+                              </p>
+                            </div>
                           )}
-                          {phicorResults.synthesis.key_alternative && (
-                            <p className={isDark ? 'text-blue-200' : 'text-blue-700'}>
-                              <strong>Key Alternative:</strong> {phicorResults.synthesis.key_alternative}
-                            </p>
-                          )}
+                          
                           {phicorResults.synthesis.discriminating_tests?.length > 0 && (
                             <div className="mt-2">
                               <strong className={isDark ? 'text-blue-200' : 'text-blue-700'}>Discriminating Tests:</strong>
-                              <ul className="mt-1 space-y-1">
+                              <div className="mt-2 space-y-2">
                                 {phicorResults.synthesis.discriminating_tests.map((test, idx) => (
-                                  <li key={idx} className={`text-xs ${isDark ? 'text-blue-300' : 'text-blue-600'}`}>
-                                    • {typeof test === 'object' ? test.test : test}
-                                    {test.expected_finding && <span className="opacity-70"> → {test.expected_finding}</span>}
-                                  </li>
+                                  <div key={idx} className={`p-2 rounded-lg text-xs ${isDark ? 'bg-blue-900/30' : 'bg-blue-100/30'}`}>
+                                    <span className={`font-medium ${isDark ? 'text-blue-200' : 'text-blue-800'}`}>
+                                      {typeof test === 'object' ? test.test : test}
+                                    </span>
+                                    {test.expected_finding && (
+                                      <span className={`block mt-1 ${isDark ? 'text-blue-300' : 'text-blue-600'}`}>
+                                        → Expected: {test.expected_finding}
+                                      </span>
+                                    )}
+                                    {test.rationale && (
+                                      <span className={`block mt-1 italic ${isDark ? 'text-blue-400' : 'text-blue-500'}`}>
+                                        {test.rationale}
+                                      </span>
+                                    )}
+                                  </div>
                                 ))}
-                              </ul>
+                              </div>
                             </div>
+                          )}
+                          
+                          {phicorResults.synthesis.clinical_uncertainty && (
+                            <p className={`text-xs italic mt-2 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                              ⚠️ {phicorResults.synthesis.clinical_uncertainty}
+                            </p>
                           )}
                         </div>
                       </div>
