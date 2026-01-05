@@ -301,6 +301,7 @@ const DifferentialPage = () => {
     try {
       let findings = [];
       let symptoms = [];
+      let result = null; // Declare result at function scope
       
       if (usePhiCor) {
         // Use PhiCor Analysis - comprehensive physiology-first reasoning
