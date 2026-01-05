@@ -1,0 +1,439 @@
+{
+  "experts": [
+    {
+      "id": "442c6979-2987-423a-b383-e07440dd408a",
+      "email": "admin@phicore.ai",
+      "password_hash": "$2b$12$hBVHUVqwZoUGD1W9FXS/kOld8CZcag/BhjTYBrfJNxXICrxMkk2k2",
+      "name": "Dr. Super Admin",
+      "specialty": "Cardiology",
+      "credentials": "MD, PhD",
+      "institution": "PhiCore Medical",
+      "role": "super_admin",
+      "created_at": "2026-01-03T21:07:04.392502+00:00",
+      "diseases_reviewed": 0,
+      "pending_changes": 0,
+      "last_login": "2026-01-03T22:07:05.657479+00:00"
+    },
+    {
+      "id": "37da11d8-2eb4-475f-bcc7-b572b56be595",
+      "email": "testexpert@phicore.ai",
+      "password_hash": "$2b$12$gnQTOgb.SgrdFD45qZlULesDzmW7zl0zO12Tyy5srhPOOZBlY2zZe",
+      "name": "Dr. Test Expert",
+      "specialty": "Neurology",
+      "credentials": "MD",
+      "institution": "Test Hospital",
+      "role": "expert",
+      "created_at": "2026-01-03T21:14:29.687816+00:00",
+      "diseases_reviewed": 0,
+      "pending_changes": 0,
+      "last_login": null
+    },
+    {
+      "id": "b8e547f0-b743-441d-8680-d966ed78c041",
+      "email": "testexpert1767474973@phicore.ai",
+      "password_hash": "$2b$12$IpyN/N9FPyV3McxfGO1GMOJCJDEHlYxq952JqbkQ.A3GkeNhYVZBe",
+      "name": "Dr. Test Expert",
+      "specialty": "Neurology",
+      "credentials": "MD",
+      "institution": "Test Hospital",
+      "role": "expert",
+      "created_at": "2026-01-03T21:16:14.632326+00:00",
+      "diseases_reviewed": 0,
+      "pending_changes": 0,
+      "last_login": null
+    },
+    {
+      "id": "065f3209-645c-431d-b597-95af39325470",
+      "email": "cardio.expert@test.com",
+      "password_hash": "$2b$12$Gwf1sn2oSe4fXokdTXi5fOjJBVWepEV144T4yroJB/eSvHg4TfmGW",
+      "name": "Dr. Cardiology Expert",
+      "specialty": "Cardiology",
+      "credentials": "MD",
+      "institution": "Test Hospital",
+      "role": "expert",
+      "created_at": "2026-01-03T21:30:19.331581+00:00",
+      "diseases_reviewed": 0,
+      "pending_changes": 0,
+      "last_login": "2026-01-03T21:31:49.360676+00:00"
+    },
+    {
+      "id": "38c02aed-b4b9-43f9-a7d1-fb317be7b097",
+      "email": "newexpert1767476912@test.com",
+      "password_hash": "$2b$12$OglAAfNvXMj5QUu8MXCn.u2/Mjhe0f2f2lB6RrWlkf4tSPnUM9QDO",
+      "name": "Dr. New Expert",
+      "specialty": "Cardiology",
+      "credentials": "MD",
+      "institution": "Test Hospital",
+      "role": "expert",
+      "created_at": "2026-01-03T21:48:34.105178+00:00",
+      "diseases_reviewed": 0,
+      "pending_changes": 0,
+      "last_login": null
+    },
+    {
+      "id": "25c1b4aa-8422-4050-8dc4-a55ccdbd5a5f",
+      "email": "admin@phicor.ai",
+      "password_hash": "$2b$12$V1pM7ae1EmS6EqV7ZCKameLZ6d5Z5NsT0gcKn98MJNuLJdDL0LB2S",
+      "name": "Dr. Super Admin",
+      "specialty": "General Medicine",
+      "credentials": "MD, PhD",
+      "institution": "PhiCor Medical",
+      "role": "super_admin",
+      "created_at": "2026-01-03T22:08:09.870485+00:00",
+      "diseases_reviewed": 0,
+      "pending_changes": 0,
+      "last_login": "2026-01-05T08:20:13.144637+00:00"
+    },
+    {
+      "id": "6ce77ac8-05e5-421c-99c5-2ffa69719f65",
+      "email": "workflow.test@phicor.ai",
+      "password_hash": "$2b$12$.qawzPtD9TMK.2JZpgmBFex/HnOcPTSwlO.4IRZe06.naGZWQTcsW",
+      "name": "Dr. Workflow Test",
+      "specialty": "Cardiology",
+      "credentials": "MD",
+      "institution": "Test Medical Center",
+      "role": "expert",
+      "created_at": "2026-01-03T23:15:07.861688+00:00",
+      "diseases_reviewed": 0,
+      "pending_changes": 0,
+      "last_login": null
+    },
+    {
+      "id": "59e5d3f4-f5da-43a9-8a1c-2ac4f15e279c",
+      "name": "Dr. Updated Expert",
+      "email": "newexpert@test.com",
+      "password_hash": "c822a0abf4ef0a5fc2a4c2010ed111e16af3ae95cee462a55e7877b8623ade36",
+      "role": "expert",
+      "specialty": "Neurology",
+      "institution": "Test Medical Center",
+      "is_active": false,
+      "created_at": "2026-01-04T15:42:27.071508+00:00",
+      "created_by": "25c1b4aa-8422-4050-8dc4-a55ccdbd5a5f",
+      "updated_at": "2026-01-04T15:42:27.133659+00:00",
+      "password_reset_at": "2026-01-04T15:42:27.174116+00:00",
+      "deactivated_at": "2026-01-04T15:42:27.213018+00:00"
+    }
+  ],
+  "knowledge_sources": [
+    {
+      "id": "1aa0150f-8b61-4218-9174-3920adba9508",
+      "disease_id": null,
+      "disease_name": "Atrial Fibrillation",
+      "source_type": "text",
+      "title": "Atrial Fibrillation Update 2024",
+      "url": null,
+      "file_id": null,
+      "file_name": null,
+      "content_preview": "Recent studies show that early rhythm control in atrial fibrillation patients reduces stroke risk by 20%. QTc prolongation threshold has been updated to 500ms for high-risk patients.",
+      "full_content": "Recent studies show that early rhythm control in atrial fibrillation patients reduces stroke risk by 20%. QTc prolongation threshold has been updated to 500ms for high-risk patients.",
+      "description": null,
+      "tags": [
+        "cardiology",
+        "ecg",
+        "guidelines"
+      ],
+      "status": "analyzed",
+      "uploaded_by": "25c1b4aa-8422-4050-8dc4-a55ccdbd5a5f",
+      "uploaded_by_name": "Dr. Super Admin",
+      "created_at": "2026-01-04T15:09:15.886579+00:00",
+      "analysis_result": {
+        "summary": "Early rhythm control in atrial fibrillation reduces stroke risk; QTc prolongation threshold updated for high-risk patients.",
+        "relevance_score": 95,
+        "suggested_changes": [
+          {
+            "change_type": "guideline_update",
+            "target": "atrial_fibrillation.rhythm_control",
+            "current_value": "not specified",
+            "proposed_value": "early rhythm control to reduce stroke risk by 20%",
+            "evidence_level": "established",
+            "confidence": 90,
+            "reasoning": "Recent studies show significant stroke risk reduction with early rhythm control.",
+            "source_quote": "Recent studies show that early rhythm control in atrial fibrillation patients reduces stroke risk by 20%."
+          },
+          {
+            "change_type": "parameter_update",
+            "target": "cardiac.qtc.high_risk_threshold",
+            "current_value": "previous threshold unknown",
+            "proposed_value": "500",
+            "unit": "ms",
+            "evidence_level": "emerging",
+            "confidence": 85,
+            "reasoning": "Updated QTc prolongation threshold to manage high-risk patients in atrial fibrillation.",
+            "source_quote": "QTc prolongation threshold has been updated to 500ms for high-risk patients."
+          }
+        ],
+        "affected_diseases": [
+          "Atrial Fibrillation"
+        ],
+        "key_findings": [
+          "Early rhythm control in atrial fibrillation reduces stroke risk by 20%.",
+          "QTc prolongation threshold for high-risk patients updated to 500ms."
+        ],
+        "warnings": []
+      },
+      "suggestions_generated": true,
+      "analyzed_at": "2026-01-04T15:09:21.495436+00:00",
+      "suggestions_count": 2
+    },
+    {
+      "id": "119fe20f-b2dc-4a2f-af77-fa6276923148",
+      "disease_id": null,
+      "disease_name": "Atrial Fibrillation",
+      "source_type": "text",
+      "title": "Atrial Fibrillation Update 2024",
+      "url": null,
+      "file_id": null,
+      "file_name": null,
+      "content_preview": "Recent studies show that early rhythm control in atrial fibrillation patients reduces stroke risk by 20%. QTc prolongation threshold has been updated to 500ms for high-risk patients.",
+      "full_content": "Recent studies show that early rhythm control in atrial fibrillation patients reduces stroke risk by 20%. QTc prolongation threshold has been updated to 500ms for high-risk patients.",
+      "description": null,
+      "tags": [
+        "cardiology",
+        "ecg",
+        "guidelines"
+      ],
+      "status": "analyzed",
+      "uploaded_by": "25c1b4aa-8422-4050-8dc4-a55ccdbd5a5f",
+      "uploaded_by_name": "Dr. Super Admin",
+      "created_at": "2026-01-04T15:10:32.716314+00:00",
+      "analysis_result": {
+        "summary": "Recent studies suggest that early rhythm control in atrial fibrillation reduces stroke risk by 20% and update the QTc prolongation threshold to 500ms for high-risk patients.",
+        "relevance_score": 85,
+        "suggested_changes": [
+          {
+            "change_type": "guideline_update",
+            "target": "Atrial Fibrillation Treatment Protocol",
+            "current_value": "Early rhythm control not prioritized",
+            "proposed_value": "Prioritize early rhythm control",
+            "unit": null,
+            "evidence_level": "emerging",
+            "confidence": 80,
+            "reasoning": "Early rhythm control reduces stroke risk by 20% in atrial fibrillation patients.",
+            "source_quote": "Recent studies show that early rhythm control in atrial fibrillation patients reduces stroke risk by 20%."
+          },
+          {
+            "change_type": "parameter_update",
+            "target": "Cardiac.QTc Interval.prolongation_threshold",
+            "current_value": "450ms for high-risk patients",
+            "proposed_value": "500ms",
+            "unit": "ms",
+            "evidence_level": "novel",
+            "confidence": 85,
+            "reasoning": "QTc prolongation threshold updated to prevent adverse cardiac events in high-risk patients.",
+            "source_quote": "QTc prolongation threshold has been updated to 500ms for high-risk patients."
+          }
+        ],
+        "affected_diseases": [
+          "Atrial Fibrillation"
+        ],
+        "key_findings": [
+          "Early rhythm control reduces stroke risk by 20% in atrial fibrillation.",
+          "QTc prolongation threshold updated to 500ms for high-risk patients."
+        ],
+        "warnings": []
+      },
+      "suggestions_generated": true,
+      "analyzed_at": "2026-01-04T15:10:36.160369+00:00",
+      "suggestions_count": 2
+    },
+    {
+      "id": "3276bd58-b8b5-41a3-a103-336f49cd3fbb",
+      "disease_id": null,
+      "disease_name": "Atrial Fibrillation",
+      "source_type": "text",
+      "title": "Atrial Fibrillation Update 2024",
+      "url": null,
+      "file_id": null,
+      "file_name": null,
+      "content_preview": "Recent studies show that early rhythm control in atrial fibrillation patients reduces stroke risk by 20%. QTc prolongation threshold has been updated to 500ms for high-risk patients.",
+      "full_content": "Recent studies show that early rhythm control in atrial fibrillation patients reduces stroke risk by 20%. QTc prolongation threshold has been updated to 500ms for high-risk patients.",
+      "description": null,
+      "tags": [
+        "cardiology",
+        "ecg",
+        "guidelines"
+      ],
+      "status": "analyzed",
+      "uploaded_by": "25c1b4aa-8422-4050-8dc4-a55ccdbd5a5f",
+      "uploaded_by_name": "Dr. Super Admin",
+      "created_at": "2026-01-04T15:11:00.532116+00:00",
+      "analysis_result": {
+        "summary": "Early rhythm control in atrial fibrillation reduces stroke risk. QTc prolongation threshold updated for high-risk patients.",
+        "relevance_score": 85,
+        "suggested_changes": [
+          {
+            "change_type": "guideline_update",
+            "target": "atrial_fibrillation_treatment_protocol",
+            "current_value": "Unknown",
+            "proposed_value": "Early rhythm control",
+            "unit": null,
+            "evidence_level": "emerging",
+            "confidence": 80,
+            "reasoning": "Early rhythm control has been shown to reduce stroke risk by 20%.",
+            "source_quote": "Recent studies show that early rhythm control in atrial fibrillation patients reduces stroke risk by 20%."
+          },
+          {
+            "change_type": "parameter_update",
+            "target": "cardiac.qtc.threshold",
+            "current_value": "Unknown",
+            "proposed_value": 500,
+            "unit": "ms",
+            "evidence_level": "novel",
+            "confidence": 75,
+            "reasoning": "The QTc prolongation threshold has been updated to 500ms for high-risk patients, providing a new standard.",
+            "source_quote": "QTc prolongation threshold has been updated to 500ms for high-risk patients."
+          }
+        ],
+        "affected_diseases": [
+          "Atrial Fibrillation"
+        ],
+        "key_findings": [
+          "Early rhythm control reduces stroke risk in atrial fibrillation by 20%.",
+          "QTc prolongation threshold updated to 500ms for high-risk patients."
+        ],
+        "warnings": []
+      },
+      "suggestions_generated": true,
+      "analyzed_at": "2026-01-04T15:11:03.596230+00:00",
+      "suggestions_count": 2
+    }
+  ],
+  "knowledge_suggestions": [
+    {
+      "id": "e101ab1a-e14f-4170-959f-ecf62d327a70",
+      "source_id": "1aa0150f-8b61-4218-9174-3920adba9508",
+      "disease_id": null,
+      "disease_name": "Atrial Fibrillation",
+      "change_type": "guideline_update",
+      "target": "atrial_fibrillation.rhythm_control",
+      "current_value": "not specified",
+      "proposed_value": "early rhythm control to reduce stroke risk by 20%",
+      "unit": null,
+      "evidence_level": "established",
+      "confidence": 90,
+      "reasoning": "Recent studies show significant stroke risk reduction with early rhythm control.",
+      "source_quote": "Recent studies show that early rhythm control in atrial fibrillation patients reduces stroke risk by 20%.",
+      "status": "pending",
+      "created_at": "2026-01-04T15:09:21.497073+00:00",
+      "reviewed_at": null,
+      "reviewed_by": null,
+      "reviewer_notes": null
+    },
+    {
+      "id": "3e6d4318-e627-41b5-95fc-04f15947b02c",
+      "source_id": "1aa0150f-8b61-4218-9174-3920adba9508",
+      "disease_id": null,
+      "disease_name": "Atrial Fibrillation",
+      "change_type": "parameter_update",
+      "target": "cardiac.qtc.high_risk_threshold",
+      "current_value": "previous threshold unknown",
+      "proposed_value": "500",
+      "unit": "ms",
+      "evidence_level": "emerging",
+      "confidence": 85,
+      "reasoning": "Updated QTc prolongation threshold to manage high-risk patients in atrial fibrillation.",
+      "source_quote": "QTc prolongation threshold has been updated to 500ms for high-risk patients.",
+      "status": "approved",
+      "created_at": "2026-01-04T15:09:21.521083+00:00",
+      "reviewed_at": "2026-01-04T15:09:21.711704+00:00",
+      "reviewed_by": "25c1b4aa-8422-4050-8dc4-a55ccdbd5a5f",
+      "reviewer_notes": "Approved after review - Knowledge Bank update is valid",
+      "reviewer_name": "Dr. Super Admin"
+    },
+    {
+      "id": "d7ec4586-33ba-4bb4-85c7-627c8331a4d0",
+      "source_id": "119fe20f-b2dc-4a2f-af77-fa6276923148",
+      "disease_id": null,
+      "disease_name": "Atrial Fibrillation",
+      "change_type": "guideline_update",
+      "target": "Atrial Fibrillation Treatment Protocol",
+      "current_value": "Early rhythm control not prioritized",
+      "proposed_value": "Prioritize early rhythm control",
+      "unit": null,
+      "evidence_level": "emerging",
+      "confidence": 80,
+      "reasoning": "Early rhythm control reduces stroke risk by 20% in atrial fibrillation patients.",
+      "source_quote": "Recent studies show that early rhythm control in atrial fibrillation patients reduces stroke risk by 20%.",
+      "status": "pending",
+      "created_at": "2026-01-04T15:10:36.161664+00:00",
+      "reviewed_at": null,
+      "reviewed_by": null,
+      "reviewer_notes": null
+    },
+    {
+      "id": "6f23fe23-5763-4364-8e20-675280cc9b7f",
+      "source_id": "119fe20f-b2dc-4a2f-af77-fa6276923148",
+      "disease_id": null,
+      "disease_name": "Atrial Fibrillation",
+      "change_type": "parameter_update",
+      "target": "Cardiac.QTc Interval.prolongation_threshold",
+      "current_value": "450ms for high-risk patients",
+      "proposed_value": "500ms",
+      "unit": "ms",
+      "evidence_level": "novel",
+      "confidence": 85,
+      "reasoning": "QTc prolongation threshold updated to prevent adverse cardiac events in high-risk patients.",
+      "source_quote": "QTc prolongation threshold has been updated to 500ms for high-risk patients.",
+      "status": "approved",
+      "created_at": "2026-01-04T15:10:36.162136+00:00",
+      "reviewed_at": "2026-01-04T15:10:36.314762+00:00",
+      "reviewed_by": "25c1b4aa-8422-4050-8dc4-a55ccdbd5a5f",
+      "reviewer_notes": "Approved after review - Knowledge Bank update is valid",
+      "reviewer_name": "Dr. Super Admin"
+    },
+    {
+      "id": "764d6ec1-ee86-4900-a0cb-b6cddb2efe2c",
+      "source_id": "3276bd58-b8b5-41a3-a103-336f49cd3fbb",
+      "disease_id": null,
+      "disease_name": "Atrial Fibrillation",
+      "change_type": "guideline_update",
+      "target": "atrial_fibrillation_treatment_protocol",
+      "current_value": "Unknown",
+      "proposed_value": "Early rhythm control",
+      "unit": null,
+      "evidence_level": "emerging",
+      "confidence": 80,
+      "reasoning": "Early rhythm control has been shown to reduce stroke risk by 20%.",
+      "source_quote": "Recent studies show that early rhythm control in atrial fibrillation patients reduces stroke risk by 20%.",
+      "status": "pending",
+      "created_at": "2026-01-04T15:11:03.597932+00:00",
+      "reviewed_at": null,
+      "reviewed_by": null,
+      "reviewer_notes": null
+    },
+    {
+      "id": "b2547ab4-10c7-4431-826a-239f5e690828",
+      "source_id": "3276bd58-b8b5-41a3-a103-336f49cd3fbb",
+      "disease_id": null,
+      "disease_name": "Atrial Fibrillation",
+      "change_type": "parameter_update",
+      "target": "cardiac.qtc.threshold",
+      "current_value": "Unknown",
+      "proposed_value": 500,
+      "unit": "ms",
+      "evidence_level": "novel",
+      "confidence": 75,
+      "reasoning": "The QTc prolongation threshold has been updated to 500ms for high-risk patients, providing a new standard.",
+      "source_quote": "QTc prolongation threshold has been updated to 500ms for high-risk patients.",
+      "status": "approved",
+      "created_at": "2026-01-04T15:11:03.598389+00:00",
+      "reviewed_at": "2026-01-04T15:11:03.754732+00:00",
+      "reviewed_by": "25c1b4aa-8422-4050-8dc4-a55ccdbd5a5f",
+      "reviewer_notes": "Approved after review - Knowledge Bank update is valid",
+      "reviewer_name": "Dr. Super Admin"
+    }
+  ],
+  "system_settings": [
+    {
+      "id": "global",
+      "auto_search_enabled": true,
+      "auto_search_interval_days": 14,
+      "ai_analysis_model": "gpt-4o",
+      "last_auto_search": null,
+      "next_auto_search": null,
+      "created_at": "2026-01-04T15:00:46.768916+00:00",
+      "updated_at": "2026-01-04T15:11:00.494350+00:00",
+      "updated_by": "25c1b4aa-8422-4050-8dc4-a55ccdbd5a5f"
+    }
+  ]
+}
