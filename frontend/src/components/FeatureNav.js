@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { Moon, Sun, Settings } from 'lucide-react';
+import RegionSelector from './RegionSelector';
 
 /**
  * Greek Symbol Navigation Component
