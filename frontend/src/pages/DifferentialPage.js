@@ -1533,7 +1533,67 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                         {/* Expanded details */}
                         {expandedDisease === idx && (
                           <div className={`p-4 border-t ${isDark ? 'border-gray-700 bg-gray-800/30' : 'border-gray-200 bg-gray-50'}`}>
-                            {/* PhiCor Matching Parameters */}
+                            {/* Clinical Reasoning from AI */}
+                            {diagnosis.clinical_reasoning && (
+                              <div className="mb-4">
+                                <h4 className="text-xs font-semibold text-blue-400 uppercase mb-2 flex items-center gap-1">
+                                  <Brain className="w-3 h-3" /> Clinical Reasoning
+                                </h4>
+                                <p className={`text-sm p-3 rounded-lg ${isDark ? 'bg-blue-900/20' : 'bg-blue-50'}`}>
+                                  {diagnosis.clinical_reasoning}
+                                </p>
+                              </div>
+                            )}
+                            
+                            {/* Supporting Findings */}
+                            {diagnosis.supporting_findings?.length > 0 && (
+                              <div className="mb-4">
+                                <h4 className="text-xs font-semibold text-emerald-400 uppercase mb-2 flex items-center gap-1">
+                                  <CheckCircle className="w-3 h-3" /> Supporting Findings
+                                </h4>
+                                <div className="flex flex-wrap gap-1">
+                                  {diagnosis.supporting_findings.map((finding, i) => (
+                                    <span key={i} className={`text-xs px-2 py-1 rounded-full ${isDark ? 'bg-emerald-900/30 text-emerald-400' : 'bg-emerald-100 text-emerald-700'}`}>
+                                      {finding}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {/* Key Discriminating Features */}
+                            {diagnosis.key_discriminating_features?.length > 0 && (
+                              <div className="mb-4">
+                                <h4 className="text-xs font-semibold text-purple-400 uppercase mb-2 flex items-center gap-1">
+                                  <Target className="w-3 h-3" /> Key Discriminating Features
+                                </h4>
+                                <div className="flex flex-wrap gap-1">
+                                  {diagnosis.key_discriminating_features.map((feature, i) => (
+                                    <span key={i} className={`text-xs px-2 py-1 rounded-full ${isDark ? 'bg-purple-900/30 text-purple-400' : 'bg-purple-100 text-purple-700'}`}>
+                                      {feature}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {/* Against Diagnosis */}
+                            {diagnosis.against_diagnosis?.length > 0 && (
+                              <div className="mb-4">
+                                <h4 className="text-xs font-semibold text-amber-400 uppercase mb-2 flex items-center gap-1">
+                                  <AlertTriangle className="w-3 h-3" /> Against This Diagnosis
+                                </h4>
+                                <div className="flex flex-wrap gap-1">
+                                  {diagnosis.against_diagnosis.map((contra, i) => (
+                                    <span key={i} className={`text-xs px-2 py-1 rounded-full ${isDark ? 'bg-amber-900/30 text-amber-400' : 'bg-amber-100 text-amber-700'}`}>
+                                      {contra}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {/* PhiCor Matching Parameters (legacy) */}
                             {diagnosis.matchingParameters?.length > 0 && (
                               <div className="mb-4">
                                 <h4 className="text-xs font-semibold text-emerald-400 uppercase mb-2 flex items-center gap-1">
@@ -1549,7 +1609,7 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                               </div>
                             )}
                             
-                            {/* PhiCor Missing Features */}
+                            {/* PhiCor Missing Features (legacy) */}
                             {diagnosis.missingFeatures?.length > 0 && (
                               <div className="mb-4">
                                 <h4 className="text-xs font-semibold text-amber-400 uppercase mb-2 flex items-center gap-1">
@@ -1564,20 +1624,6 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                                 </div>
                               </div>
                             )}
-                            
-                            {/* Clinical Reasoning (for non-PhiCor results) */}
-                            {!diagnosis.matchingParameters && (
-                            <div className="mb-4">
-                              <h4 className="text-xs font-semibold text-emerald-400 uppercase mb-2 flex items-center gap-1">
-                                <Brain className="w-3 h-3" /> Clinical Reasoning
-                              </h4>
-                              <div className={`text-sm p-3 rounded-lg ${isDark ? 'bg-emerald-900/20' : 'bg-emerald-50'}`}>
-                                {diagnosis.supportingEvidence?.length > 0 ? (
-                                  <ul className="space-y-2">
-                                    {diagnosis.supportingEvidence.slice(0, 4).map((ev, i) => (
-                                      <li key={i} className="flex items-start gap-2">
-                                        <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
-                                        <span>
                                           <strong>{ev.finding}</strong> {ev.direction === 'increase' ? '↑' : '↓'}: {ev.explanation || 'Consistent with diagnosis'}
                                         </span>
                                       </li>
