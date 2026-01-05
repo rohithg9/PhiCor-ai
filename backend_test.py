@@ -895,8 +895,8 @@ def test_phicor_clinical_analysis():
         print(f"❌ Error testing PhiCor Clinical Analysis: {e}")
         return False
 def run_all_tests():
-    """Run all PhiCor.ai Dashboard Data Display Feature tests"""
-    print("🧪 PHICOR.AI DASHBOARD DATA DISPLAY TESTING")
+    """Run all PhiCor.ai Backend Feature tests"""
+    print("🧪 PHICOR.AI BACKEND TESTING")
     print("=" * 80)
     print("Testing specific requirements from review request:")
     print("1. Admin Authentication - Admin login with admin@phicor.ai / admin123")
@@ -905,8 +905,9 @@ def run_all_tests():
     print("4. Clinical Evidence Data Structure - Verify tab data fields")
     print("5. Disease Progression Data - Verify timeline stages structure")
     print("6. New Knowledge Endpoint - Test GET /api/knowledge/disease/{disease_id}")
+    print("7. PhiCor Clinical Analysis - Test POST /api/clinical/interpret")
     print("=" * 80)
-    print("NOTE: This tests the backend data for PhiCor.ai dashboard features")
+    print("NOTE: This tests the backend APIs for PhiCor.ai platform features")
     print("=" * 80)
     
     test_results = {}
