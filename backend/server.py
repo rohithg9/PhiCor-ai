@@ -7142,15 +7142,13 @@ Provide a comprehensive clinical analysis in JSON format with these exact fields
 }}
 
 CRITICAL INSTRUCTIONS:
-1. Generate 15-20 differential diagnoses ranked by probability
+1. Generate 5-10 differential diagnoses ranked by probability (focus on most likely)
 2. For EACH vital sign and lab value, provide normal ranges and clinical significance
 3. Provide detailed clinical reasoning for each diagnosis
 4. Include specific ICD-10 codes
-5. Be comprehensive but clinically focused
-6. Interpret ALL abbreviations (SOB, CP, HTN, T2DM, BNP, EF, etc.)
-7. Consider both common and important "can't miss" diagnoses
-8. Provide actionable management guidance
-9. Return ONLY valid JSON - no markdown, no explanation text"""
+5. Interpret ALL abbreviations (SOB, CP, HTN, T2DM, BNP, EF, etc.)
+6. Consider both common and important "can't miss" diagnoses
+7. Return ONLY valid JSON - ensure ALL brackets and braces are properly closed"""
 
         llm = LlmChat(
             api_key=llm_key,
