@@ -66,24 +66,16 @@ const LandingPage = () => {
     const preloadDiseases = async () => {
       try {
         const API_URL = process.env.REACT_APP_BACKEND_URL || '';
-        // Fetch diseases in background
-        const response = await fetch(`${API_URL}/api/diseases-db?include_params=true&limit=2500`);
+        // Fetch diseases in background - browser will cache the response
+        const response = await fetch(`${API_URL}/api/diseases-db?include_params=true&limit=2500`, {
+          cache: 'force-cache' // Use browser HTTP cache
+        });
         if (response.ok) {
           const data = await response.json();
-          // Store in sessionStorage for dashboard to use (faster than fetching again)
-          try {
-            // Store a timestamp and compressed disease data
-            const cacheData = {
-              timestamp: Date.now(),
-              diseases: data.diseases || []
-            };
-            sessionStorage.setItem('phicor_diseases_cache', JSON.stringify(cacheData));
-            console.log(`✅ Pre-loaded ${data.diseases?.length || 0} diseases for instant dashboard access`);
-          } catch (storageError) {
-            // If sessionStorage is full, try to clear and retry
-            sessionStorage.removeItem('phicor_diseases_cache');
-            console.log('Disease cache cleared due to storage limits');
-          }
+          // Store count only (the actual data is cached by browser HTTP cache)
+          window.phicorDiseasesPreloaded = true;
+          window.phicorDiseasesCount = data.diseases?.length || 0;
+          console.log(`✅ Pre-loaded ${data.diseases?.length || 0} diseases for instant dashboard access`);
         }
       } catch (error) {
         console.log('Disease pre-loading skipped');
