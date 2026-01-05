@@ -2879,8 +2879,6 @@ const DashboardMultiScale = () => {
           };
           console.log(`✅ Full data loaded in background: ${data.diseases?.length} diseases`);
         }
-          };
-        }
       } catch (error) {
         console.error('Error fetching diseases:', error);
       }
