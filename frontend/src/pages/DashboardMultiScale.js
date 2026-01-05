@@ -1695,6 +1695,105 @@ const ClinicalFindingsPanel = ({ disease, isExpanded, onToggle, alwaysExpanded =
                 </div>
               )}
 
+              {/* KNOWLEDGE TAB */}
+              {activeTab === 'knowledge' && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
+                    <BookOpen className="w-4 h-4 text-amber-400" />
+                    Knowledge Bank Sources
+                  </div>
+                  
+                  {loadingKnowledge ? (
+                    <div className="text-center py-8">
+                      <Loader2 className="w-6 h-6 mx-auto animate-spin text-amber-400" />
+                      <p className="text-sm text-muted-foreground mt-2">Loading knowledge sources...</p>
+                    </div>
+                  ) : knowledgeData && (knowledgeData.sources?.length > 0 || knowledgeData.approved_updates?.length > 0) ? (
+                    <>
+                      {/* Knowledge Sources */}
+                      {knowledgeData.sources?.length > 0 && (
+                        <div className="space-y-2">
+                          <h5 className="text-xs text-amber-400 uppercase tracking-wider">Reference Sources</h5>
+                          {knowledgeData.sources.map((source, i) => (
+                            <div 
+                              key={i} 
+                              className="p-3 rounded-lg border bg-amber-500/5 border-amber-500/20"
+                            >
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="flex-1 min-w-0">
+                                  <span className="font-medium text-sm">{source.title}</span>
+                                  <p className="text-xs text-muted-foreground mt-1">{source.description}</p>
+                                </div>
+                                <Badge variant="outline" className="text-[9px] shrink-0 border-amber-500/30 text-amber-400">
+                                  {source.source_type}
+                                </Badge>
+                              </div>
+                              {source.url && (
+                                <a 
+                                  href={source.url} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-xs text-blue-400 hover:underline mt-2 inline-flex items-center gap-1"
+                                >
+                                  View Source <ChevronRight className="w-3 h-3" />
+                                </a>
+                              )}
+                              {source.tags && (
+                                <div className="flex flex-wrap gap-1 mt-2">
+                                  {source.tags.split(',').map((tag, ti) => (
+                                    <Badge key={ti} variant="secondary" className="text-[9px]">
+                                      {tag.trim()}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      
+                      {/* Approved Updates */}
+                      {knowledgeData.approved_updates?.length > 0 && (
+                        <div className="space-y-2 mt-4">
+                          <h5 className="text-xs text-green-400 uppercase tracking-wider flex items-center gap-1">
+                            <Check className="w-3 h-3" /> Approved Updates
+                          </h5>
+                          {knowledgeData.approved_updates.map((update, i) => (
+                            <div 
+                              key={i} 
+                              className="p-3 rounded-lg border bg-green-500/5 border-green-500/20"
+                            >
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-medium text-sm">{update.target}</span>
+                                <Badge className="text-[9px] bg-green-500/20 text-green-400">
+                                  {update.change_type}
+                                </Badge>
+                              </div>
+                              {update.proposed_value && (
+                                <p className="text-sm">
+                                  <span className="text-muted-foreground">Value: </span>
+                                  <span className="text-green-400 font-medium">{update.proposed_value}</span>
+                                  {update.unit && <span className="text-muted-foreground"> {update.unit}</span>}
+                                </p>
+                              )}
+                              {update.reasoning && (
+                                <p className="text-xs text-muted-foreground mt-1">{update.reasoning}</p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <BookOpen className="w-12 h-12 mx-auto mb-4 opacity-30" />
+                      <p className="text-sm">No knowledge sources available for this condition</p>
+                      <p className="text-xs mt-1">Experts can upload guidelines and research via the Expert Dashboard</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Pathophysiology Section */}
               {pathophysiology.mechanism && (
                 <div className="mt-4 p-3 rounded-lg bg-accent/5 border border-border/50">
