@@ -682,15 +682,17 @@ def test_new_knowledge_endpoint():
 def test_phicor_clinical_analysis():
     """Test 7: PhiCor Clinical Analysis - Test POST /api/clinical/interpret"""
     
-    print("\n🔬 TEST 7: PHICOR CLINICAL ANALYSIS")
+    print("\n🔬 TEST 7: PHICOR CLINICAL ANALYSIS - COMPREHENSIVE AI-POWERED")
     print("=" * 50)
-    print("Testing requirements from review request:")
-    print("- Test POST /api/clinical/interpret with specific clinical text")
-    print("- Verify two-phase architecture: AI parses text → PhiCor Engine matches against database")
-    print("- Verify response contains all required fields")
-    print("- Verify diagnoses come from MongoDB database (1974 diseases), NOT AI-generated")
+    print("Testing NEW Comprehensive PhiCor Clinical Analysis requirements:")
+    print("- Test POST /api/clinical/interpret with specific clinical case")
+    print("- Verify comprehensive AI-powered response structure")
+    print("- Verify all required fields: patient_summary, clinical_findings, dominant_syndromes")
+    print("- Verify differentials with 10+ diagnoses, ICD codes, clinical reasoning")
+    print("- Verify synthesis with discriminating tests and clinical decision pathway")
+    print("- Verify management considerations and safety alerts")
     
-    # Test clinical text from review request
+    # Test clinical text from review request - EXACT case
     test_clinical_text = "55 year old male with fever 102F, cough, shortness of breath, SpO2 92%, WBC 15000, CRP elevated. PMH: T2DM, HTN. Echo shows EF 35%."
     
     try:
