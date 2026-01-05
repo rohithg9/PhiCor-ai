@@ -3202,9 +3202,18 @@ const DashboardMultiScale = () => {
             newValue = absoluteValue;
             // If we have both value and normal values, use those for base
             if (mod.normal_min !== undefined || mod.normal_max !== undefined) {
-              baseValue = (mod.normal_min || 0 + mod.normal_max || 100) / 2;
-              if (mod.normal_min && mod.normal_max) {
-                baseValue = (mod.normal_min + mod.normal_max) / 2;
+              // Calculate midpoint of normal range as baseline
+              const normalMin = mod.normal_min || 0;
+              const normalMax = mod.normal_max || (normalMin * 2) || 100;
+              baseValue = (normalMin + normalMax) / 2;
+            } else {
+              // Try to estimate baseline from the change percent if available
+              if (changePercent !== undefined && changePercent !== null && changePercent !== 0) {
+                const sign = direction === 'decrease' ? -1 : 1;
+                // If we have absolute value and change percent, derive baseline
+                // newValue = baseValue * (1 + sign * changePercent / 100)
+                // so: baseValue = newValue / (1 + sign * changePercent / 100)
+                baseValue = absoluteValue / (1 + sign * Math.abs(changePercent) / 100);
               }
             }
           } else if (changePercent !== undefined && changePercent !== null) {
