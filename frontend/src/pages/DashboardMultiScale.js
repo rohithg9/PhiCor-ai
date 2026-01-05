@@ -968,7 +968,7 @@ const RelevantCalculatorsPanel = ({ diseaseId, diseaseName, organId, isExpanded,
 // CLINICAL FINDINGS PANEL - Comprehensive disease data display
 // ===========================================
 const ClinicalFindingsPanel = ({ disease, isExpanded, onToggle, alwaysExpanded = false }) => {
-  const [activeTab, setActiveTab] = React.useState('symptoms');
+  const [activeTab, setActiveTab] = React.useState('overview');
   const expanded = alwaysExpanded || isExpanded;
   
   if (!disease) return null;
@@ -976,6 +976,17 @@ const ClinicalFindingsPanel = ({ disease, isExpanded, onToggle, alwaysExpanded =
   // Get clinical data from multiple sources - check ALL possible locations
   const comprehensiveModel = disease.comprehensive_model || {};
   const comprehensiveClinical = comprehensiveModel.clinicalPresentation || {};
+  
+  // Extract additional comprehensive data
+  const geneticFactors = comprehensiveModel.geneticFactors || disease.geneticFactors || null;
+  const novelEquations = comprehensiveModel.novelEquations || disease.novelEquations || [];
+  const progressionData = comprehensiveModel.progression || disease.progression || [];
+  const epidemiologyData = disease.epidemiology || {};
+  const pathophysiologyText = typeof disease.pathophysiology === 'string' 
+    ? disease.pathophysiology 
+    : (disease.pathophysiology?.description || disease.pathophysiology?.mechanism || '');
+  const prognosisData = disease.prognosis || comprehensiveModel.prognosis || '';
+  const treatmentData = disease.treatment || comprehensiveModel.treatment || {};
   
   // Check both naming conventions: clinicalPresentation and clinical_presentation
   const regularClinical = disease.clinicalPresentation || disease.clinical_presentation || {};
