@@ -7182,17 +7182,6 @@ FINAL QUALITY CHECK:
 Convert all values to {unit_system} units. Return ONLY valid JSON."""
 
         llm = LlmChat(
-  "confidence": 0.75
-}}
-
-IMPORTANT:
-- Interpret ALL abbreviations (SOB, CP, HTN, DM, CKD, MI, EF, BNP, etc.)
-- Convert all values to {unit_system} units
-- Be conservative with probabilities
-- Do not recommend treatments
-- Return ONLY valid JSON"""
-
-        llm = LlmChat(
             api_key=llm_key,
             session_id=f"phicor_analysis_{datetime.now().strftime('%H%M%S')}",
             system_message=system_prompt
@@ -7221,6 +7210,8 @@ IMPORTANT:
                 "symptoms": [],
                 "syndromes": [],
                 "differentials": [],
+                "management": [],
+                "safety_alerts": [],
                 "synthesis": {},
                 "summary": "Failed to interpret clinical text",
                 "confidence": 0
@@ -7232,6 +7223,8 @@ IMPORTANT:
             "symptoms": result.get("symptoms", []),
             "syndromes": result.get("syndromes", []),
             "differentials": result.get("differentials", []),
+            "management": result.get("management", []),
+            "safety_alerts": result.get("safety_alerts", []),
             "synthesis": result.get("synthesis", {}),
             "summary": result.get("summary", ""),
             "confidence": result.get("confidence", 0.5)
