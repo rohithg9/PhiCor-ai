@@ -5,6 +5,7 @@ import { Toaster } from "./components/ui/sonner";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { ExpertProvider } from "./context/ExpertContext";
+import { RegionProvider } from "./context/RegionContext";
 import LandingPage from "./pages/LandingPage";
 import AuthPage from "./pages/AuthPage";
 import Dashboard from "./pages/DashboardMultiScale";
