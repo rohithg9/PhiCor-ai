@@ -6972,6 +6972,127 @@ Report any significant updates that should be incorporated into a medical knowle
         raise HTTPException(status_code=500, detail=f"Auto-search failed: {str(e)}")
 
 
+# ============================================================
+# AI CLINICAL TEXT INTERPRETATION ENDPOINT
+# ============================================================
+
+class ClinicalTextRequest(BaseModel):
+    text: str
+    region: str = "US"  # US, UK, EU, IN, ASIA
+    source_type: str = "free_text"  # free_text, emr, document
+
+class ExtractedFinding(BaseModel):
+    parameter_id: str
+    name: str
+    value: Optional[float] = None
+    unit: str = ""
+    direction: str = "normal"  # increase, decrease, normal, present
+    severity: float = 0  # 0-3
+    type: str = "lab"  # lab, symptom, vital, imaging
+    original_text: str = ""
+
+class ClinicalInterpretationResponse(BaseModel):
+    success: bool
+    findings: List[Dict[str, Any]]
+    symptoms: List[str]
+    summary: str
+    confidence: float
+
+@api_router.post("/clinical/interpret", response_model=ClinicalInterpretationResponse)
+async def interpret_clinical_text(request: ClinicalTextRequest):
+    """
+    AI-powered clinical text interpretation.
+    Extracts structured findings from free-text clinical notes, EMR data, or documents.
+    Handles abbreviations, regional terminology, and various unit systems.
+    """
+    try:
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        
+        llm_key = os.environ.get('EMERGENT_LLM_KEY')
+        if not llm_key:
+            raise HTTPException(status_code=500, detail="LLM key not configured")
+        
+        # Determine unit system based on region
+        unit_system = "SI" if request.region in ["UK", "EU", "IN", "ASIA"] else "conventional"
+        
+        prompt = f"""You are a clinical data extraction expert. Analyze the following clinical text and extract ALL clinical findings in a structured format.
+
+CLINICAL TEXT:
+{request.text}
+
+REGIONAL CONTEXT: {request.region} (use {unit_system} units)
+
+Extract and return a JSON object with:
+1. "findings": Array of lab values, vital signs, and imaging findings. Each should have:
+   - "parameter_id": standardized ID (e.g., "creatinine", "glucose", "heart_rate", "troponin")
+   - "name": human readable name
+   - "value": numeric value (if available)
+   - "unit": the unit of measurement
+   - "direction": "increase", "decrease", or "normal"
+   - "severity": 0-3 scale (0=normal, 1=mild, 2=moderate, 3=severe)
+   - "type": "lab", "vital", or "imaging"
+   - "original_text": the original text snippet
+
+2. "symptoms": Array of symptom strings detected (e.g., ["chest pain", "dyspnea", "fatigue"])
+
+3. "summary": Brief clinical summary (1-2 sentences)
+
+4. "confidence": 0-1 confidence score
+
+IMPORTANT:
+- Interpret abbreviations: SOB=shortness of breath, CP=chest pain, HTN=hypertension, DM=diabetes, CKD=chronic kidney disease, MI=myocardial infarction, etc.
+- Handle regional terminology: "fall" can mean a fall event, "raised" means elevated
+- Convert values to {unit_system} units if needed
+- Mark findings as abnormal based on clinical context (e.g., "raised creatinine" is abnormal)
+- If a value is explicitly described as "raised", "elevated", "high", "low", etc., set the direction accordingly
+- For "creatinine kinase" interpret as "creatine kinase" (CK)
+
+Return ONLY valid JSON, no markdown or explanation."""
+
+        llm = LlmChat(
+            api_key=llm_key,
+            session_id=f"clinical_interpret_{datetime.now().strftime('%H%M%S')}",
+            system_message="You are a clinical data extraction expert. Return only valid JSON."
+        ).with_model("openai", "gpt-4o")
+        
+        response = await llm.send_message(UserMessage(text=prompt))
+        
+        # Parse response
+        content = response.strip()
+        if content.startswith('```'):
+            lines = content.split('\n')
+            content = '\n'.join(lines[1:-1] if lines[-1].strip() == '```' else lines[1:])
+            if content.startswith('json'):
+                content = content[4:]
+        content = content.strip()
+        
+        import json
+        try:
+            result = json.loads(content)
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse AI response: {e}")
+            logger.error(f"Response content: {content[:500]}")
+            return ClinicalInterpretationResponse(
+                success=False,
+                findings=[],
+                symptoms=[],
+                summary="Failed to interpret clinical text",
+                confidence=0
+            )
+        
+        return ClinicalInterpretationResponse(
+            success=True,
+            findings=result.get("findings", []),
+            symptoms=result.get("symptoms", []),
+            summary=result.get("summary", ""),
+            confidence=result.get("confidence", 0.8)
+        )
+        
+    except Exception as e:
+        logger.error(f"Clinical interpretation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Interpretation failed: {str(e)}")
+
+
 # Include router - MUST be after all routes are defined
 app.include_router(api_router)
 
