@@ -73,7 +73,8 @@ const DifferentialPage = () => {
   const [differentialResults, setDifferentialResults] = useState([]);
   const [expandedDisease, setExpandedDisease] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [useAI, setUseAI] = useState(true); // Toggle for AI interpretation
+  const [usePhiCor, setUsePhiCor] = useState(true); // Toggle for PhiCor Analysis
+  const [phicorResults, setPhicorResults] = useState(null); // Store full PhiCor analysis results
   
   // NEW: Clinical Synthesis state
   const [clinicalSynthesis, setClinicalSynthesis] = useState(null);
