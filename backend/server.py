@@ -7181,139 +7181,6 @@ When a single diagnosis cleanly explains symptoms, labs, and imaging, do NOT dil
 
 Convert all values to {unit_system} units. Return ONLY valid JSON."""
 
-STEP 1 — ABNORMAL PARAMETER EXTRACTION (MANDATORY)
-Systematically evaluate every provided parameter. For each abnormality:
-- Identify direction and magnitude
-- Assign organ system(s)
-- Identify physiologic process involved
-Do not infer disease at this stage.
-
-STEP 2 — ORGAN SYSTEM & SYNDROME SYNTHESIS
-Group abnormalities into coherent organ-system dysfunctions:
-- Cardiac systolic vs diastolic dysfunction
-- Volume overload vs hypovolemia
-- Renal filtration vs tubular dysfunction
-- Hepatic congestion vs intrinsic injury
-- Pulmonary gas exchange vs vascular pathology
-Then infer dominant clinical syndromes.
-
-STEP 3 — MULTIFACTORIAL DISEASE MATCHING
-For each disease model:
-- Compare expected parameter deviations (pattern + severity)
-- Evaluate how many abnormalities are explained
-- Penalize contradictions and missing anchors
-Diseases explaining the largest coherent cluster of abnormalities rank higher.
-
-STEP 4 — ANCHOR & SUPPRESSION RULES (STRICT)
-Each diagnosis must meet minimum anchor criteria.
-Hard-suppress diagnoses when:
-- Required pathognomonic features are absent
-- Epidemiology is implausible
-- Only 1-2 weak abnormalities match
-Rare or catastrophic diagnoses require strong, specific evidence.
-
-STEP 5 — CAUSE vs CONSEQUENCE vs TRIGGER
-Explicitly classify each condition as:
-- Primary diagnosis
-- Precipitating factor
-- Secondary complication
-- Important rule-out
-Do not label complications as primary diagnoses.
-
-STEP 6 — PROBABILITY CALIBRATION
-- Maximum probability for any diagnosis: ≤80%
-- Only one diagnosis may exceed 70%
-- Most diagnoses should fall between 25-60%
-- Probability must reflect uncertainty
-Avoid assigning identical probabilities to multiple conditions.
-
-STEP 7 — MANAGEMENT & TREATMENT CONTEXTUALIZATION
-For each diagnosis, surface management considerations using:
-- Present information as guideline-aligned considerations
-- Do not issue prescriptive treatment orders
-- Use language like "Guidelines typically recommend...", "Management may involve...", "Treatment selection depends on clinical context..."
-Purpose: Clinical context, educational value, decision support - NOT autonomous decision-making.
-
-STEP 8 — SAFETY ALERTS ("DO NOT MISS")
-Surface time-critical considerations when appropriate.
-- Frame as considerations, not diagnoses
-- Explain why they matter
-- Do not override primary diagnosis
-Example: "Important to consider: possible ischemic trigger contributing to heart failure exacerbation."
-
-Return a JSON object with this EXACT structure:
-{{
-  "findings": [
-    {{
-      "parameter_id": "ejection_fraction",
-      "name": "Ejection Fraction",
-      "value": 28,
-      "unit": "%",
-      "direction": "decrease",
-      "severity": 3,
-      "type": "clinical",
-      "organ_system": "cardiac",
-      "physiologic_implication": "Reduced systolic function indicating myocardial contractile impairment"
-    }}
-  ],
-  "symptoms": ["dyspnea", "orthopnea", "fatigue"],
-  "syndromes": [
-    "Acute decompensated heart failure with cardiorenal syndrome",
-    "Volume overload state with pulmonary congestion"
-  ],
-  "differentials": [
-    {{
-      "name": "Heart Failure with Reduced Ejection Fraction (HFrEF)",
-      "probability": 72,
-      "role": "Primary",
-      "matching_parameters": ["EF 28%", "BNP elevated", "cardiomegaly", "pulmonary edema"],
-      "missing_features": ["known CAD history confirmation"],
-      "icd_code": "I50.2"
-    }},
-    {{
-      "name": "Acute Coronary Syndrome",
-      "probability": 45,
-      "role": "Precipitating",
-      "matching_parameters": ["troponin elevated", "prior MI history"],
-      "missing_features": ["acute ECG changes", "chest pain"],
-      "icd_code": "I21.9"
-    }}
-  ],
-  "management": [
-    {{
-      "diagnosis": "HFrEF",
-      "approaches": [
-        "Guidelines typically recommend IV diuretics for acute volume overload",
-        "Guideline-directed medical therapy (GDMT) includes ACEi/ARB/ARNI, beta-blockers, MRA",
-        "Consideration of device therapy (ICD, CRT) based on EF and QRS duration"
-      ],
-      "monitoring": ["Daily weights", "I/O balance", "Renal function", "Electrolytes"],
-      "cautions": ["Monitor for cardiorenal syndrome with aggressive diuresis"],
-      "source": "ACC/AHA Heart Failure Guidelines"
-    }}
-  ],
-  "safety_alerts": [
-    "Important to consider: elevated troponin may indicate acute ischemic trigger - evaluate for ACS",
-    "Cardiorenal syndrome present - monitor renal function closely with diuresis"
-  ],
-  "synthesis": {{
-    "primary_diagnosis": "Acute decompensated HFrEF, likely ischemic etiology, with cardiorenal syndrome",
-    "key_alternative": "Acute coronary syndrome as precipitating trigger",
-    "discriminating_tests": ["Serial troponins", "ECG", "Coronary angiography if ACS suspected"]
-  }},
-  "summary": "72-year-old male with acute decompensated heart failure (HFrEF) with EF 28%, complicated by cardiorenal syndrome. Elevated troponin warrants evaluation for ischemic trigger.",
-  "confidence": 0.75
-}}
-
-FINAL QUALITY CHECK:
-- No rare disease without anchors
-- No more than one diagnosis >70%
-- Management content is non-prescriptive
-- Complications are not mislabeled as primary
-- Output would not mislead a clinician
-
-Convert all values to {unit_system} units. Return ONLY valid JSON."""
-
         llm = LlmChat(
             api_key=llm_key,
             session_id=f"phicor_analysis_{datetime.now().strftime('%H%M%S')}",
@@ -7339,9 +7206,9 @@ Convert all values to {unit_system} units. Return ONLY valid JSON."""
             logger.error(f"Response content: {content[:500]}")
             return {
                 "success": False,
+                "dominant_syndromes": [],
                 "findings": [],
                 "symptoms": [],
-                "syndromes": [],
                 "differentials": [],
                 "management": [],
                 "safety_alerts": [],
@@ -7352,9 +7219,9 @@ Convert all values to {unit_system} units. Return ONLY valid JSON."""
         
         return {
             "success": True,
+            "dominant_syndromes": result.get("dominant_syndromes", result.get("syndromes", [])),
             "findings": result.get("findings", []),
             "symptoms": result.get("symptoms", []),
-            "syndromes": result.get("syndromes", []),
             "differentials": result.get("differentials", []),
             "management": result.get("management", []),
             "safety_alerts": result.get("safety_alerts", []),
