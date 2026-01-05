@@ -1017,6 +1017,9 @@ def run_all_tests():
     if not test_results.get('heart_failure_search'):
         critical_issues.append("❌ CRITICAL: Heart Failure search failed - specific disease data not accessible")
     
+    if not test_results.get('new_knowledge_endpoint'):
+        critical_issues.append("❌ CRITICAL: New Knowledge Endpoint failed - dashboard Knowledge tab won't work")
+    
     if not test_results.get('phicor_clinical_analysis'):
         critical_issues.append("❌ CRITICAL: PhiCor Clinical Analysis failed - core diagnostic feature broken")
     
