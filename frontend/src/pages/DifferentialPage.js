@@ -777,17 +777,17 @@ const DifferentialPage = () => {
                           <input
                             type="checkbox"
                             checked={useAI}
-                            onChange={(e) => setUseAI(e.target.checked)}
+                            onChange={(e) => setUsePhiCor(e.target.checked)}
                             className="w-4 h-4 rounded border-gray-300 text-emerald-500 focus:ring-emerald-500"
                           />
                           <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                             <Brain className="w-4 h-4 inline mr-1 text-emerald-500" />
-                            AI Interpretation
+                            PhiCor Analysis
                           </span>
                         </label>
-                        {useAI && (
+                        {usePhiCor && (
                           <span className={`text-xs px-2 py-0.5 rounded-full ${isDark ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-100 text-emerald-700'}`}>
-                            Handles abbreviations, regional terminology & units
+                            Physiology-first multifactorial reasoning
                           </span>
                         )}
                       </div>
@@ -801,11 +801,11 @@ const DifferentialPage = () => {
                       onChange={(e) => setClinicalText(e.target.value)}
                       placeholder={`Paste clinical notes, lab results, or patient history here...
 
-Example (any format works with AI):
+Example (any format works with PhiCor):
 65 y/o M c/o CP and SOB x2 days
-Labs: WBC 12.5k, Cr 1.8${isSI ? ' (159 μmol/L)' : ''}, Trop elevated
+Labs: WBC 12.5k, Cr 1.8${isSI ? ' (159 μmol/L)' : ''}, Trop elevated, BNP 1200
 PMH: HTN, T2DM, CKD stage 3
-Echo: EF 35%, dilated LV, MR 2+`}
+Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                       className={`w-full h-48 p-4 rounded-xl border resize-none ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400'}`}
                     />
                     <div className="flex gap-3">
@@ -821,8 +821,8 @@ Echo: EF 35%, dilated LV, MR 2+`}
                           </>
                         ) : (
                           <>
-                            {useAI ? <Brain className="w-4 h-4 mr-2" /> : <Search className="w-4 h-4 mr-2" />}
-                            {useAI ? 'AI Analyze' : 'Analyze Text'}
+                            <Brain className="w-4 h-4 mr-2" />
+                            {usePhiCor ? 'PhiCor Analysis' : 'Basic Analysis'}
                           </>
                         )}
                       </Button>
@@ -834,6 +834,49 @@ Echo: EF 35%, dilated LV, MR 2+`}
                         Upload Document
                       </Button>
                     </div>
+                    
+                    {/* PhiCor Syndromes & Synthesis Display */}
+                    {phicorResults && phicorResults.syndromes?.length > 0 && (
+                      <div className={`mt-4 p-4 rounded-xl border ${isDark ? 'bg-purple-900/20 border-purple-800' : 'bg-purple-50 border-purple-200'}`}>
+                        <h4 className={`text-sm font-semibold flex items-center gap-2 mb-2 ${isDark ? 'text-purple-300' : 'text-purple-800'}`}>
+                          <Target className="w-4 h-4" />
+                          Identified Syndromes
+                        </h4>
+                        <ul className="space-y-1">
+                          {phicorResults.syndromes.map((syndrome, idx) => (
+                            <li key={idx} className={`text-sm ${isDark ? 'text-purple-200' : 'text-purple-700'}`}>
+                              • {syndrome}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {phicorResults && phicorResults.synthesis && (
+                      <div className={`mt-3 p-4 rounded-xl border ${isDark ? 'bg-blue-900/20 border-blue-800' : 'bg-blue-50 border-blue-200'}`}>
+                        <h4 className={`text-sm font-semibold flex items-center gap-2 mb-2 ${isDark ? 'text-blue-300' : 'text-blue-800'}`}>
+                          <Sparkles className="w-4 h-4" />
+                          Diagnostic Synthesis
+                        </h4>
+                        <div className="space-y-2 text-sm">
+                          {phicorResults.synthesis.primary_diagnosis && (
+                            <p className={isDark ? 'text-blue-200' : 'text-blue-700'}>
+                              <strong>Most Likely:</strong> {phicorResults.synthesis.primary_diagnosis}
+                            </p>
+                          )}
+                          {phicorResults.synthesis.key_alternative && (
+                            <p className={isDark ? 'text-blue-200' : 'text-blue-700'}>
+                              <strong>Key Alternative:</strong> {phicorResults.synthesis.key_alternative}
+                            </p>
+                          )}
+                          {phicorResults.synthesis.discriminating_tests?.length > 0 && (
+                            <p className={isDark ? 'text-blue-200' : 'text-blue-700'}>
+                              <strong>Discriminating Tests:</strong> {phicorResults.synthesis.discriminating_tests.join(', ')}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
                 
