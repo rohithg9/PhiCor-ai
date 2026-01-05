@@ -798,10 +798,20 @@ def test_phicor_clinical_analysis():
                 print(f"  ❌ Clinical findings structure missing")
                 clinical_findings_pass = False
             
-            # Check dominant_syndromes
+            # Check dominant_syndromes (enhanced structure)
             dominant_syndromes = data.get('dominant_syndromes', [])
             if dominant_syndromes:
-                print(f"  ✅ Dominant syndromes present: {dominant_syndromes}")
+                print(f"  ✅ Dominant syndromes present: {len(dominant_syndromes)} syndromes")
+                # Check syndrome structure
+                for i, syndrome in enumerate(dominant_syndromes[:2]):
+                    if isinstance(syndrome, dict):
+                        syndrome_name = syndrome.get('syndrome', 'Unknown')
+                        key_features = syndrome.get('key_features', [])
+                        pathophysiology = syndrome.get('pathophysiologic_rationale', '')
+                        print(f"    📊 Syndrome {i+1}: {syndrome_name}")
+                        print(f"      Key features: {len(key_features)} items")
+                        if pathophysiology:
+                            print(f"      Pathophysiology: Present")
                 syndromes_pass = True
             else:
                 print(f"  ⚠️ No dominant syndromes identified")
