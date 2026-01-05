@@ -422,6 +422,7 @@ const DifferentialPage = () => {
           const updated = [...prev, ...newFindings];
           // Only run local diagnosis if PhiCor didn't provide differentials
           if (!usePhiCor || !hasPhicorDifferentials) {
+            setPhicorActive(false); // Reset PhiCor active flag before running local diagnosis
             setTimeout(() => {
               runDiagnosis(updated);
             }, 100);
@@ -431,11 +432,13 @@ const DifferentialPage = () => {
         setIsAnalyzing(false);
       } else {
         setIsAnalyzing(false);
+        setPhicorActive(false); // Reset PhiCor active flag
         alert('No clinical findings detected. Try adding more specific clinical details.');
       }
     } catch (error) {
       console.error('Error analyzing clinical text:', error);
       setIsAnalyzing(false);
+      setPhicorActive(false); // Reset PhiCor active flag on error
       
       // Fall back to regex parsing on error
       const parsed = parseClinicalText(clinicalText);
