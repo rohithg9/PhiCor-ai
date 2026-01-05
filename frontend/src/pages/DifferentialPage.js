@@ -294,6 +294,9 @@ const DifferentialPage = () => {
     
     setIsAnalyzing(true);
     setPhicorResults(null);
+    if (usePhiCor) {
+      setPhicorActive(true); // Mark PhiCor as active to prevent useEffect from running local diagnosis
+    }
     
     try {
       let findings = [];
