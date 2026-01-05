@@ -1624,19 +1624,6 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                                 </div>
                               </div>
                             )}
-                                          <strong>{ev.finding}</strong> {ev.direction === 'increase' ? '↑' : '↓'}: {ev.explanation || 'Consistent with diagnosis'}
-                                        </span>
-                                      </li>
-                                    ))}
-                                  </ul>
-                                ) : diagnosis.matchedParams?.length > 0 ? (
-                                  <p>Based on: {diagnosis.matchedParams.map(m => m.param).join(', ')}</p>
-                                ) : (
-                                  <p>Clinical pattern matching suggests this diagnosis based on the provided findings.</p>
-                                )}
-                              </div>
-                            </div>
-                            )}
                             
                             {/* Matched findings */}
                             {diagnosis.matchedParams?.length > 0 && (
