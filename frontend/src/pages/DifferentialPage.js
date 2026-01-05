@@ -845,16 +845,16 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                       </Button>
                     </div>
                     
-                    {/* PhiCor Syndromes & Synthesis Display */}
-                    {phicorResults && phicorResults.syndromes?.length > 0 && (
+                    {/* PhiCor Dominant Syndromes Display */}
+                    {phicorResults && (phicorResults.dominant_syndromes?.length > 0 || phicorResults.syndromes?.length > 0) && (
                       <div className={`mt-4 p-4 rounded-xl border ${isDark ? 'bg-purple-900/20 border-purple-800' : 'bg-purple-50 border-purple-200'}`}>
                         <h4 className={`text-sm font-semibold flex items-center gap-2 mb-2 ${isDark ? 'text-purple-300' : 'text-purple-800'}`}>
                           <Target className="w-4 h-4" />
-                          Identified Syndromes
+                          Dominant Clinical Syndrome(s)
                         </h4>
                         <ul className="space-y-1">
-                          {phicorResults.syndromes.map((syndrome, idx) => (
-                            <li key={idx} className={`text-sm ${isDark ? 'text-purple-200' : 'text-purple-700'}`}>
+                          {(phicorResults.dominant_syndromes || phicorResults.syndromes || []).map((syndrome, idx) => (
+                            <li key={idx} className={`text-sm font-medium ${isDark ? 'text-purple-200' : 'text-purple-700'}`}>
                               • {syndrome}
                             </li>
                           ))}
