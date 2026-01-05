@@ -776,7 +776,7 @@ const DifferentialPage = () => {
                         <label className="flex items-center gap-2 cursor-pointer">
                           <input
                             type="checkbox"
-                            checked={useAI}
+                            checked={usePhiCor}
                             onChange={(e) => setUsePhiCor(e.target.checked)}
                             className="w-4 h-4 rounded border-gray-300 text-emerald-500 focus:ring-emerald-500"
                           />
