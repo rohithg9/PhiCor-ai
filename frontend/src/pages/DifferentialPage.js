@@ -356,10 +356,12 @@ const DifferentialPage = () => {
               diseaseId: d.icd_code || d.name.toLowerCase().replace(/\s+/g, '_'),
               diseaseName: d.name,
               probability: d.probability / 100, // Convert to 0-1 scale
+              probabilityScore: d.probability, // Keep original percentage for display
               role: d.role,
               matchingParameters: d.matching_parameters || [],
               missingFeatures: d.missing_features || [],
               icdCode: d.icd_code,
+              icd10: d.icd_code, // Alias for compatibility
             }));
             
             // Set PhiCor differentials directly
