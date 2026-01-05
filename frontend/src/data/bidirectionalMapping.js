@@ -905,8 +905,55 @@ export const parseClinicalText = (clinicalText) => {
   const extractedSymptoms = [];
   const rawFindings = [];
   
-  // Extract lab values
+  // Additional patterns for "raised/elevated/high X to VALUE" constructs
+  const qualitativePatterns = {
+    creatinine: /(?:raised|elevated|high|increased)\s+creatinine\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)/i,
+    ck: /(?:raised|elevated|high|increased)\s+(?:creatine?\s*kinase|ck|cpk)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)/i,
+    troponin: /(?:raised|elevated|high|increased)\s+troponin\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)/i,
+    bnp: /(?:raised|elevated|high|increased)\s+(?:bnp|nt-?pro\s*bnp)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)/i,
+    wbc: /(?:raised|elevated|high|increased)\s+(?:wbc|white\s*cells?)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)/i,
+    bilirubin: /(?:raised|elevated|high|increased)\s+bilirubin\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)/i,
+    ast: /(?:raised|elevated|high|increased)\s+(?:ast|sgot)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)/i,
+    alt: /(?:raised|elevated|high|increased)\s+(?:alt|sgpt)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)/i,
+    lactate: /(?:raised|elevated|high|increased)\s+lactate\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)/i,
+    glucose: /(?:raised|elevated|high|increased)\s+(?:glucose|blood\s*sugar)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)/i,
+  };
+  
+  // First check qualitative patterns (they give implied direction)
+  Object.entries(qualitativePatterns).forEach(([labName, pattern]) => {
+    const match = textLower.match(pattern);
+    if (match && match[1]) {
+      const value = parseFloat(match[1]);
+      const normalRange = NORMAL_RANGES[labName];
+      
+      // "raised/elevated" implies increase
+      extractedLabs.push({
+        parameterId: labName,
+        name: labName.replace(/_/g, ' ').toUpperCase(),
+        value,
+        unit: normalRange?.unit || '',
+        direction: 'increase',
+        severity: 2, // Assume moderate severity when explicitly mentioned as raised
+        normalRange: normalRange ? `${normalRange.min}-${normalRange.max}` : 'N/A',
+        isAbnormal: true,
+      });
+      
+      rawFindings.push({
+        type: 'lab',
+        name: labName,
+        value,
+        direction: 'increase',
+      });
+    }
+  });
+  
+  // Extract lab values using standard patterns
   Object.entries(LAB_PATTERNS).forEach(([labName, pattern]) => {
+    // Skip if already extracted via qualitative pattern
+    if (extractedLabs.some(l => l.parameterId === labName)) {
+      return;
+    }
+    
     const match = textLower.match(pattern);
     if (match && match[1]) {
       const value = parseFloat(match[1]);
