@@ -567,6 +567,119 @@ def test_disease_progression_data():
     except Exception as e:
         print(f"❌ Error testing disease progression data: {e}")
         return False
+
+def test_new_knowledge_endpoint():
+    """Test 6: New Knowledge Endpoint - Test GET /api/knowledge/disease/{disease_id}"""
+    
+    print("\n🧠 TEST 6: NEW KNOWLEDGE ENDPOINT")
+    print("=" * 50)
+    print("Testing requirements from review request:")
+    print("- Call GET /api/knowledge/disease/heart_failure_hfref")
+    print("- Verify the response contains: disease_id, sources, approved_updates, stats")
+    print("- This is a new public endpoint for the dashboard Knowledge tab")
+    
+    try:
+        # Test the specific endpoint from review request
+        disease_id = "heart_failure_hfref"
+        
+        response = requests.get(
+            f"{BACKEND_URL}/api/knowledge/disease/{disease_id}",
+            timeout=15
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            print(f"✅ Knowledge endpoint call successful")
+            print(f"  📊 Response status: {response.status_code}")
+            
+            # Check required fields from review request
+            required_fields = ['disease_id', 'sources', 'approved_updates', 'stats']
+            missing_fields = []
+            present_fields = []
+            
+            for field in required_fields:
+                if field in data:
+                    present_fields.append(field)
+                    
+                    # Show field details
+                    value = data[field]
+                    if isinstance(value, list):
+                        print(f"  📊 {field}: {len(value)} items")
+                    elif isinstance(value, dict):
+                        print(f"  📊 {field}: {len(value)} keys")
+                    else:
+                        print(f"  📊 {field}: {value}")
+                else:
+                    missing_fields.append(field)
+            
+            if not missing_fields:
+                print(f"  ✅ All required fields present ✓")
+                fields_pass = True
+            else:
+                print(f"  ❌ Missing required fields: {missing_fields}")
+                print(f"  ✅ Present fields: {present_fields}")
+                fields_pass = False
+            
+            # Check stats structure specifically
+            stats = data.get('stats', {})
+            if stats:
+                print(f"  ✅ Stats structure present ✓")
+                print(f"    📊 Stats keys: {list(stats.keys())}")
+                
+                # Check for expected stats fields
+                expected_stats = ['total_sources', 'approved_updates']
+                stats_pass = True
+                for stat_field in expected_stats:
+                    if stat_field in stats:
+                        print(f"    ✅ {stat_field}: {stats[stat_field]}")
+                    else:
+                        print(f"    ⚠️ {stat_field}: missing")
+                        stats_pass = False
+            else:
+                print(f"  ❌ Stats structure missing")
+                stats_pass = False
+            
+            # Check sources structure
+            sources = data.get('sources', [])
+            if isinstance(sources, list):
+                print(f"  ✅ Sources is a list with {len(sources)} items ✓")
+                if sources:
+                    # Show sample source structure
+                    sample_source = sources[0]
+                    print(f"    📊 Sample source keys: {list(sample_source.keys())}")
+                sources_pass = True
+            else:
+                print(f"  ❌ Sources is not a list: {type(sources)}")
+                sources_pass = False
+            
+            # Check approved_updates structure
+            approved_updates = data.get('approved_updates', [])
+            if isinstance(approved_updates, list):
+                print(f"  ✅ Approved updates is a list with {len(approved_updates)} items ✓")
+                if approved_updates:
+                    # Show sample update structure
+                    sample_update = approved_updates[0]
+                    print(f"    📊 Sample update keys: {list(sample_update.keys())}")
+                updates_pass = True
+            else:
+                print(f"  ❌ Approved updates is not a list: {type(approved_updates)}")
+                updates_pass = False
+            
+            return fields_pass and stats_pass and sources_pass and updates_pass
+            
+        else:
+            print(f"❌ Knowledge endpoint call failed: {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"  ℹ️ Error details: {error_data}")
+            except:
+                print(f"  ℹ️ Response text: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Error testing knowledge endpoint: {e}")
+        return False
 def run_all_tests():
     """Run all PhiCor.ai Dashboard Data Display Feature tests"""
     print("🧪 PHICOR.AI DASHBOARD DATA DISPLAY TESTING")
