@@ -9,12 +9,12 @@ import json
 def check_phase2_coverage():
     # Get token
     login_data = {'email': 'admin@phicor.ai', 'password': 'admin123'}
-    response = requests.post('https://phicor-health.preview.emergentagent.com/api/auth/login', json=login_data)
+    response = requests.post('https://phicor-ai.preview.emergentagent.com/api/auth/login', json=login_data)
     token = response.json()['access_token']
     headers = {'Authorization': f'Bearer {token}'}
 
     # Get diseases list
-    response = requests.get('https://phicor-health.preview.emergentagent.com/api/diseases-db/list', headers=headers)
+    response = requests.get('https://phicor-ai.preview.emergentagent.com/api/diseases-db/list', headers=headers)
     diseases = response.json()['diseases']
 
     print(f'Total diseases: {len(diseases)}')
@@ -30,7 +30,7 @@ def check_phase2_coverage():
     for i, disease in enumerate(diseases[:sample_size]):
         disease_id = disease['id']
         try:
-            response = requests.get(f'https://phicor-health.preview.emergentagent.com/api/diseases-db/{disease_id}', headers=headers, timeout=5)
+            response = requests.get(f'https://phicor-ai.preview.emergentagent.com/api/diseases-db/{disease_id}', headers=headers, timeout=5)
             if response.status_code == 200:
                 data = response.json()
                 comprehensive_model = data.get('comprehensive_model', {})
