@@ -7016,8 +7016,9 @@ class PhiCorAnalysisResponse(BaseModel):
 @api_router.post("/clinical/interpret")
 async def interpret_clinical_text(request: ClinicalTextRequest):
     """
-    PhiCor Analysis: Dominant-Syndrome-Gated Clinical Reasoning Engine.
-    Identifies abnormal parameters, infers dominant syndromes, matches diseases with multifactorial reasoning.
+    PhiCor Analysis: Two-Phase Clinical Reasoning Engine.
+    Phase A: AI extracts structured findings from clinical text (understanding context, abbreviations, terminology)
+    Phase B: PhiCor Engine matches findings against our disease database (NOT AI-generated diagnoses)
     """
     try:
         from emergentintegrations.llm.chat import LlmChat, UserMessage
@@ -7029,25 +7030,358 @@ async def interpret_clinical_text(request: ClinicalTextRequest):
         # Determine unit system based on region
         unit_system = "SI" if request.region in ["UK", "EU", "IN", "ASIA"] else "conventional"
         
-        # PhiCor Dominant-Syndrome-Gated Clinical Reasoning Prompt (vNext)
-        system_prompt = """You are PhiCor.ai, a physiology-first clinical decision support system.
+        # ============================================================
+        # PHASE A: AI EXTRACTION ONLY (No diagnosis generation)
+        # Purpose: Understand clinical text, abbreviations, terminology
+        # ============================================================
+        
+        extraction_prompt = f"""You are a clinical text parser. Your ONLY job is to extract structured findings from clinical notes.
 
-You have access to:
-- Normal parameters for all organ systems (structure, physiology, biochemistry)
-- Disease models (~1900 conditions) describing parameter deviations by severity
-- A clinical knowledge bank with diagnostic patterns and guideline-based management information
+DO NOT generate diagnoses. DO NOT suggest diseases. ONLY extract what is explicitly stated.
 
-Your purpose is to identify abnormal parameters, infer dominant clinical syndromes, match diseases using multifactorial reasoning, and surface contextual management information, while avoiding implausible or unsafe conclusions.
-
-You are not a diagnostic authority and do not issue medical orders."""
-
-        prompt = f"""CLINICAL CASE:
+CLINICAL TEXT:
 {request.text}
 
 REGIONAL CONTEXT: {request.region} (use {unit_system} units)
 
-CORE PRIORITY ORDER (MANDATORY):
-1. Dominant syndrome identification
+Extract and return a JSON object with ONLY these fields:
+{{
+  "patient_demographics": {{
+    "age": <number or null>,
+    "sex": "<M/F or null>",
+    "relevant_history": ["list of PMH items"]
+  }},
+  "vital_signs": [
+    {{"name": "Heart Rate", "value": 98, "unit": "bpm", "status": "elevated"}}
+  ],
+  "laboratory_values": [
+    {{"name": "Creatinine", "parameter_id": "creatinine", "value": 2.1, "unit": "mg/dL", "status": "elevated", "organ_system": "renal"}}
+  ],
+  "imaging_findings": [
+    {{"modality": "CXR", "finding": "bilateral pleural effusions", "location": "chest"}}
+  ],
+  "symptoms": ["dyspnea", "orthopnea", "fatigue"],
+  "physical_exam": ["bilateral LE edema", "JVD", "S3 gallop"],
+  "dominant_syndrome_hint": "Brief description of the dominant clinical picture based on findings"
+}}
+
+IMPORTANT RULES:
+- Interpret ALL abbreviations (SOB=shortness of breath, CP=chest pain, HTN=hypertension, T2DM=type 2 diabetes, etc.)
+- Convert units to {unit_system} system
+- parameter_id should be lowercase with underscores (e.g., "bnp", "ejection_fraction", "creatinine")
+- Only extract what is EXPLICITLY stated or can be directly inferred
+- DO NOT diagnose - just describe findings
+- Return ONLY valid JSON"""
+
+        llm = LlmChat(
+            api_key=llm_key,
+            session_id=f"phicor_extract_{datetime.now().strftime('%H%M%S')}",
+            system_message="You are a clinical text extraction assistant. Extract findings only, do not diagnose."
+        ).with_model("openai", "gpt-4o")
+        
+        response = await llm.send_message(UserMessage(text=extraction_prompt))
+        
+        # Parse AI extraction response
+        content = response.strip()
+        if content.startswith('```'):
+            lines = content.split('\n')
+            content = '\n'.join(lines[1:-1] if lines[-1].strip() == '```' else lines[1:])
+            if content.startswith('json'):
+                content = content[4:]
+        content = content.strip()
+        
+        import json
+        try:
+            extracted = json.loads(content)
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse extraction response: {e}")
+            return {
+                "success": False,
+                "dominant_syndromes": [],
+                "findings": [],
+                "symptoms": [],
+                "differentials": [],
+                "management": [],
+                "safety_alerts": [],
+                "synthesis": {},
+                "summary": "Failed to extract clinical findings",
+                "confidence": 0
+            }
+        
+        # ============================================================
+        # PHASE B: PHICOR ENGINE - Match against OUR disease database
+        # This uses our Phase 1 & 2 data, NOT AI-generated diagnoses
+        # ============================================================
+        
+        # Get all diseases with comprehensive models from our database
+        diseases = await db.diseases.find(
+            {'comprehensive_model': {'$exists': True, '$ne': None}},
+            {'_id': 0, 'id': 1, 'name': 1, 'category': 1, 'icd10': 1, 'comprehensive_model': 1, 'parameter_modifications': 1}
+        ).to_list(None)
+        
+        # Extract patient age for demographic filtering
+        patient_age = extracted.get('patient_demographics', {}).get('age')
+        patient_sex = extracted.get('patient_demographics', {}).get('sex')
+        
+        # Build list of abnormal findings for matching
+        abnormal_findings = []
+        
+        # Add lab values
+        for lab in extracted.get('laboratory_values', []):
+            if lab.get('status') in ['elevated', 'decreased', 'abnormal', 'high', 'low']:
+                abnormal_findings.append({
+                    'type': 'lab',
+                    'parameter_id': lab.get('parameter_id', lab.get('name', '').lower().replace(' ', '_')),
+                    'name': lab.get('name'),
+                    'value': lab.get('value'),
+                    'direction': 'increase' if lab.get('status') in ['elevated', 'high'] else 'decrease',
+                    'organ_system': lab.get('organ_system', 'unknown')
+                })
+        
+        # Add vital signs
+        for vital in extracted.get('vital_signs', []):
+            if vital.get('status') in ['elevated', 'decreased', 'abnormal', 'high', 'low']:
+                abnormal_findings.append({
+                    'type': 'vital',
+                    'parameter_id': vital.get('name', '').lower().replace(' ', '_'),
+                    'name': vital.get('name'),
+                    'value': vital.get('value'),
+                    'direction': 'increase' if vital.get('status') in ['elevated', 'high'] else 'decrease',
+                    'organ_system': 'cardiovascular'
+                })
+        
+        # Add symptoms
+        symptoms = extracted.get('symptoms', [])
+        
+        # Add imaging findings
+        imaging = extracted.get('imaging_findings', [])
+        
+        # ============================================================
+        # PHICOR MATCHING ALGORITHM
+        # Score each disease based on how well it matches our findings
+        # ============================================================
+        
+        disease_scores = []
+        
+        for disease in diseases:
+            if not disease.get('comprehensive_model'):
+                continue
+                
+            model = disease['comprehensive_model']
+            score = 0
+            matched_params = []
+            missing_anchors = []
+            total_possible = 0
+            
+            # 1. HARD VETO: Age-based exclusion
+            # Skip pediatric diseases for adults, vice versa
+            disease_name_lower = disease.get('name', '').lower()
+            if patient_age:
+                if patient_age > 18 and any(term in disease_name_lower for term in ['pediatric', 'neonatal', 'infantile', 'childhood', 'kawasaki']):
+                    continue
+                if patient_age < 50 and 'giant cell arteritis' in disease_name_lower:
+                    continue
+            
+            # 2. Match symptoms from our disease model
+            disease_symptoms = []
+            clinical_pres = model.get('clinicalPresentation', {})
+            if clinical_pres:
+                for symptom_obj in clinical_pres.get('symptoms', []):
+                    if isinstance(symptom_obj, dict):
+                        disease_symptoms.append(symptom_obj.get('name', '').lower())
+                    elif isinstance(symptom_obj, str):
+                        disease_symptoms.append(symptom_obj.lower())
+            
+            # Score symptom matches
+            for patient_symptom in symptoms:
+                patient_symptom_lower = patient_symptom.lower()
+                for disease_symptom in disease_symptoms:
+                    if patient_symptom_lower in disease_symptom or disease_symptom in patient_symptom_lower:
+                        score += 15
+                        matched_params.append(f"symptom: {patient_symptom}")
+                        break
+            
+            # 3. Match parameter modifications from our Phase 1 data
+            param_mods = disease.get('parameter_modifications', {})
+            if param_mods:
+                for finding in abnormal_findings:
+                    param_id = finding.get('parameter_id', '')
+                    
+                    # Check if this disease affects this parameter
+                    if param_id in param_mods:
+                        mod = param_mods[param_id]
+                        expected_direction = mod.get('direction', '')
+                        
+                        # Check if direction matches
+                        if finding.get('direction') == expected_direction:
+                            score += 20
+                            matched_params.append(f"{finding['name']} ({finding['direction']})")
+                        total_possible += 20
+            
+            # 4. Match diagnostic workup findings (imaging)
+            diagnostic = model.get('diagnosticWorkup', {})
+            if diagnostic and imaging:
+                expected_imaging = diagnostic.get('imaging', [])
+                for img_finding in imaging:
+                    finding_text = img_finding.get('finding', '').lower()
+                    for expected in expected_imaging:
+                        if isinstance(expected, dict):
+                            expected_text = expected.get('finding', '').lower()
+                        else:
+                            expected_text = str(expected).lower()
+                        
+                        if any(word in finding_text for word in expected_text.split() if len(word) > 3):
+                            score += 25
+                            matched_params.append(f"imaging: {img_finding.get('finding')}")
+                            break
+            
+            # 5. HARD VETO: Secondary syndromes without primary trigger
+            secondary_conditions = ['dic', 'sirs', 'ards', 'mods', 'septic shock', 'cardiogenic shock']
+            if any(cond in disease_name_lower for cond in secondary_conditions):
+                # These need specific defining criteria
+                has_trigger = any('sepsis' in s.lower() or 'infection' in s.lower() or 'pneumonia' in s.lower() 
+                                 for s in symptoms + [f.get('finding', '') for f in imaging])
+                if not has_trigger:
+                    continue
+            
+            # 6. Minimum anchor requirement: need at least 2 matches
+            if len(matched_params) < 2:
+                continue
+            
+            # Calculate match percentage
+            if total_possible > 0:
+                match_percentage = min(80, (score / total_possible) * 100)
+            else:
+                match_percentage = min(80, score / 2)  # Fallback scoring
+            
+            if match_percentage > 20:  # Minimum threshold
+                disease_scores.append({
+                    'disease_id': disease.get('id'),
+                    'name': disease.get('name'),
+                    'icd_code': disease.get('icd10', ''),
+                    'category': disease.get('category', ''),
+                    'score': score,
+                    'probability': round(match_percentage, 1),
+                    'matched_params': matched_params,
+                    'missing_anchors': missing_anchors,
+                    'model': model  # Keep for management info
+                })
+        
+        # Sort by score and limit to top 10
+        disease_scores.sort(key=lambda x: x['score'], reverse=True)
+        top_diseases = disease_scores[:10]
+        
+        # ============================================================
+        # PROBABILITY CALIBRATION
+        # - Max 80%, only one >70%
+        # ============================================================
+        
+        if top_diseases:
+            # Normalize probabilities
+            max_prob = top_diseases[0]['probability']
+            if max_prob > 80:
+                scale_factor = 80 / max_prob
+                for d in top_diseases:
+                    d['probability'] = round(d['probability'] * scale_factor, 1)
+            
+            # Ensure only top disease can exceed 70%
+            for i, d in enumerate(top_diseases[1:], 1):
+                if d['probability'] > 70:
+                    d['probability'] = min(70, d['probability'])
+        
+        # ============================================================
+        # BUILD RESPONSE using OUR disease data
+        # ============================================================
+        
+        differentials = []
+        management = []
+        
+        for d in top_diseases:
+            # Determine role
+            role = "Primary" if d == top_diseases[0] else "Secondary"
+            
+            differentials.append({
+                'name': d['name'],
+                'probability': d['probability'],
+                'role': role,
+                'matching_parameters': d['matched_params'][:5],
+                'missing_features': d['missing_anchors'][:3],
+                'anchor_criteria_met': len(d['matched_params']) >= 2,
+                'icd_code': d['icd_code']
+            })
+            
+            # Get management from our knowledge bank
+            model = d.get('model', {})
+            treatment = model.get('treatment', {})
+            if treatment:
+                mgmt = {
+                    'diagnosis': d['name'],
+                    'approaches': [],
+                    'monitoring': [],
+                    'cautions': [],
+                    'source': 'PhiCor Knowledge Bank'
+                }
+                
+                # First line treatments
+                first_line = treatment.get('first_line', [])
+                for tx in first_line[:3]:
+                    if isinstance(tx, dict):
+                        mgmt['approaches'].append(f"Guidelines typically recommend: {tx.get('name', tx.get('intervention', ''))}")
+                    elif isinstance(tx, str):
+                        mgmt['approaches'].append(f"Guidelines typically recommend: {tx}")
+                
+                # Monitoring from our data
+                monitoring = model.get('monitoring', {})
+                if monitoring:
+                    params = monitoring.get('parameters', [])
+                    mgmt['monitoring'] = [p.get('name', p) if isinstance(p, dict) else p for p in params[:4]]
+                
+                if mgmt['approaches']:
+                    management.append(mgmt)
+        
+        # Build dominant syndrome from findings
+        dominant_syndrome = extracted.get('dominant_syndrome_hint', '')
+        if not dominant_syndrome and top_diseases:
+            dominant_syndrome = f"Clinical presentation consistent with {top_diseases[0]['name']}"
+        
+        # Build synthesis
+        synthesis = {
+            'primary_diagnosis': top_diseases[0]['name'] if top_diseases else 'Insufficient findings for diagnosis',
+            'key_alternative': top_diseases[1]['name'] if len(top_diseases) > 1 else None,
+            'discriminating_tests': []
+        }
+        
+        # Get discriminating tests from our data
+        if top_diseases:
+            diagnostic = top_diseases[0].get('model', {}).get('diagnosticWorkup', {})
+            labs = diagnostic.get('laboratory', [])
+            synthesis['discriminating_tests'] = [l.get('name', l) if isinstance(l, dict) else l for l in labs[:3]]
+        
+        # Format findings for response
+        formatted_findings = []
+        for finding in abnormal_findings:
+            formatted_findings.append({
+                'parameter_id': finding.get('parameter_id'),
+                'name': finding.get('name'),
+                'value': finding.get('value'),
+                'direction': finding.get('direction'),
+                'organ_system': finding.get('organ_system'),
+                'type': finding.get('type')
+            })
+        
+        return {
+            "success": True,
+            "dominant_syndromes": [dominant_syndrome] if dominant_syndrome else [],
+            "findings": formatted_findings,
+            "symptoms": symptoms,
+            "differentials": differentials,
+            "management": management,
+            "safety_alerts": [],  # Built from our data, not AI
+            "synthesis": synthesis,
+            "summary": f"Analysis based on {len(abnormal_findings)} abnormal findings matched against PhiCor disease database ({len(diseases)} conditions).",
+            "confidence": top_diseases[0]['probability'] / 100 if top_diseases else 0,
+            "data_source": "PhiCor Knowledge Bank (Phase 1 & 2 disease models)"
+        }
 2. Abnormal-parameter → physiology mapping
 3. Disease model matching
 4. Suppression of non-coherent diagnoses
