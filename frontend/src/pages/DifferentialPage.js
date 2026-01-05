@@ -404,11 +404,13 @@ const DifferentialPage = () => {
           physiologicImplication: f.physiologicImplication || '',
         }));
         
+        // Check if we should run local diagnosis
+        const hasPhicorDifferentials = result?.differentials?.length > 0;
+        
         setAbnormalFindings(prev => {
           const updated = [...prev, ...newFindings];
           // Only run local diagnosis if PhiCor didn't provide differentials
-          // Use result directly instead of state (which is async)
-          if (!usePhiCor || !result?.differentials?.length) {
+          if (!usePhiCor || !hasPhicorDifferentials) {
             setTimeout(() => {
               runDiagnosis(updated);
             }, 100);
