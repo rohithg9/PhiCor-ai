@@ -77,6 +77,10 @@ const DifferentialPage = () => {
   const [usePhiCor, setUsePhiCor] = useState(true); // Toggle for PhiCor Analysis
   const [phicorResults, setPhicorResults] = useState(null); // Store full PhiCor analysis results
   
+  // NEW: Disease Comparison Dashboard state
+  const [selectedDiseaseForComparison, setSelectedDiseaseForComparison] = useState(null);
+  const [showComparisonDashboard, setShowComparisonDashboard] = useState(false);
+  
   // NEW: Clinical Synthesis state
   const [clinicalSynthesis, setClinicalSynthesis] = useState(null);
   const [isSynthesizing, setIsSynthesizing] = useState(false);
