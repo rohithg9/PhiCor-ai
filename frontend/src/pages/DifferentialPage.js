@@ -897,9 +897,17 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                             </p>
                           )}
                           {phicorResults.synthesis.discriminating_tests?.length > 0 && (
-                            <p className={isDark ? 'text-blue-200' : 'text-blue-700'}>
-                              <strong>Discriminating Tests:</strong> {phicorResults.synthesis.discriminating_tests.join(', ')}
-                            </p>
+                            <div className="mt-2">
+                              <strong className={isDark ? 'text-blue-200' : 'text-blue-700'}>Discriminating Tests:</strong>
+                              <ul className="mt-1 space-y-1">
+                                {phicorResults.synthesis.discriminating_tests.map((test, idx) => (
+                                  <li key={idx} className={`text-xs ${isDark ? 'text-blue-300' : 'text-blue-600'}`}>
+                                    • {typeof test === 'object' ? test.test : test}
+                                    {test.expected_finding && <span className="opacity-70"> → {test.expected_finding}</span>}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
                           )}
                         </div>
                       </div>
