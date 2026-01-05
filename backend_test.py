@@ -29,7 +29,7 @@ Test 5: Disease Progression Data
 - Verify disease progression timeline data exists
 - Verify stages 1-4 structure (Early/Subclinical → Mild → Moderate → Severe/End-stage)
 
-API Base URL: https://ailabdata.preview.emergentagent.com
+API Base URL: https://phicor-health.preview.emergentagent.com
 All APIs require Authorization: Bearer {token} header
 """
 
