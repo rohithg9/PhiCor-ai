@@ -350,20 +350,24 @@ const DifferentialPage = () => {
           
           // Add symptoms as findings too
           if (result.symptoms?.length > 0) {
-            symptoms = result.symptoms.map((s, idx) => ({
-              id: `symptom-${Date.now()}-${idx}`,
-              organ: 'general',
-              parameterId: s.replace(/\s+/g, '_').toLowerCase(),
-              parameterName: s,
-              value: '',
-              unit: '',
-              direction: 'present',
-              severity: 'moderate',
-              deviation: '',
-              normalRange: '',
-              source: 'phicor-analysis',
-              type: 'symptom',
-            }));
+            symptoms = result.symptoms.map((s, idx) => {
+              const symptomName = typeof s === 'object' ? s.name : s;
+              return {
+                id: `symptom-${Date.now()}-${idx}`,
+                organ: 'general',
+                parameterId: symptomName.replace(/\s+/g, '_').toLowerCase(),
+                parameterName: symptomName,
+                value: s.severity || '',
+                unit: '',
+                direction: 'present',
+                severity: s.severity || 'moderate',
+                deviation: '',
+                normalRange: '',
+                source: 'phicor-analysis',
+                type: 'symptom',
+                clinical_significance: s.clinical_significance || '',
+              };
+            });
           }
           
           // If PhiCor returned differentials, use those directly instead of local calculation
