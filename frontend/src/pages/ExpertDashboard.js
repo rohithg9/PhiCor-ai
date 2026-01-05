@@ -17,6 +17,7 @@ import { useExpert } from '../context/ExpertContext';
 import { ORGAN_MODELS } from '../data/organModels';
 import { DISEASE_MODELS } from '../data/diseaseModels';
 import UserManagementView from '../components/expert/UserManagementView';
+import KnowledgeBankView from '../components/expert/KnowledgeBankView';
 import { 
   Search, CheckCircle2, Clock, AlertTriangle, FileEdit, 
   LogOut, User, Stethoscope, ChevronRight, ChevronDown,
