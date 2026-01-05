@@ -18,10 +18,10 @@ MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
 DB_NAME = os.environ.get('DB_NAME', 'test_database')
 EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
 
-# Number of parallel workers
-NUM_WORKERS = 3
+# Number of parallel workers (increased for faster processing)
+NUM_WORKERS = 5
 # Delay between requests per worker (to avoid rate limits)
-REQUEST_DELAY = 2
+REQUEST_DELAY = 1.5
 
 async def generate_model_fast(disease_name: str, category: str) -> dict:
     """Generate comprehensive model using simplified prompt (faster)"""
