@@ -703,7 +703,7 @@ const LAB_PATTERNS = {
   // Cardiac markers - enhanced to catch "creatinine kinase" typo and natural language
   troponin: /(?:troponin|trop\s*[it])\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:ng\/ml)?/i,
   bnp: /(?:bnp|brain\s*natriuretic\s*peptide|nt-?pro\s*bnp)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:pg\/ml)?/i,
-  ck: /(?:ck|cpk|creatine?\s*kinase)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:u\/l)?/i,
+  ck: /(?:ck|cpk|creatin(?:e|ine)?\s*kinase)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:u\/l)?/i,
   
   // Inflammatory
   crp: /(?:crp|c-reactive\s*protein)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)\s*(?:mg\/l|mg\/dl)?/i,
