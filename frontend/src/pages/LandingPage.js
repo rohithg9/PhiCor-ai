@@ -66,15 +66,15 @@ const LandingPage = () => {
     const preloadDiseases = async () => {
       try {
         const API_URL = process.env.REACT_APP_BACKEND_URL || '';
-        // Fetch diseases in background - browser will cache the response
-        const response = await fetch(`${API_URL}/api/diseases-db?include_params=true&limit=2500`, {
-          cache: 'force-cache' // Use browser HTTP cache
-        });
+        // Fetch diseases in background
+        const response = await fetch(`${API_URL}/api/diseases-db?include_params=true&limit=2500`);
         if (response.ok) {
           const data = await response.json();
-          // Store count only (the actual data is cached by browser HTTP cache)
-          window.phicorDiseasesPreloaded = true;
-          window.phicorDiseasesCount = data.diseases?.length || 0;
+          // Store in window for dashboard to use immediately (in-memory cache)
+          window.__PHICOR_DISEASES_CACHE__ = {
+            timestamp: Date.now(),
+            diseases: data.diseases || []
+          };
           console.log(`✅ Pre-loaded ${data.diseases?.length || 0} diseases for instant dashboard access`);
         }
       } catch (error) {
