@@ -1699,6 +1699,42 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                               );
                             })()}
                             
+                            {/* PhiCor Disease Profile Button */}
+                            <div className="mt-4 mb-4">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedDiseaseForComparison(diagnosis);
+                                  setShowComparisonDashboard(!showComparisonDashboard || selectedDiseaseForComparison?.diseaseName !== diagnosis.diseaseName);
+                                }}
+                                className={`w-full py-3 px-4 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${
+                                  showComparisonDashboard && selectedDiseaseForComparison?.diseaseName === diagnosis.diseaseName
+                                    ? isDark 
+                                      ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+                                      : 'bg-emerald-500 text-white hover:bg-emerald-600'
+                                    : isDark 
+                                      ? 'bg-emerald-900/20 border border-emerald-800 text-emerald-400 hover:bg-emerald-900/40'
+                                      : 'bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100'
+                                }`}
+                              >
+                                <Target className="w-4 h-4" />
+                                {showComparisonDashboard && selectedDiseaseForComparison?.diseaseName === diagnosis.diseaseName 
+                                  ? 'Hide PhiCor Profile' 
+                                  : 'View PhiCor Profile - Compare Against Patient Findings'}
+                              </button>
+                            </div>
+                            
+                            {/* PhiCor Disease Comparison Dashboard */}
+                            {showComparisonDashboard && selectedDiseaseForComparison?.diseaseName === diagnosis.diseaseName && (
+                              <div className={`mb-4 p-4 rounded-xl border ${isDark ? 'bg-gray-900/50 border-emerald-800' : 'bg-emerald-50/30 border-emerald-200'}`}>
+                                <DiseaseComparisonDashboard
+                                  disease={diagnosis}
+                                  patientFindings={abnormalFindings}
+                                  onClose={() => setShowComparisonDashboard(false)}
+                                />
+                              </div>
+                            )}
+                            
                             {/* Evidence-Based Guidelines from Backend */}
                             <DiseaseDetailPanel 
                               diseaseId={diagnosis.icd10?.replace('.', '_')} 
