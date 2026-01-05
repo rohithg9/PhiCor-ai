@@ -908,7 +908,7 @@ export const parseClinicalText = (clinicalText) => {
   // Additional patterns for "raised/elevated/high X to VALUE" constructs
   const qualitativePatterns = {
     creatinine: /(?:raised|elevated|high|increased)\s+creatinine\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)/i,
-    ck: /(?:raised|elevated|high|increased)\s+(?:creatine?\s*kinase|ck|cpk)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)/i,
+    ck: /(?:raised|elevated|high|increased)\s+(?:creatin(?:e|ine)?\s*kinase|ck|cpk)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)/i,
     troponin: /(?:raised|elevated|high|increased)\s+troponin\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)/i,
     bnp: /(?:raised|elevated|high|increased)\s+(?:bnp|nt-?pro\s*bnp)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)/i,
     wbc: /(?:raised|elevated|high|increased)\s+(?:wbc|white\s*cells?)\s*(?:[:=]|of|is|at|to|up\s*to)?\s*([\d.]+)/i,
