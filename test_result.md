@@ -130,3 +130,30 @@ agent_communication:
     message: "✅ FRONTEND DATA AUDIT COMPLETE. Added Overview, Genetics, and Math Models tabs to Clinical Evidence panel. All comprehensive_model fields are now displayed including epidemiology, pathophysiology, geneticFactors, novelEquations, and disease progression stages."
   - agent: "testing"
     message: "✅ BACKEND TESTING COMPLETE - All PhiCor.ai dashboard data display features verified working. Disease Data API returns comprehensive data structure supporting Clinical Evidence tabs (Overview, Genetics, Math Models) and Disease Progression timeline. Admin authentication functional. Only minor issue: Parameter count lower than expected (7 vs 104+) due to Phase 2 enhancement still in progress (38.5% complete). Core backend functionality ready for frontend integration."
+
+## Latest Changes (January 5, 2026)
+
+frontend:
+  - task: "Per-Disease Knowledge Tab"
+    implemented: true
+    working: true
+    file: "frontend/src/pages/DashboardMultiScale.js"
+    description: "Added Knowledge tab to Clinical Evidence panel that fetches and displays disease-specific knowledge sources"
+
+  - task: "ExpertDashboard.js Refactoring"  
+    implemented: true
+    working: true
+    file: "frontend/src/pages/ExpertDashboard.js"
+    description: "Reduced from 3079 lines to 2660 lines. Moved Knowledge Bank UI to KnowledgeBankView component. Removed duplicate Upload Dialog."
+
+backend:
+  - task: "Public Knowledge Endpoint"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    endpoint: "GET /api/knowledge/disease/{disease_id}"
+    description: "Added public endpoint for fetching disease-specific knowledge data (used by dashboard Knowledge tab)"
+
+agent_communication:
+  - agent: "main"
+    message: "✅ Completed: Per-Disease Knowledge Tab + ExpertDashboard Refactoring. Phase 2 at 57.8%"
