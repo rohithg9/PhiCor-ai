@@ -969,7 +969,26 @@ const RelevantCalculatorsPanel = ({ diseaseId, diseaseName, organId, isExpanded,
 // ===========================================
 const ClinicalFindingsPanel = ({ disease, isExpanded, onToggle, alwaysExpanded = false }) => {
   const [activeTab, setActiveTab] = React.useState('overview');
+  const [knowledgeData, setKnowledgeData] = React.useState(null);
+  const [loadingKnowledge, setLoadingKnowledge] = React.useState(false);
   const expanded = alwaysExpanded || isExpanded;
+  
+  // Fetch knowledge data when Knowledge tab is selected
+  React.useEffect(() => {
+    if (activeTab === 'knowledge' && disease?.id && !knowledgeData) {
+      setLoadingKnowledge(true);
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
+      fetch(`${backendUrl}/api/knowledge/disease/${disease.id}`)
+        .then(res => res.json())
+        .then(data => {
+          setKnowledgeData(data);
+          setLoadingKnowledge(false);
+        })
+        .catch(() => {
+          setLoadingKnowledge(false);
+        });
+    }
+  }, [activeTab, disease?.id, knowledgeData]);
   
   if (!disease) return null;
 
