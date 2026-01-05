@@ -1125,12 +1125,19 @@ const ClinicalFindingsPanel = ({ disease, isExpanded, onToggle, alwaysExpanded =
   // Get equations from pathophysiology
   const equations = pathophysiology.equations ? Object.values(pathophysiology.equations) : [];
 
+  // Count genetic data
+  const geneticCount = geneticFactors ? (
+    (geneticFactors.genes?.length || 0) + (geneticFactors.snps?.length || 0)
+  ) : 0;
+
   const tabs = [
+    { id: 'overview', label: 'Overview', icon: Info, count: 0 },
     { id: 'symptoms', label: 'Symptoms', icon: Thermometer, count: symptoms.length },
     { id: 'signs', label: 'Signs', icon: Stethoscope, count: signs.length },
     { id: 'labs', label: 'Labs', icon: TestTube, count: labFindings.length },
     { id: 'imaging', label: 'Imaging', icon: ScanLine, count: imagingModalities.length },
-    { id: 'equations', label: 'Math Models', icon: Brain, count: equations.length }
+    { id: 'genetics', label: 'Genetics', icon: Atom, count: geneticCount },
+    { id: 'equations', label: 'Math Models', icon: Brain, count: equations.length + novelEquations.length }
   ];
 
   return (
