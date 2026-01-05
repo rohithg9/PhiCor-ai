@@ -477,7 +477,7 @@ const DiseaseComparisonDashboard = ({
 
       {/* Disclaimer */}
       <p className={`text-xs mt-4 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
-        This comparison is based on PhiCor's comprehensive disease model. Actual clinical presentation may vary.
+        This comparison is based on PhiCor&apos;s comprehensive disease model. Actual clinical presentation may vary.
       </p>
     </div>
   );
