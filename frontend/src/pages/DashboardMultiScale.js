@@ -3301,6 +3301,20 @@ const DashboardMultiScale = () => {
         'hgb': 'hemoglobin',
         'hematocrit_level': 'hematocrit',
         'hct': 'hematocrit',
+        'nt_probnp': 'nt_pro_bnp',
+        'ntprobnp': 'nt_pro_bnp',
+        'bnp_level': 'bnp',
+        'creatinine_level': 'creatinine',
+        'urea_level': 'urea',
+        'bun_level': 'bun',
+        'sodium_level': 'sodium',
+        'potassium_level': 'potassium',
+        'ast_level': 'ast',
+        'alt_level': 'alt',
+        'ldh_level': 'ldh',
+        'troponin_level': 'troponin',
+        'left_atrium': 'la_size',
+        'la_diameter': 'la_size',
       };
       return normalizations[id.toLowerCase()] || id.toLowerCase();
     };
