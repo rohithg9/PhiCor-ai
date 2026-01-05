@@ -3063,6 +3063,41 @@ async def get_diseases(
 
 # Note: Specific routes MUST come BEFORE parameterized routes like {disease_id}
 
+@api_router.get("/diseases-db/list")
+async def get_disease_list_lightweight():
+    """
+    Get a lightweight list of all diseases for fast initial loading.
+    Returns only essential fields: id, name, icd10_code, category, affected_organs
+    """
+    # Only return essential fields - NO parameter_modifications or comprehensive_model
+    diseases = await db.diseases.find(
+        {},
+        {
+            "_id": 0,
+            "id": 1,
+            "name": 1,
+            "icd10_code": 1,
+            "category": 1,
+            "affected_organs": 1,
+            "description": 1
+        }
+    ).to_list(3000)
+    
+    # Group by category for faster client-side filtering
+    by_category = {}
+    for d in diseases:
+        cat = d.get("category", "other")
+        if cat not in by_category:
+            by_category[cat] = []
+        by_category[cat].append(d)
+    
+    return {
+        "total": len(diseases),
+        "diseases": diseases,
+        "by_category": by_category
+    }
+
+
 @api_router.get("/diseases-db/priority-list")
 async def get_priority_disease_list():
     """
