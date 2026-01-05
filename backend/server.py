@@ -7170,19 +7170,10 @@ IMPORTANT:
             "summary": result.get("summary", ""),
             "confidence": result.get("confidence", 0.5)
         }
-            )
-        
-        return ClinicalInterpretationResponse(
-            success=True,
-            findings=result.get("findings", []),
-            symptoms=result.get("symptoms", []),
-            summary=result.get("summary", ""),
-            confidence=result.get("confidence", 0.8)
-        )
         
     except Exception as e:
-        logger.error(f"Clinical interpretation failed: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Interpretation failed: {str(e)}")
+        logger.error(f"PhiCor Analysis failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
 
 
 # Include router - MUST be after all routes are defined
