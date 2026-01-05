@@ -274,42 +274,148 @@ const DifferentialPage = () => {
     }
   }, [abnormalFindings, runDiagnosis]);
   
-  // Analyze clinical text
-  const handleAnalyzeText = () => {
+  // Analyze clinical text - with AI interpretation option
+  const handleAnalyzeText = async () => {
     if (!clinicalText.trim()) return;
     
     setIsAnalyzing(true);
-    const parsed = parseClinicalText(clinicalText);
     
-    console.log('Parsed clinical text:', parsed);
-    
-    if (parsed.findings?.length > 0) {
-      const newFindings = parsed.findings.map((f, idx) => ({
-        id: `text-${Date.now()}-${idx}`,
-        organ: f.organ || 'unknown',
-        parameterId: f.parameterId,
-        parameterName: f.name || f.parameterId,
-        value: f.value || '',
-        unit: f.unit || '',
-        direction: f.direction,
-        severity: f.severity || 'moderate',
-        deviation: '',
-        normalRange: f.normalRange || '',
-        source: 'clinical-text',
-        diseases: f.diseases || [],
-      }));
+    try {
+      let findings = [];
+      let symptoms = [];
       
-      setAbnormalFindings(prev => {
-        const updated = [...prev, ...newFindings];
-        // Trigger diagnosis after state update
-        setTimeout(() => {
-          runDiagnosis(updated);
-        }, 100);
-        return updated;
-      });
-    } else {
+      if (useAI) {
+        // Use AI-powered interpretation
+        const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
+        const unitSystem = isSI ? 'SI' : 'conventional';
+        
+        console.log(`Using AI interpretation (Region: ${region}, Units: ${unitSystem})`);
+        
+        const response = await fetch(`${backendUrl}/api/clinical/interpret`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text: clinicalText,
+            region: region,
+            source_type: 'free_text'
+          })
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          console.log('AI interpretation result:', result);
+          
+          if (result.success && result.findings?.length > 0) {
+            findings = result.findings.map((f, idx) => ({
+              id: `ai-${Date.now()}-${idx}`,
+              organ: f.organ || 'unknown',
+              parameterId: f.parameter_id,
+              parameterName: f.name || f.parameter_id,
+              value: f.value || '',
+              unit: f.unit || '',
+              direction: f.direction,
+              severity: f.severity || 1,
+              deviation: '',
+              normalRange: '',
+              source: 'ai-interpretation',
+              originalText: f.original_text || '',
+              type: f.type || 'lab',
+            }));
+          }
+          
+          // Add symptoms as findings too
+          if (result.symptoms?.length > 0) {
+            symptoms = result.symptoms.map((s, idx) => ({
+              id: `symptom-${Date.now()}-${idx}`,
+              organ: 'general',
+              parameterId: s.replace(/\s+/g, '_').toLowerCase(),
+              parameterName: s,
+              value: '',
+              unit: '',
+              direction: 'present',
+              severity: 'moderate',
+              deviation: '',
+              normalRange: '',
+              source: 'ai-interpretation',
+              type: 'symptom',
+            }));
+          }
+        } else {
+          console.warn('AI interpretation failed, falling back to regex parsing');
+          // Fall back to regex parsing
+          const parsed = parseClinicalText(clinicalText);
+          findings = parsed.findings || [];
+        }
+      } else {
+        // Use regex-based parsing
+        const parsed = parseClinicalText(clinicalText);
+        console.log('Regex parsed clinical text:', parsed);
+        findings = parsed.findings || [];
+      }
+      
+      const allFindings = [...findings, ...symptoms];
+      
+      if (allFindings.length > 0) {
+        const newFindings = allFindings.map((f, idx) => ({
+          id: f.id || `text-${Date.now()}-${idx}`,
+          organ: f.organ || 'unknown',
+          parameterId: f.parameterId || f.parameter_id,
+          parameterName: f.parameterName || f.name || f.parameterId,
+          value: f.value || '',
+          unit: f.unit || '',
+          direction: f.direction,
+          severity: f.severity || 'moderate',
+          deviation: '',
+          normalRange: f.normalRange || '',
+          source: f.source || 'clinical-text',
+          diseases: f.diseases || [],
+          type: f.type || 'lab',
+        }));
+        
+        setAbnormalFindings(prev => {
+          const updated = [...prev, ...newFindings];
+          // Trigger diagnosis after state update
+          setTimeout(() => {
+            runDiagnosis(updated);
+          }, 100);
+          return updated;
+        });
+      } else {
+        setIsAnalyzing(false);
+        alert('No clinical findings detected. Try adding specific findings like "dilated ventricle", "pulmonary congestion", "pleural effusion", or lab values like "BNP 500".');
+      }
+    } catch (error) {
+      console.error('Error analyzing clinical text:', error);
       setIsAnalyzing(false);
-      alert('No clinical findings detected. Try adding specific findings like "dilated ventricle", "pulmonary congestion", "pleural effusion", or lab values like "BNP 500".');
+      
+      // Fall back to regex parsing on error
+      const parsed = parseClinicalText(clinicalText);
+      if (parsed.findings?.length > 0) {
+        const newFindings = parsed.findings.map((f, idx) => ({
+          id: `text-${Date.now()}-${idx}`,
+          organ: f.organ || 'unknown',
+          parameterId: f.parameterId,
+          parameterName: f.name || f.parameterId,
+          value: f.value || '',
+          unit: f.unit || '',
+          direction: f.direction,
+          severity: f.severity || 'moderate',
+          deviation: '',
+          normalRange: f.normalRange || '',
+          source: 'clinical-text',
+          diseases: f.diseases || [],
+        }));
+        
+        setAbnormalFindings(prev => {
+          const updated = [...prev, ...newFindings];
+          setTimeout(() => {
+            runDiagnosis(updated);
+          }, 100);
+          return updated;
+        });
+      } else {
+        alert('Error analyzing text. Please try again.');
+      }
     }
   };
   
