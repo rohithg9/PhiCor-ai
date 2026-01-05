@@ -66,7 +66,16 @@ const LandingPage = () => {
     const preloadDiseases = async () => {
       try {
         const API_URL = process.env.REACT_APP_BACKEND_URL || '';
-        // Fetch diseases in background
+        
+        // OPTIMIZATION: First preload lightweight list (fast)
+        const listResponse = await fetch(`${API_URL}/api/diseases-db/list`);
+        if (listResponse.ok) {
+          const listData = await listResponse.json();
+          window.__PHICOR_DISEASES_LIST__ = listData.diseases || [];
+          console.log(`⚡ Pre-loaded ${listData.diseases?.length || 0} disease names (fast)`);
+        }
+        
+        // Then fetch full data in background (slower but cached)
         const response = await fetch(`${API_URL}/api/diseases-db?include_params=true&limit=2500`);
         if (response.ok) {
           const data = await response.json();
@@ -75,7 +84,7 @@ const LandingPage = () => {
             timestamp: Date.now(),
             diseases: data.diseases || []
           };
-          console.log(`✅ Pre-loaded ${data.diseases?.length || 0} diseases for instant dashboard access`);
+          console.log(`✅ Pre-loaded ${data.diseases?.length || 0} diseases with full data`);
         }
       } catch (error) {
         console.log('Disease pre-loading skipped');
