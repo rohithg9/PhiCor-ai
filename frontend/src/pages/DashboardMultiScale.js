@@ -2843,29 +2843,54 @@ const DashboardMultiScale = () => {
     const findings = [];
     const processedParams = new Set(allModifiedParameters.map(p => `${p.organId}.${p.scaleId}.${p.id}`));
     
+    // Recursively extract parameters from nested structures
+    const extractParams = (obj, path, organId, scaleId) => {
+      if (!obj || typeof obj !== 'object') return;
+      
+      // Check if this is a leaf parameter (has change_percent or direction or value)
+      if (obj.change_percent !== undefined || obj.direction !== undefined || 
+          (obj.value !== undefined && typeof obj.value !== 'object')) {
+        const paramId = path[path.length - 1] || 'unknown';
+        const key = `${organId}.${scaleId}.${paramId}`;
+        
+        if (!processedParams.has(key) && obj.direction !== 'normal') {
+          const name = path.map(w => 
+            w.split('_').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ')
+          ).join(' - ');
+          
+          findings.push({
+            id: paramId,
+            name: name,
+            organId,
+            scaleId,
+            value: obj.value,
+            unit: obj.unit,
+            changePercent: obj.change_percent,
+            direction: obj.direction,
+            evidence: obj.evidence || obj.note || obj.description,
+            category: scaleId === 'dna' ? 'Genetic' : 
+                     scaleId === 'gene_expression' ? 'Expression' :
+                     scaleId === 'metabolism' ? 'Metabolic' :
+                     scaleId === 'cell_cycle' ? 'Cell Cycle' : 'Molecular'
+          });
+        }
+      } else {
+        // Recurse into nested objects
+        Object.entries(obj).forEach(([key, val]) => {
+          if (val && typeof val === 'object') {
+            extractParams(val, [...path, key], organId, scaleId);
+          }
+        });
+      }
+    };
+    
     Object.entries(mergedModifications).forEach(([organId, organMods]) => {
+      if (!organMods || typeof organMods !== 'object') return;
       Object.entries(organMods).forEach(([scaleId, scaleMods]) => {
+        if (!scaleMods || typeof scaleMods !== 'object') return;
         Object.entries(scaleMods).forEach(([paramId, mod]) => {
-          const key = `${organId}.${scaleId}.${paramId}`;
-          // Only include if not already in processed parameters
-          if (!processedParams.has(key) && mod.direction !== 'normal') {
-            // Format the parameter name nicely
-            const name = paramId.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-            
-            findings.push({
-              id: paramId,
-              name: name,
-              organId,
-              scaleId,
-              value: mod.value,
-              changePercent: mod.change_percent,
-              direction: mod.direction,
-              evidence: mod.evidence || mod.note,
-              category: scaleId === 'dna' ? 'Genetic' : 
-                       scaleId === 'gene_expression' ? 'Expression' :
-                       scaleId === 'metabolism' ? 'Metabolic' :
-                       scaleId === 'cell_cycle' ? 'Cell Cycle' : 'Molecular'
-            });
+          if (mod && typeof mod === 'object') {
+            extractParams(mod, [paramId], organId, scaleId);
           }
         });
       });
