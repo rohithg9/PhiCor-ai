@@ -2837,17 +2837,48 @@ const DashboardMultiScale = () => {
         return;
       }
       
-      // Fetch fresh data if no valid cache
+      // OPTIMIZATION: First fetch lightweight list for fast initial display
       try {
         const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
-        const response = await fetch(`${backendUrl}/api/diseases-db?include_params=true&limit=2500`);
-        if (response.ok) {
-          const data = await response.json();
+        
+        // Step 1: Fast load - get just names/IDs for disease selector
+        const listResponse = await fetch(`${backendUrl}/api/diseases-db/list`);
+        if (listResponse.ok) {
+          const listData = await listResponse.json();
+          // Create a lightweight map for the disease selector
+          const lightweightMap = {};
+          (listData.diseases || []).forEach(d => {
+            const diseaseKey = d.id || d.icd10_code?.replace('.', '_');
+            if (diseaseKey) {
+              lightweightMap[diseaseKey] = {
+                id: d.id,
+                name: d.name,
+                icd10: d.icd10_code,
+                category: d.category,
+                description: d.description,
+                affectedOrgans: d.affected_organs || [],
+                primaryOrgan: getPrimaryOrganFromCategory(d.category),
+                isLightweight: true // Flag to know we need to fetch full data
+              };
+            }
+          });
+          setApiDiseases(lightweightMap);
+          setIsLoadingDiseases(false);
+          console.log(`⚡ Fast loaded ${Object.keys(lightweightMap).length} diseases (lightweight)`);
+        }
+        
+        // Step 2: Background load - fetch full data for caching
+        const fullResponse = await fetch(`${backendUrl}/api/diseases-db?include_params=true&limit=2500`);
+        if (fullResponse.ok) {
+          const data = await fullResponse.json();
           processDiseaseData(data.diseases || []);
           // Store in window cache for future use
           window.__PHICOR_DISEASES_CACHE__ = {
             timestamp: Date.now(),
             diseases: data.diseases || []
+          };
+          console.log(`✅ Full data loaded in background: ${data.diseases?.length} diseases`);
+        }
           };
         }
       } catch (error) {
