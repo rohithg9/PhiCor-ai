@@ -568,19 +568,17 @@ def test_disease_progression_data():
         print(f"❌ Error testing disease progression data: {e}")
         return False
 def run_all_tests():
-    """Run all PhiCor.ai User Management System tests"""
-    print("🧪 PHICOR.AI USER MANAGEMENT SYSTEM TESTING")
+    """Run all PhiCor.ai Dashboard Data Display Feature tests"""
+    print("🧪 PHICOR.AI DASHBOARD DATA DISPLAY TESTING")
     print("=" * 80)
     print("Testing specific requirements from review request:")
     print("1. Admin Authentication - Admin login with admin@phicor.ai / admin123")
-    print("2. Get All Experts - GET /api/admin/experts (with stats)")
-    print("3. Create New Expert - POST /api/admin/experts")
-    print("4. Update Expert - PUT /api/admin/experts/{expert_id}")
-    print("5. Reset Expert Password - POST /api/admin/experts/{expert_id}/reset-password")
-    print("6. Deactivate Expert - DELETE /api/admin/experts/{expert_id}")
-    print("7. Verify Scheduler Status - Check APScheduler is running")
+    print("2. Disease Data API - GET /api/diseases-db with heart failure search")
+    print("3. Heart Failure Disease Search - Verify HFrEF with 104+ parameters")
+    print("4. Clinical Evidence Data Structure - Verify tab data fields")
+    print("5. Disease Progression Data - Verify timeline stages structure")
     print("=" * 80)
-    print("NOTE: This tests the complete User Management workflow end-to-end")
+    print("NOTE: This tests the backend data for PhiCor.ai dashboard features")
     print("=" * 80)
     
     test_results = {}
@@ -596,30 +594,26 @@ def run_all_tests():
     else:
         test_results['backend_health'] = False
     
-    # USER MANAGEMENT SYSTEM TESTS
+    # DASHBOARD DATA TESTS
     if test_results['backend_health']:
         test_results['admin_authentication'] = test_admin_authentication()
-        test_results['get_all_experts'] = test_get_all_experts()
-        test_results['create_expert'] = test_create_expert()
-        test_results['update_expert'] = test_update_expert()
-        test_results['reset_password'] = test_reset_expert_password()
-        test_results['deactivate_expert'] = test_deactivate_expert()
-        test_results['scheduler_status'] = test_scheduler_status()
+        test_results['disease_data_api'] = test_disease_data_api()
+        test_results['heart_failure_search'] = test_heart_failure_disease_search()
+        test_results['clinical_evidence_data'] = test_clinical_evidence_data_structure()
+        test_results['disease_progression_data'] = test_disease_progression_data()
     else:
         # Set all tests to False if backend is not accessible
         test_results.update({
             'admin_authentication': False,
-            'get_all_experts': False,
-            'create_expert': False,
-            'update_expert': False,
-            'reset_password': False,
-            'deactivate_expert': False,
-            'scheduler_status': False
+            'disease_data_api': False,
+            'heart_failure_search': False,
+            'clinical_evidence_data': False,
+            'disease_progression_data': False
         })
     
     # Summary
     print("\n" + "=" * 80)
-    print("🏁 PHICOR.AI USER MANAGEMENT SYSTEM TEST SUMMARY")
+    print("🏁 PHICOR.AI DASHBOARD DATA DISPLAY TEST SUMMARY")
     print("=" * 80)
     
     passed_tests = sum(1 for result in test_results.values() if result)
@@ -628,14 +622,12 @@ def run_all_tests():
     print(f"\n📊 OVERALL RESULTS: {passed_tests}/{total_tests} tests passed")
     
     # Test results breakdown
-    workflow_tests = [
+    dashboard_tests = [
         ('admin_authentication', 'Test 1: Admin Authentication (admin@phicor.ai / admin123)'),
-        ('get_all_experts', 'Test 2: Get All Experts (GET /api/admin/experts)'),
-        ('create_expert', 'Test 3: Create New Expert (POST /api/admin/experts)'),
-        ('update_expert', 'Test 4: Update Expert (PUT /api/admin/experts/{id})'),
-        ('reset_password', 'Test 5: Reset Expert Password (POST reset-password)'),
-        ('deactivate_expert', 'Test 6: Deactivate Expert (DELETE /api/admin/experts/{id})'),
-        ('scheduler_status', 'Test 7: Verify Scheduler Status (APScheduler)')
+        ('disease_data_api', 'Test 2: Disease Data API (GET /api/diseases-db)'),
+        ('heart_failure_search', 'Test 3: Heart Failure Disease Search (HFrEF with 104+ params)'),
+        ('clinical_evidence_data', 'Test 4: Clinical Evidence Data Structure (tabs data)'),
+        ('disease_progression_data', 'Test 5: Disease Progression Data (timeline stages)')
     ]
     
     infrastructure_tests = [
@@ -643,8 +635,8 @@ def run_all_tests():
         ('backend_health', 'Backend Health Check')
     ]
     
-    print(f"\n📊 USER MANAGEMENT WORKFLOW TESTS:")
-    for test_key, test_name in workflow_tests:
+    print(f"\n📊 DASHBOARD DATA TESTS:")
+    for test_key, test_name in dashboard_tests:
         if test_key in test_results:
             status = "✅ PASS" if test_results[test_key] else "❌ FAIL"
             print(f"  {status} - {test_name}")
@@ -655,80 +647,80 @@ def run_all_tests():
             status = "✅ PASS" if test_results[test_key] else "❌ FAIL"
             print(f"  {status} - {test_name}")
     
-    # Calculate workflow test success rate
-    workflow_passed = sum(1 for test_key, _ in workflow_tests if test_results.get(test_key, False))
-    workflow_total = len(workflow_tests)
+    # Calculate dashboard test success rate
+    dashboard_passed = sum(1 for test_key, _ in dashboard_tests if test_results.get(test_key, False))
+    dashboard_total = len(dashboard_tests)
     
-    if workflow_passed == workflow_total:
-        print(f"\n🎉 ALL USER MANAGEMENT WORKFLOW TESTS PASSED!")
+    if dashboard_passed == dashboard_total:
+        print(f"\n🎉 ALL DASHBOARD DATA TESTS PASSED!")
         print(f"✅ Admin authentication working with admin credentials")
-        print(f"✅ Expert listing with stats functional")
-        print(f"✅ Expert creation working")
-        print(f"✅ Expert updates functional")
-        print(f"✅ Password reset working")
-        print(f"✅ Expert deactivation functional")
-        print(f"✅ Scheduler status verified")
-        print(f"\n🔄 COMPLETE USER MANAGEMENT WORKFLOW VERIFIED:")
-        print(f"   Login → List → Create → Update → Reset Password → Deactivate")
-    elif workflow_passed >= workflow_total * 0.75:
-        print(f"\n✅ MOSTLY SUCCESSFUL! {workflow_passed}/{workflow_total} workflow tests passed.")
+        print(f"✅ Disease Data API functional with comprehensive data")
+        print(f"✅ Heart Failure search returning proper disease data")
+        print(f"✅ Clinical Evidence data structure verified")
+        print(f"✅ Disease Progression data structure verified")
+        print(f"\n🔄 COMPLETE DASHBOARD DATA WORKFLOW VERIFIED:")
+        print(f"   Login → Search Diseases → Get Comprehensive Data → Clinical Evidence → Progression")
+    elif dashboard_passed >= dashboard_total * 0.75:
+        print(f"\n✅ MOSTLY SUCCESSFUL! {dashboard_passed}/{dashboard_total} dashboard tests passed.")
         print(f"⚠️  Some minor issues detected - see failed tests above")
     else:
-        print(f"\n❌ SIGNIFICANT ISSUES DETECTED! Only {workflow_passed}/{workflow_total} workflow tests passed.")
-        print(f"🔧 Major fixes needed for User Management System workflow")
+        print(f"\n❌ SIGNIFICANT ISSUES DETECTED! Only {dashboard_passed}/{dashboard_total} dashboard tests passed.")
+        print(f"🔧 Major fixes needed for Dashboard Data Display features")
     
     # Critical Issues Detection
     print(f"\n🚨 CRITICAL ISSUES DETECTED:")
+    critical_issues = []
+    
     if not test_results.get('admin_authentication'):
-        print(f"  ❌ CRITICAL: Admin authentication failed - cannot access admin endpoints")
+        critical_issues.append("❌ CRITICAL: Admin authentication failed - cannot access protected endpoints")
     
-    if not test_results.get('create_expert'):
-        print(f"  ❌ CRITICAL: Expert creation failed - core functionality broken")
+    if not test_results.get('disease_data_api'):
+        critical_issues.append("❌ CRITICAL: Disease Data API failed - core dashboard functionality broken")
     
-    # Password hashing bug detection
-    print(f"\n⚠️ KNOWN ISSUES:")
-    print(f"  🐛 PASSWORD HASHING BUG: Admin endpoints use hashlib.sha256 but login uses bcrypt")
-    print(f"     - This means experts created via admin endpoints cannot login")
-    print(f"     - Expert registration endpoint uses bcrypt (correct)")
-    print(f"     - Admin creation/password reset endpoints use hashlib.sha256 (incorrect)")
-    print(f"     - FIX: Update admin endpoints to use bcrypt consistently")
+    if not test_results.get('heart_failure_search'):
+        critical_issues.append("❌ CRITICAL: Heart Failure search failed - specific disease data not accessible")
+    
+    if critical_issues:
+        for issue in critical_issues:
+            print(f"  {issue}")
+    else:
+        print(f"  ✅ No critical issues detected")
     
     # Detailed verification summary
-    print(f"\n📋 KEY WORKFLOW VERIFICATION POINTS:")
+    print(f"\n📋 KEY DASHBOARD DATA VERIFICATION POINTS:")
     if test_results.get('admin_authentication'):
-        print(f"  ✅ Admin authentication verified (admin@phicor.ai with admin access)")
+        print(f"  ✅ Admin authentication verified (admin@phicor.ai access)")
     else:
         print(f"  ❌ Admin authentication failed")
     
-    if test_results.get('get_all_experts'):
-        print(f"  ✅ Expert listing verified (with pending_changes, total_changes, experiments_count)")
+    if test_results.get('disease_data_api'):
+        print(f"  ✅ Disease Data API verified (comprehensive_model, epidemiology, pathophysiology)")
     else:
-        print(f"  ❌ Expert listing failed")
+        print(f"  ❌ Disease Data API failed")
     
-    if test_results.get('create_expert'):
-        print(f"  ✅ Expert creation verified (Dr. New Expert with Cardiology specialty)")
+    if test_results.get('heart_failure_search'):
+        print(f"  ✅ Heart Failure search verified (HFrEF with 104+ parameters)")
     else:
-        print(f"  ❌ Expert creation failed")
+        print(f"  ❌ Heart Failure search failed")
     
-    if test_results.get('update_expert'):
-        print(f"  ✅ Expert update verified (name and specialty changes)")
+    if test_results.get('clinical_evidence_data'):
+        print(f"  ✅ Clinical Evidence data verified (Overview, Genetics, Math Models tabs)")
     else:
-        print(f"  ❌ Expert update failed")
+        print(f"  ❌ Clinical Evidence data failed")
     
-    if test_results.get('reset_password'):
-        print(f"  ✅ Password reset verified (newpassword123)")
+    if test_results.get('disease_progression_data'):
+        print(f"  ✅ Disease Progression data verified (timeline stages 1-4)")
     else:
-        print(f"  ❌ Password reset failed")
+        print(f"  ❌ Disease Progression data failed")
     
-    if test_results.get('deactivate_expert'):
-        print(f"  ✅ Expert deactivation verified (soft delete)")
-    else:
-        print(f"  ❌ Expert deactivation failed")
-    
-    if test_results.get('scheduler_status'):
-        print(f"  ✅ Scheduler status verified (APScheduler running)")
-    else:
-        print(f"  ❌ Scheduler status failed")
+    # Frontend Integration Notes
+    print(f"\n📱 FRONTEND INTEGRATION NOTES:")
+    print(f"  ℹ️ Backend data structure supports the following frontend features:")
+    print(f"    - Dashboard Disease Display (Heart organ → HFrEF selection)")
+    print(f"    - Clinical Evidence Panel Tabs (Overview, Genetics, Math Models)")
+    print(f"    - Disease Progression Timeline (stages 1-4)")
+    print(f"  ⚠️ Frontend testing not performed (backend testing only)")
+    print(f"  🔗 Frontend should use REACT_APP_BACKEND_URL for API calls")
     
     return test_results
 
