@@ -951,14 +951,43 @@ def test_phicor_clinical_analysis():
                 print(f"  ❌ Diagnostic synthesis missing")
                 synthesis_pass = False
             
-            # Check management
+            # Check management (enhanced)
             management = data.get('management', [])
             if management:
                 print(f"  ✅ Management recommendations: {len(management)} items")
+                # Show sample management items
+                for i, mgmt in enumerate(management[:2]):
+                    if isinstance(mgmt, dict):
+                        mgmt_type = mgmt.get('type', 'Unknown')
+                        mgmt_desc = mgmt.get('description', 'N/A')
+                        print(f"    📊 Management {i+1}: {mgmt_type} - {mgmt_desc[:50]}...")
+                    else:
+                        print(f"    📊 Management {i+1}: {str(mgmt)[:50]}...")
                 management_pass = True
             else:
                 print(f"  ⚠️ No management recommendations")
                 management_pass = True  # Don't fail for this
+            
+            # Check safety_alerts (enhanced)
+            safety_alerts = data.get('safety_alerts', [])
+            if safety_alerts:
+                print(f"  ✅ Safety alerts: {len(safety_alerts)} alerts")
+                # Check safety alert structure
+                for i, alert in enumerate(safety_alerts[:2]):
+                    if isinstance(alert, dict):
+                        alert_type = alert.get('alert_type', 'Unknown')
+                        parameter = alert.get('parameter', 'N/A')
+                        message = alert.get('message', 'N/A')
+                        action = alert.get('recommended_action', 'N/A')
+                        print(f"    📊 Alert {i+1}: {alert_type} - {parameter}")
+                        print(f"      Message: {message[:50]}...")
+                        print(f"      Action: {action[:50]}...")
+                    else:
+                        print(f"    📊 Alert {i+1}: {str(alert)[:50]}...")
+                safety_pass = True
+            else:
+                print(f"  ⚠️ No safety alerts")
+                safety_pass = True  # Don't fail for this
             
             # Check data source (verify it's from PhiCor database, not AI-generated)
             data_source = data.get('data_source', '')
