@@ -379,6 +379,13 @@ const DifferentialPage = () => {
               missingFeatures: d.missing_features || [],
               icdCode: d.icd_code,
               icd10: d.icd_code, // Alias for compatibility
+              // New comprehensive fields
+              rank: d.rank,
+              clinical_reasoning: d.clinical_reasoning,
+              supporting_findings: d.supporting_findings || [],
+              key_discriminating_features: d.key_discriminating_features || [],
+              against_diagnosis: d.against_diagnosis || [],
+              anchor_criteria_met: d.anchor_criteria_met,
             }));
             
             // Set PhiCor differentials directly
