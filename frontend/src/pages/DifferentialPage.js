@@ -57,6 +57,7 @@ const EXTENDED_NORMAL_RANGES = buildAllNormalRanges();
 
 const DifferentialPage = () => {
   const { isDark } = useTheme();
+  const { region, isSI } = useRegion();
   const tutorial = useTutorial('differential');
   const [searchParams] = useSearchParams();
   
@@ -72,6 +73,7 @@ const DifferentialPage = () => {
   const [differentialResults, setDifferentialResults] = useState([]);
   const [expandedDisease, setExpandedDisease] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [useAI, setUseAI] = useState(true); // Toggle for AI interpretation
   
   // NEW: Clinical Synthesis state
   const [clinicalSynthesis, setClinicalSynthesis] = useState(null);
