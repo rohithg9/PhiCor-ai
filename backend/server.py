@@ -7032,32 +7032,40 @@ async def interpret_clinical_text(request: ClinicalTextRequest):
         
         # ============================================================
         # COMPREHENSIVE AI CLINICAL ANALYSIS
-        # Full clinical reasoning with detailed differential diagnosis
+        # Simplified prompt for more reliable JSON response
         # ============================================================
         
-        analysis_prompt = f"""You are PhiCor, an expert clinical reasoning AI assistant. Analyze the following clinical presentation and provide comprehensive differential diagnosis with detailed reasoning.
+        analysis_prompt = f"""Analyze this clinical case and return JSON.
 
-CLINICAL PRESENTATION:
+CLINICAL DATA:
 {request.text}
 
-REGIONAL CONTEXT: {request.region} (use {unit_system} units)
+REGION: {request.region} ({unit_system} units)
 
-Provide a comprehensive clinical analysis in JSON format with these exact fields:
-
+Return valid JSON with this structure:
 {{
-  "patient_summary": {{
-    "age": <number or null>,
-    "sex": "<M/F or null>",
-    "chief_complaint": "primary presenting complaint",
-    "relevant_history": ["PMH item 1", "PMH item 2"]
-  }},
-  
+  "patient_summary": {{"age": null, "sex": null, "chief_complaint": "main complaint"}},
   "clinical_findings": {{
-    "vital_signs": [
-      {{"name": "Heart Rate", "value": 108, "unit": "bpm", "normal_range": "60-100", "status": "elevated", "clinical_significance": "Tachycardia suggesting stress response or compensation"}}
-    ],
-    "laboratory_values": [
-      {{"name": "WBC", "parameter_id": "wbc", "value": 15000, "unit": "/μL", "normal_range": "4000-11000", "status": "elevated", "clinical_significance": "Leukocytosis suggesting infection or inflammation"}}
+    "vital_signs": [{{"name": "string", "value": number, "unit": "string", "normal_range": "string", "status": "elevated/decreased/normal", "clinical_significance": "string"}}],
+    "laboratory_values": [{{"name": "string", "parameter_id": "string", "value": number, "unit": "string", "normal_range": "string", "status": "elevated/decreased/normal", "clinical_significance": "string"}}],
+    "symptoms": [{{"name": "string", "severity": "mild/moderate/severe"}}]
+  }},
+  "dominant_syndromes": [{{"syndrome": "name", "key_features": ["feature1", "feature2"], "pathophysiologic_rationale": "explanation"}}],
+  "differential_diagnosis": [
+    {{"rank": 1, "diagnosis": "Disease Name", "icd10": "code", "probability": 75, "role": "Primary", "clinical_reasoning": "why this diagnosis", "supporting_findings": ["finding1"], "key_discriminating_features": ["feature1"]}}
+  ],
+  "diagnostic_synthesis": {{
+    "most_likely_diagnosis": "string",
+    "key_alternative": "string",
+    "clinical_decision_pathway": "reasoning",
+    "discriminating_tests": [{{"test": "string", "expected_finding": "string", "rationale": "string"}}],
+    "clinical_uncertainty": "string"
+  }},
+  "safety_alerts": [{{"alert_type": "critical_value", "parameter": "string", "message": "string", "recommended_action": "string"}}],
+  "management_considerations": [{{"diagnosis": "string", "immediate_actions": ["action1"], "treatment_approach": ["approach1"]}}]
+}}
+
+CRITICAL: Return ONLY valid JSON. Include 5 differential diagnoses. Interpret all abbreviations."""
     ],
     "imaging_findings": [
       {{"modality": "CXR", "finding": "bilateral infiltrates", "clinical_significance": "Consistent with pneumonia or pulmonary edema"}}
