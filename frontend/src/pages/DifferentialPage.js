@@ -862,16 +862,16 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                       </div>
                     )}
                     
-                    {/* Safety Alerts - "Do Not Miss" */}
+                    {/* Safety Considerations */}
                     {phicorResults && phicorResults.safety_alerts?.length > 0 && (
-                      <div className={`mt-3 p-4 rounded-xl border ${isDark ? 'bg-red-900/20 border-red-800' : 'bg-red-50 border-red-200'}`}>
-                        <h4 className={`text-sm font-semibold flex items-center gap-2 mb-2 ${isDark ? 'text-red-300' : 'text-red-700'}`}>
+                      <div className={`mt-3 p-4 rounded-xl border ${isDark ? 'bg-amber-900/20 border-amber-800' : 'bg-amber-50 border-amber-200'}`}>
+                        <h4 className={`text-sm font-semibold flex items-center gap-2 mb-2 ${isDark ? 'text-amber-300' : 'text-amber-700'}`}>
                           <AlertTriangle className="w-4 h-4" />
-                          ⚠️ Do Not Miss
+                          Safety Considerations
                         </h4>
                         <ul className="space-y-1">
                           {phicorResults.safety_alerts.map((alert, idx) => (
-                            <li key={idx} className={`text-sm ${isDark ? 'text-red-200' : 'text-red-700'}`}>
+                            <li key={idx} className={`text-sm ${isDark ? 'text-amber-200' : 'text-amber-700'}`}>
                               • {alert}
                             </li>
                           ))}
