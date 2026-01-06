@@ -679,21 +679,124 @@ def test_new_knowledge_endpoint():
         print(f"❌ Error testing knowledge endpoint: {e}")
         return False
 
-def test_phicor_clinical_analysis():
-    """Test 7: PhiCor Clinical Analysis - Test POST /api/clinical/interpret"""
+def test_disease_search_api():
+    """Test 7: Disease Search API - Test GET /api/diseases/search for Pneumonia"""
     
-    print("\n🔬 TEST 7: PHICOR CLINICAL ANALYSIS - COMPREHENSIVE AI-POWERED")
+    print("\n🔍 TEST 7: DISEASE SEARCH API")
     print("=" * 50)
-    print("Testing NEW Comprehensive PhiCor Clinical Analysis requirements:")
+    print("Testing requirements from review request:")
+    print("- Test GET /api/diseases/search?q=Pneumonia&limit=1")
+    print("- Verify response includes parameter_modifications object")
+    print("- Verify response includes comprehensive_model object")
+    print("- Verify organ systems data is present")
+    
+    try:
+        # Test the specific endpoint from review request
+        params = {
+            "q": "Pneumonia",
+            "limit": 1
+        }
+        
+        response = requests.get(
+            f"{BACKEND_URL}/api/diseases/search",
+            params=params,
+            timeout=15
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            print(f"✅ Disease search API call successful")
+            print(f"  📊 Response status: {response.status_code}")
+            
+            # Check if we have diseases in response
+            diseases = data.get('diseases', []) if isinstance(data, dict) else data
+            
+            if diseases and len(diseases) > 0:
+                disease = diseases[0]
+                print(f"  📊 Disease found: {disease.get('name', 'Unknown')}")
+                print(f"  📊 Disease ID: {disease.get('id', 'Unknown')}")
+                
+                # Check for parameter_modifications object
+                param_mods = disease.get('parameter_modifications', [])
+                if param_mods:
+                    print(f"  ✅ parameter_modifications present: {len(param_mods)} modifications")
+                    param_mods_pass = True
+                else:
+                    print(f"  ❌ parameter_modifications missing or empty")
+                    param_mods_pass = False
+                
+                # Check for comprehensive_model object
+                comp_model = disease.get('comprehensive_model', {})
+                if comp_model:
+                    print(f"  ✅ comprehensive_model present")
+                    if isinstance(comp_model, dict):
+                        print(f"    📊 Model sections: {list(comp_model.keys())}")
+                    comp_model_pass = True
+                else:
+                    print(f"  ❌ comprehensive_model missing or empty")
+                    comp_model_pass = False
+                
+                # Check for organ systems data
+                organ_systems_found = False
+                if param_mods:
+                    # Look for organ system references in parameter modifications
+                    organs = set()
+                    for mod in param_mods:
+                        if isinstance(mod, dict):
+                            organ = mod.get('organ', '')
+                            if organ:
+                                organs.add(organ)
+                    
+                    if organs:
+                        print(f"  ✅ Organ systems data present: {list(organs)}")
+                        organ_systems_found = True
+                    else:
+                        print(f"  ⚠️ No explicit organ systems in parameter modifications")
+                
+                if not organ_systems_found:
+                    # Check in comprehensive model for organ systems
+                    if comp_model and isinstance(comp_model, dict):
+                        for key, value in comp_model.items():
+                            if 'organ' in key.lower() or 'system' in key.lower():
+                                print(f"  ✅ Organ systems data found in comprehensive_model: {key}")
+                                organ_systems_found = True
+                                break
+                
+                if not organ_systems_found:
+                    print(f"  ❌ No organ systems data found")
+                
+                return param_mods_pass and comp_model_pass and organ_systems_found
+            else:
+                print(f"  ❌ No diseases found for 'Pneumonia' search")
+                return False
+        else:
+            print(f"❌ Disease search API call failed: {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"  ℹ️ Error details: {error_data}")
+            except:
+                print(f"  ℹ️ Response text: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Error testing disease search API: {e}")
+        return False
+
+def test_phicor_clinical_analysis():
+    """Test 8: PhiCor Clinical Analysis - Test POST /api/clinical/interpret"""
+    
+    print("\n🔬 TEST 8: PHICOR CLINICAL ANALYSIS - DIFFERENTIAL DIAGNOSIS DASHBOARD")
+    print("=" * 50)
+    print("Testing requirements from review request:")
     print("- Test POST /api/clinical/interpret with specific clinical case")
-    print("- Verify comprehensive AI-powered response structure")
-    print("- Verify all required fields: patient_summary, clinical_findings, dominant_syndromes")
-    print("- Verify differentials with 10+ diagnoses, ICD codes, clinical reasoning")
-    print("- Verify synthesis with discriminating tests and clinical decision pathway")
-    print("- Verify management considerations and safety alerts")
+    print("- Verify success: true in response")
+    print("- Verify findings array with at least 3-4 findings")
+    print("- Verify differentials array with 5 differential diagnoses")
+    print("- Each differential should have: name, probability, icd_code, supporting_findings")
     
     # Test clinical text from review request - EXACT case
-    test_clinical_text = "55 year old male with fever 102F, cough, shortness of breath, SpO2 92%, WBC 15000, CRP elevated. PMH: T2DM, HTN. Echo shows EF 35%."
+    test_clinical_text = "55 year old male with fever 102F, cough, SpO2 92%, WBC 15000, CRP elevated"
     
     try:
         # Test the clinical interpretation endpoint
