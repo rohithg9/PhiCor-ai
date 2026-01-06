@@ -1279,38 +1279,46 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
           {/* Right: Results Panel */}
           <div className={`rounded-2xl border ${isDark ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'} overflow-hidden`}>
             <div className={`p-4 border-b ${isDark ? 'border-gray-800 bg-gradient-to-r from-emerald-900/30 to-teal-900/30' : 'border-gray-200 bg-gradient-to-r from-emerald-50 to-teal-50'}`}>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-2">
                 <div className="flex items-center gap-2">
                   <Stethoscope className={`w-5 h-5 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`} />
                   <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                     Differential Diagnosis
                   </h3>
                 </div>
-                {differentialResults.length > 0 && (
-                  <Badge className="bg-emerald-500/20 text-emerald-400">
-                    {differentialResults.length} conditions
-                  </Badge>
-                )}
-                {/* PhiCor Synthesis Button in header */}
-                {(clinicalText.trim() || differentialResults.length > 0) && !clinicalSynthesis && (
-                  <Button
-                    onClick={runClinicalSynthesis}
-                    disabled={isSynthesizing}
-                    className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-xs py-1 px-3 h-auto"
-                  >
-                    {isSynthesizing ? (
-                      <>
-                        <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2" />
-                        Analyzing...
-                      </>
-                    ) : (
-                      <>
-                        <span className="font-serif font-bold mr-1">Φ</span>
-                        Run Synthesis
-                      </>
-                    )}
-                  </Button>
-                )}
+                <div className="flex items-center gap-2 flex-wrap">
+                  {differentialResults.length > 0 && (
+                    <Badge className="bg-emerald-500/20 text-emerald-400">
+                      {differentialResults.length} conditions
+                    </Badge>
+                  )}
+                  {analysisTimeTaken && !isAnalyzing && differentialResults.length > 0 && (
+                    <Badge className="bg-blue-500/20 text-blue-400 flex items-center gap-1">
+                      <Zap className="w-3 h-3" />
+                      {analysisTimeTaken}s
+                    </Badge>
+                  )}
+                  {/* PhiCor Synthesis Button in header */}
+                  {(clinicalText.trim() || differentialResults.length > 0) && !clinicalSynthesis && (
+                    <Button
+                      onClick={runClinicalSynthesis}
+                      disabled={isSynthesizing}
+                      className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-xs py-1 px-3 h-auto"
+                    >
+                      {isSynthesizing ? (
+                        <>
+                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2" />
+                          Analyzing...
+                        </>
+                      ) : (
+                        <>
+                          <span className="font-serif font-bold mr-1">Φ</span>
+                          Run Synthesis
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
             
