@@ -3063,6 +3063,121 @@ async def get_diseases(
 
 # Note: Specific routes MUST come BEFORE parameterized routes like {disease_id}
 
+@api_router.get("/diseases-db/parameter-causes/{parameter_name}")
+async def get_parameter_causes(
+    parameter_name: str,
+    direction: Optional[str] = None,
+    limit: int = 30
+):
+    """
+    Get all diseases that can cause a specific parameter abnormality.
+    This powers the "Parameter Drill-Down" feature on the Differential Dashboard.
+    
+    Args:
+        parameter_name: The parameter to search for (e.g., "wbc_count", "creatinine", "heart_rate")
+        direction: Optional filter for "increase" or "decrease"
+        limit: Maximum number of results
+    
+    Returns:
+        List of diseases that affect this parameter, with details about how they affect it.
+    """
+    try:
+        # Normalize parameter name
+        param_key = parameter_name.lower().replace(" ", "_").replace("-", "_")
+        
+        # Build regex pattern for flexible matching
+        param_pattern = f".*{param_key}.*"
+        
+        # Build aggregation pipeline to search through nested parameter_modifications
+        pipeline = [
+            # Match diseases that have parameter_modifications
+            {"$match": {"parameter_modifications": {"$exists": True, "$ne": {}}}},
+            # Project relevant fields
+            {"$project": {
+                "_id": 0,
+                "id": 1,
+                "name": 1,
+                "icd10_code": 1,
+                "category": 1,
+                "description": 1,
+                "parameter_modifications": 1
+            }},
+            {"$limit": 500}  # Limit initial fetch for performance
+        ]
+        
+        diseases = await db.diseases.aggregate(pipeline).to_list(500)
+        
+        # Filter diseases that have the parameter
+        matching_diseases = []
+        
+        for disease in diseases:
+            param_mods = disease.get("parameter_modifications", {})
+            
+            for organ, organ_data in param_mods.items():
+                if not isinstance(organ_data, dict):
+                    continue
+                    
+                # Check each category within organ (vital_signs, geometry, etc.)
+                for category, category_data in organ_data.items():
+                    if not isinstance(category_data, dict):
+                        continue
+                    
+                    # Check if this is directly a parameter or a nested structure
+                    for key, value in category_data.items():
+                        # Check if key matches our parameter
+                        key_normalized = key.lower().replace(" ", "_").replace("-", "_")
+                        
+                        if param_key in key_normalized or key_normalized in param_key:
+                            # Found a match
+                            param_info = value if isinstance(value, dict) else {"direction": "unknown"}
+                            param_direction = param_info.get("direction") or param_info.get("change_direction", "unknown")
+                            
+                            # Filter by direction if specified
+                            if direction and param_direction != direction:
+                                continue
+                            
+                            matching_diseases.append({
+                                "disease_id": disease.get("id"),
+                                "disease_name": disease.get("name"),
+                                "icd10_code": disease.get("icd10_code", ""),
+                                "category": disease.get("category", ""),
+                                "organ_system": organ,
+                                "parameter_name": key,
+                                "direction": param_direction,
+                                "magnitude": param_info.get("change_percent") or param_info.get("magnitude", ""),
+                                "evidence": param_info.get("evidence", ""),
+                                "clinical_significance": param_info.get("clinical_significance", ""),
+                                "diagnostic_weight": param_info.get("diagnostic_weight", 0.5)
+                            })
+                            break  # Found match in this disease, move to next
+        
+        # Sort by diagnostic weight (higher = more relevant)
+        matching_diseases.sort(key=lambda x: x.get("diagnostic_weight", 0), reverse=True)
+        
+        # Group by direction for easier consumption
+        increased = [d for d in matching_diseases if d["direction"] == "increase"]
+        decreased = [d for d in matching_diseases if d["direction"] == "decrease"]
+        other = [d for d in matching_diseases if d["direction"] not in ["increase", "decrease"]]
+        
+        return {
+            "parameter": parameter_name,
+            "normalized_key": param_key,
+            "total_matches": len(matching_diseases),
+            "causes_of_increase": increased[:limit],
+            "causes_of_decrease": decreased[:limit],
+            "other_associations": other[:limit],
+            "summary": {
+                "increase_count": len(increased),
+                "decrease_count": len(decreased),
+                "other_count": len(other)
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Error in parameter causes lookup: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @api_router.get("/diseases-db/list")
 async def get_disease_list_lightweight():
     """
