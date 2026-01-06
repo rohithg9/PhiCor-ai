@@ -953,18 +953,18 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                     <div className="flex gap-3">
                       <Button
                         onClick={handleAnalyzeText}
-                        className="bg-emerald-500 hover:bg-emerald-600 text-white"
-                        disabled={!clinicalText.trim() || isAnalyzing}
+                        className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-6"
+                        disabled={!clinicalText.trim() || isAnalyzing || isSynthesizing}
                       >
-                        {isAnalyzing ? (
+                        {isAnalyzing || isSynthesizing ? (
                           <>
                             <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                            Analyzing...
+                            {isAnalyzing ? 'Analyzing...' : 'Synthesizing...'}
                           </>
                         ) : (
                           <>
-                            <Brain className="w-4 h-4 mr-2" />
-                            {usePhiCor ? 'PhiCor Analysis' : 'Basic Analysis'}
+                            <span className="font-serif font-bold mr-2">Φ</span>
+                            Run Complete Analysis
                           </>
                         )}
                       </Button>
