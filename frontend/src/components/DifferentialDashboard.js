@@ -708,11 +708,58 @@ const DifferentialDashboard = ({
         </div>
       )}
 
-      {/* No Profile Available */}
+      {/* No Profile Available - Show basic info from differential instead */}
       {!loading && !currentProfile && currentDiseaseName && (
-        <div className={`p-4 text-center ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-          <AlertTriangle className="w-10 h-10 mx-auto mb-3 text-amber-500" />
-          <p className="text-sm">Disease profile not found: {currentDiseaseName}</p>
+        <div className={`p-4 ${isDark ? 'bg-gray-800/50' : 'bg-gray-50'} rounded-xl`}>
+          <div className="flex items-start gap-3 mb-4">
+            <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                {currentDiseaseName}
+              </p>
+              <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                Detailed profile loading... This condition may be under a different name in our database.
+              </p>
+            </div>
+          </div>
+          
+          {/* Show what we DO have from the differential */}
+          {currentDiff && (
+            <div className={`space-y-3 pt-3 border-t ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
+              {currentDiff.probability && (
+                <div className="flex items-center gap-2">
+                  <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Probability:</span>
+                  <Badge className="bg-emerald-500/20 text-emerald-400">{currentDiff.probability}%</Badge>
+                </div>
+              )}
+              {currentDiff.icd_code && (
+                <div className="flex items-center gap-2">
+                  <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>ICD-10:</span>
+                  <Badge className="bg-blue-500/20 text-blue-400">{currentDiff.icd_code}</Badge>
+                </div>
+              )}
+              {currentDiff.key_features && currentDiff.key_features.length > 0 && (
+                <div>
+                  <span className={`text-xs font-medium ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Key Features:</span>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {currentDiff.key_features.slice(0, 5).map((f, idx) => (
+                      <Badge key={idx} className={`text-[10px] ${isDark ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700'}`}>
+                        {f}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {currentDiff.reasoning && (
+                <div>
+                  <span className={`text-xs font-medium ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Clinical Reasoning:</span>
+                  <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                    {currentDiff.reasoning}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>
