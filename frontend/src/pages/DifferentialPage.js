@@ -318,7 +318,6 @@ const DifferentialPage = () => {
         // Retry logic for API calls
         let retryCount = 0;
         const maxRetries = 2;
-        let result = null;
         
         while (retryCount <= maxRetries) {
           try {
@@ -367,7 +366,7 @@ const DifferentialPage = () => {
           findings = result.findings.map((f, idx) => ({
             id: `phicor-${Date.now()}-${idx}`,
             organ: f.organ_system || f.organ || 'unknown',
-              parameterId: f.parameter_id,
+            parameterId: f.parameter_id,
               parameterName: f.name || f.parameter_id,
               value: f.value || '',
               unit: f.unit || '',
