@@ -277,7 +277,7 @@ const DifferentialPage = () => {
       setDifferentialResults(results.slice(0, 20));
       setIsAnalyzing(false);
     }, 500);
-  }, [abnormalFindings, clinicalText]);
+  }, [abnormalFindings, clinicalText, phicorResults]);
   
   // Track if PhiCor analysis is active to prevent race conditions
   const [phicorActive, setPhicorActive] = useState(false);
