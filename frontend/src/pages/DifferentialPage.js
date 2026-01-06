@@ -1519,45 +1519,25 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                 {isAnalyzing ? (
                   <div className="flex items-center justify-center py-12">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500" />
-                    <span className={`ml-3 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Analyzing...</span>
+                    <span className={`ml-3 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Analyzing clinical data...</span>
                   </div>
                 ) : differentialResults.length > 0 ? (
-                  <div className="space-y-3">
-                    {differentialResults.map((diagnosis, idx) => (
-                      <div
-                        key={diagnosis.icd10 || diagnosis.icdCode || idx}
-                        className={`rounded-xl border overflow-hidden transition-all ${isDark ? 'bg-gray-800/50 border-gray-700 hover:border-emerald-500/50' : 'bg-white border-gray-200 hover:border-emerald-500'}`}
-                      >
-                        <div
-                          className="p-4 cursor-pointer"
-                          onClick={() => setExpandedDisease(expandedDisease === idx ? null : idx)}
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${getProbabilityColor(diagnosis.probabilityScore || diagnosis.probability * 100)} flex items-center justify-center text-white font-bold text-sm`}>
-                              {idx + 1}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2">
-                                <p className={`font-medium truncate ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                                  {diagnosis.diseaseName}
-                                </p>
-                                {/* Role badge from PhiCor Analysis */}
-                                {diagnosis.role && (
-                                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
-                                    diagnosis.role === 'Primary' 
-                                      ? 'bg-emerald-500/20 text-emerald-400' 
-                                      : diagnosis.role === 'Secondary'
-                                        ? 'bg-blue-500/20 text-blue-400'
-                                        : 'bg-amber-500/20 text-amber-400'
-                                  }`}>
-                                    {diagnosis.role}
-                                  </span>
-                                )}
-                              </div>
-                              <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-                                {diagnosis.icd10 || diagnosis.icdCode}
-                              </p>
-                            </div>
+                  <DifferentialDashboard
+                    differentials={differentialResults}
+                    patientFindings={abnormalFindings}
+                    symptoms={abnormalFindings.filter(f => f.type === 'symptom')}
+                    onParameterClick={(paramName, type, expected) => {
+                      console.log('Parameter clicked:', paramName, type, expected);
+                      // TODO: Show modal with all causes for this parameter
+                    }}
+                  />
+                ) : (
+                  <div className={`text-center py-12 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                    <Brain className="w-16 h-16 mx-auto mb-4 opacity-30" />
+                    <p className="text-lg font-medium mb-2">No findings yet</p>
+                    <p className="text-sm">Add abnormal parameters or paste clinical text to generate differential diagnosis</p>
+                  </div>
+                )}
                             <div className="flex items-center gap-2">
                               <div className="text-right">
                                 <div className={`text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
