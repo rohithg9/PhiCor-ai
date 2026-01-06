@@ -447,7 +447,8 @@ const DifferentialDashboard = ({
                   {currentStats.matchedParams.slice(0, 10).map((m, idx) => (
                     <Badge 
                       key={idx}
-                      className={`text-[10px] ${
+                      onClick={() => onParameterClick(m.param, 'matched', m.expected)}
+                      className={`text-[10px] cursor-pointer hover:scale-105 transition-transform ${
                         m.expected?.direction === 'increase' 
                           ? 'bg-red-500/20 text-red-400 border-red-500/30'
                           : m.expected?.direction === 'decrease'
