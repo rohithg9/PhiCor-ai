@@ -1731,7 +1731,7 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                           Currently analyzing:
                         </p>
                         <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'} animate-pulse`}>
-                          "{highlightedText}"
+                          &ldquo;{highlightedText}&rdquo;
                         </p>
                       </div>
                     )}
