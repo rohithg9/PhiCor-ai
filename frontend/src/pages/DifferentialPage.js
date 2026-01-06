@@ -1010,50 +1010,78 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                       </div>
                     )}
                     
-                    {/* Clinical Findings with Normal Ranges */}
+                    {/* Clinical Findings Dashboard - ENHANCED */}
                     {phicorResults && phicorResults.findings?.length > 0 && (
-                      <div className={`mt-3 p-4 rounded-xl border ${isDark ? 'bg-gray-800/50 border-gray-700' : 'bg-gray-50 border-gray-200'}`}>
-                        <h4 className={`text-sm font-semibold flex items-center gap-2 mb-3 ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>
+                      <div className={`mt-4 p-4 rounded-xl border ${isDark ? 'bg-gray-800/50 border-gray-700' : 'bg-gray-50 border-gray-200'}`}>
+                        <h4 className={`text-sm font-semibold flex items-center gap-2 mb-4 ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>
                           <Activity className="w-4 h-4" />
-                          Clinical Findings
+                          Clinical Findings Dashboard
+                          <Badge className={`ml-2 ${isDark ? 'bg-emerald-900/50 text-emerald-400' : 'bg-emerald-100 text-emerald-700'}`}>
+                            {phicorResults.findings.length} parameters
+                          </Badge>
                         </h4>
-                        <div className="space-y-2">
-                          {phicorResults.findings.slice(0, 8).map((finding, idx) => (
-                            <div key={idx} className={`flex items-center justify-between p-2 rounded-lg ${
-                              finding.status === 'elevated' || finding.status === 'high' 
-                                ? isDark ? 'bg-red-900/20' : 'bg-red-50'
-                                : finding.status === 'low' || finding.status === 'decreased'
-                                  ? isDark ? 'bg-blue-900/20' : 'bg-blue-50'
-                                  : isDark ? 'bg-gray-700/30' : 'bg-white'
-                            }`}>
-                              <div className="flex items-center gap-2">
-                                {finding.direction === 'increase' ? (
-                                  <TrendingUp className="w-4 h-4 text-red-500" />
-                                ) : finding.direction === 'decrease' ? (
-                                  <TrendingDown className="w-4 h-4 text-blue-500" />
-                                ) : (
-                                  <Minus className="w-4 h-4 text-gray-400" />
-                                )}
-                                <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                                  {finding.name}
-                                </span>
-                              </div>
-                              <div className="text-right">
-                                <span className={`text-sm font-bold ${
-                                  finding.status === 'elevated' || finding.status === 'high' ? 'text-red-500'
-                                    : finding.status === 'low' || finding.status === 'decreased' ? 'text-blue-500'
-                                      : isDark ? 'text-green-400' : 'text-green-600'
+                        
+                        {/* Big Value Cards Grid */}
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                          {phicorResults.findings.slice(0, 12).map((finding, idx) => {
+                            const isHigh = finding.direction === 'increase' || finding.status === 'elevated' || finding.status === 'high';
+                            const isLow = finding.direction === 'decrease' || finding.status === 'low' || finding.status === 'decreased';
+                            const isAbnormal = isHigh || isLow;
+                            
+                            return (
+                              <div 
+                                key={idx} 
+                                className={`p-4 rounded-xl border-2 transition-all hover:scale-[1.02] cursor-pointer ${
+                                  isHigh 
+                                    ? isDark ? 'bg-red-900/30 border-red-500/50' : 'bg-red-50 border-red-300'
+                                    : isLow
+                                      ? isDark ? 'bg-blue-900/30 border-blue-500/50' : 'bg-blue-50 border-blue-300'
+                                      : isDark ? 'bg-gray-700/30 border-gray-600' : 'bg-white border-gray-200'
+                                }`}
+                                onClick={() => onParameterClick && onParameterClick(finding.parameter_id || finding.name, 'finding', finding)}
+                              >
+                                {/* Parameter Name */}
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className={`text-xs font-medium uppercase tracking-wide truncate ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                                    {finding.name?.replace(/_/g, ' ')}
+                                  </span>
+                                  {isHigh && <TrendingUp className="w-4 h-4 text-red-500 flex-shrink-0" />}
+                                  {isLow && <TrendingDown className="w-4 h-4 text-blue-500 flex-shrink-0" />}
+                                  {!isAbnormal && <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />}
+                                </div>
+                                
+                                {/* Big Value Display */}
+                                <div className={`text-2xl md:text-3xl font-bold mb-1 ${
+                                  isHigh ? 'text-red-500'
+                                    : isLow ? 'text-blue-500'
+                                      : isDark ? 'text-emerald-400' : 'text-emerald-600'
                                 }`}>
-                                  {finding.value} {finding.unit}
-                                </span>
+                                  {finding.value}
+                                  <span className={`text-sm font-normal ml-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                                    {finding.unit}
+                                  </span>
+                                </div>
+                                
+                                {/* Normal Range */}
                                 {finding.normal_range && (
-                                  <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                                  <div className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
                                     Normal: {finding.normal_range}
-                                  </p>
+                                  </div>
+                                )}
+                                
+                                {/* Severity Badge */}
+                                {isAbnormal && (
+                                  <Badge className={`mt-2 text-[10px] ${
+                                    isHigh 
+                                      ? 'bg-red-500/20 text-red-400 border-red-500/30'
+                                      : 'bg-blue-500/20 text-blue-400 border-blue-500/30'
+                                  }`}>
+                                    {isHigh ? '↑ ELEVATED' : '↓ LOW'}
+                                  </Badge>
                                 )}
                               </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
                     )}
