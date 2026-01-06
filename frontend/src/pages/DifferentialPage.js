@@ -345,6 +345,10 @@ const DifferentialPage = () => {
   const handleAnalyzeText = async () => {
     if (!clinicalText.trim()) return;
     
+    const startTime = Date.now();
+    setAnalysisStartTime(startTime);
+    setElapsedTime(0);
+    setAnalysisTimeTaken(null);
     setIsAnalyzing(true);
     setPhicorResults(null);
     if (usePhiCor) {
