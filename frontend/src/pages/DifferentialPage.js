@@ -478,12 +478,18 @@ const DifferentialPage = () => {
         
         setAbnormalFindings(prev => {
           const updated = [...prev, ...newFindings];
-          // Only run local diagnosis if PhiCor didn't provide differentials
+          // Only run local diagnosis if PhiCor didn't provide differentials AND PhiCor is disabled
           if (!usePhiCor || !hasPhicorDifferentials) {
             setPhicorActive(false); // Reset PhiCor active flag before running local diagnosis
             setTimeout(() => {
               runDiagnosis(updated);
             }, 100);
+          } else {
+            // PhiCor provided differentials - keep phicorActive true to prevent useEffect from running local diagnosis
+            // Reset after a short delay to allow React to process state updates
+            setTimeout(() => {
+              setPhicorActive(false);
+            }, 500);
           }
           return updated;
         });
