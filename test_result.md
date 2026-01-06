@@ -123,6 +123,8 @@ test_plan:
 agent_communication:
   - agent: "main"
     message: "✅ PHASE 1 COMPLETE (100%). Phase 2 running in background (~22%). PDF documentation created. All dashboard tabs verified working. Ready for frontend testing."
+  - agent: "main"
+    message: "✅ NEW FEATURE: Parameter Drill-Down Modal implemented. Backend API GET /api/diseases-db/parameter-causes/{parameter_name} working. Frontend modal at /differential page. Clicking on any parameter badge (e.g., systolic_bp, wbc, heart_rate) opens modal showing all 500+ diseases that affect that parameter."
   - agent: "testing"
     message: "✅ COMPREHENSIVE UI TESTING COMPLETE - All major functionality verified working. Login flow successful with 'Dr. Super Admin'. All tabs functional: Baselines (organ systems + parameter categories), Diseases (1581 items, search working), References (396 items), Knowledge (3 sources), Users (8 users with management interface). PDF documentation accessible. Only minor issue: Heart Failure search needs refinement but core functionality works."
 
