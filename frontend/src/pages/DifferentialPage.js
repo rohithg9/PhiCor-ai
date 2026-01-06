@@ -367,18 +367,18 @@ const DifferentialPage = () => {
             id: `phicor-${Date.now()}-${idx}`,
             organ: f.organ_system || f.organ || 'unknown',
             parameterId: f.parameter_id,
-              parameterName: f.name || f.parameter_id,
-              value: f.value || '',
-              unit: f.unit || '',
-              direction: f.direction,
-              severity: f.severity || 1,
-              deviation: '',
-              normalRange: '',
-              source: 'phicor-analysis',
-              originalText: f.original_text || '',
-              type: f.type || 'lab',
-              physiologicImplication: f.physiologic_implication || '',
-            }));
+            parameterName: f.name || f.parameter_id,
+            value: f.value || '',
+            unit: f.unit || '',
+            direction: f.direction,
+            severity: f.severity || 1,
+            deviation: '',
+            normalRange: '',
+            source: 'phicor-analysis',
+            originalText: f.original_text || '',
+            type: f.type || 'lab',
+            physiologicImplication: f.physiologic_implication || '',
+          }));
           }
           
           // Add symptoms as findings too
