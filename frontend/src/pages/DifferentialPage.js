@@ -102,16 +102,58 @@ const DifferentialPage = () => {
     currentDirection: null
   });
   
-  // Timer effect for live elapsed time during analysis
+  // Timer effect for live elapsed time and text highlighting simulation during analysis
   useEffect(() => {
     let timer;
+    let highlightTimer;
+    
     if (isAnalyzing && analysisStartTime) {
+      // Update elapsed time
       timer = setInterval(() => {
-        setElapsedTime(((Date.now() - analysisStartTime) / 1000).toFixed(1));
+        const elapsed = ((Date.now() - analysisStartTime) / 1000);
+        setElapsedTime(elapsed.toFixed(1));
+        
+        // Simulate analysis steps based on time
+        if (elapsed < 5) {
+          setAnalysisStep('Parsing clinical text...');
+        } else if (elapsed < 15) {
+          setAnalysisStep('Extracting vital signs & lab values...');
+        } else if (elapsed < 30) {
+          setAnalysisStep('Matching against disease database...');
+        } else if (elapsed < 45) {
+          setAnalysisStep('Computing differential probabilities...');
+        } else {
+          setAnalysisStep('Generating clinical synthesis...');
+        }
       }, 100);
+      
+      // Simulate text highlighting - pick random sections of the clinical text
+      if (clinicalText) {
+        const words = clinicalText.split(/\s+/);
+        let wordIndex = 0;
+        
+        highlightTimer = setInterval(() => {
+          if (wordIndex < words.length) {
+            // Highlight 3-5 words at a time
+            const chunkSize = Math.min(3 + Math.floor(Math.random() * 3), words.length - wordIndex);
+            const chunk = words.slice(wordIndex, wordIndex + chunkSize).join(' ');
+            setHighlightedText(chunk);
+            wordIndex += chunkSize;
+          } else {
+            wordIndex = 0; // Loop back
+          }
+        }, 800);
+      }
+    } else {
+      setHighlightedText('');
+      setAnalysisStep('');
     }
-    return () => clearInterval(timer);
-  }, [isAnalyzing, analysisStartTime]);
+    
+    return () => {
+      clearInterval(timer);
+      clearInterval(highlightTimer);
+    };
+  }, [isAnalyzing, analysisStartTime, clinicalText]);
   
   // Get all parameters organized by organ
   const allParameters = useMemo(() => getAllParameters(), []);
