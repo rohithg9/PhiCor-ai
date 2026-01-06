@@ -3085,9 +3085,6 @@ async def get_parameter_causes(
         # Normalize parameter name
         param_key = parameter_name.lower().replace(" ", "_").replace("-", "_")
         
-        # Build regex pattern for flexible matching
-        param_pattern = f".*{param_key}.*"
-        
         # Build aggregation pipeline to search through nested parameter_modifications
         pipeline = [
             # Match diseases that have parameter_modifications
