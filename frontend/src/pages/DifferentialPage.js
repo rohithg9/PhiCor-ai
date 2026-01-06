@@ -1305,25 +1305,12 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                       {analysisTimeTaken}s
                     </Badge>
                   )}
-                  {/* PhiCor Synthesis Button in header */}
-                  {(clinicalText.trim() || differentialResults.length > 0) && !clinicalSynthesis && (
-                    <Button
-                      onClick={runClinicalSynthesis}
-                      disabled={isSynthesizing}
-                      className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-xs py-1 px-3 h-auto"
-                    >
-                      {isSynthesizing ? (
-                        <>
-                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2" />
-                          Analyzing...
-                        </>
-                      ) : (
-                        <>
-                          <span className="font-serif font-bold mr-1">Φ</span>
-                          Run Synthesis
-                        </>
-                      )}
-                    </Button>
+                  {/* Show synthesizing indicator */}
+                  {isSynthesizing && (
+                    <Badge className="bg-purple-500/20 text-purple-400 flex items-center gap-1">
+                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-purple-400 mr-1" />
+                      Synthesizing...
+                    </Badge>
                   )}
                 </div>
               </div>
