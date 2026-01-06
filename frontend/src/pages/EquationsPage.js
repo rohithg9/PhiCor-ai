@@ -316,11 +316,34 @@ const EquationsPage = () => {
       const response = await fetch(`${backendUrl}/api/equations`);
       const data = await response.json();
       
+      // Handle different response formats
       if (data.all_equations) {
+        // New format with all_equations array
         setEquations(data.all_equations);
         setCategories(data.categories || []);
       } else if (Array.isArray(data)) {
+        // Direct array format
         setEquations(data);
+      } else if (typeof data === 'object' && !Array.isArray(data)) {
+        // Category-based dict format (legacy)
+        const allEquations = [];
+        const cats = Object.keys(data);
+        
+        cats.forEach(category => {
+          const categoryEquations = data[category];
+          if (typeof categoryEquations === 'object') {
+            Object.entries(categoryEquations).forEach(([id, eq]) => {
+              allEquations.push({
+                id,
+                equation_category: category,
+                ...eq
+              });
+            });
+          }
+        });
+        
+        setEquations(allEquations);
+        setCategories(cats);
       }
     } catch (error) {
       console.error('Error fetching equations:', error);
