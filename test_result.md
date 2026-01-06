@@ -150,6 +150,19 @@ frontend:
         comment: "✅ MOBILE RESPONSIVENESS TESTING COMPLETE - All test scenarios verified working: Landing Page Mobile Landscape (812x375), Differential Page Mobile Landscape, and Desktop View (1920x800). Greek symbol buttons (Φ, Δ, ρ) visible in all viewport sizes, US flag region selector functional, navigation elements properly responsive. No element cutoff issues. UI production-ready for mobile users."
 
 frontend:
+  - task: "Disease Detail Panel Text Formatting (Mobile)"
+    implemented: true
+    working: false
+    file: "frontend/src/components/DiseaseDetailPanel.js"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "❌ CRITICAL FORMATTING ISSUES IDENTIFIED - Comprehensive testing of Aortic Stenosis DiseaseDetailPanel on mobile (390x844) reveals major text formatting problems: (1) CLINICAL TAB: diagnostic_criteria.clinical_criteria nested object renders as raw JSON string '{\"name\":\"N/A\",\"major_criteria\":[...]}' instead of formatted lists. Component fails to parse nested objects properly. (2) TREATMENT TAB: Empty pharmacological arrays (first_line: [], second_line: []) display empty 'First-Line:' and 'Second-Line:' boxes with no content inside. Backend API returns correct data including newer treatments array with Aortic Valve Replacement, TAVR, Beta Blockers, ACE Inhibitors, but component prioritizes legacy treatment structure. Backend working correctly - frontend component needs to: (a) Parse nested diagnostic_criteria objects into readable format, (b) Handle empty treatment arrays gracefully, (c) Use newer treatments array when legacy structure is empty. User experience severely impacted by raw JSON display."
+
+frontend:
   - task: "Frontend Data Audit - Enhanced Clinical Evidence Panel"
     implemented: true
     working: true
