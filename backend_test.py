@@ -27,7 +27,7 @@ Test 4: Admin Authentication
 - Admin login with admin@phicor.ai / admin123
 - Verify admin access and token validity
 
-API Base URL: https://phicor-knowledge.preview.emergentagent.com
+API Base URL: https://phicor-enhance.preview.emergentagent.com
 All APIs require Authorization: Bearer {token} header
 """
 
