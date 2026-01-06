@@ -88,6 +88,15 @@ const DifferentialPage = () => {
   const [isSynthesizing, setIsSynthesizing] = useState(false);
   const [synthesisExpanded, setSynthesisExpanded] = useState(true);
   
+  // NEW: Parameter Drill-Down Modal state
+  const [drillDownModal, setDrillDownModal] = useState({
+    isOpen: false,
+    parameterName: null,
+    parameterType: null,
+    expectedValue: null,
+    currentDirection: null
+  });
+  
   // Get all parameters organized by organ
   const allParameters = useMemo(() => getAllParameters(), []);
   
