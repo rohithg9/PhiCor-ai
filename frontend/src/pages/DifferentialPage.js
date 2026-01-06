@@ -561,30 +561,27 @@ const DifferentialPage = () => {
         // Check if we should run local diagnosis
         const hasPhicorDifferentials = result?.differentials?.length > 0;
         
-        setAbnormalFindings(prev => {
-          const updated = [...prev, ...newFindings];
-          // Only run local diagnosis if PhiCor is explicitly disabled AND didn't provide differentials
-          if (!usePhiCor && !hasPhicorDifferentials) {
-            setPhicorActive(false); // Reset PhiCor active flag before running local diagnosis
-            setTimeout(() => {
-              runDiagnosis(updated);
-            }, 100);
-          } else if (hasPhicorDifferentials) {
-            // PhiCor provided differentials - DO NOT run local diagnosis
-            // Keep phicorActive true for a moment to prevent useEffect from triggering
-            setTimeout(() => {
-              setPhicorActive(false);
-            }, 1000); // Longer delay to ensure state updates propagate
-          } else {
+        // REPLACE findings instead of appending to prevent duplicates
+        setAbnormalFindings(newFindings);
+        
+        if (hasPhicorDifferentials) {
+          // PhiCor provided differentials - keep them
+          setTimeout(() => {
             setPhicorActive(false);
-          }
-          return updated;
-        });
+          }, 1000);
+        } else {
+          // Run local diagnosis if no PhiCor differentials
+          setPhicorActive(false);
+          setTimeout(() => {
+            runDiagnosis(newFindings);
+          }, 100);
+        }
+        
         const timeTaken = ((Date.now() - startTime) / 1000).toFixed(1);
         setAnalysisTimeTaken(timeTaken);
         setIsAnalyzing(false);
         
-        // AUTO-TRIGGER SYNTHESIS after successful analysis
+        // AUTO-TRIGGER SYNTHESIS after successful analysis (with delay to prevent animation conflict)
         if (result?.differentials?.length > 0 || result?.findings?.length > 0) {
           setTimeout(() => {
             runClinicalSynthesis();
