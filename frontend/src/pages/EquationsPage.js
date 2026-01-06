@@ -158,20 +158,26 @@ const EquationCalculator = ({ equation }) => {
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-3">
-          {Object.entries(variables).filter(([key]) => !['6.1', '0.03', 'R', 'κ', 'α'].includes(key)).slice(0, 6).map(([varName, varInfo]) => (
-            <div key={varName} className="space-y-1">
-              <Label className="text-xs">{varInfo.description || varName}</Label>
-              <div className="flex items-center space-x-1">
-                <Input
-                  type="number"
-                  placeholder={varInfo.normal_range || varInfo.normal || '0'}
-                  className="h-8 text-sm"
-                  onChange={(e) => handleInputChange(varName.replace(/[₂⁺⁻]/g, ''), e.target.value)}
-                />
-                <span className="text-xs text-slate-500 w-16">{varInfo.unit}</span>
+          {Object.entries(variables).filter(([key]) => !['6.1', '0.03', 'R', 'κ', 'α', 'MAP', 'CI', 'SVR', 'A-a', 'P/F', 'GFR', 'CrCl', 'FENa', 'AG'].includes(key)).slice(0, 6).map(([varName, varInfo]) => {
+            const description = typeof varInfo === 'object' ? (varInfo.description || varName) : varInfo;
+            const unit = typeof varInfo === 'object' ? (varInfo.unit || '') : '';
+            const placeholder = typeof varInfo === 'object' ? (varInfo.normal_range || varInfo.normal || '0') : '0';
+            
+            return (
+              <div key={varName} className="space-y-1">
+                <Label className="text-xs">{description}</Label>
+                <div className="flex items-center space-x-1">
+                  <Input
+                    type="number"
+                    placeholder={placeholder}
+                    className="h-8 text-sm"
+                    onChange={(e) => handleInputChange(varName, e.target.value)}
+                  />
+                  <span className="text-xs text-slate-500 w-16">{unit}</span>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
       
