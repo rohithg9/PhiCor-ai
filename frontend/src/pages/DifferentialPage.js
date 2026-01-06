@@ -1698,7 +1698,7 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                 )}
                 
                 {isAnalyzing ? (
-                  <div className={`flex flex-col items-center justify-center py-16 px-4 ${isDark ? 'bg-gray-800/30' : 'bg-gray-50'} rounded-xl`}>
+                  <div className={`flex flex-col items-center justify-center py-12 px-4 ${isDark ? 'bg-gray-800/30' : 'bg-gray-50'} rounded-xl`}>
                     {/* Animated DNA/Medical Helix */}
                     <div className="relative w-20 h-20 mb-6">
                       <div className="absolute inset-0 rounded-full border-4 border-emerald-500/30 animate-ping" />
@@ -1713,33 +1713,50 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                       PhiCor Analysis in Progress
                     </h3>
                     
-                    <div className={`text-sm mb-4 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                      Analyzing clinical patterns & physiological relationships...
+                    {/* Dynamic Analysis Step */}
+                    <div className={`text-sm mb-4 ${isDark ? 'text-emerald-400' : 'text-emerald-600'} animate-pulse`}>
+                      {analysisStep || 'Initializing analysis...'}
                     </div>
                     
                     {/* Live Timer */}
-                    <div className={`flex items-center gap-2 px-4 py-2 rounded-full ${isDark ? 'bg-emerald-900/30 text-emerald-400' : 'bg-emerald-100 text-emerald-700'}`}>
+                    <div className={`flex items-center gap-2 px-4 py-2 rounded-full mb-4 ${isDark ? 'bg-emerald-900/30 text-emerald-400' : 'bg-emerald-100 text-emerald-700'}`}>
                       <Activity className="w-4 h-4 animate-pulse" />
                       <span className="font-mono font-semibold">{elapsedTime}s</span>
                     </div>
                     
+                    {/* Currently Analyzing Text - Highlighted */}
+                    {highlightedText && (
+                      <div className={`w-full max-w-md p-4 rounded-lg mb-4 border-2 border-dashed ${isDark ? 'bg-purple-900/20 border-purple-500/50' : 'bg-purple-50 border-purple-300'}`}>
+                        <p className={`text-xs mb-2 ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>
+                          Currently analyzing:
+                        </p>
+                        <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'} animate-pulse`}>
+                          "{highlightedText}"
+                        </p>
+                      </div>
+                    )}
+                    
                     {/* Progress Steps */}
-                    <div className={`mt-6 text-xs space-y-2 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                    <div className={`w-full max-w-sm text-xs space-y-2 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
                       <div className="flex items-center gap-2">
-                        <CheckCircle className="w-3 h-3 text-emerald-500" />
-                        <span>Parsing clinical text...</span>
+                        <CheckCircle className={`w-3 h-3 ${elapsedTime >= 0 ? 'text-emerald-500' : 'text-gray-400'}`} />
+                        <span className={elapsedTime >= 0 ? (isDark ? 'text-emerald-400' : 'text-emerald-600') : ''}>Parsing clinical text...</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className={`w-3 h-3 rounded-full border-2 ${elapsedTime > 2 ? 'bg-emerald-500 border-emerald-500' : 'border-gray-400 animate-pulse'}`} />
-                        <span>Extracting parameters & findings...</span>
+                        <div className={`w-3 h-3 rounded-full border-2 transition-all ${elapsedTime > 5 ? 'bg-emerald-500 border-emerald-500' : 'border-gray-400 animate-pulse'}`} />
+                        <span className={elapsedTime > 5 ? (isDark ? 'text-emerald-400' : 'text-emerald-600') : ''}>Extracting vital signs & lab values...</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className={`w-3 h-3 rounded-full border-2 ${elapsedTime > 5 ? 'bg-emerald-500 border-emerald-500' : 'border-gray-400'}`} />
-                        <span>Running differential diagnosis...</span>
+                        <div className={`w-3 h-3 rounded-full border-2 transition-all ${elapsedTime > 15 ? 'bg-emerald-500 border-emerald-500' : 'border-gray-400'}`} />
+                        <span className={elapsedTime > 15 ? (isDark ? 'text-emerald-400' : 'text-emerald-600') : ''}>Running differential diagnosis...</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className={`w-3 h-3 rounded-full border-2 ${elapsedTime > 8 ? 'bg-emerald-500 border-emerald-500' : 'border-gray-400'}`} />
-                        <span>Matching mathematical models...</span>
+                        <div className={`w-3 h-3 rounded-full border-2 transition-all ${elapsedTime > 30 ? 'bg-emerald-500 border-emerald-500' : 'border-gray-400'}`} />
+                        <span className={elapsedTime > 30 ? (isDark ? 'text-emerald-400' : 'text-emerald-600') : ''}>Matching disease profiles & models...</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className={`w-3 h-3 rounded-full border-2 transition-all ${elapsedTime > 45 ? 'bg-emerald-500 border-emerald-500' : 'border-gray-400'}`} />
+                        <span className={elapsedTime > 45 ? (isDark ? 'text-purple-400' : 'text-purple-600') : ''}>Generating clinical synthesis...</span>
                       </div>
                     </div>
                   </div>
