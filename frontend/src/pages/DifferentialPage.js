@@ -1580,27 +1580,77 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                 )}
                 
                 {isAnalyzing ? (
-                  <div className="flex items-center justify-center py-12">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500" />
-                    <span className={`ml-3 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Analyzing clinical data...</span>
+                  <div className={`flex flex-col items-center justify-center py-16 px-4 ${isDark ? 'bg-gray-800/30' : 'bg-gray-50'} rounded-xl`}>
+                    {/* Animated DNA/Medical Helix */}
+                    <div className="relative w-20 h-20 mb-6">
+                      <div className="absolute inset-0 rounded-full border-4 border-emerald-500/30 animate-ping" />
+                      <div className="absolute inset-2 rounded-full border-4 border-t-emerald-500 border-r-transparent border-b-emerald-500/50 border-l-transparent animate-spin" />
+                      <div className="absolute inset-4 rounded-full border-4 border-t-transparent border-r-purple-500 border-b-transparent border-l-purple-500/50 animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }} />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-2xl font-serif font-bold text-emerald-400">Φ</span>
+                      </div>
+                    </div>
+                    
+                    <h3 className={`text-lg font-semibold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                      PhiCor Analysis in Progress
+                    </h3>
+                    
+                    <div className={`text-sm mb-4 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                      Analyzing clinical patterns & physiological relationships...
+                    </div>
+                    
+                    {/* Live Timer */}
+                    <div className={`flex items-center gap-2 px-4 py-2 rounded-full ${isDark ? 'bg-emerald-900/30 text-emerald-400' : 'bg-emerald-100 text-emerald-700'}`}>
+                      <Activity className="w-4 h-4 animate-pulse" />
+                      <span className="font-mono font-semibold">{elapsedTime}s</span>
+                    </div>
+                    
+                    {/* Progress Steps */}
+                    <div className={`mt-6 text-xs space-y-2 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="w-3 h-3 text-emerald-500" />
+                        <span>Parsing clinical text...</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className={`w-3 h-3 rounded-full border-2 ${elapsedTime > 2 ? 'bg-emerald-500 border-emerald-500' : 'border-gray-400 animate-pulse'}`} />
+                        <span>Extracting parameters & findings...</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className={`w-3 h-3 rounded-full border-2 ${elapsedTime > 5 ? 'bg-emerald-500 border-emerald-500' : 'border-gray-400'}`} />
+                        <span>Running differential diagnosis...</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className={`w-3 h-3 rounded-full border-2 ${elapsedTime > 8 ? 'bg-emerald-500 border-emerald-500' : 'border-gray-400'}`} />
+                        <span>Matching mathematical models...</span>
+                      </div>
+                    </div>
                   </div>
                 ) : differentialResults.length > 0 ? (
-                  <DifferentialDashboard
-                    differentials={differentialResults}
-                    patientFindings={abnormalFindings}
-                    symptoms={abnormalFindings.filter(f => f.type === 'symptom')}
-                    onParameterClick={(paramName, type, expected) => {
-                      console.log('Parameter clicked:', paramName, type, expected);
-                      // Open Parameter Drill-Down Modal
-                      setDrillDownModal({
-                        isOpen: true,
-                        parameterName: paramName,
-                        parameterType: type,
-                        expectedValue: expected,
-                        currentDirection: expected?.direction || (type === 'symptom' ? 'present' : null)
-                      });
-                    }}
-                  />
+                  <>
+                    {/* Time Taken Badge */}
+                    {analysisTimeTaken && (
+                      <div className={`mb-4 flex items-center justify-center gap-2 text-sm ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>
+                        <Zap className="w-4 h-4" />
+                        <span>Analysis completed in <strong>{analysisTimeTaken}s</strong></span>
+                      </div>
+                    )}
+                    <DifferentialDashboard
+                      differentials={differentialResults}
+                      patientFindings={abnormalFindings}
+                      symptoms={abnormalFindings.filter(f => f.type === 'symptom')}
+                      onParameterClick={(paramName, type, expected) => {
+                        console.log('Parameter clicked:', paramName, type, expected);
+                        // Open Parameter Drill-Down Modal
+                        setDrillDownModal({
+                          isOpen: true,
+                          parameterName: paramName,
+                          parameterType: type,
+                          expectedValue: expected,
+                          currentDirection: expected?.direction || (type === 'symptom' ? 'present' : null)
+                        });
+                      }}
+                    />
+                  </>
                 ) : (
                   <div className={`text-center py-12 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
                     <Brain className="w-16 h-16 mx-auto mb-4 opacity-30" />
