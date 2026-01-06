@@ -20,6 +20,7 @@ import { ScrollArea } from '../components/ui/scroll-area';
 import DiseaseDetailPanel from '../components/DiseaseDetailPanel';
 import DiseaseComparisonDashboard from '../components/DiseaseComparisonDashboard';
 import DifferentialDashboard from '../components/DifferentialDashboard';
+import ParameterDrillDownModal from '../components/ParameterDrillDownModal';
 import { 
   getDifferentialDiagnosis, 
   parseClinicalText, 
