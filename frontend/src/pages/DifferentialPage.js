@@ -312,6 +312,12 @@ const DifferentialPage = () => {
       return;
     }
     
+    // Skip if we already have differential results from PhiCor (check the results array directly)
+    if (usePhiCor && differentialResults.length > 0 && differentialResults[0]?.id?.startsWith('phicor-diff-')) {
+      console.log('Skipping local diagnosis - PhiCor results already displayed');
+      return;
+    }
+    
     // Only run local diagnosis if PhiCor is disabled
     if (!usePhiCor && (abnormalFindings.length > 0 || clinicalText.trim())) {
       console.log('Running local diagnosis - PhiCor disabled');
@@ -319,7 +325,7 @@ const DifferentialPage = () => {
     } else if (!usePhiCor && abnormalFindings.length === 0 && !clinicalText.trim()) {
       setDifferentialResults([]);
     }
-  }, [abnormalFindings, runDiagnosis, phicorResults, phicorActive, usePhiCor, isAnalyzing, clinicalText]);
+  }, [abnormalFindings, runDiagnosis, phicorResults, phicorActive, usePhiCor, isAnalyzing, clinicalText, differentialResults]);
   
   // Analyze clinical text - with PhiCor Analysis
   const handleAnalyzeText = async () => {
