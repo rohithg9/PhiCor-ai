@@ -348,86 +348,203 @@ const DiseaseDetailPanel = ({ diseaseId, diseaseName }) => {
           <TabsContent value="treatment" className="mt-3">
             <ScrollArea className="h-[300px]">
               <div className="space-y-4">
-                {disease.treatment && (
+                {/* Use newer treatments array if available */}
+                {disease.treatments && disease.treatments.length > 0 ? (
+                  <div className="space-y-3">
+                    {/* Group by type */}
+                    {(() => {
+                      const grouped = disease.treatments.reduce((acc, t) => {
+                        const type = t.type || 'other';
+                        if (!acc[type]) acc[type] = [];
+                        acc[type].push(t);
+                        return acc;
+                      }, {});
+                      
+                      const typeConfig = {
+                        medication: { label: 'Pharmacological Therapy', icon: '💊', color: 'green' },
+                        pharmacological: { label: 'Pharmacological Therapy', icon: '💊', color: 'green' },
+                        surgical: { label: 'Surgical/Procedural', icon: '🔧', color: 'purple' },
+                        device: { label: 'Device Therapy', icon: '⚡', color: 'blue' },
+                        lifestyle: { label: 'Lifestyle Modifications', icon: '🏃', color: 'amber' },
+                        other: { label: 'Other Treatments', icon: '📋', color: 'gray' }
+                      };
+                      
+                      return Object.entries(grouped).map(([type, treatments]) => {
+                        const config = typeConfig[type] || typeConfig.other;
+                        return (
+                          <div key={type} className="space-y-2">
+                            <h4 className={`text-xs font-bold text-${config.color}-500 uppercase tracking-wider flex items-center gap-1`}>
+                              <span>{config.icon}</span> {config.label}
+                            </h4>
+                            <div className="space-y-2">
+                              {treatments.map((tx, i) => (
+                                <div 
+                                  key={i} 
+                                  className={`p-2 rounded bg-${config.color}-500/5 border border-${config.color}-500/20`}
+                                >
+                                  <div className="flex items-start justify-between">
+                                    <span className={`text-xs font-medium text-${config.color}-400`}>
+                                      {tx.name}
+                                    </span>
+                                    {tx.first_line && (
+                                      <Badge variant="outline" className="text-[8px] bg-green-500/20 text-green-400">1st Line</Badge>
+                                    )}
+                                  </div>
+                                  {tx.description && (
+                                    <p className="text-[10px] text-muted-foreground mt-1">{tx.description}</p>
+                                  )}
+                                  {tx.indication && (
+                                    <p className="text-[10px] text-primary/70 mt-0.5">
+                                      <span className="font-medium">Indication:</span> {tx.indication}
+                                    </p>
+                                  )}
+                                  {tx.medications && tx.medications.length > 0 && (
+                                    <div className="flex flex-wrap gap-1 mt-1">
+                                      {tx.medications.map((med, j) => (
+                                        <Badge key={j} variant="outline" className="text-[9px]">
+                                          {typeof med === 'string' ? med : med.generic_name || med.name}
+                                          {typeof med === 'object' && med.dose && ` (${med.dose})`}
+                                        </Badge>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      });
+                    })()}
+                  </div>
+                ) : disease.treatment ? (
                   <>
-                    {/* Pharmacological Section */}
-                    {(disease.treatment.pharmacological || disease.treatment.first_line) && (
-                      <div className="space-y-2">
-                        <h4 className="text-xs font-bold text-green-500 uppercase tracking-wider flex items-center gap-1">
-                          <Pill className="w-3 h-3" /> Pharmacological Therapy
-                        </h4>
-                        
-                        {/* First Line */}
-                        {(disease.treatment.pharmacological?.first_line || disease.treatment.first_line) && (
-                          <div className="p-2 rounded bg-green-500/5 border border-green-500/20">
-                            <span className="text-[10px] text-green-400 font-semibold">First-Line:</span>
-                            <div className="flex flex-wrap gap-1 mt-1">
-                              {(Array.isArray(disease.treatment.pharmacological?.first_line || disease.treatment.first_line) 
-                                ? (disease.treatment.pharmacological?.first_line || disease.treatment.first_line)
-                                : [disease.treatment.pharmacological?.first_line || disease.treatment.first_line]
-                              ).map((tx, i) => {
-                                // Extract display name from various formats
-                                let displayName = '';
-                                let details = '';
-                                let evidence = '';
-                                
-                                if (typeof tx === 'string') {
-                                  displayName = tx;
-                                } else if (typeof tx === 'object' && tx !== null) {
-                                  displayName = tx.drug_class || tx.drug || tx.name || tx.class || 'Unknown';
-                                  if (tx.examples && Array.isArray(tx.examples)) {
-                                    details = tx.examples.join(', ');
-                                  } else if (tx.dose) {
-                                    details = tx.dose;
+                    {/* Fallback to old treatment structure */}
+                    {/* Check for pharmacological with actual data */}
+                    {(() => {
+                      const firstLine = disease.treatment.pharmacological?.first_line || disease.treatment.first_line || [];
+                      const secondLine = disease.treatment.pharmacological?.second_line || disease.treatment.second_line || [];
+                      const hasPharmData = (Array.isArray(firstLine) ? firstLine.length > 0 : firstLine) || 
+                                          (Array.isArray(secondLine) ? secondLine.length > 0 : secondLine);
+                      
+                      if (!hasPharmData) return null;
+                      
+                      return (
+                        <div className="space-y-2">
+                          <h4 className="text-xs font-bold text-green-500 uppercase tracking-wider flex items-center gap-1">
+                            <Pill className="w-3 h-3" /> Pharmacological Therapy
+                          </h4>
+                          
+                          {/* First Line */}
+                          {firstLine && (Array.isArray(firstLine) ? firstLine.length > 0 : true) && (
+                            <div className="p-2 rounded bg-green-500/5 border border-green-500/20">
+                              <span className="text-[10px] text-green-400 font-semibold">First-Line:</span>
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {(Array.isArray(firstLine) ? firstLine : [firstLine]).map((tx, i) => {
+                                  let displayName = '';
+                                  let details = '';
+                                  
+                                  if (typeof tx === 'string') {
+                                    displayName = tx;
+                                  } else if (typeof tx === 'object' && tx !== null) {
+                                    displayName = tx.drug_class || tx.drug || tx.name || tx.class || 'Treatment';
+                                    if (tx.examples && Array.isArray(tx.examples)) {
+                                      details = tx.examples.join(', ');
+                                    } else if (tx.dose) {
+                                      details = tx.dose;
+                                    }
                                   }
-                                  evidence = tx.evidence_level || '';
-                                }
-                                
-                                return (
-                                  <div key={i} className="text-xs p-1.5 bg-green-500/10 rounded border border-green-500/30">
-                                    <span className="font-medium text-green-400">{displayName}</span>
-                                    {details && <span className="text-green-300 ml-1">({details})</span>}
-                                    {evidence && <Badge variant="outline" className="ml-1 text-[8px]">{evidence}</Badge>}
-                                  </div>
-                                );
-                              })}
+                                  
+                                  if (!displayName) return null;
+                                  
+                                  return (
+                                    <div key={i} className="text-xs p-1.5 bg-green-500/10 rounded border border-green-500/30">
+                                      <span className="font-medium text-green-400">{displayName}</span>
+                                      {details && <span className="text-green-300 ml-1">({details})</span>}
+                                    </div>
+                                  );
+                                })}
+                              </div>
                             </div>
-                          </div>
-                        )}
-                        
-                        {/* Second Line */}
-                        {(disease.treatment.pharmacological?.second_line || disease.treatment.second_line) && (
-                          <div className="p-2 rounded bg-yellow-500/5 border border-yellow-500/20">
-                            <span className="text-[10px] text-yellow-400 font-semibold">Second-Line:</span>
-                            <div className="flex flex-wrap gap-1 mt-1">
-                              {(Array.isArray(disease.treatment.pharmacological?.second_line || disease.treatment.second_line)
-                                ? (disease.treatment.pharmacological?.second_line || disease.treatment.second_line)
-                                : [disease.treatment.pharmacological?.second_line || disease.treatment.second_line]
-                              ).map((tx, i) => {
-                                let displayName = '';
-                                if (typeof tx === 'string') {
-                                  displayName = tx;
-                                } else if (typeof tx === 'object' && tx !== null) {
-                                  displayName = tx.drug_class || tx.drug || tx.name || tx.class || 'Unknown';
-                                }
-                                return (
-                                  <div key={i} className="text-xs p-1.5 bg-yellow-500/10 rounded border border-yellow-500/30">
-                                    <span className="font-medium text-yellow-400">{displayName}</span>
-                                  </div>
-                                );
-                              })}
+                          )}
+                          
+                          {/* Second Line */}
+                          {secondLine && (Array.isArray(secondLine) ? secondLine.length > 0 : true) && (
+                            <div className="p-2 rounded bg-yellow-500/5 border border-yellow-500/20">
+                              <span className="text-[10px] text-yellow-400 font-semibold">Second-Line:</span>
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {(Array.isArray(secondLine) ? secondLine : [secondLine]).map((tx, i) => {
+                                  let displayName = typeof tx === 'string' ? tx : tx?.drug_class || tx?.drug || tx?.name || '';
+                                  if (!displayName) return null;
+                                  return (
+                                    <div key={i} className="text-xs p-1.5 bg-yellow-500/10 rounded border border-yellow-500/30">
+                                      <span className="font-medium text-yellow-400">{displayName}</span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
                             </div>
-                          </div>
-                        )}
+                          )}
+                        </div>
+                      );
+                    })()}
+
+                    {/* Surgical/Procedural */}
+                    {(disease.treatment.surgical || disease.treatment.procedural) && (
+                      <div className="space-y-2">
+                        <h4 className="text-xs font-bold text-purple-500 uppercase tracking-wider flex items-center gap-1">
+                          🔧 Surgical/Procedural
+                        </h4>
+                        <div className="grid gap-2">
+                          {[...(disease.treatment.surgical || []), ...(disease.treatment.procedural || [])].map((proc, i) => (
+                            <div key={i} className="text-xs p-2 bg-purple-500/10 rounded border border-purple-500/30">
+                              <span className="font-medium text-purple-400">{typeof proc === 'string' ? proc : proc.name}</span>
+                              {typeof proc === 'object' && proc.description && (
+                                <p className="text-purple-300/70 text-[10px] mt-0.5">{proc.description}</p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     )}
 
-                    {/* Device Therapy */}
-                    {(disease.treatment.device_therapy || disease.treatment.devices) && (
+                    {/* Lifestyle */}
+                    {(disease.treatment.lifestyle || disease.treatment.non_pharmacological) && (
                       <div className="space-y-2">
-                        <h4 className="text-xs font-bold text-purple-500 uppercase tracking-wider flex items-center gap-1">
-                          ⚡ Device Therapy
+                        <h4 className="text-xs font-bold text-amber-500 uppercase tracking-wider flex items-center gap-1">
+                          🏃 Lifestyle/Non-Pharmacological
                         </h4>
+                        <div className="flex flex-wrap gap-1">
+                          {[...(disease.treatment.lifestyle || []), ...(disease.treatment.non_pharmacological || [])].map((item, i) => (
+                            <Badge key={i} variant="outline" className="text-[10px] bg-amber-500/10 text-amber-400 border-amber-500/30">
+                              {typeof item === 'string' ? item : item.name}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Goals */}
+                    {disease.treatment.goals && disease.treatment.goals.length > 0 && (
+                      <div className="space-y-2">
+                        <h4 className="text-xs font-bold text-blue-500 uppercase tracking-wider flex items-center gap-1">
+                          🎯 Treatment Goals
+                        </h4>
+                        <div className="flex flex-wrap gap-1">
+                          {disease.treatment.goals.map((goal, i) => (
+                            <Badge key={i} variant="outline" className="text-[10px] bg-blue-500/10 text-blue-400 border-blue-500/30">
+                              {goal}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="text-center py-6 text-muted-foreground">
+                    <Pill className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No treatment information available</p>
+                  </div>
+                )}
                         <div className="grid gap-2">
                           {(Array.isArray(disease.treatment.device_therapy || disease.treatment.devices)
                             ? (disease.treatment.device_therapy || disease.treatment.devices)
