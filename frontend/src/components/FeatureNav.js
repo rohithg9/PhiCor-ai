@@ -75,15 +75,15 @@ const FeatureNav = ({ showTitle = true, compact = false }) => {
           </div>
           
           {/* Greek Symbol Navigation */}
-          <nav className="flex items-center gap-1 sm:gap-2">
+          <nav className="flex items-center gap-0.5 sm:gap-1 md:gap-2">
             {features.map((feature) => (
               <button
                 key={feature.path}
                 onClick={() => navigate(feature.path)}
                 className={`
                   relative group flex items-center justify-center
-                  ${compact ? 'w-10 h-10' : 'w-12 h-12 sm:w-14 sm:h-14'}
-                  rounded-xl transition-all duration-300
+                  ${compact ? 'w-8 h-8 sm:w-10 sm:h-10' : 'w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14'}
+                  rounded-lg sm:rounded-xl transition-all duration-300
                   ${isActive(feature.path) 
                     ? `bg-gradient-to-br ${feature.color} shadow-lg` 
                     : `${isDark ? 'bg-gray-800/50 hover:bg-gray-700/50' : 'bg-gray-100 hover:bg-gray-200'}`
@@ -95,7 +95,7 @@ const FeatureNav = ({ showTitle = true, compact = false }) => {
                 <span 
                   className={`
                     font-serif font-bold transition-all duration-300
-                    ${compact ? 'text-xl' : 'text-2xl sm:text-3xl'}
+                    ${compact ? 'text-lg sm:text-xl' : 'text-xl sm:text-2xl md:text-3xl'}
                     ${isActive(feature.path) 
                       ? 'text-white' 
                       : `${isDark ? 'text-gray-400 group-hover:text-white' : 'text-gray-600 group-hover:text-gray-900'}`
