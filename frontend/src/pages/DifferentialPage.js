@@ -1561,7 +1561,14 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                     symptoms={abnormalFindings.filter(f => f.type === 'symptom')}
                     onParameterClick={(paramName, type, expected) => {
                       console.log('Parameter clicked:', paramName, type, expected);
-                      // TODO: Show modal with all causes for this parameter
+                      // Open Parameter Drill-Down Modal
+                      setDrillDownModal({
+                        isOpen: true,
+                        parameterName: paramName,
+                        parameterType: type,
+                        expectedValue: expected,
+                        currentDirection: expected?.direction || (type === 'symptom' ? 'present' : null)
+                      });
                     }}
                   />
                 ) : (
