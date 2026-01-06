@@ -163,15 +163,18 @@ agent_communication:
 frontend:
   - task: "Differential Dashboard Verification"
     implemented: true
-    working: true
+    working: false
     file: "frontend/src/components/DifferentialDashboard.js"
-    stuck_count: 0
+    stuck_count: 1
     priority: "critical"
     needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "✅ DIFFERENTIAL DASHBOARD VERIFIED WORKING - All key features functional: (1) Match calculation working (e.g., 7/39=18% for Pneumonia), (2) Color coding for abnormal values (red for elevated, blue for decreased, green checkmarks for matches), (3) All 5 differential tabs displayed with progress bars, (4) Patient Findings Supporting Diagnosis section, (5) Tests Needed to Confirm section with 30+ tests, (6) Expected Symptoms with match highlighting, (7) Clinical Signs section, (8) All Parameter Changes with 7 organ systems expandable, (9) Recommended Workup section showing lab/imaging tests, (10) Independent scrolling on right panel working."
+      - working: false
+        agent: "testing"
+        comment: "❌ CRITICAL ISSUE - PhiCor Differential Diagnosis Dashboard UI testing reveals major frontend-backend integration failure. While page loads correctly with all tabs visible (Parameters, Clinical Text, Test Patient, Calculators), the core PhiCor Analysis functionality is broken. Test case '55 year old male with fever 102F, productive cough, shortness of breath, SpO2 92%, WBC 15000, CRP elevated, procalcitonin 1.2 ng/mL, PMH: T2DM, HTN, Echo EF 35%, CXR bilateral infiltrates' triggers analysis (button shows 'Analyzing...') but fails to generate any results. Backend logs show successful API calls (POST /api/clinical/interpret 200 OK) but frontend displays 'No findings yet' after analysis completion. Missing: (1) All 5 differential diagnosis tabs (#1-#5), (2) Match percentages and counts, (3) All dashboard sections (Patient Findings Supporting Diagnosis, Tests Needed to Confirm, Expected Symptoms, Clinical Signs, All Parameter Changes, Recommended Workup), (4) Clinical findings with color coding (Temperature 102F red, SpO2 92% blue, WBC 15000 red, CRP elevated red). Frontend is not processing/displaying API response data correctly. Critical bug preventing differential diagnosis dashboard from functioning."
 
 backend:
   - task: "PhiCor Differential Diagnosis Dashboard Backend APIs"
