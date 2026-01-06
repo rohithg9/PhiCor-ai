@@ -805,6 +805,116 @@ def test_phicor_clinical_analysis():
             "region": "US"
         }
         
+        print(f"  📝 Testing clinical text: {test_clinical_text}")
+        print(f"  🌍 Region: US")
+        
+        response = requests.post(
+            f"{BACKEND_URL}/api/clinical/interpret",
+            json=request_data,
+            timeout=30  # Longer timeout for AI processing
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            print(f"✅ PhiCor Clinical Analysis successful")
+            print(f"  📊 Response status: {response.status_code}")
+            
+            # Check success field (required)
+            success = data.get('success', False)
+            if success:
+                print(f"  ✅ Analysis successful (success: true) ✓")
+                success_pass = True
+            else:
+                print(f"  ❌ Analysis failed (success: false)")
+                success_pass = False
+            
+            # Check findings array (should have at least 3-4 findings)
+            findings = data.get('findings', [])
+            if len(findings) >= 3:
+                print(f"  ✅ Clinical findings extracted: {len(findings)} items (≥3 required)")
+                # Show sample findings
+                for i, finding in enumerate(findings[:4]):
+                    name = finding.get('name', 'Unknown')
+                    value = finding.get('value', 'N/A')
+                    direction = finding.get('direction', 'N/A')
+                    print(f"    - {name}: {value} ({direction})")
+                findings_pass = True
+            else:
+                print(f"  ❌ Insufficient clinical findings: {len(findings)} items (need ≥3)")
+                findings_pass = False
+            
+            # Check differentials array (should have 5 differential diagnoses)
+            differentials = data.get('differentials', [])
+            if len(differentials) >= 5:
+                print(f"  ✅ Differential diagnoses: {len(differentials)} conditions (≥5 required)")
+                
+                # Check each differential has required fields
+                required_diff_fields = ['name', 'probability', 'icd_code', 'supporting_findings']
+                all_diffs_valid = True
+                
+                for i, diff in enumerate(differentials[:5]):
+                    missing_fields = []
+                    for field in required_diff_fields:
+                        if field not in diff or not diff[field]:
+                            missing_fields.append(field)
+                    
+                    if missing_fields:
+                        print(f"    ❌ Differential {i+1} missing: {missing_fields}")
+                        all_diffs_valid = False
+                    else:
+                        name = diff.get('name', 'Unknown')
+                        prob = diff.get('probability', 0)
+                        icd = diff.get('icd_code', 'N/A')
+                        print(f"    ✅ {i+1}. {name} ({prob}%, ICD: {icd})")
+                
+                if all_diffs_valid:
+                    print(f"  ✅ All differentials have required fields ✓")
+                    differentials_pass = True
+                else:
+                    print(f"  ❌ Some differentials missing required fields")
+                    differentials_pass = False
+            else:
+                print(f"  ❌ Insufficient differential diagnoses: {len(differentials)} conditions (need ≥5)")
+                differentials_pass = False
+            
+            # Overall assessment for differential diagnosis dashboard
+            critical_tests = [success_pass, findings_pass, differentials_pass]
+            if all(critical_tests):
+                print(f"\n  ✅ PhiCor Clinical Analysis READY FOR DIFFERENTIAL DASHBOARD ✓")
+                print(f"  ✅ Success status confirmed ✓")
+                print(f"  ✅ Clinical findings extraction working (≥3 findings) ✓")
+                print(f"  ✅ Differential diagnoses generation working (≥5 diagnoses) ✓")
+                print(f"  ✅ All required fields present for dashboard display ✓")
+                return True
+            else:
+                print(f"\n  ❌ Some critical features missing for differential dashboard:")
+                test_names = ['Success status', 'Findings extraction', 'Differentials generation']
+                for i, (test_pass, test_name) in enumerate(zip(critical_tests, test_names)):
+                    status = "✅" if test_pass else "❌"
+                    print(f"    {status} {test_name}")
+                return False
+            
+        else:
+            print(f"❌ PhiCor Clinical Analysis failed: {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"  ℹ️ Error details: {error_data}")
+            except:
+                print(f"  ℹ️ Response text: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Error testing PhiCor Clinical Analysis: {e}")
+        return False
+    
+    try:
+        # Test the clinical interpretation endpoint
+        request_data = {
+            "text": test_clinical_text,
+            "region": "US"
+        }
+        
         print(f"  📝 Testing clinical text: {test_clinical_text[:80]}...")
         print(f"  🌍 Region: US")
         
