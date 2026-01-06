@@ -7328,6 +7328,102 @@ async def search_diseases(q: str, limit: int = 5):
         return []
 
 
+# ============================================================================
+# MATHEMATICAL EQUATIONS API
+# ============================================================================
+
+@api_router.get("/equations")
+async def get_equations(category: Optional[str] = None):
+    """
+    Get mathematical equations library.
+    Optional category filter: cardiovascular, respiratory, renal, acid_base, hepatology, sepsis, hematology, phicor_novel
+    """
+    try:
+        from models.mathematical_equations import ALL_EQUATIONS, get_all_equations, get_equations_by_category
+        
+        if category:
+            equations = get_equations_by_category(category)
+            return {
+                "category": category,
+                "count": len(equations),
+                "equations": equations
+            }
+        else:
+            return {
+                "total": sum(len(eq_list) for eq_list in ALL_EQUATIONS.values()),
+                "categories": list(ALL_EQUATIONS.keys()),
+                "equations_by_category": {cat: len(eq_list) for cat, eq_list in ALL_EQUATIONS.items()},
+                "all_equations": get_all_equations()
+            }
+    except Exception as e:
+        logger.error(f"Equations API error: {e}")
+        return {"error": str(e)}
+
+
+@api_router.get("/equations/{equation_id}")
+async def get_equation_by_id(equation_id: str):
+    """Get a specific equation by ID"""
+    try:
+        from models.mathematical_equations import get_all_equations
+        
+        for eq in get_all_equations():
+            if eq.get("id") == equation_id:
+                return eq
+        
+        return {"error": "Equation not found"}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@api_router.get("/equations/for-disease/{disease_category}")
+async def get_equations_for_disease_category(disease_category: str):
+    """Get relevant equations for a disease category"""
+    try:
+        from models.mathematical_equations import get_equations_for_disease
+        
+        equations = get_equations_for_disease(disease_category)
+        return {
+            "disease_category": disease_category,
+            "count": len(equations),
+            "equations": equations
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@api_router.get("/enhancement/status")
+async def get_enhancement_status():
+    """Get disease enhancement progress"""
+    try:
+        total = await db.diseases.count_documents({})
+        enhanced = await db.diseases.count_documents({"ai_enhanced": True})
+        with_models = await db.diseases.count_documents({
+            "mathematical_models": {"$exists": True, "$ne": []}
+        })
+        with_symptoms = await db.diseases.count_documents({
+            "symptoms": {"$exists": True, "$ne": []}
+        })
+        with_treatments = await db.diseases.count_documents({
+            "treatments": {"$exists": True, "$ne": []}
+        })
+        
+        return {
+            "total_diseases": total,
+            "ai_enhanced": enhanced,
+            "with_math_models": with_models,
+            "with_symptoms": with_symptoms,
+            "with_treatments": with_treatments,
+            "enhancement_percentage": f"{(enhanced/total)*100:.1f}%" if total > 0 else "0%",
+            "completeness": {
+                "symptoms": f"{(with_symptoms/total)*100:.1f}%",
+                "treatments": f"{(with_treatments/total)*100:.1f}%",
+                "math_models": f"{(with_models/total)*100:.1f}%"
+            }
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
+
 # Include router - MUST be after all routes are defined
 app.include_router(api_router)
 
