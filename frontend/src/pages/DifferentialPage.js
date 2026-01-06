@@ -536,14 +536,18 @@ const DifferentialPage = () => {
           }
           return updated;
         });
+        const timeTaken = ((Date.now() - startTime) / 1000).toFixed(1);
+        setAnalysisTimeTaken(timeTaken);
         setIsAnalyzing(false);
       } else {
+        setAnalysisTimeTaken(null);
         setIsAnalyzing(false);
         setPhicorActive(false); // Reset PhiCor active flag
         alert('No clinical findings detected. Try adding more specific clinical details.');
       }
     } catch (error) {
       console.error('Error analyzing clinical text:', error);
+      setAnalysisTimeTaken(null);
       setIsAnalyzing(false);
       setPhicorActive(false); // Reset PhiCor active flag on error
       
