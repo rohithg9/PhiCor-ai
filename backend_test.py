@@ -739,8 +739,22 @@ def test_disease_search_api():
                 
                 # Check for organ systems data
                 organ_systems_found = False
-                if param_mods:
-                    # Look for organ system references in parameter modifications
+                
+                # Check affected_organs field
+                affected_organs = disease.get('affected_organs', [])
+                if affected_organs:
+                    print(f"  ✅ Affected organs present: {affected_organs}")
+                    organ_systems_found = True
+                
+                # Check parameter_modifications structure for organ systems
+                if param_mods and isinstance(param_mods, dict):
+                    # parameter_modifications is organized by organ system
+                    organ_systems = list(param_mods.keys())
+                    if organ_systems:
+                        print(f"  ✅ Organ systems in parameter_modifications: {organ_systems}")
+                        organ_systems_found = True
+                elif param_mods and isinstance(param_mods, list):
+                    # Look for organ system references in parameter modifications list
                     organs = set()
                     for mod in param_mods:
                         if isinstance(mod, dict):
@@ -751,17 +765,6 @@ def test_disease_search_api():
                     if organs:
                         print(f"  ✅ Organ systems data present: {list(organs)}")
                         organ_systems_found = True
-                    else:
-                        print(f"  ⚠️ No explicit organ systems in parameter modifications")
-                
-                if not organ_systems_found:
-                    # Check in comprehensive model for organ systems
-                    if comp_model and isinstance(comp_model, dict):
-                        for key, value in comp_model.items():
-                            if 'organ' in key.lower() or 'system' in key.lower():
-                                print(f"  ✅ Organ systems data found in comprehensive_model: {key}")
-                                organ_systems_found = True
-                                break
                 
                 if not organ_systems_found:
                     print(f"  ❌ No organ systems data found")
