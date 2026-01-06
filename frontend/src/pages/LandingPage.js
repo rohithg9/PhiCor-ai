@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
+import { useRegion } from '../context/RegionContext';
 import { 
   ArrowRight,
   ArrowDown,
@@ -30,6 +31,7 @@ import {
   HelpCircle
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
+import RegionSelector from '../components/RegionSelector';
 
 const LandingPage = () => {
   const navigate = useNavigate();
