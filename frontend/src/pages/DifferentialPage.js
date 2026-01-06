@@ -1038,7 +1038,15 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                                       ? isDark ? 'bg-blue-900/30 border-blue-500/50' : 'bg-blue-50 border-blue-300'
                                       : isDark ? 'bg-gray-700/30 border-gray-600' : 'bg-white border-gray-200'
                                 }`}
-                                onClick={() => onParameterClick && onParameterClick(finding.parameter_id || finding.name, 'finding', finding)}
+                                onClick={() => {
+                                  setDrillDownModal({
+                                    isOpen: true,
+                                    parameterName: finding.parameter_id || finding.name,
+                                    parameterType: 'finding',
+                                    expectedValue: finding,
+                                    currentDirection: finding.direction
+                                  });
+                                }}
                               >
                                 {/* Parameter Name */}
                                 <div className="flex items-center justify-between mb-2">
