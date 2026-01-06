@@ -429,13 +429,16 @@ const DifferentialPage = () => {
             // Set PhiCor differentials directly
             setDifferentialResults(phicorDifferentials);
           }
-        } else {
-          console.warn('PhiCor Analysis failed, falling back to regex parsing');
+        }
+        
+        // Fallback to regex parsing if PhiCor didn't return usable data
+        if (!result?.success || (!result?.findings?.length && !result?.differentials?.length)) {
+          console.warn('PhiCor Analysis failed or returned no data, falling back to regex parsing');
           const parsed = parseClinicalText(clinicalText);
           findings = parsed.findings || [];
         }
       } else {
-        // Use regex-based parsing
+        // Use regex-based parsing when PhiCor is disabled
         const parsed = parseClinicalText(clinicalText);
         console.log('Regex parsed clinical text:', parsed);
         findings = parsed.findings || [];
