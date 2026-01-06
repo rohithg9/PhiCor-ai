@@ -232,8 +232,13 @@ class SmartEnhancer:
                 
                 response = await llm.send_message(UserMessage(text=prompt))
                 
-                # Parse response
-                text = response.text.strip()
+                # Parse response - handle both string and object responses
+                if hasattr(response, 'text'):
+                    text = response.text.strip()
+                elif isinstance(response, str):
+                    text = response.strip()
+                else:
+                    text = str(response).strip()
                 
                 # Clean markdown if present
                 if text.startswith('```'):
