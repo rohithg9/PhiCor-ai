@@ -100,6 +100,17 @@ const DifferentialPage = () => {
     currentDirection: null
   });
   
+  // Timer effect for live elapsed time during analysis
+  useEffect(() => {
+    let timer;
+    if (isAnalyzing && analysisStartTime) {
+      timer = setInterval(() => {
+        setElapsedTime(((Date.now() - analysisStartTime) / 1000).toFixed(1));
+      }, 100);
+    }
+    return () => clearInterval(timer);
+  }, [isAnalyzing, analysisStartTime]);
+  
   // Get all parameters organized by organ
   const allParameters = useMemo(() => getAllParameters(), []);
   
