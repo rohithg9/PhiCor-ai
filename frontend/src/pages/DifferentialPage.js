@@ -539,6 +539,13 @@ const DifferentialPage = () => {
         const timeTaken = ((Date.now() - startTime) / 1000).toFixed(1);
         setAnalysisTimeTaken(timeTaken);
         setIsAnalyzing(false);
+        
+        // AUTO-TRIGGER SYNTHESIS after successful analysis
+        if (result?.differentials?.length > 0 || result?.findings?.length > 0) {
+          setTimeout(() => {
+            runClinicalSynthesis();
+          }, 500);
+        }
       } else {
         setAnalysisTimeTaken(null);
         setIsAnalyzing(false);
