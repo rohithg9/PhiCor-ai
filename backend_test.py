@@ -1252,7 +1252,7 @@ def test_phicor_clinical_analysis():
         return False
 def run_all_tests():
     """Run all PhiCor.ai Backend Feature tests"""
-    print("🧪 PHICOR.AI BACKEND TESTING")
+    print("🧪 PHICOR.AI BACKEND TESTING - DIFFERENTIAL DIAGNOSIS DASHBOARD")
     print("=" * 80)
     print("Testing specific requirements from review request:")
     print("1. Admin Authentication - Admin login with admin@phicor.ai / admin123")
@@ -1261,9 +1261,10 @@ def run_all_tests():
     print("4. Clinical Evidence Data Structure - Verify tab data fields")
     print("5. Disease Progression Data - Verify timeline stages structure")
     print("6. New Knowledge Endpoint - Test GET /api/knowledge/disease/{disease_id}")
-    print("7. PhiCor Clinical Analysis - Test POST /api/clinical/interpret")
+    print("7. Disease Search API - Test GET /api/diseases/search?q=Pneumonia&limit=1")
+    print("8. PhiCor Clinical Analysis - Test POST /api/clinical/interpret")
     print("=" * 80)
-    print("NOTE: This tests the backend APIs for PhiCor.ai platform features")
+    print("NOTE: This tests the backend APIs for PhiCor.ai Differential Diagnosis Dashboard")
     print("=" * 80)
     
     test_results = {}
@@ -1287,6 +1288,7 @@ def run_all_tests():
         test_results['clinical_evidence_data'] = test_clinical_evidence_data_structure()
         test_results['disease_progression_data'] = test_disease_progression_data()
         test_results['new_knowledge_endpoint'] = test_new_knowledge_endpoint()
+        test_results['disease_search_api'] = test_disease_search_api()
         test_results['phicor_clinical_analysis'] = test_phicor_clinical_analysis()
     else:
         # Set all tests to False if backend is not accessible
@@ -1297,6 +1299,7 @@ def run_all_tests():
             'clinical_evidence_data': False,
             'disease_progression_data': False,
             'new_knowledge_endpoint': False,
+            'disease_search_api': False,
             'phicor_clinical_analysis': False
         })
     
@@ -1318,7 +1321,8 @@ def run_all_tests():
         ('clinical_evidence_data', 'Test 4: Clinical Evidence Data Structure (tabs data)'),
         ('disease_progression_data', 'Test 5: Disease Progression Data (timeline stages)'),
         ('new_knowledge_endpoint', 'Test 6: New Knowledge Endpoint (GET /api/knowledge/disease/{disease_id})'),
-        ('phicor_clinical_analysis', 'Test 7: PhiCor Clinical Analysis (POST /api/clinical/interpret)')
+        ('disease_search_api', 'Test 7: Disease Search API (GET /api/diseases/search?q=Pneumonia&limit=1)'),
+        ('phicor_clinical_analysis', 'Test 8: PhiCor Clinical Analysis (POST /api/clinical/interpret)')
     ]
     
     infrastructure_tests = [
@@ -1350,9 +1354,10 @@ def run_all_tests():
         print(f"✅ Clinical Evidence data structure verified")
         print(f"✅ Disease Progression data structure verified")
         print(f"✅ New Knowledge Endpoint functional for dashboard Knowledge tab")
-        print(f"✅ PhiCor Clinical Analysis working end-to-end")
-        print(f"\n🔄 COMPLETE BACKEND WORKFLOW VERIFIED:")
-        print(f"   Login → Search Diseases → Get Comprehensive Data → Clinical Evidence → Progression → Knowledge → Clinical Analysis")
+        print(f"✅ Disease Search API working for Pneumonia search")
+        print(f"✅ PhiCor Clinical Analysis working for differential diagnosis")
+        print(f"\n🔄 COMPLETE DIFFERENTIAL DIAGNOSIS WORKFLOW VERIFIED:")
+        print(f"   Disease Search → Clinical Analysis → Differential Dashboard Display")
     elif backend_passed >= backend_total * 0.75:
         print(f"\n✅ MOSTLY SUCCESSFUL! {backend_passed}/{backend_total} backend tests passed.")
         print(f"⚠️  Some minor issues detected - see failed tests above")
@@ -1367,17 +1372,11 @@ def run_all_tests():
     if not test_results.get('admin_authentication'):
         critical_issues.append("❌ CRITICAL: Admin authentication failed - cannot access protected endpoints")
     
-    if not test_results.get('disease_data_api'):
-        critical_issues.append("❌ CRITICAL: Disease Data API failed - core dashboard functionality broken")
-    
-    if not test_results.get('heart_failure_search'):
-        critical_issues.append("❌ CRITICAL: Heart Failure search failed - specific disease data not accessible")
-    
-    if not test_results.get('new_knowledge_endpoint'):
-        critical_issues.append("❌ CRITICAL: New Knowledge Endpoint failed - dashboard Knowledge tab won't work")
+    if not test_results.get('disease_search_api'):
+        critical_issues.append("❌ CRITICAL: Disease Search API failed - differential dashboard won't load diseases")
     
     if not test_results.get('phicor_clinical_analysis'):
-        critical_issues.append("❌ CRITICAL: PhiCor Clinical Analysis failed - core diagnostic feature broken")
+        critical_issues.append("❌ CRITICAL: PhiCor Clinical Analysis failed - core differential diagnosis feature broken")
     
     if critical_issues:
         for issue in critical_issues:
@@ -1385,53 +1384,17 @@ def run_all_tests():
     else:
         print(f"  ✅ No critical issues detected")
     
-    # Detailed verification summary
-    print(f"\n📋 KEY DASHBOARD DATA VERIFICATION POINTS:")
-    if test_results.get('admin_authentication'):
-        print(f"  ✅ Admin authentication verified (admin@phicor.ai access)")
+    # Differential Dashboard specific verification
+    print(f"\n📋 DIFFERENTIAL DIAGNOSIS DASHBOARD VERIFICATION:")
+    if test_results.get('disease_search_api'):
+        print(f"  ✅ Disease search verified (Pneumonia with parameter_modifications and comprehensive_model)")
     else:
-        print(f"  ❌ Admin authentication failed")
-    
-    if test_results.get('disease_data_api'):
-        print(f"  ✅ Disease Data API verified (comprehensive_model, epidemiology, pathophysiology)")
-    else:
-        print(f"  ❌ Disease Data API failed")
-    
-    if test_results.get('heart_failure_search'):
-        print(f"  ✅ Heart Failure search verified (HFrEF with 104+ parameters)")
-    else:
-        print(f"  ❌ Heart Failure search failed")
-    
-    if test_results.get('clinical_evidence_data'):
-        print(f"  ✅ Clinical Evidence data verified (Overview, Genetics, Math Models tabs)")
-    else:
-        print(f"  ❌ Clinical Evidence data failed")
-    
-    if test_results.get('disease_progression_data'):
-        print(f"  ✅ Disease Progression data verified (timeline stages 1-4)")
-    else:
-        print(f"  ❌ Disease Progression data failed")
-    
-    if test_results.get('new_knowledge_endpoint'):
-        print(f"  ✅ New Knowledge Endpoint verified (disease_id, sources, approved_updates, stats)")
-    else:
-        print(f"  ❌ New Knowledge Endpoint failed")
+        print(f"  ❌ Disease search failed")
     
     if test_results.get('phicor_clinical_analysis'):
-        print(f"  ✅ PhiCor Clinical Analysis verified (POST /api/clinical/interpret with two-phase architecture)")
+        print(f"  ✅ Clinical analysis verified (POST /api/clinical/interpret with ≥3 findings and ≥5 differentials)")
     else:
-        print(f"  ❌ PhiCor Clinical Analysis failed")
-    
-    # Frontend Integration Notes
-    print(f"\n📱 FRONTEND INTEGRATION NOTES:")
-    print(f"  ℹ️ Backend APIs support the following frontend features:")
-    print(f"    - Dashboard Disease Display (Heart organ → HFrEF selection)")
-    print(f"    - Clinical Evidence Panel Tabs (Overview, Genetics, Math Models, Knowledge)")
-    print(f"    - Disease Progression Timeline (stages 1-4)")
-    print(f"    - Knowledge Tab (sources, approved updates, stats)")
-    print(f"    - PhiCor Clinical Analysis (/differential page with Clinical Text tab)")
-    print(f"  ⚠️ Frontend testing not performed (backend testing only)")
-    print(f"  🔗 Frontend should use REACT_APP_BACKEND_URL for API calls")
+        print(f"  ❌ Clinical analysis failed")
     
     return test_results
 
