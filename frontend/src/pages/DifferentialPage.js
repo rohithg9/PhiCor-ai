@@ -379,9 +379,9 @@ const DifferentialPage = () => {
             type: f.type || 'lab',
             physiologicImplication: f.physiologic_implication || '',
           }));
-          }
+        }
           
-          // Add symptoms as findings too
+        // Add symptoms as findings too
           if (result.symptoms?.length > 0) {
             symptoms = result.symptoms.map((s, idx) => {
               const symptomName = typeof s === 'object' ? s.name : s;
