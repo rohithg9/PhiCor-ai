@@ -78,6 +78,9 @@ const DifferentialPage = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [usePhiCor, setUsePhiCor] = useState(true); // Toggle for PhiCor Analysis
   const [phicorResults, setPhicorResults] = useState(null); // Store full PhiCor analysis results
+  const [analysisStartTime, setAnalysisStartTime] = useState(null); // Track analysis start time
+  const [analysisTimeTaken, setAnalysisTimeTaken] = useState(null); // Store time taken for analysis
+  const [elapsedTime, setElapsedTime] = useState(0); // Live elapsed time during analysis
   
   // NEW: Disease Comparison Dashboard state
   const [selectedDiseaseForComparison, setSelectedDiseaseForComparison] = useState(null);
