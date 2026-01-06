@@ -1538,8 +1538,6 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                     <p className="text-sm">Add abnormal parameters or paste clinical text to generate differential diagnosis</p>
                   </div>
                 )}
-                            <div className="flex items-center gap-2">
-                              <div className="text-right">
               </div>
             </ScrollArea>
           </div>
