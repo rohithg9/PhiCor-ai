@@ -208,25 +208,25 @@ const LandingPage = () => {
             : 'bg-transparent'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center justify-between h-16">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6">
+          <div className="flex items-center justify-between h-14 sm:h-16">
             {/* Logo - PhiCor text matching dashboard style */}
             <div 
-              className="cursor-pointer group"
+              className="cursor-pointer group shrink-0"
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             >
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white group-hover:text-purple-400 transition-colors">
+              <h1 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-white group-hover:text-purple-400 transition-colors">
                 Phi<span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">Cor</span>
               </h1>
             </div>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-1">
+            {/* Desktop Navigation - hide in landscape mobile */}
+            <div className="hidden lg:flex items-center gap-1">
               {navItems.map((item) => (
                 <button
                   key={item.id}
                   onClick={() => item.isRoute ? navigate(item.route) : scrollToSection(item.id)}
-                  className={`px-4 py-2 text-sm transition-colors rounded-lg hover:bg-white/5 ${
+                  className={`px-3 py-2 text-sm transition-colors rounded-lg hover:bg-white/5 ${
                     item.isEmail 
                       ? 'text-indigo-400 hover:text-indigo-300' 
                       : item.isRoute
@@ -240,42 +240,40 @@ const LandingPage = () => {
               ))}
             </div>
 
-            {/* CTA Buttons - Greek Symbol Navigation */}
-            <div className="flex items-center gap-1 sm:gap-2">
+            {/* CTA Buttons - Greek Symbol Navigation - Always Visible */}
+            <div className="flex items-center gap-1 sm:gap-2 shrink-0">
               {/* Greek Symbol Navigation - responsive sizing */}
               <div className="flex items-center gap-0.5 sm:gap-1">
                 {/* Φ - PhiCor Engine */}
                 <button
                   onClick={() => navigate('/dashboard')}
-                  className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 flex items-center justify-center transition-all shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 hover:scale-105"
+                  className="w-8 h-8 sm:w-9 sm:h-9 md:w-11 md:h-11 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 flex items-center justify-center transition-all shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 hover:scale-105"
                   title="PhiCor Engine"
                 >
-                  <span className="text-white font-serif text-lg sm:text-xl md:text-2xl font-bold">Φ</span>
+                  <span className="text-white font-serif text-base sm:text-lg md:text-xl font-bold">Φ</span>
                 </button>
                 
                 {/* Δ - Differential Diagnosis */}
                 <button
                   onClick={() => navigate('/differential')}
-                  className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 flex items-center justify-center transition-all shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 hover:scale-105"
+                  className="w-8 h-8 sm:w-9 sm:h-9 md:w-11 md:h-11 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 flex items-center justify-center transition-all shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 hover:scale-105"
                   title="Differential Diagnosis"
                 >
-                  <span className="text-white font-serif text-lg sm:text-xl md:text-2xl font-bold">Δ</span>
+                  <span className="text-white font-serif text-base sm:text-lg md:text-xl font-bold">Δ</span>
                 </button>
                 
                 {/* ρ - Drug Details */}
                 <button
                   onClick={() => navigate('/drugs')}
-                  className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 flex items-center justify-center transition-all shadow-lg shadow-rose-500/20 hover:shadow-rose-500/40 hover:scale-105"
+                  className="w-8 h-8 sm:w-9 sm:h-9 md:w-11 md:h-11 rounded-lg bg-gradient-to-br from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 flex items-center justify-center transition-all shadow-lg shadow-rose-500/20 hover:shadow-rose-500/40 hover:scale-105"
                   title="Drug Details"
                 >
-                  <span className="text-white font-serif text-lg sm:text-xl md:text-2xl font-bold">ρ</span>
+                  <span className="text-white font-serif text-base sm:text-lg md:text-xl font-bold">ρ</span>
                 </button>
               </div>
               
-              {/* Region Selector - visible on all screen sizes */}
-              <div className="hidden sm:block">
-                <RegionSelector compact={true} />
-              </div>
+              {/* Region Selector - always visible */}
+              <RegionSelector compact={true} />
               
               {/* Desktop Theme Toggle */}
               <button
@@ -286,9 +284,9 @@ const LandingPage = () => {
                 {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
               
-              {/* Mobile menu button */}
+              {/* Mobile menu button - for tablet/portrait only */}
               <button
-                className="md:hidden p-2 text-muted-foreground hover:text-foreground"
+                className="lg:hidden p-1.5 sm:p-2 text-muted-foreground hover:text-foreground"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               >
                 {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
