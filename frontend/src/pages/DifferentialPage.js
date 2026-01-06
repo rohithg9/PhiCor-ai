@@ -19,6 +19,7 @@ import { Badge } from '../components/ui/badge';
 import { ScrollArea } from '../components/ui/scroll-area';
 import DiseaseDetailPanel from '../components/DiseaseDetailPanel';
 import DiseaseComparisonDashboard from '../components/DiseaseComparisonDashboard';
+import DifferentialDashboard from '../components/DifferentialDashboard';
 import { 
   getDifferentialDiagnosis, 
   parseClinicalText, 
