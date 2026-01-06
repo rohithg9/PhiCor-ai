@@ -708,54 +708,146 @@ const DifferentialDashboard = ({
         </div>
       )}
 
-      {/* No Profile Available - Show basic info from differential instead */}
+      {/* No Profile Available - Show comprehensive info from differential instead */}
       {!loading && !currentProfile && currentDiseaseName && (
-        <div className={`p-4 ${isDark ? 'bg-gray-800/50' : 'bg-gray-50'} rounded-xl`}>
-          <div className="flex items-start gap-3 mb-4">
-            <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+        <div className={`p-4 ${isDark ? 'bg-gray-800/50' : 'bg-gray-50'} rounded-xl space-y-4`}>
+          {/* Header */}
+          <div className="flex items-start gap-3">
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDark ? 'bg-amber-900/30' : 'bg-amber-100'}`}>
+              <AlertTriangle className="w-5 h-5 text-amber-500" />
+            </div>
+            <div className="flex-1">
+              <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                 {currentDiseaseName}
               </p>
-              <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                Detailed profile loading... This condition may be under a different name in our database.
+              <p className={`text-xs mt-0.5 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                Full profile being enhanced • Data from AI analysis shown below
               </p>
             </div>
           </div>
           
-          {/* Show what we DO have from the differential */}
+          {/* Show comprehensive info from the differential */}
           {currentDiff && (
-            <div className={`space-y-3 pt-3 border-t ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
-              {currentDiff.probability && (
-                <div className="flex items-center gap-2">
-                  <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Probability:</span>
-                  <Badge className="bg-emerald-500/20 text-emerald-400">{currentDiff.probability}%</Badge>
+            <div className="space-y-4">
+              {/* Stats Row */}
+              <div className="flex flex-wrap items-center gap-2">
+                {(currentDiff.probability !== undefined) && (
+                  <Badge className="bg-emerald-500/20 text-emerald-400 px-3 py-1">
+                    <Target className="w-3 h-3 mr-1" />
+                    {currentDiff.probability}% likely
+                  </Badge>
+                )}
+                {currentDiff.icd_code && (
+                  <Badge className="bg-blue-500/20 text-blue-400 px-3 py-1">
+                    ICD-10: {currentDiff.icd_code}
+                  </Badge>
+                )}
+                {currentDiff.role && (
+                  <Badge className={`px-3 py-1 ${
+                    currentDiff.role === 'primary' ? 'bg-red-500/20 text-red-400' :
+                    currentDiff.role === 'secondary' ? 'bg-orange-500/20 text-orange-400' :
+                    'bg-gray-500/20 text-gray-400'
+                  }`}>
+                    {currentDiff.role}
+                  </Badge>
+                )}
+              </div>
+              
+              {/* Clinical Reasoning */}
+              {(currentDiff.clinical_reasoning || currentDiff.reasoning) && (
+                <div className={`p-3 rounded-lg ${isDark ? 'bg-gray-700/50' : 'bg-white'}`}>
+                  <h4 className={`text-xs font-semibold mb-2 flex items-center gap-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <Brain className="w-3 h-3" />
+                    Clinical Reasoning
+                  </h4>
+                  <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                    {currentDiff.clinical_reasoning || currentDiff.reasoning}
+                  </p>
                 </div>
               )}
-              {currentDiff.icd_code && (
-                <div className="flex items-center gap-2">
-                  <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>ICD-10:</span>
-                  <Badge className="bg-blue-500/20 text-blue-400">{currentDiff.icd_code}</Badge>
-                </div>
-              )}
-              {currentDiff.key_features && currentDiff.key_features.length > 0 && (
+              
+              {/* Supporting Findings */}
+              {currentDiff.supporting_findings && currentDiff.supporting_findings.length > 0 && (
                 <div>
-                  <span className={`text-xs font-medium ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Key Features:</span>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {currentDiff.key_features.slice(0, 5).map((f, idx) => (
-                      <Badge key={idx} className={`text-[10px] ${isDark ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700'}`}>
+                  <h4 className={`text-xs font-semibold mb-2 flex items-center gap-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <CheckCircle className="w-3 h-3 text-emerald-500" />
+                    Supporting Findings ({currentDiff.supporting_findings.length})
+                  </h4>
+                  <div className="flex flex-wrap gap-1">
+                    {currentDiff.supporting_findings.map((f, idx) => (
+                      <Badge key={idx} className="text-[10px] bg-emerald-500/20 text-emerald-400">
+                        ✓ {typeof f === 'object' ? f.finding || f.name : f}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Key Discriminating Features */}
+              {currentDiff.key_discriminating_features && currentDiff.key_discriminating_features.length > 0 && (
+                <div>
+                  <h4 className={`text-xs font-semibold mb-2 flex items-center gap-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <Zap className="w-3 h-3 text-amber-500" />
+                    Key Discriminating Features
+                  </h4>
+                  <div className="flex flex-wrap gap-1">
+                    {currentDiff.key_discriminating_features.map((f, idx) => (
+                      <Badge key={idx} className="text-[10px] bg-amber-500/20 text-amber-400">
+                        {typeof f === 'object' ? f.feature || f.name : f}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Key Features (fallback) */}
+              {currentDiff.key_features && currentDiff.key_features.length > 0 && !currentDiff.key_discriminating_features && (
+                <div>
+                  <h4 className={`text-xs font-semibold mb-2 flex items-center gap-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <Zap className="w-3 h-3 text-amber-500" />
+                    Key Features
+                  </h4>
+                  <div className="flex flex-wrap gap-1">
+                    {currentDiff.key_features.map((f, idx) => (
+                      <Badge key={idx} className="text-[10px] bg-amber-500/20 text-amber-400">
                         {f}
                       </Badge>
                     ))}
                   </div>
                 </div>
               )}
-              {currentDiff.reasoning && (
+              
+              {/* Against Diagnosis */}
+              {currentDiff.against_diagnosis && currentDiff.against_diagnosis.length > 0 && (
                 <div>
-                  <span className={`text-xs font-medium ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Clinical Reasoning:</span>
-                  <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                    {currentDiff.reasoning}
-                  </p>
+                  <h4 className={`text-xs font-semibold mb-2 flex items-center gap-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <XCircle className="w-3 h-3 text-red-500" />
+                    Findings Against This Diagnosis
+                  </h4>
+                  <div className="flex flex-wrap gap-1">
+                    {currentDiff.against_diagnosis.map((f, idx) => (
+                      <Badge key={idx} className="text-[10px] bg-red-500/20 text-red-400">
+                        ✗ {typeof f === 'object' ? f.finding || f.name : f}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Anchor Criteria */}
+              {currentDiff.anchor_criteria_met !== undefined && (
+                <div className={`flex items-center gap-2 text-xs ${currentDiff.anchor_criteria_met ? 'text-emerald-500' : isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                  {currentDiff.anchor_criteria_met ? (
+                    <>
+                      <CheckCircle className="w-3 h-3" />
+                      <span>Anchor diagnostic criteria met</span>
+                    </>
+                  ) : (
+                    <>
+                      <XCircle className="w-3 h-3" />
+                      <span>Anchor diagnostic criteria not yet met</span>
+                    </>
+                  )}
                 </div>
               )}
             </div>
