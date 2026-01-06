@@ -1270,51 +1270,87 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
               </div>
             </div>
             
-            {/* Current Findings */}
+            {/* Current Findings - ENHANCED DASHBOARD STYLE */}
             {abnormalFindings.length > 0 && (
               <div className={`rounded-2xl border ${isDark ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'} p-4`}>
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center justify-between mb-4">
                   <h3 className={`text-sm font-semibold flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
                     <Activity className="w-4 h-4 text-emerald-500" />
-                    Current Findings ({abnormalFindings.length})
+                    Clinical Findings Dashboard
+                    <Badge className="ml-2 bg-emerald-500/20 text-emerald-400">{abnormalFindings.length} parameters</Badge>
                   </h3>
-                  {abnormalFindings.length >= 2 && (
-                    <Button
-                      onClick={runClinicalSynthesis}
-                      disabled={isSynthesizing}
-                      className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-xs py-1 px-3 h-auto"
-                    >
-                      {isSynthesizing ? (
-                        <>
-                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2" />
-                          Synthesizing...
-                        </>
-                      ) : (
-                        <>
-                          <span className="font-serif font-bold mr-1">Φ</span>
-                          Synthesis
-                        </>
-                      )}
-                    </Button>
-                  )}
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {abnormalFindings.map(finding => (
-                    <Badge
-                      key={finding.id}
-                      className={`flex items-center gap-2 py-1.5 px-3 ${
-                        finding.direction === 'increase' ? 'bg-red-500/20 text-red-400 border-red-500/30' : 'bg-blue-500/20 text-blue-400 border-blue-500/30'
-                      } border`}
-                    >
-                      {finding.direction === 'increase' ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                      <span>{finding.parameterName}</span>
-                      {finding.value && <span className="opacity-70">({finding.value} {finding.unit})</span>}
-                      <button onClick={() => removeFinding(finding.id)} className="ml-1 hover:text-white">
-                        <Trash2 className="w-3 h-3" />
-                      </button>
-                    </Badge>
-                  ))}
+                
+                {/* Big Value Cards Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                  {abnormalFindings.slice(0, 12).map(finding => {
+                    const isHigh = finding.direction === 'increase';
+                    const isLow = finding.direction === 'decrease';
+                    
+                    return (
+                      <div 
+                        key={finding.id}
+                        className={`relative p-4 rounded-xl border-2 transition-all hover:scale-[1.02] ${
+                          isHigh 
+                            ? isDark ? 'bg-red-900/30 border-red-500/50' : 'bg-red-50 border-red-300'
+                            : isLow
+                              ? isDark ? 'bg-blue-900/30 border-blue-500/50' : 'bg-blue-50 border-blue-300'
+                              : isDark ? 'bg-emerald-900/30 border-emerald-500/50' : 'bg-emerald-50 border-emerald-300'
+                        }`}
+                      >
+                        {/* Delete button */}
+                        <button 
+                          onClick={() => removeFinding(finding.id)} 
+                          className={`absolute top-2 right-2 p-1 rounded-full opacity-50 hover:opacity-100 ${isDark ? 'hover:bg-gray-700' : 'hover:bg-gray-200'}`}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                        
+                        {/* Parameter Name */}
+                        <div className="flex items-center gap-2 mb-2">
+                          {isHigh && <TrendingUp className="w-4 h-4 text-red-500" />}
+                          {isLow && <TrendingDown className="w-4 h-4 text-blue-500" />}
+                          {!isHigh && !isLow && <CheckCircle className="w-4 h-4 text-emerald-500" />}
+                          <span className={`text-xs font-medium uppercase tracking-wide ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                            {finding.parameterName?.replace(/_/g, ' ')}
+                          </span>
+                        </div>
+                        
+                        {/* Big Value */}
+                        <div className={`text-2xl font-bold ${
+                          isHigh ? 'text-red-500' : isLow ? 'text-blue-500' : isDark ? 'text-emerald-400' : 'text-emerald-600'
+                        }`}>
+                          {finding.value || '—'}
+                          {finding.unit && (
+                            <span className={`text-sm font-normal ml-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                              {finding.unit}
+                            </span>
+                          )}
+                        </div>
+                        
+                        {/* Normal Range */}
+                        {finding.normalRange && (
+                          <div className={`text-xs mt-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                            Normal: {finding.normalRange}
+                          </div>
+                        )}
+                        
+                        {/* Status Badge */}
+                        <Badge className={`mt-2 text-[10px] ${
+                          isHigh ? 'bg-red-500/20 text-red-400' : isLow ? 'bg-blue-500/20 text-blue-400' : 'bg-emerald-500/20 text-emerald-400'
+                        }`}>
+                          {isHigh ? '↑ ELEVATED' : isLow ? '↓ LOW' : '✓ PRESENT'}
+                        </Badge>
+                      </div>
+                    );
+                  })}
                 </div>
+                
+                {abnormalFindings.length > 12 && (
+                  <p className={`mt-3 text-xs text-center ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                    + {abnormalFindings.length - 12} more findings
+                  </p>
+                )}
               </div>
             )}
           </div>
