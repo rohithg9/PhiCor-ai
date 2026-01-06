@@ -282,19 +282,44 @@ const DiseaseDetailPanel = ({ diseaseId, diseaseName }) => {
                     </h4>
                     <div className="text-xs space-y-2 p-2 bg-background/50 rounded">
                       {Object.entries(disease.diagnostic_criteria).map(([key, value]) => {
+                        // Helper to render a single item (could be string or object)
+                        const renderItem = (item, idx) => {
+                          if (item === null || item === undefined) return null;
+                          if (typeof item === 'string') {
+                            return <li key={idx} className="text-muted-foreground">{item}</li>;
+                          }
+                          if (typeof item === 'object') {
+                            // Handle objects like {stage, description, criteria}
+                            const displayText = item.description || item.name || item.stage || 
+                              Object.entries(item)
+                                .filter(([k, v]) => v && v !== 'N/A')
+                                .map(([k, v]) => `${k}: ${typeof v === 'string' ? v : JSON.stringify(v)}`)
+                                .join(', ');
+                            return (
+                              <li key={idx} className="text-muted-foreground">
+                                {item.stage && <span className="font-medium text-primary/70">Stage {item.stage}: </span>}
+                                {item.description || displayText}
+                                {item.criteria && item.criteria !== item.description && (
+                                  <span className="ml-1 text-muted-foreground/70">({item.criteria})</span>
+                                )}
+                              </li>
+                            );
+                          }
+                          return <li key={idx} className="text-muted-foreground">{String(item)}</li>;
+                        };
+                        
                         // Handle different value types appropriately
                         const renderValue = (val) => {
                           if (val === null || val === undefined || val === 'N/A') {
                             return null;
                           }
                           if (Array.isArray(val)) {
-                            return val.length > 0 ? (
+                            if (val.length === 0) return null;
+                            return (
                               <ul className="list-disc list-inside ml-2 space-y-0.5">
-                                {val.map((item, idx) => (
-                                  <li key={idx} className="text-muted-foreground">{item}</li>
-                                ))}
+                                {val.map((item, idx) => renderItem(item, idx))}
                               </ul>
-                            ) : null;
+                            );
                           }
                           if (typeof val === 'object') {
                             // Handle nested objects like clinical_criteria
@@ -311,10 +336,12 @@ const DiseaseDetailPanel = ({ diseaseId, diseaseName }) => {
                                     </span>
                                     {Array.isArray(subVal) ? (
                                       <ul className="list-disc list-inside ml-2">
-                                        {subVal.map((item, idx) => (
-                                          <li key={idx} className="text-muted-foreground">{item}</li>
-                                        ))}
+                                        {subVal.map((item, idx) => renderItem(item, idx))}
                                       </ul>
+                                    ) : typeof subVal === 'object' ? (
+                                      <span className="text-muted-foreground ml-1">
+                                        {subVal.description || subVal.name || JSON.stringify(subVal)}
+                                      </span>
                                     ) : (
                                       <span className="text-muted-foreground ml-1">{String(subVal)}</span>
                                     )}
