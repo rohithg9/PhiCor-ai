@@ -1105,64 +1105,68 @@ async def get_platform_stats():
     Returns real-time counts of drugs, diseases, calculators, and other metrics.
     """
     try:
-        # Count drugs from comprehensive_drugs.py
-        from data.comprehensive_drugs import get_all_comprehensive_drugs
-        comprehensive_drugs = get_all_comprehensive_drugs()
-        comprehensive_count = len(comprehensive_drugs)
+        # Count drugs from drugs collection in MongoDB
+        db_drugs_count = await db.drugs.count_documents({})
+        
+        # Also count from comprehensive_drugs.py for backwards compatibility
+        try:
+            from data.comprehensive_drugs import get_all_comprehensive_drugs
+            comprehensive_drugs = get_all_comprehensive_drugs()
+            comprehensive_count = len(comprehensive_drugs)
+        except:
+            comprehensive_count = 0
         
         # Count AI-generated drugs
         generated_drugs_count = await db.drugs_generated.count_documents({})
         
-        # Unique drug IDs to avoid duplicates
-        comprehensive_ids = {d.get("id", "").lower() for d in comprehensive_drugs}
-        gen_drugs = await db.drugs_generated.find({}, {"_id": 0, "id": 1}).to_list(1000)
-        unique_generated = sum(1 for d in gen_drugs if d.get("id", "").lower() not in comprehensive_ids)
+        # Total drugs is the maximum of DB drugs or comprehensive + generated
+        total_drugs = max(db_drugs_count, comprehensive_count + generated_drugs_count)
         
-        total_drugs = comprehensive_count + unique_generated
-        
-        # Count diseases
+        # Count diseases from MongoDB
         total_diseases = await db.diseases.count_documents({})
         
-        # Get unique categories
-        drug_categories = set()
-        for d in comprehensive_drugs:
-            if d.get("category"):
-                drug_categories.add(d.get("category"))
-        gen_categories = await db.drugs_generated.distinct("category")
-        drug_categories.update(gen_categories)
-        
+        # Get unique disease categories (organ systems)
         disease_categories = await db.diseases.distinct("category")
+        organ_systems = len([c for c in disease_categories if c])  # Count non-null categories
+        
+        # Count diseases with mathematical models
+        diseases_with_models = await db.diseases.count_documents({
+            'mathematical_models': {'$exists': True, '$ne': [], '$type': 'array'}
+        })
+        
+        # Count total mathematical models across all diseases
+        pipeline = [
+            {'$match': {'mathematical_models': {'$exists': True, '$ne': []}}},
+            {'$project': {'model_count': {'$size': {'$ifNull': ['$mathematical_models', []]}}}},
+            {'$group': {'_id': None, 'total': {'$sum': '$model_count'}}}
+        ]
+        model_result = await db.diseases.aggregate(pipeline).to_list(1)
+        total_models = model_result[0]['total'] if model_result else 0
         
         # Count clinical calculators (from frontend data)
         calculator_count = 42  # From clinicalCalculators.js
         
-        # Organ systems covered
-        organ_systems = 6  # Heart, Lungs, Brain, Liver, Kidneys, Blood
-        
-        # Mathematical models
-        math_models = 12  # PK/PD models, organ models, etc.
-        
         return {
             "drugs": {
                 "total": total_drugs,
+                "from_db": db_drugs_count,
                 "comprehensive": comprehensive_count,
-                "ai_generated": generated_drugs_count,
-                "unique_ai_generated": unique_generated,
-                "categories": len(drug_categories)
+                "ai_generated": generated_drugs_count
             },
             "diseases": {
                 "total": total_diseases,
-                "categories": len(disease_categories)
+                "categories": len(disease_categories),
+                "with_models": diseases_with_models
             },
             "calculators": calculator_count,
             "organ_systems": organ_systems,
-            "mathematical_models": math_models,
+            "mathematical_models": total_models,
             "display_stats": {
                 "drugs": f"{total_drugs}+",
                 "diseases": f"{total_diseases}+",
                 "calculators": f"{calculator_count}+",
                 "organ_systems": str(organ_systems),
-                "models": "∞"
+                "models": f"{total_models}+" if total_models > 0 else "∞"
             }
         }
     except Exception as e:
@@ -1170,16 +1174,16 @@ async def get_platform_stats():
         # Return default values
         return {
             "drugs": {"total": 300, "comprehensive": 115, "ai_generated": 308},
-            "diseases": {"total": 200, "categories": 15},
+            "diseases": {"total": 2500, "categories": 45},
             "calculators": 42,
-            "organ_systems": 6,
-            "mathematical_models": 12,
+            "organ_systems": 45,
+            "mathematical_models": 500,
             "display_stats": {
                 "drugs": "300+",
-                "diseases": "200+",
+                "diseases": "2500+",
                 "calculators": "42+",
-                "organ_systems": "6",
-                "models": "∞"
+                "organ_systems": "45",
+                "models": "500+"
             }
         }
 
