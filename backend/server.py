@@ -7282,6 +7282,52 @@ CRITICAL: Return ONLY valid JSON. Include 5 differential diagnoses. Interpret al
         raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
 
 
+# Disease Search Endpoint for Differential Dashboard
+@api_router.get("/diseases/search")
+async def search_diseases(q: str, limit: int = 5):
+    """
+    Search for diseases by name with fuzzy matching.
+    Returns full disease data including parameter_modifications and comprehensive_model.
+    """
+    try:
+        # Try exact match first
+        disease = await db.diseases.find_one(
+            {"name": {"$regex": f"^{q}$", "$options": "i"}},
+            {"_id": 0}
+        )
+        
+        if disease:
+            return [disease]
+        
+        # Try partial match
+        diseases = await db.diseases.find(
+            {"name": {"$regex": q, "$options": "i"}},
+            {"_id": 0}
+        ).limit(limit).to_list(limit)
+        
+        if diseases:
+            return diseases
+        
+        # Try word-by-word matching for multi-word queries
+        words = q.split()
+        if len(words) > 1:
+            # Build regex pattern that matches all words in any order
+            pattern = ".*".join([f"(?=.*{word})" for word in words])
+            diseases = await db.diseases.find(
+                {"name": {"$regex": pattern, "$options": "i"}},
+                {"_id": 0}
+            ).limit(limit).to_list(limit)
+            
+            if diseases:
+                return diseases
+        
+        return []
+        
+    except Exception as e:
+        logger.error(f"Disease search error: {str(e)}")
+        return []
+
+
 # Include router - MUST be after all routes are defined
 app.include_router(api_router)
 
