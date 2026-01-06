@@ -315,29 +315,58 @@ const DifferentialPage = () => {
         
         console.log(`Using PhiCor Analysis (Region: ${region}, Units: ${unitSystem})`);
         
-        const response = await fetch(`${backendUrl}/api/clinical/interpret`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            text: clinicalText,
-            region: region,
-            source_type: 'free_text'
-          })
-        });
+        // Retry logic for API calls
+        let retryCount = 0;
+        const maxRetries = 2;
+        let result = null;
         
-        if (response.ok) {
-          result = await response.json();
-          console.log('PhiCor Analysis result:', result);
-          
-          // Store full PhiCor results for display
-          if (result.success) {
-            setPhicorResults(result);
+        while (retryCount <= maxRetries) {
+          try {
+            const response = await fetch(`${backendUrl}/api/clinical/interpret`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                text: clinicalText,
+                region: region,
+                source_type: 'free_text'
+              })
+            });
+            
+            if (response.ok) {
+              result = await response.json();
+              console.log('PhiCor Analysis result:', result);
+              
+              if (result.success && (result.findings?.length > 0 || result.differentials?.length > 0)) {
+                // Store full PhiCor results for display
+                setPhicorResults(result);
+                break; // Success, exit retry loop
+              } else if (retryCount < maxRetries) {
+                console.warn(`PhiCor Analysis returned incomplete data, retrying... (${retryCount + 1}/${maxRetries})`);
+                retryCount++;
+                continue;
+              }
+            } else {
+              if (retryCount < maxRetries) {
+                retryCount++;
+                continue;
+              }
+            }
+            break;
+          } catch (fetchError) {
+            console.error('Fetch error:', fetchError);
+            if (retryCount < maxRetries) {
+              retryCount++;
+              continue;
+            }
+            break;
           }
-          
-          if (result.success && result.findings?.length > 0) {
-            findings = result.findings.map((f, idx) => ({
-              id: `phicor-${Date.now()}-${idx}`,
-              organ: f.organ_system || f.organ || 'unknown',
+        }
+        
+        // Process successful result
+        if (result?.success && result.findings?.length > 0) {
+          findings = result.findings.map((f, idx) => ({
+            id: `phicor-${Date.now()}-${idx}`,
+            organ: f.organ_system || f.organ || 'unknown',
               parameterId: f.parameter_id,
               parameterName: f.name || f.parameter_id,
               value: f.value || '',
