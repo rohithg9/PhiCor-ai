@@ -303,7 +303,7 @@ const LandingPage = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
-              className="md:hidden bg-background/98 backdrop-blur-xl border-b border-white/10 absolute top-full left-0 right-0 z-50"
+              className="lg:hidden bg-background/98 backdrop-blur-xl border-b border-white/10 absolute top-full left-0 right-0 z-50"
             >
               <div className="px-4 py-4 space-y-2">
                 {navItems.map((item) => (
@@ -337,7 +337,6 @@ const LandingPage = () => {
                 
                 {/* Theme Toggle */}
                 <div className="pt-2 mt-2 border-t border-white/10 space-y-2">
-                  {/* Region Selector in mobile menu */}
                   <div className="px-4 py-2 text-base font-medium text-foreground bg-white/5 rounded-xl flex items-center gap-3">
                     <Globe className="w-5 h-5" />
                     <span className="mr-2">Region:</span>
