@@ -280,15 +280,64 @@ const DiseaseDetailPanel = ({ diseaseId, diseaseName }) => {
                     <h4 className="text-xs font-semibold text-muted-foreground mb-1 flex items-center gap-1">
                       <FileText className="w-3 h-3" /> Diagnostic Criteria
                     </h4>
-                    <div className="text-xs space-y-1 p-2 bg-background/50 rounded">
-                      {Object.entries(disease.diagnostic_criteria).map(([key, value]) => (
-                        <div key={key}>
-                          <span className="font-medium capitalize">{key.replace(/_/g, ' ')}: </span>
-                          <span className="text-muted-foreground">
-                            {Array.isArray(value) ? value.join(', ') : typeof value === 'object' ? JSON.stringify(value) : value}
-                          </span>
-                        </div>
-                      ))}
+                    <div className="text-xs space-y-2 p-2 bg-background/50 rounded">
+                      {Object.entries(disease.diagnostic_criteria).map(([key, value]) => {
+                        // Handle different value types appropriately
+                        const renderValue = (val) => {
+                          if (val === null || val === undefined || val === 'N/A') {
+                            return null;
+                          }
+                          if (Array.isArray(val)) {
+                            return val.length > 0 ? (
+                              <ul className="list-disc list-inside ml-2 space-y-0.5">
+                                {val.map((item, idx) => (
+                                  <li key={idx} className="text-muted-foreground">{item}</li>
+                                ))}
+                              </ul>
+                            ) : null;
+                          }
+                          if (typeof val === 'object') {
+                            // Handle nested objects like clinical_criteria
+                            const entries = Object.entries(val).filter(([k, v]) => 
+                              v && v !== 'N/A' && !(Array.isArray(v) && v.length === 0)
+                            );
+                            if (entries.length === 0) return null;
+                            return (
+                              <div className="ml-2 space-y-1">
+                                {entries.map(([subKey, subVal]) => (
+                                  <div key={subKey}>
+                                    <span className="font-medium text-primary/80 capitalize">
+                                      {subKey.replace(/_/g, ' ')}:
+                                    </span>
+                                    {Array.isArray(subVal) ? (
+                                      <ul className="list-disc list-inside ml-2">
+                                        {subVal.map((item, idx) => (
+                                          <li key={idx} className="text-muted-foreground">{item}</li>
+                                        ))}
+                                      </ul>
+                                    ) : (
+                                      <span className="text-muted-foreground ml-1">{String(subVal)}</span>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            );
+                          }
+                          return <span className="text-muted-foreground">{String(val)}</span>;
+                        };
+                        
+                        const renderedValue = renderValue(value);
+                        if (!renderedValue) return null;
+                        
+                        return (
+                          <div key={key} className="border-b border-border/30 pb-1.5 last:border-0">
+                            <span className="font-medium capitalize text-primary">
+                              {key.replace(/_/g, ' ')}:
+                            </span>
+                            {renderedValue}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
