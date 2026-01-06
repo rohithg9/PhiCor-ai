@@ -1583,6 +1583,16 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
           </div>
         </div>
       </main>
+      
+      {/* Parameter Drill-Down Modal */}
+      <ParameterDrillDownModal
+        isOpen={drillDownModal.isOpen}
+        onClose={() => setDrillDownModal(prev => ({ ...prev, isOpen: false }))}
+        parameterName={drillDownModal.parameterName}
+        parameterType={drillDownModal.parameterType}
+        expectedValue={drillDownModal.expectedValue}
+        currentDirection={drillDownModal.currentDirection}
+      />
     </div>
   );
 };
