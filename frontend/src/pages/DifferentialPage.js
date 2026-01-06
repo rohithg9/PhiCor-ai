@@ -428,7 +428,6 @@ const DifferentialPage = () => {
             // Set PhiCor differentials directly
             setDifferentialResults(phicorDifferentials);
           }
-        }
         
         // Fallback to regex parsing if PhiCor didn't return usable data
         if (!result?.success || (!result?.findings?.length && !result?.differentials?.length)) {
