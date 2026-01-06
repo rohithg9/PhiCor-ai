@@ -169,27 +169,27 @@ const LandingPage = () => {
     }
   ];
 
-  // Advantages - Real PhiCor Features
+  // Advantages - Real PhiCor Features (use dynamic stats)
   const advantages = [
     {
       icon: <Activity className="w-6 h-6" />,
       title: "Mathematical Disease Modeling",
-      description: "Simulate how diseases affect 16+ organ systems using validated mathematical equations - see real-time parameter changes."
+      description: `Simulate how diseases affect ${platformStats.organ_systems}+ organ systems using validated mathematical equations - see real-time parameter changes.`
     },
     {
       icon: <Brain className="w-6 h-6" />,
       title: "AI Differential Diagnosis",
-      description: "Input clinical findings or free text and get ranked differential diagnoses with evidence-based guidelines and ICD-10 codes."
+      description: `Input clinical findings or free text and get ranked differential diagnoses with evidence-based guidelines and ICD-10 codes.`
     },
     {
       icon: <Calculator className="w-6 h-6" />,
       title: "Clinical Calculators",
-      description: "40+ validated scoring systems (CHA₂DS₂-VASc, MELD, SOFA, GCS) linked to diseases for instant risk stratification."
+      description: `${platformStats.calculators} validated scoring systems (CHA₂DS₂-VASc, MELD, SOFA, GCS) linked to diseases for instant risk stratification.`
     },
     {
       icon: <Pill className="w-6 h-6" />,
       title: "PK/PD Drug Simulation",
-      description: "Explore 300+ drugs with real pharmacokinetic modeling, mechanism of action, and clinical effect predictions."
+      description: `Explore ${platformStats.drugs} drugs with real pharmacokinetic modeling, mechanism of action, and clinical effect predictions.`
     }
   ];
 
