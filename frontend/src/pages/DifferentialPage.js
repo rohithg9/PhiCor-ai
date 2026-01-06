@@ -213,7 +213,14 @@ const DifferentialPage = () => {
   
   // Run differential diagnosis
   const runDiagnosis = useCallback((overrideFindings = null) => {
+    // Skip local diagnosis if PhiCor already provided differentials
+    if (phicorResults?.differentials?.length > 0) {
+      console.log('runDiagnosis: Skipping - PhiCor differentials already present');
+      return;
+    }
+    
     setIsAnalyzing(true);
+    console.log('runDiagnosis: Running LOCAL diagnosis (not PhiCor)');
     
     setTimeout(() => {
       let results = [];
