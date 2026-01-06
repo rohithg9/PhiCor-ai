@@ -81,6 +81,8 @@ const DifferentialPage = () => {
   const [analysisStartTime, setAnalysisStartTime] = useState(null); // Track analysis start time
   const [analysisTimeTaken, setAnalysisTimeTaken] = useState(null); // Store time taken for analysis
   const [elapsedTime, setElapsedTime] = useState(0); // Live elapsed time during analysis
+  const [highlightedText, setHighlightedText] = useState(''); // Text currently being "analyzed"
+  const [analysisStep, setAnalysisStep] = useState(''); // Current analysis step description
   
   // NEW: Disease Comparison Dashboard state
   const [selectedDiseaseForComparison, setSelectedDiseaseForComparison] = useState(null);
