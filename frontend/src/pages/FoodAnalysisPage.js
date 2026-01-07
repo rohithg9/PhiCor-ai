@@ -164,6 +164,7 @@ const NutrientBar = ({ label, value, unit, percent, color = 'bg-green-500', isDa
 // Main Component
 const FoodAnalysisPage = () => {
   const { isDark } = useTheme();
+  const fileInputRef = useRef(null);
   
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
@@ -178,6 +179,14 @@ const FoodAnalysisPage = () => {
   // Panel state
   const [showPanel, setShowPanel] = useState(false);
   const [panelTab, setPanelTab] = useState('demographics');
+  
+  // Diseases from database
+  const [allDiseases, setAllDiseases] = useState([]);
+  const [diseasesLoading, setDiseasesLoading] = useState(true);
+  
+  // Food images for multi-image analysis
+  const [foodImages, setFoodImages] = useState([]);
+  const [isAnalyzingImages, setIsAnalyzingImages] = useState(false);
   
   // Patient profile - comprehensive
   const [profile, setProfile] = useState({
@@ -201,14 +210,39 @@ const FoodAnalysisPage = () => {
   const [diseaseSearch, setDiseaseSearch] = useState('');
   const [medSearch, setMedSearch] = useState('');
   
-  // Filtered diseases
+  // Fetch diseases from database on mount
+  useEffect(() => {
+    const fetchDiseases = async () => {
+      try {
+        const response = await fetch(`${BACKEND_URL}/api/diseases-db/list`);
+        if (response.ok) {
+          const data = await response.json();
+          // Extract disease names from the response
+          const diseaseNames = (data.diseases || []).map(d => d.name);
+          setAllDiseases(diseaseNames);
+        } else {
+          console.warn('Failed to fetch diseases, using fallback list');
+          setAllDiseases(FALLBACK_DISEASES);
+        }
+      } catch (error) {
+        console.error('Error fetching diseases:', error);
+        setAllDiseases(FALLBACK_DISEASES);
+      } finally {
+        setDiseasesLoading(false);
+      }
+    };
+    fetchDiseases();
+  }, []);
+  
+  // Filtered diseases from database
   const filteredDiseases = useMemo(() => {
-    if (!diseaseSearch) return ALL_DISEASES.slice(0, 10);
-    return ALL_DISEASES.filter(d => 
+    const diseases = allDiseases.length > 0 ? allDiseases : FALLBACK_DISEASES;
+    if (!diseaseSearch) return diseases.slice(0, 10);
+    return diseases.filter(d => 
       d.toLowerCase().includes(diseaseSearch.toLowerCase()) &&
       !profile.conditions.includes(d)
     ).slice(0, 10);
-  }, [diseaseSearch, profile.conditions]);
+  }, [diseaseSearch, profile.conditions, allDiseases]);
   
   // Filtered medications
   const filteredMeds = useMemo(() => {
@@ -227,6 +261,88 @@ const FoodAnalysisPage = () => {
     }
     return null;
   }, [profile.weight, profile.height]);
+  
+  // Handle image upload
+  const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+    
+    // Limit to 10 images at a time
+    const filesToProcess = files.slice(0, 10 - foodImages.length);
+    
+    filesToProcess.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setFoodImages(prev => [...prev, {
+          id: `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          file,
+          preview: e.target.result,
+          name: file.name
+        }]);
+      };
+      reader.readAsDataURL(file);
+    });
+    
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+  
+  // Remove image
+  const removeImage = (imageId) => {
+    setFoodImages(prev => prev.filter(img => img.id !== imageId));
+  };
+  
+  // Analyze images with AI
+  const analyzeImages = async () => {
+    if (foodImages.length === 0) {
+      toast.error('Please add at least one food image');
+      return;
+    }
+    
+    setIsAnalyzingImages(true);
+    setAnalysisResult(null);
+    setActiveScale('overview');
+    
+    try {
+      // Convert images to base64 for API
+      const imageData = foodImages.map(img => ({
+        name: img.name,
+        data: img.preview.split(',')[1] // Remove data:image/xxx;base64, prefix
+      }));
+      
+      const response = await fetch(`${BACKEND_URL}/api/food/analyze-images`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          images: imageData,
+          health_profile: profile.conditions.length > 0 || profile.medications.length > 0 ? {
+            age: profile.age,
+            sex: profile.sex,
+            weight: profile.weight,
+            height: profile.height,
+            conditions: profile.conditions,
+            medications: profile.medications,
+            allergies: profile.allergies
+          } : null
+        })
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        setAnalysisResult(data.analysis);
+        toast.success(`Analyzed ${foodImages.length} food image${foodImages.length > 1 ? 's' : ''}`);
+      } else {
+        throw new Error(data.detail || 'Image analysis failed');
+      }
+    } catch (error) {
+      console.error('Image analysis error:', error);
+      toast.error('Image analysis failed. Please try again.');
+    } finally {
+      setIsAnalyzingImages(false);
+    }
+  };
 
   // Smart search
   const smartSearch = useCallback((query) => {
