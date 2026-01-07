@@ -53,6 +53,7 @@ const useSwipe = (onSwipeLeft, onSwipeRight, threshold = 50) => {
 // Multi-scale analysis levels (mirrors disease dashboard depth)
 const ANALYSIS_SCALES = [
   { id: 'overview', name: 'Overview', icon: '📊', description: 'Summary & health score' },
+  { id: 'items', name: 'Food Items', icon: '🍽️', description: 'Individual food breakdown' },
   { id: 'nutrients', name: 'Nutrients', icon: '🧬', description: 'All nutrients breakdown' },
   { id: 'molecular', name: 'Molecular', icon: '⚗️', description: 'Molecular compounds' },
   { id: 'cellular', name: 'Cellular', icon: '🔬', description: 'Cell-level effects' },
