@@ -71,6 +71,10 @@ function AppContent() {
         <Route path="/manual" element={<UserManual />} />
         <Route path="/help" element={<UserManual />} />
         
+        {/* Cases Management */}
+        <Route path="/cases" element={<CasesPage />} />
+        <Route path="/cases/:caseId" element={<CasesPage />} />
+        
         {/* Expert Curation System Routes */}
         <Route path="/expert-login" element={<ExpertAuthPage />} />
         <Route path="/expert" element={<ExpertDashboard />} />
