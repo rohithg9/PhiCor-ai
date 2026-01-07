@@ -7540,6 +7540,270 @@ async def get_enhancement_status():
         return {"error": str(e)}
 
 
+# ============================================================================
+# ADMIN - MATHEMATICAL MODELS MANAGEMENT API
+# ============================================================================
+
+@api_router.get("/admin/mathematical-models")
+async def get_all_mathematical_models(
+    limit: int = 500,
+    offset: int = 0,
+    organ_system: Optional[str] = None,
+    validation_status: Optional[str] = None,
+    token: str = Depends(oauth2_scheme)
+):
+    """
+    Get all mathematical models from diseases collection for admin review.
+    Aggregates models from all diseases with their linked disease info.
+    """
+    try:
+        # Verify admin access
+        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        user = await db.users.find_one({"id": payload["sub"]}, {"_id": 0})
+        if not user or user.get("role") not in ["admin", "super_admin", "expert"]:
+            raise HTTPException(status_code=403, detail="Admin access required")
+        
+        # Build aggregation pipeline to extract models from diseases
+        pipeline = [
+            {"$match": {"mathematical_models": {"$exists": True, "$ne": []}}},
+            {"$unwind": "$mathematical_models"},
+            {"$project": {
+                "disease_id": "$id",
+                "disease_name": "$name",
+                "disease_category": "$category",
+                "organ_system": "$category",
+                "model": "$mathematical_models"
+            }},
+            {"$skip": offset},
+            {"$limit": limit}
+        ]
+        
+        models_cursor = db.diseases.aggregate(pipeline)
+        raw_models = await models_cursor.to_list(limit)
+        
+        # Format models
+        models = []
+        for idx, item in enumerate(raw_models):
+            model = item.get("model", {})
+            if isinstance(model, dict):
+                models.append({
+                    "id": f"{item.get('disease_id', 'unknown')}_{idx}",
+                    "name": model.get("name", "Unknown Model"),
+                    "type": model.get("type", "clinical_score"),
+                    "equation": model.get("equation", ""),
+                    "variables": model.get("variables", {}),
+                    "clinical_interpretation": model.get("clinical_interpretation", model.get("description", "")),
+                    "disease_id": item.get("disease_id"),
+                    "disease_name": item.get("disease_name"),
+                    "organ_system": item.get("organ_system", "unknown"),
+                    "validation_status": model.get("validation_status", "unreviewed"),
+                    "source": model.get("source", ""),
+                    "created_at": model.get("created_at", None)
+                })
+        
+        # Get stats
+        total_models_pipeline = [
+            {"$match": {"mathematical_models": {"$exists": True, "$ne": []}}},
+            {"$project": {"count": {"$size": "$mathematical_models"}}},
+            {"$group": {"_id": None, "total": {"$sum": "$count"}}}
+        ]
+        stats_result = await db.diseases.aggregate(total_models_pipeline).to_list(1)
+        total_models = stats_result[0]["total"] if stats_result else 0
+        
+        # Get validated count
+        validated_count = sum(1 for m in models if m.get("validation_status") == "validated")
+        pending_count = sum(1 for m in models if m.get("validation_status") == "pending")
+        
+        # Get models by organ
+        organ_counts = {}
+        for m in models:
+            organ = m.get("organ_system", "unknown")
+            organ_counts[organ] = organ_counts.get(organ, 0) + 1
+        
+        return {
+            "models": models,
+            "total": len(models),
+            "stats": {
+                "total_models": total_models,
+                "validated": validated_count,
+                "pending_review": pending_count,
+                "novel_models": 0,  # Will be populated when novel models feature is added
+                "by_organ": organ_counts
+            }
+        }
+        
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except Exception as e:
+        logger.error(f"Error fetching mathematical models: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/admin/mathematical-models/novel")
+async def get_novel_models(token: str = Depends(oauth2_scheme)):
+    """Get novel/experimental mathematical models (future feature)"""
+    try:
+        # Verify admin access
+        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        user = await db.users.find_one({"id": payload["sub"]}, {"_id": 0})
+        if not user or user.get("role") not in ["admin", "super_admin", "expert"]:
+            raise HTTPException(status_code=403, detail="Admin access required")
+        
+        # Query novel models collection (to be created)
+        novel_models = await db.novel_mathematical_models.find({}, {"_id": 0}).to_list(100)
+        
+        return {"models": novel_models}
+        
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except Exception as e:
+        logger.error(f"Error fetching novel models: {e}")
+        return {"models": []}
+
+
+@api_router.get("/admin/mathematical-models/pending-reviews")
+async def get_pending_model_reviews(token: str = Depends(oauth2_scheme)):
+    """Get pending review suggestions for mathematical models"""
+    try:
+        # Verify admin access
+        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        user = await db.users.find_one({"id": payload["sub"]}, {"_id": 0})
+        if not user or user.get("role") not in ["admin", "super_admin", "expert"]:
+            raise HTTPException(status_code=403, detail="Admin access required")
+        
+        # Query pending reviews
+        reviews = await db.model_review_suggestions.find(
+            {"status": "pending"},
+            {"_id": 0}
+        ).sort("created_at", -1).to_list(100)
+        
+        return {"reviews": reviews}
+        
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except Exception as e:
+        logger.error(f"Error fetching pending reviews: {e}")
+        return {"reviews": []}
+
+
+@api_router.post("/admin/mathematical-models/{model_id}/review")
+async def review_mathematical_model(
+    model_id: str,
+    review_data: dict,
+    token: str = Depends(oauth2_scheme)
+):
+    """Submit a review/validation for a mathematical model (super admin only)"""
+    try:
+        # Verify super admin access
+        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        user = await db.users.find_one({"id": payload["sub"]}, {"_id": 0})
+        if not user or user.get("role") != "super_admin":
+            raise HTTPException(status_code=403, detail="Super admin access required")
+        
+        # Parse model_id to get disease_id and model index
+        parts = model_id.rsplit("_", 1)
+        if len(parts) != 2:
+            raise HTTPException(status_code=400, detail="Invalid model ID format")
+        
+        disease_id, model_idx = parts[0], int(parts[1])
+        
+        # Update the model's validation status in the disease document
+        disease = await db.diseases.find_one({"id": disease_id})
+        if not disease:
+            raise HTTPException(status_code=404, detail="Disease not found")
+        
+        models = disease.get("mathematical_models", [])
+        if model_idx >= len(models):
+            raise HTTPException(status_code=404, detail="Model not found")
+        
+        # Update model validation
+        models[model_idx]["validation_status"] = review_data.get("status", "validated")
+        models[model_idx]["review_notes"] = review_data.get("notes", "")
+        models[model_idx]["review_source"] = review_data.get("source", "")
+        models[model_idx]["reviewed_by"] = user.get("email")
+        models[model_idx]["reviewed_at"] = datetime.now(timezone.utc).isoformat()
+        
+        await db.diseases.update_one(
+            {"id": disease_id},
+            {"$set": {"mathematical_models": models}}
+        )
+        
+        # Log the review
+        await db.audit_logs.insert_one({
+            "action": "model_review",
+            "model_id": model_id,
+            "disease_id": disease_id,
+            "status": review_data.get("status"),
+            "reviewed_by": user.get("email"),
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        })
+        
+        return {"success": True, "message": "Model reviewed successfully"}
+        
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error reviewing model: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.post("/admin/mathematical-models/{model_id}/suggest")
+async def suggest_model_change(
+    model_id: str,
+    suggestion_data: dict,
+    token: str = Depends(oauth2_scheme)
+):
+    """Submit a suggestion for a mathematical model (expert/admin)"""
+    try:
+        # Verify access
+        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        user = await db.users.find_one({"id": payload["sub"]}, {"_id": 0})
+        if not user or user.get("role") not in ["admin", "super_admin", "expert"]:
+            raise HTTPException(status_code=403, detail="Expert access required")
+        
+        # Parse model_id
+        parts = model_id.rsplit("_", 1)
+        disease_id = parts[0] if len(parts) == 2 else model_id
+        
+        # Get model name from disease
+        disease = await db.diseases.find_one({"id": disease_id}, {"name": 1, "mathematical_models": 1})
+        model_name = "Unknown Model"
+        if disease and len(parts) == 2:
+            models = disease.get("mathematical_models", [])
+            model_idx = int(parts[1])
+            if model_idx < len(models):
+                model_name = models[model_idx].get("name", "Unknown Model")
+        
+        # Create suggestion record
+        suggestion = {
+            "id": str(uuid4()),
+            "model_id": model_id,
+            "model_name": model_name,
+            "disease_id": disease_id,
+            "suggestion_type": suggestion_data.get("suggestion_type", "modification"),
+            "description": suggestion_data.get("description", ""),
+            "rationale": suggestion_data.get("rationale", ""),
+            "source_url": suggestion_data.get("source_url", ""),
+            "additional_notes": suggestion_data.get("additional_notes", ""),
+            "submitted_by": user.get("email"),
+            "submitted_by_role": user.get("role"),
+            "status": "pending",
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        
+        await db.model_review_suggestions.insert_one(suggestion)
+        
+        return {"success": True, "message": "Suggestion submitted for super admin review"}
+        
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except Exception as e:
+        logger.error(f"Error submitting suggestion: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # Include router - MUST be after all routes are defined
 app.include_router(api_router)
 
