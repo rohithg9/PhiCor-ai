@@ -9848,10 +9848,12 @@ Return COMPREHENSIVE JSON:
         # GPT-4o supports image analysis through base64 encoding
         image_contents = []
         for i, img in enumerate(request.images):
+            # Access as dict since images is List[Dict[str, str]]
+            img_data = img.get('data', '') if isinstance(img, dict) else img.data
             image_contents.append({
                 "type": "image_url",
                 "image_url": {
-                    "url": f"data:image/jpeg;base64,{img.data}",
+                    "url": f"data:image/jpeg;base64,{img_data}",
                     "detail": "high"
                 }
             })
