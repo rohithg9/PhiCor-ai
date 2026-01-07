@@ -247,6 +247,7 @@ const NutrientBar = ({ label, value, unit, percent, color = 'bg-green-500', isDa
 const FoodAnalysisPage = () => {
   const { isDark } = useTheme();
   const fileInputRef = useRef(null);
+  const mobileFileInputRef = useRef(null);
   
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
