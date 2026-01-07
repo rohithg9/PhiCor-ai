@@ -7148,11 +7148,64 @@ async def interpret_clinical_text(request: ClinicalTextRequest):
         unit_system = "SI" if request.region in ["UK", "EU", "IN", "ASIA"] else "conventional"
         
         # ============================================================
-        # COMPREHENSIVE AI CLINICAL ANALYSIS
-        # Simplified prompt for more reliable JSON response
+        # PHICOR CLINICAL REASONING ENGINE V2
+        # Structured clinical reasoning pipeline with syndrome-gating
         # ============================================================
         
-        analysis_prompt = f"""Analyze this clinical case and return JSON.
+        system_message = """You are PhiCor's Clinical Reasoning and Synthesis Engine.
+
+Your objective is to generate clinically accurate differential diagnoses
+by emulating expert physician reasoning, not exhaustive pattern matching.
+
+REASONING PIPELINE (FOLLOW IN ORDER):
+
+STEP 1: FINDING INGESTION & NORMALISATION
+- Ingest all patient findings (symptoms, vitals, labs, imaging, etc.)
+- Normalise values against physiological reference ranges
+- Label each finding with: organ system, acuity, specificity (pathognomonic/supportive/nonspecific)
+
+STEP 2: CLINICAL CLUSTERING  
+- Cluster findings into coherent clinical patterns (anatomical, temporal, physiological)
+- Identify which findings cluster together vs incidental
+
+STEP 3: DOMINANT SYNDROME IDENTIFICATION (MANDATORY GATE)
+- Identify ONE dominant clinical syndrome that best explains:
+  * The majority of HIGH-SPECIFICITY findings
+  * The primary patient complaint
+  * The most anatomically coherent system
+- Only ONE dominant syndrome may be selected
+- This step MUST occur before disease matching
+
+STEP 4: SECONDARY/DOWNSTREAM SYNDROMES
+- Identify secondary syndromes as: consequence, complication, or incidental comorbidity
+- Secondary syndromes must NEVER override the dominant syndrome
+
+STEP 5: CONSTRAINED DISEASE EXPANSION
+- Expand ONLY diseases that belong to the dominant syndrome OR plausibly unify dominant + secondary
+- SUPPRESS diseases that rely only on nonspecific findings or belong to unrelated systems
+
+CRITICAL RULE: Low-specificity findings (fatigue, weight loss, mild lab changes) CANNOT independently justify malignancy, rheumatologic, or rare diagnoses.
+
+STEP 6: WEIGHTED MATCHING & PENALISATION
+- Highest weight: Imaging patterns, anatomical concordance, pathognomonic tests, CSF/pathology/genetics
+- Medium weight: Clustered symptoms, disease-specific labs
+- Lowest weight: Generic inflammatory markers, isolated metabolic abnormalities
+- PENALISE: Cross-system diseases without syndrome justification, rare diseases lacking hallmark features
+
+STEP 7: CLINICAL SANITY CHECK
+- Would a domain specialist reasonably consider this diagnosis now?
+- Is a prerequisite syndrome missing?
+- Is this diagnosis premature without confirmatory red flags?
+- If YES to any → downgrade or suppress
+
+GLOBAL SAFETY RULES:
+- Prefer under-calling to over-calling
+- Never allow rare or malignant diagnoses to dominate without high-specificity evidence
+- Maintain full explainability of reasoning steps
+
+IMPORTANT: Always respond with valid JSON only. Ensure all JSON is properly closed."""
+
+        analysis_prompt = f"""Analyze this clinical case using the structured reasoning pipeline.
 
 CLINICAL DATA:
 {request.text}
@@ -7163,31 +7216,49 @@ Return valid JSON with this structure:
 {{
   "patient_summary": {{"age": null, "sex": null, "chief_complaint": "main complaint"}},
   "clinical_findings": {{
-    "vital_signs": [{{"name": "string", "value": number, "unit": "string", "normal_range": "string", "status": "elevated/decreased/normal", "clinical_significance": "string"}}],
-    "laboratory_values": [{{"name": "string", "parameter_id": "string", "value": number, "unit": "string", "normal_range": "string", "status": "elevated/decreased/normal", "clinical_significance": "string"}}],
-    "symptoms": [{{"name": "string", "severity": "mild/moderate/severe"}}]
+    "vital_signs": [{{"name": "string", "value": number, "unit": "string", "normal_range": "string", "status": "elevated/decreased/normal", "clinical_significance": "string", "specificity": "pathognomonic/supportive/nonspecific"}}],
+    "laboratory_values": [{{"name": "string", "parameter_id": "string", "value": number, "unit": "string", "normal_range": "string", "status": "elevated/decreased/normal", "clinical_significance": "string", "specificity": "pathognomonic/supportive/nonspecific"}}],
+    "symptoms": [{{"name": "string", "severity": "mild/moderate/severe", "specificity": "pathognomonic/supportive/nonspecific", "organ_system": "string"}}]
   }},
-  "dominant_syndromes": [{{"syndrome": "name", "key_features": ["feature1", "feature2"], "pathophysiologic_rationale": "explanation"}}],
+  "clinical_clustering": {{
+    "primary_cluster": {{"findings": ["finding1"], "anatomical_system": "string", "temporal_pattern": "acute/subacute/chronic"}},
+    "secondary_clusters": [{{"findings": ["finding1"], "relationship": "consequence/complication/incidental"}}]
+  }},
+  "dominant_syndrome": {{
+    "syndrome_name": "string (e.g., Acute coronary syndrome, Systemic inflammatory syndrome)",
+    "confidence": "high/moderate/low",
+    "key_supporting_findings": ["high-specificity finding 1", "finding 2"],
+    "pathophysiologic_rationale": "explanation"
+  }},
   "differential_diagnosis": [
-    {{"rank": 1, "diagnosis": "Disease Name", "icd10": "code", "probability": 75, "role": "Primary", "clinical_reasoning": "why this diagnosis", "supporting_findings": ["finding1"], "key_discriminating_features": ["feature1"]}}
+    {{"rank": 1, "diagnosis": "Disease Name", "icd10": "code", "probability": 75, "role": "Primary", "syndrome_alignment": "aligned/partial/poor", "clinical_reasoning": "why this diagnosis fits the dominant syndrome", "supporting_findings": ["finding1"], "against_findings": ["finding that doesn't fit"], "specificity_score": "high/medium/low", "key_discriminating_features": ["feature1"]}}
   ],
   "diagnostic_synthesis": {{
     "most_likely_diagnosis": "string",
-    "key_alternative": "string",
+    "key_alternative": "string", 
     "clinical_decision_pathway": "reasoning",
     "discriminating_tests": [{{"test": "string", "expected_finding": "string", "rationale": "string"}}],
-    "clinical_uncertainty": "string"
+    "clinical_uncertainty": "string",
+    "sanity_check": "Would a specialist consider these diagnoses reasonable? Why/why not?"
   }},
   "safety_alerts": [{{"alert_type": "critical_value", "parameter": "string", "message": "string", "recommended_action": "string"}}],
-  "management_considerations": [{{"diagnosis": "string", "immediate_actions": ["action1"], "treatment_approach": ["approach1"]}}]
+  "reasoning_transparency": {{
+    "suppressed_diagnoses": [{{"diagnosis": "string", "reason_suppressed": "string (e.g., no high-specificity evidence, wrong organ system)"}}],
+    "diagnostic_cautions": ["string (warnings about premature diagnoses)"]
+  }}
 }}
 
-CRITICAL: Return ONLY valid JSON. Include 5 differential diagnoses. Interpret all abbreviations."""
+CRITICAL RULES:
+1. Return ONLY valid JSON
+2. Include exactly 5 differential diagnoses
+3. Rank diagnoses by syndrome alignment AND specificity, not just symptom count
+4. Do NOT rank malignancies or rare diseases high without pathognomonic evidence
+5. Symptoms like fatigue, weakness, weight loss are NONSPECIFIC - they support but cannot drive diagnosis"""
 
         llm = LlmChat(
             api_key=llm_key,
             session_id=f"phicor_analysis_{datetime.now().strftime('%H%M%S')}",
-            system_message="You are PhiCor, an expert clinical reasoning AI. Provide comprehensive differential diagnosis with detailed reasoning and evidence-based management guidance. Always respond with valid JSON only. IMPORTANT: Ensure all JSON is properly closed with matching brackets."
+            system_message=system_message
         ).with_model("openai", "gpt-4o")
         
         response = await llm.send_message(UserMessage(text=analysis_prompt))
