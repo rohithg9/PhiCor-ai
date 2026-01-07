@@ -3447,6 +3447,7 @@ async def get_disease_detail(disease_id: str):
 
 class ClinicalFinding(BaseModel):
     """Model for a clinical finding"""
+    model_config = {"extra": "allow"}  # Allow extra fields
     parameterId: Optional[str] = None
     name: Optional[str] = None
     value: Optional[Any] = None  # Accept both numbers and strings like "elevated"
