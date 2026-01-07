@@ -8144,6 +8144,293 @@ async def search_foods(q: str, limit: int = 20):
         logger.error(f"Error searching foods: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.post("/food/analyze-from-db")
+async def analyze_food_from_database(request: Dict[str, Any] = Body(...)):
+    """
+    Database-driven food analysis - NO AI required for foods in database.
+    Uses comprehensive nutrients database for parameter effects, disease interactions, and drug interactions.
+    Falls back to AI only for foods not in database.
+    """
+    try:
+        food_name = request.get("food_name", "").strip()
+        serving_size = request.get("serving_size", "1 serving")
+        health_profile = request.get("health_profile")
+        
+        if not food_name:
+            raise HTTPException(status_code=400, detail="Food name is required")
+        
+        # Search for food in database
+        food = await db.foods.find_one(
+            {"$or": [
+                {"name": {"$regex": f"^{food_name}$", "$options": "i"}},
+                {"name": {"$regex": food_name, "$options": "i"}}
+            ]},
+            {"_id": 0}
+        )
+        
+        if not food:
+            # Food not in database - return indicator to use AI endpoint
+            return {
+                "success": False,
+                "in_database": False,
+                "message": f"'{food_name}' not found in database. Use AI analysis endpoint.",
+                "suggestion": "POST /api/food/analyze-product"
+            }
+        
+        # Food found in database - compute analysis from nutrients database
+        nutrients = food.get("nutrients", {})
+        
+        # Get all nutrient details from nutrients collection
+        nutrient_ids = list(nutrients.keys())
+        nutrient_details = await db.nutrients.find(
+            {"id": {"$in": nutrient_ids}},
+            {"_id": 0}
+        ).to_list(100)
+        
+        # Create a lookup dict
+        nutrient_lookup = {n["id"]: n for n in nutrient_details}
+        
+        # Calculate organ system effects based on nutrients
+        organ_system_effects = {}
+        all_disease_interactions = {"beneficial": [], "caution": [], "contraindicated": []}
+        all_drug_interactions = []
+        
+        for nutrient_id, nutrient_value in nutrients.items():
+            if nutrient_id not in nutrient_lookup:
+                continue
+            
+            nutrient_data = nutrient_lookup[nutrient_id]
+            amount = nutrient_value.get("value", 0)
+            daily_value = nutrient_data.get("daily_value")
+            
+            # Calculate percent daily value
+            percent_dv = None
+            if daily_value and daily_value > 0:
+                percent_dv = round((amount / daily_value) * 100, 1)
+            
+            # Add percent DV to nutrient
+            nutrients[nutrient_id]["percent_daily_value"] = percent_dv
+            nutrients[nutrient_id]["daily_value"] = daily_value
+            nutrients[nutrient_id]["nutrient_name"] = nutrient_data.get("name")
+            
+            # Process parameter effects
+            param_effects = nutrient_data.get("parameter_effects", {})
+            for organ_system, effects in param_effects.items():
+                if organ_system not in organ_system_effects:
+                    organ_system_effects[organ_system] = {
+                        "overall_effect": "neutral",
+                        "parameters_affected": [],
+                        "contributing_nutrients": []
+                    }
+                
+                for effect in effects:
+                    # Determine magnitude based on percent DV
+                    magnitude = "minimal"
+                    if percent_dv:
+                        if percent_dv >= 50:
+                            magnitude = "significant"
+                        elif percent_dv >= 20:
+                            magnitude = "moderate"
+                        elif percent_dv >= 10:
+                            magnitude = "mild"
+                    
+                    organ_system_effects[organ_system]["parameters_affected"].append({
+                        "parameter": effect.get("parameter"),
+                        "direction": effect.get("direction"),
+                        "mechanism": effect.get("mechanism"),
+                        "magnitude": magnitude,
+                        "from_nutrient": nutrient_data.get("name"),
+                        "amount": f"{amount} {nutrient_value.get('unit', '')}"
+                    })
+                    
+                    # Track contributing nutrients
+                    if nutrient_data.get("name") not in organ_system_effects[organ_system]["contributing_nutrients"]:
+                        organ_system_effects[organ_system]["contributing_nutrients"].append(nutrient_data.get("name"))
+            
+            # Collect disease interactions
+            disease_int = nutrient_data.get("disease_interactions", {})
+            for category in ["beneficial", "caution", "contraindicated"]:
+                for interaction in disease_int.get(category, []):
+                    all_disease_interactions[category].append({
+                        **interaction,
+                        "from_nutrient": nutrient_data.get("name")
+                    })
+            
+            # Collect drug interactions
+            for drug_int in nutrient_data.get("drug_interactions", []):
+                all_drug_interactions.append({
+                    **drug_int,
+                    "from_nutrient": nutrient_data.get("name")
+                })
+        
+        # Calculate overall effects for each organ system
+        for organ_system, data in organ_system_effects.items():
+            beneficial = sum(1 for p in data["parameters_affected"] if p["direction"] in ["increase", "maintain"] and p.get("magnitude") in ["moderate", "significant"])
+            harmful = sum(1 for p in data["parameters_affected"] if p["direction"] == "decrease" and "caution" in str(p.get("mechanism", "")).lower())
+            
+            if beneficial > harmful:
+                data["overall_effect"] = "beneficial"
+            elif harmful > beneficial:
+                data["overall_effect"] = "caution"
+            else:
+                data["overall_effect"] = "neutral"
+        
+        # Build personalized risk assessment if health profile provided
+        personalized_risk = None
+        if health_profile:
+            conditions = health_profile.get("conditions", [])
+            medications = health_profile.get("medications", [])
+            allergies = health_profile.get("allergies", [])
+            
+            condition_specific = []
+            medication_warnings = []
+            allergy_alerts = []
+            
+            # Check conditions against disease interactions
+            for condition in conditions:
+                condition_lower = condition.lower()
+                for category, interactions in all_disease_interactions.items():
+                    for interaction in interactions:
+                        disease_name = interaction.get("disease", "").lower().replace("_", " ")
+                        if disease_name in condition_lower or condition_lower in disease_name:
+                            condition_specific.append({
+                                "condition": condition,
+                                "category": category,
+                                "reason": interaction.get("reason"),
+                                "recommendation": interaction.get("recommendation"),
+                                "from_nutrient": interaction.get("from_nutrient")
+                            })
+            
+            # Check medications against drug interactions
+            for med in medications:
+                med_lower = med.lower()
+                for drug_int in all_drug_interactions:
+                    drug_name = drug_int.get("drug", "").lower().replace("_", " ")
+                    if drug_name in med_lower or med_lower in drug_name:
+                        medication_warnings.append({
+                            "medication": med,
+                            "interaction": drug_int.get("interaction"),
+                            "mechanism": drug_int.get("mechanism"),
+                            "from_nutrient": drug_int.get("from_nutrient")
+                        })
+            
+            # Determine overall suitability
+            has_contraindications = any(c["category"] == "contraindicated" for c in condition_specific)
+            has_cautions = any(c["category"] == "caution" for c in condition_specific) or len(medication_warnings) > 0
+            
+            if has_contraindications:
+                overall_suitability = "unsuitable"
+            elif has_cautions:
+                overall_suitability = "caution"
+            else:
+                overall_suitability = "suitable"
+            
+            personalized_risk = {
+                "overall_suitability": overall_suitability,
+                "condition_specific_analysis": condition_specific,
+                "medication_interactions": medication_warnings,
+                "allergy_alerts": allergy_alerts
+            }
+        
+        # Calculate health score based on nutrient profile
+        health_score = 70  # Base score
+        
+        # Bonus for high fiber
+        if nutrients.get("fiber", {}).get("percent_daily_value", 0) > 10:
+            health_score += 5
+        
+        # Bonus for high protein
+        if nutrients.get("protein", {}).get("percent_daily_value", 0) > 10:
+            health_score += 5
+        
+        # Bonus for high potassium
+        if nutrients.get("potassium", {}).get("percent_daily_value", 0) > 10:
+            health_score += 5
+        
+        # Penalty for high sodium
+        if nutrients.get("sodium", {}).get("percent_daily_value", 0) > 20:
+            health_score -= 10
+        
+        # Penalty for high saturated fat
+        if nutrients.get("fat_saturated", {}).get("percent_daily_value", 0) > 15:
+            health_score -= 10
+        
+        # Penalty for high added sugars
+        if nutrients.get("sugars", {}).get("value", 0) > 15:
+            health_score -= 5
+        
+        # Clamp score
+        health_score = max(20, min(100, health_score))
+        
+        # Build response
+        analysis = {
+            "product_name": food.get("name"),
+            "product_type": food.get("category", "food"),
+            "description": food.get("description"),
+            "serving_size": food.get("serving_size", serving_size),
+            "serving_size_g": food.get("serving_size_g", 100),
+            "data_source": "PhiCor Database",
+            "ai_generated": False,
+            
+            "complete_nutritional_profile": {
+                "macronutrients": {
+                    "energy_kcal": nutrients.get("energy", {}).get("value"),
+                    "protein_g": nutrients.get("protein", {}).get("value"),
+                    "carbohydrates_g": nutrients.get("carbohydrates", {}).get("value"),
+                    "fiber_g": nutrients.get("fiber", {}).get("value"),
+                    "sugars_g": nutrients.get("sugars", {}).get("value"),
+                    "fat_total_g": nutrients.get("fat_total", {}).get("value"),
+                    "fat_saturated_g": nutrients.get("fat_saturated", {}).get("value"),
+                    "cholesterol_mg": nutrients.get("cholesterol", {}).get("value"),
+                },
+                "electrolytes": {
+                    "sodium_mg": nutrients.get("sodium", {}),
+                    "potassium_mg": nutrients.get("potassium", {}),
+                    "calcium_mg": nutrients.get("calcium", {}),
+                    "magnesium_mg": nutrients.get("magnesium", {}),
+                    "phosphorus_mg": nutrients.get("phosphorus", {}),
+                },
+                "vitamins": {k: v for k, v in nutrients.items() if k.startswith("vitamin_") or k in ["thiamin", "riboflavin", "niacin", "folate"]},
+                "trace_elements": {k: v for k, v in nutrients.items() if k in ["iron", "zinc", "selenium", "iodine", "copper", "manganese", "chromium", "molybdenum"]}
+            },
+            
+            "organ_system_parameter_effects": organ_system_effects,
+            
+            "disease_interactions": all_disease_interactions,
+            "drug_interactions": all_drug_interactions,
+            
+            "bioactive_compounds": food.get("bioactive_compounds", []),
+            
+            "personalized_risk_assessment": personalized_risk,
+            
+            "clinical_summary": {
+                "healthfulness_score": health_score,
+                "key_benefits": [
+                    f"Good source of {n['nutrient_name']}" 
+                    for nid, n in nutrients.items() 
+                    if n.get("percent_daily_value", 0) >= 15
+                ][:5],
+                "key_concerns": [
+                    f"High in {n['nutrient_name']}" 
+                    for nid, n in nutrients.items() 
+                    if nid in ["sodium", "fat_saturated", "cholesterol", "sugars"] and n.get("percent_daily_value", 0) >= 20
+                ]
+            }
+        }
+        
+        return {
+            "success": True,
+            "in_database": True,
+            "analysis": analysis,
+            "analysis_type": "database_driven"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error in database food analysis: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.post("/food/analyze-dish")
 async def analyze_dish_with_ai(request: Dict[str, Any] = Body(...)):
     """
