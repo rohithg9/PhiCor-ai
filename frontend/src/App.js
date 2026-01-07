@@ -88,17 +88,19 @@ function AppContent() {
 function App() {
   return (
     <div className="App">
-      <BrowserRouter>
-        <ThemeProvider>
-          <RegionProvider>
-            <AuthProvider>
-              <ExpertProvider>
-                <AppContent />
-              </ExpertProvider>
-            </AuthProvider>
-          </RegionProvider>
-        </ThemeProvider>
-      </BrowserRouter>
+      <HelmetProvider>
+        <BrowserRouter>
+          <ThemeProvider>
+            <RegionProvider>
+              <AuthProvider>
+                <ExpertProvider>
+                  <AppContent />
+                </ExpertProvider>
+              </AuthProvider>
+            </RegionProvider>
+          </ThemeProvider>
+        </BrowserRouter>
+      </HelmetProvider>
     </div>
   );
 }
