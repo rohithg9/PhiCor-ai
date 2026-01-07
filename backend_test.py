@@ -1543,17 +1543,17 @@ def run_all_tests():
     else:
         print(f"  ✅ No critical issues detected")
     
-    # Differential Dashboard specific verification
-    print(f"\n📋 DIFFERENTIAL DIAGNOSIS DASHBOARD VERIFICATION:")
-    if test_results.get('disease_search_api'):
-        print(f"  ✅ Disease search verified (Pneumonia with parameter_modifications and comprehensive_model)")
+    # Clinical Analysis & Synthesis specific verification
+    print(f"\n📋 CLINICAL ANALYSIS & SYNTHESIS VERIFICATION:")
+    if test_results.get('phicor_clinical_interpret'):
+        print(f"  ✅ Clinical interpret verified (findings and differential_diagnosis arrays populated)")
     else:
-        print(f"  ❌ Disease search failed")
+        print(f"  ❌ Clinical interpret failed")
     
-    if test_results.get('phicor_clinical_analysis'):
-        print(f"  ✅ Clinical analysis verified (POST /api/clinical/interpret with ≥3 findings and ≥5 differentials)")
+    if test_results.get('phicor_synthesis'):
+        print(f"  ✅ Synthesis verified (diseases_referenced > 0 and drugs_referenced > 0)")
     else:
-        print(f"  ❌ Clinical analysis failed")
+        print(f"  ❌ Synthesis failed - '0 diseases/drugs' bug not fixed")
     
     return test_results
 
