@@ -673,7 +673,7 @@ const DifferentialPage = () => {
         lab_findings: labFindings.map(f => ({
           parameterId: f.parameterId || '',
           name: f.parameterName || f.parameterId || '',
-          value: typeof f.value === 'number' ? f.value : null,
+          value: f.value || null,  // Pass the actual value (string or number)
           unit: f.unit || '',
           direction: f.direction || '',
           normalRange: f.normalRange || '',
