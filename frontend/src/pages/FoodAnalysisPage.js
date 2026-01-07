@@ -1307,6 +1307,149 @@ Snacks: Apple, almonds, green tea"
                       </div>
                     )}
                     
+                    {/* Individual Food Items Scale - NEW */}
+                    {activeScale === 'items' && (
+                      <div className="space-y-4">
+                        {analysisResult.individual_food_items?.length > 0 ? (
+                          <>
+                            {/* Actionable Insights Summary */}
+                            {analysisResult.actionable_insights && (
+                              <div className={`rounded-xl border p-4 ${isDark ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'}`}>
+                                <h3 className={`text-sm font-semibold mb-3 flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                  <span>💡</span> Quick Actions
+                                </h3>
+                                <div className="grid gap-3">
+                                  {analysisResult.actionable_insights.keep_eating?.length > 0 && (
+                                    <div className={`p-3 rounded-lg ${isDark ? 'bg-green-900/20 border border-green-800/30' : 'bg-green-50 border border-green-200'}`}>
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <CheckCircle className="w-4 h-4 text-green-500" />
+                                        <span className={`text-xs font-semibold ${isDark ? 'text-green-400' : 'text-green-700'}`}>Keep Eating</span>
+                                      </div>
+                                      <ul className="space-y-1">
+                                        {analysisResult.actionable_insights.keep_eating.map((item, i) => (
+                                          <li key={i} className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>• {item}</li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
+                                  {analysisResult.actionable_insights.reduce_or_eliminate?.length > 0 && (
+                                    <div className={`p-3 rounded-lg ${isDark ? 'bg-orange-900/20 border border-orange-800/30' : 'bg-orange-50 border border-orange-200'}`}>
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <AlertTriangle className="w-4 h-4 text-orange-500" />
+                                        <span className={`text-xs font-semibold ${isDark ? 'text-orange-400' : 'text-orange-700'}`}>Reduce or Eliminate</span>
+                                      </div>
+                                      <ul className="space-y-1">
+                                        {analysisResult.actionable_insights.reduce_or_eliminate.map((item, i) => (
+                                          <li key={i} className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>• {item}</li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
+                                  {analysisResult.actionable_insights.add_next_time?.length > 0 && (
+                                    <div className={`p-3 rounded-lg ${isDark ? 'bg-blue-900/20 border border-blue-800/30' : 'bg-blue-50 border border-blue-200'}`}>
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <Plus className="w-4 h-4 text-blue-500" />
+                                        <span className={`text-xs font-semibold ${isDark ? 'text-blue-400' : 'text-blue-700'}`}>Add Next Time</span>
+                                      </div>
+                                      <ul className="space-y-1">
+                                        {analysisResult.actionable_insights.add_next_time.map((item, i) => (
+                                          <li key={i} className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>• {item}</li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {/* Individual Food Items List */}
+                            <div className={`rounded-xl border p-4 ${isDark ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'}`}>
+                              <h3 className={`text-sm font-semibold mb-3 flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                <span>🍽️</span> Individual Food Items ({analysisResult.individual_food_items.length})
+                              </h3>
+                              <div className="space-y-3">
+                                {analysisResult.individual_food_items.map((item, idx) => (
+                                  <FoodItemCard key={idx} item={item} isDark={isDark} />
+                                ))}
+                              </div>
+                            </div>
+                            
+                            {/* Combined Meal Effect */}
+                            {analysisResult.combined_meal_analysis && (
+                              <div className={`rounded-xl border p-4 ${isDark ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'}`}>
+                                <h3 className={`text-sm font-semibold mb-3 flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                  <span>🍱</span> Combined Meal Effect
+                                </h3>
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+                                  <div className={`p-2 rounded-lg text-center ${isDark ? 'bg-gray-800' : 'bg-gray-100'}`}>
+                                    <div className={`text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{analysisResult.combined_meal_analysis.total_calories}</div>
+                                    <div className={`text-[10px] ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>Total kcal</div>
+                                  </div>
+                                  <div className={`p-2 rounded-lg text-center ${isDark ? 'bg-gray-800' : 'bg-gray-100'}`}>
+                                    <div className={`text-lg font-bold text-red-400`}>{analysisResult.combined_meal_analysis.total_macros?.protein_g}g</div>
+                                    <div className={`text-[10px] ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>Protein</div>
+                                  </div>
+                                  <div className={`p-2 rounded-lg text-center ${isDark ? 'bg-gray-800' : 'bg-gray-100'}`}>
+                                    <div className={`text-lg font-bold text-yellow-400`}>{analysisResult.combined_meal_analysis.total_macros?.carbs_g}g</div>
+                                    <div className={`text-[10px] ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>Carbs</div>
+                                  </div>
+                                  <div className={`p-2 rounded-lg text-center ${isDark ? 'bg-gray-800' : 'bg-gray-100'}`}>
+                                    <div className={`text-lg font-bold text-blue-400`}>{analysisResult.combined_meal_analysis.total_macros?.fat_g}g</div>
+                                    <div className={`text-[10px] ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>Fat</div>
+                                  </div>
+                                </div>
+                                
+                                {/* Organ System Scores */}
+                                {analysisResult.combined_meal_analysis.overall_effect && (
+                                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                    {Object.entries(analysisResult.combined_meal_analysis.overall_effect).map(([system, data]) => (
+                                      <div key={system} className={`p-2 rounded-lg text-center ${
+                                        data.effect === 'beneficial' ? (isDark ? 'bg-green-900/20' : 'bg-green-50') :
+                                        data.effect === 'caution' ? (isDark ? 'bg-orange-900/20' : 'bg-orange-50') :
+                                        (isDark ? 'bg-gray-800' : 'bg-gray-100')
+                                      }`}>
+                                        <div className={`text-sm font-bold ${
+                                          data.effect === 'beneficial' ? 'text-green-500' :
+                                          data.effect === 'caution' ? 'text-orange-500' : 'text-gray-400'
+                                        }`}>{data.score || '—'}</div>
+                                        <div className={`text-[9px] capitalize ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>{system.slice(0, 6)}</div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                                
+                                {/* Synergies & Conflicts */}
+                                {(analysisResult.combined_meal_analysis.synergies?.length > 0 || analysisResult.combined_meal_analysis.conflicts?.length > 0) && (
+                                  <div className="mt-3 space-y-2">
+                                    {analysisResult.combined_meal_analysis.synergies?.map((s, i) => (
+                                      <div key={i} className={`text-xs flex items-start gap-2 ${isDark ? 'text-green-400' : 'text-green-600'}`}>
+                                        <span>✓</span> {s}
+                                      </div>
+                                    ))}
+                                    {analysisResult.combined_meal_analysis.conflicts?.map((c, i) => (
+                                      <div key={i} className={`text-xs flex items-start gap-2 ${isDark ? 'text-orange-400' : 'text-orange-600'}`}>
+                                        <span>⚠</span> {c}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <div className={`rounded-xl border p-8 text-center ${isDark ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'}`}>
+                            <div className="text-4xl mb-3">📷</div>
+                            <h3 className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                              No Individual Items Data
+                            </h3>
+                            <p className={`text-xs mt-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                              Upload food photos to get individual item breakdown with per-food analysis
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    
                     {/* Nutrients Scale - Detailed breakdown */}
                     {activeScale === 'nutrients' && (
                       <div className="space-y-4">
