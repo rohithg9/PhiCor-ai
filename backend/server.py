@@ -3449,7 +3449,7 @@ class ClinicalFinding(BaseModel):
     """Model for a clinical finding"""
     parameterId: Optional[str] = None
     name: Optional[str] = None
-    value: Optional[float] = None
+    value: Optional[Any] = None  # Accept both numbers and strings like "elevated"
     unit: Optional[str] = ""
     direction: Optional[str] = None
     normalRange: Optional[str] = ""
