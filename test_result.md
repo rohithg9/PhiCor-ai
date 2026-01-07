@@ -1,5 +1,20 @@
 # PhiCor.ai Testing Protocol
 
+## Current Session Testing Tasks (Jan 7, 2026)
+
+### Task: Feature Verification Before Food Engine Enhancement
+- **Status**: IN PROGRESS
+- **Features to Verify**:
+  1. Food Analysis Page (Π tab) - Search functionality, AI analysis
+  2. Cases Page - Load cases, view case detail, PDF export
+  3. Differential Diagnosis - Recommended Investigations, Save Case button
+  4. Parameter Drill-Down modal
+
+### Enhancement Script Status
+- **Progress**: 74.2% (1905/2568 diseases)
+- **Status**: Running in background
+- **Last check**: Jan 7, 2026 14:52
+
 ## Active Testing Tasks
 
 ### Task 1: Clinical Reasoning Engine V2 Implementation
