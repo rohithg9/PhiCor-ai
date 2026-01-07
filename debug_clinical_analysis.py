@@ -7,7 +7,7 @@ import requests
 import json
 
 # Get backend URL
-BACKEND_URL = "https://healthcare-ai-12.preview.emergentagent.com"
+BACKEND_URL = "https://healthpi.preview.emergentagent.com"
 
 def test_clinical_analysis():
     """Test the clinical analysis endpoint with detailed debugging"""
