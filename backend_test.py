@@ -31,20 +31,17 @@ import json
 import time
 import sys
 import os
+import base64
 from typing import Dict, List, Any, Optional
 
 # Get the backend URL from frontend .env
 FRONTEND_ENV_PATH = "/app/frontend/.env"
 BACKEND_URL = None
 
-# Test credentials from review request
-ADMIN_EMAIL = "admin@phicor.ai"
-ADMIN_PASSWORD = "admin123"
-
 # Global variables for test state
-admin_token = None
-admin_user_data = None
-heart_failure_disease = None
+disease_count = 0
+banana_analysis = None
+image_analysis = None
 
 def get_backend_url():
     """Extract backend URL from frontend .env file"""
