@@ -8595,6 +8595,189 @@ async def get_nutrient_info(nutrient: str):
         logger.error(f"Error getting nutrient info: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
+class DailyIntakeRequest(BaseModel):
+    daily_intake_text: str
+    health_profile: Optional[Dict[str, Any]] = None
+
+
+@api_router.post("/food/analyze-daily")
+async def analyze_daily_intake(request: DailyIntakeRequest):
+    """
+    Analyze a full day's food intake from natural language description.
+    Parses meals, snacks, beverages, and supplements to provide comprehensive nutritional analysis.
+    """
+    try:
+        llm_key = os.environ.get('LLM_KEY') or os.environ.get('EMERGENT_LLM_KEY')
+        if not llm_key:
+            raise HTTPException(status_code=500, detail="LLM key not configured")
+        
+        # Build health context
+        health_context = ""
+        if request.health_profile:
+            profile = request.health_profile
+            conditions = profile.get('conditions', [])
+            allergies = profile.get('allergies', [])
+            medications = profile.get('medications', [])
+            restrictions = profile.get('dietary_restrictions', [])
+            
+            if conditions:
+                health_context += f"\nMedical conditions: {', '.join(conditions)}"
+            if allergies:
+                health_context += f"\nFood allergies: {', '.join(allergies)}"
+            if medications:
+                health_context += f"\nCurrent medications: {', '.join(medications)}"
+            if restrictions:
+                health_context += f"\nDietary restrictions: {', '.join(restrictions)}"
+            if profile.get('age'):
+                health_context += f"\nAge: {profile.get('age')} years"
+            if profile.get('sex'):
+                health_context += f"\nSex: {profile.get('sex')}"
+            if profile.get('weight'):
+                health_context += f"\nWeight: {profile.get('weight')} kg"
+        
+        system_message = """You are PhiCor's Daily Nutrition Analysis Engine (Π). Parse and analyze complete daily food intake descriptions in natural language. 
+
+You MUST:
+1. Identify ALL food items, meals, snacks, beverages, and supplements mentioned
+2. Estimate standard portion sizes where not specified
+3. Calculate cumulative nutritional totals for the entire day
+4. Analyze the day's intake against recommended daily values
+5. Identify nutritional gaps and excesses
+6. Provide personalized insights based on health profile
+7. Flag any concerns for specific medical conditions
+
+Always respond with valid JSON only."""
+
+        analysis_prompt = f"""Analyze this complete daily food intake:
+
+"{request.daily_intake_text}"
+
+{health_context if health_context else "No specific health profile provided."}
+
+Parse ALL items and return comprehensive JSON:
+{{
+  "dish_name": "Daily Food Intake Analysis",
+  "category": "daily_summary",
+  "description": "Comprehensive analysis of full day's nutritional intake",
+  "meals_parsed": [
+    {{
+      "meal_time": "Breakfast/Lunch/Dinner/Snack/Supplement",
+      "items": [
+        {{
+          "name": "food item",
+          "quantity": "amount",
+          "estimated_calories": number,
+          "key_nutrients": ["nutrient1", "nutrient2"]
+        }}
+      ],
+      "meal_calories": number
+    }}
+  ],
+  "total_items_count": number,
+  "macronutrients": {{
+    "calories": {{"value": number, "unit": "kcal", "percent_daily": number, "assessment": "low/adequate/high"}},
+    "protein": {{"value": number, "unit": "g", "percent_daily": number, "assessment": "low/adequate/high"}},
+    "carbohydrates": {{
+      "total": {{"value": number, "unit": "g", "percent_daily": number}},
+      "fiber": {{"value": number, "unit": "g"}},
+      "sugar": {{"value": number, "unit": "g"}}
+    }},
+    "fats": {{
+      "total": {{"value": number, "unit": "g", "percent_daily": number}},
+      "saturated": {{"value": number, "unit": "g"}},
+      "omega_3": {{"value": number, "unit": "mg"}}
+    }}
+  }},
+  "micronutrients": {{
+    "vitamins": [
+      {{"name": "vitamin", "value": number, "unit": "unit", "percent_daily": number, "status": "deficient/low/adequate/high"}}
+    ],
+    "minerals": [
+      {{"name": "mineral", "value": number, "unit": "unit", "percent_daily": number, "status": "deficient/low/adequate/high"}}
+    ]
+  }},
+  "hydration": {{
+    "total_fluids_ml": number,
+    "water_equivalent_ml": number,
+    "hydration_status": "inadequate/adequate/good/excellent",
+    "recommendation": "suggestion"
+  }},
+  "nutritional_gaps": [
+    {{"nutrient": "name", "current_percent": number, "recommendation": "how to address"}}
+  ],
+  "nutritional_excesses": [
+    {{"nutrient": "name", "current_percent": number, "concern": "why this matters"}}
+  ],
+  "metabolic_impact": {{
+    "estimated_glycemic_load": "low/moderate/high",
+    "meal_timing_assessment": "description of eating pattern",
+    "energy_distribution": "description of calorie spread"
+  }},
+  "organ_system_effects": {{
+    "cardiovascular": {{"effect": "beneficial/neutral/caution", "mechanism": "overall impact from day's intake"}},
+    "gastrointestinal": {{"effect": "beneficial/neutral/caution", "mechanism": "overall impact"}},
+    "renal": {{"effect": "beneficial/neutral/caution", "mechanism": "overall impact"}},
+    "neurological": {{"effect": "beneficial/neutral/caution", "mechanism": "overall impact"}}
+  }},
+  "personalized_analysis": {{
+    "condition_specific_warnings": [
+      {{"condition": "condition", "severity": "low/moderate/high", "warning": "specific concern", "recommendation": "action"}}
+    ],
+    "medication_interactions": [
+      {{"medication": "med", "food": "food", "interaction": "description"}}
+    ]
+  }},
+  "clinical_scores": {{
+    "healthfulness_score": number,
+    "nutrient_density_score": number,
+    "balance_score": number,
+    "recommendation": "overall assessment",
+    "clinical_notes": "summary insights"
+  }},
+  "improvement_suggestions": [
+    {{"area": "what to improve", "suggestion": "specific recommendation", "benefit": "expected benefit"}}
+  ]
+}}"""
+
+        from emergentintegrations.llm.chat import UserMessage
+        
+        chat = LlmChat(
+            api_key=llm_key,
+            session_id=f"phicor_daily_{datetime.now().strftime('%H%M%S')}",
+            system_message=system_message
+        ).with_model("openai", "gpt-4o")
+        
+        response = await chat.send_message(UserMessage(text=analysis_prompt))
+        
+        # Parse JSON response
+        import json
+        import re
+        
+        response_text = response.text if hasattr(response, 'text') else str(response)
+        
+        # Extract JSON from response
+        json_match = re.search(r'\{[\s\S]*\}', response_text)
+        if json_match:
+            try:
+                analysis = json.loads(json_match.group())
+                return {
+                    "success": True,
+                    "analysis": analysis,
+                    "raw_input": request.daily_intake_text[:200] + "..." if len(request.daily_intake_text) > 200 else request.daily_intake_text
+                }
+            except json.JSONDecodeError as e:
+                logger.error(f"JSON parse error: {e}")
+                raise HTTPException(status_code=500, detail="Failed to parse analysis response")
+        else:
+            raise HTTPException(status_code=500, detail="Invalid response format")
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error analyzing daily intake: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.get("/food/conditions/{condition}")
 async def get_condition_food_constraints(condition: str):
     """Get food constraints for a specific medical condition"""
