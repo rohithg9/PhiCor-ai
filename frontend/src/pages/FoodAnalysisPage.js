@@ -1449,6 +1449,62 @@ Snacks: Apple, almonds, green tea"
                       </div>
                     )}
                     
+                    {/* Individual Organ System View - when clicked from overview */}
+                    {analysisResult.organ_system_parameter_effects?.[activeScale] && !['overview', 'nutrients', 'molecular', 'cellular', 'physiology', 'clinical'].includes(activeScale) && (
+                      <div className="space-y-4">
+                        {(() => {
+                          const sysData = analysisResult.organ_system_parameter_effects[activeScale];
+                          const sysInfo = ORGAN_SYSTEMS.find(s => s.id === activeScale) || { name: activeScale, icon: '🔬', color: 'from-gray-500 to-gray-600' };
+                          return (
+                            <div className={`rounded-xl border p-4 ${isDark ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'}`}>
+                              <div className="flex items-center gap-2 mb-4">
+                                <button 
+                                  onClick={() => setActiveScale('overview')}
+                                  className={`text-xs ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}
+                                >
+                                  ← Back to Overview
+                                </button>
+                              </div>
+                              <div className="flex items-center gap-3 mb-4">
+                                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${sysInfo.color} flex items-center justify-center`}>
+                                  <span className="text-2xl">{sysInfo.icon}</span>
+                                </div>
+                                <div>
+                                  <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                    {sysInfo.name} System Effects
+                                  </h3>
+                                  <Badge className={`mt-1 ${
+                                    sysData.overall_effect === 'beneficial' ? 'bg-green-500/20 text-green-400' :
+                                    sysData.overall_effect === 'caution' ? 'bg-orange-500/20 text-orange-400' :
+                                    'bg-gray-500/20 text-gray-400'
+                                  }`}>
+                                    {sysData.overall_effect}
+                                  </Badge>
+                                </div>
+                              </div>
+                              {sysData.contributing_nutrients?.length > 0 && (
+                                <div className="mb-4">
+                                  <span className={`text-[10px] font-semibold uppercase tracking-wider ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                                    Contributing Nutrients
+                                  </span>
+                                  <div className="flex flex-wrap gap-1 mt-1">
+                                    {sysData.contributing_nutrients.map((n, i) => (
+                                      <Badge key={i} variant="outline" className="text-[9px]">{n}</Badge>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                              <div className="grid gap-2">
+                                {sysData.parameters_affected?.map((param, i) => (
+                                  <ParameterCard key={i} param={param} isDark={isDark} />
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    )}
+                    
                     {/* Clinical Scale - Lab parameters */}
                     {activeScale === 'clinical' && (
                       <div className="space-y-4">
