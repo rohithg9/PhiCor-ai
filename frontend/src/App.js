@@ -74,6 +74,7 @@ function AppContent() {
         <Route path="/expert" element={<ExpertDashboard />} />
         <Route path="/expert/experiments" element={<ExperimentLab />} />
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/models" element={<MathModelsAdmin />} />
         <Route path="/equations" element={<EquationsPage />} />
         
         <Route path="*" element={<Navigate to="/" replace />} />
