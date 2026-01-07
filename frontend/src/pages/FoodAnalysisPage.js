@@ -437,7 +437,7 @@ const FoodAnalysisPage = () => {
     }
   };
   
-  // Analyze multi-food intake
+  // Analyze multi-food intake with timeout handling
   const analyzeIntake = async () => {
     if (!profile.foodIntake.trim()) {
       toast.error('Please enter your food intake');
@@ -448,6 +448,10 @@ const FoodAnalysisPage = () => {
     setAnalysisResult(null);
     setActiveScale('overview');
     setShowPanel(false);
+    
+    // Create abort controller for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
     
     try {
       const response = await fetch(`${BACKEND_URL}/api/food/analyze-daily`, {
@@ -464,8 +468,11 @@ const FoodAnalysisPage = () => {
             medications: profile.medications,
             allergies: profile.allergies
           } : null
-        })
+        }),
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
       
       const data = await response.json();
       if (data.success) {
@@ -475,8 +482,13 @@ const FoodAnalysisPage = () => {
         throw new Error(data.detail || 'Analysis failed');
       }
     } catch (error) {
+      clearTimeout(timeoutId);
       console.error('Analysis error:', error);
-      toast.error('Analysis failed. Please try again.');
+      if (error.name === 'AbortError') {
+        toast.error('Analysis timed out. Please try again.');
+      } else {
+        toast.error('Analysis failed. Please check your connection and try again.');
+      }
     } finally {
       setIsAnalyzing(false);
     }
