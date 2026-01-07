@@ -1,34 +1,29 @@
 #!/usr/bin/env python3
 """
-Backend Testing for PhiCor.ai Phase 2 Data Enhancement Completion
+Backend Testing for PhiCor.ai Food Analysis Engine
 Testing specific requirements from review request:
 
-PHASE 2 DATA ENHANCEMENT VERIFICATION:
+FOOD ANALYSIS ENGINE VERIFICATION:
 
-Test 1: Database Count Verification
-- Total diseases should be 1974
-- All 1974 diseases should have comprehensive_model with clinicalPresentation field
-- Verify no diseases are missing the comprehensive_model
+Test 1: Disease Database API
+- GET /api/diseases-db/list - Should return 2568+ diseases from database
+- Verify diseases are loaded from database, not hardcoded
 
-Test 2: API Endpoint Tests
-- GET /api/platform/stats - verify diseases.total = 1974
-- GET /api/diseases-db/list - verify lightweight endpoint returns all diseases
-- GET /api/diseases-db/{disease_id} - verify full data with comprehensive_model for sample disease
+Test 2: Food Analysis API
+- POST /api/food/analyze-product with {"product_name": "Banana", "serving_size": "1 medium"}
+- Should return comprehensive analysis with organ_system_parameter_effects
+- Verify health score (0-100), macronutrients, clinical summary, organ system effects
 
-Test 3: Data Structure Verification
-For a sample disease (heart_failure_hfref), verify comprehensive_model has:
-- clinicalPresentation (with symptoms and signs arrays)
-- diagnosticWorkup (with laboratory, imaging arrays)
-- treatment (with first_line, second_line arrays)
-- prognosis
-- monitoring
+Test 3: Image Analysis API  
+- POST /api/food/analyze-images with {"images": [{"name": "test.jpg", "data": "base64data"}]}
+- New endpoint for image analysis
+- Should handle base64 image data and return food analysis
 
-Test 4: Admin Authentication
-- Admin login with admin@phicor.ai / admin123
-- Verify admin access and token validity
+Test Credentials:
+- URL: https://healthpi.preview.emergentagent.com
+- Food Analysis Page: /food
 
 API Base URL: https://healthpi.preview.emergentagent.com
-All APIs require Authorization: Bearer {token} header
 """
 
 import requests
