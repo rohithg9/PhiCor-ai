@@ -1119,7 +1119,8 @@ NUTRIENTS_DATABASE = {
             {"drug": "oral_contraceptives", "interaction": "deficiency_risk", "mechanism": "Estrogen increases B6 requirements"}
         ],
         "deficiency_effects": ["peripheral_neuropathy", "seborrheic_dermatitis", "glossitis", "depression", "confusion", "anemia"],
-        "toxicity_effects": ["sensory_neuropathy", "ataxia", "photosensitivity", "threshold": ">200mg/day chronic"]
+        "toxicity_effects": ["sensory_neuropathy", "ataxia", "photosensitivity"],
+        "toxicity_threshold": ">200mg/day chronic"
     },
     
     "folate": {
