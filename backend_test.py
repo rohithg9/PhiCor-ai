@@ -1441,7 +1441,8 @@ def run_all_tests():
         test_results['disease_progression_data'] = test_disease_progression_data()
         test_results['new_knowledge_endpoint'] = test_new_knowledge_endpoint()
         test_results['disease_search_api'] = test_disease_search_api()
-        test_results['phicor_clinical_analysis'] = test_phicor_clinical_analysis()
+        test_results['phicor_clinical_interpret'] = test_phicor_clinical_interpret()
+        test_results['phicor_synthesis'] = test_phicor_synthesis()
     else:
         # Set all tests to False if backend is not accessible
         test_results.update({
