@@ -1476,7 +1476,8 @@ def run_all_tests():
         ('disease_progression_data', 'Test 5: Disease Progression Data (timeline stages)'),
         ('new_knowledge_endpoint', 'Test 6: New Knowledge Endpoint (GET /api/knowledge/disease/{disease_id})'),
         ('disease_search_api', 'Test 7: Disease Search API (GET /api/diseases/search?q=Pneumonia&limit=1)'),
-        ('phicor_clinical_analysis', 'Test 8: PhiCor Clinical Analysis (POST /api/clinical/interpret)')
+        ('phicor_clinical_interpret', 'Test 8: PhiCor Clinical Interpret (POST /api/clinical/interpret)'),
+        ('phicor_synthesis', 'Test 9: PhiCor Synthesis (POST /api/diagnosis/synthesize - BUG FIX)')
     ]
     
     infrastructure_tests = [
