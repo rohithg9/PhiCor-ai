@@ -9844,15 +9844,42 @@ Return COMPREHENSIVE JSON:
             system_message=system_message
         ).with_model("openai", "gpt-4o")
         
-        # For now, we simulate by describing the images in the prompt
-        # In production, you would pass images to a vision-enabled endpoint
-        image_desc = f"[User has uploaded {image_count} food image(s). Provide a comprehensive analysis based on typical meal compositions.]"
+        # Build message with images for vision model
+        # GPT-4o supports image analysis through base64 encoding
+        image_contents = []
+        for i, img in enumerate(request.images):
+            image_contents.append({
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/jpeg;base64,{img.data}",
+                    "detail": "high"
+                }
+            })
         
-        full_prompt = f"{analysis_prompt}\n\n{image_desc}"
+        # Create the message with text + images
+        text_content = {
+            "type": "text", 
+            "text": analysis_prompt
+        }
         
-        response = await chat.send_message(UserMessage(text=full_prompt))
+        # Use OpenAI client directly for vision (emergentintegrations may not support image content)
+        from openai import AsyncOpenAI
         
-        response_text = response.text if hasattr(response, 'text') else str(response)
+        client = AsyncOpenAI(api_key=llm_key)
+        
+        messages = [
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": [text_content] + image_contents}
+        ]
+        
+        vision_response = await client.chat.completions.create(
+            model="gpt-4o",
+            messages=messages,
+            max_tokens=4000,
+            temperature=0.3
+        )
+        
+        response_text = vision_response.choices[0].message.content
         
         # Extract JSON from response
         json_match = re.search(r'\{[\s\S]*\}', response_text)
