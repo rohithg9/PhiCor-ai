@@ -954,11 +954,7 @@ Snacks: Apple, almonds, green tea"
                     placeholder="Search food, dish, vitamin, nutrient..."
                     className={`pr-10 ${isDark ? 'bg-gray-800 border-gray-700' : ''}`}
                   />
-                  {isAnalyzing ? (
-                    <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-green-500" />
-                  ) : (
-                    <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  )}
+                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   
                   {/* Search Dropdown - only show when no analysis result */}
                   {showResults && searchResults.length > 0 && !analysisResult && !isAnalyzing && (
