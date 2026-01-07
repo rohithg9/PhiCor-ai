@@ -280,6 +280,15 @@ const LandingPage = () => {
                 >
                   <span className="text-white font-serif text-base sm:text-lg md:text-xl font-bold">ρ</span>
                 </button>
+                
+                {/* Π - Food Analysis Engine */}
+                <button
+                  onClick={() => navigate('/food')}
+                  className="w-8 h-8 sm:w-9 sm:h-9 md:w-11 md:h-11 rounded-lg bg-gradient-to-br from-green-500 to-lime-500 hover:from-green-600 hover:to-lime-600 flex items-center justify-center transition-all shadow-lg shadow-green-500/20 hover:shadow-green-500/40 hover:scale-105"
+                  title="Food Analysis Engine"
+                >
+                  <span className="text-white font-serif text-base sm:text-lg md:text-xl font-bold">Π</span>
+                </button>
               </div>
               
               {/* Region Selector - always visible */}
