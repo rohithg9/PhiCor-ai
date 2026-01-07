@@ -1900,7 +1900,12 @@ Snacks: Apple, almonds, green tea"
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => fileInputRef.current?.click()}
+                        onClick={() => {
+                          // More reliable click for mobile
+                          if (fileInputRef.current) {
+                            fileInputRef.current.click();
+                          }
+                        }}
                         disabled={foodImages.length >= 10}
                         className={`w-full h-16 border-dashed flex flex-col gap-1 ${isDark ? 'border-gray-700' : ''}`}
                       >
