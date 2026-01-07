@@ -7776,6 +7776,8 @@ async def suggest_model_change(
         token = credentials.credentials
         payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         user = await db.users.find_one({"id": payload["sub"]}, {"_id": 0})
+        if not user:
+            user = await db.experts.find_one({"id": payload["sub"]}, {"_id": 0})
         if not user or user.get("role") not in ["admin", "super_admin", "expert"]:
             raise HTTPException(status_code=403, detail="Expert access required")
         
