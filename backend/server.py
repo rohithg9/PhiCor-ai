@@ -8778,6 +8778,489 @@ Parse ALL items and return comprehensive JSON:
         logger.error(f"Error analyzing daily intake: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
+class ProductAnalysisRequest(BaseModel):
+    """Request model for deep product analysis"""
+    product_name: str
+    ingredient_list: Optional[str] = None  # For packaged products
+    image_description: Optional[str] = None  # If image was analyzed
+    serving_size: str = "1 serving"
+    health_profile: Optional[Dict[str, Any]] = None
+
+
+@api_router.post("/food/analyze-product")
+async def analyze_product_deep(request: ProductAnalysisRequest):
+    """
+    Deep analysis of a food product with parameter-level organ system effects.
+    Breaks down ALL ingredients including trace elements, and maps effects to
+    specific physiological parameters (like disease dashboard).
+    """
+    try:
+        llm_key = os.environ.get('LLM_KEY') or os.environ.get('EMERGENT_LLM_KEY')
+        if not llm_key:
+            raise HTTPException(status_code=500, detail="LLM key not configured")
+        
+        # Build health context for personalization
+        health_context = ""
+        risk_factors = []
+        if request.health_profile:
+            profile = request.health_profile
+            conditions = profile.get('conditions', [])
+            allergies = profile.get('allergies', [])
+            medications = profile.get('medications', [])
+            
+            if conditions:
+                health_context += f"\n**CRITICAL - Patient Conditions**: {', '.join(conditions)}"
+                risk_factors.extend(conditions)
+            if allergies:
+                health_context += f"\n**CRITICAL - Allergies**: {', '.join(allergies)}"
+                risk_factors.extend([f"allergy:{a}" for a in allergies])
+            if medications:
+                health_context += f"\n**Medications (check interactions)**: {', '.join(medications)}"
+            if profile.get('age'):
+                health_context += f"\nAge: {profile.get('age')} years"
+            if profile.get('weight') and profile.get('height'):
+                bmi = float(profile.get('weight')) / (float(profile.get('height'))/100)**2
+                health_context += f"\nBMI: {bmi:.1f}"
+        
+        ingredient_info = ""
+        if request.ingredient_list:
+            ingredient_info = f"\n**Product Ingredient List**: {request.ingredient_list}"
+        
+        system_message = """You are PhiCor's Deep Product Analysis Engine (Π). You perform EXHAUSTIVE biochemical and physiological analysis of food products, treating them as parameterized biological inputs that modify human organ system parameters.
+
+Your analysis must be:
+1. EXHAUSTIVE - Break down EVERY ingredient including trace amounts, preservatives, additives
+2. ELEMENT-LEVEL - Analyze every electrolyte, mineral, trace element present
+3. PARAMETER-SPECIFIC - Map effects to specific physiological parameters (like: blood_pressure_systolic, GFR, serum_potassium, LDL_cholesterol, etc.)
+4. PERSONALIZED - Cross-reference with patient conditions, medications, allergies to identify specific risks
+5. CLINICAL-GRADE - Provide actionable insights a physician or dietitian would find valuable
+
+You are PhiCor's analytical engine. Respond ONLY with valid JSON."""
+
+        analysis_prompt = f"""Perform EXHAUSTIVE PhiCor deep analysis on: "{request.product_name}"
+Serving size: {request.serving_size}
+{ingredient_info}
+{health_context if health_context else "No specific health profile provided - provide general analysis."}
+
+Return COMPREHENSIVE JSON with PARAMETER-LEVEL detail:
+{{
+  "product_name": "{request.product_name}",
+  "product_type": "prepared_dish/packaged_food/beverage/supplement/raw_ingredient",
+  "description": "detailed description",
+  
+  "ingredients_breakdown": {{
+    "primary_ingredients": [
+      {{
+        "name": "ingredient",
+        "amount": "estimated amount",
+        "percentage_of_product": number,
+        "function": "protein/carb/fat/flavor/preservative/colorant/emulsifier/etc",
+        "nutritional_contribution": {{
+          "calories": number,
+          "protein_g": number,
+          "carbs_g": number,
+          "fat_g": number
+        }},
+        "bioactive_compounds": ["compound1", "compound2"],
+        "potential_concerns": ["concern if any"]
+      }}
+    ],
+    "secondary_ingredients": [
+      {{
+        "name": "ingredient",
+        "amount": "trace/small amount",
+        "function": "what it does in the product",
+        "safety_notes": "any concerns"
+      }}
+    ],
+    "additives_and_preservatives": [
+      {{
+        "name": "additive name",
+        "e_number": "E-number if applicable",
+        "function": "preservative/colorant/emulsifier/stabilizer/etc",
+        "safety_classification": "GRAS/approved/limited/controversial",
+        "potential_effects": ["effect1"]
+      }}
+    ],
+    "allergens_present": ["allergen1"],
+    "allergens_may_contain": ["trace allergen"],
+    "total_ingredient_count": number
+  }},
+  
+  "complete_nutritional_profile": {{
+    "macronutrients": {{
+      "energy_kcal": number,
+      "protein_g": number,
+      "carbohydrates_g": number,
+      "sugars_g": number,
+      "fiber_g": number,
+      "fat_total_g": number,
+      "fat_saturated_g": number,
+      "fat_trans_g": number,
+      "fat_monounsaturated_g": number,
+      "fat_polyunsaturated_g": number,
+      "cholesterol_mg": number
+    }},
+    "electrolytes": {{
+      "sodium_mg": {{"value": number, "percent_daily": number, "clinical_note": "impact on BP, fluid balance"}},
+      "potassium_mg": {{"value": number, "percent_daily": number, "clinical_note": "cardiac, renal implications"}},
+      "chloride_mg": {{"value": number, "percent_daily": number}},
+      "calcium_mg": {{"value": number, "percent_daily": number}},
+      "magnesium_mg": {{"value": number, "percent_daily": number}},
+      "phosphorus_mg": {{"value": number, "percent_daily": number}}
+    }},
+    "trace_elements": {{
+      "iron_mg": {{"value": number, "percent_daily": number, "form": "heme/non-heme"}},
+      "zinc_mg": {{"value": number, "percent_daily": number}},
+      "copper_mcg": {{"value": number, "percent_daily": number}},
+      "manganese_mg": {{"value": number, "percent_daily": number}},
+      "selenium_mcg": {{"value": number, "percent_daily": number}},
+      "iodine_mcg": {{"value": number, "percent_daily": number}},
+      "chromium_mcg": {{"value": number, "percent_daily": number}},
+      "molybdenum_mcg": {{"value": number, "percent_daily": number}}
+    }},
+    "vitamins": {{
+      "vitamin_a_mcg_rae": {{"value": number, "percent_daily": number}},
+      "vitamin_d_mcg": {{"value": number, "percent_daily": number}},
+      "vitamin_e_mg": {{"value": number, "percent_daily": number}},
+      "vitamin_k_mcg": {{"value": number, "percent_daily": number}},
+      "vitamin_c_mg": {{"value": number, "percent_daily": number}},
+      "thiamin_b1_mg": {{"value": number, "percent_daily": number}},
+      "riboflavin_b2_mg": {{"value": number, "percent_daily": number}},
+      "niacin_b3_mg": {{"value": number, "percent_daily": number}},
+      "pantothenic_acid_b5_mg": {{"value": number, "percent_daily": number}},
+      "pyridoxine_b6_mg": {{"value": number, "percent_daily": number}},
+      "biotin_b7_mcg": {{"value": number, "percent_daily": number}},
+      "folate_b9_mcg_dfe": {{"value": number, "percent_daily": number}},
+      "cobalamin_b12_mcg": {{"value": number, "percent_daily": number}}
+    }},
+    "other_compounds": {{
+      "caffeine_mg": number,
+      "alcohol_g": number,
+      "purines_mg": number,
+      "oxalates_mg": number,
+      "phytates_mg": number,
+      "tannins_mg": number
+    }}
+  }},
+  
+  "organ_system_parameter_effects": {{
+    "cardiovascular": {{
+      "overall_effect": "beneficial/neutral/caution/harmful",
+      "parameters_affected": [
+        {{
+          "parameter": "blood_pressure_systolic",
+          "direction": "increase/decrease/neutral",
+          "magnitude": "minimal/moderate/significant",
+          "mechanism": "sodium content affects fluid retention",
+          "clinical_significance": "relevant for hypertension"
+        }},
+        {{
+          "parameter": "blood_pressure_diastolic",
+          "direction": "increase/decrease/neutral",
+          "magnitude": "minimal/moderate/significant",
+          "mechanism": "explanation"
+        }},
+        {{
+          "parameter": "heart_rate",
+          "direction": "increase/decrease/neutral",
+          "mechanism": "caffeine, electrolyte effects"
+        }},
+        {{
+          "parameter": "LDL_cholesterol",
+          "direction": "increase/decrease/neutral",
+          "mechanism": "saturated fat, trans fat effects"
+        }},
+        {{
+          "parameter": "HDL_cholesterol",
+          "direction": "increase/decrease/neutral",
+          "mechanism": "omega-3, fiber effects"
+        }},
+        {{
+          "parameter": "triglycerides",
+          "direction": "increase/decrease/neutral",
+          "mechanism": "sugar, refined carb effects"
+        }},
+        {{
+          "parameter": "cardiac_output",
+          "direction": "increase/decrease/neutral",
+          "mechanism": "fluid, electrolyte effects"
+        }}
+      ]
+    }},
+    "renal": {{
+      "overall_effect": "beneficial/neutral/caution/harmful",
+      "parameters_affected": [
+        {{
+          "parameter": "GFR_estimated",
+          "direction": "increase/decrease/neutral",
+          "mechanism": "protein load, sodium effects"
+        }},
+        {{
+          "parameter": "serum_creatinine",
+          "direction": "increase/decrease/neutral",
+          "mechanism": "protein intake effects"
+        }},
+        {{
+          "parameter": "serum_potassium",
+          "direction": "increase/decrease/neutral",
+          "magnitude": "amount",
+          "mechanism": "potassium content",
+          "clinical_significance": "critical for CKD, heart failure patients"
+        }},
+        {{
+          "parameter": "serum_phosphorus",
+          "direction": "increase/decrease/neutral",
+          "mechanism": "phosphorus additives, protein"
+        }},
+        {{
+          "parameter": "urine_output",
+          "direction": "increase/decrease/neutral",
+          "mechanism": "fluid, caffeine, sodium effects"
+        }},
+        {{
+          "parameter": "uric_acid",
+          "direction": "increase/decrease/neutral",
+          "mechanism": "purine content effects"
+        }}
+      ]
+    }},
+    "hepatic": {{
+      "overall_effect": "beneficial/neutral/caution/harmful",
+      "parameters_affected": [
+        {{
+          "parameter": "ALT",
+          "direction": "increase/decrease/neutral",
+          "mechanism": "alcohol, certain additives"
+        }},
+        {{
+          "parameter": "AST",
+          "direction": "increase/decrease/neutral",
+          "mechanism": "explanation"
+        }},
+        {{
+          "parameter": "bilirubin",
+          "direction": "increase/decrease/neutral",
+          "mechanism": "explanation"
+        }},
+        {{
+          "parameter": "albumin_synthesis",
+          "direction": "increase/decrease/neutral",
+          "mechanism": "protein quality effects"
+        }}
+      ]
+    }},
+    "glycemic": {{
+      "overall_effect": "beneficial/neutral/caution/harmful",
+      "parameters_affected": [
+        {{
+          "parameter": "blood_glucose_fasting",
+          "direction": "increase/decrease/neutral",
+          "magnitude": "expected change",
+          "mechanism": "carb content, glycemic index"
+        }},
+        {{
+          "parameter": "blood_glucose_postprandial",
+          "direction": "increase/decrease/neutral",
+          "peak_time_minutes": number,
+          "mechanism": "glycemic load"
+        }},
+        {{
+          "parameter": "HbA1c_impact",
+          "direction": "increase/decrease/neutral",
+          "mechanism": "chronic glucose effects"
+        }},
+        {{
+          "parameter": "insulin_secretion",
+          "direction": "increase/decrease/neutral",
+          "mechanism": "insulinogenic index"
+        }},
+        {{
+          "parameter": "insulin_sensitivity",
+          "direction": "increase/decrease/neutral",
+          "mechanism": "fiber, fat type effects"
+        }}
+      ]
+    }},
+    "gastrointestinal": {{
+      "overall_effect": "beneficial/neutral/caution/harmful",
+      "parameters_affected": [
+        {{
+          "parameter": "gastric_acid_secretion",
+          "direction": "increase/decrease/neutral",
+          "mechanism": "spices, caffeine effects"
+        }},
+        {{
+          "parameter": "gut_motility",
+          "direction": "increase/decrease/neutral",
+          "mechanism": "fiber, fat content"
+        }},
+        {{
+          "parameter": "microbiome_diversity",
+          "direction": "increase/decrease/neutral",
+          "mechanism": "fiber, prebiotics"
+        }},
+        {{
+          "parameter": "intestinal_permeability",
+          "direction": "increase/decrease/neutral",
+          "mechanism": "certain additives, gluten"
+        }}
+      ]
+    }},
+    "neurological": {{
+      "overall_effect": "beneficial/neutral/caution/harmful",
+      "parameters_affected": [
+        {{
+          "parameter": "alertness",
+          "direction": "increase/decrease/neutral",
+          "mechanism": "caffeine, sugar effects"
+        }},
+        {{
+          "parameter": "cognitive_function",
+          "direction": "increase/decrease/neutral",
+          "mechanism": "glucose, omega-3 effects"
+        }},
+        {{
+          "parameter": "mood",
+          "direction": "increase/decrease/neutral",
+          "mechanism": "tryptophan, sugar effects"
+        }},
+        {{
+          "parameter": "sleep_quality",
+          "direction": "increase/decrease/neutral",
+          "mechanism": "caffeine, magnesium effects"
+        }}
+      ]
+    }},
+    "musculoskeletal": {{
+      "overall_effect": "beneficial/neutral/caution/harmful",
+      "parameters_affected": [
+        {{
+          "parameter": "muscle_protein_synthesis",
+          "direction": "increase/decrease/neutral",
+          "mechanism": "protein quality, leucine"
+        }},
+        {{
+          "parameter": "bone_density_impact",
+          "direction": "increase/decrease/neutral",
+          "mechanism": "calcium, vitamin D, phosphorus"
+        }}
+      ]
+    }},
+    "immune": {{
+      "overall_effect": "beneficial/neutral/caution/harmful",
+      "parameters_affected": [
+        {{
+          "parameter": "inflammatory_markers",
+          "direction": "increase/decrease/neutral",
+          "mechanism": "omega ratio, antioxidants"
+        }},
+        {{
+          "parameter": "immune_cell_function",
+          "direction": "increase/decrease/neutral",
+          "mechanism": "zinc, vitamin C, D effects"
+        }}
+      ]
+    }}
+  }},
+  
+  "personalized_risk_assessment": {{
+    "overall_suitability": "highly_suitable/suitable/caution/unsuitable/contraindicated",
+    "suitability_score": number,
+    "condition_specific_analysis": [
+      {{
+        "condition": "patient's condition",
+        "risk_level": "none/low/moderate/high/critical",
+        "specific_concerns": [
+          {{
+            "nutrient_or_ingredient": "what's concerning",
+            "reason": "why it's concerning for this condition",
+            "parameter_at_risk": "which parameter could be affected",
+            "recommendation": "what to do"
+          }}
+        ],
+        "safe_portion": "recommended portion for this condition",
+        "frequency_recommendation": "how often safe to consume"
+      }}
+    ],
+    "medication_interactions": [
+      {{
+        "medication": "drug name or class",
+        "interacting_component": "nutrient/compound",
+        "interaction_type": "absorption/metabolism/effect",
+        "severity": "minor/moderate/major",
+        "clinical_action": "what to do"
+      }}
+    ],
+    "allergy_alerts": [
+      {{
+        "allergen": "allergen name",
+        "present_in": "which ingredient",
+        "severity": "mild/moderate/severe/anaphylaxis_risk",
+        "action": "avoid/caution"
+      }}
+    ]
+  }},
+  
+  "clinical_summary": {{
+    "healthfulness_score": number,
+    "nutrient_density_score": number,
+    "personalized_score": number,
+    "overall_recommendation": "highly_recommended/recommended/moderate/limit/avoid",
+    "key_benefits": ["benefit1", "benefit2"],
+    "key_concerns": ["concern1", "concern2"],
+    "clinical_notes": "summary for healthcare provider",
+    "patient_friendly_summary": "easy to understand summary for patient"
+  }},
+  
+  "optimization_suggestions": [
+    {{
+      "suggestion": "how to make this healthier or safer",
+      "benefit": "what improvement it provides",
+      "parameter_improved": "which parameter benefits"
+    }}
+  ]
+}}"""
+
+        from emergentintegrations.llm.chat import UserMessage
+        
+        chat = LlmChat(
+            api_key=llm_key,
+            session_id=f"phicor_product_{datetime.now().strftime('%H%M%S')}",
+            system_message=system_message
+        ).with_model("openai", "gpt-4o")
+        
+        response = await chat.send_message(UserMessage(text=analysis_prompt))
+        
+        # Parse JSON response
+        import json
+        import re
+        
+        response_text = response.text if hasattr(response, 'text') else str(response)
+        
+        # Extract JSON from response
+        json_match = re.search(r'\{[\s\S]*\}', response_text)
+        if json_match:
+            try:
+                analysis = json.loads(json_match.group())
+                return {
+                    "success": True,
+                    "analysis": analysis,
+                    "analysis_type": "deep_product_analysis"
+                }
+            except json.JSONDecodeError as e:
+                logger.error(f"JSON parse error: {e}")
+                raise HTTPException(status_code=500, detail="Failed to parse analysis response")
+        else:
+            raise HTTPException(status_code=500, detail="Invalid response format")
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error in deep product analysis: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.get("/food/conditions/{condition}")
 async def get_condition_food_constraints(condition: str):
     """Get food constraints for a specific medical condition"""
