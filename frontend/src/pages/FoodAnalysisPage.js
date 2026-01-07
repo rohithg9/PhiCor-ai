@@ -978,6 +978,32 @@ Supplements: Vitamin D 1000IU, Omega-3 capsule"
                     isDark={isDark}
                   />
                 )}
+                
+                {/* Deep Analysis Toggle */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setDeepAnalysisMode(!deepAnalysisMode)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all ${
+                      deepAnalysisMode
+                        ? 'bg-purple-500 text-white'
+                        : isDark ? 'bg-gray-800 text-gray-400 hover:bg-gray-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                    title="Deep analysis includes parameter-level effects, detailed ingredient breakdown, and personalized risk assessment"
+                  >
+                    <Microscope className="w-3.5 h-3.5" />
+                    Deep
+                  </button>
+                  {searchQuery && (
+                    <Button
+                      onClick={() => analyzeFood({ name: searchQuery }, null, null, deepAnalysisMode)}
+                      size="sm"
+                      className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 h-8"
+                    >
+                      <Scan className="w-4 h-4 mr-1" />
+                      Analyze
+                    </Button>
+                  )}
+                </div>
               </div>
               
               {/* Category Quick Filters */}
