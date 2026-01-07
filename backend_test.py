@@ -1510,9 +1510,10 @@ def run_all_tests():
         print(f"✅ Disease Progression data structure verified")
         print(f"✅ New Knowledge Endpoint functional for dashboard Knowledge tab")
         print(f"✅ Disease Search API working for Pneumonia search")
-        print(f"✅ PhiCor Clinical Analysis working for differential diagnosis")
-        print(f"\n🔄 COMPLETE DIFFERENTIAL DIAGNOSIS WORKFLOW VERIFIED:")
-        print(f"   Disease Search → Clinical Analysis → Differential Dashboard Display")
+        print(f"✅ PhiCor Clinical Interpret working for clinical analysis")
+        print(f"✅ PhiCor Synthesis working - '0 diseases/drugs' bug fixed")
+        print(f"\n🔄 COMPLETE CLINICAL ANALYSIS & SYNTHESIS WORKFLOW VERIFIED:")
+        print(f"   Clinical Text → Interpret → Synthesis → Knowledge Base Stats")
     elif backend_passed >= backend_total * 0.75:
         print(f"\n✅ MOSTLY SUCCESSFUL! {backend_passed}/{backend_total} backend tests passed.")
         print(f"⚠️  Some minor issues detected - see failed tests above")
