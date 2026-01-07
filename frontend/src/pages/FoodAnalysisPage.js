@@ -1153,44 +1153,305 @@ Snacks: Apple, almonds, green tea"
                       </div>
                     )}
                     
-                    {/* System-specific parameter views */}
-                    {activeScale !== 'overview' && (
-                      <div className={`rounded-xl border p-4 ${isDark ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'}`}>
-                        <div className="flex items-center gap-2 mb-4">
-                          <span className="text-xl">
-                            {activeScale === 'cardiovascular' ? '❤️' :
-                             activeScale === 'renal' ? '🫘' :
-                             activeScale === 'hepatic' ? '🫀' :
-                             activeScale === 'glycemic' ? '🍬' :
-                             activeScale === 'gastrointestinal' ? '🥗' :
-                             activeScale === 'neurological' ? '🧠' :
-                             activeScale === 'musculoskeletal' ? '💪' :
-                             activeScale === 'immune' ? '🛡️' : '📊'}
-                          </span>
-                          <h3 className={`text-sm font-semibold capitalize ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                            {activeScale} Parameters
+                    {/* Nutrients Scale - Detailed breakdown */}
+                    {activeScale === 'nutrients' && (
+                      <div className="space-y-4">
+                        {/* Macronutrients */}
+                        <div className={`rounded-xl border p-4 ${isDark ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'}`}>
+                          <h3 className={`text-sm font-semibold mb-3 flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                            <span>🍽️</span> Macronutrients
                           </h3>
-                          {getSystemParams(activeScale)?.overall_effect && (
-                            <Badge className={`ml-auto ${
-                              getSystemParams(activeScale).overall_effect === 'beneficial' ? 'bg-green-500/20 text-green-400' :
-                              getSystemParams(activeScale).overall_effect === 'caution' ? 'bg-orange-500/20 text-orange-400' :
-                              'bg-gray-500/20 text-gray-400'
-                            }`}>
-                              {getSystemParams(activeScale).overall_effect}
-                            </Badge>
-                          )}
-                        </div>
-                        
-                        {getSystemParams(activeScale)?.parameters_affected ? (
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            {getSystemParams(activeScale).parameters_affected.map((param, i) => (
-                              <ParameterCard key={i} param={param} isDark={isDark} />
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            {[
+                              { name: 'Energy', value: analysisResult.complete_nutritional_profile?.macronutrients?.energy_kcal, unit: 'kcal', icon: '⚡' },
+                              { name: 'Protein', value: analysisResult.complete_nutritional_profile?.macronutrients?.protein_g, unit: 'g', icon: '💪' },
+                              { name: 'Carbs', value: analysisResult.complete_nutritional_profile?.macronutrients?.carbohydrates_g, unit: 'g', icon: '🌾' },
+                              { name: 'Fat', value: analysisResult.complete_nutritional_profile?.macronutrients?.fat_total_g, unit: 'g', icon: '🥑' },
+                              { name: 'Fiber', value: analysisResult.complete_nutritional_profile?.macronutrients?.fiber_g, unit: 'g', icon: '🥬' },
+                              { name: 'Sugars', value: analysisResult.complete_nutritional_profile?.macronutrients?.sugars_g, unit: 'g', icon: '🍬' },
+                              { name: 'Sat Fat', value: analysisResult.complete_nutritional_profile?.macronutrients?.fat_saturated_g, unit: 'g', icon: '🧈' },
+                              { name: 'Cholesterol', value: analysisResult.complete_nutritional_profile?.macronutrients?.cholesterol_mg, unit: 'mg', icon: '❤️' },
+                            ].map((n, i) => (
+                              <div key={i} className={`p-2 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-gray-100'}`}>
+                                <div className="flex items-center gap-1 mb-1">
+                                  <span className="text-sm">{n.icon}</span>
+                                  <span className={`text-[10px] ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{n.name}</span>
+                                </div>
+                                <div className={`text-sm font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                  {n.value ?? '—'} {n.value && n.unit}
+                                </div>
+                              </div>
                             ))}
                           </div>
-                        ) : (
-                          <p className={`text-sm text-center py-8 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
-                            No parameter data available for this system
+                        </div>
+                        
+                        {/* Electrolytes */}
+                        {analysisResult.complete_nutritional_profile?.electrolytes && (
+                          <div className={`rounded-xl border p-4 ${isDark ? 'bg-blue-900/20 border-blue-800/30' : 'bg-blue-50 border-blue-200'}`}>
+                            <h3 className={`text-sm font-semibold mb-3 flex items-center gap-2 ${isDark ? 'text-blue-400' : 'text-blue-700'}`}>
+                              <span>⚡</span> Electrolytes
+                            </h3>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                              {Object.entries(analysisResult.complete_nutritional_profile.electrolytes).map(([key, data]) => (
+                                <div key={key} className={`p-2 rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-white'}`}>
+                                  <div className={`text-[10px] capitalize ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                    {key.replace(/_/g, ' ')}
+                                  </div>
+                                  <div className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                    {typeof data === 'object' ? data.value : data} mg
+                                  </div>
+                                  {typeof data === 'object' && data.percent_daily && (
+                                    <div className="text-[9px] text-blue-500">{data.percent_daily}% DV</div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Vitamins */}
+                        {analysisResult.complete_nutritional_profile?.vitamins && (
+                          <div className={`rounded-xl border p-4 ${isDark ? 'bg-yellow-900/20 border-yellow-800/30' : 'bg-yellow-50 border-yellow-200'}`}>
+                            <h3 className={`text-sm font-semibold mb-3 flex items-center gap-2 ${isDark ? 'text-yellow-400' : 'text-yellow-700'}`}>
+                              <span>💊</span> Vitamins
+                            </h3>
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                              {Object.entries(analysisResult.complete_nutritional_profile.vitamins).map(([key, data]) => (
+                                <div key={key} className={`p-2 rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-white'}`}>
+                                  <div className={`text-[9px] uppercase ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                    {key.replace(/_/g, ' ').replace('vitamin ', 'Vit ')}
+                                  </div>
+                                  <div className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                    {typeof data === 'object' ? data.value : data}
+                                  </div>
+                                  {typeof data === 'object' && data.percent_daily && (
+                                    <div className="text-[9px] text-yellow-500">{data.percent_daily}%</div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Trace Elements */}
+                        {analysisResult.complete_nutritional_profile?.trace_elements && (
+                          <div className={`rounded-xl border p-4 ${isDark ? 'bg-purple-900/20 border-purple-800/30' : 'bg-purple-50 border-purple-200'}`}>
+                            <h3 className={`text-sm font-semibold mb-3 flex items-center gap-2 ${isDark ? 'text-purple-400' : 'text-purple-700'}`}>
+                              <span>🔬</span> Trace Elements
+                            </h3>
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                              {Object.entries(analysisResult.complete_nutritional_profile.trace_elements).map(([key, data]) => (
+                                <div key={key} className={`p-2 rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-white'}`}>
+                                  <div className={`text-[9px] capitalize ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                    {key.replace(/_/g, ' ')}
+                                  </div>
+                                  <div className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                    {typeof data === 'object' ? data.value : data}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* Molecular Scale - Bioactive compounds */}
+                    {activeScale === 'molecular' && (
+                      <div className="space-y-4">
+                        {/* Bioactive Compounds from ingredients */}
+                        {analysisResult.ingredients_breakdown?.primary_ingredients?.some(i => i.bioactive_compounds?.length > 0) && (
+                          <div className={`rounded-xl border p-4 ${isDark ? 'bg-cyan-900/20 border-cyan-800/30' : 'bg-cyan-50 border-cyan-200'}`}>
+                            <h3 className={`text-sm font-semibold mb-3 flex items-center gap-2 ${isDark ? 'text-cyan-400' : 'text-cyan-700'}`}>
+                              <span>⚗️</span> Bioactive Compounds
+                            </h3>
+                            <div className="flex flex-wrap gap-2">
+                              {analysisResult.ingredients_breakdown.primary_ingredients.flatMap(i => i.bioactive_compounds || []).map((c, i) => (
+                                <Badge key={i} variant="outline" className="text-xs">{c}</Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Other Compounds */}
+                        {analysisResult.complete_nutritional_profile?.other_compounds && (
+                          <div className={`rounded-xl border p-4 ${isDark ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'}`}>
+                            <h3 className={`text-sm font-semibold mb-3 flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                              <span>🧪</span> Other Compounds
+                            </h3>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                              {Object.entries(analysisResult.complete_nutritional_profile.other_compounds).filter(([k, v]) => v && v > 0).map(([key, value]) => (
+                                <div key={key} className={`p-2 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-gray-100'}`}>
+                                  <div className={`text-[10px] capitalize ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                    {key.replace(/_/g, ' ')}
+                                  </div>
+                                  <div className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                    {value} mg
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Additives */}
+                        {analysisResult.ingredients_breakdown?.additives_and_preservatives?.length > 0 && (
+                          <div className={`rounded-xl border p-4 ${isDark ? 'bg-orange-900/20 border-orange-800/30' : 'bg-orange-50 border-orange-200'}`}>
+                            <h3 className={`text-sm font-semibold mb-3 flex items-center gap-2 ${isDark ? 'text-orange-400' : 'text-orange-700'}`}>
+                              <span>⚠️</span> Additives & Preservatives
+                            </h3>
+                            <div className="space-y-2">
+                              {analysisResult.ingredients_breakdown.additives_and_preservatives.map((a, i) => (
+                                <div key={i} className={`p-2 rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-white'}`}>
+                                  <div className="flex items-center gap-2">
+                                    <span className={`text-xs font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{a.name}</span>
+                                    {a.e_number && <Badge variant="outline" className="text-[9px]">{a.e_number}</Badge>}
+                                  </div>
+                                  <div className={`text-[10px] ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{a.function}</div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* Cellular Scale */}
+                    {activeScale === 'cellular' && (
+                      <div className="space-y-4">
+                        <div className={`rounded-xl border p-4 ${isDark ? 'bg-green-900/20 border-green-800/30' : 'bg-green-50 border-green-200'}`}>
+                          <h3 className={`text-sm font-semibold mb-3 flex items-center gap-2 ${isDark ? 'text-green-400' : 'text-green-700'}`}>
+                            <span>🔬</span> Cellular Effects
+                          </h3>
+                          <p className={`text-xs mb-3 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                            How nutrients affect cellular processes
                           </p>
+                          <div className="grid gap-2">
+                            {ORGAN_SYSTEMS.map(sys => {
+                              const sysData = analysisResult.organ_system_parameter_effects?.[sys.id];
+                              if (!sysData) return null;
+                              return (
+                                <div key={sys.id} className={`p-3 rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-white'}`}>
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <span>{sys.icon}</span>
+                                    <span className={`text-xs font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{sys.name}</span>
+                                    <Badge className={`ml-auto text-[8px] ${
+                                      sysData.overall_effect === 'beneficial' ? 'bg-green-500/30 text-green-400' :
+                                      sysData.overall_effect === 'caution' ? 'bg-orange-500/30 text-orange-400' :
+                                      'bg-gray-500/30 text-gray-400'
+                                    }`}>
+                                      {sysData.overall_effect}
+                                    </Badge>
+                                  </div>
+                                  {sysData.parameters_affected?.slice(0, 2).map((p, i) => (
+                                    <div key={i} className={`text-[10px] ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                      • {p.parameter}: {p.mechanism}
+                                    </div>
+                                  ))}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Physiology Scale - Organ System Detail */}
+                    {activeScale === 'physiology' && (
+                      <div className="space-y-4">
+                        {ORGAN_SYSTEMS.map(sys => {
+                          const sysData = analysisResult.organ_system_parameter_effects?.[sys.id];
+                          if (!sysData?.parameters_affected?.length) return null;
+                          return (
+                            <div key={sys.id} className={`rounded-xl border p-4 ${isDark ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'}`}>
+                              <div className="flex items-center gap-2 mb-3">
+                                <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${sys.color} flex items-center justify-center`}>
+                                  <span className="text-lg">{sys.icon}</span>
+                                </div>
+                                <h3 className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                  {sys.name} System
+                                </h3>
+                                <Badge className={`ml-auto ${
+                                  sysData.overall_effect === 'beneficial' ? 'bg-green-500/20 text-green-400' :
+                                  sysData.overall_effect === 'caution' ? 'bg-orange-500/20 text-orange-400' :
+                                  'bg-gray-500/20 text-gray-400'
+                                }`}>
+                                  {sysData.overall_effect}
+                                </Badge>
+                              </div>
+                              <div className="grid gap-2">
+                                {sysData.parameters_affected.map((param, i) => (
+                                  <ParameterCard key={i} param={param} isDark={isDark} />
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                    
+                    {/* Clinical Scale - Lab parameters */}
+                    {activeScale === 'clinical' && (
+                      <div className="space-y-4">
+                        <div className={`rounded-xl border p-4 ${isDark ? 'bg-red-900/20 border-red-800/30' : 'bg-red-50 border-red-200'}`}>
+                          <h3 className={`text-sm font-semibold mb-3 flex items-center gap-2 ${isDark ? 'text-red-400' : 'text-red-700'}`}>
+                            <span>🩺</span> Clinical Parameters Affected
+                          </h3>
+                          <div className="grid gap-2">
+                            {Object.entries(analysisResult.organ_system_parameter_effects || {}).flatMap(([sys, data]) => 
+                              (data.parameters_affected || []).filter(p => 
+                                ['GFR', 'creatinine', 'ALT', 'AST', 'cholesterol', 'glucose', 'hemoglobin', 'potassium', 'sodium'].some(k => 
+                                  p.parameter?.toLowerCase().includes(k.toLowerCase())
+                                )
+                              ).map((p, i) => (
+                                <div key={`${sys}-${i}`} className={`p-2 rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-white'}`}>
+                                  <div className="flex items-center justify-between">
+                                    <span className={`text-xs font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                      {p.parameter?.replace(/_/g, ' ')}
+                                    </span>
+                                    <Badge className={`text-[9px] ${
+                                      p.direction === 'increase' ? 'bg-red-500/20 text-red-400' :
+                                      p.direction === 'decrease' ? 'bg-blue-500/20 text-blue-400' :
+                                      'bg-gray-500/20 text-gray-400'
+                                    }`}>
+                                      {p.direction === 'increase' ? '↑' : p.direction === 'decrease' ? '↓' : '—'} {p.magnitude || ''}
+                                    </Badge>
+                                  </div>
+                                  <div className={`text-[10px] mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                    {p.mechanism}
+                                  </div>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                        
+                        {/* Drug Interactions */}
+                        {analysisResult.personalized_risk_assessment?.medication_interactions?.length > 0 && (
+                          <div className={`rounded-xl border p-4 ${isDark ? 'bg-purple-900/20 border-purple-800/30' : 'bg-purple-50 border-purple-200'}`}>
+                            <h3 className={`text-sm font-semibold mb-3 flex items-center gap-2 ${isDark ? 'text-purple-400' : 'text-purple-700'}`}>
+                              <span>💊</span> Drug Interactions
+                            </h3>
+                            <div className="space-y-2">
+                              {analysisResult.personalized_risk_assessment.medication_interactions.map((int, i) => (
+                                <div key={i} className={`p-2 rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-white'}`}>
+                                  <div className="flex items-center gap-2">
+                                    <span className={`text-xs font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{int.medication}</span>
+                                    <Badge className={`text-[9px] ${
+                                      int.severity === 'major' ? 'bg-red-500/20 text-red-400' :
+                                      int.severity === 'moderate' ? 'bg-orange-500/20 text-orange-400' :
+                                      'bg-yellow-500/20 text-yellow-400'
+                                    }`}>
+                                      {int.severity}
+                                    </Badge>
+                                  </div>
+                                  <div className={`text-[10px] ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                    {int.interacting_component}: {int.interaction_type}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
                         )}
                       </div>
                     )}
