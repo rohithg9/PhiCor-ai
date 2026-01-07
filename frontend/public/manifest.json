@@ -1,0 +1,26 @@
+{
+  "name": "PhiCor.ai",
+  "short_name": "PhiCor",
+  "description": "Decoding the Equations of Life - AI-powered clinical decision support using mathematical modeling of human physiology",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#10b981",
+  "background_color": "#0f172a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["medical", "health", "productivity", "education"],
+  "lang": "en-US",
+  "dir": "ltr"
+}

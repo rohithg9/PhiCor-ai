@@ -1,0 +1,24 @@
+# PhiCor.ai Robots.txt
+# https://phicor.ai
+
+User-agent: *
+Allow: /
+Allow: /differential
+Allow: /dashboard
+Allow: /drugs
+Allow: /equations
+Allow: /manual
+Allow: /login
+
+# Disallow admin and expert pages from indexing
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /expert
+Disallow: /expert/*
+Disallow: /expert-login
+
+# Sitemap location
+Sitemap: https://phicor.ai/sitemap.xml
+
+# Crawl-delay for polite crawling
+Crawl-delay: 1
