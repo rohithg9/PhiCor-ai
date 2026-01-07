@@ -20,6 +20,7 @@ import ExperimentLab from "./pages/ExperimentLab";
 import EquationsPage from "./pages/EquationsPage";
 import MathModelsAdmin from "./pages/MathModelsAdmin";
 import CasesPage from "./pages/CasesPage";
+import FoodAnalysisPage from "./pages/FoodAnalysisPage";
 
 // Protected route wrapper
 const ProtectedRoute = ({ children }) => {
