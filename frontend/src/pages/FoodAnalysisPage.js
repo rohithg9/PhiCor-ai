@@ -244,6 +244,133 @@ const NutrientBar = ({ label, value, unit, percent, color = 'bg-green-500', isDa
   );
 };
 
+// Individual Food Item Card Component
+const FoodItemCard = ({ item, isDark }) => {
+  const [expanded, setExpanded] = useState(false);
+  
+  if (!item) return null;
+  
+  // Determine overall effect color
+  const getEffectColor = (effect) => {
+    if (effect === 'beneficial') return 'text-green-500';
+    if (effect === 'caution') return 'text-orange-500';
+    if (effect === 'harmful') return 'text-red-500';
+    return 'text-gray-400';
+  };
+  
+  const getBgColor = (effect) => {
+    if (effect === 'beneficial') return isDark ? 'bg-green-900/20 border-green-800/30' : 'bg-green-50 border-green-200';
+    if (effect === 'caution') return isDark ? 'bg-orange-900/20 border-orange-800/30' : 'bg-orange-50 border-orange-200';
+    if (effect === 'harmful') return isDark ? 'bg-red-900/20 border-red-800/30' : 'bg-red-50 border-red-200';
+    return isDark ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-200';
+  };
+  
+  // Count effects by type
+  const effects = item.parameter_effects || {};
+  const beneficialCount = Object.values(effects).filter(e => e?.effect === 'beneficial').length;
+  const cautionCount = Object.values(effects).filter(e => e?.effect === 'caution').length;
+  
+  return (
+    <div className={`rounded-lg border ${isDark ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'}`}>
+      <button 
+        onClick={() => setExpanded(!expanded)} 
+        className="w-full p-3 text-left"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="text-lg">{item.item_name?.toLowerCase().includes('chicken') ? '🍗' : 
+                                          item.item_name?.toLowerCase().includes('rice') ? '🍚' :
+                                          item.item_name?.toLowerCase().includes('salad') ? '🥗' :
+                                          item.item_name?.toLowerCase().includes('egg') ? '🥚' :
+                                          item.item_name?.toLowerCase().includes('fish') ? '🐟' :
+                                          item.item_name?.toLowerCase().includes('bread') ? '🍞' :
+                                          item.item_name?.toLowerCase().includes('fruit') ? '🍎' :
+                                          item.item_name?.toLowerCase().includes('vegetable') ? '🥦' : '🍽️'}</span>
+              <span className={`font-medium text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>{item.item_name}</span>
+            </div>
+            <div className={`text-xs mt-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+              {item.estimated_portion} • {item.calories} kcal
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {beneficialCount > 0 && (
+              <span className="text-xs text-green-500">✓{beneficialCount}</span>
+            )}
+            {cautionCount > 0 && (
+              <span className="text-xs text-orange-500">⚠{cautionCount}</span>
+            )}
+            <ChevronDown className={`w-4 h-4 transition-transform ${expanded ? 'rotate-180' : ''} ${isDark ? 'text-gray-500' : 'text-gray-400'}`} />
+          </div>
+        </div>
+        
+        {/* Macros mini display */}
+        <div className="flex gap-3 mt-2">
+          <span className={`text-[10px] ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+            P: <span className="text-red-400">{item.macros?.protein_g}g</span>
+          </span>
+          <span className={`text-[10px] ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+            C: <span className="text-yellow-400">{item.macros?.carbs_g}g</span>
+          </span>
+          <span className={`text-[10px] ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+            F: <span className="text-blue-400">{item.macros?.fat_g}g</span>
+          </span>
+        </div>
+      </button>
+      
+      {expanded && (
+        <div className={`px-3 pb-3 space-y-3 border-t ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
+          {/* Key Nutrients */}
+          {item.key_nutrients?.length > 0 && (
+            <div className="pt-3">
+              <span className={`text-[10px] font-semibold uppercase tracking-wider ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>Key Nutrients</span>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {item.key_nutrients.map((n, i) => (
+                  <Badge key={i} variant="outline" className="text-[9px]">{n}</Badge>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {/* Parameter Effects */}
+          {Object.keys(effects).length > 0 && (
+            <div>
+              <span className={`text-[10px] font-semibold uppercase tracking-wider ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>Body System Effects</span>
+              <div className="grid gap-1.5 mt-1">
+                {Object.entries(effects).map(([system, data]) => (
+                  <div key={system} className={`p-2 rounded text-xs ${getBgColor(data.effect)}`}>
+                    <div className="flex items-center justify-between">
+                      <span className={`capitalize font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{system}</span>
+                      <span className={`font-bold ${getEffectColor(data.effect)}`}>
+                        {data.effect === 'beneficial' ? '✓ Good' : data.effect === 'caution' ? '⚠ Caution' : data.effect}
+                      </span>
+                    </div>
+                    <p className={`mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{data.reason}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {/* Recommendation */}
+          {item.recommendation && (
+            <div className={`p-2 rounded-lg ${isDark ? 'bg-blue-900/20 border border-blue-800/30' : 'bg-blue-50 border border-blue-200'}`}>
+              <span className={`text-xs font-medium ${isDark ? 'text-blue-400' : 'text-blue-700'}`}>💡 {item.recommendation}</span>
+            </div>
+          )}
+          
+          {/* What to Modify */}
+          {item.what_to_modify && (
+            <div className={`p-2 rounded-lg ${isDark ? 'bg-orange-900/20 border border-orange-800/30' : 'bg-orange-50 border border-orange-200'}`}>
+              <span className={`text-xs ${isDark ? 'text-orange-400' : 'text-orange-700'}`}>🔄 {item.what_to_modify}</span>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 // Main Component
 const FoodAnalysisPage = () => {
   const { isDark } = useTheme();
