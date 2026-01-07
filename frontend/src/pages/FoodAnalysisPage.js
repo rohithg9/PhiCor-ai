@@ -423,7 +423,7 @@ const FoodAnalysisPage = () => {
     return () => clearTimeout(timer);
   }, [searchQuery, smartSearch]);
   
-  // Analyze food with timeout handling
+  // Analyze food - DATABASE FIRST, then AI fallback
   const analyzeFood = async (foodName) => {
     setShowResults(false);
     setSearchQuery(foodName);
@@ -431,42 +431,66 @@ const FoodAnalysisPage = () => {
     setAnalysisResult(null);
     setActiveScale('overview');
     
-    // Create abort controller for timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
+    const healthProfile = profile.conditions.length > 0 || profile.medications.length > 0 || profile.allergies.length > 0 ? {
+      age: profile.age,
+      sex: profile.sex,
+      weight: profile.weight,
+      height: profile.height,
+      conditions: profile.conditions,
+      medications: profile.medications,
+      allergies: profile.allergies,
+      dietary_restrictions: profile.dietaryPrefs
+    } : null;
     
     try {
-      const response = await fetch(`${BACKEND_URL}/api/food/analyze-product`, {
+      // STEP 1: Try database-driven analysis first (fast, no AI)
+      const dbResponse = await fetch(`${BACKEND_URL}/api/food/analyze-from-db`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          food_name: foodName,
+          serving_size: '1 standard serving',
+          health_profile: healthProfile
+        })
+      });
+      
+      const dbData = await dbResponse.json();
+      
+      if (dbData.success && dbData.in_database) {
+        // Found in database - instant results!
+        setAnalysisResult(dbData.analysis);
+        toast.success('PhiCor analysis complete (from database)');
+        return;
+      }
+      
+      // STEP 2: Not in database - fall back to AI analysis
+      console.log('Food not in database, using AI analysis...');
+      toast.info('Analyzing with AI (food not in database)...');
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 120000);
+      
+      const aiResponse = await fetch(`${BACKEND_URL}/api/food/analyze-product`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           product_name: foodName,
           serving_size: '1 standard serving',
-          health_profile: profile.conditions.length > 0 || profile.medications.length > 0 || profile.allergies.length > 0 ? {
-            age: profile.age,
-            sex: profile.sex,
-            weight: profile.weight,
-            height: profile.height,
-            conditions: profile.conditions,
-            medications: profile.medications,
-            allergies: profile.allergies,
-            dietary_restrictions: profile.dietaryPrefs
-          } : null
+          health_profile: healthProfile
         }),
         signal: controller.signal
       });
       
       clearTimeout(timeoutId);
       
-      const data = await response.json();
-      if (data.success) {
-        setAnalysisResult(data.analysis);
-        toast.success('PhiCor analysis complete');
+      const aiData = await aiResponse.json();
+      if (aiData.success) {
+        setAnalysisResult(aiData.analysis);
+        toast.success('PhiCor AI analysis complete');
       } else {
-        throw new Error(data.detail || 'Analysis failed');
+        throw new Error(aiData.detail || 'Analysis failed');
       }
     } catch (error) {
-      clearTimeout(timeoutId);
       console.error('Analysis error:', error);
       if (error.name === 'AbortError') {
         toast.error('Analysis timed out. Please try again.');
