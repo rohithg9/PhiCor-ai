@@ -3571,7 +3571,16 @@ const DashboardMultiScale = () => {
   }, []);
 
   return (
-    <div className={`min-h-screen flex flex-col bg-background text-foreground`}>
+    <>
+      <Helmet>
+        <title>PhiCor Engine | Interactive Organ System Dashboard - PhiCor.ai</title>
+        <meta name="description" content="Explore the mathematical human body model with real-time organ system simulation, disease modeling, and clinical parameter visualization across 6 organ systems." />
+        <link rel="canonical" href="https://phicor.ai/dashboard" />
+        <meta property="og:title" content="PhiCor Engine | Interactive Organ System Dashboard" />
+        <meta property="og:description" content="Real-time organ system simulation with 2500+ diseases and 4000+ mathematical models." />
+        <meta property="og:url" content="https://phicor.ai/dashboard" />
+      </Helmet>
+      <div className={`min-h-screen flex flex-col bg-background text-foreground`}>
       {/* Global Feature Navigation */}
       <FeatureNav />
       
