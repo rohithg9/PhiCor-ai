@@ -23,18 +23,46 @@ import FeatureNav from '../components/FeatureNav';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-// Parameter scale levels (like disease dashboard)
-const PARAM_SCALES = [
-  { id: 'overview', name: 'Overview', icon: '📊', description: 'Summary view' },
-  { id: 'cardiovascular', name: 'Cardio', icon: '❤️', description: 'Heart & vessels' },
-  { id: 'renal', name: 'Renal', icon: '🫘', description: 'Kidney function' },
-  { id: 'hepatic', name: 'Hepatic', icon: '🫀', description: 'Liver function' },
-  { id: 'glycemic', name: 'Glycemic', icon: '🍬', description: 'Blood sugar' },
-  { id: 'gastrointestinal', name: 'GI', icon: '🥗', description: 'Digestive' },
-  { id: 'neurological', name: 'Neuro', icon: '🧠', description: 'Brain & nerves' },
-  { id: 'musculoskeletal', name: 'MSK', icon: '💪', description: 'Muscles & bones' },
-  { id: 'immune', name: 'Immune', icon: '🛡️', description: 'Immune system' },
+// Multi-scale analysis levels (mirrors disease dashboard depth)
+const ANALYSIS_SCALES = [
+  { id: 'overview', name: 'Overview', icon: '📊', description: 'Summary & health score' },
+  { id: 'nutrients', name: 'Nutrients', icon: '🧬', description: 'All nutrients breakdown' },
+  { id: 'molecular', name: 'Molecular', icon: '⚗️', description: 'Molecular compounds' },
+  { id: 'cellular', name: 'Cellular', icon: '🔬', description: 'Cell-level effects' },
+  { id: 'physiology', name: 'Physiology', icon: '⚡', description: 'Organ functions' },
+  { id: 'clinical', name: 'Clinical', icon: '🩺', description: 'Lab parameters' },
 ];
+
+// Organ systems for parameter effects
+const ORGAN_SYSTEMS = [
+  { id: 'cardiovascular', name: 'Cardio', icon: '❤️', color: 'from-red-500 to-rose-600' },
+  { id: 'renal', name: 'Renal', icon: '🫘', color: 'from-amber-500 to-orange-600' },
+  { id: 'hepatic', name: 'Hepatic', icon: '🫀', color: 'from-purple-500 to-violet-600' },
+  { id: 'glycemic', name: 'Glycemic', icon: '🍬', color: 'from-pink-500 to-rose-600' },
+  { id: 'gastrointestinal', name: 'GI', icon: '🥗', color: 'from-green-500 to-emerald-600' },
+  { id: 'neurological', name: 'Neuro', icon: '🧠', color: 'from-blue-500 to-cyan-600' },
+  { id: 'musculoskeletal', name: 'MSK', icon: '💪', color: 'from-orange-500 to-yellow-600' },
+  { id: 'immune', name: 'Immune', icon: '🛡️', color: 'from-teal-500 to-cyan-600' },
+  { id: 'endocrine', name: 'Endocrine', icon: '⚖️', color: 'from-indigo-500 to-purple-600' },
+  { id: 'hematologic', name: 'Blood', icon: '🩸', color: 'from-red-600 to-rose-700' },
+];
+
+// Health score explanation
+const HEALTH_SCORE_EXPLANATION = {
+  '90-100': { label: 'Excellent', color: 'text-green-500', desc: 'Highly nutritious, minimal concerns' },
+  '70-89': { label: 'Good', color: 'text-lime-500', desc: 'Generally healthy with minor considerations' },
+  '50-69': { label: 'Moderate', color: 'text-yellow-500', desc: 'Balance of benefits and concerns' },
+  '30-49': { label: 'Caution', color: 'text-orange-500', desc: 'Significant concerns, consume mindfully' },
+  '0-29': { label: 'Low', color: 'text-red-500', desc: 'Multiple health concerns, limit intake' },
+};
+
+const getScoreInfo = (score) => {
+  if (score >= 90) return HEALTH_SCORE_EXPLANATION['90-100'];
+  if (score >= 70) return HEALTH_SCORE_EXPLANATION['70-89'];
+  if (score >= 50) return HEALTH_SCORE_EXPLANATION['50-69'];
+  if (score >= 30) return HEALTH_SCORE_EXPLANATION['30-49'];
+  return HEALTH_SCORE_EXPLANATION['0-29'];
+};
 
 // Food icons based on type
 const getFoodIcon = (name) => {
