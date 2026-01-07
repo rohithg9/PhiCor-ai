@@ -2,6 +2,18 @@
 
 ## Current Session Testing Tasks (Jan 7, 2026)
 
+### Task: Food Engine UX Improvements V3 - Navigation & Discoverability 🔄 IN PROGRESS
+- **Status**: IN PROGRESS - Testing
+- **What was done**:
+  1. Made "Back to Overview" button prominent with proper styling and arrow icon
+  2. Added swipe support for mobile navigation between organ systems
+  3. Added left/right navigation buttons between organ systems with page indicator (e.g., "5 of 12")
+  4. Added "👆 Tap for details" hint on Organ System Effects section
+  5. Each organ card now shows preview quantified change (e.g., "+2 mg/dL", "-1.3 mmHg")
+  6. Each organ card shows effect count (e.g., "14 effects")
+  7. Parameter cards show nutrient source inline (e.g., "via Potassium") without expanding
+  8. Added "👆 Swipe to navigate" hint in organ detail view
+
 ### Task: Food Engine Enhancements V2 - Serving Size & Quantified Parameters ✅ COMPLETED
 - **Status**: COMPLETED - All tests passed
 - **What was done**:
