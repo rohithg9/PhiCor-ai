@@ -1,27 +1,29 @@
 #!/usr/bin/env python3
 """
-Backend Testing for PhiCor.ai Food Analysis Engine
+Backend Testing for PhiCor.ai Application
 Testing specific requirements from review request:
 
-FOOD ANALYSIS ENGINE VERIFICATION:
+PHICOR.AI APPLICATION VERIFICATION:
 
-Test 1: Disease Database API
-- GET /api/diseases-db/list - Should return 2568+ diseases from database
-- Verify diseases are loaded from database, not hardcoded
+Test 1: Platform Stats API Test
+- GET /api/platform/stats
+- Verify it returns: drugs, diseases, foods, nutrients counts
+- Expected: Foods: 148+, Nutrients: 38+, Diseases: 2568+, Drugs: 415+
 
-Test 2: Food Analysis API
-- POST /api/food/analyze-product with {"product_name": "Banana", "serving_size": "1 medium"}
-- Should return comprehensive analysis with organ_system_parameter_effects
-- Verify health score (0-100), macronutrients, clinical summary, organ system effects
+Test 2: Drug Enhancement Verification
+- GET /api/drugs to get drug list
+- Find a drug like "Lisinopril" or "Metformin"
+- Verify it has `organ_system_parameter_effects` with detailed effects
+- Check for cardiovascular, renal, glycemic system effects
 
-Test 3: Image Analysis API  
-- POST /api/food/analyze-images with {"images": [{"name": "test.jpg", "data": "base64data"}]}
-- New endpoint for image analysis
-- Should handle base64 image data and return food analysis
+Test 3: Food Analysis API Test  
+- POST /api/food/analyze-from-db with {"food_name": "Banana", "serving_size": "1 medium"}
+- Verify response has organ_system_parameter_effects
+- Verify quantified changes are present (e.g., "-1.3 mmHg" for blood pressure)
 
 Test Credentials:
-- URL: https://phicor-health-1.preview.emergentagent.com
-- Food Analysis Page: /food
+- Backend URL: https://phicor-health-1.preview.emergentagent.com (or localhost:8001)
+- Frontend URL: https://phicor-health.preview.emergentagent.com (or localhost:3000)
 
 API Base URL: https://phicor-health-1.preview.emergentagent.com
 """
