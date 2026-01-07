@@ -1055,6 +1055,14 @@ Snacks: Apple, almonds, green tea"
                           <p className={`text-xs line-clamp-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                             {analysisResult.description}
                           </p>
+                          {/* Serving Size - Prominently Displayed */}
+                          <div className={`mt-2 inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs ${isDark ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700'}`}>
+                            <Scale className="w-3 h-3" />
+                            <span className="font-medium">Per {analysisResult.serving_size || '100g'}</span>
+                            {analysisResult.serving_size_g && (
+                              <span className={`${isDark ? 'text-blue-500' : 'text-blue-600'}`}>({analysisResult.serving_size_g}g)</span>
+                            )}
+                          </div>
                         </div>
                         {/* Enhanced Score Display */}
                         <div className="text-center flex-shrink-0">
