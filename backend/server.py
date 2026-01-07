@@ -9838,50 +9838,33 @@ Return COMPREHENSIVE JSON:
         # For now, we'll use GPT-4o with the image descriptions
         # The actual implementation would pass the base64 images to a vision API
         
+        from emergentintegrations.llm.chat import LlmChat, UserMessage, ImageContent
+        import json
+        import re
+        
         chat = LlmChat(
             api_key=llm_key,
             session_id=f"phicor_images_{datetime.now().strftime('%H%M%S')}",
             system_message=system_message
         ).with_model("openai", "gpt-4o")
         
-        # Build message with images for vision model
-        # GPT-4o supports image analysis through base64 encoding
+        # Build message with images using ImageContent from emergentintegrations
         image_contents = []
         for i, img in enumerate(request.images):
             # Access as dict since images is List[Dict[str, str]]
             img_data = img.get('data', '') if isinstance(img, dict) else img.data
-            image_contents.append({
-                "type": "image_url",
-                "image_url": {
-                    "url": f"data:image/jpeg;base64,{img_data}",
-                    "detail": "high"
-                }
-            })
+            if img_data:
+                image_contents.append(ImageContent(image_base64=img_data))
         
-        # Create the message with text + images
-        text_content = {
-            "type": "text", 
-            "text": analysis_prompt
-        }
-        
-        # Use OpenAI client directly for vision (emergentintegrations may not support image content)
-        from openai import AsyncOpenAI
-        
-        client = AsyncOpenAI(api_key=llm_key)
-        
-        messages = [
-            {"role": "system", "content": system_message},
-            {"role": "user", "content": [text_content] + image_contents}
-        ]
-        
-        vision_response = await client.chat.completions.create(
-            model="gpt-4o",
-            messages=messages,
-            max_tokens=4000,
-            temperature=0.3
+        # Create the user message with text and image attachments
+        user_message = UserMessage(
+            text=analysis_prompt,
+            file_contents=image_contents
         )
         
-        response_text = vision_response.choices[0].message.content
+        # Send the message with images
+        response = await chat.send_message(user_message)
+        response_text = response.text if hasattr(response, 'text') else str(response)
         
         # Extract JSON from response
         json_match = re.search(r'\{[\s\S]*\}', response_text)
