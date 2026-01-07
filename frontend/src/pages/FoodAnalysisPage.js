@@ -1745,12 +1745,52 @@ Snacks: Apple, almonds, green tea"
                     {/* Cellular Scale */}
                     {activeScale === 'cellular' && (
                       <div className="space-y-4">
+                        {/* For image analysis with identified food items - show per-item cellular effects */}
+                        {analysisResult.individual_food_items?.length > 0 && (
+                          <div className={`rounded-xl border p-4 ${isDark ? 'bg-purple-900/20 border-purple-800/30' : 'bg-purple-50 border-purple-200'}`}>
+                            <h3 className={`text-sm font-semibold mb-3 flex items-center gap-2 ${isDark ? 'text-purple-400' : 'text-purple-700'}`}>
+                              <span>🍽️</span> Food Items in This Meal ({analysisResult.individual_food_items.length})
+                            </h3>
+                            <div className="grid gap-2">
+                              {analysisResult.individual_food_items.map((item, idx) => (
+                                <div key={idx} className={`p-3 rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-white'}`}>
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <span className="text-xl">{getFoodIcon(item.name)}</span>
+                                    <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{item.name}</span>
+                                    {item.estimated_weight && (
+                                      <Badge variant="outline" className="ml-auto text-[10px]">{item.estimated_weight}</Badge>
+                                    )}
+                                  </div>
+                                  <div className={`text-[10px] ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                    {item.calories && `${item.calories} kcal`}
+                                    {item.macros && ` • P: ${item.macros.protein || '?'}g • C: ${item.macros.carbs || '?'}g • F: ${item.macros.fat || '?'}g`}
+                                  </div>
+                                  {/* Show per-item cellular effects */}
+                                  {item.health_effects && (
+                                    <div className="mt-2 flex flex-wrap gap-1">
+                                      {item.health_effects.benefits?.slice(0, 2).map((b, i) => (
+                                        <Badge key={`b-${i}`} className="text-[8px] bg-green-500/20 text-green-400">{b}</Badge>
+                                      ))}
+                                      {item.health_effects.concerns?.slice(0, 2).map((c, i) => (
+                                        <Badge key={`c-${i}`} className="text-[8px] bg-orange-500/20 text-orange-400">{c}</Badge>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Combined Cellular Effects across organ systems */}
                         <div className={`rounded-xl border p-4 ${isDark ? 'bg-green-900/20 border-green-800/30' : 'bg-green-50 border-green-200'}`}>
                           <h3 className={`text-sm font-semibold mb-3 flex items-center gap-2 ${isDark ? 'text-green-400' : 'text-green-700'}`}>
-                            <span>🔬</span> Cellular Effects
+                            <span>🔬</span> {analysisResult.individual_food_items?.length > 0 ? 'Combined Cellular Effects' : 'Cellular Effects'}
                           </h3>
                           <p className={`text-xs mb-3 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                            How nutrients affect cellular processes
+                            {analysisResult.individual_food_items?.length > 0 
+                              ? 'How this meal affects cellular processes across organ systems'
+                              : 'How nutrients affect cellular processes'}
                           </p>
                           <div className="grid gap-2">
                             {ORGAN_SYSTEMS.map(sys => {
@@ -1771,7 +1811,7 @@ Snacks: Apple, almonds, green tea"
                                   </div>
                                   {sysData.parameters_affected?.slice(0, 2).map((p, i) => (
                                     <div key={i} className={`text-[10px] ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                                      • {p.parameter}: {p.mechanism}
+                                      • {p.parameter}: {p.quantified_change || p.direction || ''} {p.mechanism && `(${p.mechanism})`}
                                     </div>
                                   ))}
                                 </div>
