@@ -9709,8 +9709,7 @@ async def analyze_food_images(request: ImageAnalysisRequest):
             if profile.get('age'):
                 health_context += f"\nAge: {profile.get('age')} years"
         
-        # Create vision-enabled chat
-        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        # Import will be done in the image processing section
         import json
         import re
         
