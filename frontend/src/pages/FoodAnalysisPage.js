@@ -56,8 +56,8 @@ const QUICK_FOODS = [
   'Vitamin D', 'Avocado', 'Oatmeal', 'Eggs', 'Almonds', 'Coffee', 'Rice'
 ];
 
-// All diseases from disease database (searchable)
-const ALL_DISEASES = [
+// Fallback diseases list (used if API fails)
+const FALLBACK_DISEASES = [
   'Diabetes Type 2', 'Diabetes Type 1', 'Hypertension', 'Heart Failure',
   'Coronary Artery Disease', 'Atrial Fibrillation', 'Chronic Kidney Disease',
   'Acute Kidney Injury', 'Liver Cirrhosis', 'NAFLD', 'Hepatitis B', 'Hepatitis C',
