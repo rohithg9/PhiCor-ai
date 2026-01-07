@@ -872,12 +872,156 @@ const DifferentialDashboard = ({
                   )}
                 </div>
               )}
+              
+              {/* Recommended Investigations - Tests to confirm/rule out this diagnosis */}
+              {currentProfile && currentProfile.parameter_modifications && (
+                <RecommendedInvestigations 
+                  diseaseProfile={currentProfile}
+                  patientFindings={patientFindings}
+                  isDark={isDark}
+                />
+              )}
             </div>
           )}
         </div>
       )}
     </div>
   );
+};
+
+// Component to show recommended investigations based on disease profile
+const RecommendedInvestigations = ({ diseaseProfile, patientFindings, isDark }) => {
+  // Get all parameters that would be abnormal in this disease
+  const diseaseParams = [];
+  const paramMods = diseaseProfile.parameter_modifications || {};
+  
+  Object.entries(paramMods).forEach(([organ, params]) => {
+    if (Array.isArray(params)) {
+      params.forEach(p => {
+        if (p && p.parameter) {
+          diseaseParams.push({
+            name: p.parameter,
+            organ: organ,
+            direction: p.direction,
+            specificity: p.specificity || 'supportive',
+            test_type: p.test_type || getTestType(p.parameter, organ)
+          });
+        }
+      });
+    }
+  });
+  
+  // Get patient's current findings as a set
+  const patientParamNames = new Set(
+    (patientFindings || []).map(f => 
+      (f.parameterName || f.parameterId || f.name || '').toLowerCase().replace(/[_\s]/g, '')
+    )
+  );
+  
+  // Filter to show only tests NOT already in patient findings
+  // Prioritize by specificity: pathognomonic > supportive > nonspecific
+  const specificityOrder = { pathognomonic: 0, supportive: 1, nonspecific: 2 };
+  
+  const recommendedTests = diseaseParams
+    .filter(p => !patientParamNames.has(p.name.toLowerCase().replace(/[_\s]/g, '')))
+    .sort((a, b) => (specificityOrder[a.specificity] || 2) - (specificityOrder[b.specificity] || 2))
+    .slice(0, 8); // Show top 8 recommendations
+  
+  if (recommendedTests.length === 0) return null;
+  
+  // Group by test type
+  const labTests = recommendedTests.filter(t => t.test_type === 'lab' || t.test_type === 'blood');
+  const imagingTests = recommendedTests.filter(t => t.test_type === 'imaging');
+  const otherTests = recommendedTests.filter(t => !['lab', 'blood', 'imaging'].includes(t.test_type));
+  
+  return (
+    <div className={`mt-4 p-3 rounded-lg ${isDark ? 'bg-cyan-900/20 border border-cyan-800/30' : 'bg-cyan-50 border border-cyan-200'}`}>
+      <h4 className={`text-xs font-semibold mb-3 flex items-center gap-2 ${isDark ? 'text-cyan-400' : 'text-cyan-700'}`}>
+        <TestTube className="w-4 h-4" />
+        Recommended Investigations to Confirm/Rule Out
+      </h4>
+      
+      <div className="space-y-2">
+        {labTests.length > 0 && (
+          <div>
+            <span className={`text-[10px] uppercase font-medium ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+              Laboratory Tests:
+            </span>
+            <div className="flex flex-wrap gap-1 mt-1">
+              {labTests.map((t, idx) => (
+                <Badge 
+                  key={idx} 
+                  className={`text-[10px] ${
+                    t.specificity === 'pathognomonic' 
+                      ? 'bg-red-500/20 text-red-400 border border-red-500/30' 
+                      : 'bg-cyan-500/20 text-cyan-400'
+                  }`}
+                >
+                  🧪 {t.name.replace(/_/g, ' ')} 
+                  {t.direction && <span className="ml-1 opacity-70">({t.direction === 'increase' ? '↑' : t.direction === 'decrease' ? '↓' : '?'})</span>}
+                  {t.specificity === 'pathognomonic' && <span className="ml-1">⭐</span>}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {imagingTests.length > 0 && (
+          <div>
+            <span className={`text-[10px] uppercase font-medium ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+              Imaging:
+            </span>
+            <div className="flex flex-wrap gap-1 mt-1">
+              {imagingTests.map((t, idx) => (
+                <Badge 
+                  key={idx} 
+                  className={`text-[10px] ${
+                    t.specificity === 'pathognomonic' 
+                      ? 'bg-red-500/20 text-red-400 border border-red-500/30' 
+                      : 'bg-purple-500/20 text-purple-400'
+                  }`}
+                >
+                  📷 {t.name.replace(/_/g, ' ')}
+                  {t.specificity === 'pathognomonic' && <span className="ml-1">⭐</span>}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {otherTests.length > 0 && (
+          <div>
+            <span className={`text-[10px] uppercase font-medium ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+              Other Tests:
+            </span>
+            <div className="flex flex-wrap gap-1 mt-1">
+              {otherTests.map((t, idx) => (
+                <Badge 
+                  key={idx} 
+                  className={`text-[10px] bg-gray-500/20 text-gray-400`}
+                >
+                  📋 {t.name.replace(/_/g, ' ')}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+      
+      <p className={`text-[10px] mt-2 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+        ⭐ = Highly specific for this diagnosis
+      </p>
+    </div>
+  );
+};
+
+// Helper to determine test type from parameter name
+const getTestType = (paramName, organ) => {
+  const name = paramName.toLowerCase();
+  if (['ct', 'mri', 'xray', 'ultrasound', 'echo', 'scan', 'imaging'].some(t => name.includes(t))) return 'imaging';
+  if (['blood', 'serum', 'plasma', 'wbc', 'rbc', 'hgb', 'creatinine', 'glucose', 'troponin', 'bnp'].some(t => name.includes(t))) return 'lab';
+  if (organ === 'blood' || organ === 'liver' || organ === 'kidneys') return 'lab';
+  return 'other';
 };
 
 export default DifferentialDashboard;
