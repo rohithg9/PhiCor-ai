@@ -786,20 +786,19 @@ def test_disease_search_api():
         print(f"❌ Error testing disease search API: {e}")
         return False
 
-def test_phicor_clinical_analysis():
-    """Test 8: PhiCor Clinical Analysis - Test POST /api/clinical/interpret"""
+def test_phicor_clinical_interpret():
+    """Test 8: PhiCor Clinical Interpret - Test POST /api/clinical/interpret"""
     
-    print("\n🔬 TEST 8: PHICOR CLINICAL ANALYSIS - DIFFERENTIAL DIAGNOSIS DASHBOARD")
+    print("\n🔬 TEST 8: PHICOR CLINICAL INTERPRET ENDPOINT")
     print("=" * 50)
     print("Testing requirements from review request:")
     print("- Test POST /api/clinical/interpret with specific clinical case")
     print("- Verify success: true in response")
-    print("- Verify findings array with at least 3-4 findings")
-    print("- Verify differentials array with 5 differential diagnoses")
-    print("- Each differential should have: name, probability, icd_code, supporting_findings")
+    print("- Verify findings array is populated")
+    print("- Verify differential_diagnosis array has diagnoses with probabilities")
     
     # Test clinical text from review request - EXACT case
-    test_clinical_text = "55 year old male with fever 102F, cough, SpO2 92%, WBC 15000, CRP elevated"
+    test_clinical_text = "55 year old male with chest pain, shortness of breath. BP 140/90, HR 110, SpO2 92%. Troponin elevated. BNP 1500."
     
     try:
         # Test the clinical interpretation endpoint
