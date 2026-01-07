@@ -7402,30 +7402,44 @@ CRITICAL RULES:
                 'type': 'lab'
             })
         
-        # Build symptoms list with details
+        # Build symptoms list with details - include specificity and organ system
         symptoms = []
         for symptom in clinical_findings.get('symptoms', []):
             if isinstance(symptom, dict):
-                symptoms.append(symptom)
+                symptoms.append({
+                    'name': symptom.get('name'),
+                    'severity': symptom.get('severity', 'moderate'),
+                    'specificity': symptom.get('specificity', 'nonspecific'),
+                    'organ_system': symptom.get('organ_system', 'general'),
+                    'type': 'symptom'
+                })
             else:
-                symptoms.append({'name': symptom})
+                symptoms.append({
+                    'name': symptom,
+                    'severity': 'moderate',
+                    'specificity': 'nonspecific',
+                    'type': 'symptom'
+                })
         
-        # Build differential list for frontend
+        # Build differential list for frontend with new clinical reasoning fields
         formatted_differentials = []
         for diff in differentials:
             supporting = diff.get('supporting_findings', [])
+            against = diff.get('against_findings', diff.get('against_diagnosis', []))
             formatted_differentials.append({
                 'rank': diff.get('rank', 0),
                 'name': diff.get('diagnosis'),
                 'icd_code': diff.get('icd10', ''),
                 'probability': diff.get('probability', 0),
                 'role': diff.get('role', 'Secondary'),
+                'syndrome_alignment': diff.get('syndrome_alignment', 'partial'),
+                'specificity_score': diff.get('specificity_score', 'medium'),
                 'supporting_findings': supporting,
-                'matching_parameters': supporting,  # Use supporting findings as matching parameters
-                'missing_features': diff.get('key_discriminating_features', []),  # Use discriminating features as missing
+                'matching_parameters': supporting,
+                'against_findings': against,
+                'missing_features': diff.get('key_discriminating_features', []),
                 'clinical_reasoning': diff.get('clinical_reasoning', ''),
                 'key_discriminating_features': diff.get('key_discriminating_features', []),
-                'against_diagnosis': diff.get('against_diagnosis', []),
                 'anchor_criteria_met': diff.get('anchor_criteria_met', True)
             })
         
