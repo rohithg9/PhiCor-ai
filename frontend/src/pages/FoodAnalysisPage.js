@@ -589,9 +589,11 @@ const FoodAnalysisPage = () => {
       clearTimeout(timeoutId);
       console.error('Image analysis error:', error);
       if (error.name === 'AbortError') {
-        toast.error('Image analysis timed out. Please try again.');
+        toast.error('Image analysis timed out. Please try with fewer or smaller images.');
+      } else if (error.message?.includes('502') || error.message?.includes('503') || error.message?.includes('Gateway')) {
+        toast.error('AI service temporarily unavailable. Please try again in a moment.');
       } else {
-        toast.error('Image analysis failed. Please try again.');
+        toast.error(`Analysis failed: ${error.message || 'Unknown error'}. Please try again.`);
       }
     } finally {
       setIsAnalyzingImages(false);
