@@ -142,28 +142,50 @@ const ParameterCard = ({ param, isDark }) => {
                   param.direction === 'decrease' ? (isDark ? 'bg-blue-900/20 border-blue-800/30' : 'bg-blue-50 border-blue-200') :
                   (isDark ? 'bg-gray-800/50 border-gray-700' : 'bg-gray-50 border-gray-200');
   
+  // Format quantified change with sign and unit
+  const formatQuantifiedChange = () => {
+    if (param.quantified_change === null || param.quantified_change === undefined) return null;
+    const sign = param.quantified_change > 0 ? '+' : '';
+    return `${sign}${param.quantified_change} ${param.change_unit || ''}`.trim();
+  };
+  
+  const quantifiedDisplay = formatQuantifiedChange();
+  
   return (
     <div className={`rounded-lg border p-3 ${bgColor}`}>
       <button onClick={() => setExpanded(!expanded)} className="w-full text-left">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {param.direction === 'increase' && <TrendingUp className={`w-4 h-4 ${directionColor}`} />}
-            {param.direction === 'decrease' && <TrendingDown className={`w-4 h-4 ${directionColor}`} />}
-            {param.direction === 'neutral' && <Minus className={`w-4 h-4 ${directionColor}`} />}
-            <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            {param.direction === 'increase' && <TrendingUp className={`w-4 h-4 flex-shrink-0 ${directionColor}`} />}
+            {param.direction === 'decrease' && <TrendingDown className={`w-4 h-4 flex-shrink-0 ${directionColor}`} />}
+            {param.direction === 'neutral' && <Minus className={`w-4 h-4 flex-shrink-0 ${directionColor}`} />}
+            <span className={`text-sm font-medium truncate ${isDark ? 'text-white' : 'text-gray-900'}`}>
               {param.parameter?.replace(/_/g, ' ')}
             </span>
+            {/* Quantified Change - Prominently displayed */}
+            {quantifiedDisplay && (
+              <span className={`text-sm font-bold ml-1 ${
+                param.quantified_change > 0 ? 'text-red-500' : 
+                param.quantified_change < 0 ? 'text-blue-500' : 'text-gray-400'
+              }`}>
+                {quantifiedDisplay}
+              </span>
+            )}
           </div>
-          {param.magnitude && (
-            <Badge variant="outline" className="text-[9px]">{param.magnitude}</Badge>
-          )}
-          {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          <div className="flex items-center gap-1 flex-shrink-0 ml-2">
+            {param.magnitude && (
+              <Badge variant="outline" className="text-[9px]">{param.magnitude}</Badge>
+            )}
+            {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </div>
         </div>
       </button>
       
       {expanded && (
         <div className={`mt-2 pt-2 border-t text-xs space-y-1 ${isDark ? 'border-gray-700 text-gray-400' : 'border-gray-200 text-gray-600'}`}>
           {param.mechanism && <p><strong>Mechanism:</strong> {param.mechanism}</p>}
+          {param.from_nutrient && <p><strong>From:</strong> {param.from_nutrient} ({param.amount})</p>}
+          {param.percent_dv && <p><strong>% Daily Value:</strong> {param.percent_dv}%</p>}
           {param.clinical_significance && <p className="text-yellow-500"><strong>Clinical Note:</strong> {param.clinical_significance}</p>}
         </div>
       )}
