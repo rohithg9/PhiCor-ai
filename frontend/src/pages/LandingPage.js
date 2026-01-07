@@ -644,7 +644,7 @@ const LandingPage = () => {
 
       {/* ========== PLATFORM FEATURES SECTION ========== */}
       <section id="platform-features" className="relative py-24 px-6 border-t border-white/5">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -656,14 +656,14 @@ const LandingPage = () => {
               <span className="text-xs text-indigo-400 font-medium uppercase tracking-wider">Clinical Tools</span>
             </div>
             <h2 className="font-manrope text-3xl sm:text-4xl font-bold mb-4">
-              Three Pillars of <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Clinical Excellence</span>
+              Four Pillars of <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Clinical Excellence</span>
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Every tool designed to reduce diagnostic uncertainty, accelerate clinical decisions, and improve patient outcomes
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Φ - PhiCor Engine */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
