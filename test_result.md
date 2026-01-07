@@ -2,14 +2,21 @@
 
 ## Current Session Testing Tasks (Jan 7, 2026)
 
-### Task: Food Engine Enhancements ✅ COMPLETED
-- **Status**: COMPLETED
+### Task: Food Engine Enhancements V2 - Serving Size & Quantified Parameters 🔄 IN PROGRESS
+- **Status**: IN PROGRESS - Testing
 - **What was done**:
-  1. Fixed main blocker - Food analysis results now display correctly
-  2. Added dynamic disease loading from database (2568 diseases)
-  3. Added image upload capability for food photos (up to 10 images)
-  4. Created new backend endpoint `/api/food/analyze-images`
-  5. Updated frontend to fetch diseases from `/api/diseases-db/list`
+  1. **P0 - Fixed serving size display**: Now shows human-readable format like "1 medium (118g)" instead of just "Per 118"
+  2. **P1 - Added quantified parameter changes**: Parameters now show numerical values like "-1.3 mmHg" for blood pressure effects
+  3. Added per-100g calculations support in backend
+  4. Added individual organ system detail view with "← Back to Overview" navigation
+  5. ParameterCard now shows quantified changes, nutrient source, and % Daily Value when expanded
+
+### Previous Session Tasks ✅ COMPLETED
+- Fixed main blocker - Food analysis results now display correctly
+- Added dynamic disease loading from database (2568 diseases)
+- Added image upload capability for food photos (up to 10 images)
+- Created new backend endpoint `/api/food/analyze-images`
+- Updated frontend to fetch diseases from `/api/diseases-db/list`
 
 ### Enhancement Script Status
 - **Progress**: 91.3% (2344/2568 diseases)
