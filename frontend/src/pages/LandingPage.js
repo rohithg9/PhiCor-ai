@@ -826,20 +826,24 @@ const LandingPage = () => {
             transition={{ delay: 0.4 }}
             className="mt-16 glass-panel rounded-2xl p-8 border border-white/10"
           >
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
               <div className="text-center">
                 <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">{platformStats.diseases}</div>
                 <p className="text-sm text-muted-foreground mt-1">Disease Profiles</p>
               </div>
               <div className="text-center">
-                <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">{platformStats.drugs}</div>
+                <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-rose-400 to-pink-400 bg-clip-text text-transparent">{platformStats.drugs}</div>
                 <p className="text-sm text-muted-foreground mt-1">Drug Monographs</p>
               </div>
               <div className="text-center">
-                <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-rose-400 to-pink-400 bg-clip-text text-transparent">{platformStats.organ_systems}</div>
-                <p className="text-sm text-muted-foreground mt-1">Organ Systems</p>
+                <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-green-400 to-lime-400 bg-clip-text text-transparent">{platformStats.foods}</div>
+                <p className="text-sm text-muted-foreground mt-1">Food Analyses</p>
               </div>
               <div className="text-center">
+                <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">{platformStats.nutrients}</div>
+                <p className="text-sm text-muted-foreground mt-1">Nutrient Profiles</p>
+              </div>
+              <div className="text-center col-span-2 md:col-span-1">
                 <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">{platformStats.models}</div>
                 <p className="text-sm text-muted-foreground mt-1">Mathematical Models</p>
               </div>
