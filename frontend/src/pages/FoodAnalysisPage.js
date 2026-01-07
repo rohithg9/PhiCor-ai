@@ -1267,7 +1267,11 @@ Supplements: Vitamin D 1000IU, Omega-3 capsule"
                             Vitamins
                           </h3>
                           <div className="space-y-2">
-                            {(analysisResult.micronutrients?.vitamins || analysisResult.micronutrients || []).map((vit, idx) => (
+                            {(analysisResult.micronutrients?.vitamins || analysisResult.complete_nutritional_profile?.vitamins ? 
+                              Object.entries(analysisResult.complete_nutritional_profile?.vitamins || {}).map(([key, val]) => ({
+                                name: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                                ...val
+                              })) : analysisResult.micronutrients || []).map((vit, idx) => (
                               <div key={idx} className={`p-2 rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-gray-50'}`}>
                                 <div className="flex justify-between items-center">
                                   <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{vit.name}</span>
@@ -1301,6 +1305,306 @@ Supplements: Vitamin D 1000IU, Omega-3 capsule"
                             ))}
                           </div>
                         </div>
+                      </div>
+                    )}
+                    
+                    {/* Elements Tab - Electrolytes & Trace Elements */}
+                    {activeScale === 'elements' && (
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        {/* Electrolytes */}
+                        <div className={`rounded-xl border p-4 ${isDark ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'}`}>
+                          <h3 className={`text-sm font-semibold flex items-center gap-2 mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                            <Zap className="w-4 h-4 text-yellow-500" />
+                            Electrolytes
+                          </h3>
+                          <div className="space-y-2">
+                            {analysisResult.complete_nutritional_profile?.electrolytes ? 
+                              Object.entries(analysisResult.complete_nutritional_profile.electrolytes).map(([key, val], idx) => (
+                                <div key={idx} className={`p-3 rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-gray-50'}`}>
+                                  <div className="flex justify-between items-center">
+                                    <span className={`text-sm font-medium capitalize ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                      {key.replace(/_/g, ' ')}
+                                    </span>
+                                    <div className="text-right">
+                                      <span className={`text-sm font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                        {val.value} mg
+                                      </span>
+                                      {val.percent_daily && (
+                                        <span className={`text-xs ml-1 ${val.percent_daily > 100 ? 'text-orange-500' : 'text-green-500'}`}>
+                                          ({val.percent_daily}% DV)
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                  {val.clinical_note && (
+                                    <p className={`text-xs mt-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{val.clinical_note}</p>
+                                  )}
+                                </div>
+                              )) : (
+                              <p className={`text-sm ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                                Run deep analysis for detailed electrolyte breakdown
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {/* Trace Elements */}
+                        <div className={`rounded-xl border p-4 ${isDark ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'}`}>
+                          <h3 className={`text-sm font-semibold flex items-center gap-2 mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                            <Atom className="w-4 h-4 text-cyan-500" />
+                            Trace Elements
+                          </h3>
+                          <div className="space-y-2">
+                            {analysisResult.complete_nutritional_profile?.trace_elements ? 
+                              Object.entries(analysisResult.complete_nutritional_profile.trace_elements).map(([key, val], idx) => (
+                                <div key={idx} className={`p-2 rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-gray-50'}`}>
+                                  <div className="flex justify-between items-center">
+                                    <span className={`text-sm font-medium capitalize ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                      {key.replace(/_/g, ' ')}
+                                    </span>
+                                    <span className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                      {val.value} {val.value > 100 ? 'mcg' : 'mg'}
+                                      {val.percent_daily && <span className="text-green-500 ml-1">({val.percent_daily}%)</span>}
+                                    </span>
+                                  </div>
+                                </div>
+                              )) : (
+                              <p className={`text-sm ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                                Run deep analysis for trace element breakdown
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Parameters Tab - Specific Physiological Parameters */}
+                    {activeScale === 'params' && (
+                      <div className="space-y-4">
+                        {analysisResult.organ_system_parameter_effects ? (
+                          Object.entries(analysisResult.organ_system_parameter_effects).map(([system, data]) => (
+                            <div key={system} className={`rounded-xl border p-4 ${isDark ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'}`}>
+                              <h3 className={`text-sm font-semibold flex items-center gap-2 mb-4 capitalize ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                {system === 'cardiovascular' && <Heart className="w-4 h-4 text-red-500" />}
+                                {system === 'renal' && <Droplets className="w-4 h-4 text-blue-500" />}
+                                {system === 'hepatic' && <Activity className="w-4 h-4 text-amber-500" />}
+                                {system === 'glycemic' && <Gauge className="w-4 h-4 text-purple-500" />}
+                                {system === 'gastrointestinal' && <Salad className="w-4 h-4 text-green-500" />}
+                                {system === 'neurological' && <Brain className="w-4 h-4 text-pink-500" />}
+                                {system === 'musculoskeletal' && <Shield className="w-4 h-4 text-orange-500" />}
+                                {system === 'immune' && <Shield className="w-4 h-4 text-cyan-500" />}
+                                {system.replace(/_/g, ' ')} Parameters
+                                <Badge className={`ml-2 text-[9px] ${
+                                  data.overall_effect === 'beneficial' ? 'bg-green-500/20 text-green-400' :
+                                  data.overall_effect === 'caution' || data.overall_effect === 'harmful' ? 'bg-orange-500/20 text-orange-400' :
+                                  'bg-gray-500/20 text-gray-400'
+                                }`}>
+                                  {data.overall_effect}
+                                </Badge>
+                              </h3>
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                                {data.parameters_affected?.map((param, idx) => (
+                                  <div key={idx} className={`p-3 rounded-lg border ${
+                                    param.direction === 'increase' ? (isDark ? 'bg-red-900/20 border-red-800/30' : 'bg-red-50 border-red-200') :
+                                    param.direction === 'decrease' ? (isDark ? 'bg-blue-900/20 border-blue-800/30' : 'bg-blue-50 border-blue-200') :
+                                    (isDark ? 'bg-gray-800/50 border-gray-700' : 'bg-gray-50 border-gray-200')
+                                  }`}>
+                                    <div className="flex items-center justify-between mb-1">
+                                      <span className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                        {param.parameter?.replace(/_/g, ' ')}
+                                      </span>
+                                      <div className="flex items-center gap-1">
+                                        {param.direction === 'increase' && <TrendingUp className="w-3 h-3 text-red-500" />}
+                                        {param.direction === 'decrease' && <TrendingDown className="w-3 h-3 text-blue-500" />}
+                                        {param.direction === 'neutral' && <Minus className="w-3 h-3 text-gray-500" />}
+                                        {param.magnitude && (
+                                          <Badge variant="outline" className="text-[8px]">{param.magnitude}</Badge>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <p className={`text-[10px] ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                      {param.mechanism}
+                                    </p>
+                                    {param.clinical_significance && (
+                                      <p className={`text-[9px] mt-1 font-medium ${isDark ? 'text-yellow-400' : 'text-yellow-600'}`}>
+                                        ⚠️ {param.clinical_significance}
+                                      </p>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className={`rounded-xl border p-8 text-center ${isDark ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'}`}>
+                            <Gauge className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+                            <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                              Parameter-Level Analysis
+                            </p>
+                            <p className={`text-xs mt-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                              Use "Deep Analysis" mode for detailed parameter effects on blood pressure, GFR, glucose, cholesterol, and more.
+                            </p>
+                            <Button 
+                              onClick={() => analyzeFood({ name: searchQuery }, null, null, true)}
+                              className="mt-4 bg-gradient-to-r from-purple-500 to-indigo-500"
+                              size="sm"
+                            >
+                              <Microscope className="w-4 h-4 mr-2" />
+                              Run Deep Analysis
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* Risks Tab - Personalized Risk Assessment */}
+                    {activeScale === 'risks' && (
+                      <div className="space-y-4">
+                        {analysisResult.personalized_risk_assessment ? (
+                          <>
+                            {/* Overall Suitability */}
+                            <div className={`rounded-xl border p-4 ${isDark ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'}`}>
+                              <div className="flex items-center justify-between">
+                                <h3 className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                  Personalized Suitability
+                                </h3>
+                                <div className="flex items-center gap-2">
+                                  <Badge className={`${
+                                    analysisResult.personalized_risk_assessment.overall_suitability === 'highly_suitable' ? 'bg-green-500' :
+                                    analysisResult.personalized_risk_assessment.overall_suitability === 'suitable' ? 'bg-emerald-500' :
+                                    analysisResult.personalized_risk_assessment.overall_suitability === 'caution' ? 'bg-yellow-500' :
+                                    analysisResult.personalized_risk_assessment.overall_suitability === 'unsuitable' ? 'bg-orange-500' :
+                                    'bg-red-500'
+                                  } text-white`}>
+                                    {analysisResult.personalized_risk_assessment.overall_suitability?.replace(/_/g, ' ')}
+                                  </Badge>
+                                  {analysisResult.personalized_risk_assessment.suitability_score && (
+                                    <span className={`text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                      {analysisResult.personalized_risk_assessment.suitability_score}/100
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {/* Condition-Specific Analysis */}
+                            {analysisResult.personalized_risk_assessment.condition_specific_analysis?.length > 0 && (
+                              <div className={`rounded-xl border p-4 ${isDark ? 'bg-orange-900/20 border-orange-800/30' : 'bg-orange-50 border-orange-200'}`}>
+                                <h3 className={`text-sm font-semibold flex items-center gap-2 mb-3 ${isDark ? 'text-orange-400' : 'text-orange-700'}`}>
+                                  <AlertTriangle className="w-4 h-4" />
+                                  Condition-Specific Risks
+                                </h3>
+                                <div className="space-y-3">
+                                  {analysisResult.personalized_risk_assessment.condition_specific_analysis.map((item, idx) => (
+                                    <div key={idx} className={`p-3 rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-white'}`}>
+                                      <div className="flex items-center justify-between mb-2">
+                                        <span className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{item.condition}</span>
+                                        <Badge className={`${
+                                          item.risk_level === 'critical' || item.risk_level === 'high' ? 'bg-red-500/20 text-red-400' :
+                                          item.risk_level === 'moderate' ? 'bg-orange-500/20 text-orange-400' :
+                                          'bg-green-500/20 text-green-400'
+                                        }`}>
+                                          {item.risk_level} risk
+                                        </Badge>
+                                      </div>
+                                      {item.specific_concerns?.map((concern, cIdx) => (
+                                        <div key={cIdx} className={`text-xs p-2 rounded mt-1 ${isDark ? 'bg-gray-900/50' : 'bg-gray-50'}`}>
+                                          <span className="font-medium">{concern.nutrient_or_ingredient}:</span> {concern.reason}
+                                          {concern.recommendation && (
+                                            <p className="text-green-500 mt-1">→ {concern.recommendation}</p>
+                                          )}
+                                        </div>
+                                      ))}
+                                      {item.safe_portion && (
+                                        <p className={`text-xs mt-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                          <strong>Safe portion:</strong> {item.safe_portion}
+                                        </p>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {/* Medication Interactions */}
+                            {analysisResult.personalized_risk_assessment.medication_interactions?.length > 0 && (
+                              <div className={`rounded-xl border p-4 ${isDark ? 'bg-purple-900/20 border-purple-800/30' : 'bg-purple-50 border-purple-200'}`}>
+                                <h3 className={`text-sm font-semibold flex items-center gap-2 mb-3 ${isDark ? 'text-purple-400' : 'text-purple-700'}`}>
+                                  <Pill className="w-4 h-4" />
+                                  Medication Interactions
+                                </h3>
+                                <div className="space-y-2">
+                                  {analysisResult.personalized_risk_assessment.medication_interactions.map((int, idx) => (
+                                    <div key={idx} className={`p-3 rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-white'}`}>
+                                      <div className="flex items-center gap-2 mb-1">
+                                        <Badge variant="outline">{int.medication}</Badge>
+                                        <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>↔</span>
+                                        <Badge variant="outline">{int.interacting_component}</Badge>
+                                        <Badge className={`text-[9px] ${
+                                          int.severity === 'major' ? 'bg-red-500/20 text-red-400' :
+                                          int.severity === 'moderate' ? 'bg-orange-500/20 text-orange-400' :
+                                          'bg-yellow-500/20 text-yellow-400'
+                                        }`}>
+                                          {int.severity}
+                                        </Badge>
+                                      </div>
+                                      <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                        {int.interaction_type}: {int.clinical_action}
+                                      </p>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {/* Allergy Alerts */}
+                            {analysisResult.personalized_risk_assessment.allergy_alerts?.length > 0 && (
+                              <div className={`rounded-xl border p-4 ${isDark ? 'bg-red-900/20 border-red-800/30' : 'bg-red-50 border-red-200'}`}>
+                                <h3 className={`text-sm font-semibold flex items-center gap-2 mb-3 ${isDark ? 'text-red-400' : 'text-red-700'}`}>
+                                  <AlertTriangle className="w-4 h-4" />
+                                  Allergy Alerts
+                                </h3>
+                                <div className="space-y-2">
+                                  {analysisResult.personalized_risk_assessment.allergy_alerts.map((alert, idx) => (
+                                    <div key={idx} className={`p-3 rounded-lg ${isDark ? 'bg-red-900/30' : 'bg-red-100'}`}>
+                                      <div className="flex items-center justify-between">
+                                        <span className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{alert.allergen}</span>
+                                        <Badge className={alert.severity === 'anaphylaxis_risk' ? 'bg-red-500' : 'bg-orange-500'}>
+                                          {alert.severity}
+                                        </Badge>
+                                      </div>
+                                      <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                        Found in: {alert.present_in}
+                                      </p>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <div className={`rounded-xl border p-8 text-center ${isDark ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'}`}>
+                            <Shield className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+                            <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                              Personalized Risk Assessment
+                            </p>
+                            <p className={`text-xs mt-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                              Add your medical conditions, medications, and allergies in the Profile panel, then run Deep Analysis to see personalized risks.
+                            </p>
+                            <Button 
+                              onClick={() => {
+                                setShowProfilePanel(true);
+                                setActiveProfileTab('medical');
+                              }}
+                              className="mt-4"
+                              variant="outline"
+                              size="sm"
+                            >
+                              <User className="w-4 h-4 mr-2" />
+                              Setup Health Profile
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     )}
                     
