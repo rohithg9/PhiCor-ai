@@ -8487,14 +8487,21 @@ async def analyze_food_from_database(request: Dict[str, Any] = Body(...)):
             
             "complete_nutritional_profile": {
                 "macronutrients": {
-                    "energy_kcal": nutrients.get("energy", {}).get("value"),
+                    "energy_kcal": nutrients.get("energy", {}).get("value") or nutrients.get("calories", {}).get("value"),
                     "protein_g": nutrients.get("protein", {}).get("value"),
                     "carbohydrates_g": nutrients.get("carbohydrates", {}).get("value"),
                     "fiber_g": nutrients.get("fiber", {}).get("value"),
-                    "sugars_g": nutrients.get("sugars", {}).get("value"),
-                    "fat_total_g": nutrients.get("fat_total", {}).get("value"),
+                    "sugars_g": nutrients.get("sugars", {}).get("value") or nutrients.get("sugar", {}).get("value"),
+                    "fat_total_g": nutrients.get("fat_total", {}).get("value") or nutrients.get("fat", {}).get("value"),
                     "fat_saturated_g": nutrients.get("fat_saturated", {}).get("value"),
                     "cholesterol_mg": nutrients.get("cholesterol", {}).get("value"),
+                },
+                "per_100g": {
+                    # Calculate per 100g values if serving size is different
+                    "energy_kcal": round((nutrients.get("energy", {}).get("value") or nutrients.get("calories", {}).get("value") or 0) * 100 / serving_grams, 1) if serving_grams else None,
+                    "protein_g": round((nutrients.get("protein", {}).get("value") or 0) * 100 / serving_grams, 1) if serving_grams else None,
+                    "carbohydrates_g": round((nutrients.get("carbohydrates", {}).get("value") or 0) * 100 / serving_grams, 1) if serving_grams else None,
+                    "fat_total_g": round((nutrients.get("fat_total", {}).get("value") or nutrients.get("fat", {}).get("value") or 0) * 100 / serving_grams, 1) if serving_grams else None,
                 },
                 "electrolytes": {
                     "sodium_mg": nutrients.get("sodium", {}),
