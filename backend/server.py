@@ -8144,6 +8144,139 @@ async def search_foods(q: str, limit: int = 20):
         logger.error(f"Error searching foods: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.post("/food/analyze-dish")
+async def analyze_dish_with_ai(request: Dict[str, Any] = Body(...)):
+    """
+    AI-powered dish analysis for complex foods like 'Chicken Tikka Masala', 
+    'Pasta Carbonara', 'Chicken Katsu Curry', etc.
+    Uses LLM to break down ingredients, estimate nutrients, and assess organ impacts.
+    """
+    try:
+        dish_name = request.get('dish_name', '')
+        serving_size = request.get('serving_size', 'standard portion')
+        health_profile = request.get('health_profile')
+        
+        if not dish_name:
+            raise HTTPException(status_code=400, detail="dish_name is required")
+        
+        llm_key = os.environ.get('EMERGENT_LLM_KEY')
+        if not llm_key:
+            raise HTTPException(status_code=500, detail="LLM key not configured")
+        
+        from emergentintegrations.llm.chat import LlmChat
+        
+        # Build health context if profile provided
+        health_context = ""
+        if health_profile:
+            conditions = health_profile.get('conditions', [])
+            allergies = health_profile.get('allergies', [])
+            dietary = health_profile.get('dietary_restrictions', [])
+            if conditions:
+                health_context += f"Medical conditions: {', '.join(conditions)}. "
+            if allergies:
+                health_context += f"Allergies: {', '.join(allergies)}. "
+            if dietary:
+                health_context += f"Dietary restrictions: {', '.join(dietary)}. "
+        
+        system_message = """You are PhiCor's Food Analysis Engine. Analyze dishes with deep molecular and biochemical precision.
+        
+For each dish, you must:
+1. Identify ALL ingredients (main and minor)
+2. Estimate nutritional composition per serving
+3. Identify bioactive compounds and their effects
+4. Assess organ system impacts
+5. Provide personalized warnings based on health profile
+6. Rate overall healthfulness
+
+Always respond with valid JSON only."""
+
+        analysis_prompt = f"""Analyze this dish/food: "{dish_name}" (serving size: {serving_size})
+
+{health_context}
+
+Return valid JSON with this structure:
+{{
+  "dish_name": "{dish_name}",
+  "category": "cuisine type (Indian, Italian, etc.)",
+  "description": "brief description of the dish",
+  "ingredients": [
+    {{"name": "ingredient", "estimated_amount": "amount", "key_nutrients": ["nutrient1"]}}
+  ],
+  "nutrients_per_serving": {{
+    "calories": {{"value": number, "unit": "kcal"}},
+    "protein": {{"value": number, "unit": "g"}},
+    "carbohydrates": {{"value": number, "unit": "g"}},
+    "fiber": {{"value": number, "unit": "g"}},
+    "sugar": {{"value": number, "unit": "g"}},
+    "fat": {{"value": number, "unit": "g"}},
+    "saturated_fat": {{"value": number, "unit": "g"}},
+    "sodium": {{"value": number, "unit": "mg"}},
+    "potassium": {{"value": number, "unit": "mg"}},
+    "cholesterol": {{"value": number, "unit": "mg"}}
+  }},
+  "micronutrients": [
+    {{"name": "vitamin/mineral", "value": number, "unit": "unit", "daily_value_percent": number}}
+  ],
+  "bioactive_compounds": [
+    {{"name": "compound", "source_ingredient": "ingredient", "health_effect": "description"}}
+  ],
+  "organ_effects": {{
+    "heart": {{"effect": "beneficial/neutral/caution", "mechanism": "explanation"}},
+    "liver": {{"effect": "beneficial/neutral/caution", "mechanism": "explanation"}},
+    "kidneys": {{"effect": "beneficial/neutral/caution", "mechanism": "explanation"}},
+    "pancreas": {{"effect": "beneficial/neutral/caution", "mechanism": "explanation"}},
+    "intestines": {{"effect": "beneficial/neutral/caution", "mechanism": "explanation"}},
+    "brain": {{"effect": "beneficial/neutral/caution", "mechanism": "explanation"}}
+  }},
+  "glycemic_index_estimate": number,
+  "glycemic_category": "low/medium/high",
+  "personalized_warnings": [
+    {{"type": "warning_type", "severity": "low/moderate/high/critical", "message": "warning message"}}
+  ],
+  "benefits": ["benefit1", "benefit2"],
+  "healthfulness_score": number,
+  "recommendation": "recommended/moderate/limit/avoid",
+  "healthier_alternatives": ["alternative1", "alternative2"],
+  "preparation_tips": ["tip1 for healthier preparation"]
+}}"""
+
+        llm = LlmChat(
+            api_key=llm_key,
+            session_id=f"phicor_food_{datetime.now().strftime('%H%M%S')}",
+            system_message=system_message
+        ).with_model("openai", "gpt-4o")
+        
+        response = await llm.chat_async(analysis_prompt)
+        
+        # Parse JSON response
+        import json
+        import re
+        
+        json_match = re.search(r'\{[\s\S]*\}', response)
+        if json_match:
+            analysis = json.loads(json_match.group())
+            
+            # Store in cache/DB for future use
+            analysis['id'] = f"dish_{dish_name.lower().replace(' ', '_')[:20]}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+            analysis['analyzed_at'] = datetime.now(timezone.utc).isoformat()
+            analysis['source'] = 'ai_analysis'
+            
+            # Add serving info
+            analysis['serving_size'] = serving_size
+            
+            return {
+                "success": True,
+                "analysis": analysis
+            }
+        else:
+            raise Exception("Failed to parse AI response")
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error analyzing dish: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.get("/food/{food_id}")
 async def get_food_details(food_id: str):
     """Get detailed food information with organ effects"""
