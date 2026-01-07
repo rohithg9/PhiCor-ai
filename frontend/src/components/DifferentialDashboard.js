@@ -248,10 +248,32 @@ const DifferentialDashboard = ({
               profiles[diseaseName] = data[0];
               stats[diseaseName] = calculateMatchStats(data[0], findingsMap);
               console.log(`Match stats for ${diseaseName}:`, stats[diseaseName]);
+            } else {
+              // Fallback: Use matching_parameters from PhiCor analysis if disease not found in DB
+              const matchingParams = diff.matchingParameters || diff.matching_parameters || diff.supporting_findings || [];
+              const missingFeats = diff.missingFeatures || diff.missing_features || [];
+              const totalFeatures = matchingParams.length + missingFeats.length;
+              stats[diseaseName] = {
+                total: totalFeatures > 0 ? totalFeatures : Object.keys(findingsMap).length,
+                matched: matchingParams.length,
+                percentage: totalFeatures > 0 ? Math.round((matchingParams.length / totalFeatures) * 100) : 0,
+                matchedParams: matchingParams.map(p => ({ param: typeof p === 'string' ? p : p.name || p, type: 'phicor' })),
+                missingParams: missingFeats.map(p => ({ param: typeof p === 'string' ? p : p.name || p, type: 'phicor' }))
+              };
+              console.log(`Using PhiCor fallback stats for ${diseaseName}:`, stats[diseaseName]);
             }
           }
         } catch (error) {
           console.error('Error loading disease profile:', error);
+          // Fallback on error too
+          const matchingParams = diff.matchingParameters || diff.matching_parameters || diff.supporting_findings || [];
+          stats[diseaseName] = {
+            total: matchingParams.length || 1,
+            matched: matchingParams.length,
+            percentage: matchingParams.length > 0 ? 100 : 0,
+            matchedParams: matchingParams.map(p => ({ param: typeof p === 'string' ? p : p.name || p, type: 'phicor' })),
+            missingParams: []
+          };
         }
       }
       
