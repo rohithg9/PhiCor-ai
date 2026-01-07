@@ -972,7 +972,7 @@ def test_phicor_synthesis():
                     drugs_pass = False
                 
                 # Check database_diseases array
-                database_diseases = data.get('database_diseases', [])
+                database_diseases = synthesis.get('knowledge_base', {}).get('database_diseases', [])
                 if database_diseases:
                     print(f"  ✅ Database diseases array present: {len(database_diseases)} diseases")
                     # Show sample disease names
