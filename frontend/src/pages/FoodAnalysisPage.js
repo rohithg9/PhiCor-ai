@@ -30,10 +30,12 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const FOOD_SCALES = [
   { id: 'macros', name: 'Macros', fullName: 'Macronutrients', icon: '🍽️', description: 'Proteins, Carbs, Fats' },
   { id: 'micros', name: 'Micros', fullName: 'Micronutrients', icon: '💊', description: 'Vitamins & Minerals' },
+  { id: 'elements', name: 'Elements', fullName: 'Electrolytes & Trace Elements', icon: '⚛️', description: 'Every mineral & element' },
   { id: 'compounds', name: 'Bioactives', fullName: 'Bioactive Compounds', icon: '🧬', description: 'Phytochemicals, Antioxidants' },
   { id: 'metabolic', name: 'Metabolic', fullName: 'Metabolic Impact', icon: '⚡', description: 'Glycemic, Insulin Response' },
+  { id: 'params', name: 'Parameters', fullName: 'Parameter Effects', icon: '📊', description: 'Specific physiological parameters' },
   { id: 'organs', name: 'Organs', fullName: 'Organ System Effects', icon: '🫀', description: 'Multi-organ impact' },
-  { id: 'molecular', name: 'Molecular', fullName: 'Molecular Pathways', icon: '🔬', description: 'Cellular mechanisms' },
+  { id: 'risks', name: 'Risks', fullName: 'Personalized Risks', icon: '⚠️', description: 'Condition-specific warnings' },
 ];
 
 // Food categories for smart search
