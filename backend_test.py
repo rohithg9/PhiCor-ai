@@ -1531,8 +1531,11 @@ def run_all_tests():
     if not test_results.get('disease_search_api'):
         critical_issues.append("❌ CRITICAL: Disease Search API failed - differential dashboard won't load diseases")
     
-    if not test_results.get('phicor_clinical_analysis'):
-        critical_issues.append("❌ CRITICAL: PhiCor Clinical Analysis failed - core differential diagnosis feature broken")
+    if not test_results.get('phicor_clinical_interpret'):
+        critical_issues.append("❌ CRITICAL: PhiCor Clinical Interpret failed - clinical analysis feature broken")
+    
+    if not test_results.get('phicor_synthesis'):
+        critical_issues.append("❌ CRITICAL: PhiCor Synthesis failed - '0 diseases/drugs' bug not fixed")
     
     if critical_issues:
         for issue in critical_issues:
