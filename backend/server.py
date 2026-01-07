@@ -8234,13 +8234,95 @@ async def analyze_food_from_database(request: Dict[str, Any] = Body(...)):
                         elif percent_dv >= 10:
                             magnitude = "mild"
                     
+                    # Calculate quantified parameter change
+                    quantified_change = None
+                    change_unit = None
+                    effect_magnitude_text = effect.get("magnitude", "")  # e.g., "2-4 mmHg per 1000mg increase"
+                    
+                    # Parse magnitude from nutrient database if available
+                    if effect_magnitude_text and amount > 0:
+                        # Try to extract numerical change from magnitude text
+                        # Examples: "2-4 mmHg per 1000mg increase", "10-40% increase"
+                        import re
+                        
+                        # Pattern for "X-Y unit per Zmg" format
+                        per_pattern = r"(\d+(?:\.\d+)?)-?(\d+(?:\.\d+)?)?\s*(\w+(?:/\w+)?)\s*per\s*(\d+)\s*mg"
+                        per_match = re.search(per_pattern, effect_magnitude_text, re.IGNORECASE)
+                        
+                        if per_match:
+                            min_change = float(per_match.group(1))
+                            max_change = float(per_match.group(2)) if per_match.group(2) else min_change
+                            change_unit = per_match.group(3)
+                            per_amount = float(per_match.group(4))
+                            
+                            # Calculate change based on actual amount
+                            avg_change = (min_change + max_change) / 2
+                            quantified_change = round((amount / per_amount) * avg_change, 1)
+                            
+                            # Apply direction
+                            if effect.get("direction") == "decrease":
+                                quantified_change = -quantified_change
+                        else:
+                            # Pattern for simple percentage or direct value
+                            simple_pattern = r"(\d+(?:\.\d+)?)-?(\d+(?:\.\d+)?)?\s*(%|mmHg|mg/dL|mEq/L|mg|g|mcg|IU)"
+                            simple_match = re.search(simple_pattern, effect_magnitude_text)
+                            
+                            if simple_match:
+                                min_change = float(simple_match.group(1))
+                                max_change = float(simple_match.group(2)) if simple_match.group(2) else min_change
+                                change_unit = simple_match.group(3)
+                                
+                                # Scale by percent DV if available
+                                if percent_dv:
+                                    avg_change = (min_change + max_change) / 2
+                                    quantified_change = round((percent_dv / 100) * avg_change, 1)
+                                    
+                                    if effect.get("direction") == "decrease":
+                                        quantified_change = -quantified_change
+                    
+                    # Estimate change for common parameters if not calculated
+                    if quantified_change is None and percent_dv and percent_dv >= 5:
+                        param_name = effect.get("parameter", "").lower()
+                        direction = effect.get("direction", "")
+                        
+                        # Estimated effects per serving based on nutrient contribution
+                        if "blood_pressure" in param_name or param_name in ["bp_systolic", "bp_diastolic"]:
+                            # Estimate based on potassium/sodium effect on BP
+                            if nutrient_id == "potassium":
+                                quantified_change = round(-0.5 * (percent_dv / 10), 1)  # ~0.5 mmHg per 10% DV potassium
+                                change_unit = "mmHg"
+                            elif nutrient_id == "sodium":
+                                quantified_change = round(0.3 * (percent_dv / 10), 1)  # ~0.3 mmHg per 10% DV sodium
+                                change_unit = "mmHg"
+                        elif "glucose" in param_name or "blood_sugar" in param_name:
+                            if nutrient_id in ["sugar", "sugars", "carbohydrates"]:
+                                quantified_change = round(2 * (percent_dv / 10), 1)  # ~2 mg/dL per 10% DV
+                                change_unit = "mg/dL"
+                        elif "cholesterol" in param_name and "serum" not in param_name:
+                            if nutrient_id == "cholesterol":
+                                quantified_change = round(1.5 * (percent_dv / 10), 1)
+                                change_unit = "mg/dL"
+                        elif param_name == "serum_potassium":
+                            if nutrient_id == "potassium":
+                                quantified_change = round(0.05 * (percent_dv / 10), 2)  # ~0.05 mEq/L per 10% DV
+                                change_unit = "mEq/L"
+                        
+                        # Apply direction modifier
+                        if quantified_change and direction == "decrease":
+                            quantified_change = -abs(quantified_change)
+                        elif quantified_change and direction == "increase":
+                            quantified_change = abs(quantified_change)
+                    
                     organ_system_effects[organ_system]["parameters_affected"].append({
                         "parameter": effect.get("parameter"),
                         "direction": effect.get("direction"),
                         "mechanism": effect.get("mechanism"),
                         "magnitude": magnitude,
+                        "quantified_change": quantified_change,
+                        "change_unit": change_unit,
                         "from_nutrient": nutrient_data.get("name"),
-                        "amount": f"{amount} {nutrient_value.get('unit', '')}"
+                        "amount": f"{amount} {nutrient_value.get('unit', '')}",
+                        "percent_dv": percent_dv
                     })
                     
                     # Track contributing nutrients
@@ -8362,13 +8444,44 @@ async def analyze_food_from_database(request: Dict[str, Any] = Body(...)):
         # Clamp score
         health_score = max(20, min(100, health_score))
         
+        # Build serving info - human-readable format
+        serving_grams = food.get("serving_size", 100)  # Default to 100g if not specified
+        serving_description = food.get("description", "")
+        
+        # Extract serving description from food description if available
+        # E.g., "Medium banana, raw" -> "1 medium"
+        serving_text = "1 serving"
+        if serving_description:
+            desc_lower = serving_description.lower()
+            if "medium" in desc_lower:
+                serving_text = "1 medium"
+            elif "large" in desc_lower:
+                serving_text = "1 large"
+            elif "small" in desc_lower:
+                serving_text = "1 small"
+            elif "cup" in desc_lower:
+                serving_text = "1 cup"
+            elif "slice" in desc_lower:
+                serving_text = "1 slice"
+            elif "piece" in desc_lower:
+                serving_text = "1 piece"
+            elif "oz" in desc_lower or "ounce" in desc_lower:
+                serving_text = "1 oz"
+            elif "fillet" in desc_lower:
+                serving_text = "1 fillet"
+            elif "egg" in desc_lower:
+                serving_text = "1 egg"
+            elif "tbsp" in desc_lower or "tablespoon" in desc_lower:
+                serving_text = "1 tbsp"
+        
         # Build response
         analysis = {
             "product_name": food.get("name"),
             "product_type": food.get("category", "food"),
             "description": food.get("description"),
-            "serving_size": food.get("serving_size", serving_size),
-            "serving_size_g": food.get("serving_size_g", 100),
+            "serving_size": serving_text,
+            "serving_size_g": serving_grams,
+            "serving_display": f"{serving_text} ({serving_grams}g)",
             "data_source": "PhiCor Database",
             "ai_generated": False,
             
