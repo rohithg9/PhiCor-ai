@@ -383,7 +383,7 @@ const FoodAnalysisPage = () => {
   }, [searchQuery, searchFoods]);
   
   // Analyze single food/dish
-  const analyzeFood = async (food, customQuantity = null, customUnit = null) => {
+  const analyzeFood = async (food, customQuantity = null, customUnit = null, deepMode = false) => {
     setShowSuggestions(false);
     setSearchQuery(food.name);
     setIsAnalyzing(true);
@@ -398,26 +398,69 @@ const FoodAnalysisPage = () => {
       : `${quantity} ${unit}`;
     
     try {
-      const response = await fetch(`${BACKEND_URL}/api/food/analyze-dish`, {
+      // Use deep analysis endpoint for comprehensive parameter-level analysis
+      const endpoint = deepMode ? '/api/food/analyze-product' : '/api/food/analyze-dish';
+      const requestBody = deepMode ? {
+        product_name: food.name,
+        ingredient_list: food.ingredients || null,
+        serving_size: portionInfo,
+        health_profile: healthProfile.conditions.length > 0 || healthProfile.allergies.length > 0 || healthProfile.medications.length > 0 ? healthProfile : null
+      } : {
+        dish_name: food.name,
+        serving_size: portionInfo,
+        health_profile: healthProfile.conditions.length > 0 || healthProfile.allergies.length > 0 ? healthProfile : null
+      };
+      
+      const response = await fetch(`${BACKEND_URL}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          dish_name: food.name,
-          serving_size: portionInfo,
-          health_profile: healthProfile.conditions.length > 0 || healthProfile.allergies.length > 0 ? healthProfile : null
-        })
+        body: JSON.stringify(requestBody)
       });
       
       const data = await response.json();
       if (data.success) {
         setAnalysisResult(data.analysis);
-        toast.success('PhiCor analysis complete');
+        toast.success(deepMode ? 'PhiCor deep analysis complete' : 'PhiCor analysis complete');
       } else {
         throw new Error(data.detail || 'Analysis failed');
       }
     } catch (error) {
       console.error('Analysis error:', error);
       toast.error('Analysis failed. Please try again.');
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+  
+  // Deep product analysis with ingredient list
+  const analyzeProductDeep = async (productName, ingredientList = null) => {
+    setShowSuggestions(false);
+    setSearchQuery(productName);
+    setIsAnalyzing(true);
+    setAnalysisResult(null);
+    
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/food/analyze-product`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          product_name: productName,
+          ingredient_list: ingredientList,
+          serving_size: `${quantity} ${unit}`,
+          health_profile: healthProfile.conditions.length > 0 || healthProfile.allergies.length > 0 || healthProfile.medications.length > 0 ? healthProfile : null
+        })
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        setAnalysisResult(data.analysis);
+        toast.success('PhiCor deep product analysis complete');
+      } else {
+        throw new Error(data.detail || 'Analysis failed');
+      }
+    } catch (error) {
+      console.error('Deep analysis error:', error);
+      toast.error('Deep analysis failed. Please try again.');
     } finally {
       setIsAnalyzing(false);
     }
