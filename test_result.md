@@ -175,3 +175,23 @@
   
   All UX improvements are production-ready. Food Analysis Engine UX V3 fully functional and meets all review requirements."
 
+- agent: testing
+  message: "✅ MOBILE TESTING COMPLETED (Jan 7, 2026 21:57): Tested PhiCor application on mobile viewport (390x844) for two main features:
+
+  **1. Food Engine - Image Upload Button Test:**
+  ❌ PARTIAL FAILURE: Mobile hamburger menu opens successfully, but Intake tab in Subject Profile panel has visibility issues preventing access to Upload Photos button. The mobile panel structure exists but tab navigation needs fixing for proper mobile UX.
+  
+  **2. Drug Engine - Effects Tab Test:**
+  ✅ COMPLETE SUCCESS: 
+  - Successfully navigated to /drugs page on mobile
+  - Found and clicked on 'Losartan' drug
+  - Located and clicked 'Effects' tab successfully  
+  - Verified quantified parameter effects display correctly:
+    * heart: aortic_systolic -14%
+    * heart: aortic_diastolic -11% 
+    * kidneys: uric_acid -15%
+  - Found 6 percentage values and 14 organ references
+  - Effects tab shows proper quantified parameters with percentage changes as requested
+  
+  **Critical Issue:** Food Engine mobile panel tab navigation needs fixing - Intake tab not accessible on mobile viewport despite hamburger menu working."
+
