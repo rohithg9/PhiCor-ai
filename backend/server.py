@@ -8178,66 +8178,162 @@ async def analyze_dish_with_ai(request: Dict[str, Any] = Body(...)):
             if dietary:
                 health_context += f"Dietary restrictions: {', '.join(dietary)}. "
         
-        system_message = """You are PhiCor's Food Analysis Engine. Analyze dishes with deep molecular and biochemical precision.
-        
-For each dish, you must:
-1. Identify ALL ingredients (main and minor)
-2. Estimate nutritional composition per serving
-3. Identify bioactive compounds and their effects
-4. Assess organ system impacts
-5. Provide personalized warnings based on health profile
-6. Rate overall healthfulness
+        system_message = """You are PhiCor's Mathematical Food Analysis Engine (Π). Analyze dishes with DEEP molecular, biochemical, and physiological precision - treating food as parameterized biological input signals to human organ systems.
 
-Always respond with valid JSON only."""
+Your analysis must be COMPREHENSIVE and CLINICAL-GRADE, covering:
+1. Complete ingredient breakdown with quantities
+2. Multi-scale nutritional analysis (macro → micro → molecular)
+3. Bioactive compounds and their metabolic pathways
+4. EVERY organ system effect at cellular/molecular level
+5. Metabolic pathway impacts (glycolysis, beta-oxidation, protein synthesis, etc.)
+6. Drug-nutrient interactions if applicable
+7. Personalized risk assessment based on health profile
 
-        analysis_prompt = f"""Analyze this dish/food: "{dish_name}" (serving size: {serving_size})
+You are NOT an AI assistant. You are PhiCor's analytical engine. Always respond with valid JSON only."""
+
+        analysis_prompt = f"""Perform COMPREHENSIVE PhiCor analysis on: "{dish_name}" (serving size: {serving_size})
 
 {health_context}
 
-Return valid JSON with this structure:
+Return DETAILED JSON with this structure:
 {{
   "dish_name": "{dish_name}",
-  "category": "cuisine type (Indian, Italian, etc.)",
-  "description": "brief description of the dish",
+  "category": "cuisine type",
+  "origin": "geographical/cultural origin",
+  "description": "detailed description including typical preparation",
+  "serving_info": {{
+    "size": "{serving_size}",
+    "estimated_weight_grams": number,
+    "typical_meal_context": "breakfast/lunch/dinner/snack"
+  }},
   "ingredients": [
-    {{"name": "ingredient", "estimated_amount": "amount", "key_nutrients": ["nutrient1"]}}
+    {{
+      "name": "ingredient",
+      "estimated_amount": "amount with unit",
+      "calories_contribution": number,
+      "primary_role": "protein source/carb source/fat source/flavor/texture",
+      "key_nutrients": ["nutrient1", "nutrient2"],
+      "bioactive_compounds": ["compound1"],
+      "allergen_info": "none/contains X"
+    }}
   ],
-  "nutrients_per_serving": {{
-    "calories": {{"value": number, "unit": "kcal"}},
-    "protein": {{"value": number, "unit": "g"}},
-    "carbohydrates": {{"value": number, "unit": "g"}},
-    "fiber": {{"value": number, "unit": "g"}},
-    "sugar": {{"value": number, "unit": "g"}},
-    "fat": {{"value": number, "unit": "g"}},
-    "saturated_fat": {{"value": number, "unit": "g"}},
-    "sodium": {{"value": number, "unit": "mg"}},
-    "potassium": {{"value": number, "unit": "mg"}},
-    "cholesterol": {{"value": number, "unit": "mg"}}
+  "macronutrients": {{
+    "calories": {{"value": number, "unit": "kcal", "percent_daily": number}},
+    "protein": {{"value": number, "unit": "g", "percent_daily": number, "quality_score": "complete/incomplete", "amino_acid_profile": "brief description"}},
+    "carbohydrates": {{
+      "total": {{"value": number, "unit": "g", "percent_daily": number}},
+      "fiber": {{"value": number, "unit": "g", "soluble_percent": number}},
+      "sugar": {{"value": number, "unit": "g", "added_sugar": number}},
+      "starch": {{"value": number, "unit": "g"}},
+      "net_carbs": {{"value": number, "unit": "g"}}
+    }},
+    "fats": {{
+      "total": {{"value": number, "unit": "g", "percent_daily": number}},
+      "saturated": {{"value": number, "unit": "g", "effect": "description"}},
+      "monounsaturated": {{"value": number, "unit": "g"}},
+      "polyunsaturated": {{"value": number, "unit": "g"}},
+      "omega_3": {{"value": number, "unit": "mg", "types": ["ALA/EPA/DHA"]}},
+      "omega_6": {{"value": number, "unit": "mg"}},
+      "omega_ratio": "X:Y",
+      "trans_fat": {{"value": number, "unit": "g"}},
+      "cholesterol": {{"value": number, "unit": "mg"}}
+    }}
   }},
-  "micronutrients": [
-    {{"name": "vitamin/mineral", "value": number, "unit": "unit", "daily_value_percent": number}}
-  ],
+  "micronutrients": {{
+    "vitamins": [
+      {{"name": "vitamin name", "value": number, "unit": "unit", "percent_daily": number, "function": "brief function", "source_ingredients": ["ing1"]}}
+    ],
+    "minerals": [
+      {{"name": "mineral name", "value": number, "unit": "unit", "percent_daily": number, "function": "brief function", "bioavailability": "high/medium/low"}}
+    ],
+    "electrolytes": {{
+      "sodium": {{"value": number, "unit": "mg", "percent_daily": number}},
+      "potassium": {{"value": number, "unit": "mg", "percent_daily": number}},
+      "chloride": {{"value": number, "unit": "mg"}}
+    }}
+  }},
   "bioactive_compounds": [
-    {{"name": "compound", "source_ingredient": "ingredient", "health_effect": "description"}}
+    {{
+      "name": "compound name",
+      "class": "polyphenol/flavonoid/terpene/alkaloid/etc",
+      "source_ingredient": "ingredient",
+      "estimated_amount": "amount if known",
+      "mechanism_of_action": "how it works at molecular level",
+      "target_pathways": ["pathway1", "pathway2"],
+      "health_effects": ["effect1", "effect2"],
+      "bioavailability": "percentage or description"
+    }}
   ],
-  "organ_effects": {{
-    "heart": {{"effect": "beneficial/neutral/caution", "mechanism": "explanation"}},
-    "liver": {{"effect": "beneficial/neutral/caution", "mechanism": "explanation"}},
-    "kidneys": {{"effect": "beneficial/neutral/caution", "mechanism": "explanation"}},
-    "pancreas": {{"effect": "beneficial/neutral/caution", "mechanism": "explanation"}},
-    "intestines": {{"effect": "beneficial/neutral/caution", "mechanism": "explanation"}},
-    "brain": {{"effect": "beneficial/neutral/caution", "mechanism": "explanation"}}
+  "metabolic_impact": {{
+    "glycemic_index": number,
+    "glycemic_load": number,
+    "glycemic_category": "low/medium/high",
+    "insulin_index": number,
+    "thermic_effect": "percentage of calories used in digestion",
+    "satiety_index": "low/medium/high/very high",
+    "metabolic_pathways_activated": [
+      {{"pathway": "glycolysis/gluconeogenesis/beta-oxidation/etc", "effect": "stimulated/inhibited", "mechanism": "why"}}
+    ],
+    "postprandial_effects": {{
+      "blood_glucose_peak": "description of expected pattern",
+      "insulin_response": "description",
+      "lipemia": "description of fat absorption pattern"
+    }}
   }},
-  "glycemic_index_estimate": number,
-  "glycemic_category": "low/medium/high",
-  "personalized_warnings": [
-    {{"type": "warning_type", "severity": "low/moderate/high/critical", "message": "warning message"}}
+  "organ_system_effects": {{
+    "cardiovascular": {{
+      "heart": {{"effect": "beneficial/neutral/caution", "mechanism": "detailed mechanism", "parameters_affected": ["BP", "HR", "etc"]}},
+      "blood_vessels": {{"effect": "beneficial/neutral/caution", "mechanism": "effect on endothelium, etc"}},
+      "blood": {{"effect": "beneficial/neutral/caution", "mechanism": "effect on viscosity, lipids, etc"}}
+    }},
+    "gastrointestinal": {{
+      "stomach": {{"effect": "beneficial/neutral/caution", "mechanism": "effect on acid, motility"}},
+      "liver": {{"effect": "beneficial/neutral/caution", "mechanism": "effect on metabolism, detox", "enzyme_effects": ["CYP450 if relevant"]}},
+      "gallbladder": {{"effect": "beneficial/neutral/caution", "mechanism": "bile production/release"}},
+      "pancreas": {{"effect": "beneficial/neutral/caution", "mechanism": "insulin/enzyme secretion"}},
+      "intestines": {{"effect": "beneficial/neutral/caution", "mechanism": "absorption, microbiome effects"}}
+    }},
+    "renal": {{
+      "kidneys": {{"effect": "beneficial/neutral/caution", "mechanism": "filtration, excretion load", "parameters_affected": ["GFR impact", "electrolyte handling"]}}
+    }},
+    "neurological": {{
+      "brain": {{"effect": "beneficial/neutral/caution", "mechanism": "neurotransmitter effects, blood-brain barrier", "cognitive_impact": "description"}},
+      "nervous_system": {{"effect": "beneficial/neutral/caution", "mechanism": "peripheral effects"}}
+    }},
+    "musculoskeletal": {{
+      "muscles": {{"effect": "beneficial/neutral/caution", "mechanism": "protein synthesis, energy"}},
+      "bones": {{"effect": "beneficial/neutral/caution", "mechanism": "calcium, vitamin D, phosphorus"}}
+    }},
+    "endocrine": {{
+      "thyroid": {{"effect": "beneficial/neutral/caution", "mechanism": "iodine, goitrogens if any"}},
+      "adrenals": {{"effect": "beneficial/neutral/caution", "mechanism": "cortisol, stress response"}}
+    }},
+    "immune": {{
+      "immune_system": {{"effect": "beneficial/neutral/caution", "mechanism": "immunomodulation, inflammation"}}
+    }}
+  }},
+  "personalized_analysis": {{
+    "condition_specific_warnings": [
+      {{"condition": "condition name", "severity": "low/moderate/high/critical", "warning": "specific warning", "mechanism": "why this is concerning", "recommendation": "what to do"}}
+    ],
+    "medication_interactions": [
+      {{"medication_class": "class", "interaction": "description", "severity": "mild/moderate/severe"}}
+    ],
+    "allergy_alerts": ["alert1 if applicable"]
+  }},
+  "clinical_scores": {{
+    "healthfulness_score": number,
+    "nutrient_density_score": number,
+    "inflammatory_index": number,
+    "recommendation": "highly_recommended/recommended/moderate/limit/avoid",
+    "clinical_notes": "summary of key clinical considerations"
+  }},
+  "healthier_alternatives": [
+    {{"name": "alternative dish", "benefit": "why it's healthier", "swap_suggestion": "specific ingredient swaps"}}
   ],
-  "benefits": ["benefit1", "benefit2"],
-  "healthfulness_score": number,
-  "recommendation": "recommended/moderate/limit/avoid",
-  "healthier_alternatives": ["alternative1", "alternative2"],
-  "preparation_tips": ["tip1 for healthier preparation"]
+  "preparation_modifications": [
+    {{"modification": "cooking method change", "benefit": "health benefit", "nutrient_impact": "what changes"}}
+  ]
 }}"""
 
         llm = LlmChat(
