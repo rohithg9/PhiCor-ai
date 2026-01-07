@@ -1004,22 +1004,25 @@ Snacks: Apple, almonds, green tea"
             {/* Content */}
             <ScrollArea className="flex-1">
               <div className="p-3 sm:p-4">
-                {isAnalyzing ? (
+                {(isAnalyzing || isAnalyzingImages) ? (
                   <div className={`rounded-xl border p-8 sm:p-12 text-center ${isDark ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'}`}>
                     <div className="w-16 h-16 mx-auto mb-4 relative">
-                      <Loader2 className="w-16 h-16 animate-spin text-green-500" />
+                      <div className="w-16 h-16 rounded-full border-4 border-green-500/20 border-t-green-500 animate-spin" style={{ animationDuration: '1s', animationTimingFunction: 'linear' }} />
                       <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-xl font-bold text-green-500">Π</span>
                     </div>
                     <h3 className={`text-base sm:text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                      PhiCor Analysis
+                      PhiCor Deep Analysis
                     </h3>
                     <p className={`text-xs sm:text-sm mt-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
-                      Analyzing nutrient impact on body parameters...
+                      {isAnalyzingImages ? 'Analyzing food images with AI vision...' : 'Analyzing nutrients at molecular, cellular & organ levels...'}
+                    </p>
+                    <p className={`text-[10px] mt-3 ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
+                      ⏱️ This may take 30-60 seconds for comprehensive analysis
                     </p>
                   </div>
                 ) : analysisResult ? (
                   <div className="space-y-4">
-                    {/* Header Card */}
+                    {/* Header Card with Score Explanation */}
                     <div className={`rounded-xl border p-4 ${isDark ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'}`}>
                       <div className="flex items-start gap-3">
                         <div className="w-12 h-12 flex-shrink-0 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
@@ -1033,16 +1036,29 @@ Snacks: Apple, almonds, green tea"
                             {analysisResult.description}
                           </p>
                         </div>
+                        {/* Enhanced Score Display */}
                         <div className="text-center flex-shrink-0">
-                          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                            (analysisResult.clinical_summary?.healthfulness_score || 50) >= 70 ? 'bg-green-500' :
-                            (analysisResult.clinical_summary?.healthfulness_score || 50) >= 50 ? 'bg-yellow-500' : 'bg-orange-500'
-                          }`}>
-                            <span className="text-white text-lg font-bold">
-                              {analysisResult.clinical_summary?.healthfulness_score || analysisResult.healthfulness_score || '—'}
-                            </span>
-                          </div>
-                          <p className={`text-[9px] mt-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>Score</p>
+                          {(() => {
+                            const score = analysisResult.clinical_summary?.healthfulness_score || analysisResult.healthfulness_score || 50;
+                            const scoreInfo = getScoreInfo(score);
+                            return (
+                              <>
+                                <div className={`w-14 h-14 rounded-full flex items-center justify-center border-4 ${
+                                  score >= 70 ? 'bg-green-500/20 border-green-500' :
+                                  score >= 50 ? 'bg-yellow-500/20 border-yellow-500' : 'bg-orange-500/20 border-orange-500'
+                                }`}>
+                                  <span className={`text-xl font-bold ${
+                                    score >= 70 ? 'text-green-500' :
+                                    score >= 50 ? 'text-yellow-500' : 'text-orange-500'
+                                  }`}>
+                                    {score}
+                                  </span>
+                                </div>
+                                <p className={`text-[10px] mt-1 font-medium ${scoreInfo.color}`}>{scoreInfo.label}</p>
+                                <p className={`text-[8px] max-w-[80px] ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>{scoreInfo.desc}</p>
+                              </>
+                            );
+                          })()}
                         </div>
                       </div>
                     </div>
