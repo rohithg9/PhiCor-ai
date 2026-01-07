@@ -17,6 +17,7 @@ import ExpertDashboard from "./pages/ExpertDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import ExperimentLab from "./pages/ExperimentLab";
 import EquationsPage from "./pages/EquationsPage";
+import MathModelsAdmin from "./pages/MathModelsAdmin";
 
 // Protected route wrapper
 const ProtectedRoute = ({ children }) => {
