@@ -1491,21 +1491,31 @@ Snacks: Apple, almonds, green tea"
                         {(() => {
                           const sysData = analysisResult.organ_system_parameter_effects[activeScale];
                           const sysInfo = ORGAN_SYSTEMS.find(s => s.id === activeScale) || { name: activeScale, icon: '🔬', color: 'from-gray-500 to-gray-600' };
+                          
+                          // Get list of all organ systems for navigation
+                          const allSystems = Object.keys(analysisResult.organ_system_parameter_effects);
+                          const currentIndex = allSystems.indexOf(activeScale);
+                          const prevSystem = currentIndex > 0 ? allSystems[currentIndex - 1] : null;
+                          const nextSystem = currentIndex < allSystems.length - 1 ? allSystems[currentIndex + 1] : null;
+                          
                           return (
                             <div className={`rounded-xl border p-4 ${isDark ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'}`}>
-                              <div className="flex items-center gap-2 mb-4">
-                                <button 
-                                  onClick={() => setActiveScale('overview')}
-                                  className={`text-xs ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}
-                                >
-                                  ← Back to Overview
-                                </button>
-                              </div>
+                              {/* Prominent Back Button */}
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setActiveScale('overview')}
+                                className={`mb-4 ${isDark ? 'border-gray-700 hover:bg-gray-800' : ''}`}
+                              >
+                                <ArrowLeft className="w-4 h-4 mr-1" />
+                                Back to Overview
+                              </Button>
+                              
                               <div className="flex items-center gap-3 mb-4">
                                 <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${sysInfo.color} flex items-center justify-center`}>
                                   <span className="text-2xl">{sysInfo.icon}</span>
                                 </div>
-                                <div>
+                                <div className="flex-1">
                                   <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                                     {sysInfo.name} System Effects
                                   </h3>
@@ -1518,6 +1528,30 @@ Snacks: Apple, almonds, green tea"
                                   </Badge>
                                 </div>
                               </div>
+                              
+                              {/* Swipe Navigation Hint */}
+                              <div className={`flex items-center justify-between mb-4 text-[10px] ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                                {prevSystem ? (
+                                  <button 
+                                    onClick={() => setActiveScale(prevSystem)}
+                                    className={`flex items-center gap-1 px-2 py-1 rounded hover:bg-gray-800/50`}
+                                  >
+                                    <ChevronLeft className="w-3 h-3" />
+                                    {prevSystem.charAt(0).toUpperCase() + prevSystem.slice(1)}
+                                  </button>
+                                ) : <span />}
+                                <span className="text-center">{currentIndex + 1} of {allSystems.length}</span>
+                                {nextSystem ? (
+                                  <button 
+                                    onClick={() => setActiveScale(nextSystem)}
+                                    className={`flex items-center gap-1 px-2 py-1 rounded hover:bg-gray-800/50`}
+                                  >
+                                    {nextSystem.charAt(0).toUpperCase() + nextSystem.slice(1)}
+                                    <ChevronRight className="w-3 h-3" />
+                                  </button>
+                                ) : <span />}
+                              </div>
+                              
                               {sysData.contributing_nutrients?.length > 0 && (
                                 <div className="mb-4">
                                   <span className={`text-[10px] font-semibold uppercase tracking-wider ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
