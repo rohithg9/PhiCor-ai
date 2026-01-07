@@ -816,6 +816,57 @@ const LandingPage = () => {
                 </Button>
               </div>
             </motion.div>
+
+            {/* Π - Food Engine */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4 }}
+              className="group relative"
+            >
+              <div className="glass-panel rounded-2xl p-8 h-full border border-green-500/20 hover:border-green-500/40 transition-all hover:shadow-lg hover:shadow-green-500/10">
+                {/* Icon */}
+                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-green-500 to-lime-500 flex items-center justify-center mb-6 shadow-lg shadow-green-500/20 group-hover:scale-110 transition-transform">
+                  <span className="text-white font-serif text-3xl font-bold">Π</span>
+                </div>
+                
+                <h3 className="font-manrope text-xl font-bold mb-2 text-foreground">Food Engine</h3>
+                <p className="text-sm text-green-400 font-medium mb-4">Nutritional Intelligence</p>
+                
+                <p className="text-muted-foreground text-sm leading-relaxed mb-6">
+                  Mathematical modeling of how food affects your body. Analyze meals with AI vision, map nutrients to organ parameters, and design personalized diets with quantified health outcomes.
+                </p>
+                
+                {/* Clinical Value */}
+                <div className="space-y-3 pt-4 border-t border-white/10">
+                  <p className="text-xs text-green-400 font-medium uppercase tracking-wider">Clinical Value</p>
+                  <ul className="space-y-2">
+                    <li className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <span className="text-green-400 mt-0.5">→</span>
+                      {platformStats.foods} foods with parameter effects
+                    </li>
+                    <li className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <span className="text-green-400 mt-0.5">→</span>
+                      AI meal photo analysis
+                    </li>
+                    <li className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <span className="text-green-400 mt-0.5">→</span>
+                      Quantified nutrient-to-organ mapping
+                    </li>
+                  </ul>
+                </div>
+                
+                <Button
+                  onClick={() => navigate('/food')}
+                  variant="ghost"
+                  className="mt-6 w-full text-green-400 hover:text-green-300 hover:bg-green-500/10"
+                >
+                  Analyze Food
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </div>
+            </motion.div>
           </div>
 
           {/* Bottom Stats Bar */}
