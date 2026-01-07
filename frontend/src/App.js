@@ -76,6 +76,10 @@ function AppContent() {
         <Route path="/cases" element={<CasesPage />} />
         <Route path="/cases/:caseId" element={<CasesPage />} />
         
+        {/* Food Analysis - Π (Pi) Tab */}
+        <Route path="/food" element={<FoodAnalysisPage />} />
+        <Route path="/nutrition" element={<FoodAnalysisPage />} />
+        
         {/* Expert Curation System Routes */}
         <Route path="/expert-login" element={<ExpertAuthPage />} />
         <Route path="/expert" element={<ExpertDashboard />} />
