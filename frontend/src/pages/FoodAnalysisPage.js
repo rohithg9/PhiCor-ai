@@ -1165,52 +1165,83 @@ Snacks: Apple, almonds, green tea"
                           )}
                         </div>
                         
-                        {/* System Overview */}
+                        {/* System Overview - Clickable cards with visual affordance */}
                         {analysisResult.organ_system_parameter_effects && (
                           <div className={`rounded-xl border p-4 lg:col-span-2 ${isDark ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'}`}>
-                            <h3 className={`text-sm font-semibold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                              Organ System Effects
-                            </h3>
+                            <div className="flex items-center justify-between mb-3">
+                              <h3 className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                Organ System Effects
+                              </h3>
+                              <span className={`text-[10px] ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                                👆 Tap for details
+                              </span>
+                            </div>
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                              {Object.entries(analysisResult.organ_system_parameter_effects).map(([system, data]) => (
-                                <button
-                                  key={system}
-                                  onClick={() => setActiveScale(system)}
-                                  className={`p-3 rounded-lg border text-center transition-all ${
-                                    data.overall_effect === 'beneficial' ? (isDark ? 'bg-green-900/20 border-green-800/30 hover:bg-green-900/30' : 'bg-green-50 border-green-200 hover:bg-green-100') :
-                                    data.overall_effect === 'caution' || data.overall_effect === 'harmful' ? (isDark ? 'bg-orange-900/20 border-orange-800/30 hover:bg-orange-900/30' : 'bg-orange-50 border-orange-200 hover:bg-orange-100') :
-                                    (isDark ? 'bg-gray-800 border-gray-700 hover:bg-gray-700' : 'bg-gray-100 border-gray-200 hover:bg-gray-200')
-                                  }`}
-                                >
-                                  <span className="text-xl">
-                                    {system === 'cardiovascular' ? '❤️' :
-                                     system === 'renal' ? '🫘' :
-                                     system === 'hepatic' ? '🫀' :
-                                     system === 'glycemic' ? '🍬' :
-                                     system === 'gastrointestinal' ? '🥗' :
-                                     system === 'neurological' ? '🧠' :
-                                     system === 'musculoskeletal' ? '💪' :
-                                     system === 'immune' ? '🛡️' : 
-                                     system === 'metabolic' ? '🔥' :
-                                     system === 'endocrine' ? '⚖️' :
-                                     system === 'hematologic' ? '🩸' : '🔬'}
-                                  </span>
-                                  <div className={`text-[10px] font-medium mt-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                                    {system === 'cardiovascular' ? 'Cardio' :
-                                     system === 'gastrointestinal' ? 'GI' :
-                                     system === 'musculoskeletal' ? 'MSK' :
-                                     system === 'neurological' ? 'Neuro' :
-                                     system.charAt(0).toUpperCase() + system.slice(1)}
-                                  </div>
-                                  <Badge className={`mt-1 text-[8px] ${
-                                    data.overall_effect === 'beneficial' ? 'bg-green-500/30 text-green-400' :
-                                    data.overall_effect === 'caution' ? 'bg-orange-500/30 text-orange-400' :
-                                    'bg-gray-500/30 text-gray-400'
-                                  }`}>
-                                    {data.overall_effect}
-                                  </Badge>
-                                </button>
-                              ))}
+                              {Object.entries(analysisResult.organ_system_parameter_effects).map(([system, data]) => {
+                                // Get a sample quantified change for preview
+                                const sampleChange = data.parameters_affected?.find(p => p.quantified_change !== null && p.quantified_change !== undefined);
+                                const paramCount = data.parameters_affected?.length || 0;
+                                
+                                return (
+                                  <button
+                                    key={system}
+                                    onClick={() => setActiveScale(system)}
+                                    className={`p-3 rounded-lg border text-center transition-all group relative ${
+                                      data.overall_effect === 'beneficial' ? (isDark ? 'bg-green-900/20 border-green-800/30 hover:bg-green-900/40 hover:border-green-600' : 'bg-green-50 border-green-200 hover:bg-green-100 hover:border-green-400') :
+                                      data.overall_effect === 'caution' || data.overall_effect === 'harmful' ? (isDark ? 'bg-orange-900/20 border-orange-800/30 hover:bg-orange-900/40 hover:border-orange-600' : 'bg-orange-50 border-orange-200 hover:bg-orange-100 hover:border-orange-400') :
+                                      (isDark ? 'bg-gray-800 border-gray-700 hover:bg-gray-700 hover:border-gray-500' : 'bg-gray-100 border-gray-200 hover:bg-gray-200 hover:border-gray-400')
+                                    }`}
+                                  >
+                                    {/* Click indicator */}
+                                    <div className={`absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                                      <ChevronRight className="w-3 h-3" />
+                                    </div>
+                                    
+                                    <span className="text-xl">
+                                      {system === 'cardiovascular' ? '❤️' :
+                                       system === 'renal' ? '🫘' :
+                                       system === 'hepatic' ? '🫀' :
+                                       system === 'glycemic' ? '🍬' :
+                                       system === 'gastrointestinal' ? '🥗' :
+                                       system === 'neurological' ? '🧠' :
+                                       system === 'musculoskeletal' ? '💪' :
+                                       system === 'immune' ? '🛡️' : 
+                                       system === 'metabolic' ? '🔥' :
+                                       system === 'endocrine' ? '⚖️' :
+                                       system === 'hematologic' ? '🩸' : '🔬'}
+                                    </span>
+                                    <div className={`text-[10px] font-medium mt-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                      {system === 'cardiovascular' ? 'Cardio' :
+                                       system === 'gastrointestinal' ? 'GI' :
+                                       system === 'musculoskeletal' ? 'MSK' :
+                                       system === 'neurological' ? 'Neuro' :
+                                       system.charAt(0).toUpperCase() + system.slice(1)}
+                                    </div>
+                                    
+                                    {/* Show sample quantified change if available */}
+                                    {sampleChange?.quantified_change !== null && sampleChange?.quantified_change !== undefined ? (
+                                      <div className={`text-[10px] font-bold mt-1 ${
+                                        sampleChange.quantified_change > 0 ? 'text-red-400' : 'text-blue-400'
+                                      }`}>
+                                        {sampleChange.quantified_change > 0 ? '+' : ''}{sampleChange.quantified_change} {sampleChange.change_unit}
+                                      </div>
+                                    ) : (
+                                      <Badge className={`mt-1 text-[8px] ${
+                                        data.overall_effect === 'beneficial' ? 'bg-green-500/30 text-green-400' :
+                                        data.overall_effect === 'caution' ? 'bg-orange-500/30 text-orange-400' :
+                                        'bg-gray-500/30 text-gray-400'
+                                      }`}>
+                                        {data.overall_effect}
+                                      </Badge>
+                                    )}
+                                    
+                                    {/* Parameter count hint */}
+                                    <div className={`text-[9px] mt-0.5 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                                      {paramCount} effect{paramCount !== 1 ? 's' : ''}
+                                    </div>
+                                  </button>
+                                );
+                              })}
                             </div>
                           </div>
                         )}
