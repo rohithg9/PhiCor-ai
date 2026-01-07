@@ -979,17 +979,17 @@ Snacks: Apple, almonds, green tea"
               )}
             </div>
             
-            {/* Parameter Scale Tabs */}
+            {/* Multi-Scale Analysis Tabs */}
             {analysisResult && (
               <div className={`px-3 sm:px-4 py-2 border-b overflow-x-auto ${isDark ? 'bg-gray-900/20 border-gray-800' : 'bg-gray-50 border-gray-200'}`}>
                 <div className="flex gap-1">
-                  {PARAM_SCALES.map(scale => (
+                  {ANALYSIS_SCALES.map(scale => (
                     <button
                       key={scale.id}
                       onClick={() => setActiveScale(scale.id)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap flex items-center gap-1 ${
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap flex items-center gap-1 transition-all ${
                         activeScale === scale.id
-                          ? 'bg-green-500 text-white'
+                          ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg'
                           : isDark ? 'bg-gray-800 text-gray-400 hover:bg-gray-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                       }`}
                     >
