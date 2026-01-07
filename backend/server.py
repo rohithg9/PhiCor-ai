@@ -7930,6 +7930,150 @@ async def suggest_model_change(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ============================================================
+# CASE MANAGEMENT ENDPOINTS
+# Save, list, share clinical cases
+# ============================================================
+
+class SaveCaseRequest(BaseModel):
+    """Request model for saving a clinical case"""
+    title: Optional[str] = None
+    clinical_text: str
+    patient_summary: Optional[Dict[str, Any]] = None
+    findings: List[Dict[str, Any]] = []
+    symptoms: List[Dict[str, Any]] = []
+    differentials: List[Dict[str, Any]] = []
+    synthesis: Optional[Dict[str, Any]] = None
+    dominant_syndrome: Optional[Dict[str, Any]] = None
+    safety_alerts: List[Dict[str, Any]] = []
+    tags: List[str] = []
+
+@api_router.post("/cases/save")
+async def save_clinical_case(request: SaveCaseRequest):
+    """Save a clinical case for later reference"""
+    try:
+        from uuid import uuid4
+        
+        case_id = str(uuid4())[:8]  # Short ID for easy sharing
+        
+        # Generate title if not provided
+        title = request.title
+        if not title:
+            if request.patient_summary:
+                age = request.patient_summary.get('age', '')
+                sex = request.patient_summary.get('sex', '')
+                chief = request.patient_summary.get('chief_complaint', 'Clinical Case')
+                title = f"{age}{'yo ' if age else ''}{sex}{' - ' if (age or sex) else ''}{chief[:50]}"
+            else:
+                title = f"Clinical Case - {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+        
+        # Get primary diagnosis
+        primary_diagnosis = None
+        if request.differentials and len(request.differentials) > 0:
+            primary_diagnosis = request.differentials[0].get('name') or request.differentials[0].get('diagnosis')
+        
+        case = {
+            "id": case_id,
+            "title": title,
+            "clinical_text": request.clinical_text,
+            "patient_summary": request.patient_summary,
+            "findings": request.findings,
+            "symptoms": request.symptoms,
+            "differentials": request.differentials,
+            "synthesis": request.synthesis,
+            "dominant_syndrome": request.dominant_syndrome,
+            "safety_alerts": request.safety_alerts,
+            "primary_diagnosis": primary_diagnosis,
+            "tags": request.tags,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "views": 0,
+            "is_demo": False
+        }
+        
+        await db.clinical_cases.insert_one(case)
+        
+        return {
+            "success": True,
+            "case_id": case_id,
+            "share_url": f"/cases/{case_id}",
+            "message": "Case saved successfully"
+        }
+        
+    except Exception as e:
+        logger.error(f"Error saving case: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/cases")
+async def list_clinical_cases(limit: int = 20, skip: int = 0, tag: Optional[str] = None):
+    """List all saved clinical cases"""
+    try:
+        query = {}
+        if tag:
+            query["tags"] = tag
+        
+        cases = await db.clinical_cases.find(
+            query,
+            {"_id": 0}
+        ).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
+        
+        total = await db.clinical_cases.count_documents(query)
+        
+        return {
+            "success": True,
+            "cases": cases,
+            "total": total,
+            "limit": limit,
+            "skip": skip
+        }
+        
+    except Exception as e:
+        logger.error(f"Error listing cases: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/cases/{case_id}")
+async def get_clinical_case(case_id: str):
+    """Get a specific clinical case by ID"""
+    try:
+        case = await db.clinical_cases.find_one({"id": case_id}, {"_id": 0})
+        
+        if not case:
+            raise HTTPException(status_code=404, detail="Case not found")
+        
+        # Increment view count
+        await db.clinical_cases.update_one(
+            {"id": case_id},
+            {"$inc": {"views": 1}}
+        )
+        
+        return {
+            "success": True,
+            "case": case
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting case: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.delete("/cases/{case_id}")
+async def delete_clinical_case(case_id: str):
+    """Delete a clinical case"""
+    try:
+        result = await db.clinical_cases.delete_one({"id": case_id})
+        
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Case not found")
+        
+        return {"success": True, "message": "Case deleted"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting case: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # Include router - MUST be after all routes are defined
 app.include_router(api_router)
 
