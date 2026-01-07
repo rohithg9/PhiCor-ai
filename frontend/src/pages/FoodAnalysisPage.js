@@ -1685,6 +1685,41 @@ Snacks: Apple, almonds, green tea"
                     {/* Molecular Scale - Bioactive compounds */}
                     {activeScale === 'molecular' && (
                       <div className="space-y-4">
+                        {/* For image analysis - show food composition breakdown */}
+                        {analysisResult.individual_food_items?.length > 0 && (
+                          <div className={`rounded-xl border p-4 ${isDark ? 'bg-indigo-900/20 border-indigo-800/30' : 'bg-indigo-50 border-indigo-200'}`}>
+                            <h3 className={`text-sm font-semibold mb-3 flex items-center gap-2 ${isDark ? 'text-indigo-400' : 'text-indigo-700'}`}>
+                              <span>🧬</span> Molecular Composition of Meal
+                            </h3>
+                            <p className={`text-xs mb-3 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                              Key molecular components identified in this meal
+                            </p>
+                            <div className="grid gap-2">
+                              {analysisResult.individual_food_items.map((item, idx) => (
+                                <div key={idx} className={`p-3 rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-white'}`}>
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <span className="text-lg">{getFoodIcon(item.name)}</span>
+                                    <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{item.name}</span>
+                                  </div>
+                                  {/* Key nutrients/molecules */}
+                                  <div className="flex flex-wrap gap-1">
+                                    {item.key_nutrients?.slice(0, 5).map((n, i) => (
+                                      <Badge key={i} variant="outline" className="text-[9px]">{n}</Badge>
+                                    ))}
+                                    {!item.key_nutrients && item.macros && (
+                                      <>
+                                        <Badge variant="outline" className="text-[9px]">Protein: {item.macros.protein}g</Badge>
+                                        <Badge variant="outline" className="text-[9px]">Carbs: {item.macros.carbs}g</Badge>
+                                        <Badge variant="outline" className="text-[9px]">Fat: {item.macros.fat}g</Badge>
+                                      </>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
                         {/* Bioactive Compounds from ingredients */}
                         {analysisResult.ingredients_breakdown?.primary_ingredients?.some(i => i.bioactive_compounds?.length > 0) && (
                           <div className={`rounded-xl border p-4 ${isDark ? 'bg-cyan-900/20 border-cyan-800/30' : 'bg-cyan-50 border-cyan-200'}`}>
@@ -1737,6 +1772,17 @@ Snacks: Apple, almonds, green tea"
                                 </div>
                               ))}
                             </div>
+                          </div>
+                        )}
+                        
+                        {/* Fallback: if no molecular data available */}
+                        {!analysisResult.individual_food_items?.length && 
+                         !analysisResult.ingredients_breakdown?.primary_ingredients?.length && 
+                         !analysisResult.complete_nutritional_profile?.other_compounds && (
+                          <div className={`rounded-xl border p-4 ${isDark ? 'bg-gray-900/50 border-gray-800' : 'bg-gray-50 border-gray-200'}`}>
+                            <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                              Molecular composition data not available for this analysis. Try searching for a specific food or uploading a meal image.
+                            </p>
                           </div>
                         )}
                       </div>
