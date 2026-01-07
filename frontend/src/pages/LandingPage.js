@@ -193,6 +193,11 @@ const LandingPage = () => {
       icon: <Pill className="w-6 h-6" />,
       title: "PK/PD Drug Simulation",
       description: `Explore ${platformStats.drugs} drugs with real pharmacokinetic modeling, mechanism of action, and clinical effect predictions.`
+    },
+    {
+      icon: <Zap className="w-6 h-6" />,
+      title: "Food-to-Body Parameter Mapping",
+      description: `Analyze ${platformStats.foods} foods mathematically - see exactly how each nutrient affects specific body parameters like blood pressure (-2 mmHg), glucose (+5 mg/dL), and more.`
     }
   ];
 
