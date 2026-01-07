@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useInView } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { 
@@ -28,10 +28,54 @@ import {
   Calculator,
   Pill,
   BookOpen,
-  HelpCircle
+  HelpCircle,
+  TrendingDown,
+  Clock,
+  Users,
+  CheckCircle
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import RegionSelector from '../components/RegionSelector';
+
+// Animated Counter Component
+const AnimatedCounter = ({ value, duration = 2000, suffix = '', className }) => {
+  const [count, setCount] = useState(0);
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  
+  // Extract numeric value from string like "2568+" or "415+"
+  const numericValue = parseInt(value?.toString().replace(/[^0-9]/g, '')) || 0;
+  const hasSuffix = value?.toString().includes('+');
+  
+  useEffect(() => {
+    if (!isInView) return;
+    
+    let startTime;
+    let animationFrame;
+    
+    const animate = (timestamp) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      
+      // Easing function for smooth animation
+      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+      setCount(Math.floor(easeOutQuart * numericValue));
+      
+      if (progress < 1) {
+        animationFrame = requestAnimationFrame(animate);
+      }
+    };
+    
+    animationFrame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationFrame);
+  }, [isInView, numericValue, duration]);
+  
+  return (
+    <span ref={ref} className={className}>
+      {count.toLocaleString()}{hasSuffix ? '+' : ''}{suffix}
+    </span>
+  );
+};
 
 const LandingPage = () => {
   const navigate = useNavigate();
