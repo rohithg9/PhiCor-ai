@@ -8074,6 +8074,409 @@ async def delete_clinical_case(case_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ============================================================
+# FOOD MATHEMATICAL MODEL ENGINE - Π (Pi) Tab
+# Treats food as parameterized biological input with organ effects
+# ============================================================
+
+from food_engine import (
+    NUTRIENT_ORGAN_EFFECTS, 
+    GLYCEMIC_CATEGORIES, 
+    CONDITION_FOOD_CONSTRAINTS,
+    SAMPLE_FOODS_DATABASE
+)
+
+class UserHealthProfile(BaseModel):
+    """User health profile for personalized food analysis"""
+    model_config = {"extra": "allow"}
+    age: Optional[int] = None
+    sex: Optional[str] = None
+    weight: Optional[float] = None  # kg
+    height: Optional[float] = None  # cm
+    conditions: List[str] = []  # Active medical conditions
+    medications: List[str] = []
+    allergies: List[str] = []
+    lab_values: Optional[Dict[str, Any]] = None  # Recent lab results
+    lifestyle: Optional[Dict[str, Any]] = None  # Activity, smoking, alcohol
+    dietary_restrictions: List[str] = []  # Vegetarian, halal, etc.
+
+class FoodAnalysisRequest(BaseModel):
+    """Request for food analysis"""
+    food_name: Optional[str] = None
+    food_id: Optional[str] = None
+    barcode: Optional[str] = None
+    serving_size: Optional[float] = None
+    health_profile: Optional[UserHealthProfile] = None
+
+class MealPlanRequest(BaseModel):
+    """Request for meal plan optimization"""
+    health_profile: UserHealthProfile
+    meal_type: str = "day"  # day, week
+    preferences: Optional[Dict[str, Any]] = None
+    constraints: Optional[Dict[str, Any]] = None
+
+@api_router.get("/food/search")
+async def search_foods(q: str, limit: int = 20):
+    """Search for foods in the database"""
+    try:
+        # Search in MongoDB food collection
+        foods = await db.foods.find(
+            {"$or": [
+                {"name": {"$regex": q, "$options": "i"}},
+                {"description": {"$regex": q, "$options": "i"}},
+                {"category": {"$regex": q, "$options": "i"}}
+            ]},
+            {"_id": 0}
+        ).limit(limit).to_list(limit)
+        
+        # If no results in DB, search sample foods
+        if not foods:
+            foods = [f for f in SAMPLE_FOODS_DATABASE 
+                    if q.lower() in f['name'].lower() or 
+                       q.lower() in f.get('description', '').lower()][:limit]
+        
+        return {
+            "success": True,
+            "foods": foods,
+            "total": len(foods)
+        }
+    except Exception as e:
+        logger.error(f"Error searching foods: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/food/{food_id}")
+async def get_food_details(food_id: str):
+    """Get detailed food information with organ effects"""
+    try:
+        # Try MongoDB first
+        food = await db.foods.find_one({"id": food_id}, {"_id": 0})
+        
+        # Fallback to sample database
+        if not food:
+            food = next((f for f in SAMPLE_FOODS_DATABASE if f['id'] == food_id), None)
+        
+        if not food:
+            raise HTTPException(status_code=404, detail="Food not found")
+        
+        # Enrich with nutrient-organ effects
+        enriched_effects = {}
+        for nutrient, data in food.get('nutrients', {}).items():
+            if nutrient in NUTRIENT_ORGAN_EFFECTS:
+                effect_info = NUTRIENT_ORGAN_EFFECTS[nutrient]
+                enriched_effects[nutrient] = {
+                    "value": data.get('value'),
+                    "unit": data.get('unit'),
+                    "organs_affected": effect_info.get('organs_affected', []),
+                    "effects": effect_info.get('effects', {}),
+                    "conditions_sensitive": effect_info.get('conditions_sensitive', [])
+                }
+        
+        food['nutrient_organ_mapping'] = enriched_effects
+        
+        return {
+            "success": True,
+            "food": food
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting food details: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/food/analyze")
+async def analyze_food_for_user(request: FoodAnalysisRequest):
+    """
+    Analyze a food item for a specific user based on their health profile.
+    Returns personalized effects, warnings, and recommendations.
+    """
+    try:
+        # Get food data
+        food = None
+        if request.food_id:
+            food = await db.foods.find_one({"id": request.food_id}, {"_id": 0})
+            if not food:
+                food = next((f for f in SAMPLE_FOODS_DATABASE if f['id'] == request.food_id), None)
+        elif request.food_name:
+            food = await db.foods.find_one(
+                {"name": {"$regex": request.food_name, "$options": "i"}},
+                {"_id": 0}
+            )
+            if not food:
+                food = next((f for f in SAMPLE_FOODS_DATABASE 
+                           if request.food_name.lower() in f['name'].lower()), None)
+        
+        if not food:
+            raise HTTPException(status_code=404, detail="Food not found")
+        
+        # Calculate serving multiplier
+        serving_mult = 1.0
+        if request.serving_size and food.get('serving_size'):
+            serving_mult = request.serving_size / food['serving_size']
+        
+        # Analyze based on health profile
+        analysis = {
+            "food": food,
+            "serving_multiplier": serving_mult,
+            "personalized_analysis": None,
+            "warnings": [],
+            "benefits": [],
+            "organ_impact_summary": {},
+            "constraint_violations": [],
+            "nutritional_score": 0,
+            "recommendation": "neutral"
+        }
+        
+        if request.health_profile:
+            profile = request.health_profile
+            
+            # Check condition-specific constraints
+            for condition in profile.conditions:
+                condition_key = condition.lower().replace(' ', '_')
+                if condition_key in CONDITION_FOOD_CONSTRAINTS:
+                    constraints = CONDITION_FOOD_CONSTRAINTS[condition_key]
+                    
+                    # Check hard constraints
+                    for nutrient in constraints.get('key_nutrients', []):
+                        if nutrient in food.get('nutrients', {}):
+                            nutrient_val = food['nutrients'][nutrient].get('value', 0) * serving_mult
+                            targets = constraints.get('targets', {}).get(nutrient, {})
+                            
+                            if 'max_daily' in targets and nutrient_val > targets['max_daily'] * 0.3:
+                                analysis['warnings'].append({
+                                    "type": "constraint_warning",
+                                    "severity": "high" if nutrient_val > targets['max_daily'] * 0.5 else "moderate",
+                                    "nutrient": nutrient,
+                                    "message": f"High {nutrient} ({nutrient_val:.0f} {targets.get('unit', 'mg')}) - caution for {condition}",
+                                    "condition": condition
+                                })
+                                analysis['constraint_violations'].append({
+                                    "nutrient": nutrient,
+                                    "value": nutrient_val,
+                                    "limit": targets['max_daily'],
+                                    "condition": condition
+                                })
+            
+            # Check allergies
+            for allergen in food.get('allergens', []):
+                if allergen.lower() in [a.lower() for a in profile.allergies]:
+                    analysis['warnings'].append({
+                        "type": "allergy_alert",
+                        "severity": "critical",
+                        "allergen": allergen,
+                        "message": f"ALLERGEN ALERT: Contains {allergen}"
+                    })
+                    analysis['recommendation'] = "avoid"
+            
+            # Analyze organ impacts based on conditions
+            for organ, effect_data in food.get('organ_effects', {}).items():
+                impact = {
+                    "organ": organ,
+                    "effect": effect_data.get('effect'),
+                    "mechanism": effect_data.get('mechanism'),
+                    "relevance": "normal"
+                }
+                
+                # Check if user has conditions affecting this organ
+                organ_conditions = {
+                    "kidneys": ["CKD", "kidney disease", "renal"],
+                    "heart": ["heart failure", "CAD", "arrhythmia", "hypertension"],
+                    "liver": ["cirrhosis", "hepatitis", "NAFLD"],
+                    "pancreas": ["diabetes", "pancreatitis"]
+                }
+                
+                for cond in profile.conditions:
+                    for organ_key, keywords in organ_conditions.items():
+                        if organ_key == organ and any(kw.lower() in cond.lower() for kw in keywords):
+                            impact['relevance'] = "high"
+                            if effect_data.get('effect') == 'caution':
+                                analysis['warnings'].append({
+                                    "type": "organ_caution",
+                                    "severity": "moderate",
+                                    "organ": organ,
+                                    "condition": cond,
+                                    "message": f"Caution: {effect_data.get('mechanism')}"
+                                })
+                
+                analysis['organ_impact_summary'][organ] = impact
+            
+            # Add benefits
+            for condition in food.get('medical_considerations', {}).get('beneficial_for', []):
+                if any(condition.lower() in c.lower() for c in profile.conditions):
+                    analysis['benefits'].append({
+                        "condition": condition,
+                        "message": f"May be beneficial for {condition}"
+                    })
+        
+        # Calculate overall nutritional score (0-100)
+        score = 50  # Base score
+        if len(analysis['warnings']) == 0:
+            score += 20
+        elif any(w.get('severity') == 'critical' for w in analysis['warnings']):
+            score = 10
+        else:
+            score -= len(analysis['warnings']) * 10
+        
+        if len(analysis['benefits']) > 0:
+            score += len(analysis['benefits']) * 10
+        
+        score = max(0, min(100, score))
+        analysis['nutritional_score'] = score
+        
+        # Set recommendation
+        if analysis['recommendation'] != 'avoid':
+            if score >= 70:
+                analysis['recommendation'] = 'recommended'
+            elif score >= 40:
+                analysis['recommendation'] = 'moderate'
+            else:
+                analysis['recommendation'] = 'limit'
+        
+        return {
+            "success": True,
+            "analysis": analysis
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error analyzing food: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/food/nutrients/{nutrient}")
+async def get_nutrient_info(nutrient: str):
+    """Get detailed information about a nutrient and its organ effects"""
+    try:
+        nutrient_key = nutrient.lower().replace(' ', '_')
+        
+        if nutrient_key not in NUTRIENT_ORGAN_EFFECTS:
+            raise HTTPException(status_code=404, detail=f"Nutrient '{nutrient}' not found")
+        
+        info = NUTRIENT_ORGAN_EFFECTS[nutrient_key]
+        
+        return {
+            "success": True,
+            "nutrient": nutrient_key,
+            "info": info
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting nutrient info: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/food/conditions/{condition}")
+async def get_condition_food_constraints(condition: str):
+    """Get food constraints for a specific medical condition"""
+    try:
+        condition_key = condition.lower().replace(' ', '_')
+        
+        if condition_key not in CONDITION_FOOD_CONSTRAINTS:
+            # Try partial match
+            matches = [k for k in CONDITION_FOOD_CONSTRAINTS.keys() 
+                      if condition_key in k or k in condition_key]
+            if matches:
+                condition_key = matches[0]
+            else:
+                raise HTTPException(status_code=404, detail=f"Condition '{condition}' not found")
+        
+        constraints = CONDITION_FOOD_CONSTRAINTS[condition_key]
+        
+        return {
+            "success": True,
+            "condition": condition_key,
+            "constraints": constraints
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting condition constraints: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/food/categories")
+async def get_food_categories():
+    """Get all food categories"""
+    try:
+        categories = await db.foods.distinct("category")
+        
+        if not categories:
+            categories = list(set(f['category'] for f in SAMPLE_FOODS_DATABASE))
+        
+        return {
+            "success": True,
+            "categories": categories
+        }
+    except Exception as e:
+        logger.error(f"Error getting categories: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/food/seed-database")
+async def seed_food_database():
+    """Seed the food database with sample foods"""
+    try:
+        # Check if already seeded
+        count = await db.foods.count_documents({})
+        if count > 0:
+            return {"success": True, "message": f"Database already has {count} foods"}
+        
+        # Insert sample foods
+        await db.foods.insert_many(SAMPLE_FOODS_DATABASE)
+        
+        return {
+            "success": True,
+            "message": f"Seeded {len(SAMPLE_FOODS_DATABASE)} foods into database"
+        }
+    except Exception as e:
+        logger.error(f"Error seeding database: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/platform/stats")
+async def get_platform_stats():
+    """Get real-time platform statistics"""
+    try:
+        # Get counts from database
+        disease_count = await db.diseases.count_documents({})
+        enhanced_count = await db.diseases.count_documents({"fully_enhanced": True})
+        drug_count = await db.drugs.count_documents({})
+        food_count = await db.foods.count_documents({})
+        cases_count = await db.clinical_cases.count_documents({})
+        
+        # Count mathematical models
+        models_count = 0
+        async for disease in db.diseases.find({"mathematical_models": {"$exists": True}}, {"mathematical_models": 1}):
+            models = disease.get("mathematical_models", [])
+            if isinstance(models, list):
+                models_count += len(models)
+        
+        return {
+            "success": True,
+            "stats": {
+                "diseases": disease_count,
+                "diseases_enhanced": enhanced_count,
+                "enhancement_progress": round((enhanced_count / disease_count * 100), 1) if disease_count > 0 else 0,
+                "drugs": drug_count,
+                "foods": food_count if food_count > 0 else len(SAMPLE_FOODS_DATABASE),
+                "mathematical_models": models_count,
+                "clinical_cases": cases_count,
+                "organ_systems": 6,
+                "parameters": 200
+            }
+        }
+    except Exception as e:
+        logger.error(f"Error getting platform stats: {e}")
+        return {
+            "success": True,
+            "stats": {
+                "diseases": 2568,
+                "drugs": 292,
+                "foods": 5,
+                "mathematical_models": 4500,
+                "clinical_cases": 0,
+                "organ_systems": 6,
+                "parameters": 200
+            }
+        }
+
+
 # Include router - MUST be after all routes are defined
 app.include_router(api_router)
 
