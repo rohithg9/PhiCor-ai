@@ -27,7 +27,7 @@ Test 4: Admin Authentication
 - Admin login with admin@phicor.ai / admin123
 - Verify admin access and token validity
 
-API Base URL: https://aimeddiagnosis.preview.emergentagent.com
+API Base URL: https://healthcare-ai-12.preview.emergentagent.com
 All APIs require Authorization: Bearer {token} header
 """
 
