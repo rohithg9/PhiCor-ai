@@ -41,6 +41,8 @@ const LandingPage = () => {
   const [platformStats, setPlatformStats] = useState({
     drugs: "300+",
     diseases: "200+",
+    foods: "148+",
+    nutrients: "38+",
     calculators: "42+",
     organ_systems: "6",
     models: "∞"
