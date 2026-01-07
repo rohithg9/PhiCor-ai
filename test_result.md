@@ -46,8 +46,8 @@
 - Password: admin123
 
 ## Backend API Verification
-- POST /api/clinical/interpret - ✅ Working
-- POST /api/diagnosis/synthesize - ✅ Working (returns diseases_referenced: 20, drugs_referenced: 25)
+- POST /api/clinical/interpret - ✅ Working (200 OK)
+- POST /api/diagnosis/synthesize - ❌ FAILING (422 Unprocessable Entity)
 
 ## Bug Fixes Applied This Session
 1. **ClinicalFinding.value type** (server.py): Changed from `Optional[float]` to `Optional[Any]`
@@ -56,9 +56,17 @@
 4. **Differential matching_parameters** (server.py): Added matching_parameters and missing_features to response
 5. **Fallback stats** (DifferentialDashboard.js): Use PhiCor analysis data when disease not in DB
 
+## Critical Issues Found During Testing
+1. **Diagnostic Synthesis Section Missing**: The "X diseases referenced / Y drugs matched" section is not appearing on the frontend despite successful PhiCor analysis
+2. **Synthesis API Errors**: Backend logs show `POST /api/diagnosis/synthesize HTTP/1.1" 422 Unprocessable Entity` errors
+3. **Frontend State Issue**: The synthesis section may not be rendering due to API errors or frontend state management issues
+
 ## Enhancement Progress
 - Script still running in background
 
 ## agent_communication
 - agent: main
   message: "Applied multiple fixes for the 0 diseases/drugs bug and 0/0 parameter matching. The issues were: 1) React state closure capturing stale abnormalFindings, 2) Type conversion losing string values, 3) Frontend not using PhiCor matching_parameters as fallback. Testing needed to verify fixes work end-to-end."
+
+- agent: testing
+  message: "TESTING COMPLETED: Parameter matching (Task 2) is now working correctly - showing non-zero values like 10/39, 10/60, etc. However, Task 1 (diseases/drugs synthesis) is still failing. The PhiCor analysis API works (200 OK) but the synthesis API returns 422 errors, and the Diagnostic Synthesis section is not visible on the frontend. The main issue appears to be in the synthesis API endpoint or the frontend rendering of synthesis results."
