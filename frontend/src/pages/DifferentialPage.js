@@ -1394,11 +1394,21 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                           </div>
                         )}
                         
-                        {/* Status Badge */}
+                        {/* Status Badge - Show severity for symptoms, direction for labs/vitals */}
                         <Badge className={`mt-2 text-[10px] ${
-                          isHigh ? 'bg-red-500/20 text-red-400' : isLow ? 'bg-blue-500/20 text-blue-400' : 'bg-emerald-500/20 text-emerald-400'
+                          isHigh ? 'bg-red-500/20 text-red-400' 
+                            : isLow ? 'bg-blue-500/20 text-blue-400' 
+                            : isSymptom 
+                              ? severity === 'severe' ? 'bg-orange-500/20 text-orange-400'
+                                : severity === 'mild' ? 'bg-gray-500/20 text-gray-400'
+                                : 'bg-purple-500/20 text-purple-400'
+                              : 'bg-emerald-500/20 text-emerald-400'
                         }`}>
-                          {isHigh ? '↑ ELEVATED' : isLow ? '↓ LOW' : '✓ PRESENT'}
+                          {isHigh ? '↑ ELEVATED' 
+                            : isLow ? '↓ LOW' 
+                            : isSymptom 
+                              ? `⚠ ${severity.toUpperCase()}${specificity === 'nonspecific' ? ' (nonspecific)' : ''}`
+                              : '✓ PRESENT'}
                         </Badge>
                       </div>
                     );
