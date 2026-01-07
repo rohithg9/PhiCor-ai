@@ -1102,7 +1102,7 @@ async def calculate_frank_starling(params: Dict[str, float]):
 async def get_platform_stats():
     """
     Get dynamic platform statistics for landing page and dashboards.
-    Returns real-time counts of drugs, diseases, calculators, and other metrics.
+    Returns real-time counts of drugs, diseases, foods, calculators, and other metrics.
     """
     try:
         # Count drugs from drugs collection in MongoDB
@@ -1143,6 +1143,12 @@ async def get_platform_stats():
         model_result = await db.diseases.aggregate(pipeline).to_list(1)
         total_models = model_result[0]['total'] if model_result else 0
         
+        # Count foods from MongoDB
+        total_foods = await db.foods.count_documents({})
+        
+        # Count nutrients tracked
+        total_nutrients = await db.nutrients.count_documents({})
+        
         # Count clinical calculators (from frontend data)
         calculator_count = 42  # From clinicalCalculators.js
         
@@ -1158,12 +1164,20 @@ async def get_platform_stats():
                 "categories": len(disease_categories),
                 "with_models": diseases_with_models
             },
+            "foods": {
+                "total": total_foods
+            },
+            "nutrients": {
+                "total": total_nutrients
+            },
             "calculators": calculator_count,
             "organ_systems": organ_systems,
             "mathematical_models": total_models,
             "display_stats": {
                 "drugs": f"{total_drugs}+",
                 "diseases": f"{total_diseases}+",
+                "foods": f"{total_foods}+",
+                "nutrients": f"{total_nutrients}+",
                 "calculators": f"{calculator_count}+",
                 "organ_systems": str(organ_systems),
                 "models": f"{total_models}+" if total_models > 0 else "∞"
