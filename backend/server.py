@@ -9878,7 +9878,7 @@ IMPORTANT RULES:
 3. For EACH food item, explain its effect on body systems
 4. Provide ACTIONABLE recommendations (what to keep, reduce, add)
 5. If multiple images = multiple meals, group by meal
-6. Give SPECIFIC quantified changes where possible (e.g., +35 mg/dL blood glucose)""""""
+6. Give SPECIFIC quantified changes where possible (e.g., +35 mg/dL blood glucose)"""
 
         # Note: For actual image analysis, we would need to use a vision-capable model
         # For now, we'll use GPT-4o with the image descriptions
