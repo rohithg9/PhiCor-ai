@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useRegion } from '../context/RegionContext';
 import FeatureNav from '../components/FeatureNav';
@@ -11,13 +11,15 @@ import {
   Search, Plus, Trash2, FileText, Upload, AlertTriangle,
   CheckCircle, ChevronDown, ChevronUp, Activity, User, Clipboard,
   TrendingUp, TrendingDown, Minus, Brain, FlaskConical, Heart,
-  Stethoscope, Gauge, Info, Sparkles, Target, Zap, Shield, Pill, Calculator
+  Stethoscope, Gauge, Info, Sparkles, Target, Zap, Shield, Pill, Calculator,
+  Save, Share2, FolderOpen
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Slider } from '../components/ui/slider';
 import { Badge } from '../components/ui/badge';
 import { ScrollArea } from '../components/ui/scroll-area';
+import { toast } from 'sonner';
 import DiseaseDetailPanel from '../components/DiseaseDetailPanel';
 import DiseaseComparisonDashboard from '../components/DiseaseComparisonDashboard';
 import DifferentialDashboard from '../components/DifferentialDashboard';
