@@ -7550,7 +7550,7 @@ async def get_all_mathematical_models(
     offset: int = 0,
     organ_system: Optional[str] = None,
     validation_status: Optional[str] = None,
-    token: str = Depends(oauth2_scheme)
+    credentials: HTTPAuthorizationCredentials = Depends(security)
 ):
     """
     Get all mathematical models from diseases collection for admin review.
@@ -7558,7 +7558,8 @@ async def get_all_mathematical_models(
     """
     try:
         # Verify admin access
-        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        token = credentials.credentials
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         user = await db.users.find_one({"id": payload["sub"]}, {"_id": 0})
         if not user or user.get("role") not in ["admin", "super_admin", "expert"]:
             raise HTTPException(status_code=403, detail="Admin access required")
@@ -7640,11 +7641,12 @@ async def get_all_mathematical_models(
 
 
 @api_router.get("/admin/mathematical-models/novel")
-async def get_novel_models(token: str = Depends(oauth2_scheme)):
+async def get_novel_models(credentials: HTTPAuthorizationCredentials = Depends(security)):
     """Get novel/experimental mathematical models (future feature)"""
     try:
         # Verify admin access
-        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        token = credentials.credentials
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         user = await db.users.find_one({"id": payload["sub"]}, {"_id": 0})
         if not user or user.get("role") not in ["admin", "super_admin", "expert"]:
             raise HTTPException(status_code=403, detail="Admin access required")
@@ -7662,11 +7664,12 @@ async def get_novel_models(token: str = Depends(oauth2_scheme)):
 
 
 @api_router.get("/admin/mathematical-models/pending-reviews")
-async def get_pending_model_reviews(token: str = Depends(oauth2_scheme)):
+async def get_pending_model_reviews(credentials: HTTPAuthorizationCredentials = Depends(security)):
     """Get pending review suggestions for mathematical models"""
     try:
         # Verify admin access
-        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        token = credentials.credentials
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         user = await db.users.find_one({"id": payload["sub"]}, {"_id": 0})
         if not user or user.get("role") not in ["admin", "super_admin", "expert"]:
             raise HTTPException(status_code=403, detail="Admin access required")
@@ -7690,12 +7693,13 @@ async def get_pending_model_reviews(token: str = Depends(oauth2_scheme)):
 async def review_mathematical_model(
     model_id: str,
     review_data: dict,
-    token: str = Depends(oauth2_scheme)
+    credentials: HTTPAuthorizationCredentials = Depends(security)
 ):
     """Submit a review/validation for a mathematical model (super admin only)"""
     try:
         # Verify super admin access
-        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        token = credentials.credentials
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         user = await db.users.find_one({"id": payload["sub"]}, {"_id": 0})
         if not user or user.get("role") != "super_admin":
             raise HTTPException(status_code=403, detail="Super admin access required")
@@ -7753,12 +7757,13 @@ async def review_mathematical_model(
 async def suggest_model_change(
     model_id: str,
     suggestion_data: dict,
-    token: str = Depends(oauth2_scheme)
+    credentials: HTTPAuthorizationCredentials = Depends(security)
 ):
     """Submit a suggestion for a mathematical model (expert/admin)"""
     try:
         # Verify access
-        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        token = credentials.credentials
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         user = await db.users.find_one({"id": payload["sub"]}, {"_id": 0})
         if not user or user.get("role") not in ["admin", "super_admin", "expert"]:
             raise HTTPException(status_code=403, detail="Expert access required")
@@ -7777,6 +7782,7 @@ async def suggest_model_change(
                 model_name = models[model_idx].get("name", "Unknown Model")
         
         # Create suggestion record
+        from uuid import uuid4
         suggestion = {
             "id": str(uuid4()),
             "model_id": model_id,
