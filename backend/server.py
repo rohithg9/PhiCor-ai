@@ -7560,7 +7560,10 @@ async def get_all_mathematical_models(
         # Verify admin access
         token = credentials.credentials
         payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        # Check both users and experts collections
         user = await db.users.find_one({"id": payload["sub"]}, {"_id": 0})
+        if not user:
+            user = await db.experts.find_one({"id": payload["sub"]}, {"_id": 0})
         if not user or user.get("role") not in ["admin", "super_admin", "expert"]:
             raise HTTPException(status_code=403, detail="Admin access required")
         
@@ -7647,7 +7650,10 @@ async def get_novel_models(credentials: HTTPAuthorizationCredentials = Depends(s
         # Verify admin access
         token = credentials.credentials
         payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        # Check both users and experts collections
         user = await db.users.find_one({"id": payload["sub"]}, {"_id": 0})
+        if not user:
+            user = await db.experts.find_one({"id": payload["sub"]}, {"_id": 0})
         if not user or user.get("role") not in ["admin", "super_admin", "expert"]:
             raise HTTPException(status_code=403, detail="Admin access required")
         
@@ -7670,7 +7676,10 @@ async def get_pending_model_reviews(credentials: HTTPAuthorizationCredentials = 
         # Verify admin access
         token = credentials.credentials
         payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        # Check both users and experts collections
         user = await db.users.find_one({"id": payload["sub"]}, {"_id": 0})
+        if not user:
+            user = await db.experts.find_one({"id": payload["sub"]}, {"_id": 0})
         if not user or user.get("role") not in ["admin", "super_admin", "expert"]:
             raise HTTPException(status_code=403, detail="Admin access required")
         
