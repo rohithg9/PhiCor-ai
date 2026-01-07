@@ -971,12 +971,13 @@ const LandingPage = () => {
             viewport={{ once: true }}
             className="grid lg:grid-cols-2 gap-16 items-center"
           >
-            {/* Left: Visual */}
+            {/* Left: Healthcare Impact Visual */}
             <div className="order-2 lg:order-1">
               <div className="glass-panel rounded-2xl p-8 border border-purple-500/20">
                 <div className="space-y-4">
+                  {/* Comparison: Standard AI vs PhiCor */}
                   <div className="flex items-center gap-3 p-4 rounded-lg bg-white/5 border border-white/10">
-                    <div className="w-3 h-3 rounded-full bg-green-400 animate-pulse" />
+                    <div className="w-3 h-3 rounded-full bg-gray-400" />
                     <span className="text-sm text-muted-foreground">Standard AI:</span>
                     <span className="text-sm text-foreground ml-auto">"Based on similar patients..."</span>
                   </div>
@@ -985,20 +986,52 @@ const LandingPage = () => {
                     <span className="text-sm text-purple-300">PhiCor:</span>
                     <span className="text-sm text-foreground ml-auto font-mono">∇P = ρg + μ∇²v</span>
                   </div>
-                  <div className="mt-6 p-4 rounded-lg bg-white/5">
-                    <p className="text-xs text-muted-foreground mb-2">Patient Trajectory Prediction</p>
-                    <div className="h-24 flex items-end gap-1">
-                      {[40, 45, 42, 55, 60, 58, 70, 75, 80, 85, 90].map((h, i) => (
-                        <div
-                          key={i}
-                          className="flex-1 bg-gradient-to-t from-purple-500 to-indigo-400 rounded-t opacity-80"
-                          style={{ height: `${h}%` }}
-                        />
-                      ))}
+                  
+                  {/* Healthcare Impact Metrics */}
+                  <div className="mt-6 p-4 rounded-lg bg-gradient-to-br from-purple-500/5 to-indigo-500/5 border border-purple-500/20">
+                    <p className="text-xs text-purple-400 font-medium uppercase tracking-wider mb-4">Expected Healthcare Impact</p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center p-3 rounded-lg bg-white/5">
+                        <div className="flex items-center justify-center gap-1 text-green-400 mb-1">
+                          <TrendingDown className="w-4 h-4" />
+                          <span className="text-xl font-bold">40%</span>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground">Faster Diagnosis</p>
+                      </div>
+                      <div className="text-center p-3 rounded-lg bg-white/5">
+                        <div className="flex items-center justify-center gap-1 text-blue-400 mb-1">
+                          <Clock className="w-4 h-4" />
+                          <span className="text-xl font-bold">24h</span>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground">Earlier Detection</p>
+                      </div>
+                      <div className="text-center p-3 rounded-lg bg-white/5">
+                        <div className="flex items-center justify-center gap-1 text-purple-400 mb-1">
+                          <CheckCircle className="w-4 h-4" />
+                          <span className="text-xl font-bold">95%</span>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground">Model Accuracy</p>
+                      </div>
+                      <div className="text-center p-3 rounded-lg bg-white/5">
+                        <div className="flex items-center justify-center gap-1 text-amber-400 mb-1">
+                          <Users className="w-4 h-4" />
+                          <span className="text-xl font-bold">∞</span>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground">Scalable to All</p>
+                      </div>
                     </div>
-                    <div className="flex justify-between text-xs text-muted-foreground mt-2">
-                      <span>Now</span>
-                      <span>+24h</span>
+                  </div>
+                  
+                  {/* Live Feature Demo */}
+                  <div className="mt-4 p-3 rounded-lg bg-indigo-500/10 border border-indigo-500/20">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                      <span className="text-xs text-indigo-400 font-medium">Live Mathematical Modeling</span>
+                    </div>
+                    <div className="space-y-1 font-mono text-[10px] text-muted-foreground">
+                      <div>GFR = Kf × (P_gc - P_bs - π_gc) <span className="text-green-400">✓</span></div>
+                      <div>MAP = CO × SVR <span className="text-green-400">✓</span></div>
+                      <div>HbA1c ↔ eAG = 28.7 × A1c - 46.7 <span className="text-green-400">✓</span></div>
                     </div>
                   </div>
                 </div>
