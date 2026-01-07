@@ -582,12 +582,8 @@ const DifferentialPage = () => {
         setAnalysisTimeTaken(timeTaken);
         setIsAnalyzing(false);
         
-        // AUTO-TRIGGER SYNTHESIS after successful analysis (with delay to prevent animation conflict)
-        if (result?.differentials?.length > 0 || result?.findings?.length > 0) {
-          setTimeout(() => {
-            runClinicalSynthesis();
-          }, 500);
-        }
+        // Synthesis will be auto-triggered by useEffect when abnormalFindings updates
+        // The useEffect has a 1500ms debounce which ensures state is settled
       } else {
         setAnalysisTimeTaken(null);
         setIsAnalyzing(false);
