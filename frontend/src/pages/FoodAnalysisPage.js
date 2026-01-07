@@ -1898,7 +1898,7 @@ Snacks: Apple, almonds, green tea"
                         <div className={`flex-1 h-px ${isDark ? 'bg-gray-700' : 'bg-gray-200'}`} />
                       </div>
                       
-                      {/* Hidden file input for mobile */}
+                      {/* Hidden file input for mobile - using label for better compatibility */}
                       <input
                         type="file"
                         ref={mobileFileInputRef}
@@ -1909,21 +1909,19 @@ Snacks: Apple, almonds, green tea"
                         id="mobile-food-upload"
                       />
                       
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          // More reliable click for mobile
-                          if (mobileFileInputRef.current) {
-                            mobileFileInputRef.current.click();
-                          }
-                        }}
-                        disabled={foodImages.length >= 10}
-                        className={`w-full h-16 border-dashed flex flex-col gap-1 ${isDark ? 'border-gray-700' : ''}`}
+                      <label
+                        htmlFor="mobile-food-upload"
+                        className={`w-full h-16 border-dashed border-2 rounded-md flex flex-col gap-1 items-center justify-center cursor-pointer transition-colors ${
+                          isDark 
+                            ? 'border-gray-700 hover:bg-gray-800 hover:border-gray-600' 
+                            : 'border-gray-300 hover:bg-gray-50 hover:border-gray-400'
+                        } ${foodImages.length >= 10 ? 'opacity-50 cursor-not-allowed' : ''}`}
                       >
                         <Camera className="w-5 h-5 text-purple-500" />
-                        <span className="text-xs">Upload Photos ({foodImages.length}/10)</span>
-                      </Button>
+                        <span className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                          Upload Photos ({foodImages.length}/10)
+                        </span>
+                      </label>
                       
                       {foodImages.length > 0 && (
                         <>
