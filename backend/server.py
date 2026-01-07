@@ -8336,13 +8336,15 @@ Return DETAILED JSON with this structure:
   ]
 }}"""
 
-        llm = LlmChat(
+        from emergentintegrations.llm.chat import UserMessage
+        
+        chat = LlmChat(
             api_key=llm_key,
             session_id=f"phicor_food_{datetime.now().strftime('%H%M%S')}",
             system_message=system_message
         ).with_model("openai", "gpt-4o")
         
-        response = await llm.chat_async(analysis_prompt)
+        response = await chat.send_message(UserMessage(text=analysis_prompt))
         
         # Parse JSON response
         import json
