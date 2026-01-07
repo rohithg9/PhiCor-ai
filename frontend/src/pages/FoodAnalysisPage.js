@@ -270,6 +270,36 @@ const FoodAnalysisPage = () => {
   const [foodImages, setFoodImages] = useState([]);
   const [isAnalyzingImages, setIsAnalyzingImages] = useState(false);
   
+  // Swipe navigation for organ systems
+  const handleSwipeNavigation = useCallback((direction) => {
+    if (!analysisResult?.organ_system_parameter_effects) return;
+    
+    const allSystems = Object.keys(analysisResult.organ_system_parameter_effects);
+    const isOrganView = allSystems.includes(activeScale);
+    
+    if (!isOrganView) return;
+    
+    const currentIndex = allSystems.indexOf(activeScale);
+    
+    if (direction === 'left' && currentIndex < allSystems.length - 1) {
+      setActiveScale(allSystems[currentIndex + 1]);
+    } else if (direction === 'right') {
+      if (currentIndex > 0) {
+        setActiveScale(allSystems[currentIndex - 1]);
+      } else {
+        // Swipe right from first organ goes back to overview
+        setActiveScale('overview');
+      }
+    }
+  }, [analysisResult, activeScale]);
+  
+  // Set up swipe handlers
+  const swipeHandlers = useSwipe(
+    () => handleSwipeNavigation('left'),
+    () => handleSwipeNavigation('right'),
+    50
+  );
+  
   // Patient profile - comprehensive
   const [profile, setProfile] = useState({
     // Demographics
