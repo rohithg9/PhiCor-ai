@@ -1898,13 +1898,24 @@ Snacks: Apple, almonds, green tea"
                         <div className={`flex-1 h-px ${isDark ? 'bg-gray-700' : 'bg-gray-200'}`} />
                       </div>
                       
+                      {/* Hidden file input for mobile */}
+                      <input
+                        type="file"
+                        ref={mobileFileInputRef}
+                        onChange={handleImageUpload}
+                        accept="image/*"
+                        multiple
+                        className="hidden"
+                        id="mobile-food-upload"
+                      />
+                      
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => {
                           // More reliable click for mobile
-                          if (fileInputRef.current) {
-                            fileInputRef.current.click();
+                          if (mobileFileInputRef.current) {
+                            mobileFileInputRef.current.click();
                           }
                         }}
                         disabled={foodImages.length >= 10}
