@@ -1402,7 +1402,7 @@ def test_phicor_synthesis():
 
 def run_all_tests():
     """Run all PhiCor.ai Backend Feature tests"""
-    print("🧪 PHICOR.AI BACKEND TESTING - DIFFERENTIAL DIAGNOSIS DASHBOARD")
+    print("🧪 PHICOR.AI BACKEND TESTING - CLINICAL ANALYSIS & SYNTHESIS")
     print("=" * 80)
     print("Testing specific requirements from review request:")
     print("1. Admin Authentication - Admin login with admin@phicor.ai / admin123")
@@ -1412,9 +1412,11 @@ def run_all_tests():
     print("5. Disease Progression Data - Verify timeline stages structure")
     print("6. New Knowledge Endpoint - Test GET /api/knowledge/disease/{disease_id}")
     print("7. Disease Search API - Test GET /api/diseases/search?q=Pneumonia&limit=1")
-    print("8. PhiCor Clinical Analysis - Test POST /api/clinical/interpret")
+    print("8. PhiCor Clinical Interpret - Test POST /api/clinical/interpret")
+    print("9. PhiCor Synthesis - Test POST /api/diagnosis/synthesize (BUG FIX VERIFICATION)")
     print("=" * 80)
-    print("NOTE: This tests the backend APIs for PhiCor.ai Differential Diagnosis Dashboard")
+    print("NOTE: This tests the backend APIs for PhiCor.ai Clinical Analysis & Synthesis")
+    print("FOCUS: Verifying '0 diseases referenced / 0 drugs matched' bug has been fixed")
     print("=" * 80)
     
     test_results = {}
