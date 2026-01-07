@@ -936,8 +936,8 @@ Snacks: Apple, almonds, green tea"
                     <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   )}
                   
-                  {/* Search Dropdown */}
-                  {showResults && searchResults.length > 0 && (
+                  {/* Search Dropdown - only show when no analysis result */}
+                  {showResults && searchResults.length > 0 && !analysisResult && !isAnalyzing && (
                     <div className={`absolute z-50 left-0 right-0 mt-2 rounded-xl border shadow-xl overflow-hidden ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
                       {searchResults.map((item) => (
                         <button
