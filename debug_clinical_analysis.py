@@ -7,7 +7,7 @@ import requests
 import json
 
 # Get backend URL
-BACKEND_URL = "https://phicor-enhance.preview.emergentagent.com"
+BACKEND_URL = "https://aimeddiagnosis.preview.emergentagent.com"
 
 def test_clinical_analysis():
     """Test the clinical analysis endpoint with detailed debugging"""

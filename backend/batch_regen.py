@@ -11,7 +11,7 @@ from datetime import datetime
 
 MONGO_URL = 'mongodb://localhost:27017'
 DB_NAME = 'test_database'
-API_URL = 'https://phicor-enhance.preview.emergentagent.com'
+API_URL = 'https://aimeddiagnosis.preview.emergentagent.com'
 LOG_FILE = '/tmp/batch_regen.log'
 
 def log(msg):
