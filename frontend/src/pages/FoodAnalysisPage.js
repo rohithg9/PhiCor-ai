@@ -382,13 +382,17 @@ const FoodAnalysisPage = () => {
     return () => clearTimeout(timer);
   }, [searchQuery, smartSearch]);
   
-  // Analyze food
+  // Analyze food with timeout handling
   const analyzeFood = async (foodName) => {
     setShowResults(false);
     setSearchQuery(foodName);
     setIsAnalyzing(true);
     setAnalysisResult(null);
     setActiveScale('overview');
+    
+    // Create abort controller for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
     
     try {
       const response = await fetch(`${BACKEND_URL}/api/food/analyze-product`, {
@@ -407,8 +411,11 @@ const FoodAnalysisPage = () => {
             allergies: profile.allergies,
             dietary_restrictions: profile.dietaryPrefs
           } : null
-        })
+        }),
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
       
       const data = await response.json();
       if (data.success) {
@@ -418,8 +425,13 @@ const FoodAnalysisPage = () => {
         throw new Error(data.detail || 'Analysis failed');
       }
     } catch (error) {
+      clearTimeout(timeoutId);
       console.error('Analysis error:', error);
-      toast.error('Analysis failed. Please try again.');
+      if (error.name === 'AbortError') {
+        toast.error('Analysis timed out. Please try again.');
+      } else {
+        toast.error('Analysis failed. Please check your connection and try again.');
+      }
     } finally {
       setIsAnalyzing(false);
     }
