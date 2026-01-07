@@ -8336,7 +8336,7 @@ Return DETAILED JSON with this structure:
   ]
 }}"""
 
-        from emergentintegrations.llm.chat import UserMessage
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
         
         chat = LlmChat(
             api_key=llm_key,
@@ -8740,7 +8740,7 @@ Parse ALL items and return comprehensive JSON:
   ]
 }}"""
 
-        from emergentintegrations.llm.chat import UserMessage
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
         
         chat = LlmChat(
             api_key=llm_key,
@@ -9223,7 +9223,7 @@ Return COMPREHENSIVE JSON with PARAMETER-LEVEL detail:
   ]
 }}"""
 
-        from emergentintegrations.llm.chat import UserMessage
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
         
         chat = LlmChat(
             api_key=llm_key,
