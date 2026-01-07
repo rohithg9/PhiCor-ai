@@ -1540,6 +1540,33 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                       Synthesizing...
                     </Badge>
                   )}
+                  {/* Save & View Cases Buttons */}
+                  {differentialResults.length > 0 && !isAnalyzing && (
+                    <>
+                      <Button
+                        onClick={saveCase}
+                        disabled={isSaving}
+                        size="sm"
+                        className="h-7 px-2 bg-cyan-600 hover:bg-cyan-700 text-white"
+                      >
+                        {isSaving ? (
+                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1" />
+                        ) : (
+                          <Save className="w-3 h-3 mr-1" />
+                        )}
+                        Save
+                      </Button>
+                      <Button
+                        onClick={() => navigate('/cases')}
+                        size="sm"
+                        variant="outline"
+                        className="h-7 px-2"
+                      >
+                        <FolderOpen className="w-3 h-3 mr-1" />
+                        Cases
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
