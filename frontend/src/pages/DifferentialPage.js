@@ -1816,6 +1816,7 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
         currentDirection={drillDownModal.currentDirection}
       />
     </div>
+    </>
   );
 };
 
