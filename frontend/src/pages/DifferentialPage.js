@@ -66,6 +66,7 @@ const DifferentialPage = () => {
   const { region, isSI } = useRegion();
   const tutorial = useTutorial('differential');
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   
   // State management
   const initialTab = searchParams.get('tab') || 'parameters';
@@ -86,6 +87,7 @@ const DifferentialPage = () => {
   const [elapsedTime, setElapsedTime] = useState(0); // Live elapsed time during analysis
   const [highlightedText, setHighlightedText] = useState(''); // Text currently being "analyzed"
   const [analysisStep, setAnalysisStep] = useState(''); // Current analysis step description
+  const [isSaving, setIsSaving] = useState(false); // Track saving state
   
   // NEW: Disease Comparison Dashboard state
   const [selectedDiseaseForComparison, setSelectedDiseaseForComparison] = useState(null);
