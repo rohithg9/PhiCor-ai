@@ -1544,7 +1544,10 @@ Snacks: Apple, almonds, green tea"
                     
                     {/* Individual Organ System View - when clicked from overview */}
                     {analysisResult.organ_system_parameter_effects?.[activeScale] && !['overview', 'nutrients', 'molecular', 'cellular', 'physiology', 'clinical'].includes(activeScale) && (
-                      <div className="space-y-4">
+                      <div 
+                        className="space-y-4"
+                        {...swipeHandlers}
+                      >
                         {(() => {
                           const sysData = analysisResult.organ_system_parameter_effects[activeScale];
                           const sysInfo = ORGAN_SYSTEMS.find(s => s.id === activeScale) || { name: activeScale, icon: '🔬', color: 'from-gray-500 to-gray-600' };
