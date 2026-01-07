@@ -847,14 +847,14 @@ def test_phicor_clinical_interpret():
                 findings_pass = False
             
             # Check differential_diagnosis array has diagnoses with probabilities
-            differential_diagnosis = data.get('differential_diagnosis', [])
-            if len(differential_diagnosis) > 0:
-                print(f"  ✅ Differential diagnoses: {len(differential_diagnosis)} conditions")
+            differentials = data.get('differentials', [])
+            if len(differentials) > 0:
+                print(f"  ✅ Differential diagnoses: {len(differentials)} conditions")
                 
                 # Check each differential has probability
                 all_diffs_valid = True
                 
-                for i, diff in enumerate(differential_diagnosis[:3]):
+                for i, diff in enumerate(differentials[:3]):
                     name = diff.get('name', 'Unknown')
                     prob = diff.get('probability', None)
                     
