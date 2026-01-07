@@ -7710,6 +7710,8 @@ async def review_mathematical_model(
         token = credentials.credentials
         payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         user = await db.users.find_one({"id": payload["sub"]}, {"_id": 0})
+        if not user:
+            user = await db.experts.find_one({"id": payload["sub"]}, {"_id": 0})
         if not user or user.get("role") != "super_admin":
             raise HTTPException(status_code=403, detail="Super admin access required")
         
