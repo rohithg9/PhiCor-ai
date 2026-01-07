@@ -130,8 +130,8 @@ const DIETARY_PREFS = [
   { id: 'paleo', label: 'Paleo', icon: '🦴' },
 ];
 
-// Parameter Card Component (like disease dashboard)
-const ParameterCard = ({ param, isDark }) => {
+// Parameter Card Component - Shows key info at a glance, expandable for details
+const ParameterCard = ({ param, isDark, compact = false }) => {
   const [expanded, setExpanded] = useState(false);
   
   if (!param) return null;
@@ -152,33 +152,38 @@ const ParameterCard = ({ param, isDark }) => {
   const quantifiedDisplay = formatQuantifiedChange();
   
   return (
-    <div className={`rounded-lg border p-3 ${bgColor}`}>
+    <div className={`rounded-lg border p-2 sm:p-3 ${bgColor}`}>
       <button onClick={() => setExpanded(!expanded)} className="w-full text-left">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 flex-1 min-w-0">
-            {param.direction === 'increase' && <TrendingUp className={`w-4 h-4 flex-shrink-0 ${directionColor}`} />}
-            {param.direction === 'decrease' && <TrendingDown className={`w-4 h-4 flex-shrink-0 ${directionColor}`} />}
-            {param.direction === 'neutral' && <Minus className={`w-4 h-4 flex-shrink-0 ${directionColor}`} />}
-            <span className={`text-sm font-medium truncate ${isDark ? 'text-white' : 'text-gray-900'}`}>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5 flex-1 min-w-0">
+            {param.direction === 'increase' && <TrendingUp className={`w-3.5 h-3.5 flex-shrink-0 ${directionColor}`} />}
+            {param.direction === 'decrease' && <TrendingDown className={`w-3.5 h-3.5 flex-shrink-0 ${directionColor}`} />}
+            {param.direction === 'neutral' && <Minus className={`w-3.5 h-3.5 flex-shrink-0 ${directionColor}`} />}
+            <span className={`text-xs sm:text-sm font-medium truncate ${isDark ? 'text-white' : 'text-gray-900'}`}>
               {param.parameter?.replace(/_/g, ' ')}
             </span>
-            {/* Quantified Change - Prominently displayed */}
-            {quantifiedDisplay && (
-              <span className={`text-sm font-bold ml-1 ${
+          </div>
+          {/* Quantified Change - Always visible and prominent */}
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            {quantifiedDisplay ? (
+              <span className={`text-sm sm:text-base font-bold ${
                 param.quantified_change > 0 ? 'text-red-500' : 
                 param.quantified_change < 0 ? 'text-blue-500' : 'text-gray-400'
               }`}>
                 {quantifiedDisplay}
               </span>
+            ) : (
+              <Badge variant="outline" className="text-[8px] sm:text-[9px]">{param.magnitude || param.direction}</Badge>
             )}
-          </div>
-          <div className="flex items-center gap-1 flex-shrink-0 ml-2">
-            {param.magnitude && (
-              <Badge variant="outline" className="text-[9px]">{param.magnitude}</Badge>
-            )}
-            {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${expanded ? 'rotate-180' : ''} ${isDark ? 'text-gray-500' : 'text-gray-400'}`} />
           </div>
         </div>
+        {/* Show nutrient source inline for quick reference */}
+        {param.from_nutrient && !expanded && (
+          <div className={`text-[10px] mt-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+            via {param.from_nutrient}
+          </div>
+        )}
       </button>
       
       {expanded && (
