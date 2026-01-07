@@ -1589,27 +1589,42 @@ Snacks: Apple, almonds, green tea"
                                 </div>
                               </div>
                               
-                              {/* Swipe Navigation Hint */}
-                              <div className={`flex items-center justify-between mb-4 text-[10px] ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                              {/* Swipe Navigation Hint + Buttons */}
+                              <div className={`flex items-center justify-between mb-4 ${isDark ? 'bg-gray-800/50' : 'bg-gray-100'} rounded-lg p-2`}>
                                 {prevSystem ? (
                                   <button 
                                     onClick={() => setActiveScale(prevSystem)}
-                                    className={`flex items-center gap-1 px-2 py-1 rounded hover:bg-gray-800/50`}
+                                    className={`flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${isDark ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-200 text-gray-600'}`}
                                   >
-                                    <ChevronLeft className="w-3 h-3" />
-                                    {prevSystem.charAt(0).toUpperCase() + prevSystem.slice(1)}
+                                    <ChevronLeft className="w-4 h-4" />
+                                    <span className="hidden sm:inline">{prevSystem.charAt(0).toUpperCase() + prevSystem.slice(1)}</span>
                                   </button>
-                                ) : <span />}
-                                <span className="text-center">{currentIndex + 1} of {allSystems.length}</span>
+                                ) : (
+                                  <button 
+                                    onClick={() => setActiveScale('overview')}
+                                    className={`flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${isDark ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-200 text-gray-600'}`}
+                                  >
+                                    <ChevronLeft className="w-4 h-4" />
+                                    <span className="hidden sm:inline">Overview</span>
+                                  </button>
+                                )}
+                                <div className="flex flex-col items-center">
+                                  <span className={`text-xs font-medium ${isDark ? 'text-white' : 'text-gray-700'}`}>
+                                    {currentIndex + 1} of {allSystems.length}
+                                  </span>
+                                  <span className={`text-[9px] ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                                    👆 Swipe to navigate
+                                  </span>
+                                </div>
                                 {nextSystem ? (
                                   <button 
                                     onClick={() => setActiveScale(nextSystem)}
-                                    className={`flex items-center gap-1 px-2 py-1 rounded hover:bg-gray-800/50`}
+                                    className={`flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${isDark ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-200 text-gray-600'}`}
                                   >
-                                    {nextSystem.charAt(0).toUpperCase() + nextSystem.slice(1)}
-                                    <ChevronRight className="w-3 h-3" />
+                                    <span className="hidden sm:inline">{nextSystem.charAt(0).toUpperCase() + nextSystem.slice(1)}</span>
+                                    <ChevronRight className="w-4 h-4" />
                                   </button>
-                                ) : <span />}
+                                ) : <span className="w-16" />}
                               </div>
                               
                               {sysData.contributing_nutrients?.length > 0 && (
