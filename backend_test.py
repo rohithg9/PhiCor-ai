@@ -20,10 +20,10 @@ Test 3: Image Analysis API
 - Should handle base64 image data and return food analysis
 
 Test Credentials:
-- URL: https://healthpi.preview.emergentagent.com
+- URL: https://health-nutrient-db.preview.emergentagent.com
 - Food Analysis Page: /food
 
-API Base URL: https://healthpi.preview.emergentagent.com
+API Base URL: https://health-nutrient-db.preview.emergentagent.com
 """
 
 import requests
@@ -493,7 +493,7 @@ def run_all_tests():
     print("3. Image Analysis API - POST /api/food/analyze-images (base64 image)")
     print("=" * 80)
     print("Test Credentials:")
-    print("- URL: https://healthpi.preview.emergentagent.com")
+    print("- URL: https://health-nutrient-db.preview.emergentagent.com")
     print("- Food Analysis Page: /food")
     print("=" * 80)
     print("NOTE: This tests the backend APIs for PhiCor.ai Food Analysis Engine")
