@@ -294,7 +294,7 @@ const FoodAnalysisPage = () => {
     setFoodImages(prev => prev.filter(img => img.id !== imageId));
   };
   
-  // Analyze images with AI
+  // Analyze images with AI (with timeout handling)
   const analyzeImages = async () => {
     if (foodImages.length === 0) {
       toast.error('Please add at least one food image');
@@ -304,6 +304,11 @@ const FoodAnalysisPage = () => {
     setIsAnalyzingImages(true);
     setAnalysisResult(null);
     setActiveScale('overview');
+    setShowPanel(false);
+    
+    // Create abort controller for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
     
     try {
       // Convert images to base64 for API
@@ -326,8 +331,11 @@ const FoodAnalysisPage = () => {
             medications: profile.medications,
             allergies: profile.allergies
           } : null
-        })
+        }),
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
       
       const data = await response.json();
       if (data.success) {
@@ -337,8 +345,13 @@ const FoodAnalysisPage = () => {
         throw new Error(data.detail || 'Image analysis failed');
       }
     } catch (error) {
+      clearTimeout(timeoutId);
       console.error('Image analysis error:', error);
-      toast.error('Image analysis failed. Please try again.');
+      if (error.name === 'AbortError') {
+        toast.error('Image analysis timed out. Please try again.');
+      } else {
+        toast.error('Image analysis failed. Please try again.');
+      }
     } finally {
       setIsAnalyzingImages(false);
     }
