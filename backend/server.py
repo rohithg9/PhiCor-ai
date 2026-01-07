@@ -7443,9 +7443,18 @@ CRITICAL RULES:
                 'anchor_criteria_met': diff.get('anchor_criteria_met', True)
             })
         
-        # Build dominant syndromes
+        # Build dominant syndrome (singular - now with mandatory gate logic)
         dominant_syndromes = []
-        for syndrome in analysis.get('dominant_clinical_syndromes', []):
+        dominant_syndrome = analysis.get('dominant_syndrome', {})
+        if dominant_syndrome and isinstance(dominant_syndrome, dict):
+            dominant_syndromes.append({
+                'syndrome': dominant_syndrome.get('syndrome_name', dominant_syndrome.get('syndrome')),
+                'confidence': dominant_syndrome.get('confidence', 'moderate'),
+                'key_features': dominant_syndrome.get('key_supporting_findings', dominant_syndrome.get('key_features', [])),
+                'pathophysiologic_rationale': dominant_syndrome.get('pathophysiologic_rationale', '')
+            })
+        # Fallback to old format if present
+        for syndrome in analysis.get('dominant_clinical_syndromes', analysis.get('dominant_syndromes', [])):
             if isinstance(syndrome, dict):
                 dominant_syndromes.append({
                     'syndrome': syndrome.get('syndrome'),
@@ -7455,14 +7464,21 @@ CRITICAL RULES:
             else:
                 dominant_syndromes.append({'syndrome': syndrome})
         
-        # Build formatted synthesis
+        # Build clinical clustering info
+        clinical_clustering = analysis.get('clinical_clustering', {})
+        
+        # Get reasoning transparency (suppressed diagnoses, cautions)
+        reasoning_transparency = analysis.get('reasoning_transparency', {})
+        
+        # Build formatted synthesis with sanity check
         formatted_synthesis = {
             'primary_diagnosis': synthesis.get('most_likely_diagnosis'),
             'key_alternative': synthesis.get('key_alternative'),
             'clinical_decision_pathway': synthesis.get('clinical_decision_pathway'),
             'discriminating_tests': synthesis.get('discriminating_tests', []),
             'confidence_level': synthesis.get('confidence_level', 0.5),
-            'clinical_uncertainty': synthesis.get('clinical_uncertainty')
+            'clinical_uncertainty': synthesis.get('clinical_uncertainty'),
+            'sanity_check': synthesis.get('sanity_check', '')
         }
         
         return {
@@ -7472,8 +7488,10 @@ CRITICAL RULES:
             "findings": findings,
             "symptoms": symptoms,
             "dominant_syndromes": dominant_syndromes,
+            "clinical_clustering": clinical_clustering,
             "differentials": formatted_differentials,
             "synthesis": formatted_synthesis,
+            "reasoning_transparency": reasoning_transparency,
             "management": analysis.get('management_considerations', []),
             "safety_alerts": analysis.get('safety_alerts', []),
             "clinical_pearls": analysis.get('clinical_pearls', []),
