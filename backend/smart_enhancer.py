@@ -19,6 +19,11 @@ from typing import Dict, List, Optional
 from motor.motor_asyncio import AsyncIOMotorClient
 import uuid
 import re
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv(Path(__file__).parent / '.env')
 
 # Setup logging
 logging.basicConfig(
