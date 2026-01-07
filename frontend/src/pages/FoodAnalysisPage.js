@@ -1157,10 +1157,17 @@ Snacks: Apple, almonds, green tea"
                                      system === 'gastrointestinal' ? '🥗' :
                                      system === 'neurological' ? '🧠' :
                                      system === 'musculoskeletal' ? '💪' :
-                                     system === 'immune' ? '🛡️' : '🔬'}
+                                     system === 'immune' ? '🛡️' : 
+                                     system === 'metabolic' ? '🔥' :
+                                     system === 'endocrine' ? '⚖️' :
+                                     system === 'hematologic' ? '🩸' : '🔬'}
                                   </span>
-                                  <div className={`text-xs font-medium capitalize mt-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                                    {system.slice(0, 6)}
+                                  <div className={`text-[10px] font-medium mt-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                    {system === 'cardiovascular' ? 'Cardio' :
+                                     system === 'gastrointestinal' ? 'GI' :
+                                     system === 'musculoskeletal' ? 'MSK' :
+                                     system === 'neurological' ? 'Neuro' :
+                                     system.charAt(0).toUpperCase() + system.slice(1)}
                                   </div>
                                   <Badge className={`mt-1 text-[8px] ${
                                     data.overall_effect === 'beneficial' ? 'bg-green-500/30 text-green-400' :
