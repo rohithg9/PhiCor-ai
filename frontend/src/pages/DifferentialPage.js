@@ -1333,6 +1333,16 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                   {abnormalFindings.slice(0, 12).map(finding => {
                     const isHigh = finding.direction === 'increase';
                     const isLow = finding.direction === 'decrease';
+                    const isSymptom = finding.type === 'symptom' || finding.direction === 'present';
+                    const severity = finding.severity || 'moderate';
+                    const specificity = finding.specificity || 'supportive';
+                    
+                    // Determine symptom severity styling
+                    const getSeverityStyle = () => {
+                      if (severity === 'severe') return isDark ? 'bg-orange-900/30 border-orange-500/50' : 'bg-orange-50 border-orange-300';
+                      if (severity === 'mild') return isDark ? 'bg-gray-800/50 border-gray-600/50' : 'bg-gray-100 border-gray-300';
+                      return isDark ? 'bg-purple-900/30 border-purple-500/50' : 'bg-purple-50 border-purple-300';
+                    };
                     
                     return (
                       <div 
@@ -1342,7 +1352,9 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                             ? isDark ? 'bg-red-900/30 border-red-500/50' : 'bg-red-50 border-red-300'
                             : isLow
                               ? isDark ? 'bg-blue-900/30 border-blue-500/50' : 'bg-blue-50 border-blue-300'
-                              : isDark ? 'bg-emerald-900/30 border-emerald-500/50' : 'bg-emerald-50 border-emerald-300'
+                              : isSymptom
+                                ? getSeverityStyle()
+                                : isDark ? 'bg-emerald-900/30 border-emerald-500/50' : 'bg-emerald-50 border-emerald-300'
                         }`}
                       >
                         {/* Delete button */}
