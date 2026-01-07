@@ -266,6 +266,9 @@ const FoodAnalysisPage = () => {
   const [quantity, setQuantity] = useState(1);
   const [unit, setUnit] = useState('portion');
   const [foodType, setFoodType] = useState('default');
+  const [deepAnalysisMode, setDeepAnalysisMode] = useState(false);
+  const [ingredientInput, setIngredientInput] = useState('');
+  const [showIngredientInput, setShowIngredientInput] = useState(false);
   
   // Health profile panel state
   const [showProfilePanel, setShowProfilePanel] = useState(true);
