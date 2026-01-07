@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTheme } from '../context/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -7,7 +7,8 @@ import {
   ChevronDown, ChevronUp, Activity, Zap, Shield, Target, Pill, User,
   TrendingUp, TrendingDown, Minus, Loader2, X, UtensilsCrossed, Leaf,
   Sparkles, Flame, Microscope, Atom, Gauge, Menu, Scale, Ruler,
-  Calendar, Weight, HeartPulse, Beaker, TestTube, FileText, Plus
+  Calendar, Weight, HeartPulse, Beaker, TestTube, FileText, Plus,
+  Camera, Image, Upload, Trash2
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
