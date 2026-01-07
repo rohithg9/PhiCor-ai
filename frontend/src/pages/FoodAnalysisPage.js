@@ -1282,11 +1282,48 @@ Snacks: Apple, almonds, green tea"
                     <TabsContent value="intake" className="space-y-3">
                       <Textarea value={profile.foodIntake} onChange={(e) => setProfile(p => ({ ...p, foodIntake: e.target.value }))}
                         placeholder="What did you eat today?&#10;Breakfast: ...&#10;Lunch: ...&#10;Dinner: ..."
-                        className={`min-h-[150px] text-xs ${isDark ? 'bg-gray-800 border-gray-700' : ''}`} />
+                        className={`min-h-[100px] text-xs ${isDark ? 'bg-gray-800 border-gray-700' : ''}`} />
                       <Button onClick={analyzeIntake} disabled={isAnalyzing || !profile.foodIntake.trim()} className="w-full bg-gradient-to-r from-green-500 to-emerald-500">
                         {isAnalyzing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />}
-                        Analyze Intake
+                        Analyze Text
                       </Button>
+                      
+                      {/* Mobile Image Upload */}
+                      <div className="flex items-center gap-2 py-1">
+                        <div className={`flex-1 h-px ${isDark ? 'bg-gray-700' : 'bg-gray-200'}`} />
+                        <span className={`text-[10px] ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>OR</span>
+                        <div className={`flex-1 h-px ${isDark ? 'bg-gray-700' : 'bg-gray-200'}`} />
+                      </div>
+                      
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={foodImages.length >= 10}
+                        className={`w-full h-16 border-dashed flex flex-col gap-1 ${isDark ? 'border-gray-700' : ''}`}
+                      >
+                        <Camera className="w-5 h-5 text-purple-500" />
+                        <span className="text-xs">Upload Photos ({foodImages.length}/10)</span>
+                      </Button>
+                      
+                      {foodImages.length > 0 && (
+                        <>
+                          <div className="grid grid-cols-5 gap-1">
+                            {foodImages.map((img) => (
+                              <div key={img.id} className="relative group aspect-square">
+                                <img src={img.preview} alt={img.name} className="w-full h-full object-cover rounded" />
+                                <button onClick={() => removeImage(img.id)} className="absolute top-0 right-0 p-0.5 bg-red-500 rounded-bl text-white">
+                                  <X className="w-2 h-2" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                          <Button onClick={analyzeImages} disabled={isAnalyzingImages} className="w-full bg-gradient-to-r from-purple-500 to-pink-500">
+                            {isAnalyzingImages ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Image className="w-4 h-4 mr-2" />}
+                            Analyze Photos
+                          </Button>
+                        </>
+                      )}
                     </TabsContent>
                   </Tabs>
                 </div>
