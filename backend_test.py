@@ -1242,6 +1242,164 @@ def test_phicor_clinical_interpret():
     except Exception as e:
         print(f"❌ Error testing PhiCor Clinical Analysis: {e}")
         return False
+
+def test_phicor_synthesis():
+    """Test 9: PhiCor Synthesis - Test POST /api/diagnosis/synthesize"""
+    
+    print("\n🧬 TEST 9: PHICOR SYNTHESIS ENDPOINT")
+    print("=" * 50)
+    print("Testing requirements from review request:")
+    print("- Test POST /api/diagnosis/synthesize with clinical data")
+    print("- CRITICAL: Verify synthesis.knowledge_base.diseases_referenced > 0")
+    print("- CRITICAL: Verify synthesis.knowledge_base.drugs_referenced > 0")
+    print("- Check that database_diseases array has disease names")
+    print("- Test with different value types (string and numeric)")
+    
+    try:
+        # Test with string value first
+        request_data = {
+            "clinical_text": "55 year old male with chest pain and dyspnea",
+            "lab_findings": [{"name": "Troponin", "value": "elevated", "direction": "increase"}],
+            "imaging_findings": [],
+            "symptoms": [
+                {"name": "chest pain", "severity": "moderate"}, 
+                {"name": "shortness of breath", "severity": "moderate"}
+            ],
+            "patient_info": None
+        }
+        
+        print(f"  📝 Testing synthesis with string value: 'elevated'")
+        
+        response = requests.post(
+            f"{BACKEND_URL}/api/diagnosis/synthesize",
+            json=request_data,
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            print(f"✅ PhiCor Synthesis successful")
+            print(f"  📊 Response status: {response.status_code}")
+            
+            # Check synthesis structure
+            synthesis = data.get('synthesis', {})
+            if synthesis:
+                print(f"  ✅ Synthesis object present ✓")
+                
+                # Check knowledge_base (CRITICAL)
+                knowledge_base = synthesis.get('knowledge_base', {})
+                if knowledge_base:
+                    diseases_referenced = knowledge_base.get('diseases_referenced', 0)
+                    drugs_referenced = knowledge_base.get('drugs_referenced', 0)
+                    
+                    print(f"  📊 Diseases referenced: {diseases_referenced}")
+                    print(f"  📊 Drugs referenced: {drugs_referenced}")
+                    
+                    if diseases_referenced > 0:
+                        print(f"  ✅ CRITICAL: diseases_referenced > 0 ✓")
+                        diseases_pass = True
+                    else:
+                        print(f"  ❌ CRITICAL: diseases_referenced = 0 (BUG NOT FIXED)")
+                        diseases_pass = False
+                    
+                    if drugs_referenced > 0:
+                        print(f"  ✅ CRITICAL: drugs_referenced > 0 ✓")
+                        drugs_pass = True
+                    else:
+                        print(f"  ❌ CRITICAL: drugs_referenced = 0 (BUG NOT FIXED)")
+                        drugs_pass = False
+                else:
+                    print(f"  ❌ CRITICAL: knowledge_base missing")
+                    diseases_pass = False
+                    drugs_pass = False
+                
+                # Check database_diseases array
+                database_diseases = data.get('database_diseases', [])
+                if database_diseases:
+                    print(f"  ✅ Database diseases array present: {len(database_diseases)} diseases")
+                    # Show sample disease names
+                    for i, disease in enumerate(database_diseases[:3]):
+                        if isinstance(disease, dict):
+                            name = disease.get('name', 'Unknown')
+                            print(f"    - {name}")
+                        else:
+                            print(f"    - {disease}")
+                    db_diseases_pass = True
+                else:
+                    print(f"  ❌ Database diseases array empty or missing")
+                    db_diseases_pass = False
+                
+                synthesis_pass = True
+            else:
+                print(f"  ❌ Synthesis object missing")
+                synthesis_pass = False
+                diseases_pass = False
+                drugs_pass = False
+                db_diseases_pass = False
+            
+            # Test with numeric value
+            print(f"\n  📝 Testing synthesis with numeric value: 2.5")
+            
+            request_data_numeric = {
+                "clinical_text": "55 year old male with chest pain and dyspnea",
+                "lab_findings": [{"name": "Troponin", "value": 2.5, "direction": "increase"}],
+                "imaging_findings": [],
+                "symptoms": [
+                    {"name": "chest pain", "severity": "moderate"}, 
+                    {"name": "shortness of breath", "severity": "moderate"}
+                ],
+                "patient_info": None
+            }
+            
+            response_numeric = requests.post(
+                f"{BACKEND_URL}/api/diagnosis/synthesize",
+                json=request_data_numeric,
+                timeout=30
+            )
+            
+            if response_numeric.status_code == 200:
+                print(f"  ✅ Numeric value test successful ✓")
+                numeric_pass = True
+            else:
+                print(f"  ❌ Numeric value test failed: {response_numeric.status_code}")
+                try:
+                    error_data = response_numeric.json()
+                    print(f"    ℹ️ Error details: {error_data}")
+                except:
+                    print(f"    ℹ️ Response text: {response_numeric.text}")
+                numeric_pass = False
+            
+            # Overall assessment
+            critical_tests = [diseases_pass, drugs_pass, db_diseases_pass, numeric_pass]
+            if all(critical_tests):
+                print(f"\n  ✅ PhiCor Synthesis endpoint working correctly ✓")
+                print(f"  ✅ CRITICAL BUG FIXED: diseases_referenced > 0 ✓")
+                print(f"  ✅ CRITICAL BUG FIXED: drugs_referenced > 0 ✓")
+                print(f"  ✅ Database diseases populated ✓")
+                print(f"  ✅ Both string and numeric values accepted ✓")
+                return True
+            else:
+                print(f"\n  ❌ Critical issues detected:")
+                test_names = ['Diseases referenced > 0', 'Drugs referenced > 0', 'Database diseases', 'Numeric values']
+                for i, (test_pass, test_name) in enumerate(zip(critical_tests, test_names)):
+                    status = "✅" if test_pass else "❌"
+                    print(f"    {status} {test_name}")
+                return False
+            
+        else:
+            print(f"❌ PhiCor Synthesis failed: {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"  ℹ️ Error details: {error_data}")
+            except:
+                print(f"  ℹ️ Response text: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Error testing PhiCor Synthesis: {e}")
+        return False
+
 def run_all_tests():
     """Run all PhiCor.ai Backend Feature tests"""
     print("🧪 PHICOR.AI BACKEND TESTING - DIFFERENTIAL DIAGNOSIS DASHBOARD")
