@@ -4,11 +4,11 @@ import { useTheme } from '../context/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, Apple, Droplets, Heart, Brain, AlertTriangle, CheckCircle,
-  ChevronDown, ChevronUp, Activity, Zap, Shield, Target, Pill, User,
+  ChevronDown, ChevronUp, ChevronRight, ChevronLeft, Activity, Zap, Shield, Target, Pill, User,
   TrendingUp, TrendingDown, Minus, Loader2, X, UtensilsCrossed, Leaf,
   Sparkles, Flame, Microscope, Atom, Gauge, Menu, Scale, Ruler,
   Calendar, Weight, HeartPulse, Beaker, TestTube, FileText, Plus,
-  Camera, Image, Upload, Trash2
+  Camera, Image, Upload, Trash2, ArrowLeft
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
