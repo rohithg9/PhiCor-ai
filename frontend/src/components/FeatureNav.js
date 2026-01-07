@@ -38,15 +38,6 @@ const features = [
     hoverColor: 'hover:bg-emerald-500/20',
   },
   {
-    symbol: 'Π',
-    name: 'Food Analysis',
-    description: 'Mathematical nutrition engine',
-    path: '/food',
-    color: 'from-green-500 to-lime-500',
-    activeColor: 'bg-green-500',
-    hoverColor: 'hover:bg-green-500/20',
-  },
-  {
     symbol: 'ρ',
     name: 'Drug Details',
     description: 'Pharmacology & drug effects',
@@ -54,6 +45,15 @@ const features = [
     color: 'from-rose-500 to-pink-500',
     activeColor: 'bg-rose-500',
     hoverColor: 'hover:bg-rose-500/20',
+  },
+  {
+    symbol: 'Π',
+    name: 'Food Analysis',
+    description: 'Mathematical nutrition engine',
+    path: '/food',
+    color: 'from-green-500 to-lime-500',
+    activeColor: 'bg-green-500',
+    hoverColor: 'hover:bg-green-500/20',
   },
 ];
 
