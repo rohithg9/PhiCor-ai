@@ -1453,7 +1453,8 @@ def run_all_tests():
             'disease_progression_data': False,
             'new_knowledge_endpoint': False,
             'disease_search_api': False,
-            'phicor_clinical_analysis': False
+            'phicor_clinical_interpret': False,
+            'phicor_synthesis': False
         })
     
     # Summary
