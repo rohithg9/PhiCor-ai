@@ -7341,13 +7341,16 @@ CRITICAL: Return ONLY valid JSON. Include 5 differential diagnoses. Interpret al
         # Build differential list for frontend
         formatted_differentials = []
         for diff in differentials:
+            supporting = diff.get('supporting_findings', [])
             formatted_differentials.append({
                 'rank': diff.get('rank', 0),
                 'name': diff.get('diagnosis'),
                 'icd_code': diff.get('icd10', ''),
                 'probability': diff.get('probability', 0),
                 'role': diff.get('role', 'Secondary'),
-                'supporting_findings': diff.get('supporting_findings', []),
+                'supporting_findings': supporting,
+                'matching_parameters': supporting,  # Use supporting findings as matching parameters
+                'missing_features': diff.get('key_discriminating_features', []),  # Use discriminating features as missing
                 'clinical_reasoning': diff.get('clinical_reasoning', ''),
                 'key_discriminating_features': diff.get('key_discriminating_features', []),
                 'against_diagnosis': diff.get('against_diagnosis', []),
