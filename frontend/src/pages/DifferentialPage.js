@@ -752,6 +752,89 @@ const DifferentialPage = () => {
     return () => clearTimeout(timer);
   }, [abnormalFindings, clinicalText, differentialResults, runClinicalSynthesis]);
   
+  // Save case function
+  const saveCase = useCallback(async () => {
+    if (differentialResults.length === 0 && !clinicalText.trim()) {
+      toast.error('No analysis to save. Run an analysis first.');
+      return;
+    }
+    
+    setIsSaving(true);
+    try {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
+      
+      // Get dominant syndrome from phicorResults
+      const dominantSyndrome = phicorResults?.dominant_syndromes?.[0] || clinicalSynthesis?.dominant_syndrome || null;
+      
+      const caseData = {
+        clinical_text: clinicalText,
+        patient_summary: phicorResults?.patient_summary || null,
+        findings: abnormalFindings.map(f => ({
+          parameterId: f.parameterId,
+          parameterName: f.parameterName,
+          value: f.value,
+          unit: f.unit,
+          direction: f.direction,
+          status: f.status,
+          normalRange: f.normalRange
+        })),
+        symptoms: phicorResults?.symptoms || abnormalFindings.filter(f => f.type === 'symptom'),
+        differentials: differentialResults.map(d => ({
+          rank: d.rank,
+          name: d.diseaseName || d.name,
+          diagnosis: d.diseaseName || d.name,
+          probability: d.probability || d.matchScore,
+          role: d.role || 'Differential',
+          clinical_reasoning: d.clinical_reasoning || d.reasoning,
+          supporting_findings: d.matchingParameters || d.supporting_findings || [],
+          syndrome_alignment: d.syndrome_alignment
+        })),
+        synthesis: clinicalSynthesis,
+        dominant_syndrome: dominantSyndrome,
+        safety_alerts: phicorResults?.safety_alerts || [],
+        tags: []
+      };
+      
+      // Auto-generate tags from differentials
+      if (differentialResults.length > 0) {
+        const topDiagnosis = differentialResults[0].diseaseName || differentialResults[0].name;
+        if (topDiagnosis) {
+          // Extract key terms for tags
+          const terms = topDiagnosis.toLowerCase().split(/[\s,]+/).filter(t => t.length > 3);
+          caseData.tags = terms.slice(0, 3);
+        }
+      }
+      
+      const response = await fetch(`${backendUrl}/api/cases/save`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(caseData)
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        toast.success(
+          <div>
+            <p>Case saved successfully!</p>
+            <button 
+              onClick={() => navigate(`/cases/${data.case_id}`)}
+              className="text-sm underline mt-1"
+            >
+              View case →
+            </button>
+          </div>
+        );
+      } else {
+        throw new Error('Failed to save case');
+      }
+    } catch (error) {
+      console.error('Error saving case:', error);
+      toast.error('Failed to save case. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  }, [clinicalText, abnormalFindings, differentialResults, clinicalSynthesis, phicorResults, navigate]);
+  
   // Get probability color
   const getProbabilityColor = (score) => {
     if (score >= 70) return 'from-green-500 to-emerald-500';
