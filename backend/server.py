@@ -9729,109 +9729,156 @@ Respond ONLY with valid JSON."""
         analysis_prompt = f"""Analyze {image_count} food image(s) showing what the person ate.
 {health_context if health_context else "No health profile provided - give general analysis."}
 
-For each image, identify ALL foods visible and then provide COMBINED analysis.
+CRITICAL: You MUST identify EACH INDIVIDUAL food item visible and provide DETAILED per-item analysis.
 
-Return COMPREHENSIVE JSON:
+Return COMPREHENSIVE JSON with this EXACT structure:
+
 {{
-  "product_name": "Combined Meal Analysis ({image_count} images)",
+  "product_name": "Meal Analysis ({image_count} {'image' if image_count == 1 else 'images'})",
   "product_type": "meal_images",
-  "description": "Summary of all foods identified across all images",
+  "serving_display": "Total estimated weight",
   
   "images_analyzed": [
     {{
       "image_number": 1,
-      "foods_identified": ["food1", "food2"],
-      "estimated_portions": {{"food1": "portion size", "food2": "portion size"}},
       "meal_type": "breakfast/lunch/dinner/snack",
+      "foods_identified": ["food1", "food2", "food3"],
       "confidence": 85
     }}
   ],
   
-  "all_foods_identified": ["complete list of all foods from all images"],
-  "total_estimated_calories": number,
-  
-  "complete_nutritional_profile": {{
-    "macronutrients": {{
-      "energy_kcal": number,
-      "protein_g": number,
-      "carbohydrates_g": number,
-      "sugars_g": number,
-      "fiber_g": number,
-      "fat_total_g": number
+  "individual_food_items": [
+    {{
+      "item_name": "Grilled Chicken Breast",
+      "estimated_portion": "150g (1 medium breast)",
+      "calories": 231,
+      "macros": {{"protein_g": 43, "carbs_g": 0, "fat_g": 5, "fiber_g": 0}},
+      "key_nutrients": ["High protein", "Low fat", "Vitamin B6", "Selenium"],
+      "parameter_effects": {{
+        "cardiovascular": {{"effect": "beneficial", "reason": "Lean protein source, low saturated fat"}},
+        "glycemic": {{"effect": "beneficial", "reason": "Zero carbs, stable blood sugar"}},
+        "musculoskeletal": {{"effect": "beneficial", "reason": "Complete protein for muscle maintenance"}},
+        "renal": {{"effect": "caution", "reason": "High protein - monitor if kidney issues"}}
+      }},
+      "recommendation": "Keep this - excellent lean protein",
+      "what_to_modify": null
     }},
-    "micronutrients": {{
-      "vitamins": {{"vitamin_c_mg": number, "vitamin_d_iu": number}},
-      "minerals": {{"sodium_mg": number, "potassium_mg": number, "calcium_mg": number}}
+    {{
+      "item_name": "White Rice",
+      "estimated_portion": "200g (1 cup cooked)",
+      "calories": 260,
+      "macros": {{"protein_g": 5, "carbs_g": 56, "fat_g": 0.5, "fiber_g": 0.6}},
+      "key_nutrients": ["Carbohydrates", "Manganese", "Folate"],
+      "parameter_effects": {{
+        "cardiovascular": {{"effect": "neutral", "reason": "Low sodium, but refined grain"}},
+        "glycemic": {{"effect": "caution", "reason": "High GI ~73, rapid blood glucose spike"}},
+        "gastrointestinal": {{"effect": "neutral", "reason": "Low fiber content"}}
+      }},
+      "recommendation": "Consider swapping for brown rice or quinoa",
+      "what_to_modify": "Replace with whole grain for better fiber and lower GI"
+    }}
+  ],
+  
+  "combined_meal_analysis": {{
+    "total_calories": 491,
+    "total_macros": {{"protein_g": 48, "carbs_g": 56, "fat_g": 5.5, "fiber_g": 0.6}},
+    "macro_balance": "High protein (39%), High carb (46%), Low fat (10%)",
+    "overall_effect": {{
+      "cardiovascular": {{"effect": "beneficial", "score": 75}},
+      "glycemic": {{"effect": "caution", "score": 55}},
+      "renal": {{"effect": "caution", "score": 60}},
+      "gastrointestinal": {{"effect": "neutral", "score": 50}},
+      "musculoskeletal": {{"effect": "beneficial", "score": 80}},
+      "neurological": {{"effect": "neutral", "score": 60}},
+      "hepatic": {{"effect": "neutral", "score": 65}},
+      "immune": {{"effect": "beneficial", "score": 70}}
+    }},
+    "synergies": ["Protein + Carbs good for post-workout recovery"],
+    "conflicts": ["White rice spikes blood sugar - pair with protein helps but still concerning"]
+  }},
+  
+  "daily_summary": {{
+    "is_single_meal": true,
+    "meal_breakdown": [
+      {{
+        "meal_name": "Lunch",
+        "image_numbers": [1],
+        "total_calories": 491,
+        "items_count": 2
+      }}
+    ],
+    "daily_totals": {{
+      "calories": 491,
+      "protein_g": 48,
+      "carbs_g": 56,
+      "fat_g": 5.5,
+      "fiber_g": 0.6,
+      "sodium_mg": 120,
+      "potassium_mg": 450
+    }},
+    "daily_goals_met": {{
+      "calories": "25% of 2000 kcal",
+      "protein": "96% of 50g RDA",
+      "fiber": "2% of 28g RDA - VERY LOW"
     }}
   }},
   
   "organ_system_parameter_effects": {{
     "cardiovascular": {{
-      "overall_effect": "beneficial/neutral/caution/harmful",
+      "overall_effect": "beneficial",
+      "contributing_foods": ["Chicken - lean protein"],
       "parameters_affected": [
-        {{"parameter": "blood_pressure", "direction": "increase/decrease/neutral", "mechanism": "explanation"}}
+        {{"parameter": "blood_pressure_systolic", "direction": "decrease", "quantified_change": -2, "change_unit": "mmHg", "mechanism": "Low sodium content", "from_food": "Overall meal"}}
+      ]
+    }},
+    "glycemic": {{
+      "overall_effect": "caution",
+      "contributing_foods": ["White rice - high GI"],
+      "parameters_affected": [
+        {{"parameter": "blood_glucose", "direction": "increase", "quantified_change": 35, "change_unit": "mg/dL", "mechanism": "White rice high glycemic index", "from_food": "White Rice"}}
       ]
     }},
     "renal": {{
-      "overall_effect": "beneficial/neutral/caution/harmful",
+      "overall_effect": "neutral",
+      "contributing_foods": ["Chicken - high protein"],
       "parameters_affected": [
-        {{"parameter": "GFR_impact", "direction": "increase/decrease/neutral", "mechanism": "explanation"}}
+        {{"parameter": "urea_nitrogen", "direction": "increase", "quantified_change": 5, "change_unit": "mg/dL", "mechanism": "Protein metabolism byproduct", "from_food": "Chicken"}}
       ]
     }},
-    "hepatic": {{
-      "overall_effect": "beneficial/neutral/caution/harmful",
-      "parameters_affected": []
-    }},
-    "glycemic": {{
-      "overall_effect": "beneficial/neutral/caution/harmful",
-      "parameters_affected": [
-        {{"parameter": "blood_glucose", "direction": "increase/decrease/neutral", "mechanism": "explanation"}}
-      ]
-    }},
-    "gastrointestinal": {{
-      "overall_effect": "beneficial/neutral/caution/harmful",
-      "parameters_affected": []
-    }},
-    "neurological": {{
-      "overall_effect": "beneficial/neutral/caution/harmful",
-      "parameters_affected": []
-    }},
+    "hepatic": {{"overall_effect": "neutral", "contributing_foods": [], "parameters_affected": []}},
+    "gastrointestinal": {{"overall_effect": "neutral", "contributing_foods": [], "parameters_affected": []}},
+    "neurological": {{"overall_effect": "neutral", "contributing_foods": [], "parameters_affected": []}},
     "musculoskeletal": {{
-      "overall_effect": "beneficial/neutral/caution/harmful",
-      "parameters_affected": []
+      "overall_effect": "beneficial",
+      "contributing_foods": ["Chicken - complete protein"],
+      "parameters_affected": [
+        {{"parameter": "muscle_protein_synthesis", "direction": "increase", "mechanism": "Essential amino acids", "from_food": "Chicken"}}
+      ]
     }},
-    "immune": {{
-      "overall_effect": "beneficial/neutral/caution/harmful",
-      "parameters_affected": []
-    }}
-  }},
-  
-  "personalized_risk_assessment": {{
-    "overall_suitability": "highly_suitable/suitable/caution/unsuitable",
-    "condition_specific_analysis": [
-      {{
-        "condition": "patient condition if any",
-        "risk_level": "low/moderate/high",
-        "specific_concerns": []
-      }}
-    ],
-    "allergy_alerts": []
+    "immune": {{"overall_effect": "neutral", "contributing_foods": [], "parameters_affected": []}}
   }},
   
   "clinical_summary": {{
-    "healthfulness_score": number (0-100),
-    "key_benefits": ["benefit1", "benefit2"],
-    "key_concerns": ["concern1 if any"],
-    "recommendation": "overall dietary recommendation"
+    "healthfulness_score": 65,
+    "key_benefits": ["High quality protein", "Low sodium", "Good for muscle building"],
+    "key_concerns": ["Low fiber", "High glycemic impact from white rice", "Limited vegetables"],
+    "recommendation": "Add leafy greens or vegetables to balance the meal. Consider swapping white rice for brown rice or quinoa."
   }},
   
-  "optimization_suggestions": [
-    {{
-      "suggestion": "how to improve this meal",
-      "benefit": "what improvement it provides"
-    }}
-  ]
-}}"""
+  "actionable_insights": {{
+    "keep_eating": ["Grilled chicken - excellent lean protein source"],
+    "reduce_or_eliminate": ["White rice - high glycemic, low fiber"],
+    "add_next_time": ["Leafy greens", "Colorful vegetables", "Healthy fats like avocado"]
+  }}
+}}
+
+IMPORTANT RULES:
+1. ALWAYS identify every visible food item separately
+2. For EACH food item, provide specific calorie and macro breakdown
+3. For EACH food item, explain its effect on body systems
+4. Provide ACTIONABLE recommendations (what to keep, reduce, add)
+5. If multiple images = multiple meals, group by meal
+6. Give SPECIFIC quantified changes where possible (e.g., +35 mg/dL blood glucose)""""""
 
         # Note: For actual image analysis, we would need to use a vision-capable model
         # For now, we'll use GPT-4o with the image descriptions
