@@ -736,8 +736,10 @@ const FoodAnalysisPage = () => {
                 {/* Food Intake Tab */}
                 <TabsContent value="intake" className="space-y-3 mt-0">
                   <div className={`p-2 rounded-lg text-[10px] ${isDark ? 'bg-green-900/20 text-green-400' : 'bg-green-50 text-green-700'}`}>
-                    💡 Enter what you ate (breakfast, lunch, dinner) for combined analysis
+                    💡 Enter what you ate or upload food photos for AI analysis
                   </div>
+                  
+                  {/* Text Intake */}
                   <Textarea
                     value={profile.foodIntake}
                     onChange={(e) => setProfile(p => ({ ...p, foodIntake: e.target.value }))}
@@ -746,7 +748,7 @@ Breakfast: 2 eggs, toast, orange juice
 Lunch: Chicken salad, bread roll
 Dinner: Salmon with rice and vegetables
 Snacks: Apple, almonds, green tea"
-                    className={`min-h-[180px] text-xs ${isDark ? 'bg-gray-800 border-gray-700' : ''}`}
+                    className={`min-h-[120px] text-xs ${isDark ? 'bg-gray-800 border-gray-700' : ''}`}
                   />
                   <Button 
                     onClick={analyzeIntake}
@@ -754,8 +756,85 @@ Snacks: Apple, almonds, green tea"
                     className="w-full bg-gradient-to-r from-green-500 to-emerald-500"
                   >
                     {isAnalyzing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />}
-                    Analyze Full Intake
+                    Analyze Text Intake
                   </Button>
+                  
+                  {/* Divider */}
+                  <div className="flex items-center gap-2 py-1">
+                    <div className={`flex-1 h-px ${isDark ? 'bg-gray-700' : 'bg-gray-200'}`} />
+                    <span className={`text-[10px] ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>OR</span>
+                    <div className={`flex-1 h-px ${isDark ? 'bg-gray-700' : 'bg-gray-200'}`} />
+                  </div>
+                  
+                  {/* Image Upload Section */}
+                  <div>
+                    <label className={`text-[10px] font-semibold uppercase tracking-wider ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                      📸 Upload Food Photos
+                    </label>
+                    <p className={`text-[9px] mt-1 ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
+                      Upload photos of your meals for AI analysis (up to 10 images)
+                    </p>
+                    
+                    {/* Hidden file input */}
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleImageUpload}
+                      accept="image/*"
+                      multiple
+                      className="hidden"
+                    />
+                    
+                    {/* Upload button */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={foodImages.length >= 10}
+                      className={`w-full mt-2 h-20 border-dashed flex flex-col gap-1 ${isDark ? 'border-gray-700 hover:bg-gray-800' : ''}`}
+                    >
+                      <Camera className="w-5 h-5 text-green-500" />
+                      <span className="text-xs">Add Photos</span>
+                      <span className="text-[9px] text-gray-500">{foodImages.length}/10 images</span>
+                    </Button>
+                    
+                    {/* Image Previews */}
+                    {foodImages.length > 0 && (
+                      <div className="mt-2 grid grid-cols-4 gap-1">
+                        {foodImages.map((img) => (
+                          <div key={img.id} className="relative group aspect-square">
+                            <img
+                              src={img.preview}
+                              alt={img.name}
+                              className="w-full h-full object-cover rounded"
+                            />
+                            <button
+                              onClick={() => removeImage(img.id)}
+                              className="absolute top-0 right-0 p-0.5 bg-red-500 rounded-bl text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* Analyze Images Button */}
+                    {foodImages.length > 0 && (
+                      <Button 
+                        onClick={analyzeImages}
+                        disabled={isAnalyzingImages}
+                        className="w-full mt-2 bg-gradient-to-r from-purple-500 to-pink-500"
+                      >
+                        {isAnalyzingImages ? (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : (
+                          <Image className="w-4 h-4 mr-2" />
+                        )}
+                        Analyze {foodImages.length} Photo{foodImages.length > 1 ? 's' : ''}
+                      </Button>
+                    )}
+                  </div>
                 </TabsContent>
               </Tabs>
             </div>
