@@ -761,7 +761,16 @@ const DifferentialPage = () => {
   };
   
   return (
-    <div className={`min-h-screen ${isDark ? 'bg-gray-950' : 'bg-gray-50'}`}>
+    <>
+      <Helmet>
+        <title>Differential Diagnosis | PhiCor.ai - AI-Powered Clinical Reasoning</title>
+        <meta name="description" content="Advanced AI-powered differential diagnosis tool. Enter clinical data, symptoms, and lab values to get evidence-based diagnostic probabilities and clinical reasoning." />
+        <link rel="canonical" href="https://phicor.ai/differential" />
+        <meta property="og:title" content="Differential Diagnosis | PhiCor.ai" />
+        <meta property="og:description" content="AI-powered differential diagnosis with clinical reasoning and evidence-based diagnostic probabilities." />
+        <meta property="og:url" content="https://phicor.ai/differential" />
+      </Helmet>
+      <div className={`min-h-screen ${isDark ? 'bg-gray-950' : 'bg-gray-50'}`}>
       <FeatureNav />
       
       <main className="container mx-auto px-4 py-6">
