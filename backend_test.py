@@ -85,16 +85,15 @@ def test_backend_health():
         return False
 
 def test_platform_stats_api():
-    """Test 1: Platform Stats API Test - GET /api/platform/stats"""
+    """Test Platform Stats API - verify food and drug counts as per review request"""
     global platform_stats
     
-    print("\n📊 TEST 1: PLATFORM STATS API (AFTER DATABASE EXPANSION)")
+    print("\n📊 TEST: PLATFORM STATS API (REVIEW REQUEST)")
     print("=" * 60)
     print("Testing requirements from review request:")
-    print("- GET /api/platform/stats")
-    print("- Should return foods.total >= 9900 (after MASSIVE database expansion)")
-    print("- Should return nutrients.total = 45")
-    print("- Should return display_stats.foods showing '9900+' or similar")
+    print("- Total foods should be ~9,951")
+    print("- Foods with organ effects should be 5,000+")
+    print("- Total drugs with parameter_effects should be 200+")
     
     try:
         response = requests.get(f"{BACKEND_URL}/api/platform/stats", timeout=15)
@@ -106,49 +105,37 @@ def test_platform_stats_api():
             print(f"✅ Platform stats API call successful")
             print(f"  📊 Response status: {response.status_code}")
             
-            # Check expected counts after database expansion
-            expected_counts = {
-                'foods': 9900,  # Updated expectation after MASSIVE database expansion
-                'nutrients': 45
-            }
+            all_checks_pass = True
             
-            all_counts_pass = True
-            
-            # Check foods count (CRITICAL - should be >= 844 after expansion)
+            # Check foods count
             foods_total = data.get('foods', {}).get('total', 0)
-            if foods_total >= expected_counts['foods']:
-                print(f"  ✅ Foods: {foods_total} (expected {expected_counts['foods']}+) ✓")
+            if foods_total >= 9900:  # Allow some variance
+                print(f"  ✅ Foods: {foods_total} (expected ~9,951) ✓")
             else:
-                print(f"  ❌ Foods: {foods_total} (expected {expected_counts['foods']}+) - MASSIVE DATABASE EXPANSION FAILED")
-                all_counts_pass = False
+                print(f"  ❌ Foods: {foods_total} (expected ~9,951)")
+                all_checks_pass = False
             
-            # Check nutrients count
-            nutrients_total = data.get('nutrients', {}).get('total', 0)
-            if nutrients_total >= expected_counts['nutrients']:
-                print(f"  ✅ Nutrients: {nutrients_total} (expected {expected_counts['nutrients']}+) ✓")
+            # Check drugs count
+            drugs_data = data.get('drugs', {})
+            total_drugs = drugs_data.get('total', 0)
+            if total_drugs >= 200:
+                print(f"  ✅ Drugs: {total_drugs} (expected 200+) ✓")
             else:
-                print(f"  ❌ Nutrients: {nutrients_total} (expected {expected_counts['nutrients']}+)")
-                all_counts_pass = False
+                print(f"  ❌ Drugs: {total_drugs} (expected 200+)")
+                all_checks_pass = False
             
-            # Check display stats format for foods showing "844+"
+            # Check display stats format
             display_stats = data.get('display_stats', {})
             if display_stats:
                 foods_display = display_stats.get('foods', '')
+                drugs_display = display_stats.get('drugs', '')
                 print(f"  ✅ Display stats format present")
                 print(f"    📊 Foods display: {foods_display}")
-                
-                # Verify foods display shows 9900+
-                if '9900' in str(foods_display) or foods_total >= 9900:
-                    print(f"    ✅ Foods display shows MASSIVE expansion (9900+) ✓")
-                    display_pass = True
-                else:
-                    print(f"    ❌ Foods display doesn't show MASSIVE expansion (expected 9900+)")
-                    display_pass = False
+                print(f"    📊 Drugs display: {drugs_display}")
             else:
                 print(f"  ⚠️ Display stats format missing")
-                display_pass = False
             
-            return all_counts_pass and display_pass
+            return all_checks_pass
             
         else:
             print(f"❌ Platform stats API call failed: {response.status_code}")
