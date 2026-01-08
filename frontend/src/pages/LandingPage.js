@@ -1062,7 +1062,7 @@ const LandingPage = () => {
               </h2>
               
               <p className="text-muted-foreground mb-8 leading-relaxed">
-                PhiCor combines <span className="text-foreground font-medium">AI-powered diagnosis</span> with <span className="text-purple-400">validated mathematical models</span> of human physiology. Not just pattern matching — real equations modeling real organ systems.
+                PhiCor uses <span className="text-foreground font-medium">real medical data</span> with <span className="text-purple-400">validated mathematical models</span> of human physiology. Not speculation — real equations modeling real organ systems.
               </p>
               
               <div className="space-y-4">
