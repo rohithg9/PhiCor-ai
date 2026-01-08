@@ -235,6 +235,7 @@ def transform_off_product(product):
     
     # Build food document
     food_doc = {
+        "id": str(uuid.uuid4()),  # Main ID field for MongoDB index
         "food_id": str(uuid.uuid4()),
         "name": name[:100],  # Limit name length
         "category": category[:50],
@@ -345,12 +346,19 @@ async def import_from_open_food_facts(max_products=500):
         # Rate limiting - be nice to the API
         time.sleep(0.5)
     
-    # Bulk insert
+    # Insert one by one to handle duplicates
     if foods_to_insert:
-        await db.foods.insert_many(foods_to_insert)
-        print(f"\n✅ Successfully imported {len(foods_to_insert)} products from Open Food Facts!")
+        inserted = 0
+        for food in foods_to_insert:
+            try:
+                await db.foods.insert_one(food)
+                inserted += 1
+            except Exception as e:
+                pass  # Skip duplicates silently
+        print(f"\n✅ Successfully imported {inserted} products from Open Food Facts!")
+        return inserted
     
-    return len(foods_to_insert)
+    return 0
 
 async def main():
     """Main function to run the importer"""
