@@ -1,31 +1,33 @@
 #!/usr/bin/env python3
 """
-Backend Testing for PhiCor.ai Application
+Backend Testing for PhiCor.ai Food Engine After Database Expansion
 Testing specific requirements from review request:
 
-PHICOR.AI APPLICATION VERIFICATION:
+PHICOR.AI FOOD ENGINE DATA EXPANSION VERIFICATION:
 
 Test 1: Platform Stats API Test
 - GET /api/platform/stats
-- Verify it returns: drugs, diseases, foods, nutrients counts
-- Expected: Foods: 148+, Nutrients: 38+, Diseases: 2568+, Drugs: 415+
+- Should return foods.total >= 844 (after database expansion)
+- Should return nutrients.total = 45
+- Should return display_stats.foods showing "844+"
 
-Test 2: Drug Enhancement Verification
-- GET /api/drugs to get drug list
-- Find a drug like "Lisinopril" or "Metformin"
-- Verify it has `organ_system_parameter_effects` with detailed effects
-- Check for cardiovascular, renal, glycemic system effects
+Test 2: Food Analysis from DB Test
+- POST /api/food/analyze-from-db with food_name: "Banana" - should return comprehensive analysis with organ_system_parameter_effects
+- POST /api/food/analyze-from-db with food_name: "Coca Cola" - should find one of the newly imported Open Food Facts products
+- POST /api/food/analyze-from-db with food_name: "Spirulina powder" - should find the newly added superfood
 
-Test 3: Food Analysis API Test  
-- POST /api/food/analyze-from-db with {"food_name": "Banana", "serving_size": "1 medium"}
-- Verify response has organ_system_parameter_effects
-- Verify quantified changes are present (e.g., "-1.3 mmHg" for blood pressure)
+Test 3: Food Search Verification
+- Verify the database contains branded products (search for "Coca Cola", "Pepsi", "Nestle")
+- Verify superfoods (search for "spirulina", "maca", "moringa")
+- Verify fermented foods (search for "kombucha", "kefir", "natto")
+- Verify exotic fruits (search for "dragon fruit", "durian", "jackfruit")
 
-Test Credentials:
-- Backend URL: https://nutrihealth-11.preview.emergentagent.com (or localhost:8001)
-- Frontend URL: https://nutrihealth-11.preview.emergentagent.com (or localhost:3000)
+Expected Results:
+- All branded food searches should return results from "open_food_facts" source
+- All superfood searches should return results from "phicor_curated" source
+- Food analysis should include organ effects (cardiovascular, glycemic, renal, etc.)
 
-API Base URL: https://nutrihealth-11.preview.emergentagent.com
+API Base URL: Use REACT_APP_BACKEND_URL from /app/frontend/.env
 """
 
 import requests
