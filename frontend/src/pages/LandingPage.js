@@ -37,45 +37,34 @@ import {
 import { Button } from '../components/ui/button';
 import RegionSelector from '../components/RegionSelector';
 
-// Animated Counter Component - Simplified and robust
+// Animated Counter Component - Always shows correct value
 const AnimatedCounter = ({ value, duration = 2000, suffix = '', className }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-50px" });
   
-  // If value is not valid, return the original value or default
-  if (!value || value === '0' || value === 0) {
-    return <span ref={ref} className={className}>0{suffix}</span>;
-  }
-  
-  // If value is already a formatted string like "2568+", just display it
-  const valueStr = value.toString();
-  if (valueStr.includes('+') || isNaN(parseInt(valueStr.replace(/[^0-9]/g, '')))) {
-    return <span ref={ref} className={className}>{valueStr}{suffix}</span>;
-  }
-  
-  // Extract numeric value for animation
+  // Parse the value - extract numeric portion and check for '+' suffix
+  const valueStr = value?.toString() || '0';
   const numericValue = parseInt(valueStr.replace(/[^0-9]/g, '')) || 0;
   const hasSuffix = valueStr.includes('+');
   
-  const [count, setCount] = useState(numericValue);
+  // Always start with the actual value, not 0
+  const [displayCount, setDisplayCount] = useState(numericValue);
   const [hasAnimated, setHasAnimated] = useState(false);
   
+  // Update display when value changes from API
   useEffect(() => {
-    // Update count when numericValue changes (from API)
-    if (numericValue > 0 && !hasAnimated) {
-      setCount(numericValue);
+    if (numericValue > 0) {
+      setDisplayCount(numericValue);
     }
-  }, [numericValue, hasAnimated]);
+  }, [numericValue]);
   
+  // Animation effect - only animate once when in view
   useEffect(() => {
     if (!isInView || hasAnimated || numericValue === 0) return;
     
     setHasAnimated(true);
     
-    // Don't animate if we're already at the value
-    if (count === numericValue) return;
-    
-    setCount(0);
+    // Start animation from 0
     let startTime;
     let animationFrame;
     
@@ -83,25 +72,31 @@ const AnimatedCounter = ({ value, duration = 2000, suffix = '', className }) => 
       if (!startTime) startTime = timestamp;
       const progress = Math.min((timestamp - startTime) / duration, 1);
       const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-      setCount(Math.floor(easeOutQuart * numericValue));
+      const currentCount = Math.floor(easeOutQuart * numericValue);
+      setDisplayCount(currentCount);
       
       if (progress < 1) {
         animationFrame = requestAnimationFrame(animate);
       } else {
-        setCount(numericValue);
+        setDisplayCount(numericValue);
       }
     };
     
-    animationFrame = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(animationFrame);
-  }, [isInView, numericValue, duration, hasAnimated, count]);
+    // Small delay before starting animation
+    setTimeout(() => {
+      setDisplayCount(0);
+      animationFrame = requestAnimationFrame(animate);
+    }, 100);
+    
+    return () => {
+      if (animationFrame) cancelAnimationFrame(animationFrame);
+    };
+  }, [isInView, numericValue, duration, hasAnimated]);
   
-  // Always show at least the numericValue if > 0
-  const displayValue = count > 0 ? count : numericValue;
-  
+  // If value includes '+', show with plus sign; otherwise just the number
   return (
     <span ref={ref} className={className}>
-      {displayValue > 0 ? displayValue.toLocaleString() : '0'}{hasSuffix ? '+' : ''}{suffix}
+      {displayCount.toLocaleString()}{hasSuffix ? '+' : ''}{suffix}
     </span>
   );
 };
