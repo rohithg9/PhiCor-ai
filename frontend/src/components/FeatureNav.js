@@ -31,7 +31,7 @@ const features = [
   {
     symbol: 'Δ',
     name: 'Differential Diagnosis',
-    description: 'AI-powered diagnostic engine',
+    description: 'Mathematical diagnostic engine',
     path: '/differential',
     color: 'from-emerald-500 to-teal-500',
     activeColor: 'bg-emerald-500',
