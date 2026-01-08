@@ -8382,6 +8382,29 @@ async def analyze_food_from_database(request: Dict[str, Any] = Body(...)):
             else:
                 data["overall_effect"] = "neutral"
         
+        # FALLBACK: If organ_system_effects is empty (no nutrients in DB), use food's pre-calculated effects
+        if not organ_system_effects and food.get("organ_effects"):
+            food_organ_effects = food.get("organ_effects", {})
+            for organ_system, effect_data in food_organ_effects.items():
+                organ_system_effects[organ_system] = {
+                    "overall_effect": effect_data.get("overall", "neutral"),
+                    "parameters_affected": [
+                        {
+                            "parameter": e.get("parameter"),
+                            "direction": e.get("direction"),
+                            "mechanism": e.get("mechanism"),
+                            "magnitude": e.get("magnitude", "moderate"),
+                            "quantified_change": None,
+                            "change_unit": None,
+                            "from_nutrient": "Food composition",
+                            "amount": "",
+                            "percent_dv": None
+                        }
+                        for e in effect_data.get("effects", [])
+                    ],
+                    "contributing_nutrients": []
+                }
+        
         # Build personalized risk assessment if health profile provided
         personalized_risk = None
         if health_profile:
