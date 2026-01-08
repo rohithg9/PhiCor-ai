@@ -136,12 +136,12 @@ def test_platform_stats_api():
                 print(f"  ✅ Display stats format present")
                 print(f"    📊 Foods display: {foods_display}")
                 
-                # Verify foods display shows 844+
-                if '844' in str(foods_display) or foods_total >= 844:
-                    print(f"    ✅ Foods display shows expansion (844+) ✓")
+                # Verify foods display shows 9900+
+                if '9900' in str(foods_display) or foods_total >= 9900:
+                    print(f"    ✅ Foods display shows MASSIVE expansion (9900+) ✓")
                     display_pass = True
                 else:
-                    print(f"    ❌ Foods display doesn't show expansion (expected 844+)")
+                    print(f"    ❌ Foods display doesn't show MASSIVE expansion (expected 9900+)")
                     display_pass = False
             else:
                 print(f"  ⚠️ Display stats format missing")
