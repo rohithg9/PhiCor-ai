@@ -324,6 +324,26 @@ def fetch_usda_foods_page(page_number=1, page_size=200, data_type=None):
         print(f"  Exception fetching page {page_number}: {e}")
         return []
 
+def fetch_food_details(fdc_ids):
+    """Fetch detailed food info for multiple FDC IDs"""
+    url = f"{USDA_BASE_URL}/foods"
+    
+    try:
+        response = requests.post(
+            url,
+            params={"api_key": USDA_API_KEY},
+            json={"fdcIds": fdc_ids},
+            timeout=60
+        )
+        if response.status_code == 200:
+            return response.json()
+        else:
+            print(f"  Error fetching details: {response.status_code}")
+            return []
+    except Exception as e:
+        print(f"  Exception fetching details: {e}")
+        return []
+
 async def update_live_stats():
     """Update stats so landing page shows real-time counts"""
     foods_count = await db.foods.count_documents({})
