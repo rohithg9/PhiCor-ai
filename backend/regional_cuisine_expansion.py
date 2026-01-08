@@ -346,12 +346,19 @@ async def expand_regional_cuisines():
             existing.add(food["name"].lower())
     
     if foods_to_insert:
-        await db.foods.insert_many(foods_to_insert)
-        print(f"✅ Added {len(foods_to_insert)} regional cuisine foods")
+        # Insert one by one to handle potential duplicates
+        inserted = 0
+        for food in foods_to_insert:
+            try:
+                await db.foods.insert_one(food)
+                inserted += 1
+            except Exception as e:
+                print(f"  Skipped (duplicate): {food['name']}")
+        print(f"✅ Added {inserted} regional cuisine foods")
+        return inserted
     else:
         print("No new regional foods to add (all already exist)")
-    
-    return len(foods_to_insert)
+        return 0
 
 async def main():
     print("=" * 60)
