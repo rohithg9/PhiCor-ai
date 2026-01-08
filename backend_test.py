@@ -430,153 +430,144 @@ def run_all_tests():
         print(f"  ❌ Database verification failed")
     
     return test_results
-def test_food_search_verification():
-    """Test 3: Food Search Verification - Verify database contains expanded food categories"""
-    global food_search_results
+def test_database_verification():
+    """Test 3: Database Verification - Verify USDA foods, Open Food Facts, nutrients and organ_effects"""
     
-    print("\n🔍 TEST 3: FOOD SEARCH VERIFICATION (DATABASE EXPANSION)")
+    print("\n🗄️ TEST 3: DATABASE VERIFICATION (MASSIVE EXPANSION)")
     print("=" * 60)
     print("Testing requirements from review request:")
-    print("- Verify branded products (Coca Cola, Pepsi, Nestle)")
-    print("- Verify superfoods (spirulina, maca, moringa)")
-    print("- Verify fermented foods (kombucha, kefir, natto)")
-    print("- Verify exotic fruits (dragon fruit, durian, jackfruit)")
-    print("- Expected: branded = open_food_facts, superfoods = phicor_curated")
+    print("- USDA FoodData Central foods should be present")
+    print("- Open Food Facts branded products should be present")
+    print("- Foods should have nutrients and organ_effects")
+    print("- Total food count should be approximately 9,951")
     
-    search_categories = [
-        {
-            "name": "Branded Products",
-            "searches": ["Coca Cola", "Pepsi", "Nestle"],
-            "expected_source": "open_food_facts",
-            "min_results": 1
-        },
-        {
-            "name": "Superfoods",
-            "searches": ["spirulina", "maca", "moringa"],
-            "expected_source": "phicor_curated",
-            "min_results": 1
-        },
-        {
-            "name": "Fermented Foods",
-            "searches": ["kombucha", "kefir", "natto"],
-            "expected_source": "phicor_curated",
-            "min_results": 1
-        },
-        {
-            "name": "Exotic Fruits",
-            "searches": ["dragon fruit", "durian", "jackfruit"],
-            "expected_source": "phicor_curated",
-            "min_results": 1
-        }
-    ]
+    verification_passed = True
     
-    all_categories_pass = True
-    food_search_results = {}
-    
-    for category in search_categories:
-        category_name = category["name"]
-        searches = category["searches"]
-        expected_source = category["expected_source"]
-        min_results = category["min_results"]
-        
-        print(f"\n  🧪 Testing Category: {category_name}")
-        category_results = []
-        category_pass = False
-        
-        for search_term in searches:
-            print(f"    🔍 Searching for: {search_term}")
-            
-            try:
-                # Try food search endpoint (if it exists)
-                search_endpoints = [
-                    f"{BACKEND_URL}/api/food/search",
-                    f"{BACKEND_URL}/api/foods/search",
-                    f"{BACKEND_URL}/api/foods"
-                ]
-                
-                search_success = False
-                
-                for endpoint in search_endpoints:
-                    try:
-                        # Try different search parameter formats
-                        search_params = [
-                            {"q": search_term},
-                            {"search": search_term},
-                            {"query": search_term},
-                            {"name": search_term}
-                        ]
-                        
-                        for params in search_params:
-                            response = requests.get(endpoint, params=params, timeout=15)
-                            
-                            if response.status_code == 200:
-                                data = response.json()
-                                
-                                # Check different response formats
-                                foods = []
-                                if isinstance(data, dict):
-                                    foods = data.get('foods', data.get('results', data.get('items', [])))
-                                elif isinstance(data, list):
-                                    foods = data
-                                
-                                # Filter results that match search term
-                                matching_foods = []
-                                for food in foods:
-                                    if isinstance(food, dict):
-                                        food_name = food.get('name', food.get('product_name', ''))
-                                        if search_term.lower() in food_name.lower():
-                                            matching_foods.append(food)
-                                
-                                if matching_foods:
-                                    print(f"      ✅ Found {len(matching_foods)} results")
-                                    
-                                    # Check data sources
-                                    sources_found = []
-                                    for food in matching_foods[:3]:  # Check first 3 results
-                                        source = food.get('data_source', food.get('source', ''))
-                                        if source:
-                                            sources_found.append(source)
-                                    
-                                    if sources_found:
-                                        print(f"      📊 Sources: {set(sources_found)}")
-                                        if any(expected_source in source.lower() for source in sources_found):
-                                            print(f"      ✅ Expected source found ({expected_source}) ✓")
-                                            category_pass = True
-                                    
-                                    category_results.extend(matching_foods)
-                                    search_success = True
-                                    break
-                            
-                            if search_success:
-                                break
-                        
-                        if search_success:
-                            break
-                            
-                    except Exception as e:
-                        continue
-                
-                if not search_success:
-                    print(f"      ⚠️ No results found or search endpoint not available")
-                    
-            except Exception as e:
-                print(f"      ❌ Error searching for {search_term}: {e}")
-        
-        # Store results
-        food_search_results[category_name] = {
-            "results": category_results,
-            "passed": category_pass,
-            "total_found": len(category_results)
+    # Test 3.1: Check if we can find USDA foods
+    print(f"\n  🧪 Testing: USDA FoodData Central Integration")
+    try:
+        # Try to analyze a common USDA food
+        request_data = {
+            "food_name": "Apple, raw",
+            "serving_size": "1 medium"
         }
         
-        # Category assessment
-        if category_pass:
-            print(f"    ✅ {category_name} verification passed ✓")
+        response = requests.post(
+            f"{BACKEND_URL}/api/food/analyze-from-db",
+            json=request_data,
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('success'):
+                analysis = data.get('analysis', {})
+                data_source = analysis.get('data_source', '').lower()
+                
+                if 'usda' in data_source or 'fdc' in data_source:
+                    print(f"    ✅ USDA food found: {analysis.get('product_name', 'Apple')}")
+                    print(f"    📊 Data source: {analysis.get('data_source', 'N/A')}")
+                else:
+                    print(f"    ⚠️ Food found but source unclear: {data_source}")
+            else:
+                print(f"    ❌ USDA food analysis failed")
+                verification_passed = False
         else:
-            print(f"    ❌ {category_name} verification failed")
-            all_categories_pass = False
+            print(f"    ❌ USDA food lookup failed: {response.status_code}")
+            verification_passed = False
+            
+    except Exception as e:
+        print(f"    ❌ Error testing USDA integration: {e}")
+        verification_passed = False
     
-    return all_categories_pass
+    # Test 3.2: Check if we can find Open Food Facts products
+    print(f"\n  🧪 Testing: Open Food Facts Integration")
+    try:
+        # Try to analyze a branded product
+        request_data = {
+            "food_name": "Coca Cola",
+            "serving_size": "1 can"
+        }
+        
+        response = requests.post(
+            f"{BACKEND_URL}/api/food/analyze-from-db",
+            json=request_data,
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('success'):
+                analysis = data.get('analysis', {})
+                data_source = analysis.get('data_source', '').lower()
+                
+                if 'open_food_facts' in data_source or 'off' in data_source:
+                    print(f"    ✅ Open Food Facts product found: {analysis.get('product_name', 'Coca Cola')}")
+                    print(f"    📊 Data source: {analysis.get('data_source', 'N/A')}")
+                else:
+                    print(f"    ⚠️ Product found but source unclear: {data_source}")
+            else:
+                print(f"    ❌ Open Food Facts product analysis failed")
+                verification_passed = False
+        else:
+            print(f"    ❌ Open Food Facts product lookup failed: {response.status_code}")
+            verification_passed = False
+            
+    except Exception as e:
+        print(f"    ❌ Error testing Open Food Facts integration: {e}")
+        verification_passed = False
+    
+    # Test 3.3: Verify nutrients and organ effects are present
+    print(f"\n  🧪 Testing: Nutrients and Organ Effects")
+    try:
+        # Use the Apple analysis from earlier test
+        if apple_analysis and apple_analysis.get('success'):
+            analysis = apple_analysis.get('analysis', {})
+            
+            # Check for nutrients
+            nutrients = analysis.get('nutrients', {})
+            if nutrients and len(nutrients) > 0:
+                print(f"    ✅ Nutrients present: {len(nutrients)} nutrients found")
+                print(f"      📊 Sample nutrients: {list(nutrients.keys())[:5]}")
+            else:
+                print(f"    ❌ Nutrients missing or empty")
+                verification_passed = False
+            
+            # Check for organ effects
+            organ_effects = analysis.get('organ_system_parameter_effects', {})
+            if organ_effects and len(organ_effects) > 0:
+                print(f"    ✅ Organ effects present: {len(organ_effects)} organ systems")
+                print(f"      📊 Organ systems: {list(organ_effects.keys())[:3]}")
+            else:
+                print(f"    ❌ Organ effects missing or empty")
+                verification_passed = False
+        else:
+            print(f"    ⚠️ Cannot verify nutrients/organ effects - Apple analysis not available")
+            
+    except Exception as e:
+        print(f"    ❌ Error testing nutrients and organ effects: {e}")
+        verification_passed = False
+    
+    # Test 3.4: Verify total food count is approximately 9,951
+    print(f"\n  🧪 Testing: Total Food Count Verification")
+    try:
+        if platform_stats:
+            foods_total = platform_stats.get('foods', {}).get('total', 0)
+            expected_range = (9900, 10000)  # Allow some variance
+            
+            if expected_range[0] <= foods_total <= expected_range[1]:
+                print(f"    ✅ Food count in expected range: {foods_total} (expected ~9,951)")
+            else:
+                print(f"    ❌ Food count outside expected range: {foods_total} (expected ~9,951)")
+                verification_passed = False
+        else:
+            print(f"    ⚠️ Cannot verify food count - platform stats not available")
+            
+    except Exception as e:
+        print(f"    ❌ Error verifying food count: {e}")
+        verification_passed = False
+    
+    return verification_passed
 
 if __name__ == "__main__":
     run_all_tests()
