@@ -448,7 +448,7 @@ def test_database_verification():
     try:
         # Try to analyze a common USDA food
         request_data = {
-            "food_name": "Apple, raw",
+            "food_name": "Apples, raw",
             "serving_size": "1 medium"
         }
         
