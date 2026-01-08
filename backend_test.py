@@ -381,11 +381,11 @@ def run_all_tests():
     
     if app_passed == app_total:
         print(f"\n🎉 ALL PHICOR.AI FOOD ENGINE TESTS PASSED!")
-        print(f"✅ Platform stats showing 844+ foods after database expansion")
-        print(f"✅ Food analysis working for Banana, Coca Cola, and Spirulina powder")
-        print(f"✅ Food search verification confirmed branded products and superfoods")
+        print(f"✅ Platform stats showing 9900+ foods after MASSIVE database expansion")
+        print(f"✅ Food analysis working for Apple, Chicken breast, and Coca Cola")
+        print(f"✅ Database verification confirmed USDA and Open Food Facts integration")
         print(f"\n🔄 COMPLETE FOOD ENGINE WORKFLOW VERIFIED:")
-        print(f"   Database Expansion → Open Food Facts Integration → Superfood Addition → Analysis")
+        print(f"   USDA API Integration → Open Food Facts → Food Analysis → Organ Effects")
     elif app_passed >= app_total * 0.75:
         print(f"\n✅ MOSTLY SUCCESSFUL! {app_passed}/{app_total} food engine tests passed.")
         print(f"⚠️  Some minor issues detected - see failed tests above")
