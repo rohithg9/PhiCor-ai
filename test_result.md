@@ -43,12 +43,13 @@
   - **Exotic Fruits**: ✅ dragon fruit, durian, jackfruit found (phicor_curated source)
 - **Verification**: Database expansion successfully integrated all expected food categories
 
-### Database Summary After Expansion
-- **Foods**: 844+ (was 488)
-- **Nutrients**: 45 (comprehensive profiles)
+### Database Summary After Expansion & Testing
+- **Foods**: 844+ (was 488) ✅ VERIFIED
+- **Nutrients**: 45 (comprehensive profiles) ✅ VERIFIED
 - **Drugs**: 292+ (with parameter effects)
 - **Diseases**: 2,568+
 - **Food Categories**: 53 (including international cuisines)
+- **Data Sources**: Open Food Facts (300), PhiCor Curated (482), PhiCor Expanded (62) ✅ ALL VERIFIED
 
 ### Files Created
 - `/app/backend/open_food_facts_importer.py` - Imports branded foods from Open Food Facts API
