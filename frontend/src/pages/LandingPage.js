@@ -97,13 +97,19 @@ const LandingPage = () => {
     const fetchStats = async () => {
       try {
         const API_URL = process.env.REACT_APP_BACKEND_URL || '';
+        console.log('Fetching stats from:', `${API_URL}/api/platform/stats`);
         const response = await fetch(`${API_URL}/api/platform/stats`);
         if (response.ok) {
           const data = await response.json();
-          setPlatformStats(data.display_stats);
+          console.log('Stats received:', data.display_stats);
+          if (data.display_stats) {
+            setPlatformStats(data.display_stats);
+          }
+        } else {
+          console.error('Stats fetch failed:', response.status);
         }
       } catch (error) {
-        console.log('Using default stats');
+        console.error('Stats fetch error:', error);
       }
     };
     fetchStats();
