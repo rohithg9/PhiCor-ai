@@ -658,19 +658,19 @@ def test_drug_parameter_effects():
     return all_tests_pass
 
 def run_all_tests():
-    """Run all PhiCor.ai Food Engine tests after database expansion"""
-    print("🧪 PHICOR.AI FOOD ENGINE TESTING (AFTER DATABASE EXPANSION)")
+    """Run all PhiCor.ai Food Engine and Drug Engine tests"""
+    print("🧪 PHICOR.AI COMPREHENSIVE TESTING (FOOD ENGINE + DRUG ENGINE)")
     print("=" * 80)
     print("Testing specific requirements from review request:")
-    print("1. Platform Stats API Test - Should return foods.total >= 9900")
-    print("2. Food Analysis from DB Test - Test Apple, Chicken breast, Coca Cola")
-    print("3. Database Verification - USDA foods, Open Food Facts, nutrients and organ_effects")
+    print("FOOD ENGINE TESTING:")
+    print("1. Food Analysis - Test Banana with 8+ organ systems")
+    print("2. Food Database Stats - 9,951+ foods with organ effects")
+    print("DRUG ENGINE TESTING:")
+    print("3. Drug Parameter Effects - Lisinopril, Metoprolol, Metformin")
+    print("4. Drug Database Stats - 200+ drugs with parameter_effects")
     print("=" * 80)
     print("Test Credentials:")
     print("- Backend URL: Use REACT_APP_BACKEND_URL from /app/frontend/.env")
-    print("=" * 80)
-    print("NOTE: This tests the PhiCor.ai Food Engine after MASSIVE database expansion using USDA API")
-    print("FOCUS: Verifying 9900+ foods, USDA FoodData Central, Open Food Facts integration")
     print("=" * 80)
     
     test_results = {}
@@ -686,22 +686,26 @@ def run_all_tests():
     else:
         test_results['backend_health'] = False
     
-    # PHICOR.AI FOOD ENGINE TESTS (AFTER MASSIVE DATABASE EXPANSION)
+    # FOOD ENGINE TESTS
     if test_results['backend_health']:
+        test_results['food_analysis_banana'] = test_food_analysis_banana()
         test_results['platform_stats_api'] = test_platform_stats_api()
-        test_results['food_analysis_from_db'] = test_food_analysis_from_db()
-        test_results['database_verification'] = test_database_verification()
+        
+        # DRUG ENGINE TESTS
+        test_results['drug_database_stats'] = test_drug_database_stats()
+        test_results['drug_parameter_effects'] = test_drug_parameter_effects()
     else:
         # Set all tests to False if backend is not accessible
         test_results.update({
+            'food_analysis_banana': False,
             'platform_stats_api': False,
-            'food_analysis_from_db': False,
-            'database_verification': False
+            'drug_database_stats': False,
+            'drug_parameter_effects': False
         })
     
     # Summary
     print("\n" + "=" * 80)
-    print("🏁 PHICOR.AI FOOD ENGINE TEST SUMMARY (MASSIVE DATABASE EXPANSION)")
+    print("🏁 PHICOR.AI COMPREHENSIVE TEST SUMMARY")
     print("=" * 80)
     
     passed_tests = sum(1 for result in test_results.values() if result)
@@ -711,9 +715,13 @@ def run_all_tests():
     
     # Test results breakdown
     food_engine_tests = [
-        ('platform_stats_api', 'Test 1: Platform Stats API (foods.total >= 9900)'),
-        ('food_analysis_from_db', 'Test 2: Food Analysis from DB (Apple, Chicken breast, Coca Cola)'),
-        ('database_verification', 'Test 3: Database Verification (USDA, Open Food Facts, nutrients)')
+        ('food_analysis_banana', 'Food Analysis - Banana (8+ organ systems)'),
+        ('platform_stats_api', 'Food Database Stats (9,951+ foods)')
+    ]
+    
+    drug_engine_tests = [
+        ('drug_database_stats', 'Drug Database Stats (200+ drugs)'),
+        ('drug_parameter_effects', 'Drug Parameter Effects (Lisinopril, Metoprolol, Metformin)')
     ]
     
     infrastructure_tests = [
@@ -721,8 +729,14 @@ def run_all_tests():
         ('backend_health', 'Backend Health Check')
     ]
     
-    print(f"\n📊 PHICOR.AI FOOD ENGINE TESTS:")
+    print(f"\n📊 FOOD ENGINE TESTS:")
     for test_key, test_name in food_engine_tests:
+        if test_key in test_results:
+            status = "✅ PASS" if test_results[test_key] else "❌ FAIL"
+            print(f"  {status} - {test_name}")
+    
+    print(f"\n📊 DRUG ENGINE TESTS:")
+    for test_key, test_name in drug_engine_tests:
         if test_key in test_results:
             status = "✅ PASS" if test_results[test_key] else "❌ FAIL"
             print(f"  {status} - {test_name}")
@@ -733,59 +747,48 @@ def run_all_tests():
             status = "✅ PASS" if test_results[test_key] else "❌ FAIL"
             print(f"  {status} - {test_name}")
     
-    # Calculate food engine test success rate
-    app_passed = sum(1 for test_key, _ in food_engine_tests if test_results.get(test_key, False))
-    app_total = len(food_engine_tests)
+    # Calculate success rates
+    food_passed = sum(1 for test_key, _ in food_engine_tests if test_results.get(test_key, False))
+    food_total = len(food_engine_tests)
     
-    if app_passed == app_total:
-        print(f"\n🎉 ALL PHICOR.AI FOOD ENGINE TESTS PASSED!")
-        print(f"✅ Platform stats showing 9900+ foods after MASSIVE database expansion")
-        print(f"✅ Food analysis working for Apple, Chicken breast, and Coca Cola")
-        print(f"✅ Database verification confirmed USDA and Open Food Facts integration")
-        print(f"\n🔄 COMPLETE FOOD ENGINE WORKFLOW VERIFIED:")
-        print(f"   USDA API Integration → Open Food Facts → Food Analysis → Organ Effects")
-    elif app_passed >= app_total * 0.75:
-        print(f"\n✅ MOSTLY SUCCESSFUL! {app_passed}/{app_total} food engine tests passed.")
+    drug_passed = sum(1 for test_key, _ in drug_engine_tests if test_results.get(test_key, False))
+    drug_total = len(drug_engine_tests)
+    
+    print(f"\n📊 SUCCESS RATES:")
+    print(f"  Food Engine: {food_passed}/{food_total} tests passed")
+    print(f"  Drug Engine: {drug_passed}/{drug_total} tests passed")
+    
+    if food_passed == food_total and drug_passed == drug_total:
+        print(f"\n🎉 ALL PHICOR.AI TESTS PASSED!")
+        print(f"✅ Food Engine: Banana analysis with 8+ organ systems")
+        print(f"✅ Food Engine: 9,951+ foods in database")
+        print(f"✅ Drug Engine: 200+ drugs with parameter effects")
+        print(f"✅ Drug Engine: Lisinopril, Metoprolol, Metformin verified")
+    elif (food_passed + drug_passed) >= (food_total + drug_total) * 0.75:
+        print(f"\n✅ MOSTLY SUCCESSFUL! {food_passed + drug_passed}/{food_total + drug_total} tests passed.")
         print(f"⚠️  Some minor issues detected - see failed tests above")
     else:
-        print(f"\n❌ SIGNIFICANT ISSUES DETECTED! Only {app_passed}/{app_total} food engine tests passed.")
-        print(f"🔧 Major fixes needed for PhiCor.ai Food Engine features")
+        print(f"\n❌ SIGNIFICANT ISSUES DETECTED! Only {food_passed + drug_passed}/{food_total + drug_total} tests passed.")
+        print(f"🔧 Major fixes needed for PhiCor.ai features")
     
     # Critical Issues Detection
     print(f"\n🚨 CRITICAL ISSUES DETECTED:")
     critical_issues = []
     
-    if not test_results.get('platform_stats_api'):
-        critical_issues.append("❌ CRITICAL: Platform stats API failed - foods count may not show 9900+ expansion")
+    if not test_results.get('food_analysis_banana'):
+        critical_issues.append("❌ CRITICAL: Food analysis failed - Banana analysis with organ systems not working")
     
-    if not test_results.get('food_analysis_from_db'):
-        critical_issues.append("❌ CRITICAL: Food analysis from DB failed - USDA/Open Food Facts foods may not be analyzable")
+    if not test_results.get('drug_parameter_effects'):
+        critical_issues.append("❌ CRITICAL: Drug parameter effects failed - Lisinopril/Metoprolol/Metformin not working")
     
-    if not test_results.get('database_verification'):
-        critical_issues.append("❌ CRITICAL: Database verification failed - MASSIVE database expansion may not be complete")
+    if not test_results.get('drug_database_stats'):
+        critical_issues.append("❌ CRITICAL: Drug database stats failed - May not have 200+ drugs")
     
     if critical_issues:
         for issue in critical_issues:
             print(f"  {issue}")
     else:
         print(f"  ✅ No critical issues detected")
-    
-    # PhiCor.ai Food Engine specific verification
-    print(f"\n📋 PHICOR.AI FOOD ENGINE VERIFICATION:")
-    if test_results.get('platform_stats_api'):
-        print(f"  ✅ Platform stats verified (Foods: 9900+, Nutrients: 45)")
-    else:
-        print(f"  ❌ Platform stats failed")
-    
-    if test_results.get('food_analysis_from_db'):
-        print(f"  ✅ Food analysis verified (Apple, Chicken breast, Coca Cola with organ effects)")
-    else:
-        print(f"  ❌ Food analysis from DB failed")
-    
-    if test_results.get('database_verification'):
-        print(f"  ✅ Database verified (USDA FoodData Central, Open Food Facts, nutrients)")
-    else:
-        print(f"  ❌ Database verification failed")
     
     return test_results
 def test_database_verification():
