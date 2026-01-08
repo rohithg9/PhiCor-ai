@@ -107,7 +107,7 @@ def test_platform_stats_api():
             
             # Check expected counts after database expansion
             expected_counts = {
-                'foods': 844,  # Updated expectation after database expansion
+                'foods': 9900,  # Updated expectation after MASSIVE database expansion
                 'nutrients': 45
             }
             
