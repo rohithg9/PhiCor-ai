@@ -83,13 +83,13 @@ const LandingPage = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [platformStats, setPlatformStats] = useState({
-    drugs: "300+",
-    diseases: "200+",
-    foods: "148+",
-    nutrients: "38+",
+    drugs: "415+",
+    diseases: "2568+",
+    foods: "9951+",
+    nutrients: "45+",
     calculators: "42+",
-    organ_systems: "6",
-    models: "∞"
+    organ_systems: "46",
+    models: "7892+"
   });
 
   // Fetch platform stats
