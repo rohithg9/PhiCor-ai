@@ -3746,7 +3746,8 @@ const DashboardMultiScale = () => {
             {[
               { symbol: 'Φ', path: '/dashboard', color: 'from-indigo-500 to-purple-500' },
               { symbol: 'Δ', path: '/differential', color: 'from-emerald-500 to-teal-500' },
-              { symbol: 'ρ', path: '/drugs', color: 'from-rose-500 to-pink-500' }
+              { symbol: 'ρ', path: '/drugs', color: 'from-rose-500 to-pink-500' },
+              { symbol: 'Π', path: '/food', color: 'from-green-500 to-lime-500' }
             ].map((item) => (
               <button
                 key={item.path}
