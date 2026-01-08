@@ -3733,7 +3733,7 @@ const DashboardMultiScale = () => {
 
       {/* Mobile Header - Fixed at top with proper z-index */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-background border-b border-border/50">
-        {/* Mobile FeatureNav - Compact version */}
+        {/* Mobile FeatureNav - Compact version matching other pages */}
         <div className="flex items-center justify-between px-3 py-2 bg-background/95 backdrop-blur-sm border-b border-border/30">
           <div 
             className="cursor-pointer"
@@ -3743,6 +3743,8 @@ const DashboardMultiScale = () => {
               Phi<span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">Cor</span>
             </span>
           </div>
+          
+          {/* Greek Symbol Navigation */}
           <div className="flex items-center gap-1">
             {[
               { symbol: 'Φ', path: '/dashboard', color: 'from-indigo-500 to-purple-500' },
@@ -3766,6 +3768,22 @@ const DashboardMultiScale = () => {
                 </span>
               </button>
             ))}
+          </div>
+          
+          {/* Right side controls - Region selector and Theme toggle */}
+          <div className="flex items-center gap-1">
+            <RegionSelector compact={true} />
+            <button
+              onClick={toggleTheme}
+              className={`p-2 rounded-lg transition-all ${
+                isDark 
+                  ? 'bg-gray-800/50 hover:bg-gray-700/50 text-gray-400 hover:text-yellow-400' 
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-900'
+              }`}
+              title={isDark ? 'Light mode' : 'Dark mode'}
+            >
+              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
           </div>
         </div>
         
