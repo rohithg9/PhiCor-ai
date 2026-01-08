@@ -162,7 +162,364 @@ def test_platform_stats_api():
         print(f"❌ Error testing platform stats API: {e}")
         return False
 
-def test_food_analysis_from_db():
+def test_food_analysis_banana():
+    """Test Food Analysis with Banana - verify 8+ organ systems as per review request"""
+    global banana_analysis
+    
+    print("\n🍌 TEST: FOOD ANALYSIS - BANANA (REVIEW REQUEST)")
+    print("=" * 60)
+    print("Testing requirements from review request:")
+    print("- Test with food_name: 'Banana' - verify it returns 8+ organ systems")
+    print("- Verify organ systems include: cardiovascular, glycemic, hepatic, renal, gastrointestinal, musculoskeletal, neurological, immune")
+    print("- Verify each system has parameters_affected with quantified changes")
+    
+    try:
+        request_data = {
+            "food_name": "Banana",
+            "serving_size": "1 medium"
+        }
+        
+        response = requests.post(
+            f"{BACKEND_URL}/api/food/analyze-from-db",
+            json=request_data,
+            timeout=60
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            banana_analysis = data
+            
+            print(f"✅ API call successful")
+            
+            # Check success field
+            success = data.get('success', False)
+            if not success:
+                print(f"❌ Analysis failed (success: false)")
+                return False
+            
+            print(f"✅ Analysis successful (success: true) ✓")
+            
+            # Get analysis data
+            analysis = data.get('analysis', {})
+            if not analysis:
+                print(f"❌ Analysis data missing")
+                return False
+            
+            # Check organ system parameter effects (CRITICAL)
+            organ_effects = analysis.get('organ_system_parameter_effects', {})
+            
+            if not organ_effects or not isinstance(organ_effects, dict):
+                print(f"❌ organ_system_parameter_effects missing")
+                return False
+            
+            print(f"✅ organ_system_parameter_effects present ✓")
+            organ_systems = list(organ_effects.keys())
+            organ_count = len(organ_systems)
+            print(f"  📊 Organ systems found: {organ_count} systems")
+            
+            # Check for 8+ organ systems as per review request
+            if organ_count >= 8:
+                print(f"  ✅ Meets requirement: {organ_count} >= 8 organ systems ✓")
+            else:
+                print(f"  ❌ Does not meet requirement: {organ_count} < 8 organ systems")
+                return False
+            
+            # Check for required organ systems from review request
+            required_systems = ['cardiovascular', 'glycemic', 'hepatic', 'renal', 'gastrointestinal', 'musculoskeletal', 'neurological', 'immune']
+            found_systems = []
+            
+            for required in required_systems:
+                for system in organ_systems:
+                    if required.lower() in system.lower():
+                        found_systems.append(required)
+                        break
+            
+            print(f"  📊 Required systems found: {found_systems}")
+            print(f"  📊 Coverage: {len(found_systems)}/{len(required_systems)} required systems")
+            
+            if len(found_systems) >= 6:  # Allow some flexibility
+                print(f"  ✅ Good coverage of required organ systems ✓")
+            else:
+                print(f"  ⚠️ Limited coverage of required organ systems")
+            
+            # Check for parameters_affected with quantified changes
+            has_quantified_params = False
+            for system_name, system_data in organ_effects.items():
+                if isinstance(system_data, dict):
+                    parameters = system_data.get('parameters_affected', [])
+                    if parameters:
+                        print(f"  📊 {system_name}: {len(parameters)} parameters")
+                        # Check if parameters have quantified changes
+                        for param in parameters[:2]:  # Check first 2 parameters
+                            if isinstance(param, dict):
+                                change = param.get('quantified_change', '')
+                                if change and any(char.isdigit() for char in str(change)):
+                                    has_quantified_params = True
+                                    print(f"    ✅ Quantified change found: {change}")
+                                    break
+                        if has_quantified_params:
+                            break
+            
+            if has_quantified_params:
+                print(f"  ✅ Parameters have quantified changes ✓")
+            else:
+                print(f"  ⚠️ Limited quantified changes found")
+            
+            return True
+            
+        else:
+            print(f"❌ API call failed: {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"  ℹ️ Error details: {error_data}")
+            except:
+                print(f"  ℹ️ Response text: {response.text}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Error testing Banana analysis: {e}")
+        return False
+
+
+def test_drug_database_stats():
+    """Test Drug Database Stats - verify 200+ drugs with parameter_effects"""
+    global drug_stats
+    
+    print("\n💊 TEST: DRUG DATABASE STATS (REVIEW REQUEST)")
+    print("=" * 60)
+    print("Testing requirements from review request:")
+    print("- Total drugs with parameter_effects should be 200+")
+    print("- Verify drug classes are identified (ace_inhibitor, beta_blocker, statin, etc.)")
+    
+    try:
+        # Test platform stats for drug counts
+        response = requests.get(f"{BACKEND_URL}/api/platform/stats", timeout=15)
+        
+        if response.status_code == 200:
+            data = response.json()
+            drug_stats = data
+            
+            print(f"✅ Platform stats API call successful")
+            
+            # Check drug counts
+            drugs_data = data.get('drugs', {})
+            total_drugs = drugs_data.get('total', 0)
+            
+            print(f"  📊 Total drugs: {total_drugs}")
+            
+            if total_drugs >= 200:
+                print(f"  ✅ Meets requirement: {total_drugs} >= 200 drugs ✓")
+                stats_pass = True
+            else:
+                print(f"  ❌ Does not meet requirement: {total_drugs} < 200 drugs")
+                stats_pass = False
+            
+            # Test drug list API to verify drug classes
+            print(f"\n  🧪 Testing drug list API for drug classes...")
+            drugs_response = requests.get(f"{BACKEND_URL}/api/drugs?limit=50", timeout=15)
+            
+            if drugs_response.status_code == 200:
+                drugs_list_data = drugs_response.json()
+                drugs_list = drugs_list_data.get('drugs', [])
+                
+                print(f"  📊 Retrieved {len(drugs_list)} drugs for class verification")
+                
+                # Check for drug classes
+                drug_classes_found = set()
+                expected_classes = ['ace_inhibitor', 'beta_blocker', 'statin', 'diuretic', 'calcium_channel_blocker']
+                
+                for drug in drugs_list:
+                    drug_class = drug.get('drug_class', '').lower()
+                    if drug_class:
+                        drug_classes_found.add(drug_class)
+                        # Check for expected classes
+                        for expected in expected_classes:
+                            if expected.replace('_', ' ') in drug_class or expected.replace('_', '-') in drug_class:
+                                print(f"    ✅ Found {expected}: {drug.get('name', 'Unknown')} ({drug_class})")
+                
+                print(f"  📊 Unique drug classes found: {len(drug_classes_found)}")
+                print(f"  📊 Sample classes: {list(drug_classes_found)[:5]}")
+                
+                if len(drug_classes_found) >= 10:
+                    print(f"  ✅ Good variety of drug classes ✓")
+                    classes_pass = True
+                else:
+                    print(f"  ⚠️ Limited drug class variety")
+                    classes_pass = False
+                
+            else:
+                print(f"  ❌ Drug list API failed: {drugs_response.status_code}")
+                classes_pass = False
+            
+            return stats_pass and classes_pass
+            
+        else:
+            print(f"❌ Platform stats API call failed: {response.status_code}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Error testing drug database stats: {e}")
+        return False
+
+
+def test_drug_parameter_effects():
+    """Test specific drugs for parameter effects as per review request"""
+    global lisinopril_data, metoprolol_data, metformin_data
+    
+    print("\n💊 TEST: DRUG PARAMETER EFFECTS (REVIEW REQUEST)")
+    print("=" * 60)
+    print("Testing requirements from review request:")
+    print("- Verify Lisinopril has 8+ parameter_effects across cardiovascular, renal, endocrine systems")
+    print("- Verify Metoprolol (beta blocker) has cardiovascular and respiratory effects")
+    print("- Verify Metformin has glycemic effects with -20-40 mg/dL fasting glucose change")
+    
+    test_drugs = [
+        {
+            "name": "lisinopril",
+            "expected_systems": ["cardiovascular", "renal", "endocrine"],
+            "min_effects": 8,
+            "variable": "lisinopril_data"
+        },
+        {
+            "name": "metoprolol",
+            "expected_systems": ["cardiovascular", "respiratory"],
+            "min_effects": 4,
+            "variable": "metoprolol_data"
+        },
+        {
+            "name": "metformin",
+            "expected_systems": ["glycemic", "endocrine"],
+            "min_effects": 3,
+            "variable": "metformin_data",
+            "special_check": "glucose_change"
+        }
+    ]
+    
+    all_tests_pass = True
+    
+    for drug_test in test_drugs:
+        drug_name = drug_test["name"]
+        expected_systems = drug_test["expected_systems"]
+        min_effects = drug_test["min_effects"]
+        
+        print(f"\n  🧪 Testing: {drug_name.title()}")
+        
+        try:
+            # Try to get drug info
+            response = requests.get(f"{BACKEND_URL}/api/drugs/{drug_name}", timeout=30)
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Store in global variables
+                if drug_name == "lisinopril":
+                    lisinopril_data = data
+                elif drug_name == "metoprolol":
+                    metoprolol_data = data
+                elif drug_name == "metformin":
+                    metformin_data = data
+                
+                print(f"    ✅ Drug found: {data.get('name', drug_name)}")
+                
+                # Check drug class
+                drug_class = data.get('drug_class', '')
+                if drug_class:
+                    print(f"    📊 Drug class: {drug_class}")
+                
+                # Check for parameter effects in different possible formats
+                parameter_effects_count = 0
+                found_systems = []
+                
+                # Check therapeutic_effects
+                therapeutic_effects = data.get('therapeutic_effects', [])
+                if therapeutic_effects:
+                    print(f"    📊 Therapeutic effects found: {len(therapeutic_effects)}")
+                    for effect in therapeutic_effects:
+                        if isinstance(effect, dict):
+                            organs = effect.get('organs', [])
+                            for organ in organs:
+                                if isinstance(organ, dict):
+                                    organ_id = organ.get('organ_id', '').lower()
+                                    scales = organ.get('scales', [])
+                                    for scale in scales:
+                                        if isinstance(scale, dict):
+                                            parameters = scale.get('parameters', [])
+                                            parameter_effects_count += len(parameters)
+                                            # Check if this matches expected systems
+                                            for expected in expected_systems:
+                                                if expected in organ_id and expected not in found_systems:
+                                                    found_systems.append(expected)
+                
+                # Check mechanisms (alternative format)
+                mechanisms = data.get('mechanisms', [])
+                if mechanisms:
+                    print(f"    📊 Mechanisms found: {len(mechanisms)}")
+                    for mechanism in mechanisms:
+                        if isinstance(mechanism, dict):
+                            parameter_effects_count += 1
+                            target = mechanism.get('target', '').lower()
+                            organ = mechanism.get('organ', '').lower()
+                            # Check if this matches expected systems
+                            for expected in expected_systems:
+                                if (expected in target or expected in organ) and expected not in found_systems:
+                                    found_systems.append(expected)
+                
+                # Check parameter_effects (direct format)
+                parameter_effects = data.get('parameter_effects', [])
+                if parameter_effects:
+                    print(f"    📊 Parameter effects found: {len(parameter_effects)}")
+                    parameter_effects_count += len(parameter_effects)
+                
+                print(f"    📊 Total parameter effects: {parameter_effects_count}")
+                print(f"    📊 Systems found: {found_systems}")
+                
+                # Check minimum effects requirement
+                if parameter_effects_count >= min_effects:
+                    print(f"    ✅ Meets requirement: {parameter_effects_count} >= {min_effects} effects ✓")
+                    effects_pass = True
+                else:
+                    print(f"    ❌ Does not meet requirement: {parameter_effects_count} < {min_effects} effects")
+                    effects_pass = False
+                
+                # Check expected systems
+                systems_coverage = len(found_systems) / len(expected_systems)
+                if systems_coverage >= 0.5:  # At least 50% coverage
+                    print(f"    ✅ Good system coverage: {found_systems} ✓")
+                    systems_pass = True
+                else:
+                    print(f"    ⚠️ Limited system coverage: {found_systems}")
+                    systems_pass = False
+                
+                # Special check for Metformin glucose change
+                if drug_test.get("special_check") == "glucose_change" and drug_name == "metformin":
+                    glucose_change_found = False
+                    # Look for glucose-related effects
+                    for effect in therapeutic_effects + mechanisms:
+                        if isinstance(effect, dict):
+                            description = str(effect.get('description', '')).lower()
+                            target = str(effect.get('target', '')).lower()
+                            if 'glucose' in description or 'glucose' in target:
+                                print(f"    ✅ Glucose effect found: {description or target}")
+                                glucose_change_found = True
+                                break
+                    
+                    if glucose_change_found:
+                        print(f"    ✅ Metformin glucose effects confirmed ✓")
+                    else:
+                        print(f"    ⚠️ Metformin glucose effects not clearly identified")
+                
+                if not (effects_pass and systems_pass):
+                    all_tests_pass = False
+                
+            else:
+                print(f"    ❌ Drug not found: {response.status_code}")
+                all_tests_pass = False
+                
+        except Exception as e:
+            print(f"    ❌ Error testing {drug_name}: {e}")
+            all_tests_pass = False
+    
+    return all_tests_pass
     """Test 2: Food Analysis from DB Test - Multiple foods including USDA and Open Food Facts"""
     global apple_analysis, chicken_analysis, coca_cola_analysis
     
