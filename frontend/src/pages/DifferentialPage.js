@@ -846,11 +846,11 @@ const DifferentialPage = () => {
   return (
     <>
       <Helmet>
-        <title>Differential Diagnosis | PhiCor.ai - AI-Powered Clinical Reasoning</title>
-        <meta name="description" content="Advanced AI-powered differential diagnosis tool. Enter clinical data, symptoms, and lab values to get evidence-based diagnostic probabilities and clinical reasoning." />
+        <title>Differential Diagnosis | PhiCor.ai - Mathematical Clinical Reasoning</title>
+        <meta name="description" content="Advanced mathematical differential diagnosis tool. Enter clinical data, symptoms, and lab values to get evidence-based diagnostic probabilities and clinical reasoning." />
         <link rel="canonical" href="https://phicor.ai/differential" />
         <meta property="og:title" content="Differential Diagnosis | PhiCor.ai" />
-        <meta property="og:description" content="AI-powered differential diagnosis with clinical reasoning and evidence-based diagnostic probabilities." />
+        <meta property="og:description" content="Mathematical differential diagnosis with clinical reasoning and evidence-based diagnostic probabilities." />
         <meta property="og:url" content="https://phicor.ai/differential" />
       </Helmet>
       <div className={`min-h-screen ${isDark ? 'bg-gray-950' : 'bg-gray-50'}`}>
@@ -869,7 +869,7 @@ const DifferentialPage = () => {
                   Differential Diagnosis
                 </h1>
                 <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                  AI-powered diagnostic reasoning engine
+                  Mathematical diagnostic reasoning engine
                 </p>
               </div>
             </div>
