@@ -45,9 +45,9 @@ BACKEND_URL = None
 # Global variables for test state
 platform_stats = None
 food_search_results = None
-banana_analysis = None
+apple_analysis = None
+chicken_analysis = None
 coca_cola_analysis = None
-spirulina_analysis = None
 
 def get_backend_url():
     """Extract backend URL from frontend .env file"""
