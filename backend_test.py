@@ -398,13 +398,13 @@ def run_all_tests():
     critical_issues = []
     
     if not test_results.get('platform_stats_api'):
-        critical_issues.append("❌ CRITICAL: Platform stats API failed - foods count may not show 844+ expansion")
+        critical_issues.append("❌ CRITICAL: Platform stats API failed - foods count may not show 9900+ expansion")
     
     if not test_results.get('food_analysis_from_db'):
-        critical_issues.append("❌ CRITICAL: Food analysis from DB failed - new foods may not be analyzable")
+        critical_issues.append("❌ CRITICAL: Food analysis from DB failed - USDA/Open Food Facts foods may not be analyzable")
     
-    if not test_results.get('food_search_verification'):
-        critical_issues.append("❌ CRITICAL: Food search verification failed - database expansion may not be complete")
+    if not test_results.get('database_verification'):
+        critical_issues.append("❌ CRITICAL: Database verification failed - MASSIVE database expansion may not be complete")
     
     if critical_issues:
         for issue in critical_issues:
