@@ -30,6 +30,7 @@ import LungCancerModule from '../components/LungCancerModule';
 import TreatmentGuidelinesPanel from '../components/TreatmentGuidelinesPanel';
 import DiseaseDetailPanel from '../components/DiseaseDetailPanel';
 import FeatureNav from '../components/FeatureNav';
+import RegionSelector from '../components/RegionSelector';
 import 'katex/dist/katex.min.css';
 import { BlockMath, InlineMath } from 'react-katex';
 
