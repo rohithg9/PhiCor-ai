@@ -306,7 +306,7 @@ const LandingPage = () => {
               className="cursor-pointer group shrink-0"
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             >
-              <h1 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-white group-hover:text-purple-400 transition-colors">
+              <h1 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-foreground group-hover:text-purple-400 transition-colors">
                 Phi<span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">Cor</span>
               </h1>
             </div>
