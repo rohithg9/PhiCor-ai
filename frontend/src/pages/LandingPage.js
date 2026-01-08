@@ -403,7 +403,7 @@ const LandingPage = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
-              className="lg:hidden bg-background/98 backdrop-blur-xl border-b border-white/10 absolute top-full left-0 right-0 z-50"
+              className="lg:hidden bg-background border-b border-border shadow-xl absolute top-full left-0 right-0 z-50"
             >
               <div className="px-4 py-4 space-y-2">
                 {navItems.map((item) => (
@@ -426,7 +426,7 @@ const LandingPage = () => {
                         ? 'text-indigo-400 bg-indigo-500/10 border border-indigo-500/20' 
                         : item.isRoute
                         ? 'text-primary bg-primary/10 border border-primary/20'
-                        : 'text-foreground bg-white/5 hover:bg-white/10 active:bg-white/15'
+                        : 'text-foreground bg-muted/50 hover:bg-muted active:bg-muted/80'
                     }`}
                   >
                     {item.isEmail && <Mail className="w-5 h-5" />}
@@ -436,8 +436,8 @@ const LandingPage = () => {
                 ))}
                 
                 {/* Theme Toggle */}
-                <div className="pt-2 mt-2 border-t border-white/10 space-y-2">
-                  <div className="px-4 py-2 text-base font-medium text-foreground bg-white/5 rounded-xl flex items-center gap-3">
+                <div className="pt-2 mt-2 border-t border-border space-y-2">
+                  <div className="px-4 py-2 text-base font-medium text-foreground bg-muted/50 rounded-xl flex items-center gap-3">
                     <Globe className="w-5 h-5" />
                     <span className="mr-2">Region:</span>
                     <RegionSelector compact={true} />
@@ -451,7 +451,7 @@ const LandingPage = () => {
                       toggleTheme();
                     }}
                     style={{ touchAction: 'manipulation' }}
-                    className="w-full text-left px-4 py-4 text-base font-medium transition-all rounded-xl active:scale-95 cursor-pointer select-none flex items-center gap-3 text-foreground bg-white/5 hover:bg-white/10 active:bg-white/15"
+                    className="w-full text-left px-4 py-4 text-base font-medium transition-all rounded-xl active:scale-95 cursor-pointer select-none flex items-center gap-3 text-foreground bg-muted/50 hover:bg-muted active:bg-muted/80"
                   >
                     {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                     {isDark ? 'Light Mode' : 'Dark Mode'}
