@@ -343,7 +343,7 @@ def run_all_tests():
     
     # Summary
     print("\n" + "=" * 80)
-    print("🏁 PHICOR.AI FOOD ENGINE TEST SUMMARY (DATABASE EXPANSION)")
+    print("🏁 PHICOR.AI FOOD ENGINE TEST SUMMARY (MASSIVE DATABASE EXPANSION)")
     print("=" * 80)
     
     passed_tests = sum(1 for result in test_results.values() if result)
