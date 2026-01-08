@@ -445,6 +445,24 @@ export default function ExpertDashboard() {
     }
   }, [token]);
 
+  // Fetch platform stats for real-time counts
+  const fetchPlatformStats = useCallback(async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/platform/stats`);
+      const data = await response.json();
+      setPlatformStats({
+        drugs: data.drugs?.total || 0,
+        diseases: data.diseases?.total || 0,
+        foods: data.foods?.total || 0,
+        nutrients: data.nutrients?.total || 0,
+        models: parseInt(data.display_stats?.models) || 0,
+        organ_systems: parseInt(data.display_stats?.organ_systems) || 0
+      });
+    } catch (err) {
+      console.error('Failed to fetch platform stats:', err);
+    }
+  }, []);
+
   // Fetch knowledge bank data
   const fetchKnowledgeData = useCallback(async () => {
     if (!token || !isAdmin) return;
