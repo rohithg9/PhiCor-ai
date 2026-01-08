@@ -1,31 +1,27 @@
 #!/usr/bin/env python3
 """
-Backend Testing for PhiCor.ai Food Engine After Database Expansion
+Backend Testing for PhiCor.ai Food Engine and Drug Engine
 Testing specific requirements from review request:
 
-PHICOR.AI FOOD ENGINE DATA EXPANSION VERIFICATION:
+## FOOD ENGINE TESTING
+1. **Food Analysis** (POST /api/food/analyze-from-db):
+   - Test with food_name: "Banana" - verify it returns 8+ organ systems
+   - Verify organ systems include: cardiovascular, glycemic, hepatic, renal, gastrointestinal, musculoskeletal, neurological, immune
+   - Verify each system has parameters_affected with quantified changes
 
-Test 1: Platform Stats API Test
-- GET /api/platform/stats
-- Should return foods.total >= 9900 (after MASSIVE database expansion)
-- Should return nutrients.total = 45
-- Should return display_stats.foods showing "9900+" or similar
+2. **Food Database Stats**:
+   - Total foods should be ~9,951
+   - Foods with organ effects should be 5,000+
 
-Test 2: Food Analysis from DB Test
-- POST /api/food/analyze-from-db with food_name: "Apple" - should return comprehensive analysis with organ_system_parameter_effects
-- POST /api/food/analyze-from-db with food_name: "Chicken breast" - should find USDA food
-- POST /api/food/analyze-from-db with food_name: "Coca Cola" - should find Open Food Facts product
+## DRUG ENGINE TESTING  
+3. **Drug Parameter Effects**:
+   - Verify Lisinopril has 8+ parameter_effects across cardiovascular, renal, endocrine systems
+   - Verify Metoprolol (beta blocker) has cardiovascular and respiratory effects
+   - Verify Metformin has glycemic effects with -20-40 mg/dL fasting glucose change
 
-Test 3: Food Search Verification
-- Verify the database contains branded products (search for "Coca Cola", "Pepsi", "Nestle")
-- Verify superfoods (search for "spirulina", "maca", "moringa")
-- Verify fermented foods (search for "kombucha", "kefir", "natto")
-- Verify exotic fruits (search for "dragon fruit", "durian", "jackfruit")
-
-Expected Results:
-- Total food count should be approximately 9,951
-- Multiple data sources (USDA, Open Food Facts, PhiCor) should be present
-- Food analysis should work for various food types
+4. **Drug Database Stats**:
+   - Total drugs with parameter_effects should be 200+
+   - Verify drug classes are identified (ace_inhibitor, beta_blocker, statin, etc.)
 
 API Base URL: Use REACT_APP_BACKEND_URL from /app/frontend/.env
 """
