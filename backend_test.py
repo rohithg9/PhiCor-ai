@@ -353,9 +353,9 @@ def run_all_tests():
     
     # Test results breakdown
     food_engine_tests = [
-        ('platform_stats_api', 'Test 1: Platform Stats API (foods.total >= 844)'),
-        ('food_analysis_from_db', 'Test 2: Food Analysis from DB (Banana, Coca Cola, Spirulina)'),
-        ('food_search_verification', 'Test 3: Food Search Verification (branded, superfoods, etc.)')
+        ('platform_stats_api', 'Test 1: Platform Stats API (foods.total >= 9900)'),
+        ('food_analysis_from_db', 'Test 2: Food Analysis from DB (Apple, Chicken breast, Coca Cola)'),
+        ('database_verification', 'Test 3: Database Verification (USDA, Open Food Facts, nutrients)')
     ]
     
     infrastructure_tests = [
