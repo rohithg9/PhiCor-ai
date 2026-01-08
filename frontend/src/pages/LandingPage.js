@@ -278,11 +278,11 @@ const LandingPage = () => {
   return (
     <>
       <Helmet>
-        <title>PhiCor.ai | AI Clinical Decision Support - Mathematical Disease Modeling</title>
-        <meta name="description" content="PhiCor.ai revolutionizes clinical decision-making with AI-powered differential diagnosis, 2500+ disease profiles, 4000+ mathematical models, and real-time organ system simulation. Moving medicine from speculation to calculation." />
+        <title>PhiCor.ai | Mathematical Clinical Decision Support - Precision Disease Modeling</title>
+        <meta name="description" content="PhiCor revolutionizes clinical decision-making with mathematical disease modeling, 2568+ disease profiles, 7892+ validated equations, and real-time organ system simulation. Moving medicine from speculation to calculation." />
         <link rel="canonical" href="https://phicor.ai/" />
-        <meta property="og:title" content="PhiCor.ai | AI Clinical Decision Support" />
-        <meta property="og:description" content="AI-powered differential diagnosis with mathematical disease modeling and organ system simulation." />
+        <meta property="og:title" content="PhiCor.ai | Mathematical Clinical Decision Support" />
+        <meta property="og:description" content="Evidence-based differential diagnosis with mathematical disease modeling and real-time organ system simulation." />
         <meta property="og:url" content="https://phicor.ai/" />
       </Helmet>
       <div className="min-h-screen bg-background relative overflow-hidden">
