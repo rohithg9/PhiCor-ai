@@ -219,12 +219,12 @@ def test_food_analysis_from_db():
                 data = response.json()
                 
                 # Store in global variables
-                if food_name == "Banana":
-                    banana_analysis = data
+                if food_name == "Apple":
+                    apple_analysis = data
+                elif food_name == "Chicken breast":
+                    chicken_analysis = data
                 elif food_name == "Coca Cola":
                     coca_cola_analysis = data
-                elif food_name == "Spirulina powder":
-                    spirulina_analysis = data
                 
                 print(f"    ✅ API call successful")
                 
