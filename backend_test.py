@@ -415,19 +415,19 @@ def run_all_tests():
     # PhiCor.ai Food Engine specific verification
     print(f"\n📋 PHICOR.AI FOOD ENGINE VERIFICATION:")
     if test_results.get('platform_stats_api'):
-        print(f"  ✅ Platform stats verified (Foods: 844+, Nutrients: 45)")
+        print(f"  ✅ Platform stats verified (Foods: 9900+, Nutrients: 45)")
     else:
         print(f"  ❌ Platform stats failed")
     
     if test_results.get('food_analysis_from_db'):
-        print(f"  ✅ Food analysis verified (Banana, Coca Cola, Spirulina with organ effects)")
+        print(f"  ✅ Food analysis verified (Apple, Chicken breast, Coca Cola with organ effects)")
     else:
         print(f"  ❌ Food analysis from DB failed")
     
-    if test_results.get('food_search_verification'):
-        print(f"  ✅ Food search verified (branded products, superfoods, fermented foods, exotic fruits)")
+    if test_results.get('database_verification'):
+        print(f"  ✅ Database verified (USDA FoodData Central, Open Food Facts, nutrients)")
     else:
-        print(f"  ❌ Food search verification failed")
+        print(f"  ❌ Database verification failed")
     
     return test_results
 def test_food_search_verification():
