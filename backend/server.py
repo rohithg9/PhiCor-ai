@@ -8511,27 +8511,6 @@ async def analyze_food_from_database(request: Dict[str, Any] = Body(...)):
         
         serving_description = food.get("description", "")
         serving_text = food.get("serving_size", "1 serving") if isinstance(food.get("serving_size"), str) else "1 serving"
-            desc_lower = serving_description.lower()
-            if "medium" in desc_lower:
-                serving_text = "1 medium"
-            elif "large" in desc_lower:
-                serving_text = "1 large"
-            elif "small" in desc_lower:
-                serving_text = "1 small"
-            elif "cup" in desc_lower:
-                serving_text = "1 cup"
-            elif "slice" in desc_lower:
-                serving_text = "1 slice"
-            elif "piece" in desc_lower:
-                serving_text = "1 piece"
-            elif "oz" in desc_lower or "ounce" in desc_lower:
-                serving_text = "1 oz"
-            elif "fillet" in desc_lower:
-                serving_text = "1 fillet"
-            elif "egg" in desc_lower:
-                serving_text = "1 egg"
-            elif "tbsp" in desc_lower or "tablespoon" in desc_lower:
-                serving_text = "1 tbsp"
         
         # Build response
         analysis = {
