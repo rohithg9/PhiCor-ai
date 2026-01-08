@@ -300,20 +300,19 @@ def test_food_analysis_from_db():
     return all_tests_pass
 
 def run_all_tests():
-    """Run all PhiCor.ai Application tests"""
-    print("🧪 PHICOR.AI APPLICATION TESTING")
+    """Run all PhiCor.ai Food Engine tests after database expansion"""
+    print("🧪 PHICOR.AI FOOD ENGINE TESTING (AFTER DATABASE EXPANSION)")
     print("=" * 80)
     print("Testing specific requirements from review request:")
-    print("1. Platform Stats API Test - GET /api/platform/stats")
-    print("2. Drug Enhancement Verification - GET /api/drugs and verify organ_system_parameter_effects")
-    print("3. Food Analysis API Test - POST /api/food/analyze-from-db")
+    print("1. Platform Stats API Test - Should return foods.total >= 844")
+    print("2. Food Analysis from DB Test - Test Banana, Coca Cola, Spirulina powder")
+    print("3. Food Search Verification - Verify branded products, superfoods, etc.")
     print("=" * 80)
     print("Test Credentials:")
-    print("- Backend URL: https://nutrihealth-11.preview.emergentagent.com")
-    print("- Frontend URL: https://nutrihealth-11.preview.emergentagent.com")
+    print("- Backend URL: Use REACT_APP_BACKEND_URL from /app/frontend/.env")
     print("=" * 80)
-    print("NOTE: This tests the backend APIs for PhiCor.ai Application")
-    print("FOCUS: Verifying platform stats, drug enhancements, and food analysis endpoints")
+    print("NOTE: This tests the PhiCor.ai Food Engine after significant database expansion")
+    print("FOCUS: Verifying 844+ foods, Open Food Facts integration, superfood additions")
     print("=" * 80)
     
     test_results = {}
@@ -329,22 +328,22 @@ def run_all_tests():
     else:
         test_results['backend_health'] = False
     
-    # PHICOR.AI APPLICATION TESTS
+    # PHICOR.AI FOOD ENGINE TESTS (AFTER DATABASE EXPANSION)
     if test_results['backend_health']:
         test_results['platform_stats_api'] = test_platform_stats_api()
-        test_results['drug_enhancement_verification'] = test_drug_enhancement_verification()
         test_results['food_analysis_from_db'] = test_food_analysis_from_db()
+        test_results['food_search_verification'] = test_food_search_verification()
     else:
         # Set all tests to False if backend is not accessible
         test_results.update({
             'platform_stats_api': False,
-            'drug_enhancement_verification': False,
-            'food_analysis_from_db': False
+            'food_analysis_from_db': False,
+            'food_search_verification': False
         })
     
     # Summary
     print("\n" + "=" * 80)
-    print("🏁 PHICOR.AI APPLICATION TEST SUMMARY")
+    print("🏁 PHICOR.AI FOOD ENGINE TEST SUMMARY (DATABASE EXPANSION)")
     print("=" * 80)
     
     passed_tests = sum(1 for result in test_results.values() if result)
@@ -353,10 +352,10 @@ def run_all_tests():
     print(f"\n📊 OVERALL RESULTS: {passed_tests}/{total_tests} tests passed")
     
     # Test results breakdown
-    application_tests = [
-        ('platform_stats_api', 'Test 1: Platform Stats API (GET /api/platform/stats)'),
-        ('drug_enhancement_verification', 'Test 2: Drug Enhancement Verification (GET /api/drugs)'),
-        ('food_analysis_from_db', 'Test 3: Food Analysis from DB API (POST /api/food/analyze-from-db)')
+    food_engine_tests = [
+        ('platform_stats_api', 'Test 1: Platform Stats API (foods.total >= 844)'),
+        ('food_analysis_from_db', 'Test 2: Food Analysis from DB (Banana, Coca Cola, Spirulina)'),
+        ('food_search_verification', 'Test 3: Food Search Verification (branded, superfoods, etc.)')
     ]
     
     infrastructure_tests = [
@@ -364,8 +363,8 @@ def run_all_tests():
         ('backend_health', 'Backend Health Check')
     ]
     
-    print(f"\n📊 PHICOR.AI APPLICATION TESTS:")
-    for test_key, test_name in application_tests:
+    print(f"\n📊 PHICOR.AI FOOD ENGINE TESTS:")
+    for test_key, test_name in food_engine_tests:
         if test_key in test_results:
             status = "✅ PASS" if test_results[test_key] else "❌ FAIL"
             print(f"  {status} - {test_name}")
@@ -376,36 +375,36 @@ def run_all_tests():
             status = "✅ PASS" if test_results[test_key] else "❌ FAIL"
             print(f"  {status} - {test_name}")
     
-    # Calculate application test success rate
-    app_passed = sum(1 for test_key, _ in application_tests if test_results.get(test_key, False))
-    app_total = len(application_tests)
+    # Calculate food engine test success rate
+    app_passed = sum(1 for test_key, _ in food_engine_tests if test_results.get(test_key, False))
+    app_total = len(food_engine_tests)
     
     if app_passed == app_total:
-        print(f"\n🎉 ALL PHICOR.AI APPLICATION TESTS PASSED!")
-        print(f"✅ Platform stats API returning correct counts")
-        print(f"✅ Drug enhancement verification with organ system parameter effects")
-        print(f"✅ Food analysis from DB API working with quantified changes")
-        print(f"\n🔄 COMPLETE PHICOR.AI WORKFLOW VERIFIED:")
-        print(f"   Platform Stats → Drug Enhancement → Food Analysis → Organ System Effects")
+        print(f"\n🎉 ALL PHICOR.AI FOOD ENGINE TESTS PASSED!")
+        print(f"✅ Platform stats showing 844+ foods after database expansion")
+        print(f"✅ Food analysis working for Banana, Coca Cola, and Spirulina powder")
+        print(f"✅ Food search verification confirmed branded products and superfoods")
+        print(f"\n🔄 COMPLETE FOOD ENGINE WORKFLOW VERIFIED:")
+        print(f"   Database Expansion → Open Food Facts Integration → Superfood Addition → Analysis")
     elif app_passed >= app_total * 0.75:
-        print(f"\n✅ MOSTLY SUCCESSFUL! {app_passed}/{app_total} application tests passed.")
+        print(f"\n✅ MOSTLY SUCCESSFUL! {app_passed}/{app_total} food engine tests passed.")
         print(f"⚠️  Some minor issues detected - see failed tests above")
     else:
-        print(f"\n❌ SIGNIFICANT ISSUES DETECTED! Only {app_passed}/{app_total} application tests passed.")
-        print(f"🔧 Major fixes needed for PhiCor.ai Application features")
+        print(f"\n❌ SIGNIFICANT ISSUES DETECTED! Only {app_passed}/{app_total} food engine tests passed.")
+        print(f"🔧 Major fixes needed for PhiCor.ai Food Engine features")
     
     # Critical Issues Detection
     print(f"\n🚨 CRITICAL ISSUES DETECTED:")
     critical_issues = []
     
     if not test_results.get('platform_stats_api'):
-        critical_issues.append("❌ CRITICAL: Platform stats API failed - landing page stats won't load")
-    
-    if not test_results.get('drug_enhancement_verification'):
-        critical_issues.append("❌ CRITICAL: Drug enhancement verification failed - drug effects may not be detailed")
+        critical_issues.append("❌ CRITICAL: Platform stats API failed - foods count may not show 844+ expansion")
     
     if not test_results.get('food_analysis_from_db'):
-        critical_issues.append("❌ CRITICAL: Food analysis from DB API failed - food analysis feature broken")
+        critical_issues.append("❌ CRITICAL: Food analysis from DB failed - new foods may not be analyzable")
+    
+    if not test_results.get('food_search_verification'):
+        critical_issues.append("❌ CRITICAL: Food search verification failed - database expansion may not be complete")
     
     if critical_issues:
         for issue in critical_issues:
@@ -413,22 +412,22 @@ def run_all_tests():
     else:
         print(f"  ✅ No critical issues detected")
     
-    # PhiCor.ai Application specific verification
-    print(f"\n📋 PHICOR.AI APPLICATION VERIFICATION:")
+    # PhiCor.ai Food Engine specific verification
+    print(f"\n📋 PHICOR.AI FOOD ENGINE VERIFICATION:")
     if test_results.get('platform_stats_api'):
-        print(f"  ✅ Platform stats verified (Foods: 148+, Nutrients: 38+, Diseases: 2568+, Drugs: 415+)")
+        print(f"  ✅ Platform stats verified (Foods: 844+, Nutrients: 45)")
     else:
         print(f"  ❌ Platform stats failed")
     
-    if test_results.get('drug_enhancement_verification'):
-        print(f"  ✅ Drug enhancement verified (organ_system_parameter_effects with detailed effects)")
-    else:
-        print(f"  ❌ Drug enhancement verification failed")
-    
     if test_results.get('food_analysis_from_db'):
-        print(f"  ✅ Food analysis from DB verified (Banana analysis with quantified changes)")
+        print(f"  ✅ Food analysis verified (Banana, Coca Cola, Spirulina with organ effects)")
     else:
         print(f"  ❌ Food analysis from DB failed")
+    
+    if test_results.get('food_search_verification'):
+        print(f"  ✅ Food search verified (branded products, superfoods, fermented foods, exotic fruits)")
+    else:
+        print(f"  ❌ Food search verification failed")
     
     return test_results
 def test_food_search_verification():
