@@ -175,13 +175,13 @@ def test_food_analysis_from_db():
     
     test_foods = [
         {
-            "name": "Apple",
-            "description": "Basic food analysis",
+            "name": "Apples, raw",
+            "description": "USDA FoodData Central food",
             "expected_source": "usda",
             "variable": "apple_analysis"
         },
         {
-            "name": "Chicken breast",
+            "name": "Chicken, broilers or fryers, breast, meat only, cooked, roasted",
             "description": "USDA FoodData Central food",
             "expected_source": "usda",
             "variable": "chicken_analysis"
