@@ -44,6 +44,11 @@ food_search_results = None
 apple_analysis = None
 chicken_analysis = None
 coca_cola_analysis = None
+banana_analysis = None
+drug_stats = None
+lisinopril_data = None
+metoprolol_data = None
+metformin_data = None
 
 def get_backend_url():
     """Extract backend URL from frontend .env file"""
