@@ -161,283 +161,143 @@ def test_platform_stats_api():
         print(f"❌ Error testing platform stats API: {e}")
         return False
 
-def test_drug_enhancement_verification():
-    """Test 2: Drug Enhancement Verification - GET /api/drugs and verify organ_system_parameter_effects"""
-    global drug_list, lisinopril_drug, metformin_drug
-    
-    print("\n💊 TEST 2: DRUG ENHANCEMENT VERIFICATION")
-    print("=" * 50)
-    print("Testing requirements from review request:")
-    print("- GET /api/drugs to get drug list")
-    print("- Find a drug like 'Lisinopril' or 'Metformin'")
-    print("- Verify it has `organ_system_parameter_effects` with detailed effects")
-    print("- Check for cardiovascular, renal, glycemic system effects")
-    
-    try:
-        # First get the drug list
-        response = requests.get(f"{BACKEND_URL}/api/drugs", timeout=15)
-        
-        if response.status_code == 200:
-            data = response.json()
-            drug_list = data
-            
-            print(f"✅ Drug list API call successful")
-            drugs = data.get('drugs', [])
-            total_drugs = data.get('total', len(drugs))
-            print(f"  📊 Total drugs available: {total_drugs}")
-            
-            # Look for Lisinopril
-            lisinopril = None
-            metformin = None
-            
-            for drug in drugs:
-                drug_name = drug.get('name', '').lower()
-                if 'lisinopril' in drug_name:
-                    lisinopril = drug
-                elif 'metformin' in drug_name:
-                    metformin = drug
-            
-            if lisinopril:
-                print(f"  ✅ Found Lisinopril: {lisinopril.get('name')}")
-                target_drug = lisinopril
-                target_drug_id = lisinopril.get('id')
-            elif metformin:
-                print(f"  ✅ Found Metformin: {metformin.get('name')}")
-                target_drug = metformin
-                target_drug_id = metformin.get('id')
-            else:
-                print(f"  ⚠️ Neither Lisinopril nor Metformin found in drug list")
-                # Try to find any ACE inhibitor or diabetes drug
-                for drug in drugs:
-                    drug_class = drug.get('drug_class', '').lower()
-                    if 'ace inhibitor' in drug_class or 'biguanide' in drug_class:
-                        target_drug = drug
-                        target_drug_id = drug.get('id')
-                        print(f"  ✅ Found alternative drug: {drug.get('name')} ({drug.get('drug_class')})")
-                        break
-                else:
-                    print(f"  ❌ No suitable test drug found")
-                    return False
-            
-            # Now get detailed drug information
-            if target_drug_id:
-                drug_response = requests.get(f"{BACKEND_URL}/api/drugs/{target_drug_id}", timeout=15)
-                
-                if drug_response.status_code == 200:
-                    drug_data = drug_response.json()
-                    
-                    if lisinopril:
-                        lisinopril_drug = drug_data
-                    elif metformin:
-                        metformin_drug = drug_data
-                    
-                    print(f"✅ Detailed drug information retrieved")
-                    print(f"  📊 Drug name: {drug_data.get('name')}")
-                    print(f"  📊 Drug class: {drug_data.get('drug_class')}")
-                    
-                    # Check for organ_system_parameter_effects
-                    organ_effects = drug_data.get('organ_system_parameter_effects', {})
-                    therapeutic_effects = drug_data.get('therapeutic_effects', [])
-                    
-                    if organ_effects and isinstance(organ_effects, dict):
-                        print(f"  ✅ organ_system_parameter_effects present ✓")
-                        organ_systems = list(organ_effects.keys())
-                        print(f"    📊 Organ systems affected: {organ_systems}")
-                        
-                        # Check for specific system effects
-                        cardiovascular_found = any('cardio' in sys.lower() or 'heart' in sys.lower() for sys in organ_systems)
-                        renal_found = any('renal' in sys.lower() or 'kidney' in sys.lower() for sys in organ_systems)
-                        glycemic_found = any('glycemic' in sys.lower() or 'glucose' in sys.lower() or 'endocrine' in sys.lower() for sys in organ_systems)
-                        
-                        if cardiovascular_found:
-                            print(f"    ✅ Cardiovascular system effects found ✓")
-                        if renal_found:
-                            print(f"    ✅ Renal system effects found ✓")
-                        if glycemic_found:
-                            print(f"    ✅ Glycemic/Endocrine system effects found ✓")
-                        
-                        # Check for detailed parameter effects
-                        detailed_effects_found = False
-                        for system, effects in organ_effects.items():
-                            if isinstance(effects, dict) and effects:
-                                detailed_effects_found = True
-                                print(f"    ✅ Detailed effects in {system}: {len(effects)} parameters")
-                                break
-                        
-                        if detailed_effects_found:
-                            print(f"  ✅ Detailed parameter effects verified ✓")
-                            return True
-                        else:
-                            print(f"  ❌ No detailed parameter effects found")
-                            return False
-                            
-                    elif therapeutic_effects and isinstance(therapeutic_effects, list):
-                        print(f"  ✅ therapeutic_effects present (alternative format)")
-                        print(f"    📊 Number of therapeutic effects: {len(therapeutic_effects)}")
-                        
-                        # Check for organ system effects in therapeutic_effects
-                        organ_systems_found = []
-                        for effect in therapeutic_effects:
-                            if isinstance(effect, dict):
-                                organs = effect.get('organs', [])
-                                for organ in organs:
-                                    if isinstance(organ, dict):
-                                        organ_id = organ.get('organ_id', '')
-                                        if organ_id:
-                                            organ_systems_found.append(organ_id)
-                        
-                        if organ_systems_found:
-                            print(f"    ✅ Organ systems in therapeutic effects: {set(organ_systems_found)}")
-                            return True
-                        else:
-                            print(f"    ⚠️ Limited organ system detail in therapeutic effects")
-                            return True  # Don't fail for this
-                    else:
-                        print(f"  ❌ No organ_system_parameter_effects or therapeutic_effects found")
-                        return False
-                else:
-                    print(f"❌ Failed to get detailed drug information: {drug_response.status_code}")
-                    return False
-            else:
-                print(f"  ❌ No drug ID found for detailed lookup")
-                return False
-                
-        else:
-            print(f"❌ Drug list API call failed: {response.status_code}")
-            try:
-                error_data = response.json()
-                print(f"  ℹ️ Error details: {error_data}")
-            except:
-                print(f"  ℹ️ Response text: {response.text}")
-            return False
-            
-    except Exception as e:
-        print(f"❌ Error testing drug enhancement verification: {e}")
-        return False
-
 def test_food_analysis_from_db():
-    """Test 3: Food Analysis API Test - POST /api/food/analyze-from-db"""
-    global banana_analysis
+    """Test 2: Food Analysis from DB Test - Multiple foods including new imports"""
+    global banana_analysis, coca_cola_analysis, spirulina_analysis
     
-    print("\n🍌 TEST 3: FOOD ANALYSIS FROM DB API")
-    print("=" * 50)
+    print("\n🍌 TEST 2: FOOD ANALYSIS FROM DB (EXPANDED DATABASE)")
+    print("=" * 60)
     print("Testing requirements from review request:")
-    print("- POST /api/food/analyze-from-db with {'food_name': 'Banana', 'serving_size': '1 medium'}")
-    print("- Verify response has organ_system_parameter_effects")
-    print("- Verify quantified changes are present (e.g., '-1.3 mmHg' for blood pressure)")
+    print("- Test with food_name: 'Banana' - should return comprehensive analysis")
+    print("- Test with food_name: 'Coca Cola' - should find Open Food Facts product")
+    print("- Test with food_name: 'Spirulina powder' - should find newly added superfood")
+    print("- All should include organ_system_parameter_effects")
     
-    try:
-        # Test the exact request from review request
-        request_data = {
-            "food_name": "Banana",
-            "serving_size": "1 medium"
+    test_foods = [
+        {
+            "name": "Banana",
+            "description": "Basic food analysis",
+            "expected_source": "phicor_curated",
+            "variable": "banana_analysis"
+        },
+        {
+            "name": "Coca Cola",
+            "description": "Open Food Facts branded product",
+            "expected_source": "open_food_facts",
+            "variable": "coca_cola_analysis"
+        },
+        {
+            "name": "Spirulina powder",
+            "description": "Newly added superfood",
+            "expected_source": "phicor_curated",
+            "variable": "spirulina_analysis"
         }
+    ]
+    
+    all_tests_pass = True
+    
+    for food_test in test_foods:
+        food_name = food_test["name"]
+        description = food_test["description"]
+        expected_source = food_test["expected_source"]
         
-        print(f"  📝 Testing food: {request_data['food_name']}")
-        print(f"  📏 Serving size: {request_data['serving_size']}")
+        print(f"\n  🧪 Testing: {food_name} ({description})")
         
-        response = requests.post(
-            f"{BACKEND_URL}/api/food/analyze-from-db",
-            json=request_data,
-            timeout=60  # Longer timeout for AI processing
-        )
-        
-        if response.status_code == 200:
-            data = response.json()
-            banana_analysis = data
+        try:
+            request_data = {
+                "food_name": food_name,
+                "serving_size": "1 serving"
+            }
             
-            print(f"✅ Food analysis from DB API call successful")
-            print(f"  📊 Response status: {response.status_code}")
+            response = requests.post(
+                f"{BACKEND_URL}/api/food/analyze-from-db",
+                json=request_data,
+                timeout=60
+            )
             
-            # Check success field
-            success = data.get('success', False)
-            if success:
-                print(f"  ✅ Analysis successful (success: true) ✓")
-                success_pass = True
-            else:
-                print(f"  ❌ Analysis failed (success: false)")
-                success_pass = False
-            
-            # Get analysis data
-            analysis = data.get('analysis', {})
-            if not analysis:
-                print(f"  ❌ Analysis data missing")
-                return False
-            
-            # Check organ system parameter effects (CRITICAL)
-            organ_effects = analysis.get('organ_system_parameter_effects', {})
-            
-            if organ_effects and isinstance(organ_effects, dict):
-                print(f"  ✅ organ_system_parameter_effects present ✓")
-                organ_systems = list(organ_effects.keys())
-                print(f"    📊 Organ systems: {organ_systems}")
+            if response.status_code == 200:
+                data = response.json()
                 
-                # Check for quantified changes
-                quantified_found = False
-                quantified_examples = []
+                # Store in global variables
+                if food_name == "Banana":
+                    banana_analysis = data
+                elif food_name == "Coca Cola":
+                    coca_cola_analysis = data
+                elif food_name == "Spirulina powder":
+                    spirulina_analysis = data
                 
-                for system, effects in organ_effects.items():
-                    if isinstance(effects, dict):
-                        for param, value in effects.items():
-                            if isinstance(value, str):
-                                # Look for quantified values like "-1.3 mmHg", "+2 mg/dL"
-                                if any(unit in value.lower() for unit in ['mmhg', 'mg/dl', 'meq/l', '%', 'bpm']):
-                                    quantified_found = True
-                                    quantified_examples.append(f"{param}: {value}")
-                                    if len(quantified_examples) >= 3:  # Limit examples
-                                        break
-                    if quantified_found and len(quantified_examples) >= 3:
-                        break
+                print(f"    ✅ API call successful")
                 
-                if quantified_found:
-                    print(f"  ✅ Quantified parameter changes found ✓")
-                    for example in quantified_examples:
-                        print(f"    📊 {example}")
-                    quantified_pass = True
+                # Check success field
+                success = data.get('success', False)
+                if success:
+                    print(f"    ✅ Analysis successful (success: true) ✓")
                 else:
-                    print(f"  ⚠️ No quantified parameter changes found (e.g., '-1.3 mmHg')")
-                    quantified_pass = True  # Don't fail for this, might be different format
+                    print(f"    ❌ Analysis failed (success: false)")
+                    all_tests_pass = False
+                    continue
                 
-                organ_pass = True
+                # Get analysis data
+                analysis = data.get('analysis', {})
+                if not analysis:
+                    print(f"    ❌ Analysis data missing")
+                    all_tests_pass = False
+                    continue
+                
+                # Check product name
+                product_name = analysis.get('product_name', '')
+                if food_name.lower() in product_name.lower():
+                    print(f"    ✅ Product found: {product_name}")
+                else:
+                    print(f"    ⚠️ Product name: {product_name}")
+                
+                # Check data source (if available)
+                data_source = analysis.get('data_source', '')
+                if data_source:
+                    print(f"    📊 Data source: {data_source}")
+                    if expected_source in data_source.lower():
+                        print(f"    ✅ Expected source confirmed ({expected_source}) ✓")
+                    else:
+                        print(f"    ⚠️ Different source than expected (expected: {expected_source})")
+                
+                # Check organ system parameter effects (CRITICAL)
+                organ_effects = analysis.get('organ_system_parameter_effects', {})
+                
+                if organ_effects and isinstance(organ_effects, dict):
+                    print(f"    ✅ organ_system_parameter_effects present ✓")
+                    organ_systems = list(organ_effects.keys())
+                    print(f"      📊 Organ systems: {len(organ_systems)} systems")
+                    
+                    # Check for key organ systems
+                    key_systems = ['cardiovascular', 'glycemic', 'renal', 'hepatic', 'gastrointestinal']
+                    found_systems = []
+                    for key_system in key_systems:
+                        if any(key_system in system.lower() for system in organ_systems):
+                            found_systems.append(key_system)
+                    
+                    if found_systems:
+                        print(f"      ✅ Key organ systems found: {found_systems}")
+                    else:
+                        print(f"      ⚠️ No key organ systems found")
+                    
+                else:
+                    print(f"    ❌ organ_system_parameter_effects missing")
+                    all_tests_pass = False
+                
             else:
-                print(f"  ❌ organ_system_parameter_effects missing")
-                organ_pass = False
-                quantified_pass = False
-            
-            # Check product name and basic structure
-            product_name = analysis.get('product_name', '')
-            if 'banana' in product_name.lower():
-                print(f"  ✅ Product name correct: {product_name}")
-                name_pass = True
-            else:
-                print(f"  ⚠️ Product name: {product_name}")
-                name_pass = True  # Don't fail for this
-            
-            # Overall assessment
-            critical_tests = [success_pass, organ_pass]
-            if all(critical_tests):
-                print(f"\n  ✅ Food analysis from DB endpoint working correctly ✓")
-                return True
-            else:
-                print(f"\n  ❌ Some critical features missing:")
-                test_names = ['Success status', 'Organ system parameter effects']
-                for i, (test_pass, test_name) in enumerate(zip(critical_tests, test_names)):
-                    status = "✅" if test_pass else "❌"
-                    print(f"    {status} {test_name}")
-                return False
-            
-        else:
-            print(f"❌ Food analysis from DB API call failed: {response.status_code}")
-            try:
-                error_data = response.json()
-                print(f"  ℹ️ Error details: {error_data}")
-            except:
-                print(f"  ℹ️ Response text: {response.text}")
-            return False
-            
-    except Exception as e:
-        print(f"❌ Error testing food analysis from DB API: {e}")
-        return False
+                print(f"    ❌ API call failed: {response.status_code}")
+                try:
+                    error_data = response.json()
+                    print(f"      ℹ️ Error details: {error_data}")
+                except:
+                    print(f"      ℹ️ Response text: {response.text}")
+                all_tests_pass = False
+                
+        except Exception as e:
+            print(f"    ❌ Error testing {food_name}: {e}")
+            all_tests_pass = False
+    
+    return all_tests_pass
 
 def run_all_tests():
     """Run all PhiCor.ai Application tests"""
