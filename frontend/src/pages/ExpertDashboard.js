@@ -290,6 +290,18 @@ export default function ExpertDashboard() {
   
   // User Management state
   const [allExperts, setAllExperts] = useState([]);
+  
+  // Platform stats for real-time counts
+  const [platformStats, setPlatformStats] = useState({
+    drugs: 0, diseases: 0, foods: 0, nutrients: 0, models: 0, organ_systems: 0
+  });
+  
+  // Equations browser state
+  const [equationsSearch, setEquationsSearch] = useState('');
+  const [equationsOrgan, setEquationsOrgan] = useState('all');
+  const [equationsCategory, setEquationsCategory] = useState('all');
+  const [selectedEquation, setSelectedEquation] = useState(null);
+  const [equationReview, setEquationReview] = useState({ status: '', notes: '', source_verification: '' });
 
   // Check specialty match
   const matchesSpecialty = useCallback((disease) => {
