@@ -384,14 +384,12 @@ async def import_usda_foods(max_foods=10000, batch_size=200):
     print(f"Found {len(existing_fdc_ids)} existing USDA foods to skip")
     
     imported = 0
-    page = 1
-    consecutive_empty = 0
     
     # Import from different data types for variety
     data_types = [
-        ("Foundation", 2000),      # High-quality foundational foods
-        ("SR Legacy", 3000),       # Standard Reference (legacy database)
-        ("Branded", 5000),         # Branded/commercial products
+        ("Foundation", 1500),      # High-quality foundational foods
+        ("SR Legacy", 4000),       # Standard Reference (legacy database)
+        ("Branded", 4500),         # Branded/commercial products
     ]
     
     for data_type, type_limit in data_types:
@@ -404,55 +402,74 @@ async def import_usda_foods(max_foods=10000, batch_size=200):
         consecutive_empty = 0
         
         while type_imported < type_limit and imported < max_foods:
-            foods_data = fetch_usda_foods_page(page, batch_size, data_type)
+            # Get list of foods
+            foods_list = fetch_usda_foods_page(page, batch_size, data_type)
             
-            if not foods_data:
+            if not foods_list:
                 consecutive_empty += 1
                 if consecutive_empty >= 3:
                     print(f"  No more {data_type} foods available")
                     break
                 page += 1
+                time.sleep(0.5)
                 continue
             
             consecutive_empty = 0
-            foods_to_insert = []
             
-            for food in foods_data:
+            # Filter out existing and get FDC IDs to fetch
+            fdc_ids_to_fetch = []
+            for food in foods_list:
                 fdc_id = food.get("fdcId")
+                if fdc_id and fdc_id not in existing_fdc_ids:
+                    fdc_ids_to_fetch.append(fdc_id)
+            
+            if not fdc_ids_to_fetch:
+                page += 1
+                continue
+            
+            # Fetch detailed info in batches of 20
+            for i in range(0, len(fdc_ids_to_fetch), 20):
+                batch_ids = fdc_ids_to_fetch[i:i+20]
+                detailed_foods = fetch_food_details(batch_ids)
                 
-                # Skip if already exists
-                if fdc_id in existing_fdc_ids:
+                if not detailed_foods:
                     continue
                 
-                food_doc = transform_usda_food(food)
-                if food_doc and food_doc["name"].lower() not in existing_names:
-                    foods_to_insert.append(food_doc)
-                    existing_fdc_ids.add(fdc_id)
-                    existing_names.add(food_doc["name"].lower())
-            
-            # Insert batch
-            if foods_to_insert:
-                try:
-                    await db.foods.insert_many(foods_to_insert, ordered=False)
-                    imported += len(foods_to_insert)
-                    type_imported += len(foods_to_insert)
-                except Exception as e:
-                    # Handle duplicates gracefully
-                    for food in foods_to_insert:
-                        try:
-                            await db.foods.insert_one(food)
-                            imported += 1
-                            type_imported += 1
-                        except:
-                            pass
+                foods_to_insert = []
+                for food_data in detailed_foods:
+                    fdc_id = food_data.get("fdcId")
+                    if fdc_id in existing_fdc_ids:
+                        continue
+                    
+                    food_doc = transform_usda_food(food_data)
+                    if food_doc and food_doc["name"].lower() not in existing_names:
+                        foods_to_insert.append(food_doc)
+                        existing_fdc_ids.add(fdc_id)
+                        existing_names.add(food_doc["name"].lower())
+                
+                # Insert batch
+                if foods_to_insert:
+                    try:
+                        await db.foods.insert_many(foods_to_insert, ordered=False)
+                        imported += len(foods_to_insert)
+                        type_imported += len(foods_to_insert)
+                    except Exception as e:
+                        for food in foods_to_insert:
+                            try:
+                                await db.foods.insert_one(food)
+                                imported += 1
+                                type_imported += 1
+                            except:
+                                pass
+                
+                # Rate limiting
+                time.sleep(0.2)
             
             # Update live stats periodically
-            if imported % 500 == 0:
+            if imported % 200 == 0 and imported > 0:
                 current_count = await update_live_stats()
-                print(f"  📊 Progress: {imported} imported, {current_count} total foods in database")
+                print(f"  📊 Progress: {imported} imported ({type_imported} {data_type}), {current_count} total foods")
             
-            # Rate limiting
-            time.sleep(0.3)
             page += 1
         
         print(f"  ✅ {data_type}: Imported {type_imported} foods")
