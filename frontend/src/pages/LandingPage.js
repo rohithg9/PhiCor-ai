@@ -39,16 +39,28 @@ import RegionSelector from '../components/RegionSelector';
 
 // Animated Counter Component
 const AnimatedCounter = ({ value, duration = 2000, suffix = '', className }) => {
-  const [count, setCount] = useState(0);
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const isInView = useInView(ref, { once: true, margin: "-50px" });
   
   // Extract numeric value from string like "2568+" or "415+"
   const numericValue = parseInt(value?.toString().replace(/[^0-9]/g, '')) || 0;
   const hasSuffix = value?.toString().includes('+');
   
+  const [count, setCount] = useState(numericValue); // Start with the actual value
+  const [hasAnimated, setHasAnimated] = useState(false);
+  
   useEffect(() => {
-    if (!isInView) return;
+    // Always set the final value after component mounts
+    if (!hasAnimated) {
+      setCount(numericValue);
+    }
+  }, [numericValue, hasAnimated]);
+  
+  useEffect(() => {
+    if (!isInView || hasAnimated) return;
+    
+    setHasAnimated(true);
+    setCount(0); // Reset to 0 for animation
     
     let startTime;
     let animationFrame;
@@ -63,12 +75,14 @@ const AnimatedCounter = ({ value, duration = 2000, suffix = '', className }) => 
       
       if (progress < 1) {
         animationFrame = requestAnimationFrame(animate);
+      } else {
+        setCount(numericValue); // Ensure exact final value
       }
     };
     
     animationFrame = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animationFrame);
-  }, [isInView, numericValue, duration]);
+  }, [isInView, numericValue, duration, hasAnimated]);
   
   return (
     <span ref={ref} className={className}>
