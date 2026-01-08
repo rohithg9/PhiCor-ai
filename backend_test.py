@@ -431,6 +431,153 @@ def run_all_tests():
         print(f"  ❌ Food analysis from DB failed")
     
     return test_results
+def test_food_search_verification():
+    """Test 3: Food Search Verification - Verify database contains expanded food categories"""
+    global food_search_results
+    
+    print("\n🔍 TEST 3: FOOD SEARCH VERIFICATION (DATABASE EXPANSION)")
+    print("=" * 60)
+    print("Testing requirements from review request:")
+    print("- Verify branded products (Coca Cola, Pepsi, Nestle)")
+    print("- Verify superfoods (spirulina, maca, moringa)")
+    print("- Verify fermented foods (kombucha, kefir, natto)")
+    print("- Verify exotic fruits (dragon fruit, durian, jackfruit)")
+    print("- Expected: branded = open_food_facts, superfoods = phicor_curated")
+    
+    search_categories = [
+        {
+            "name": "Branded Products",
+            "searches": ["Coca Cola", "Pepsi", "Nestle"],
+            "expected_source": "open_food_facts",
+            "min_results": 1
+        },
+        {
+            "name": "Superfoods",
+            "searches": ["spirulina", "maca", "moringa"],
+            "expected_source": "phicor_curated",
+            "min_results": 1
+        },
+        {
+            "name": "Fermented Foods",
+            "searches": ["kombucha", "kefir", "natto"],
+            "expected_source": "phicor_curated",
+            "min_results": 1
+        },
+        {
+            "name": "Exotic Fruits",
+            "searches": ["dragon fruit", "durian", "jackfruit"],
+            "expected_source": "phicor_curated",
+            "min_results": 1
+        }
+    ]
+    
+    all_categories_pass = True
+    food_search_results = {}
+    
+    for category in search_categories:
+        category_name = category["name"]
+        searches = category["searches"]
+        expected_source = category["expected_source"]
+        min_results = category["min_results"]
+        
+        print(f"\n  🧪 Testing Category: {category_name}")
+        category_results = []
+        category_pass = False
+        
+        for search_term in searches:
+            print(f"    🔍 Searching for: {search_term}")
+            
+            try:
+                # Try food search endpoint (if it exists)
+                search_endpoints = [
+                    f"{BACKEND_URL}/api/food/search",
+                    f"{BACKEND_URL}/api/foods/search",
+                    f"{BACKEND_URL}/api/foods"
+                ]
+                
+                search_success = False
+                
+                for endpoint in search_endpoints:
+                    try:
+                        # Try different search parameter formats
+                        search_params = [
+                            {"q": search_term},
+                            {"search": search_term},
+                            {"query": search_term},
+                            {"name": search_term}
+                        ]
+                        
+                        for params in search_params:
+                            response = requests.get(endpoint, params=params, timeout=15)
+                            
+                            if response.status_code == 200:
+                                data = response.json()
+                                
+                                # Check different response formats
+                                foods = []
+                                if isinstance(data, dict):
+                                    foods = data.get('foods', data.get('results', data.get('items', [])))
+                                elif isinstance(data, list):
+                                    foods = data
+                                
+                                # Filter results that match search term
+                                matching_foods = []
+                                for food in foods:
+                                    if isinstance(food, dict):
+                                        food_name = food.get('name', food.get('product_name', ''))
+                                        if search_term.lower() in food_name.lower():
+                                            matching_foods.append(food)
+                                
+                                if matching_foods:
+                                    print(f"      ✅ Found {len(matching_foods)} results")
+                                    
+                                    # Check data sources
+                                    sources_found = []
+                                    for food in matching_foods[:3]:  # Check first 3 results
+                                        source = food.get('data_source', food.get('source', ''))
+                                        if source:
+                                            sources_found.append(source)
+                                    
+                                    if sources_found:
+                                        print(f"      📊 Sources: {set(sources_found)}")
+                                        if any(expected_source in source.lower() for source in sources_found):
+                                            print(f"      ✅ Expected source found ({expected_source}) ✓")
+                                            category_pass = True
+                                    
+                                    category_results.extend(matching_foods)
+                                    search_success = True
+                                    break
+                            
+                            if search_success:
+                                break
+                        
+                        if search_success:
+                            break
+                            
+                    except Exception as e:
+                        continue
+                
+                if not search_success:
+                    print(f"      ⚠️ No results found or search endpoint not available")
+                    
+            except Exception as e:
+                print(f"      ❌ Error searching for {search_term}: {e}")
+        
+        # Store results
+        food_search_results[category_name] = {
+            "results": category_results,
+            "passed": category_pass,
+            "total_found": len(category_results)
+        }
+        
+        # Category assessment
+        if category_pass:
+            print(f"    ✅ {category_name} verification passed ✓")
+        else:
+            print(f"    ❌ {category_name} verification failed")
+            all_categories_pass = False
+    
+    return all_categories_pass
 
 if __name__ == "__main__":
     run_all_tests()
