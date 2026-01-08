@@ -2586,9 +2586,9 @@ export default function ExpertDashboard() {
 
                   return (
                     <Card key={organKey} className="overflow-hidden">
-                      <Collapsible defaultOpen={equationsOrgan !== 'all'}>
+                      <Collapsible key={`${organKey}-${equationsOrgan}`} defaultOpen={equationsOrgan !== 'all' || allEquations.length <= 10}>
                         <CollapsibleTrigger className="w-full">
-                          <CardHeader className="flex flex-row items-center justify-between bg-muted/30 hover:bg-muted/50 transition-colors">
+                          <CardHeader className="flex flex-row items-center justify-between bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer">
                             <div className="flex items-center gap-3">
                               <span className="text-2xl">{organ.icon}</span>
                               <div className="text-left">
@@ -2600,7 +2600,7 @@ export default function ExpertDashboard() {
                               <Badge variant="outline" className="text-orange-500 border-orange-500/50">
                                 {allEquations.length} equations
                               </Badge>
-                              <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                              <ChevronDown className="w-5 h-5 text-muted-foreground transition-transform" />
                             </div>
                           </CardHeader>
                         </CollapsibleTrigger>
