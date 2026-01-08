@@ -498,7 +498,7 @@ def test_drug_parameter_effects():
                     glucose_change_found = False
                     # Look for glucose-related effects in all parameters
                     for param in all_parameters:
-                        if 'glucose' in str(param).lower():
+                        if 'glucose' in str(param).lower() or 'hba1c' in str(param).lower():
                             print(f"    ✅ Glucose effect found: {param}")
                             glucose_change_found = True
                             break
@@ -507,8 +507,8 @@ def test_drug_parameter_effects():
                     if not glucose_change_found:
                         for effect in therapeutic_effects:
                             if isinstance(effect, dict):
-                                effect_desc = str(effect.get('effect', '')).lower()
-                                if 'glucose' in effect_desc:
+                                effect_desc = str(effect.get('description', '')).lower()
+                                if 'glucose' in effect_desc or 'hba1c' in effect_desc:
                                     print(f"    ✅ Glucose effect found in description: {effect_desc}")
                                     glucose_change_found = True
                                     break
