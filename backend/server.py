@@ -8173,14 +8173,39 @@ async def analyze_food_from_database(request: Dict[str, Any] = Body(...)):
         if not food_name:
             raise HTTPException(status_code=400, detail="Food name is required")
         
-        # Search for food in database
+        # Search for food in database - prioritize foods with nutrient data
+        # First try exact match with nutrients
         food = await db.foods.find_one(
-            {"$or": [
-                {"name": {"$regex": f"^{food_name}$", "$options": "i"}},
-                {"name": {"$regex": food_name, "$options": "i"}}
-            ]},
+            {
+                "$and": [
+                    {"$or": [
+                        {"name": {"$regex": f"^{food_name}$", "$options": "i"}},
+                        {"name": {"$regex": f"^{food_name},", "$options": "i"}}  # Matches "Banana, raw"
+                    ]},
+                    {"nutrients": {"$ne": {}}}
+                ]
+            },
             {"_id": 0}
         )
+        
+        # If no exact match with nutrients, try partial match with nutrients
+        if not food:
+            food = await db.foods.find_one(
+                {
+                    "$and": [
+                        {"name": {"$regex": food_name, "$options": "i"}},
+                        {"nutrients": {"$ne": {}}}
+                    ]
+                },
+                {"_id": 0}
+            )
+        
+        # If still no match, try any food (including those without nutrients)
+        if not food:
+            food = await db.foods.find_one(
+                {"name": {"$regex": food_name, "$options": "i"}},
+                {"_id": 0}
+            )
         
         if not food:
             # Food not in database - return indicator to use AI endpoint
