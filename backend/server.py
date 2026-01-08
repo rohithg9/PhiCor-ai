@@ -8214,12 +8214,23 @@ async def analyze_food_from_database(request: Dict[str, Any] = Body(...)):
                 continue
             
             nutrient_data = nutrient_lookup[nutrient_id]
-            amount = nutrient_value.get("value", 0)
+            # Ensure amount is a number
+            raw_amount = nutrient_value.get("value", 0)
+            try:
+                amount = float(raw_amount) if raw_amount is not None else 0
+            except (ValueError, TypeError):
+                amount = 0
+            
             daily_value = nutrient_data.get("daily_value")
+            # Ensure daily_value is a number
+            try:
+                daily_value = float(daily_value) if daily_value is not None else None
+            except (ValueError, TypeError):
+                daily_value = None
             
             # Calculate percent daily value
             percent_dv = None
-            if daily_value and daily_value > 0:
+            if daily_value and daily_value > 0 and amount > 0:
                 percent_dv = round((amount / daily_value) * 100, 1)
             
             # Add percent DV to nutrient
