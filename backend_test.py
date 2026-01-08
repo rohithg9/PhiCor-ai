@@ -328,17 +328,17 @@ def run_all_tests():
     else:
         test_results['backend_health'] = False
     
-    # PHICOR.AI FOOD ENGINE TESTS (AFTER DATABASE EXPANSION)
+    # PHICOR.AI FOOD ENGINE TESTS (AFTER MASSIVE DATABASE EXPANSION)
     if test_results['backend_health']:
         test_results['platform_stats_api'] = test_platform_stats_api()
         test_results['food_analysis_from_db'] = test_food_analysis_from_db()
-        test_results['food_search_verification'] = test_food_search_verification()
+        test_results['database_verification'] = test_database_verification()
     else:
         # Set all tests to False if backend is not accessible
         test_results.update({
             'platform_stats_api': False,
             'food_analysis_from_db': False,
-            'food_search_verification': False
+            'database_verification': False
         })
     
     # Summary
