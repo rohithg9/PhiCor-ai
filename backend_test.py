@@ -22,10 +22,10 @@ Test 3: Food Analysis API Test
 - Verify quantified changes are present (e.g., "-1.3 mmHg" for blood pressure)
 
 Test Credentials:
-- Backend URL: https://phicor-health-1.preview.emergentagent.com (or localhost:8001)
-- Frontend URL: https://phicor-health.preview.emergentagent.com (or localhost:3000)
+- Backend URL: https://nutrihealth-11.preview.emergentagent.com (or localhost:8001)
+- Frontend URL: https://nutrihealth-11.preview.emergentagent.com (or localhost:3000)
 
-API Base URL: https://phicor-health-1.preview.emergentagent.com
+API Base URL: https://nutrihealth-11.preview.emergentagent.com
 """
 
 import requests
@@ -459,8 +459,8 @@ def run_all_tests():
     print("3. Food Analysis API Test - POST /api/food/analyze-from-db")
     print("=" * 80)
     print("Test Credentials:")
-    print("- Backend URL: https://phicor-health-1.preview.emergentagent.com")
-    print("- Frontend URL: https://phicor-health.preview.emergentagent.com")
+    print("- Backend URL: https://nutrihealth-11.preview.emergentagent.com")
+    print("- Frontend URL: https://nutrihealth-11.preview.emergentagent.com")
     print("=" * 80)
     print("NOTE: This tests the backend APIs for PhiCor.ai Application")
     print("FOCUS: Verifying platform stats, drug enhancements, and food analysis endpoints")
