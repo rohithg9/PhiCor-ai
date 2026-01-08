@@ -311,7 +311,7 @@ def fetch_usda_foods_page(page_number=1, page_size=200, data_type=None):
         "pageSize": page_size,
     }
     if data_type:
-        params["dataType"] = data_type
+        params["dataType"] = [data_type]  # Must be a list
     
     try:
         response = requests.get(url, params=params, timeout=30)
