@@ -1160,6 +1160,16 @@ export default function ExpertDashboard() {
               <Beaker className="w-4 h-4 mr-2" />
               Lab
             </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className={`rounded-b-none border-b-2 ${activeView === 'equations' ? 'border-primary bg-primary/5' : 'border-transparent'}`}
+              onClick={() => setActiveView('equations')}
+            >
+              <Calculator className="w-4 h-4 mr-2" />
+              Equations
+              <Badge variant="secondary" className="ml-1 text-xs px-1.5">{platformStats.models}+</Badge>
+            </Button>
             {isAdmin && (
               <Button 
                 variant="ghost" 
