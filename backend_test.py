@@ -118,7 +118,7 @@ def test_platform_stats_api():
             if foods_total >= expected_counts['foods']:
                 print(f"  ✅ Foods: {foods_total} (expected {expected_counts['foods']}+) ✓")
             else:
-                print(f"  ❌ Foods: {foods_total} (expected {expected_counts['foods']}+) - DATABASE EXPANSION FAILED")
+                print(f"  ❌ Foods: {foods_total} (expected {expected_counts['foods']}+) - MASSIVE DATABASE EXPANSION FAILED")
                 all_counts_pass = False
             
             # Check nutrients count
