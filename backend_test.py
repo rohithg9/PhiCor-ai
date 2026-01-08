@@ -311,8 +311,8 @@ def run_all_tests():
     print("Test Credentials:")
     print("- Backend URL: Use REACT_APP_BACKEND_URL from /app/frontend/.env")
     print("=" * 80)
-    print("NOTE: This tests the PhiCor.ai Food Engine after significant database expansion")
-    print("FOCUS: Verifying 844+ foods, Open Food Facts integration, superfood additions")
+    print("NOTE: This tests the PhiCor.ai Food Engine after MASSIVE database expansion using USDA API")
+    print("FOCUS: Verifying 9900+ foods, USDA FoodData Central, Open Food Facts integration")
     print("=" * 80)
     
     test_results = {}
