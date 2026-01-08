@@ -37,56 +37,71 @@ import {
 import { Button } from '../components/ui/button';
 import RegionSelector from '../components/RegionSelector';
 
-// Animated Counter Component
+// Animated Counter Component - Simplified and robust
 const AnimatedCounter = ({ value, duration = 2000, suffix = '', className }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-50px" });
   
-  // Extract numeric value from string like "2568+" or "415+"
-  const numericValue = parseInt(value?.toString().replace(/[^0-9]/g, '')) || 0;
-  const hasSuffix = value?.toString().includes('+');
+  // If value is not valid, return the original value or default
+  if (!value || value === '0' || value === 0) {
+    return <span ref={ref} className={className}>0{suffix}</span>;
+  }
   
-  const [count, setCount] = useState(numericValue); // Start with the actual value
+  // If value is already a formatted string like "2568+", just display it
+  const valueStr = value.toString();
+  if (valueStr.includes('+') || isNaN(parseInt(valueStr.replace(/[^0-9]/g, '')))) {
+    return <span ref={ref} className={className}>{valueStr}{suffix}</span>;
+  }
+  
+  // Extract numeric value for animation
+  const numericValue = parseInt(valueStr.replace(/[^0-9]/g, '')) || 0;
+  const hasSuffix = valueStr.includes('+');
+  
+  const [count, setCount] = useState(numericValue);
   const [hasAnimated, setHasAnimated] = useState(false);
   
   useEffect(() => {
-    // Always set the final value after component mounts
-    if (!hasAnimated) {
+    // Update count when numericValue changes (from API)
+    if (numericValue > 0 && !hasAnimated) {
       setCount(numericValue);
     }
   }, [numericValue, hasAnimated]);
   
   useEffect(() => {
-    if (!isInView || hasAnimated) return;
+    if (!isInView || hasAnimated || numericValue === 0) return;
     
     setHasAnimated(true);
-    setCount(0); // Reset to 0 for animation
     
+    // Don't animate if we're already at the value
+    if (count === numericValue) return;
+    
+    setCount(0);
     let startTime;
     let animationFrame;
     
     const animate = (timestamp) => {
       if (!startTime) startTime = timestamp;
       const progress = Math.min((timestamp - startTime) / duration, 1);
-      
-      // Easing function for smooth animation
       const easeOutQuart = 1 - Math.pow(1 - progress, 4);
       setCount(Math.floor(easeOutQuart * numericValue));
       
       if (progress < 1) {
         animationFrame = requestAnimationFrame(animate);
       } else {
-        setCount(numericValue); // Ensure exact final value
+        setCount(numericValue);
       }
     };
     
     animationFrame = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animationFrame);
-  }, [isInView, numericValue, duration, hasAnimated]);
+  }, [isInView, numericValue, duration, hasAnimated, count]);
+  
+  // Always show at least the numericValue if > 0
+  const displayValue = count > 0 ? count : numericValue;
   
   return (
     <span ref={ref} className={className}>
-      {count.toLocaleString()}{hasSuffix ? '+' : ''}{suffix}
+      {displayValue > 0 ? displayValue.toLocaleString() : '0'}{hasSuffix ? '+' : ''}{suffix}
     </span>
   );
 };
