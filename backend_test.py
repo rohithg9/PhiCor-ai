@@ -12,9 +12,9 @@ Test 1: Platform Stats API Test
 - Should return display_stats.foods showing "9900+" or similar
 
 Test 2: Food Analysis from DB Test
-- POST /api/food/analyze-from-db with food_name: "Banana" - should return comprehensive analysis with organ_system_parameter_effects
-- POST /api/food/analyze-from-db with food_name: "Coca Cola" - should find one of the newly imported Open Food Facts products
-- POST /api/food/analyze-from-db with food_name: "Spirulina powder" - should find the newly added superfood
+- POST /api/food/analyze-from-db with food_name: "Apple" - should return comprehensive analysis with organ_system_parameter_effects
+- POST /api/food/analyze-from-db with food_name: "Chicken breast" - should find USDA food
+- POST /api/food/analyze-from-db with food_name: "Coca Cola" - should find Open Food Facts product
 
 Test 3: Food Search Verification
 - Verify the database contains branded products (search for "Coca Cola", "Pepsi", "Nestle")
