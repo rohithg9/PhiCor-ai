@@ -7,9 +7,9 @@ PHICOR.AI FOOD ENGINE DATA EXPANSION VERIFICATION:
 
 Test 1: Platform Stats API Test
 - GET /api/platform/stats
-- Should return foods.total >= 844 (after database expansion)
+- Should return foods.total >= 9900 (after MASSIVE database expansion)
 - Should return nutrients.total = 45
-- Should return display_stats.foods showing "844+"
+- Should return display_stats.foods showing "9900+" or similar
 
 Test 2: Food Analysis from DB Test
 - POST /api/food/analyze-from-db with food_name: "Banana" - should return comprehensive analysis with organ_system_parameter_effects
