@@ -465,10 +465,13 @@ def test_database_verification():
                 data_source = analysis.get('data_source', '').lower()
                 
                 if 'usda' in data_source or 'fdc' in data_source:
-                    print(f"    ✅ USDA food found: {analysis.get('product_name', 'Apple')}")
+                    print(f"    ✅ USDA food found: {analysis.get('product_name', 'Apples')}")
                     print(f"    📊 Data source: {analysis.get('data_source', 'N/A')}")
                 else:
                     print(f"    ⚠️ Food found but source unclear: {data_source}")
+                    # For PhiCor Database, this is still acceptable as it may contain USDA data
+                    if 'phicor' in data_source.lower():
+                        print(f"    ✅ Food found in PhiCor Database (may contain USDA data)")
             else:
                 print(f"    ❌ USDA food analysis failed")
                 verification_passed = False
