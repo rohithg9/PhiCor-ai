@@ -8470,13 +8470,24 @@ async def analyze_food_from_database(request: Dict[str, Any] = Body(...)):
         health_score = max(20, min(100, health_score))
         
         # Build serving info - human-readable format
-        serving_grams = food.get("serving_size", 100)  # Default to 100g if not specified
-        serving_description = food.get("description", "")
+        # Try to get numeric serving size from serving_size_g field first
+        serving_grams = food.get("serving_size_g")
+        if not serving_grams or not isinstance(serving_grams, (int, float)):
+            # Fallback: try to extract from serving_size string
+            serving_size_str = str(food.get("serving_size", "100g"))
+            try:
+                # Extract number followed by 'g' from string like "1 cup (250g)" or "200g"
+                import re
+                gram_match = re.search(r'(\d+(?:\.\d+)?)\s*g\b', serving_size_str)
+                if gram_match:
+                    serving_grams = float(gram_match.group(1))
+                else:
+                    serving_grams = 100  # Default to 100g
+            except:
+                serving_grams = 100
         
-        # Extract serving description from food description if available
-        # E.g., "Medium banana, raw" -> "1 medium"
-        serving_text = "1 serving"
-        if serving_description:
+        serving_description = food.get("description", "")
+        serving_text = food.get("serving_size", "1 serving") if isinstance(food.get("serving_size"), str) else "1 serving"
             desc_lower = serving_description.lower()
             if "medium" in desc_lower:
                 serving_text = "1 medium"
