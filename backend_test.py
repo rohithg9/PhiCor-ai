@@ -424,15 +424,37 @@ def test_drug_parameter_effects():
                     print(f"    📊 Therapeutic effects found: {len(therapeutic_effects)}")
                     for effect in therapeutic_effects:
                         if isinstance(effect, dict):
-                            organ_system = effect.get('organ_system', '').lower()
-                            parameters = effect.get('parameters_affected', [])
-                            parameter_effects_count += len(parameters)
-                            all_parameters.extend(parameters)
-                            
-                            # Check if this matches expected systems
-                            for expected in expected_systems:
-                                if expected.lower() in organ_system and expected not in found_systems:
-                                    found_systems.append(expected)
+                            # Handle new format with organs/scales/parameters
+                            organs = effect.get('organs', [])
+                            if organs:
+                                for organ in organs:
+                                    if isinstance(organ, dict):
+                                        organ_id = organ.get('organ_id', '').lower()
+                                        scales = organ.get('scales', [])
+                                        for scale in scales:
+                                            if isinstance(scale, dict):
+                                                parameters = scale.get('parameters', [])
+                                                parameter_effects_count += len(parameters)
+                                                for param in parameters:
+                                                    if isinstance(param, dict):
+                                                        param_id = param.get('parameter_id', '')
+                                                        all_parameters.append(param_id)
+                                        
+                                        # Check if this matches expected systems
+                                        for expected in expected_systems:
+                                            if expected.lower() in organ_id and expected not in found_systems:
+                                                found_systems.append(expected)
+                            else:
+                                # Handle old format with organ_system and parameters_affected
+                                organ_system = effect.get('organ_system', '').lower()
+                                parameters = effect.get('parameters_affected', [])
+                                parameter_effects_count += len(parameters)
+                                all_parameters.extend(parameters)
+                                
+                                # Check if this matches expected systems
+                                for expected in expected_systems:
+                                    if expected.lower() in organ_system and expected not in found_systems:
+                                        found_systems.append(expected)
                 
                 # Check mechanisms (alternative format)
                 mechanisms = data.get('mechanisms', [])
