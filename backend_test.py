@@ -219,9 +219,9 @@ def test_food_analysis_from_db():
                 data = response.json()
                 
                 # Store in global variables
-                if food_name == "Apple":
+                if "Apples, raw" in food_name:
                     apple_analysis = data
-                elif food_name == "Chicken breast":
+                elif "Chicken, broilers" in food_name:
                     chicken_analysis = data
                 elif food_name == "Coca Cola":
                     coca_cola_analysis = data
