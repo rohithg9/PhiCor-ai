@@ -23,9 +23,9 @@ Test 3: Food Search Verification
 - Verify exotic fruits (search for "dragon fruit", "durian", "jackfruit")
 
 Expected Results:
-- All branded food searches should return results from "open_food_facts" source
-- All superfood searches should return results from "phicor_curated" source
-- Food analysis should include organ effects (cardiovascular, glycemic, renal, etc.)
+- Total food count should be approximately 9,951
+- Multiple data sources (USDA, Open Food Facts, PhiCor) should be present
+- Food analysis should work for various food types
 
 API Base URL: Use REACT_APP_BACKEND_URL from /app/frontend/.env
 """
