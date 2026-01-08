@@ -91,9 +91,9 @@ def test_platform_stats_api():
     print("=" * 60)
     print("Testing requirements from review request:")
     print("- GET /api/platform/stats")
-    print("- Should return foods.total >= 844 (after database expansion)")
+    print("- Should return foods.total >= 9900 (after MASSIVE database expansion)")
     print("- Should return nutrients.total = 45")
-    print("- Should return display_stats.foods showing '844+'")
+    print("- Should return display_stats.foods showing '9900+' or similar")
     
     try:
         response = requests.get(f"{BACKEND_URL}/api/platform/stats", timeout=15)
