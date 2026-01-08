@@ -162,35 +162,35 @@ def test_platform_stats_api():
         return False
 
 def test_food_analysis_from_db():
-    """Test 2: Food Analysis from DB Test - Multiple foods including new imports"""
-    global banana_analysis, coca_cola_analysis, spirulina_analysis
+    """Test 2: Food Analysis from DB Test - Multiple foods including USDA and Open Food Facts"""
+    global apple_analysis, chicken_analysis, coca_cola_analysis
     
-    print("\n🍌 TEST 2: FOOD ANALYSIS FROM DB (EXPANDED DATABASE)")
+    print("\n🍎 TEST 2: FOOD ANALYSIS FROM DB (MASSIVE DATABASE EXPANSION)")
     print("=" * 60)
     print("Testing requirements from review request:")
-    print("- Test with food_name: 'Banana' - should return comprehensive analysis")
+    print("- Test with food_name: 'Apple' - should return comprehensive analysis")
+    print("- Test with food_name: 'Chicken breast' - should find USDA food")
     print("- Test with food_name: 'Coca Cola' - should find Open Food Facts product")
-    print("- Test with food_name: 'Spirulina powder' - should find newly added superfood")
     print("- All should include organ_system_parameter_effects")
     
     test_foods = [
         {
-            "name": "Banana",
+            "name": "Apple",
             "description": "Basic food analysis",
-            "expected_source": "phicor_curated",
-            "variable": "banana_analysis"
+            "expected_source": "usda",
+            "variable": "apple_analysis"
+        },
+        {
+            "name": "Chicken breast",
+            "description": "USDA FoodData Central food",
+            "expected_source": "usda",
+            "variable": "chicken_analysis"
         },
         {
             "name": "Coca Cola",
             "description": "Open Food Facts branded product",
             "expected_source": "open_food_facts",
             "variable": "coca_cola_analysis"
-        },
-        {
-            "name": "Spirulina powder",
-            "description": "Newly added superfood",
-            "expected_source": "phicor_curated",
-            "variable": "spirulina_analysis"
         }
     ]
     
