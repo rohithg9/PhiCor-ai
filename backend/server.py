@@ -8411,23 +8411,27 @@ async def analyze_food_from_database(request: Dict[str, Any] = Body(...)):
         if not organ_system_effects and food.get("organ_effects"):
             food_organ_effects = food.get("organ_effects", {})
             for organ_system, effect_data in food_organ_effects.items():
+                # Handle both old format (effects) and new format (parameters)
+                params = effect_data.get("parameters", effect_data.get("effects", []))
                 organ_system_effects[organ_system] = {
-                    "overall_effect": effect_data.get("overall", "neutral"),
+                    "system_name": effect_data.get("system_name", organ_system.replace("_", " ").title()),
+                    "overall_effect": effect_data.get("overall_effect", effect_data.get("overall", "neutral")),
+                    "summary": effect_data.get("summary", f"{len(params)} parameters affected"),
                     "parameters_affected": [
                         {
                             "parameter": e.get("parameter"),
                             "direction": e.get("direction"),
                             "mechanism": e.get("mechanism"),
-                            "magnitude": e.get("magnitude", "moderate"),
-                            "quantified_change": None,
+                            "magnitude": e.get("clinical_significance", e.get("magnitude", "moderate")),
+                            "quantified_change": e.get("change"),
                             "change_unit": None,
-                            "from_nutrient": "Food composition",
-                            "amount": "",
+                            "from_nutrient": e.get("source_nutrient", "Food composition"),
+                            "amount": e.get("amount", ""),
                             "percent_dv": None
                         }
-                        for e in effect_data.get("effects", [])
+                        for e in params
                     ],
-                    "contributing_nutrients": []
+                    "contributing_nutrients": list(set(e.get("source_nutrient") for e in params if e.get("source_nutrient")))
                 }
         
         # Build personalized risk assessment if health profile provided
