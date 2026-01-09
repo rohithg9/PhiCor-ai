@@ -210,8 +210,8 @@ const LandingPage = () => {
   const navItems = [
     { id: 'science', label: 'The Philosophy' },
     { id: 'features', label: 'About PhiCor' },
-    { id: 'how-it-works', label: 'How It Works' },
     { id: 'platform-features', label: 'Clinical Tools' },
+    { id: 'how-it-works', label: 'How It Works' },
     { id: 'advantages', label: 'Advantages' },
     { id: 'user-manual', label: 'User Manual', isRoute: true, route: '/user-manual' },
     { id: 'expert-login', label: 'Expert Login', isRoute: true, route: '/expert-login' },
