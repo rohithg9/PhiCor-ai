@@ -657,54 +657,6 @@ const LandingPage = () => {
 
       {/* ========== PLATFORM FEATURES SECTION (FOUR PILLARS) ========== */}
       <section id="platform-features" className="relative py-24 px-6 border-t border-white/5">
-        <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 mb-6">
-              <Cpu className="w-4 h-4 text-green-400" />
-              <span className="text-xs text-green-400 font-medium uppercase tracking-wider">The Process</span>
-            </div>
-            <h2 className="font-manrope text-3xl sm:text-4xl font-bold mb-4">
-              How It <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">Works</span>
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              From data integration to clinical decision support in four precision-engineered steps
-            </p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {steps.map((step, index) => (
-              <motion.div
-                key={step.number}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="relative glass-panel rounded-xl p-6 hover:border-green-500/30 transition-colors group"
-              >
-                {/* Step number */}
-                <div className="text-5xl font-bold text-white/5 absolute top-4 right-4 group-hover:text-green-500/10 transition-colors">
-                  {step.number}
-                </div>
-                
-                <div className="w-12 h-12 rounded-lg bg-green-500/10 flex items-center justify-center mb-4 text-green-400 group-hover:bg-green-500/20 transition-colors">
-                  {step.icon}
-                </div>
-                
-                <h3 className="font-manrope font-semibold text-lg mb-3 text-foreground">{step.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{step.description}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ========== PLATFORM FEATURES SECTION ========== */}
-      <section id="platform-features" className="relative py-24 px-6 border-t border-white/5">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0 }}
@@ -971,6 +923,54 @@ const LandingPage = () => {
               </div>
             </div>
           </motion.div>
+        </div>
+      </section>
+
+      {/* ========== HOW IT WORKS SECTION ========== */}
+      <section id="how-it-works" className="relative py-24 px-6 border-t border-white/5">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 mb-6">
+              <Cpu className="w-4 h-4 text-green-400" />
+              <span className="text-xs text-green-400 font-medium uppercase tracking-wider">The Process</span>
+            </div>
+            <h2 className="font-manrope text-3xl sm:text-4xl font-bold mb-4">
+              How It <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">Works</span>
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              From data integration to clinical decision support in four precision-engineered steps
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {steps.map((step, index) => (
+              <motion.div
+                key={step.number}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                className="relative glass-panel rounded-xl p-6 hover:border-green-500/30 transition-colors group"
+              >
+                {/* Step number */}
+                <div className="text-5xl font-bold text-white/5 absolute top-4 right-4 group-hover:text-green-500/10 transition-colors">
+                  {step.number}
+                </div>
+                
+                <div className="w-12 h-12 rounded-lg bg-green-500/10 flex items-center justify-center mb-4 text-green-400 group-hover:bg-green-500/20 transition-colors">
+                  {step.icon}
+                </div>
+                
+                <h3 className="font-manrope font-semibold text-lg mb-3 text-foreground">{step.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{step.description}</p>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
