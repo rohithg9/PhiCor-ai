@@ -2540,28 +2540,36 @@ export default function ExpertDashboard() {
             {/* Header with Stats */}
             <Card className="border-orange-500/30">
               <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-4">
                   <div>
                     <CardTitle className="flex items-center gap-2">
                       <Calculator className="w-5 h-5 text-orange-500" />
-                      Mathematical Models & Equations
+                      Mathematical Models & Equations Database
                     </CardTitle>
                     <CardDescription>
-                      Browse, review, and validate all mathematical equations used in PhiCor's physiological modeling
+                      Browse, review, and validate all mathematical equations used in PhiCor's physiological, pharmacological, and nutritional modeling
                     </CardDescription>
                   </div>
-                  <div className="flex gap-4 text-center">
+                  <div className="flex gap-3 text-center flex-wrap">
                     <div className="px-4 py-2 bg-orange-500/10 rounded-lg">
-                      <p className="text-2xl font-bold text-orange-500">{platformStats.models}+</p>
-                      <p className="text-xs text-muted-foreground">Equations</p>
+                      <p className="text-2xl font-bold text-orange-500">{apiModelsSummary.total || platformStats.models}+</p>
+                      <p className="text-xs text-muted-foreground">Total Models</p>
+                    </div>
+                    <div className="px-4 py-2 bg-green-500/10 rounded-lg">
+                      <p className="text-2xl font-bold text-green-500">{apiModelsSummary.categories?.organ || 0}</p>
+                      <p className="text-xs text-muted-foreground">Physiological</p>
                     </div>
                     <div className="px-4 py-2 bg-purple-500/10 rounded-lg">
-                      <p className="text-2xl font-bold text-purple-500">{platformStats.organ_systems}</p>
-                      <p className="text-xs text-muted-foreground">Organ Systems</p>
+                      <p className="text-2xl font-bold text-purple-500">{apiModelsSummary.categories?.drug || 0}</p>
+                      <p className="text-xs text-muted-foreground">Drug Models</p>
                     </div>
                     <div className="px-4 py-2 bg-blue-500/10 rounded-lg">
-                      <p className="text-2xl font-bold text-blue-500">{platformStats.diseases}</p>
-                      <p className="text-xs text-muted-foreground">Diseases</p>
+                      <p className="text-2xl font-bold text-blue-500">{apiModelsSummary.categories?.disease || 0}</p>
+                      <p className="text-xs text-muted-foreground">Disease Models</p>
+                    </div>
+                    <div className="px-4 py-2 bg-cyan-500/10 rounded-lg">
+                      <p className="text-2xl font-bold text-cyan-500">{apiModelsSummary.categories?.food || 0}</p>
+                      <p className="text-xs text-muted-foreground">Food/Nutrient</p>
                     </div>
                   </div>
                 </div>
@@ -2580,44 +2588,356 @@ export default function ExpertDashboard() {
                 />
               </div>
               <select
-                value={equationsOrgan}
-                onChange={(e) => setEquationsOrgan(e.target.value)}
-                className="px-3 py-2 rounded-md border bg-background text-sm"
-              >
-                <option value="all">All Organ Systems</option>
-                {Object.keys(ORGAN_MODELS).map(organ => (
-                  <option key={organ} value={organ}>{ORGAN_MODELS[organ].name}</option>
-                ))}
-              </select>
-              <select
                 value={equationsCategory}
                 onChange={(e) => setEquationsCategory(e.target.value)}
                 className="px-3 py-2 rounded-md border bg-background text-sm"
               >
                 <option value="all">All Categories</option>
-                {SCALE_LEVELS.map(scale => (
-                  <option key={scale.id} value={scale.id}>{scale.fullName}</option>
-                ))}
+                <option value="organ">Physiological Models</option>
+                <option value="drug">Drug/Pharmacokinetic Models</option>
+                <option value="disease">Disease Models</option>
+                <option value="food">Food/Nutrient Models</option>
+                <option value="clinical">Clinical Calculators</option>
               </select>
+              <select
+                value={equationsOrgan}
+                onChange={(e) => setEquationsOrgan(e.target.value)}
+                className="px-3 py-2 rounded-md border bg-background text-sm"
+              >
+                <option value="all">All Organ Systems</option>
+                <option value="cardiovascular">Cardiovascular</option>
+                <option value="renal">Renal</option>
+                <option value="metabolic">Metabolic/Endocrine</option>
+                <option value="respiratory">Respiratory</option>
+                <option value="hepatic">Hepatic</option>
+                <option value="neurological">Neurological</option>
+                <option value="pharmacokinetics">Pharmacokinetics</option>
+              </select>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={fetchMathematicalModels}
+                disabled={apiModelsLoading}
+              >
+                {apiModelsLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <RefreshCw className="w-4 h-4 mr-2" />}
+                Refresh
+              </Button>
             </div>
 
-            {/* Equations by Organ System */}
-            <div className="grid gap-6">
-              {Object.entries(ORGAN_MODELS)
-                .filter(([key]) => equationsOrgan === 'all' || key === equationsOrgan)
-                .map(([organKey, organ]) => {
-                  // Collect all equations from all scales in this organ
-                  const allEquations = [];
-                  SCALE_LEVELS.forEach(scale => {
-                    const scaleData = organ[scale.id];
-                    if (scaleData?.equations) {
-                      scaleData.equations.forEach(eq => {
-                        if (equationsCategory === 'all' || equationsCategory === scale.id) {
-                          if (!equationsSearch || 
-                              eq.name?.toLowerCase().includes(equationsSearch.toLowerCase()) ||
-                              eq.latex?.toLowerCase().includes(equationsSearch.toLowerCase()) ||
-                              eq.description?.toLowerCase().includes(equationsSearch.toLowerCase())) {
-                            allEquations.push({ ...eq, scale: scale.id, scaleName: scale.fullName });
+            {/* Loading State */}
+            {apiModelsLoading && (
+              <Card className="p-8 text-center">
+                <Loader2 className="w-8 h-8 animate-spin mx-auto text-orange-500 mb-4" />
+                <p className="text-muted-foreground">Loading mathematical models from database...</p>
+              </Card>
+            )}
+
+            {/* API Models Display */}
+            {!apiModelsLoading && apiModels.length > 0 && (
+              <div className="space-y-4">
+                {/* Group models by organ system */}
+                {Object.entries(
+                  apiModels.reduce((acc, model) => {
+                    const organ = model.organ_system || 'other';
+                    if (!acc[organ]) acc[organ] = [];
+                    acc[organ].push(model);
+                    return acc;
+                  }, {})
+                ).map(([organSystem, models]) => (
+                  <Card key={organSystem} className="overflow-hidden">
+                    <Collapsible defaultOpen={Object.keys(apiModelsSummary.organs || {}).length <= 3}>
+                      <CollapsibleTrigger className="w-full">
+                        <CardHeader className="flex flex-row items-center justify-between bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer">
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl">
+                              {organSystem === 'cardiovascular' ? '❤️' :
+                               organSystem === 'renal' ? '🫘' :
+                               organSystem === 'metabolic' ? '🔄' :
+                               organSystem === 'respiratory' ? '🫁' :
+                               organSystem === 'hepatic' ? '🟤' :
+                               organSystem === 'neurological' ? '🧠' :
+                               organSystem === 'pharmacokinetics' ? '💊' :
+                               '🔬'}
+                            </span>
+                            <div className="text-left">
+                              <CardTitle className="text-lg capitalize">{organSystem.replace('_', ' ')}</CardTitle>
+                              <CardDescription>{models.length} mathematical models</CardDescription>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <Badge variant="outline" className="text-orange-500 border-orange-500/50">
+                              {models.length} equations
+                            </Badge>
+                            <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                          </div>
+                        </CardHeader>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <CardContent className="pt-4">
+                          <div className="space-y-4">
+                            {models.map((model, idx) => (
+                              <div 
+                                key={model.id || idx}
+                                className={`p-4 rounded-lg border transition-all ${
+                                  selectedEquation?.id === model.id 
+                                    ? 'border-orange-500 bg-orange-500/5' 
+                                    : 'border-border hover:border-orange-500/50 hover:bg-muted/30'
+                                }`}
+                              >
+                                {/* Model Header */}
+                                <div className="flex items-start justify-between gap-4 mb-3">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 flex-wrap mb-2">
+                                      <h4 className="font-semibold text-lg">{model.name}</h4>
+                                      <Badge variant="secondary" className="text-xs capitalize">
+                                        {model.category}
+                                      </Badge>
+                                      {model.validation_status && (
+                                        <Badge 
+                                          className={`text-xs ${
+                                            model.validation_status === 'established' ? 'bg-green-500/20 text-green-500' :
+                                            model.validation_status === 'database' ? 'bg-blue-500/20 text-blue-500' :
+                                            'bg-yellow-500/20 text-yellow-500'
+                                          }`}
+                                        >
+                                          {model.validation_status}
+                                        </Badge>
+                                      )}
+                                      {model.disease_name && (
+                                        <Badge variant="outline" className="text-xs text-red-500 border-red-500/50">
+                                          {model.disease_name}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    
+                                    {/* Equation Display */}
+                                    <div className="font-mono text-sm bg-gray-900 text-orange-400 p-4 rounded-lg mb-3 overflow-x-auto">
+                                      <code>{model.equation || model.latex}</code>
+                                    </div>
+                                    
+                                    {/* Description */}
+                                    <p className="text-sm text-muted-foreground mb-3">{model.description}</p>
+                                    
+                                    {/* Variables Table */}
+                                    {model.variables && model.variables.length > 0 && (
+                                      <div className="mb-3">
+                                        <h5 className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1">
+                                          <FileText className="w-3 h-3" /> VARIABLES & PARAMETERS
+                                        </h5>
+                                        <div className="grid gap-2">
+                                          {model.variables.slice(0, 6).map((v, i) => (
+                                            <div key={i} className="flex items-center gap-3 text-sm bg-muted/30 px-3 py-2 rounded">
+                                              <code className="font-mono text-orange-500 font-bold min-w-[60px]">{v.symbol}</code>
+                                              <span className="flex-1">{v.name}</span>
+                                              {v.unit && <span className="text-muted-foreground">[{v.unit}]</span>}
+                                              {v.normal_range && (
+                                                <Badge variant="outline" className="text-xs text-green-500">
+                                                  Normal: {v.normal_range}
+                                                </Badge>
+                                              )}
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+                                    
+                                    {/* Normal Values */}
+                                    {model.normal_values && Object.keys(model.normal_values).length > 0 && (
+                                      <div className="mb-3">
+                                        <h5 className="text-xs font-semibold text-green-500 mb-2 flex items-center gap-1">
+                                          <CheckCircle2 className="w-3 h-3" /> NORMAL VALUES
+                                        </h5>
+                                        <div className="flex flex-wrap gap-2">
+                                          {Object.entries(model.normal_values).slice(0, 5).map(([key, value]) => (
+                                            <Badge key={key} variant="outline" className="text-xs text-green-600 border-green-500/30">
+                                              {key.replace(/_/g, ' ')}: {value}
+                                            </Badge>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+                                    
+                                    {/* Abnormal Conditions */}
+                                    {model.abnormal_conditions && model.abnormal_conditions.length > 0 && (
+                                      <div className="mb-3">
+                                        <h5 className="text-xs font-semibold text-red-500 mb-2 flex items-center gap-1">
+                                          <AlertTriangle className="w-3 h-3" /> ABNORMAL CONDITIONS & DISEASE INFLUENCES
+                                        </h5>
+                                        <div className="space-y-2">
+                                          {model.abnormal_conditions.slice(0, 4).map((cond, i) => (
+                                            <div key={i} className="text-sm bg-red-500/5 border border-red-500/20 p-2 rounded">
+                                              <span className="font-semibold text-red-500">{cond.condition}:</span>
+                                              <span className="text-muted-foreground ml-2">{cond.effect}</span>
+                                              {cond.consequence && (
+                                                <span className="text-yellow-500 ml-2">→ {cond.consequence}</span>
+                                              )}
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+                                    
+                                    {/* Evidence Sources */}
+                                    {model.evidence_sources && model.evidence_sources.length > 0 && (
+                                      <div className="mb-3">
+                                        <h5 className="text-xs font-semibold text-blue-500 mb-2 flex items-center gap-1">
+                                          <ExternalLink className="w-3 h-3" /> EVIDENCE SOURCES
+                                        </h5>
+                                        <div className="space-y-1">
+                                          {model.evidence_sources.slice(0, 3).map((source, i) => (
+                                            <p key={i} className="text-xs text-blue-400 flex items-start gap-1">
+                                              <span className="text-blue-500">•</span>
+                                              {source}
+                                            </p>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+                                    
+                                    {/* Clinical Significance */}
+                                    {model.clinical_significance && (
+                                      <div className="mt-3 p-3 bg-purple-500/10 rounded-lg">
+                                        <h5 className="text-xs font-semibold text-purple-500 mb-1 flex items-center gap-1">
+                                          <Stethoscope className="w-3 h-3" /> CLINICAL SIGNIFICANCE
+                                        </h5>
+                                        <p className="text-sm text-purple-300">{model.clinical_significance}</p>
+                                      </div>
+                                    )}
+                                  </div>
+                                  
+                                  {/* Review Button */}
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="shrink-0"
+                                    onClick={() => {
+                                      setSelectedEquation(selectedEquation?.id === model.id ? null : model);
+                                      setEquationReview({ status: 'approved', notes: '', source_verification: '' });
+                                    }}
+                                  >
+                                    <CheckCircle2 className="w-4 h-4 mr-1" />
+                                    {selectedEquation?.id === model.id ? 'Close' : 'Review'}
+                                  </Button>
+                                </div>
+                                
+                                {/* Review Form (expanded) */}
+                                {selectedEquation?.id === model.id && (
+                                  <div className="mt-4 pt-4 border-t border-border space-y-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                      <div>
+                                        <Label className="text-sm">Review Status</Label>
+                                        <select
+                                          value={equationReview.status}
+                                          onChange={(e) => setEquationReview({...equationReview, status: e.target.value})}
+                                          className="w-full mt-1 px-3 py-2 rounded-md border bg-background text-sm"
+                                        >
+                                          <option value="approved">✓ Approved - Verified correct</option>
+                                          <option value="needs_revision">⚠ Needs Revision</option>
+                                          <option value="suggest_change">📝 Suggest Change</option>
+                                          <option value="flag_for_review">🚩 Flag for Expert Review</option>
+                                        </select>
+                                      </div>
+                                      <div>
+                                        <Label className="text-sm">Source Verification</Label>
+                                        <Input
+                                          placeholder="Link to source or reference..."
+                                          value={equationReview.source_verification}
+                                          onChange={(e) => setEquationReview({...equationReview, source_verification: e.target.value})}
+                                          className="mt-1"
+                                        />
+                                      </div>
+                                    </div>
+                                    <div>
+                                      <Label className="text-sm">Notes / Suggested Changes</Label>
+                                      <Textarea
+                                        placeholder="Add your review notes, corrections, or suggestions..."
+                                        value={equationReview.notes}
+                                        onChange={(e) => setEquationReview({...equationReview, notes: e.target.value})}
+                                        className="mt-1"
+                                        rows={3}
+                                      />
+                                    </div>
+                                    <div className="flex justify-end gap-2">
+                                      <Button 
+                                        variant="outline" 
+                                        size="sm"
+                                        onClick={() => {
+                                          setSelectedEquation(null);
+                                          setEquationReview({ status: '', notes: '', source_verification: '' });
+                                        }}
+                                      >
+                                        Cancel
+                                      </Button>
+                                      <Button 
+                                        size="sm"
+                                        onClick={() => {
+                                          toast.success(`Review submitted for: ${model.name}`);
+                                          setSelectedEquation(null);
+                                          setEquationReview({ status: '', notes: '', source_verification: '' });
+                                        }}
+                                      >
+                                        <Save className="w-4 h-4 mr-1" />
+                                        Submit Review
+                                      </Button>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            {/* Empty State */}
+            {!apiModelsLoading && apiModels.length === 0 && (
+              <Card className="p-8 text-center">
+                <Calculator className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No Models Found</h3>
+                <p className="text-muted-foreground mb-4">Try adjusting your search or filter criteria</p>
+                <Button variant="outline" onClick={() => {
+                  setEquationsSearch('');
+                  setEquationsCategory('all');
+                  setEquationsOrgan('all');
+                }}>
+                  Clear Filters
+                </Button>
+              </Card>
+            )}
+
+            {/* Summary Stats */}
+            <Card className="bg-gradient-to-r from-orange-500/10 to-purple-500/10 border-orange-500/20">
+              <CardContent className="py-6">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
+                  <div>
+                    <p className="text-3xl font-bold text-orange-500">{apiModelsSummary.total || 0}</p>
+                    <p className="text-sm text-muted-foreground">Total Models</p>
+                  </div>
+                  <div>
+                    <p className="text-3xl font-bold text-green-500">{apiModelsSummary.categories?.organ || 0}</p>
+                    <p className="text-sm text-muted-foreground">Physiological</p>
+                  </div>
+                  <div>
+                    <p className="text-3xl font-bold text-purple-500">{apiModelsSummary.categories?.drug || 0}</p>
+                    <p className="text-sm text-muted-foreground">Drug Models</p>
+                  </div>
+                  <div>
+                    <p className="text-3xl font-bold text-red-500">{apiModelsSummary.categories?.disease || 0}</p>
+                    <p className="text-sm text-muted-foreground">Disease Models</p>
+                  </div>
+                  <div>
+                    <p className="text-3xl font-bold text-cyan-500">{apiModelsSummary.categories?.food || 0}</p>
+                    <p className="text-sm text-muted-foreground">Food/Nutrient</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
                           }
                         }
                       });
