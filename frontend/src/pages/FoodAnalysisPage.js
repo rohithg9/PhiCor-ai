@@ -822,13 +822,12 @@ const FoodAnalysisPage = () => {
         // Found in database - instant results!
         setAnalysisResult(dbData.analysis);
         setIsAnalyzing(false);
-        // Silently complete - no toast needed for database results
         return;
       }
       
-      // STEP 2: Not in database - fall back to AI analysis
-      console.log('Food not in database, using AI analysis...');
-      toast.info('Analyzing with AI (food not in database)...');
+      // STEP 2: Not in database - silently use ingredient breakdown analysis
+      // No user-facing message about AI - it's a seamless experience
+      console.log('Analyzing dish components...');
       
       const timeoutId = setTimeout(() => {
         if (abortControllerRef.current) {
@@ -852,7 +851,7 @@ const FoodAnalysisPage = () => {
       const aiData = await aiResponse.json();
       if (aiData.success) {
         setAnalysisResult(aiData.analysis);
-        toast.success('PhiCor AI analysis complete');
+        // Silent success - no toast needed
       } else {
         throw new Error(aiData.detail || 'Analysis failed');
       }
