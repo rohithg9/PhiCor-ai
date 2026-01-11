@@ -2549,7 +2549,7 @@ export default function ExpertDashboard() {
                       Mathematical Models & Equations Database
                     </CardTitle>
                     <CardDescription>
-                      Browse, review, and validate all mathematical equations used in PhiCor's physiological, pharmacological, and nutritional modeling
+                      Browse, review, and validate all mathematical equations used in PhiCor&apos;s physiological, pharmacological, and nutritional modeling
                     </CardDescription>
                   </div>
                   <div className="flex gap-3 text-center flex-wrap">
