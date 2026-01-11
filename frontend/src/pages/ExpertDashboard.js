@@ -302,6 +302,48 @@ export default function ExpertDashboard() {
   const [equationsCategory, setEquationsCategory] = useState('all');
   const [selectedEquation, setSelectedEquation] = useState(null);
   const [equationReview, setEquationReview] = useState({ status: '', notes: '', source_verification: '' });
+  
+  // API-based mathematical models
+  const [apiModels, setApiModels] = useState([]);
+  const [apiModelsLoading, setApiModelsLoading] = useState(false);
+  const [apiModelsSummary, setApiModelsSummary] = useState({ total: 0, categories: {}, organs: {} });
+
+  // Fetch mathematical models from API
+  const fetchMathematicalModels = useCallback(async () => {
+    setApiModelsLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (equationsOrgan !== 'all') params.append('organ_system', equationsOrgan);
+      if (equationsCategory !== 'all') params.append('category', equationsCategory);
+      if (equationsSearch) params.append('search', equationsSearch);
+      params.append('limit', '500');
+      
+      const response = await fetch(`${BACKEND_URL}/api/expert/mathematical-models?${params.toString()}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setApiModels(data.models || []);
+        setApiModelsSummary({
+          total: data.total_models || 0,
+          categories: data.category_summary || {},
+          organs: data.organ_system_summary || {}
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching mathematical models:', error);
+    } finally {
+      setApiModelsLoading(false);
+    }
+  }, [equationsOrgan, equationsCategory, equationsSearch, token]);
+  
+  // Fetch models when filters change
+  useEffect(() => {
+    if (activeView === 'equations' && token) {
+      fetchMathematicalModels();
+    }
+  }, [activeView, fetchMathematicalModels, token]);
 
   // Check specialty match
   const matchesSpecialty = useCallback((disease) => {
