@@ -1561,8 +1561,8 @@ Snacks: Apple, almonds, green tea"
                                        system.charAt(0).toUpperCase() + system.slice(1)}
                                     </div>
                                     
-                                    {/* Show sample quantified change if available */}
-                                    {sampleChange?.quantified_change !== null && sampleChange?.quantified_change !== undefined ? (
+                                    {/* Show sample quantified change if available and non-zero */}
+                                    {sampleChange?.quantified_change !== null && sampleChange?.quantified_change !== undefined && sampleChange?.quantified_change !== 0 ? (
                                       <div className={`text-[10px] font-bold mt-1 ${
                                         sampleChange.quantified_change > 0 ? 'text-red-400' : 'text-blue-400'
                                       }`}>
