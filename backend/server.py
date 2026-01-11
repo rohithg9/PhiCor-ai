@@ -8722,6 +8722,53 @@ async def analyze_food_from_database(request: Dict[str, Any] = Body(...)):
         if serving_unit == 'ml':
             scale_factor = serving_amount / 100.0  # ml to 100g reference
         
+        # Scale organ system parameter effects according to serving size
+        # The effects are calculated based on 100g, so we need to scale them
+        for organ_system, data in organ_system_effects.items():
+            for param in data.get("parameters_affected", []):
+                # Scale quantified changes if they exist
+                if param.get("quantified_change"):
+                    original_change = param["quantified_change"]
+                    # Try to parse numeric values from the change string
+                    try:
+                        import re
+                        # Match patterns like "↓ 2-4 mmHg", "↑ 5%", "-10 mg/dL", etc.
+                        match = re.search(r'([↑↓+-]?\s*)(\d+(?:\.\d+)?)\s*(?:-\s*(\d+(?:\.\d+)?))?\s*(%|mmHg|mg/dL|mg|bpm|ms|%)?', str(original_change))
+                        if match:
+                            prefix = match.group(1) or ""
+                            low_val = float(match.group(2))
+                            high_val = float(match.group(3)) if match.group(3) else None
+                            unit = match.group(4) or ""
+                            
+                            # Scale the values
+                            scaled_low = round(low_val * scale_factor, 1)
+                            scaled_high = round(high_val * scale_factor, 1) if high_val else None
+                            
+                            if scaled_high:
+                                param["quantified_change"] = f"{prefix}{scaled_low}-{scaled_high} {unit}".strip()
+                            else:
+                                param["quantified_change"] = f"{prefix}{scaled_low} {unit}".strip()
+                            
+                            param["per_serving"] = True
+                            param["original_per_100g"] = original_change
+                    except:
+                        pass  # Keep original if parsing fails
+                
+                # Scale percent DV if present
+                if param.get("percent_dv"):
+                    try:
+                        param["percent_dv"] = round(float(param["percent_dv"]) * scale_factor, 1)
+                    except:
+                        pass
+                
+                # Update amount description to reflect serving
+                if param.get("amount") and "100g" in str(param.get("amount", "")):
+                    param["amount"] = str(param["amount"]).replace("100g", serving_text)
+            
+            # Update summary to reflect serving size
+            if "per 100g" in str(data.get("summary", "")).lower():
+                data["summary"] = data["summary"].replace("per 100g", f"per {serving_text}")
+        
         # Build response with scaled nutrients
         analysis = {
             "product_name": food.get("name"),
