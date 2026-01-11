@@ -8158,6 +8158,109 @@ async def search_foods(q: str, limit: int = 20):
         logger.error(f"Error searching foods: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# Comprehensive Parameter Reference Database with Normal Ranges
+# Used to provide mathematical precision in organ system effects
+PARAMETER_REFERENCE = {
+    # Cardiovascular Parameters
+    "blood_pressure": {"name": "Blood Pressure", "normal_range": "90-120/60-80", "unit": "mmHg", "normal_systolic": (90, 120), "normal_diastolic": (60, 80)},
+    "bp_systolic": {"name": "Systolic BP", "normal_range": "90-120", "unit": "mmHg", "normal": (90, 120)},
+    "bp_diastolic": {"name": "Diastolic BP", "normal_range": "60-80", "unit": "mmHg", "normal": (60, 80)},
+    "heart_rate": {"name": "Heart Rate", "normal_range": "60-100", "unit": "bpm", "normal": (60, 100)},
+    "cardiac_output": {"name": "Cardiac Output", "normal_range": "4-8", "unit": "L/min", "normal": (4, 8)},
+    "stroke_volume": {"name": "Stroke Volume", "normal_range": "60-100", "unit": "mL/beat", "normal": (60, 100)},
+    "ejection_fraction": {"name": "Ejection Fraction", "normal_range": "55-70", "unit": "%", "normal": (55, 70)},
+    "cardiac_workload": {"name": "Cardiac Workload", "normal_range": "normal", "unit": "RPP", "normal": (6000, 12000)},
+    "qt_interval": {"name": "QT Interval", "normal_range": "350-450", "unit": "ms", "normal": (350, 450)},
+    "pr_interval": {"name": "PR Interval", "normal_range": "120-200", "unit": "ms", "normal": (120, 200)},
+    
+    # Renal Parameters
+    "gfr": {"name": "GFR", "normal_range": "90-120", "unit": "mL/min/1.73m²", "normal": (90, 120)},
+    "bun": {"name": "BUN", "normal_range": "7-20", "unit": "mg/dL", "normal": (7, 20)},
+    "creatinine": {"name": "Serum Creatinine", "normal_range": "0.7-1.3", "unit": "mg/dL", "normal": (0.7, 1.3)},
+    "serum_potassium": {"name": "Serum Potassium", "normal_range": "3.5-5.0", "unit": "mEq/L", "normal": (3.5, 5.0)},
+    "serum_sodium": {"name": "Serum Sodium", "normal_range": "136-145", "unit": "mEq/L", "normal": (136, 145)},
+    "serum_calcium": {"name": "Serum Calcium", "normal_range": "8.5-10.5", "unit": "mg/dL", "normal": (8.5, 10.5)},
+    "serum_magnesium": {"name": "Serum Magnesium", "normal_range": "1.7-2.2", "unit": "mg/dL", "normal": (1.7, 2.2)},
+    "serum_phosphorus": {"name": "Serum Phosphorus", "normal_range": "2.5-4.5", "unit": "mg/dL", "normal": (2.5, 4.5)},
+    "urine_output": {"name": "Urine Output", "normal_range": "800-2000", "unit": "mL/day", "normal": (800, 2000)},
+    
+    # Hepatic Parameters
+    "alt": {"name": "ALT", "normal_range": "7-56", "unit": "U/L", "normal": (7, 56)},
+    "ast": {"name": "AST", "normal_range": "10-40", "unit": "U/L", "normal": (10, 40)},
+    "alp": {"name": "ALP", "normal_range": "44-147", "unit": "U/L", "normal": (44, 147)},
+    "ggt": {"name": "GGT", "normal_range": "9-48", "unit": "U/L", "normal": (9, 48)},
+    "bilirubin_total": {"name": "Total Bilirubin", "normal_range": "0.1-1.2", "unit": "mg/dL", "normal": (0.1, 1.2)},
+    "albumin": {"name": "Albumin", "normal_range": "3.5-5.0", "unit": "g/dL", "normal": (3.5, 5.0)},
+    "pt_inr": {"name": "PT/INR", "normal_range": "0.8-1.2", "unit": "INR", "normal": (0.8, 1.2)},
+    
+    # Lipid Panel
+    "total_cholesterol": {"name": "Total Cholesterol", "normal_range": "<200", "unit": "mg/dL", "normal": (0, 200)},
+    "ldl_cholesterol": {"name": "LDL Cholesterol", "normal_range": "<100", "unit": "mg/dL", "normal": (0, 100)},
+    "hdl_cholesterol": {"name": "HDL Cholesterol", "normal_range": ">40/50", "unit": "mg/dL", "normal": (40, 100)},
+    "triglycerides": {"name": "Triglycerides", "normal_range": "<150", "unit": "mg/dL", "normal": (0, 150)},
+    
+    # Metabolic/Endocrine Parameters
+    "blood_glucose": {"name": "Blood Glucose", "normal_range": "70-100", "unit": "mg/dL", "normal": (70, 100)},
+    "hba1c": {"name": "HbA1c", "normal_range": "<5.7", "unit": "%", "normal": (4, 5.7)},
+    "insulin": {"name": "Insulin", "normal_range": "2.6-24.9", "unit": "µU/mL", "normal": (2.6, 24.9)},
+    "tsh": {"name": "TSH", "normal_range": "0.4-4.0", "unit": "mIU/L", "normal": (0.4, 4.0)},
+    "t3": {"name": "T3", "normal_range": "80-200", "unit": "ng/dL", "normal": (80, 200)},
+    "t4": {"name": "T4", "normal_range": "5.0-12.0", "unit": "µg/dL", "normal": (5.0, 12.0)},
+    "cortisol": {"name": "Cortisol", "normal_range": "6-23", "unit": "µg/dL", "normal": (6, 23)},
+    
+    # Hematological Parameters
+    "hemoglobin": {"name": "Hemoglobin", "normal_range": "12-17.5", "unit": "g/dL", "normal": (12, 17.5)},
+    "hematocrit": {"name": "Hematocrit", "normal_range": "36-52", "unit": "%", "normal": (36, 52)},
+    "rbc": {"name": "RBC Count", "normal_range": "4.5-5.5", "unit": "M/µL", "normal": (4.5, 5.5)},
+    "wbc": {"name": "WBC Count", "normal_range": "4.5-11.0", "unit": "K/µL", "normal": (4.5, 11.0)},
+    "platelet": {"name": "Platelet Count", "normal_range": "150-400", "unit": "K/µL", "normal": (150, 400)},
+    "ferritin": {"name": "Ferritin", "normal_range": "12-300", "unit": "ng/mL", "normal": (12, 300)},
+    "iron": {"name": "Serum Iron", "normal_range": "60-170", "unit": "µg/dL", "normal": (60, 170)},
+    
+    # Inflammatory Markers
+    "crp": {"name": "CRP", "normal_range": "<3.0", "unit": "mg/L", "normal": (0, 3.0)},
+    "esr": {"name": "ESR", "normal_range": "0-20", "unit": "mm/hr", "normal": (0, 20)},
+    "il6": {"name": "IL-6", "normal_range": "<7", "unit": "pg/mL", "normal": (0, 7)},
+    
+    # Bone Parameters
+    "bone_density": {"name": "Bone Density", "normal_range": "-1 to +1", "unit": "T-score", "normal": (-1, 1)},
+    "vitamin_d": {"name": "Vitamin D", "normal_range": "30-100", "unit": "ng/mL", "normal": (30, 100)},
+    "pth": {"name": "PTH", "normal_range": "15-65", "unit": "pg/mL", "normal": (15, 65)},
+    
+    # Neurological Parameters
+    "neurotransmitter_balance": {"name": "Neurotransmitter Balance", "normal_range": "balanced", "unit": "relative", "normal": (0, 1)},
+    "cognitive_function": {"name": "Cognitive Function", "normal_range": "normal", "unit": "relative", "normal": (0, 1)},
+    "nerve_conduction": {"name": "Nerve Conduction", "normal_range": "40-60", "unit": "m/s", "normal": (40, 60)},
+    
+    # Gastrointestinal Parameters  
+    "gastric_ph": {"name": "Gastric pH", "normal_range": "1.5-3.5", "unit": "pH", "normal": (1.5, 3.5)},
+    "gut_motility": {"name": "Gut Motility", "normal_range": "normal", "unit": "relative", "normal": (0, 1)},
+    "nutrient_absorption": {"name": "Nutrient Absorption", "normal_range": "normal", "unit": "%", "normal": (85, 100)},
+    
+    # Pulmonary Parameters
+    "fev1": {"name": "FEV1", "normal_range": ">80", "unit": "% predicted", "normal": (80, 120)},
+    "fvc": {"name": "FVC", "normal_range": ">80", "unit": "% predicted", "normal": (80, 120)},
+    "oxygen_saturation": {"name": "SpO2", "normal_range": "95-100", "unit": "%", "normal": (95, 100)},
+    "pao2": {"name": "PaO2", "normal_range": "80-100", "unit": "mmHg", "normal": (80, 100)},
+    "paco2": {"name": "PaCO2", "normal_range": "35-45", "unit": "mmHg", "normal": (35, 45)},
+}
+
+# Helper function to get parameter reference data
+def get_parameter_reference(param_name: str) -> dict:
+    """Get reference data for a parameter including normal ranges."""
+    param_lower = param_name.lower().replace(" ", "_").replace("-", "_")
+    
+    # Direct match
+    if param_lower in PARAMETER_REFERENCE:
+        return PARAMETER_REFERENCE[param_lower]
+    
+    # Partial match
+    for key, value in PARAMETER_REFERENCE.items():
+        if key in param_lower or param_lower in key:
+            return value
+    
+    return None
+
 # Helper function to determine smart serving sizes based on food type
 def get_smart_serving_size(food_name: str, food_data: dict = None) -> tuple:
     """
