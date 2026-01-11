@@ -9632,31 +9632,29 @@ async def analyze_food_from_database(request: Dict[str, Any] = Body(...)):
         # The effects are calculated based on 100g, so we need to scale them
         for organ_system, data in organ_system_effects.items():
             for param in data.get("parameters_affected", []):
-                # Scale quantified changes if they exist
-                if param.get("quantified_change"):
+                # Scale quantified changes if they exist - KEEP AS NUMBER
+                if param.get("quantified_change") is not None:
                     original_change = param["quantified_change"]
-                    # Try to parse numeric values from the change string
                     try:
-                        import re
-                        # Match patterns like "↓ 2-4 mmHg", "↑ 5%", "-10 mg/dL", etc.
-                        match = re.search(r'([↑↓+-]?\s*)(\d+(?:\.\d+)?)\s*(?:-\s*(\d+(?:\.\d+)?))?\s*(%|mmHg|mg/dL|mg|bpm|ms|%)?', str(original_change))
-                        if match:
-                            prefix = match.group(1) or ""
-                            low_val = float(match.group(2))
-                            high_val = float(match.group(3)) if match.group(3) else None
-                            unit = match.group(4) or ""
-                            
-                            # Scale the values
-                            scaled_low = round(low_val * scale_factor, 1)
-                            scaled_high = round(high_val * scale_factor, 1) if high_val else None
-                            
-                            if scaled_high:
-                                param["quantified_change"] = f"{prefix}{scaled_low}-{scaled_high} {unit}".strip()
-                            else:
-                                param["quantified_change"] = f"{prefix}{scaled_low} {unit}".strip()
-                            
+                        # If it's already a number, scale it directly
+                        if isinstance(original_change, (int, float)):
+                            param["quantified_change"] = round(float(original_change) * scale_factor, 2)
                             param["per_serving"] = True
                             param["original_per_100g"] = original_change
+                        else:
+                            # Try to parse numeric values from string (legacy format)
+                            import re
+                            match = re.search(r'([↑↓+-]?\s*)(\d+(?:\.\d+)?)', str(original_change))
+                            if match:
+                                val = float(match.group(2))
+                                scaled_val = round(val * scale_factor, 2)
+                                # Keep as number, preserve sign from original
+                                if '-' in str(original_change) or '↓' in str(original_change):
+                                    param["quantified_change"] = -abs(scaled_val)
+                                else:
+                                    param["quantified_change"] = scaled_val
+                                param["per_serving"] = True
+                                param["original_per_100g"] = original_change
                     except:
                         pass  # Keep original if parsing fails
                 
@@ -9688,14 +9686,16 @@ async def analyze_food_from_database(request: Dict[str, Any] = Body(...)):
                 data["summary"] = data["summary"].replace("per 100g", f"per {serving_text}")
         
         # Build response with scaled nutrients
+        # Convert serving_text to string in case it's a number
+        serving_text_str = str(serving_text)
         analysis = {
             "product_name": food.get("name"),
             "product_type": food.get("category", "food"),
             "description": food.get("description"),
-            "serving_size": serving_text,
+            "serving_size": serving_text_str,
             "serving_size_g": serving_amount if serving_unit == 'g' else serving_amount,  # Keep numeric for calculations
             "serving_unit": serving_unit,
-            "serving_display": f"{serving_text}" if serving_unit in ['ml', 'g'] and serving_text.endswith(')') else f"{serving_text} ({serving_amount}{serving_unit})",
+            "serving_display": f"{serving_text_str}" if serving_unit in ['ml', 'g'] and serving_text_str.endswith(')') else f"{serving_text_str} ({serving_amount}{serving_unit})",
             "data_source": "PhiCor Database",
             "ai_generated": False,
             
