@@ -716,6 +716,13 @@ const FoodAnalysisPage = () => {
     setIsAnalyzing(true);
     setAnalysisResult(null);
     setActiveScale('overview');
+    setCurrentFactIndex(Math.floor(Math.random() * foodFacts.length)); // Start with random fact
+    
+    // Cancel any existing analysis
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
     
     const healthProfile = profile.conditions.length > 0 || profile.medications.length > 0 || profile.allergies.length > 0 ? {
       age: profile.age,
@@ -737,7 +744,8 @@ const FoodAnalysisPage = () => {
           food_name: foodName,
           serving_size: '1 standard serving',
           health_profile: healthProfile
-        })
+        }),
+        signal: abortControllerRef.current.signal
       });
       
       const dbData = await dbResponse.json();
@@ -745,6 +753,7 @@ const FoodAnalysisPage = () => {
       if (dbData.success && dbData.in_database) {
         // Found in database - instant results!
         setAnalysisResult(dbData.analysis);
+        setIsAnalyzing(false);
         toast.success('PhiCor analysis complete (from database)');
         return;
       }
@@ -753,8 +762,11 @@ const FoodAnalysisPage = () => {
       console.log('Food not in database, using AI analysis...');
       toast.info('Analyzing with AI (food not in database)...');
       
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 120000);
+      const timeoutId = setTimeout(() => {
+        if (abortControllerRef.current) {
+          abortControllerRef.current.abort();
+        }
+      }, 120000);
       
       const aiResponse = await fetch(`${BACKEND_URL}/api/food/analyze-product`, {
         method: 'POST',
@@ -764,7 +776,7 @@ const FoodAnalysisPage = () => {
           serving_size: '1 standard serving',
           health_profile: healthProfile
         }),
-        signal: controller.signal
+        signal: abortControllerRef.current.signal
       });
       
       clearTimeout(timeoutId);
