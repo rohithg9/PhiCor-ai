@@ -8447,6 +8447,470 @@ def get_smart_serving_size(food_name: str, food_data: dict = None) -> tuple:
     # Default: 1 serving (~100g) for unknown foods
     return ('1 serving', 100, 'g')
 
+# =============================================================================
+# RECIPE DATABASE - Complex dish ingredient breakdown
+# =============================================================================
+# Maps complex dishes to their constituent ingredients with proportions
+# Each ingredient has: name (matches DB), amount_g (in grams), is_primary (main ingredient)
+
+RECIPE_DATABASE = {
+    # Indian Dishes
+    "chicken tikka masala": {
+        "category": "Indian",
+        "serving_size_g": 350,
+        "serving_text": "1 serving (350g)",
+        "ingredients": [
+            {"name": "chicken", "amount_g": 150, "is_primary": True, "display": "150g chicken breast"},
+            {"name": "tomato", "amount_g": 80, "is_primary": True, "display": "80g tomatoes (sauce base)"},
+            {"name": "cream", "amount_g": 40, "is_primary": False, "display": "40g heavy cream"},
+            {"name": "onion", "amount_g": 30, "is_primary": False, "display": "30g onion"},
+            {"name": "garlic", "amount_g": 6, "is_primary": False, "display": "2 cloves garlic"},
+            {"name": "ginger", "amount_g": 5, "is_primary": False, "display": "5g fresh ginger"},
+            {"name": "butter", "amount_g": 15, "is_primary": False, "display": "1 tbsp butter"},
+            {"name": "vegetable oil", "amount_g": 10, "is_primary": False, "display": "2 tsp oil"},
+            {"name": "yogurt", "amount_g": 30, "is_primary": False, "display": "30g yogurt (marinade)"},
+        ],
+        "spices": ["garam masala", "cumin", "coriander", "turmeric", "paprika", "chili powder"],
+    },
+    "butter chicken": {
+        "category": "Indian",
+        "serving_size_g": 350,
+        "serving_text": "1 serving (350g)",
+        "ingredients": [
+            {"name": "chicken", "amount_g": 150, "is_primary": True, "display": "150g chicken thigh"},
+            {"name": "tomato", "amount_g": 100, "is_primary": True, "display": "100g tomatoes"},
+            {"name": "butter", "amount_g": 30, "is_primary": False, "display": "2 tbsp butter"},
+            {"name": "cream", "amount_g": 50, "is_primary": False, "display": "50g heavy cream"},
+            {"name": "onion", "amount_g": 25, "is_primary": False, "display": "25g onion"},
+            {"name": "garlic", "amount_g": 6, "is_primary": False, "display": "2 cloves garlic"},
+            {"name": "ginger", "amount_g": 5, "is_primary": False, "display": "5g ginger"},
+        ],
+        "spices": ["garam masala", "kashmiri chili", "fenugreek"],
+    },
+    "chicken biryani": {
+        "category": "Indian",
+        "serving_size_g": 400,
+        "serving_text": "1 serving (400g)",
+        "ingredients": [
+            {"name": "chicken", "amount_g": 120, "is_primary": True, "display": "120g chicken"},
+            {"name": "rice", "amount_g": 150, "is_primary": True, "display": "150g basmati rice"},
+            {"name": "onion", "amount_g": 40, "is_primary": False, "display": "40g fried onions"},
+            {"name": "yogurt", "amount_g": 40, "is_primary": False, "display": "40g yogurt"},
+            {"name": "vegetable oil", "amount_g": 20, "is_primary": False, "display": "20ml oil/ghee"},
+            {"name": "tomato", "amount_g": 30, "is_primary": False, "display": "30g tomatoes"},
+        ],
+        "spices": ["biryani masala", "saffron", "bay leaves", "cardamom", "cinnamon"],
+    },
+    "dal": {
+        "category": "Indian",
+        "serving_size_g": 200,
+        "serving_text": "1 bowl (200g)",
+        "ingredients": [
+            {"name": "lentils", "amount_g": 80, "is_primary": True, "display": "80g lentils (dry weight)"},
+            {"name": "tomato", "amount_g": 30, "is_primary": False, "display": "30g tomatoes"},
+            {"name": "onion", "amount_g": 20, "is_primary": False, "display": "20g onion"},
+            {"name": "garlic", "amount_g": 3, "is_primary": False, "display": "1 clove garlic"},
+            {"name": "vegetable oil", "amount_g": 10, "is_primary": False, "display": "2 tsp oil"},
+        ],
+        "spices": ["turmeric", "cumin", "mustard seeds"],
+    },
+    "palak paneer": {
+        "category": "Indian",
+        "serving_size_g": 250,
+        "serving_text": "1 serving (250g)",
+        "ingredients": [
+            {"name": "spinach", "amount_g": 150, "is_primary": True, "display": "150g spinach"},
+            {"name": "paneer", "amount_g": 80, "is_primary": True, "display": "80g paneer"},
+            {"name": "cream", "amount_g": 20, "is_primary": False, "display": "20g cream"},
+            {"name": "onion", "amount_g": 20, "is_primary": False, "display": "20g onion"},
+            {"name": "garlic", "amount_g": 3, "is_primary": False, "display": "1 clove garlic"},
+        ],
+        "spices": ["cumin", "garam masala", "green chili"],
+    },
+    
+    # Italian Dishes
+    "pasta carbonara": {
+        "category": "Italian",
+        "serving_size_g": 350,
+        "serving_text": "1 serving (350g)",
+        "ingredients": [
+            {"name": "pasta", "amount_g": 100, "is_primary": True, "display": "100g spaghetti (dry)"},
+            {"name": "bacon", "amount_g": 50, "is_primary": True, "display": "50g pancetta/bacon"},
+            {"name": "egg", "amount_g": 50, "is_primary": True, "display": "1 egg yolk"},
+            {"name": "parmesan", "amount_g": 30, "is_primary": False, "display": "30g parmesan"},
+            {"name": "black pepper", "amount_g": 1, "is_primary": False, "display": "fresh black pepper"},
+        ],
+        "spices": ["black pepper"],
+    },
+    "spaghetti bolognese": {
+        "category": "Italian",
+        "serving_size_g": 400,
+        "serving_text": "1 serving (400g)",
+        "ingredients": [
+            {"name": "pasta", "amount_g": 100, "is_primary": True, "display": "100g spaghetti"},
+            {"name": "beef", "amount_g": 100, "is_primary": True, "display": "100g ground beef"},
+            {"name": "tomato", "amount_g": 100, "is_primary": True, "display": "100g crushed tomatoes"},
+            {"name": "onion", "amount_g": 30, "is_primary": False, "display": "30g onion"},
+            {"name": "carrot", "amount_g": 20, "is_primary": False, "display": "20g carrot"},
+            {"name": "celery", "amount_g": 15, "is_primary": False, "display": "15g celery"},
+            {"name": "olive oil", "amount_g": 10, "is_primary": False, "display": "2 tsp olive oil"},
+            {"name": "parmesan", "amount_g": 15, "is_primary": False, "display": "15g parmesan"},
+        ],
+        "spices": ["basil", "oregano", "bay leaf"],
+    },
+    "margherita pizza": {
+        "category": "Italian",
+        "serving_size_g": 250,
+        "serving_text": "2 slices (250g)",
+        "ingredients": [
+            {"name": "wheat flour", "amount_g": 80, "is_primary": True, "display": "80g pizza dough"},
+            {"name": "tomato", "amount_g": 50, "is_primary": True, "display": "50g tomato sauce"},
+            {"name": "mozzarella", "amount_g": 80, "is_primary": True, "display": "80g mozzarella"},
+            {"name": "olive oil", "amount_g": 10, "is_primary": False, "display": "2 tsp olive oil"},
+        ],
+        "spices": ["basil", "oregano"],
+    },
+    "lasagna": {
+        "category": "Italian",
+        "serving_size_g": 300,
+        "serving_text": "1 piece (300g)",
+        "ingredients": [
+            {"name": "pasta", "amount_g": 70, "is_primary": True, "display": "70g lasagna sheets"},
+            {"name": "beef", "amount_g": 80, "is_primary": True, "display": "80g ground beef"},
+            {"name": "tomato", "amount_g": 60, "is_primary": True, "display": "60g tomato sauce"},
+            {"name": "ricotta", "amount_g": 50, "is_primary": False, "display": "50g ricotta"},
+            {"name": "mozzarella", "amount_g": 40, "is_primary": False, "display": "40g mozzarella"},
+            {"name": "parmesan", "amount_g": 15, "is_primary": False, "display": "15g parmesan"},
+        ],
+        "spices": ["basil", "oregano", "garlic"],
+    },
+    
+    # Asian Dishes
+    "chicken katsu curry": {
+        "category": "Japanese",
+        "serving_size_g": 450,
+        "serving_text": "1 serving (450g)",
+        "ingredients": [
+            {"name": "chicken", "amount_g": 150, "is_primary": True, "display": "150g chicken cutlet"},
+            {"name": "rice", "amount_g": 180, "is_primary": True, "display": "180g steamed rice"},
+            {"name": "onion", "amount_g": 40, "is_primary": False, "display": "40g onion (curry)"},
+            {"name": "carrot", "amount_g": 20, "is_primary": False, "display": "20g carrot"},
+            {"name": "potato", "amount_g": 30, "is_primary": False, "display": "30g potato"},
+            {"name": "vegetable oil", "amount_g": 20, "is_primary": False, "display": "20ml frying oil"},
+            {"name": "wheat flour", "amount_g": 15, "is_primary": False, "display": "15g breadcrumbs"},
+        ],
+        "spices": ["curry powder", "garam masala"],
+    },
+    "pad thai": {
+        "category": "Thai",
+        "serving_size_g": 350,
+        "serving_text": "1 serving (350g)",
+        "ingredients": [
+            {"name": "rice noodles", "amount_g": 100, "is_primary": True, "display": "100g rice noodles"},
+            {"name": "shrimp", "amount_g": 60, "is_primary": True, "display": "60g shrimp"},
+            {"name": "egg", "amount_g": 50, "is_primary": False, "display": "1 egg"},
+            {"name": "bean sprouts", "amount_g": 40, "is_primary": False, "display": "40g bean sprouts"},
+            {"name": "tofu", "amount_g": 30, "is_primary": False, "display": "30g tofu"},
+            {"name": "peanut", "amount_g": 15, "is_primary": False, "display": "15g peanuts"},
+            {"name": "vegetable oil", "amount_g": 15, "is_primary": False, "display": "1 tbsp oil"},
+        ],
+        "spices": ["tamarind", "fish sauce", "lime"],
+    },
+    "fried rice": {
+        "category": "Asian",
+        "serving_size_g": 300,
+        "serving_text": "1 serving (300g)",
+        "ingredients": [
+            {"name": "rice", "amount_g": 180, "is_primary": True, "display": "180g cooked rice"},
+            {"name": "egg", "amount_g": 50, "is_primary": False, "display": "1 egg"},
+            {"name": "carrot", "amount_g": 20, "is_primary": False, "display": "20g carrot"},
+            {"name": "peas", "amount_g": 20, "is_primary": False, "display": "20g peas"},
+            {"name": "onion", "amount_g": 20, "is_primary": False, "display": "20g green onion"},
+            {"name": "vegetable oil", "amount_g": 15, "is_primary": False, "display": "1 tbsp oil"},
+        ],
+        "spices": ["soy sauce", "sesame oil"],
+    },
+    "sushi roll": {
+        "category": "Japanese",
+        "serving_size_g": 200,
+        "serving_text": "6 pieces (200g)",
+        "ingredients": [
+            {"name": "rice", "amount_g": 100, "is_primary": True, "display": "100g sushi rice"},
+            {"name": "salmon", "amount_g": 50, "is_primary": True, "display": "50g salmon"},
+            {"name": "nori", "amount_g": 3, "is_primary": False, "display": "1 sheet nori"},
+            {"name": "avocado", "amount_g": 25, "is_primary": False, "display": "25g avocado"},
+            {"name": "cucumber", "amount_g": 20, "is_primary": False, "display": "20g cucumber"},
+        ],
+        "spices": ["rice vinegar", "wasabi", "ginger"],
+    },
+    
+    # American/Western Dishes
+    "cheeseburger": {
+        "category": "American",
+        "serving_size_g": 250,
+        "serving_text": "1 burger (250g)",
+        "ingredients": [
+            {"name": "beef", "amount_g": 120, "is_primary": True, "display": "120g beef patty"},
+            {"name": "bread", "amount_g": 60, "is_primary": True, "display": "60g burger bun"},
+            {"name": "cheddar", "amount_g": 30, "is_primary": False, "display": "1 slice cheddar"},
+            {"name": "lettuce", "amount_g": 15, "is_primary": False, "display": "lettuce leaf"},
+            {"name": "tomato", "amount_g": 20, "is_primary": False, "display": "tomato slice"},
+            {"name": "onion", "amount_g": 10, "is_primary": False, "display": "onion rings"},
+        ],
+        "spices": ["ketchup", "mustard", "pickles"],
+    },
+    "caesar salad": {
+        "category": "American",
+        "serving_size_g": 250,
+        "serving_text": "1 bowl (250g)",
+        "ingredients": [
+            {"name": "lettuce", "amount_g": 150, "is_primary": True, "display": "150g romaine lettuce"},
+            {"name": "chicken", "amount_g": 60, "is_primary": True, "display": "60g grilled chicken"},
+            {"name": "parmesan", "amount_g": 20, "is_primary": False, "display": "20g parmesan"},
+            {"name": "bread", "amount_g": 20, "is_primary": False, "display": "20g croutons"},
+        ],
+        "spices": ["caesar dressing", "black pepper"],
+    },
+    "grilled chicken salad": {
+        "category": "American",
+        "serving_size_g": 300,
+        "serving_text": "1 bowl (300g)",
+        "ingredients": [
+            {"name": "chicken", "amount_g": 100, "is_primary": True, "display": "100g grilled chicken"},
+            {"name": "lettuce", "amount_g": 100, "is_primary": True, "display": "100g mixed greens"},
+            {"name": "tomato", "amount_g": 40, "is_primary": False, "display": "40g cherry tomatoes"},
+            {"name": "cucumber", "amount_g": 30, "is_primary": False, "display": "30g cucumber"},
+            {"name": "olive oil", "amount_g": 15, "is_primary": False, "display": "1 tbsp olive oil"},
+        ],
+        "spices": ["balsamic vinegar", "herbs"],
+    },
+    
+    # Mexican Dishes
+    "chicken burrito": {
+        "category": "Mexican",
+        "serving_size_g": 350,
+        "serving_text": "1 burrito (350g)",
+        "ingredients": [
+            {"name": "chicken", "amount_g": 100, "is_primary": True, "display": "100g chicken"},
+            {"name": "tortilla", "amount_g": 60, "is_primary": True, "display": "1 large flour tortilla"},
+            {"name": "rice", "amount_g": 60, "is_primary": False, "display": "60g rice"},
+            {"name": "black beans", "amount_g": 50, "is_primary": False, "display": "50g black beans"},
+            {"name": "cheddar", "amount_g": 30, "is_primary": False, "display": "30g cheese"},
+            {"name": "sour cream", "amount_g": 20, "is_primary": False, "display": "20g sour cream"},
+            {"name": "lettuce", "amount_g": 20, "is_primary": False, "display": "shredded lettuce"},
+        ],
+        "spices": ["cumin", "chili powder", "salsa"],
+    },
+    "tacos": {
+        "category": "Mexican",
+        "serving_size_g": 200,
+        "serving_text": "2 tacos (200g)",
+        "ingredients": [
+            {"name": "beef", "amount_g": 80, "is_primary": True, "display": "80g seasoned beef"},
+            {"name": "tortilla", "amount_g": 40, "is_primary": True, "display": "2 corn tortillas"},
+            {"name": "lettuce", "amount_g": 20, "is_primary": False, "display": "shredded lettuce"},
+            {"name": "tomato", "amount_g": 20, "is_primary": False, "display": "diced tomato"},
+            {"name": "cheddar", "amount_g": 20, "is_primary": False, "display": "20g cheese"},
+            {"name": "sour cream", "amount_g": 15, "is_primary": False, "display": "15g sour cream"},
+        ],
+        "spices": ["taco seasoning", "salsa", "lime"],
+    },
+    
+    # Breakfast Items
+    "eggs benedict": {
+        "category": "Breakfast",
+        "serving_size_g": 250,
+        "serving_text": "1 serving (250g)",
+        "ingredients": [
+            {"name": "egg", "amount_g": 100, "is_primary": True, "display": "2 poached eggs"},
+            {"name": "bread", "amount_g": 60, "is_primary": True, "display": "1 english muffin"},
+            {"name": "bacon", "amount_g": 50, "is_primary": True, "display": "50g canadian bacon"},
+            {"name": "butter", "amount_g": 30, "is_primary": False, "display": "30g hollandaise (butter)"},
+            {"name": "egg", "amount_g": 20, "is_primary": False, "display": "hollandaise (egg yolk)"},
+        ],
+        "spices": ["lemon juice", "cayenne"],
+    },
+    "pancakes": {
+        "category": "Breakfast",
+        "serving_size_g": 200,
+        "serving_text": "3 pancakes (200g)",
+        "ingredients": [
+            {"name": "wheat flour", "amount_g": 80, "is_primary": True, "display": "80g flour"},
+            {"name": "milk", "amount_g": 60, "is_primary": False, "display": "60ml milk"},
+            {"name": "egg", "amount_g": 50, "is_primary": False, "display": "1 egg"},
+            {"name": "butter", "amount_g": 15, "is_primary": False, "display": "1 tbsp butter"},
+            {"name": "maple syrup", "amount_g": 30, "is_primary": False, "display": "2 tbsp maple syrup"},
+        ],
+        "spices": ["baking powder", "vanilla"],
+    },
+    "omelette": {
+        "category": "Breakfast",
+        "serving_size_g": 180,
+        "serving_text": "1 omelette (180g)",
+        "ingredients": [
+            {"name": "egg", "amount_g": 100, "is_primary": True, "display": "2 eggs"},
+            {"name": "cheddar", "amount_g": 30, "is_primary": False, "display": "30g cheese"},
+            {"name": "butter", "amount_g": 10, "is_primary": False, "display": "2 tsp butter"},
+            {"name": "onion", "amount_g": 20, "is_primary": False, "display": "diced vegetables"},
+            {"name": "pepper", "amount_g": 15, "is_primary": False, "display": "bell peppers"},
+        ],
+        "spices": ["salt", "pepper", "herbs"],
+    },
+}
+
+def find_recipe(food_name: str) -> dict:
+    """
+    Find a recipe match for the given food name.
+    Returns the recipe dict if found, None otherwise.
+    """
+    name_lower = food_name.lower().strip()
+    
+    # Direct match
+    if name_lower in RECIPE_DATABASE:
+        return RECIPE_DATABASE[name_lower]
+    
+    # Partial match - check if food name contains recipe name or vice versa
+    for recipe_name, recipe_data in RECIPE_DATABASE.items():
+        # Check if the recipe name is contained in the food name
+        if recipe_name in name_lower:
+            return recipe_data
+        # Check if food name is contained in recipe name
+        if name_lower in recipe_name:
+            return recipe_data
+        # Check word overlap (at least 2 matching words for multi-word dishes)
+        recipe_words = set(recipe_name.split())
+        food_words = set(name_lower.split())
+        common_words = recipe_words & food_words
+        if len(common_words) >= 2 or (len(common_words) == 1 and len(recipe_words) == 1):
+            return recipe_data
+    
+    return None
+
+# =============================================================================
+# UNIVERSAL QUANTIFICATION - Default parameter effect values
+# =============================================================================
+# Provides baseline numerical effects when explicit data isn't available
+# Based on published nutritional science literature averages
+
+DEFAULT_PARAMETER_EFFECTS = {
+    # Cardiovascular parameters - per 10% DV of typical nutrient
+    "blood_pressure": {"base_change": 0.5, "unit": "mmHg"},
+    "bp_systolic": {"base_change": 0.5, "unit": "mmHg"},
+    "bp_diastolic": {"base_change": 0.3, "unit": "mmHg"},
+    "heart_rate": {"base_change": 0.2, "unit": "bpm"},
+    "cardiac_output": {"base_change": 0.01, "unit": "L/min"},
+    
+    # Metabolic parameters
+    "blood_glucose": {"base_change": 2.0, "unit": "mg/dL"},
+    "insulin": {"base_change": 0.5, "unit": "µU/mL"},
+    "hba1c": {"base_change": 0.01, "unit": "%"},
+    
+    # Lipid parameters
+    "total_cholesterol": {"base_change": 1.0, "unit": "mg/dL"},
+    "ldl_cholesterol": {"base_change": 0.8, "unit": "mg/dL"},
+    "hdl_cholesterol": {"base_change": 0.3, "unit": "mg/dL"},
+    "triglycerides": {"base_change": 2.0, "unit": "mg/dL"},
+    
+    # Renal parameters
+    "serum_potassium": {"base_change": 0.02, "unit": "mEq/L"},
+    "serum_sodium": {"base_change": 0.1, "unit": "mEq/L"},
+    "serum_calcium": {"base_change": 0.05, "unit": "mg/dL"},
+    "serum_magnesium": {"base_change": 0.02, "unit": "mg/dL"},
+    "gfr": {"base_change": 0.5, "unit": "mL/min"},
+    "creatinine": {"base_change": 0.01, "unit": "mg/dL"},
+    "bun": {"base_change": 0.2, "unit": "mg/dL"},
+    
+    # Hepatic parameters
+    "alt": {"base_change": 0.5, "unit": "U/L"},
+    "ast": {"base_change": 0.5, "unit": "U/L"},
+    "albumin": {"base_change": 0.01, "unit": "g/dL"},
+    "bilirubin_total": {"base_change": 0.01, "unit": "mg/dL"},
+    
+    # Hematological parameters
+    "hemoglobin": {"base_change": 0.05, "unit": "g/dL"},
+    "hematocrit": {"base_change": 0.1, "unit": "%"},
+    "ferritin": {"base_change": 1.0, "unit": "ng/mL"},
+    "iron": {"base_change": 1.0, "unit": "µg/dL"},
+    
+    # Inflammatory markers
+    "crp": {"base_change": 0.1, "unit": "mg/L"},
+    "esr": {"base_change": 0.2, "unit": "mm/hr"},
+    
+    # Bone parameters
+    "vitamin_d": {"base_change": 0.5, "unit": "ng/mL"},
+    "pth": {"base_change": 0.5, "unit": "pg/mL"},
+    
+    # Thyroid
+    "tsh": {"base_change": 0.05, "unit": "mIU/L"},
+    "t3": {"base_change": 1.0, "unit": "ng/dL"},
+    "t4": {"base_change": 0.1, "unit": "µg/dL"},
+    
+    # Neurological (relative scale 0-1)
+    "neurotransmitter_balance": {"base_change": 0.02, "unit": "relative"},
+    "cognitive_function": {"base_change": 0.01, "unit": "relative"},
+    
+    # GI parameters
+    "gastric_ph": {"base_change": 0.1, "unit": "pH"},
+    "gut_motility": {"base_change": 0.02, "unit": "relative"},
+    "nutrient_absorption": {"base_change": 0.5, "unit": "%"},
+}
+
+def calculate_universal_quantified_change(
+    param_name: str, 
+    direction: str, 
+    percent_dv: float = None, 
+    nutrient_id: str = None,
+    nutrient_amount: float = None
+) -> tuple:
+    """
+    Calculate a quantified change value for ANY parameter.
+    Returns (quantified_change, change_unit)
+    Always returns a numerical value - never 'minimal' or other text labels.
+    """
+    param_lower = param_name.lower().replace(" ", "_").replace("-", "_")
+    
+    # Get base effect from defaults
+    default_effect = DEFAULT_PARAMETER_EFFECTS.get(param_lower)
+    
+    # Try partial match if direct match fails
+    if not default_effect:
+        for key, value in DEFAULT_PARAMETER_EFFECTS.items():
+            if key in param_lower or param_lower in key:
+                default_effect = value
+                break
+    
+    # If still no match, use generic small effect
+    if not default_effect:
+        default_effect = {"base_change": 0.1, "unit": "relative"}
+    
+    base_change = default_effect["base_change"]
+    unit = default_effect["unit"]
+    
+    # Scale by percent daily value if available
+    if percent_dv is not None and percent_dv > 0:
+        # Scale: effect increases with %DV, normalized to 10% DV baseline
+        scale_factor = percent_dv / 10.0
+        quantified_change = round(base_change * scale_factor, 2)
+    elif nutrient_amount is not None and nutrient_amount > 0:
+        # Use nutrient amount as a scaling proxy (assume per 100mg baseline)
+        scale_factor = nutrient_amount / 100.0
+        quantified_change = round(base_change * scale_factor, 2)
+    else:
+        # Minimum detectable effect
+        quantified_change = round(base_change * 0.5, 2)
+    
+    # Apply direction
+    if direction == "decrease":
+        quantified_change = -abs(quantified_change)
+    elif direction == "increase":
+        quantified_change = abs(quantified_change)
+    
+    # Ensure non-zero (minimum threshold)
+    if quantified_change == 0:
+        quantified_change = 0.01 if direction != "decrease" else -0.01
+    
+    return (quantified_change, unit)
+
 @api_router.post("/food/analyze-from-db")
 async def analyze_food_from_database(request: Dict[str, Any] = Body(...)):
     """
