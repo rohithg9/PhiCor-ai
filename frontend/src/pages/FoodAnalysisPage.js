@@ -283,6 +283,13 @@ const ParameterCard = ({ param, isDark, compact = false }) => {
                 {param.amount && <span className="font-mono ml-1">({param.amount})</span>}
               </p>
             )}
+            {/* Show contributing ingredients for recipe analysis */}
+            {param.from_ingredients && param.from_ingredients.length > 0 && (
+              <p>
+                <strong className={isDark ? 'text-gray-300' : 'text-gray-700'}>Source Ingredients:</strong>{' '}
+                <span className="text-blue-400">{param.from_ingredients.join(', ')}</span>
+              </p>
+            )}
             {param.percent_dv && param.percent_dv > 0 && (
               <p>
                 <strong className={isDark ? 'text-gray-300' : 'text-gray-700'}>% Daily Value:</strong>{' '}
