@@ -10,6 +10,7 @@ PhiCor.ai is a unified, parameter-based health intelligence system that provides
 4. **Multiple Input Methods** - Support text search, logs, and image uploads
 5. **UI/UX Parity** - Food/Drug engines must have deep, multi-scale dashboard UI
 6. **Comprehensive Knowledge Base** - Extensive data on foods, drugs, and diseases
+7. **Report Export & Sharing** - PDF export with PhiCor branding for all analysis types
 
 ## User Personas
 - **Patients/Consumers** - Want to understand how foods affect their health conditions
@@ -21,10 +22,23 @@ PhiCor.ai is a unified, parameter-based health intelligence system that provides
 - **Frontend**: React
 - **Database**: MongoDB
 - **AI Integration**: OpenAI GPT-4o via Emergent LLM Key (silent ingredient breakdown for unknown dishes)
+- **PDF Generation**: jsPDF + html2canvas
 
 ## What's Been Implemented
 
-### January 11, 2025 - Major Feature Update
+### January 11, 2025 - PDF Export & Sharing Feature
+
+#### PDF Export for All Analysis Types
+- **Food Analysis PDF**: Includes PhiCor logo, nutritional profile, ingredient breakdown, organ system effects, clinical summary
+- **Drug Analysis PDF**: Drug info, indications, contraindications, parameter effects
+- **Differential Diagnosis PDF**: Patient profile, clinical presentation, ranked diagnoses with probabilities
+- **Disease Analysis PDF**: Disease overview, affected parameters, symptoms, treatments
+
+#### PDF Sharing Options
+- Download PDF directly
+- Share via Web Share API (mobile)
+- Share via Email (opens mail client)
+- Share via WhatsApp
 
 #### Smart International Dish Analysis
 - **AI-Powered Ingredient Breakdown**: ANY dish from ANY cuisine worldwide is now supported
@@ -33,28 +47,13 @@ PhiCor.ai is a unified, parameter-based health intelligence system that provides
 - No "AI" or "not in database" messages shown to users - seamless experience
 
 #### P0 Features Complete
-- **Ingredient Breakdown for Complex Foods** ✅
-  - Predefined RECIPE_DATABASE with ~25 common dishes
-  - AI fallback for any dish not in predefined recipes
-  - Shows primary/secondary ingredients with DB match status
-  - Aggregated nutrients and parameter effects from all ingredients
+- **Ingredient Breakdown for Complex Foods**
+- **Universal Quantification** - All parameters show +/- numerical values
 
-- **Universal Quantification** ✅
-  - `DEFAULT_PARAMETER_EFFECTS` with baseline values for ~40 parameters
-  - ALL parameters show +/- numerical values (e.g., -0.5 mmHg, +2.1 mg/dL)
-  - No more generic labels like "minimal"
-
-- **Removed AI Mentions from UI** ✅
-  - No toast messages about "AI analysis" or "not in database"
-  - Clean, seamless user experience
-
-### Previous Session - UI/UX Overhaul
-- Resolved all landing page stat counter bugs
-- Standardized mobile navigation headers
-- Rebranded from "AI" to "Mathematical" modeling
-- Added Equations Browser for expert dashboard (7,892+ models)
-- Smart serving sizes (e.g., "1 glass (250ml)" instead of "100g")
-- Parameter effects scaled by serving size with reference ranges
+### Previous Sessions
+- UI/UX Overhaul (landing page, navigation, rebranding)
+- Equations Browser for expert dashboard
+- Smart serving sizes with scaling
 
 ## Database Collections
 - **foods**: ~9,951 foods with nutrient data
@@ -62,10 +61,13 @@ PhiCor.ai is a unified, parameter-based health intelligence system that provides
 - **diseases**: 2,568 diseases
 - **nutrients**: Nutrient definitions with parameter_effects, disease_interactions, drug_interactions
 
-## Key API Endpoints
-- `POST /api/food/analyze-from-db` - Database-driven food analysis with smart ingredient breakdown
-- `POST /api/food/analyze-product` - AI-powered analysis fallback
-- `GET /api/platform/stats` - Platform statistics
+## Key Files Added/Modified
+- `/app/frontend/src/utils/pdfExport.js` - PDF generation utilities for all report types
+- `/app/frontend/src/components/PDFExportButton.jsx` - Reusable export button component
+- `/app/frontend/src/pages/FoodAnalysisPage.js` - Added PDF export button
+- `/app/frontend/src/pages/DrugsPage.js` - Added PDF export to drug details
+- `/app/frontend/src/pages/DifferentialPage.js` - Added PDF export to diagnosis results
+- `/app/frontend/src/pages/DashboardMultiScale.js` - Added PDF export to disease view
 
 ## Prioritized Backlog
 
@@ -79,16 +81,10 @@ PhiCor.ai is a unified, parameter-based health intelligence system that provides
 
 ### Future/Backlog
 - Enhanced Expert Knowledge Bank
-- Expand predefined recipe coverage
-- Real-time parameter monitoring integration
+- Expand recipe coverage
+- Real-time parameter monitoring
 
 ## Test Credentials
 - **Expert Login**: `/expert-login`
 - **Email**: admin@phicor.ai
 - **Password**: admin123
-
-## Files of Reference
-- `/app/backend/server.py` - Main backend with RECIPE_DATABASE, AI ingredient breakdown, quantification logic
-- `/app/frontend/src/pages/FoodAnalysisPage.js` - Food analysis UI with ingredient breakdown
-- `/app/frontend/src/pages/ExpertDashboard.js` - Expert dashboard with Equations Browser
-- `/app/tests/test_food_analysis_p0.py` - P0 feature test suite (20 tests)
