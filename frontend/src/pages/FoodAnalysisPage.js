@@ -553,6 +553,27 @@ const FoodAnalysisPage = () => {
     return null;
   }, [profile.weight, profile.height]);
   
+  // Cycle through facts while analyzing
+  useEffect(() => {
+    if (isAnalyzing || isAnalyzingImages) {
+      const interval = setInterval(() => {
+        setCurrentFactIndex(prev => (prev + 1) % foodFacts.length);
+      }, 4000); // Change fact every 4 seconds
+      return () => clearInterval(interval);
+    }
+  }, [isAnalyzing, isAnalyzingImages, foodFacts.length]);
+  
+  // Cancel analysis function
+  const cancelAnalysis = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setIsAnalyzing(false);
+    setIsAnalyzingImages(false);
+    toast.info('Analysis cancelled');
+  }, []);
+  
   // Handle image upload
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
