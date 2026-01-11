@@ -24,6 +24,7 @@ import DiseaseDetailPanel from '../components/DiseaseDetailPanel';
 import DiseaseComparisonDashboard from '../components/DiseaseComparisonDashboard';
 import DifferentialDashboard from '../components/DifferentialDashboard';
 import ParameterDrillDownModal from '../components/ParameterDrillDownModal';
+import PDFExportButton from '../components/PDFExportButton';
 import { 
   getDifferentialDiagnosis, 
   parseClinicalText, 
