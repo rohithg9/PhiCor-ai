@@ -203,7 +203,7 @@ const ParameterCard = ({ param, isDark, compact = false }) => {
             {param.direction === 'decrease' && <TrendingDown className={`w-3.5 h-3.5 flex-shrink-0 ${directionColor}`} />}
             {param.direction === 'neutral' && <Minus className={`w-3.5 h-3.5 flex-shrink-0 ${directionColor}`} />}
             <span className={`text-xs sm:text-sm font-medium truncate ${isDark ? 'text-white' : 'text-gray-900'}`}>
-              {param.parameter?.replace(/_/g, ' ')}
+              {param.parameter_name || param.parameter?.replace(/_/g, ' ')}
             </span>
           </div>
           {/* Quantified Change - Always visible and prominent */}
@@ -230,11 +230,71 @@ const ParameterCard = ({ param, isDark, compact = false }) => {
       </button>
       
       {expanded && (
-        <div className={`mt-2 pt-2 border-t text-xs space-y-1 ${isDark ? 'border-gray-700 text-gray-400' : 'border-gray-200 text-gray-600'}`}>
-          {param.mechanism && <p><strong>Mechanism:</strong> {param.mechanism}</p>}
-          {param.from_nutrient && <p><strong>From:</strong> {param.from_nutrient} ({param.amount})</p>}
-          {param.percent_dv && <p><strong>% Daily Value:</strong> {param.percent_dv}%</p>}
-          {param.clinical_significance && <p className="text-yellow-500"><strong>Clinical Note:</strong> {param.clinical_significance}</p>}
+        <div className={`mt-2 pt-2 border-t text-xs space-y-2 ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
+          {/* Reference Range Box - Mathematical Precision */}
+          {param.reference?.normal_range && (
+            <div className={`p-2 rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-gray-50'}`}>
+              <div className="flex items-center justify-between mb-1">
+                <span className={`text-[10px] font-medium uppercase tracking-wide ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                  Reference Range
+                </span>
+                <span className={`text-[10px] ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                  {param.reference.unit}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`font-mono text-sm font-bold ${isDark ? 'text-green-400' : 'text-green-600'}`}>
+                  {param.reference.normal_range}
+                </span>
+                {param.quantified_change && param.quantified_change !== 0 && (
+                  <span className={`text-xs ${param.quantified_change > 0 ? 'text-red-400' : 'text-blue-400'}`}>
+                    → {param.quantified_change > 0 ? '+' : ''}{param.quantified_change} {param.change_unit || param.reference.unit}
+                  </span>
+                )}
+              </div>
+              {/* Visual deviation indicator */}
+              {param.reference.normal_low !== null && param.reference.normal_high !== null && (
+                <div className="mt-2">
+                  <div className={`h-1.5 rounded-full overflow-hidden ${isDark ? 'bg-gray-700' : 'bg-gray-200'}`}>
+                    <div 
+                      className="h-full bg-gradient-to-r from-green-500 to-emerald-500" 
+                      style={{ width: '100%' }}
+                    />
+                  </div>
+                  <div className="flex justify-between mt-0.5">
+                    <span className={`text-[9px] ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                      {param.reference.normal_low}
+                    </span>
+                    <span className={`text-[9px] ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                      {param.reference.normal_high}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          
+          {/* Mechanism and Source */}
+          <div className={`space-y-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+            {param.mechanism && <p><strong className={isDark ? 'text-gray-300' : 'text-gray-700'}>Mechanism:</strong> {param.mechanism}</p>}
+            {param.from_nutrient && (
+              <p>
+                <strong className={isDark ? 'text-gray-300' : 'text-gray-700'}>From:</strong> {param.from_nutrient}
+                {param.amount && <span className="font-mono ml-1">({param.amount})</span>}
+              </p>
+            )}
+            {param.percent_dv && param.percent_dv > 0 && (
+              <p>
+                <strong className={isDark ? 'text-gray-300' : 'text-gray-700'}>% Daily Value:</strong>{' '}
+                <span className="font-mono">{param.percent_dv}%</span>
+              </p>
+            )}
+            {param.clinical_significance && (
+              <p className="text-yellow-500">
+                <strong>Clinical Note:</strong> {param.clinical_significance}
+              </p>
+            )}
+          </div>
         </div>
       )}
     </div>
