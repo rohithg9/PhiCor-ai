@@ -88,7 +88,7 @@ PhiCor.ai is a unified, parameter-based health intelligence system that provides
 - **Password**: admin123
 
 ## Files of Reference
-- `/app/backend/server.py` - Main backend with RECIPE_DATABASE, quantification logic
+- `/app/backend/server.py` - Main backend with RECIPE_DATABASE, AI ingredient breakdown, quantification logic
 - `/app/frontend/src/pages/FoodAnalysisPage.js` - Food analysis UI with ingredient breakdown
 - `/app/frontend/src/pages/ExpertDashboard.js` - Expert dashboard with Equations Browser
 - `/app/tests/test_food_analysis_p0.py` - P0 feature test suite (20 tests)
