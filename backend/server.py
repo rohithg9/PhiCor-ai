@@ -1680,6 +1680,486 @@ async def get_equations_reference():
         }
     }
 
+# Comprehensive Mathematical Models API for Expert Review
+@api_router.get("/expert/mathematical-models")
+async def get_comprehensive_mathematical_models(
+    category: Optional[str] = None,  # organ, drug, disease, food, clinical
+    organ_system: Optional[str] = None,
+    search: Optional[str] = None,
+    limit: int = 100,
+    offset: int = 0
+):
+    """
+    Get ALL mathematical models and equations from the database for expert review.
+    Includes: physiological equations, drug models, disease models, food-nutrient models.
+    Each model includes evidence sources, normal values, and abnormal influences.
+    """
+    try:
+        all_models = []
+        
+        # 1. PHYSIOLOGICAL EQUATIONS (built-in models)
+        physiological_models = {
+            "cardiovascular": [
+                {
+                    "id": "cv_windkessel",
+                    "name": "Windkessel Model (2-Element)",
+                    "category": "organ",
+                    "organ_system": "cardiovascular",
+                    "equation": "dP/dt = (Q - P/R) / C",
+                    "latex": "\\frac{dP}{dt} = \\frac{Q - \\frac{P}{R}}{C}",
+                    "description": "Models arterial pressure dynamics as an electrical circuit analog with resistance and compliance.",
+                    "variables": [
+                        {"symbol": "P", "name": "Arterial pressure", "unit": "mmHg", "normal_range": "80-120"},
+                        {"symbol": "Q", "name": "Cardiac output", "unit": "L/min", "normal_range": "4-8"},
+                        {"symbol": "R", "name": "Total peripheral resistance", "unit": "mmHg·min/L", "normal_range": "15-20"},
+                        {"symbol": "C", "name": "Arterial compliance", "unit": "mL/mmHg", "normal_range": "1-2"}
+                    ],
+                    "evidence_sources": ["Westerhof N et al., 'Arterial Hemodynamics' 2005", "Nichols WW, O'Rourke MF, 'McDonald's Blood Flow in Arteries'"],
+                    "normal_values": {"systolic": "90-120 mmHg", "diastolic": "60-80 mmHg", "mean": "70-105 mmHg"},
+                    "abnormal_conditions": [
+                        {"condition": "Hypertension", "effect": "Increased R, decreased C", "consequence": "Elevated P"},
+                        {"condition": "Heart Failure", "effect": "Decreased Q", "consequence": "Reduced perfusion"},
+                        {"condition": "Arteriosclerosis", "effect": "Decreased C", "consequence": "Increased pulse pressure"}
+                    ],
+                    "clinical_significance": "Used to model arterial stiffness and predict cardiovascular risk",
+                    "validation_status": "established"
+                },
+                {
+                    "id": "cv_frank_starling",
+                    "name": "Frank-Starling Law",
+                    "category": "organ",
+                    "organ_system": "cardiovascular",
+                    "equation": "SV = SV_max × (1 - e^(-k × EDV)) × contractility",
+                    "latex": "SV = SV_{max} \\times (1 - e^{-k \\cdot EDV}) \\times contractility",
+                    "description": "The heart's ability to increase stroke volume in response to increased preload (venous return).",
+                    "variables": [
+                        {"symbol": "SV", "name": "Stroke volume", "unit": "mL", "normal_range": "60-100"},
+                        {"symbol": "SV_max", "name": "Maximum stroke volume", "unit": "mL", "normal_range": "100-140"},
+                        {"symbol": "EDV", "name": "End-diastolic volume", "unit": "mL", "normal_range": "110-150"},
+                        {"symbol": "k", "name": "Sensitivity coefficient", "unit": "mL⁻¹", "normal_range": "0.015-0.025"},
+                        {"symbol": "contractility", "name": "Contractility factor", "unit": "dimensionless", "normal_range": "0.8-1.2"}
+                    ],
+                    "evidence_sources": ["Guyton AC, Hall JE, 'Textbook of Medical Physiology'", "Katz AM, 'Physiology of the Heart'"],
+                    "normal_values": {"stroke_volume": "60-100 mL", "ejection_fraction": "55-70%"},
+                    "abnormal_conditions": [
+                        {"condition": "Heart Failure (systolic)", "effect": "Decreased contractility", "consequence": "Reduced SV despite high EDV"},
+                        {"condition": "Hypovolemia", "effect": "Decreased EDV", "consequence": "Reduced preload and SV"},
+                        {"condition": "Exercise", "effect": "Increased contractility", "consequence": "Increased SV"}
+                    ],
+                    "clinical_significance": "Fundamental principle explaining cardiac adaptation to volume changes",
+                    "validation_status": "established"
+                },
+                {
+                    "id": "cv_cardiac_output",
+                    "name": "Cardiac Output Equation",
+                    "category": "organ",
+                    "organ_system": "cardiovascular",
+                    "equation": "CO = SV × HR",
+                    "latex": "CO = SV \\times HR",
+                    "description": "Total blood volume pumped by the heart per minute.",
+                    "variables": [
+                        {"symbol": "CO", "name": "Cardiac output", "unit": "L/min", "normal_range": "4-8"},
+                        {"symbol": "SV", "name": "Stroke volume", "unit": "mL", "normal_range": "60-100"},
+                        {"symbol": "HR", "name": "Heart rate", "unit": "bpm", "normal_range": "60-100"}
+                    ],
+                    "evidence_sources": ["Standard cardiovascular physiology", "ACC/AHA Guidelines"],
+                    "normal_values": {"cardiac_output": "4-8 L/min", "cardiac_index": "2.5-4.0 L/min/m²"},
+                    "abnormal_conditions": [
+                        {"condition": "Cardiogenic shock", "effect": "CO < 2.2 L/min/m²", "consequence": "Tissue hypoperfusion"},
+                        {"condition": "Sepsis", "effect": "Initially elevated CO", "consequence": "Distributive shock"},
+                        {"condition": "Bradycardia", "effect": "Reduced HR", "consequence": "May reduce CO if SV doesn't compensate"}
+                    ],
+                    "clinical_significance": "Primary measure of cardiac performance and systemic perfusion",
+                    "validation_status": "established"
+                },
+                {
+                    "id": "cv_map",
+                    "name": "Mean Arterial Pressure",
+                    "category": "organ",
+                    "organ_system": "cardiovascular",
+                    "equation": "MAP = DBP + (1/3) × (SBP - DBP)",
+                    "latex": "MAP = DBP + \\frac{1}{3}(SBP - DBP)",
+                    "description": "Average arterial pressure during one cardiac cycle, weighted toward diastole.",
+                    "variables": [
+                        {"symbol": "MAP", "name": "Mean arterial pressure", "unit": "mmHg", "normal_range": "70-105"},
+                        {"symbol": "SBP", "name": "Systolic blood pressure", "unit": "mmHg", "normal_range": "90-120"},
+                        {"symbol": "DBP", "name": "Diastolic blood pressure", "unit": "mmHg", "normal_range": "60-80"}
+                    ],
+                    "evidence_sources": ["Standard clinical calculation", "JNC Guidelines"],
+                    "normal_values": {"map": "70-105 mmHg"},
+                    "abnormal_conditions": [
+                        {"condition": "Hypotension", "effect": "MAP < 65 mmHg", "consequence": "Inadequate organ perfusion"},
+                        {"condition": "Hypertensive crisis", "effect": "MAP > 130 mmHg", "consequence": "End-organ damage risk"}
+                    ],
+                    "clinical_significance": "Target for maintaining organ perfusion in critical care",
+                    "validation_status": "established"
+                }
+            ],
+            "renal": [
+                {
+                    "id": "renal_gfr",
+                    "name": "GFR Estimation (CKD-EPI)",
+                    "category": "organ",
+                    "organ_system": "renal",
+                    "equation": "GFR = 141 × min(Cr/κ,1)^α × max(Cr/κ,1)^(-1.209) × 0.993^age × [1.018 if female]",
+                    "latex": "GFR = 141 \\times min(\\frac{Cr}{\\kappa},1)^{\\alpha} \\times max(\\frac{Cr}{\\kappa},1)^{-1.209} \\times 0.993^{age}",
+                    "description": "Gold standard equation for estimating glomerular filtration rate from serum creatinine.",
+                    "variables": [
+                        {"symbol": "GFR", "name": "Glomerular filtration rate", "unit": "mL/min/1.73m²", "normal_range": ">90"},
+                        {"symbol": "Cr", "name": "Serum creatinine", "unit": "mg/dL", "normal_range": "0.7-1.3"},
+                        {"symbol": "κ", "name": "Sex-specific constant", "unit": "", "normal_range": "0.7 (F) or 0.9 (M)"},
+                        {"symbol": "α", "name": "Sex-specific exponent", "unit": "", "normal_range": "-0.329 (F) or -0.411 (M)"}
+                    ],
+                    "evidence_sources": ["Levey AS et al., 'CKD-EPI equation' Ann Intern Med 2009", "KDIGO Guidelines 2012"],
+                    "normal_values": {"gfr_normal": ">90 mL/min/1.73m²", "stage_1": ">90", "stage_2": "60-89", "stage_3a": "45-59", "stage_3b": "30-44", "stage_4": "15-29", "stage_5": "<15"},
+                    "abnormal_conditions": [
+                        {"condition": "CKD Stage 3", "effect": "GFR 30-59", "consequence": "Moderate kidney function loss"},
+                        {"condition": "ESRD", "effect": "GFR < 15", "consequence": "Dialysis or transplant needed"},
+                        {"condition": "AKI", "effect": "Rapid GFR decline", "consequence": "Acute kidney injury requiring intervention"}
+                    ],
+                    "clinical_significance": "Primary method for assessing kidney function and staging CKD",
+                    "validation_status": "established"
+                },
+                {
+                    "id": "renal_cockcroft_gault",
+                    "name": "Cockcroft-Gault Equation",
+                    "category": "organ",
+                    "organ_system": "renal",
+                    "equation": "CrCl = [(140 - age) × weight] / (72 × Cr) × [0.85 if female]",
+                    "latex": "CrCl = \\frac{(140 - age) \\times weight}{72 \\times Cr} \\times [0.85 \\text{ if female}]",
+                    "description": "Estimates creatinine clearance for drug dosing adjustments.",
+                    "variables": [
+                        {"symbol": "CrCl", "name": "Creatinine clearance", "unit": "mL/min", "normal_range": "90-130"},
+                        {"symbol": "age", "name": "Age", "unit": "years", "normal_range": "N/A"},
+                        {"symbol": "weight", "name": "Body weight", "unit": "kg", "normal_range": "N/A"},
+                        {"symbol": "Cr", "name": "Serum creatinine", "unit": "mg/dL", "normal_range": "0.7-1.3"}
+                    ],
+                    "evidence_sources": ["Cockcroft DW, Gault MH, 'Prediction of creatinine clearance' Nephron 1976"],
+                    "normal_values": {"crcl": "90-130 mL/min"},
+                    "abnormal_conditions": [
+                        {"condition": "Renal impairment", "effect": "CrCl < 60", "consequence": "Drug dose adjustment required"}
+                    ],
+                    "clinical_significance": "Standard for drug dosing in renal impairment",
+                    "validation_status": "established"
+                }
+            ],
+            "metabolic": [
+                {
+                    "id": "met_bergman",
+                    "name": "Bergman Minimal Model",
+                    "category": "organ",
+                    "organ_system": "metabolic",
+                    "equation": "dG/dt = -p₁(G - Gᵦ) - X·G + Rₐ; dX/dt = -p₂X + p₃(I - Iᵦ)",
+                    "latex": "\\frac{dG}{dt} = -p_1(G - G_b) - X \\cdot G + R_a",
+                    "description": "Mathematical model of glucose-insulin dynamics for assessing insulin sensitivity.",
+                    "variables": [
+                        {"symbol": "G", "name": "Plasma glucose", "unit": "mg/dL", "normal_range": "70-100 (fasting)"},
+                        {"symbol": "I", "name": "Plasma insulin", "unit": "μU/mL", "normal_range": "2-20 (fasting)"},
+                        {"symbol": "X", "name": "Insulin action", "unit": "min⁻¹", "normal_range": "Variable"},
+                        {"symbol": "p₁", "name": "Glucose effectiveness", "unit": "min⁻¹", "normal_range": "0.028"},
+                        {"symbol": "p₂", "name": "Insulin action decay", "unit": "min⁻¹", "normal_range": "0.025"},
+                        {"symbol": "p₃", "name": "Insulin sensitivity", "unit": "(μU/mL)⁻¹·min⁻²", "normal_range": "0.000013"}
+                    ],
+                    "evidence_sources": ["Bergman RN, 'Minimal Model' Am J Physiol 1981", "Cobelli C et al., 'Diabetes Models' IEEE Rev Biomed Eng 2009"],
+                    "normal_values": {"fasting_glucose": "70-100 mg/dL", "fasting_insulin": "2-20 μU/mL", "HOMA-IR": "<2.5"},
+                    "abnormal_conditions": [
+                        {"condition": "Type 2 Diabetes", "effect": "Decreased insulin sensitivity (↓p₃)", "consequence": "Hyperglycemia"},
+                        {"condition": "Insulin Resistance", "effect": "Reduced glucose uptake", "consequence": "Compensatory hyperinsulinemia"},
+                        {"condition": "Type 1 Diabetes", "effect": "No insulin production", "consequence": "Complete dependence on exogenous insulin"}
+                    ],
+                    "clinical_significance": "Gold standard for quantifying insulin sensitivity in research",
+                    "validation_status": "established"
+                },
+                {
+                    "id": "met_homa_ir",
+                    "name": "HOMA-IR (Insulin Resistance)",
+                    "category": "organ",
+                    "organ_system": "metabolic",
+                    "equation": "HOMA-IR = (fasting insulin × fasting glucose) / 405",
+                    "latex": "HOMA\\text{-}IR = \\frac{\\text{Fasting Insulin} \\times \\text{Fasting Glucose}}{405}",
+                    "description": "Homeostatic Model Assessment for insulin resistance.",
+                    "variables": [
+                        {"symbol": "HOMA-IR", "name": "Insulin resistance index", "unit": "dimensionless", "normal_range": "<2.5"},
+                        {"symbol": "fasting insulin", "name": "Fasting insulin", "unit": "μU/mL", "normal_range": "2-20"},
+                        {"symbol": "fasting glucose", "name": "Fasting glucose", "unit": "mg/dL", "normal_range": "70-100"}
+                    ],
+                    "evidence_sources": ["Matthews DR et al., 'HOMA' Diabetologia 1985"],
+                    "normal_values": {"homa_ir_normal": "<2.5", "insulin_resistance": ">2.5", "severe_resistance": ">5.0"},
+                    "abnormal_conditions": [
+                        {"condition": "Metabolic Syndrome", "effect": "HOMA-IR > 2.5", "consequence": "Increased diabetes risk"},
+                        {"condition": "PCOS", "effect": "Elevated HOMA-IR", "consequence": "Associated insulin resistance"}
+                    ],
+                    "clinical_significance": "Simple clinical tool for assessing insulin resistance",
+                    "validation_status": "established"
+                }
+            ],
+            "pharmacokinetics": [
+                {
+                    "id": "pk_one_compartment",
+                    "name": "One-Compartment PK Model",
+                    "category": "drug",
+                    "organ_system": "pharmacokinetics",
+                    "equation": "C(t) = (F × D / Vd) × e^(-k_el × t)",
+                    "latex": "C(t) = \\frac{F \\cdot D}{V_d} \\cdot e^{-k_{el} \\cdot t}",
+                    "description": "Models drug concentration over time assuming uniform distribution.",
+                    "variables": [
+                        {"symbol": "C(t)", "name": "Plasma concentration at time t", "unit": "mg/L", "normal_range": "Drug-specific"},
+                        {"symbol": "F", "name": "Bioavailability", "unit": "fraction", "normal_range": "0-1"},
+                        {"symbol": "D", "name": "Dose", "unit": "mg", "normal_range": "Drug-specific"},
+                        {"symbol": "Vd", "name": "Volume of distribution", "unit": "L", "normal_range": "Drug-specific"},
+                        {"symbol": "k_el", "name": "Elimination rate constant", "unit": "h⁻¹", "normal_range": "0.693/t½"}
+                    ],
+                    "evidence_sources": ["Rowland M, Tozer TN, 'Clinical Pharmacokinetics'", "Goodman & Gilman's Pharmacological Basis of Therapeutics"],
+                    "normal_values": {"therapeutic_range": "Drug-specific"},
+                    "abnormal_conditions": [
+                        {"condition": "Renal impairment", "effect": "Decreased k_el", "consequence": "Drug accumulation"},
+                        {"condition": "Hepatic impairment", "effect": "Decreased metabolism", "consequence": "Prolonged half-life"},
+                        {"condition": "Obesity", "effect": "Altered Vd", "consequence": "Modified dosing needed"}
+                    ],
+                    "clinical_significance": "Foundation for drug dosing calculations",
+                    "validation_status": "established"
+                },
+                {
+                    "id": "pk_half_life",
+                    "name": "Half-Life Equation",
+                    "category": "drug",
+                    "organ_system": "pharmacokinetics",
+                    "equation": "t½ = 0.693 / k_el = (0.693 × Vd) / CL",
+                    "latex": "t_{1/2} = \\frac{0.693}{k_{el}} = \\frac{0.693 \\times V_d}{CL}",
+                    "description": "Time required for drug concentration to decrease by 50%.",
+                    "variables": [
+                        {"symbol": "t½", "name": "Half-life", "unit": "hours", "normal_range": "Drug-specific"},
+                        {"symbol": "k_el", "name": "Elimination rate constant", "unit": "h⁻¹", "normal_range": "Drug-specific"},
+                        {"symbol": "Vd", "name": "Volume of distribution", "unit": "L", "normal_range": "Drug-specific"},
+                        {"symbol": "CL", "name": "Clearance", "unit": "L/h", "normal_range": "Drug-specific"}
+                    ],
+                    "evidence_sources": ["Clinical pharmacokinetics textbooks"],
+                    "normal_values": {"note": "4-5 half-lives to reach steady state"},
+                    "abnormal_conditions": [
+                        {"condition": "Drug-drug interaction", "effect": "Altered CL", "consequence": "Changed half-life"}
+                    ],
+                    "clinical_significance": "Determines dosing interval and time to steady state",
+                    "validation_status": "established"
+                }
+            ],
+            "respiratory": [
+                {
+                    "id": "resp_alveolar_gas",
+                    "name": "Alveolar Gas Equation",
+                    "category": "organ",
+                    "organ_system": "respiratory",
+                    "equation": "PAO₂ = FiO₂ × (Patm - PH₂O) - (PaCO₂ / RQ)",
+                    "latex": "P_{A}O_2 = F_iO_2 \\times (P_{atm} - P_{H_2O}) - \\frac{P_aCO_2}{RQ}",
+                    "description": "Calculates the partial pressure of oxygen in the alveoli.",
+                    "variables": [
+                        {"symbol": "PAO₂", "name": "Alveolar oxygen tension", "unit": "mmHg", "normal_range": "100-110"},
+                        {"symbol": "FiO₂", "name": "Fraction of inspired oxygen", "unit": "decimal", "normal_range": "0.21 (room air)"},
+                        {"symbol": "Patm", "name": "Atmospheric pressure", "unit": "mmHg", "normal_range": "760 (sea level)"},
+                        {"symbol": "PH₂O", "name": "Water vapor pressure", "unit": "mmHg", "normal_range": "47"},
+                        {"symbol": "PaCO₂", "name": "Arterial CO₂ tension", "unit": "mmHg", "normal_range": "35-45"},
+                        {"symbol": "RQ", "name": "Respiratory quotient", "unit": "dimensionless", "normal_range": "0.8"}
+                    ],
+                    "evidence_sources": ["West JB, 'Respiratory Physiology: The Essentials'"],
+                    "normal_values": {"pao2_room_air": "100-110 mmHg"},
+                    "abnormal_conditions": [
+                        {"condition": "ARDS", "effect": "Increased A-a gradient", "consequence": "Hypoxemia despite high FiO₂"},
+                        {"condition": "High altitude", "effect": "Decreased Patm", "consequence": "Reduced PAO₂"}
+                    ],
+                    "clinical_significance": "Essential for calculating A-a gradient and assessing oxygenation",
+                    "validation_status": "established"
+                },
+                {
+                    "id": "resp_aa_gradient",
+                    "name": "A-a Gradient",
+                    "category": "organ",
+                    "organ_system": "respiratory",
+                    "equation": "A-a gradient = PAO₂ - PaO₂",
+                    "latex": "A\\text{-}a\\,gradient = P_AO_2 - P_aO_2",
+                    "description": "Difference between alveolar and arterial oxygen, assessing gas exchange efficiency.",
+                    "variables": [
+                        {"symbol": "A-a gradient", "name": "Alveolar-arterial gradient", "unit": "mmHg", "normal_range": "<15 (age-dependent)"},
+                        {"symbol": "PAO₂", "name": "Alveolar oxygen", "unit": "mmHg", "normal_range": "100-110"},
+                        {"symbol": "PaO₂", "name": "Arterial oxygen", "unit": "mmHg", "normal_range": "80-100"}
+                    ],
+                    "evidence_sources": ["Pulmonary physiology standards"],
+                    "normal_values": {"normal_gradient": "Expected = Age/4 + 4", "young_adult": "5-15 mmHg"},
+                    "abnormal_conditions": [
+                        {"condition": "Pulmonary embolism", "effect": "Increased gradient", "consequence": "V/Q mismatch"},
+                        {"condition": "Pneumonia", "effect": "Increased gradient", "consequence": "Shunt physiology"},
+                        {"condition": "Hypoventilation (pure)", "effect": "Normal gradient", "consequence": "Differentiates from parenchymal disease"}
+                    ],
+                    "clinical_significance": "Differentiates causes of hypoxemia",
+                    "validation_status": "established"
+                }
+            ],
+            "hepatic": [
+                {
+                    "id": "hep_meld",
+                    "name": "MELD Score",
+                    "category": "clinical",
+                    "organ_system": "hepatic",
+                    "equation": "MELD = 3.78×ln(bilirubin) + 11.2×ln(INR) + 9.57×ln(creatinine) + 6.43",
+                    "latex": "MELD = 3.78 \\ln(bili) + 11.2 \\ln(INR) + 9.57 \\ln(Cr) + 6.43",
+                    "description": "Model for End-Stage Liver Disease, predicts 3-month mortality and liver transplant priority.",
+                    "variables": [
+                        {"symbol": "MELD", "name": "MELD score", "unit": "points", "normal_range": "6-40"},
+                        {"symbol": "bilirubin", "name": "Total bilirubin", "unit": "mg/dL", "normal_range": "0.1-1.2"},
+                        {"symbol": "INR", "name": "International normalized ratio", "unit": "ratio", "normal_range": "0.9-1.1"},
+                        {"symbol": "creatinine", "name": "Serum creatinine", "unit": "mg/dL", "normal_range": "0.7-1.3"}
+                    ],
+                    "evidence_sources": ["Kamath PS et al., 'MELD' Hepatology 2001", "UNOS transplant allocation"],
+                    "normal_values": {"low_risk": "<10", "moderate_risk": "10-19", "high_risk": "20-29", "severe": "≥30"},
+                    "abnormal_conditions": [
+                        {"condition": "Cirrhosis", "effect": "Elevated MELD", "consequence": "Transplant listing priority"},
+                        {"condition": "Acute liver failure", "effect": "Rapidly rising MELD", "consequence": "Urgent transplant consideration"}
+                    ],
+                    "clinical_significance": "Standard for liver transplant allocation",
+                    "validation_status": "established"
+                },
+                {
+                    "id": "hep_child_pugh",
+                    "name": "Child-Pugh Score",
+                    "category": "clinical",
+                    "organ_system": "hepatic",
+                    "equation": "Score = points(bilirubin) + points(albumin) + points(INR) + points(ascites) + points(encephalopathy)",
+                    "latex": "\\text{Child-Pugh} = \\sum \\text{points (5 criteria)}",
+                    "description": "Assesses prognosis in chronic liver disease using clinical and laboratory parameters.",
+                    "variables": [
+                        {"symbol": "Total points", "name": "Child-Pugh score", "unit": "points", "normal_range": "5-15"},
+                        {"symbol": "Class A", "name": "Well-compensated", "unit": "points", "normal_range": "5-6"},
+                        {"symbol": "Class B", "name": "Significant dysfunction", "unit": "points", "normal_range": "7-9"},
+                        {"symbol": "Class C", "name": "Decompensated", "unit": "points", "normal_range": "10-15"}
+                    ],
+                    "evidence_sources": ["Child CG, Turcotte JG, 1964", "Pugh RN et al., 1973"],
+                    "normal_values": {"class_a": "5-6 points (100% 1-yr survival)", "class_b": "7-9 points (80% 1-yr)", "class_c": "10-15 points (45% 1-yr)"},
+                    "abnormal_conditions": [
+                        {"condition": "Cirrhosis Class C", "effect": "Score 10-15", "consequence": "High mortality, transplant indicated"}
+                    ],
+                    "clinical_significance": "Surgical risk stratification and prognosis in cirrhosis",
+                    "validation_status": "established"
+                }
+            ]
+        }
+        
+        # Flatten physiological models and apply filters
+        for system, models in physiological_models.items():
+            for model in models:
+                if organ_system and model.get("organ_system") != organ_system:
+                    continue
+                if category and model.get("category") != category:
+                    continue
+                if search:
+                    search_lower = search.lower()
+                    if not (search_lower in model.get("name", "").lower() or
+                            search_lower in model.get("equation", "").lower() or
+                            search_lower in model.get("description", "").lower()):
+                        continue
+                all_models.append(model)
+        
+        # 2. DISEASE MODELS FROM DATABASE
+        disease_query = {}
+        if search:
+            disease_query["$or"] = [
+                {"name": {"$regex": search, "$options": "i"}},
+                {"mathematical_models.name": {"$regex": search, "$options": "i"}}
+            ]
+        
+        if not category or category == "disease":
+            diseases_with_models = await db.diseases.find(
+                {"mathematical_models": {"$exists": True, "$ne": [], "$type": "array"}},
+                {"_id": 0, "name": 1, "mathematical_models": 1, "affected_organs": 1, "category": 1}
+            ).limit(200).to_list(200)
+            
+            for disease in diseases_with_models:
+                for model in disease.get("mathematical_models", []):
+                    model_entry = {
+                        "id": f"disease_{disease.get('name', '').replace(' ', '_').lower()}_{model.get('name', '').replace(' ', '_').lower()}",
+                        "name": model.get("name", "Unknown Model"),
+                        "category": "disease",
+                        "organ_system": disease.get("affected_organs", ["general"])[0] if disease.get("affected_organs") else "general",
+                        "disease_name": disease.get("name"),
+                        "equation": model.get("equation", ""),
+                        "latex": model.get("latex", model.get("equation", "")),
+                        "description": model.get("description", ""),
+                        "variables": model.get("variables", []),
+                        "evidence_sources": model.get("evidence", model.get("sources", [])),
+                        "clinical_significance": model.get("clinical_application", ""),
+                        "validation_status": model.get("evidence_level", "database")
+                    }
+                    
+                    if organ_system and model_entry.get("organ_system") != organ_system:
+                        continue
+                    
+                    all_models.append(model_entry)
+        
+        # 3. NUTRIENT EFFECT MODELS FROM DATABASE
+        if not category or category == "food":
+            nutrients_with_models = await db.nutrients.find(
+                {"parameter_effects": {"$exists": True, "$ne": {}}},
+                {"_id": 0, "id": 1, "name": 1, "parameter_effects": 1, "daily_value": 1, "unit": 1}
+            ).limit(100).to_list(100)
+            
+            for nutrient in nutrients_with_models:
+                for organ, effects in nutrient.get("parameter_effects", {}).items():
+                    for effect in effects:
+                        if search:
+                            search_lower = search.lower()
+                            if not (search_lower in nutrient.get("name", "").lower() or
+                                    search_lower in effect.get("parameter", "").lower()):
+                                continue
+                        
+                        if organ_system and organ != organ_system:
+                            continue
+                        
+                        model_entry = {
+                            "id": f"nutrient_{nutrient.get('id', '')}_{effect.get('parameter', '').replace(' ', '_')}",
+                            "name": f"{nutrient.get('name', 'Nutrient')} → {effect.get('parameter', 'Parameter')}",
+                            "category": "food",
+                            "organ_system": organ,
+                            "nutrient_name": nutrient.get("name"),
+                            "equation": f"{effect.get('parameter')} {effect.get('direction', '=')} f({nutrient.get('name')})",
+                            "description": effect.get("mechanism", ""),
+                            "variables": [
+                                {"symbol": nutrient.get("name"), "unit": nutrient.get("unit", "mg"), "daily_value": nutrient.get("daily_value")},
+                                {"symbol": effect.get("parameter"), "direction": effect.get("direction"), "magnitude": effect.get("magnitude")}
+                            ],
+                            "evidence_sources": effect.get("evidence", []),
+                            "clinical_significance": f"Dietary {nutrient.get('name')} affects {effect.get('parameter')}",
+                            "validation_status": "database"
+                        }
+                        all_models.append(model_entry)
+        
+        # Apply pagination
+        total_count = len(all_models)
+        paginated_models = all_models[offset:offset + limit]
+        
+        # Group by category for summary
+        category_counts = {}
+        for model in all_models:
+            cat = model.get("category", "other")
+            category_counts[cat] = category_counts.get(cat, 0) + 1
+        
+        # Group by organ system for summary
+        organ_counts = {}
+        for model in all_models:
+            org = model.get("organ_system", "other")
+            organ_counts[org] = organ_counts.get(org, 0) + 1
+        
+        return {
+            "success": True,
+            "total_models": total_count,
+            "returned_count": len(paginated_models),
+            "offset": offset,
+            "limit": limit,
+            "category_summary": category_counts,
+            "organ_system_summary": organ_counts,
+            "models": paginated_models
+        }
+        
+    except Exception as e:
+        logger.error(f"Error fetching mathematical models: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Transcription endpoint for Medical Scribe
 # Clinical Analysis endpoint
 @api_router.post("/analyze-clinical")
