@@ -2741,9 +2741,21 @@ const DiseasePanel = ({
     {/* Disease Summary */}
     {currentDisease && (
       <div className="p-4 border-t border-border/50 bg-destructive/5">
-        <h4 className="text-xs font-semibold text-destructive mb-2">Active Condition</h4>
-        <p className="text-sm font-medium">{currentDisease.name}</p>
-        <p className="text-xs text-muted-foreground mt-1">{currentDisease.description}</p>
+        <div className="flex items-start justify-between">
+          <div>
+            <h4 className="text-xs font-semibold text-destructive mb-2">Active Condition</h4>
+            <p className="text-sm font-medium">{currentDisease.name}</p>
+            <p className="text-xs text-muted-foreground mt-1">{currentDisease.description}</p>
+          </div>
+          {/* PDF Export Button */}
+          <PDFExportButton 
+            type="disease"
+            data={currentDisease}
+            isDark={true}
+            variant="outline"
+            size="sm"
+          />
+        </div>
         <div className="mt-3 flex flex-wrap gap-1">
           {currentDisease.affectedOrgans?.map(org => (
             <Badge key={org} variant="outline" className="text-[10px]">
