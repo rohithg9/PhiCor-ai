@@ -553,12 +553,12 @@ const FoodAnalysisPage = () => {
     return null;
   }, [profile.weight, profile.height]);
   
-  // Cycle through facts while analyzing
+  // Cycle through facts while analyzing - slower for readability
   useEffect(() => {
     if (isAnalyzing || isAnalyzingImages) {
       const interval = setInterval(() => {
         setCurrentFactIndex(prev => (prev + 1) % foodFacts.length);
-      }, 4000); // Change fact every 4 seconds
+      }, 8000); // Change fact every 8 seconds for better readability
       return () => clearInterval(interval);
     }
   }, [isAnalyzing, isAnalyzingImages, foodFacts.length]);
