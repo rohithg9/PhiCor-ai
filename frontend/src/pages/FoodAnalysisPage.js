@@ -754,7 +754,7 @@ const FoodAnalysisPage = () => {
         // Found in database - instant results!
         setAnalysisResult(dbData.analysis);
         setIsAnalyzing(false);
-        toast.success('PhiCor analysis complete (from database)');
+        // Silently complete - no toast needed for database results
         return;
       }
       
