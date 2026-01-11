@@ -1751,6 +1751,14 @@ const DrugInfoView = ({ drug }) => {
               <Badge variant="outline">{drug.category}</Badge>
             </div>
           </div>
+          {/* PDF Export Button */}
+          <PDFExportButton 
+            type="drug"
+            data={drug}
+            isDark={true}
+            variant="outline"
+            size="sm"
+          />
         </div>
       </div>
       
