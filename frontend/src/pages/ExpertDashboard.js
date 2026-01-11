@@ -2721,7 +2721,7 @@ export default function ExpertDashboard() {
                                     <p className="text-sm text-muted-foreground mb-3">{model.description}</p>
                                     
                                     {/* Variables Table */}
-                                    {model.variables && model.variables.length > 0 && (
+                                    {model.variables && Array.isArray(model.variables) && model.variables.length > 0 && (
                                       <div className="mb-3">
                                         <h5 className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1">
                                           <FileText className="w-3 h-3" /> VARIABLES & PARAMETERS
@@ -2739,6 +2739,33 @@ export default function ExpertDashboard() {
                                               )}
                                             </div>
                                           ))}
+                                        </div>
+                                      </div>
+                                    )}
+                                    {/* Variables as Object/String fallback */}
+                                    {model.variables && !Array.isArray(model.variables) && (
+                                      <div className="mb-3">
+                                        <h5 className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1">
+                                          <FileText className="w-3 h-3" /> VARIABLES & PARAMETERS
+                                        </h5>
+                                        <div className="grid gap-2">
+                                          {typeof model.variables === 'string' ? (
+                                            <div className="text-sm bg-muted/30 px-3 py-2 rounded text-muted-foreground">
+                                              {model.variables}
+                                            </div>
+                                          ) : (
+                                            Object.entries(model.variables).slice(0, 6).map(([key, value], i) => (
+                                              <div key={i} className="flex items-center gap-3 text-sm bg-muted/30 px-3 py-2 rounded">
+                                                <code className="font-mono text-orange-500 font-bold min-w-[60px]">{key}</code>
+                                                <span className="flex-1">
+                                                  {typeof value === 'object' ? (value.description || value.name || JSON.stringify(value)) : value}
+                                                </span>
+                                                {typeof value === 'object' && value.unit && (
+                                                  <span className="text-muted-foreground">[{value.unit}]</span>
+                                                )}
+                                              </div>
+                                            ))
+                                          )}
                                         </div>
                                       </div>
                                     )}
