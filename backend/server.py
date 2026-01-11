@@ -8761,9 +8761,21 @@ async def analyze_food_from_database(request: Dict[str, Any] = Body(...)):
                     except:
                         pass
                 
-                # Update amount description to reflect serving
-                if param.get("amount") and "100g" in str(param.get("amount", "")):
-                    param["amount"] = str(param["amount"]).replace("100g", serving_text)
+                # Scale the nutrient amount to reflect serving size
+                if param.get("amount"):
+                    amount_str = str(param["amount"])
+                    try:
+                        import re
+                        # Match patterns like "422.0 mg", "3.1 g", "0.4 mg"
+                        amount_match = re.match(r'(\d+(?:\.\d+)?)\s*(mg|g|mcg|IU|µg|ug)', amount_str)
+                        if amount_match:
+                            original_amount = float(amount_match.group(1))
+                            unit = amount_match.group(2)
+                            scaled_amount = round(original_amount * scale_factor, 1)
+                            param["amount"] = f"{scaled_amount} {unit}"
+                            param["amount_per_100g"] = f"{original_amount} {unit}"
+                    except:
+                        pass
             
             # Update summary to reflect serving size
             if "per 100g" in str(data.get("summary", "")).lower():
