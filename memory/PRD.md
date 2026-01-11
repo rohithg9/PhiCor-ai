@@ -79,7 +79,7 @@ PhiCor.ai is a unified, parameter-based health intelligence system that provides
 
 ### Future/Backlog
 - Enhanced Expert Knowledge Bank
-- More recipe coverage (currently ~25 dishes)
+- Expand predefined recipe coverage
 - Real-time parameter monitoring integration
 
 ## Test Credentials
