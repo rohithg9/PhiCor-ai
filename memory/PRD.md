@@ -20,25 +20,33 @@ PhiCor.ai is a unified, parameter-based health intelligence system that provides
 - **Backend**: FastAPI (Python) 
 - **Frontend**: React
 - **Database**: MongoDB
-- **AI Integration**: OpenAI GPT-4o via Emergent LLM Key (for foods not in database)
+- **AI Integration**: OpenAI GPT-4o via Emergent LLM Key (silent ingredient breakdown for unknown dishes)
 
 ## What's Been Implemented
 
-### January 11, 2025 - P0 Features Complete
-- **Ingredient Breakdown for Complex Foods**
-  - Created RECIPE_DATABASE with ~25 complex dishes mapped to ingredients
-  - Recipes include: Chicken Tikka Masala, Butter Chicken, Pasta Carbonara, Spaghetti Bolognese, Pad Thai, Chicken Biryani, etc.
-  - `find_recipe()` function detects complex dishes
-  - Recipe analysis fetches each ingredient from DB and aggregates nutrients + parameter effects
-  - Frontend displays "Ingredient Breakdown" section with primary/secondary ingredients
-  - Shows DB match status, spices/seasonings, and per-ingredient calorie contributions
+### January 11, 2025 - Major Feature Update
 
-- **Universal Quantification**
-  - Created `DEFAULT_PARAMETER_EFFECTS` data structure with baseline values for ~40 parameters
-  - `calculate_universal_quantified_change()` function ensures every parameter gets a numerical value
-  - All parameters now show specific +/- numerical values (e.g., -0.5 mmHg, +2.1 mg/dL)
-  - Eliminated all generic labels like "minimal"
-  - Test suite: 20/20 tests passing
+#### Smart International Dish Analysis
+- **AI-Powered Ingredient Breakdown**: ANY dish from ANY cuisine worldwide is now supported
+- System silently uses AI to identify dish components, then analyzes each ingredient from the database
+- Works for: Ethiopian (Doro Wat), Japanese (Tonkotsu Ramen), Middle Eastern (Falafel Wrap), etc.
+- No "AI" or "not in database" messages shown to users - seamless experience
+
+#### P0 Features Complete
+- **Ingredient Breakdown for Complex Foods** ✅
+  - Predefined RECIPE_DATABASE with ~25 common dishes
+  - AI fallback for any dish not in predefined recipes
+  - Shows primary/secondary ingredients with DB match status
+  - Aggregated nutrients and parameter effects from all ingredients
+
+- **Universal Quantification** ✅
+  - `DEFAULT_PARAMETER_EFFECTS` with baseline values for ~40 parameters
+  - ALL parameters show +/- numerical values (e.g., -0.5 mmHg, +2.1 mg/dL)
+  - No more generic labels like "minimal"
+
+- **Removed AI Mentions from UI** ✅
+  - No toast messages about "AI analysis" or "not in database"
+  - Clean, seamless user experience
 
 ### Previous Session - UI/UX Overhaul
 - Resolved all landing page stat counter bugs
