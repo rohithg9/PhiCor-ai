@@ -20,6 +20,7 @@ import { Textarea } from '../components/ui/textarea';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../components/ui/collapsible';
 import { toast } from 'sonner';
 import FeatureNav from '../components/FeatureNav';
+import PDFExportButton from '../components/PDFExportButton';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
