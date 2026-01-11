@@ -1534,7 +1534,12 @@ Snacks: Apple, almonds, green tea"
                         <PDFExportButton 
                           type="food"
                           data={analysisResult}
-                          patientProfile={healthProfile}
+                          patientProfile={{
+                            height: profile.height,
+                            weight: profile.weight,
+                            age: profile.age,
+                            bmi: profile.weight && profile.height ? (profile.weight / Math.pow(profile.height / 100, 2)) : null
+                          }}
                           isDark={isDark}
                           variant="outline"
                           size="sm"
