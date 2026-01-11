@@ -8158,6 +8158,192 @@ async def search_foods(q: str, limit: int = 20):
         logger.error(f"Error searching foods: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# Helper function to determine smart serving sizes based on food type
+def get_smart_serving_size(food_name: str, food_data: dict = None) -> tuple:
+    """
+    Returns (serving_text, serving_grams, serving_unit) based on food type.
+    Uses contextually appropriate units: ml for beverages, pieces for fruits, portions for meals.
+    """
+    name_lower = food_name.lower()
+    
+    # Check if food has its own serving data
+    if food_data:
+        stored_serving = food_data.get("serving_size", "")
+        stored_grams = food_data.get("serving_size_g")
+        if stored_serving and stored_grams and stored_grams != 100:
+            return (stored_serving, stored_grams, "g")
+    
+    # Beverages - use ml
+    beverages = {
+        'coconut water': ('1 glass (250ml)', 250, 'ml'),
+        'coconut milk': ('1 cup (240ml)', 240, 'ml'),
+        'orange juice': ('1 glass (250ml)', 250, 'ml'),
+        'apple juice': ('1 glass (250ml)', 250, 'ml'),
+        'milk': ('1 cup (240ml)', 240, 'ml'),
+        'almond milk': ('1 cup (240ml)', 240, 'ml'),
+        'oat milk': ('1 cup (240ml)', 240, 'ml'),
+        'soy milk': ('1 cup (240ml)', 240, 'ml'),
+        'coffee': ('1 cup (240ml)', 240, 'ml'),
+        'tea': ('1 cup (240ml)', 240, 'ml'),
+        'green tea': ('1 cup (240ml)', 240, 'ml'),
+        'smoothie': ('1 glass (350ml)', 350, 'ml'),
+        'water': ('1 glass (250ml)', 250, 'ml'),
+        'soda': ('1 can (330ml)', 330, 'ml'),
+        'beer': ('1 bottle (330ml)', 330, 'ml'),
+        'wine': ('1 glass (150ml)', 150, 'ml'),
+        'juice': ('1 glass (250ml)', 250, 'ml'),
+        'lemonade': ('1 glass (250ml)', 250, 'ml'),
+        'soup': ('1 bowl (250ml)', 250, 'ml'),
+        'broth': ('1 cup (240ml)', 240, 'ml'),
+    }
+    
+    # Fruits - use pieces/medium size
+    fruits = {
+        'apple': ('1 medium apple', 182, 'g'),
+        'banana': ('1 medium banana', 118, 'g'),
+        'orange': ('1 medium orange', 131, 'g'),
+        'avocado': ('½ medium avocado', 68, 'g'),
+        'mango': ('1 cup sliced', 165, 'g'),
+        'pineapple': ('1 cup chunks', 165, 'g'),
+        'strawberr': ('1 cup (8 berries)', 144, 'g'),
+        'blueberr': ('1 cup', 148, 'g'),
+        'grape': ('1 cup', 151, 'g'),
+        'watermelon': ('1 cup diced', 152, 'g'),
+        'peach': ('1 medium peach', 150, 'g'),
+        'pear': ('1 medium pear', 178, 'g'),
+        'kiwi': ('1 medium kiwi', 69, 'g'),
+        'cherry': ('1 cup', 138, 'g'),
+        'plum': ('1 medium plum', 66, 'g'),
+        'lemon': ('1 medium lemon', 58, 'g'),
+        'lime': ('1 medium lime', 44, 'g'),
+        'grapefruit': ('½ medium grapefruit', 123, 'g'),
+        'papaya': ('1 cup cubed', 145, 'g'),
+        'cantaloupe': ('1 cup cubed', 160, 'g'),
+        'honeydew': ('1 cup cubed', 177, 'g'),
+        'fig': ('1 medium fig', 50, 'g'),
+        'date': ('2 dates', 48, 'g'),
+        'prune': ('5 prunes', 42, 'g'),
+        'raisin': ('¼ cup', 41, 'g'),
+        'coconut': ('¼ cup shredded', 20, 'g'),
+    }
+    
+    # Vegetables - use cups or pieces
+    vegetables = {
+        'carrot': ('1 medium carrot', 61, 'g'),
+        'broccoli': ('1 cup florets', 91, 'g'),
+        'spinach': ('1 cup raw', 30, 'g'),
+        'kale': ('1 cup chopped', 67, 'g'),
+        'lettuce': ('1 cup shredded', 36, 'g'),
+        'tomato': ('1 medium tomato', 123, 'g'),
+        'cucumber': ('½ medium cucumber', 100, 'g'),
+        'pepper': ('1 medium pepper', 119, 'g'),
+        'onion': ('½ medium onion', 55, 'g'),
+        'garlic': ('2 cloves', 6, 'g'),
+        'potato': ('1 medium potato', 150, 'g'),
+        'sweet potato': ('1 medium', 130, 'g'),
+        'corn': ('1 ear', 90, 'g'),
+        'celery': ('2 stalks', 80, 'g'),
+        'asparagus': ('6 spears', 90, 'g'),
+        'zucchini': ('1 medium', 196, 'g'),
+        'eggplant': ('1 cup cubed', 82, 'g'),
+        'mushroom': ('1 cup sliced', 70, 'g'),
+        'cabbage': ('1 cup shredded', 89, 'g'),
+        'cauliflower': ('1 cup florets', 100, 'g'),
+        'peas': ('½ cup', 80, 'g'),
+        'beans': ('½ cup cooked', 90, 'g'),
+        'lentils': ('½ cup cooked', 100, 'g'),
+    }
+    
+    # Proteins - use portions
+    proteins = {
+        'chicken': ('3 oz (palm-sized)', 85, 'g'),
+        'beef': ('3 oz (palm-sized)', 85, 'g'),
+        'pork': ('3 oz (palm-sized)', 85, 'g'),
+        'fish': ('3 oz fillet', 85, 'g'),
+        'salmon': ('3 oz fillet', 85, 'g'),
+        'tuna': ('3 oz', 85, 'g'),
+        'shrimp': ('6 large shrimp', 84, 'g'),
+        'egg': ('1 large egg', 50, 'g'),
+        'tofu': ('½ cup cubed', 126, 'g'),
+        'turkey': ('3 oz (palm-sized)', 85, 'g'),
+        'lamb': ('3 oz (palm-sized)', 85, 'g'),
+    }
+    
+    # Grains and starches
+    grains = {
+        'rice': ('1 cup cooked', 158, 'g'),
+        'pasta': ('1 cup cooked', 140, 'g'),
+        'bread': ('1 slice', 30, 'g'),
+        'oatmeal': ('1 cup cooked', 234, 'g'),
+        'oats': ('½ cup dry', 40, 'g'),
+        'quinoa': ('1 cup cooked', 185, 'g'),
+        'cereal': ('1 cup', 30, 'g'),
+        'noodle': ('1 cup cooked', 140, 'g'),
+    }
+    
+    # Dairy
+    dairy = {
+        'cheese': ('1 oz slice', 28, 'g'),
+        'yogurt': ('1 cup (170g)', 170, 'g'),
+        'butter': ('1 tbsp', 14, 'g'),
+        'cream': ('2 tbsp', 30, 'g'),
+        'ice cream': ('½ cup', 66, 'g'),
+    }
+    
+    # Nuts and seeds
+    nuts = {
+        'almond': ('1 oz (23 almonds)', 28, 'g'),
+        'walnut': ('1 oz (7 halves)', 28, 'g'),
+        'peanut': ('1 oz', 28, 'g'),
+        'cashew': ('1 oz (18 cashews)', 28, 'g'),
+        'pistachio': ('1 oz (49 pistachios)', 28, 'g'),
+        'hazelnut': ('1 oz (21 hazelnuts)', 28, 'g'),
+        'macadamia': ('1 oz (10-12 nuts)', 28, 'g'),
+        'pecan': ('1 oz (19 halves)', 28, 'g'),
+        'sunflower seed': ('¼ cup', 32, 'g'),
+        'pumpkin seed': ('¼ cup', 32, 'g'),
+        'chia seed': ('2 tbsp', 24, 'g'),
+        'flax seed': ('2 tbsp', 20, 'g'),
+    }
+    
+    # Oils and condiments
+    condiments = {
+        'olive oil': ('1 tbsp', 14, 'ml'),
+        'vegetable oil': ('1 tbsp', 14, 'ml'),
+        'coconut oil': ('1 tbsp', 14, 'ml'),
+        'honey': ('1 tbsp', 21, 'g'),
+        'maple syrup': ('1 tbsp', 20, 'ml'),
+        'ketchup': ('1 tbsp', 17, 'g'),
+        'mayonnaise': ('1 tbsp', 14, 'g'),
+        'mustard': ('1 tsp', 5, 'g'),
+        'soy sauce': ('1 tbsp', 16, 'ml'),
+        'vinegar': ('1 tbsp', 15, 'ml'),
+        'salt': ('¼ tsp', 1.5, 'g'),
+        'sugar': ('1 tsp', 4, 'g'),
+    }
+    
+    # Check each category
+    all_foods = {**beverages, **fruits, **vegetables, **proteins, **grains, **dairy, **nuts, **condiments}
+    
+    for key, value in all_foods.items():
+        if key in name_lower:
+            return value
+    
+    # Check for generic beverage indicators
+    if any(word in name_lower for word in ['juice', 'drink', 'water', 'milk', 'tea', 'coffee', 'smoothie', 'shake', 'soda', 'wine', 'beer', 'cocktail']):
+        return ('1 glass (250ml)', 250, 'ml')
+    
+    # Check for generic fruit indicators
+    if any(word in name_lower for word in ['berry', 'fruit', 'melon']):
+        return ('1 cup', 150, 'g')
+    
+    # Check for generic soup/liquid indicators
+    if any(word in name_lower for word in ['soup', 'broth', 'stew']):
+        return ('1 bowl (250ml)', 250, 'ml')
+    
+    # Default: 1 serving (~100g) for unknown foods
+    return ('1 serving', 100, 'g')
+
 @api_router.post("/food/analyze-from-db")
 async def analyze_food_from_database(request: Dict[str, Any] = Body(...)):
     """
