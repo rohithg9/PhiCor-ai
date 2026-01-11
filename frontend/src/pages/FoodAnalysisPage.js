@@ -1568,6 +1568,121 @@ Snacks: Apple, almonds, green tea"
                           )}
                         </div>
                         
+                        {/* INGREDIENT BREAKDOWN - For complex dishes/recipes */}
+                        {analysisResult.is_recipe && analysisResult.ingredient_breakdown && (
+                          <div className={`rounded-xl border p-4 lg:col-span-2 ${isDark ? 'bg-gradient-to-br from-gray-900/80 to-gray-900/50 border-gray-800' : 'bg-gradient-to-br from-blue-50/50 to-white border-gray-200'}`}>
+                            <div className="flex items-center justify-between mb-3">
+                              <h3 className={`text-sm font-semibold flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                <UtensilsCrossed className="w-4 h-4 text-blue-500" />
+                                Ingredient Breakdown
+                              </h3>
+                              <Badge className={`text-[9px] ${isDark ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-600'}`}>
+                                {analysisResult.ingredient_breakdown.total_ingredients} ingredients
+                              </Badge>
+                            </div>
+                            
+                            {/* Primary Ingredients */}
+                            <div className="mb-4">
+                              <div className={`text-[10px] font-semibold uppercase tracking-wide mb-2 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                                Primary Ingredients
+                              </div>
+                              <div className="space-y-2">
+                                {analysisResult.ingredient_breakdown.primary_ingredients?.map((ing, i) => (
+                                  <div key={i} className={`flex items-center justify-between p-2 rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-white border border-gray-100'}`}>
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-lg">
+                                        {ing.ingredient_name?.toLowerCase().includes('chicken') ? '🍗' :
+                                         ing.ingredient_name?.toLowerCase().includes('rice') ? '🍚' :
+                                         ing.ingredient_name?.toLowerCase().includes('tomato') ? '🍅' :
+                                         ing.ingredient_name?.toLowerCase().includes('cream') ? '🥛' :
+                                         ing.ingredient_name?.toLowerCase().includes('egg') ? '🥚' :
+                                         ing.ingredient_name?.toLowerCase().includes('beef') ? '🥩' :
+                                         ing.ingredient_name?.toLowerCase().includes('pasta') ? '🍝' :
+                                         ing.ingredient_name?.toLowerCase().includes('onion') ? '🧅' :
+                                         ing.ingredient_name?.toLowerCase().includes('garlic') ? '🧄' :
+                                         ing.ingredient_name?.toLowerCase().includes('spinach') ? '🥬' :
+                                         ing.ingredient_name?.toLowerCase().includes('fish') || ing.ingredient_name?.toLowerCase().includes('salmon') ? '🐟' :
+                                         ing.ingredient_name?.toLowerCase().includes('cheese') || ing.ingredient_name?.toLowerCase().includes('paneer') ? '🧀' :
+                                         '🥗'}
+                                      </span>
+                                      <div>
+                                        <span className={`text-xs font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                          {ing.ingredient_name}
+                                        </span>
+                                        {ing.matched_food && ing.found_in_db && (
+                                          <span className={`text-[9px] block ${isDark ? 'text-green-400' : 'text-green-600'}`}>
+                                            ✓ DB Match: {ing.matched_food.slice(0, 30)}
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <div className="text-right">
+                                      <span className={`text-xs font-mono ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                        {ing.amount_g}g
+                                      </span>
+                                      {ing.nutrients?.energy?.value > 0 && (
+                                        <span className={`text-[9px] block ${isDark ? 'text-orange-400' : 'text-orange-600'}`}>
+                                          {Math.round(ing.nutrients.energy?.value || ing.nutrients.calories?.value || 0)} kcal
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                            
+                            {/* Secondary Ingredients */}
+                            {analysisResult.ingredient_breakdown.secondary_ingredients?.length > 0 && (
+                              <div className="mb-3">
+                                <Collapsible>
+                                  <CollapsibleTrigger className="flex items-center gap-2 w-full">
+                                    <div className={`text-[10px] font-semibold uppercase tracking-wide ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                                      Secondary Ingredients ({analysisResult.ingredient_breakdown.secondary_ingredients.length})
+                                    </div>
+                                    <ChevronDown className={`w-3 h-3 ${isDark ? 'text-gray-500' : 'text-gray-400'}`} />
+                                  </CollapsibleTrigger>
+                                  <CollapsibleContent className="mt-2">
+                                    <div className="grid grid-cols-2 gap-2">
+                                      {analysisResult.ingredient_breakdown.secondary_ingredients.map((ing, i) => (
+                                        <div key={i} className={`p-2 rounded text-xs ${isDark ? 'bg-gray-800/30' : 'bg-gray-50'}`}>
+                                          <span className={`${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{ing.ingredient_name}</span>
+                                          <span className={`text-[9px] ml-1 font-mono ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                                            ({ing.amount_g}g)
+                                          </span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </CollapsibleContent>
+                                </Collapsible>
+                              </div>
+                            )}
+                            
+                            {/* Spices & Seasonings */}
+                            {analysisResult.ingredient_breakdown.spices_seasonings?.length > 0 && (
+                              <div className="mt-3 pt-3 border-t border-dashed border-gray-700/50">
+                                <div className={`text-[10px] font-semibold uppercase tracking-wide mb-2 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                                  🌶️ Spices & Seasonings
+                                </div>
+                                <div className="flex flex-wrap gap-1">
+                                  {analysisResult.ingredient_breakdown.spices_seasonings.map((spice, i) => (
+                                    <Badge key={i} variant="outline" className={`text-[9px] ${isDark ? 'border-yellow-800/50 text-yellow-400' : 'border-yellow-300 text-yellow-700'}`}>
+                                      {spice}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {/* Analysis note */}
+                            <div className={`mt-3 pt-3 border-t ${isDark ? 'border-gray-700/50' : 'border-gray-200'}`}>
+                              <div className={`text-[9px] flex items-center gap-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                                <Microscope className="w-3 h-3" />
+                                {analysisResult.ingredient_breakdown.ingredients_found_in_db} of {analysisResult.ingredient_breakdown.total_ingredients} ingredients analyzed from database
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        
                         {/* System Overview - Clickable cards with visual affordance */}
                         {analysisResult.organ_system_parameter_effects && (
                           <div className={`rounded-xl border p-4 lg:col-span-2 ${isDark ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'}`}>
