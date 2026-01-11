@@ -186,7 +186,8 @@ const ParameterCard = ({ param, isDark, compact = false }) => {
   
   // Format quantified change with sign and unit
   const formatQuantifiedChange = () => {
-    if (param.quantified_change === null || param.quantified_change === undefined) return null;
+    // Hide if null, undefined, or zero (minimal effect)
+    if (param.quantified_change === null || param.quantified_change === undefined || param.quantified_change === 0) return null;
     const sign = param.quantified_change > 0 ? '+' : '';
     return `${sign}${param.quantified_change} ${param.change_unit || ''}`.trim();
   };
