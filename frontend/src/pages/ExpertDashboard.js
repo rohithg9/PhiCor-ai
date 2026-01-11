@@ -3072,7 +3072,7 @@ export default function ExpertDashboard() {
               Edit Change Request
             </DialogTitle>
             <DialogDescription>
-              Update your pending change request before it's reviewed
+              Update your pending change request before it&apos;s reviewed
             </DialogDescription>
           </DialogHeader>
           
