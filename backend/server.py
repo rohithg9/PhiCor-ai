@@ -8746,18 +8746,18 @@ async def analyze_food_from_database(request: Dict[str, Any] = Body(...)):
                     "cholesterol_mg": round((nutrients.get("cholesterol", {}).get("value") or 0) * scale_factor, 1),
                 },
                 "per_100g": {
-                    # Calculate per 100g values if serving size is different
-                    "energy_kcal": round((nutrients.get("energy", {}).get("value") or nutrients.get("calories", {}).get("value") or 0) * 100 / serving_grams, 1) if serving_grams else None,
-                    "protein_g": round((nutrients.get("protein", {}).get("value") or 0) * 100 / serving_grams, 1) if serving_grams else None,
-                    "carbohydrates_g": round((nutrients.get("carbohydrates", {}).get("value") or 0) * 100 / serving_grams, 1) if serving_grams else None,
-                    "fat_total_g": round((nutrients.get("fat_total", {}).get("value") or nutrients.get("fat", {}).get("value") or 0) * 100 / serving_grams, 1) if serving_grams else None,
+                    # Original values per 100g for reference
+                    "energy_kcal": nutrients.get("energy", {}).get("value") or nutrients.get("calories", {}).get("value"),
+                    "protein_g": nutrients.get("protein", {}).get("value"),
+                    "carbohydrates_g": nutrients.get("carbohydrates", {}).get("value"),
+                    "fat_total_g": nutrients.get("fat_total", {}).get("value") or nutrients.get("fat", {}).get("value"),
                 },
                 "electrolytes": {
-                    "sodium_mg": nutrients.get("sodium", {}),
-                    "potassium_mg": nutrients.get("potassium", {}),
-                    "calcium_mg": nutrients.get("calcium", {}),
-                    "magnesium_mg": nutrients.get("magnesium", {}),
-                    "phosphorus_mg": nutrients.get("phosphorus", {}),
+                    "sodium_mg": round((nutrients.get("sodium", {}).get("value") or 0) * scale_factor, 1) if nutrients.get("sodium", {}).get("value") else nutrients.get("sodium", {}),
+                    "potassium_mg": round((nutrients.get("potassium", {}).get("value") or 0) * scale_factor, 1) if nutrients.get("potassium", {}).get("value") else nutrients.get("potassium", {}),
+                    "calcium_mg": round((nutrients.get("calcium", {}).get("value") or 0) * scale_factor, 1) if nutrients.get("calcium", {}).get("value") else nutrients.get("calcium", {}),
+                    "magnesium_mg": round((nutrients.get("magnesium", {}).get("value") or 0) * scale_factor, 1) if nutrients.get("magnesium", {}).get("value") else nutrients.get("magnesium", {}),
+                    "phosphorus_mg": round((nutrients.get("phosphorus", {}).get("value") or 0) * scale_factor, 1) if nutrients.get("phosphorus", {}).get("value") else nutrients.get("phosphorus", {}),
                 },
                 "vitamins": {k: v for k, v in nutrients.items() if k.startswith("vitamin_") or k in ["thiamin", "riboflavin", "niacin", "folate"]},
                 "trace_elements": {k: v for k, v in nutrients.items() if k in ["iron", "zinc", "selenium", "iodine", "copper", "manganese", "chromium", "molybdenum"]}
