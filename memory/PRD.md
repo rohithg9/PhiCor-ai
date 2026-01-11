@@ -62,12 +62,26 @@ PhiCor.ai is a unified, parameter-based health intelligence system that provides
 - **nutrients**: Nutrient definitions with parameter_effects, disease_interactions, drug_interactions
 
 ## Key Files Added/Modified
-- `/app/frontend/src/utils/pdfExport.js` - PDF generation utilities for all report types
-- `/app/frontend/src/components/PDFExportButton.jsx` - Reusable export button component
+- `/app/frontend/src/utils/pdfExport.js` - Comprehensive PDF generation with ALL data:
+  - Food: Nutritional profile, ingredient breakdown, ALL organ system parameters, disease & drug interactions
+  - Drug: Drug info, mechanism, indications, contraindications, ALL parameter effects, side effects
+  - Diagnosis: Patient profile, clinical presentation, ALL differential diagnoses with probabilities, recommended workup
+  - Disease: Overview, ALL affected parameters, symptoms, treatments, affected organs
+- `/app/frontend/src/components/PDFExportButton.jsx` - Reusable export button with dropdown
 - `/app/frontend/src/pages/FoodAnalysisPage.js` - Added PDF export button
 - `/app/frontend/src/pages/DrugsPage.js` - Added PDF export to drug details
 - `/app/frontend/src/pages/DifferentialPage.js` - Added PDF export to diagnosis results
 - `/app/frontend/src/pages/DashboardMultiScale.js` - Added PDF export to disease view
+
+## PDF Report Contents
+Each PDF includes:
+- **Large PhiCor Logo** with brand colors
+- **Complete nutritional/clinical data** from ALL tabs
+- **ALL organ system parameter effects** with quantified +/- values
+- **Patient profile** (height, weight, age, BMI)
+- **Multi-page support** with automatic page breaks
+- **Professional formatting** matching website design
+- **Footer with disclaimer** on every page
 
 ## Prioritized Backlog
 
