@@ -8707,47 +8707,43 @@ async def analyze_food_from_database(request: Dict[str, Any] = Body(...)):
         # Clamp score
         health_score = max(20, min(100, health_score))
         
-        # Build serving info - human-readable format
-        # Try to get numeric serving size from serving_size_g field first
-        serving_grams = food.get("serving_size_g")
-        if not serving_grams or not isinstance(serving_grams, (int, float)):
-            # Fallback: try to extract from serving_size string
-            serving_size_str = str(food.get("serving_size", "100g"))
-            try:
-                # Extract number followed by 'g' from string like "1 cup (250g)" or "200g"
-                import re
-                gram_match = re.search(r'(\d+(?:\.\d+)?)\s*g\b', serving_size_str)
-                if gram_match:
-                    serving_grams = float(gram_match.group(1))
-                else:
-                    serving_grams = 100  # Default to 100g
-            except:
-                serving_grams = 100
+        # Build serving info using smart serving sizes
+        # Use contextually appropriate units: ml for beverages, pieces for fruits, etc.
+        smart_serving = get_smart_serving_size(food.get("name", ""), food)
+        serving_text = smart_serving[0]
+        serving_amount = smart_serving[1]
+        serving_unit = smart_serving[2]
         
-        serving_description = food.get("description", "")
-        serving_text = food.get("serving_size", "1 serving") if isinstance(food.get("serving_size"), str) else "1 serving"
+        # Calculate nutrient scaling factor (from 100g reference to actual serving)
+        # Most USDA data is per 100g, so we scale accordingly
+        scale_factor = serving_amount / 100.0 if serving_unit == 'g' else serving_amount / 100.0
         
-        # Build response
+        # For liquids, assume density close to water (1ml ≈ 1g for most beverages)
+        if serving_unit == 'ml':
+            scale_factor = serving_amount / 100.0  # ml to 100g reference
+        
+        # Build response with scaled nutrients
         analysis = {
             "product_name": food.get("name"),
             "product_type": food.get("category", "food"),
             "description": food.get("description"),
             "serving_size": serving_text,
-            "serving_size_g": serving_grams,
-            "serving_display": f"{serving_text} ({serving_grams}g)",
+            "serving_size_g": serving_amount if serving_unit == 'g' else serving_amount,  # Keep numeric for calculations
+            "serving_unit": serving_unit,
+            "serving_display": f"{serving_text}" if serving_unit in ['ml', 'g'] and serving_text.endswith(')') else f"{serving_text} ({serving_amount}{serving_unit})",
             "data_source": "PhiCor Database",
             "ai_generated": False,
             
             "complete_nutritional_profile": {
                 "macronutrients": {
-                    "energy_kcal": nutrients.get("energy", {}).get("value") or nutrients.get("calories", {}).get("value"),
-                    "protein_g": nutrients.get("protein", {}).get("value"),
-                    "carbohydrates_g": nutrients.get("carbohydrates", {}).get("value"),
-                    "fiber_g": nutrients.get("fiber", {}).get("value"),
-                    "sugars_g": nutrients.get("sugars", {}).get("value") or nutrients.get("sugar", {}).get("value"),
-                    "fat_total_g": nutrients.get("fat_total", {}).get("value") or nutrients.get("fat", {}).get("value"),
-                    "fat_saturated_g": nutrients.get("fat_saturated", {}).get("value"),
-                    "cholesterol_mg": nutrients.get("cholesterol", {}).get("value"),
+                    "energy_kcal": round((nutrients.get("energy", {}).get("value") or nutrients.get("calories", {}).get("value") or 0) * scale_factor, 1),
+                    "protein_g": round((nutrients.get("protein", {}).get("value") or 0) * scale_factor, 1),
+                    "carbohydrates_g": round((nutrients.get("carbohydrates", {}).get("value") or 0) * scale_factor, 1),
+                    "fiber_g": round((nutrients.get("fiber", {}).get("value") or 0) * scale_factor, 1),
+                    "sugars_g": round((nutrients.get("sugars", {}).get("value") or nutrients.get("sugar", {}).get("value") or 0) * scale_factor, 1),
+                    "fat_total_g": round((nutrients.get("fat_total", {}).get("value") or nutrients.get("fat", {}).get("value") or 0) * scale_factor, 1),
+                    "fat_saturated_g": round((nutrients.get("fat_saturated", {}).get("value") or 0) * scale_factor, 1),
+                    "cholesterol_mg": round((nutrients.get("cholesterol", {}).get("value") or 0) * scale_factor, 1),
                 },
                 "per_100g": {
                     # Calculate per 100g values if serving size is different
