@@ -31,6 +31,7 @@ import TreatmentGuidelinesPanel from '../components/TreatmentGuidelinesPanel';
 import DiseaseDetailPanel from '../components/DiseaseDetailPanel';
 import FeatureNav from '../components/FeatureNav';
 import RegionSelector from '../components/RegionSelector';
+import PDFExportButton from '../components/PDFExportButton';
 import 'katex/dist/katex.min.css';
 import { BlockMath, InlineMath } from 'react-katex';
 
