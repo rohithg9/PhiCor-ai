@@ -1301,7 +1301,16 @@ Snacks: Apple, almonds, green tea"
             {analysisResult && (
               <div className={`px-3 sm:px-4 py-2 border-b overflow-x-auto ${isDark ? 'bg-gray-900/20 border-gray-800' : 'bg-gray-50 border-gray-200'}`}>
                 <div className="flex gap-1">
-                  {ANALYSIS_SCALES.map(scale => (
+                  {ANALYSIS_SCALES
+                    .filter(scale => {
+                      // Hide "items" tab if no multi-food data (individual_foods or combined_meal_analysis)
+                      if (scale.id === 'items') {
+                        return analysisResult.individual_foods?.length > 0 || 
+                               analysisResult.combined_meal_analysis;
+                      }
+                      return true;
+                    })
+                    .map(scale => (
                     <button
                       key={scale.id}
                       onClick={() => setActiveScale(scale.id)}
