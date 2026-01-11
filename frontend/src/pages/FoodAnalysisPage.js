@@ -400,6 +400,42 @@ const FoodAnalysisPage = () => {
   const [analysisResult, setAnalysisResult] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [activeScale, setActiveScale] = useState('overview');
+  const [currentFactIndex, setCurrentFactIndex] = useState(0);
+  const abortControllerRef = useRef(null);
+  
+  // "Did You Know?" facts about food and body parameters
+  const foodFacts = useMemo(() => [
+    { fact: "Potassium in bananas can lower blood pressure by 2-4 mmHg", organ: "🫀 Cardiovascular", nutrient: "Potassium" },
+    { fact: "Spinach contains nitrates that dilate blood vessels, improving oxygen delivery by 5%", organ: "💪 Muscular", nutrient: "Nitrates" },
+    { fact: "Omega-3 fatty acids in salmon reduce inflammation markers (CRP) by up to 30%", organ: "🛡️ Immune", nutrient: "Omega-3" },
+    { fact: "Fiber in oats can lower LDL cholesterol by 5-10% over 6 weeks", organ: "🫀 Cardiovascular", nutrient: "Fiber" },
+    { fact: "Vitamin D from eggs supports calcium absorption, improving bone density", organ: "🦴 Skeletal", nutrient: "Vitamin D" },
+    { fact: "Lycopene in tomatoes crosses the blood-brain barrier, protecting neurons", organ: "🧠 Neurological", nutrient: "Lycopene" },
+    { fact: "Turmeric's curcumin is 10x more bioavailable when combined with black pepper", organ: "🛡️ Immune", nutrient: "Curcumin" },
+    { fact: "Blueberry anthocyanins can improve memory recall by 20% in clinical trials", organ: "🧠 Neurological", nutrient: "Anthocyanins" },
+    { fact: "Garlic's allicin can reduce systolic blood pressure by 5-8 mmHg", organ: "🫀 Cardiovascular", nutrient: "Allicin" },
+    { fact: "Green tea catechins increase metabolic rate by 4% over 24 hours", organ: "⚡ Metabolic", nutrient: "Catechins" },
+    { fact: "Magnesium in dark chocolate improves insulin sensitivity by 15%", organ: "🔬 Endocrine", nutrient: "Magnesium" },
+    { fact: "Sulforaphane in broccoli activates 200+ protective genes in cells", organ: "🔬 Cellular", nutrient: "Sulforaphane" },
+    { fact: "Probiotics in yogurt increase serotonin production in the gut", organ: "🧠 Neurological", nutrient: "Probiotics" },
+    { fact: "Beetroot nitrates improve exercise endurance by 16% in athletes", organ: "💪 Muscular", nutrient: "Nitrates" },
+    { fact: "Vitamin C from oranges increases iron absorption by 67%", organ: "🩸 Hematological", nutrient: "Vitamin C" },
+    { fact: "Walnuts contain ALA omega-3 that reduces triglycerides by 10%", organ: "🫀 Cardiovascular", nutrient: "ALA" },
+    { fact: "Ginger compounds can reduce nausea intensity by 40% within 24 hours", organ: "🫃 Gastrointestinal", nutrient: "Gingerols" },
+    { fact: "Quercetin in apples can reduce allergy symptoms by blocking histamine", organ: "🛡️ Immune", nutrient: "Quercetin" },
+    { fact: "Vitamin K in kale activates proteins essential for blood clotting", organ: "🩸 Hematological", nutrient: "Vitamin K" },
+    { fact: "Selenium in Brazil nuts supports thyroid hormone conversion (T4→T3)", organ: "🔬 Endocrine", nutrient: "Selenium" },
+    { fact: "Choline in eggs is essential for liver fat metabolism", organ: "🔶 Hepatic", nutrient: "Choline" },
+    { fact: "Capsaicin in peppers can increase calorie burning by 50 kcal/day", organ: "⚡ Metabolic", nutrient: "Capsaicin" },
+    { fact: "Zinc in pumpkin seeds supports over 300 enzymatic reactions", organ: "🔬 Cellular", nutrient: "Zinc" },
+    { fact: "Resveratrol in grapes activates longevity genes (sirtuins)", organ: "🔬 Cellular", nutrient: "Resveratrol" },
+    { fact: "Potassium:Sodium ratio is more important than absolute sodium intake", organ: "🫘 Renal", nutrient: "Electrolytes" },
+    { fact: "Tryptophan in turkey is a precursor to melatonin (sleep hormone)", organ: "🧠 Neurological", nutrient: "Tryptophan" },
+    { fact: "Beta-glucans in mushrooms enhance immune cell activity by 40%", organ: "🛡️ Immune", nutrient: "Beta-glucans" },
+    { fact: "Folate in leafy greens reduces homocysteine (cardiovascular risk marker)", organ: "🫀 Cardiovascular", nutrient: "Folate" },
+    { fact: "Chromium in whole grains improves insulin receptor sensitivity", organ: "🔬 Endocrine", nutrient: "Chromium" },
+    { fact: "CoQ10 in organ meats is essential for mitochondrial ATP production", organ: "⚡ Metabolic", nutrient: "CoQ10" },
+  ], []);
   
   // Panel state
   const [showPanel, setShowPanel] = useState(false);
