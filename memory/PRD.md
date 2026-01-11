@@ -63,9 +63,8 @@ PhiCor.ai is a unified, parameter-based health intelligence system that provides
 - **nutrients**: Nutrient definitions with parameter_effects, disease_interactions, drug_interactions
 
 ## Key API Endpoints
-- `POST /api/food/analyze-from-db` - Database-driven food analysis (with recipe breakdown)
-- `POST /api/food/analyze-product` - AI-powered analysis for foods not in DB
-- `POST /api/food/analyze-dish` - AI-powered complex dish analysis
+- `POST /api/food/analyze-from-db` - Database-driven food analysis with smart ingredient breakdown
+- `POST /api/food/analyze-product` - AI-powered analysis fallback
 - `GET /api/platform/stats` - Platform statistics
 
 ## Prioritized Backlog
