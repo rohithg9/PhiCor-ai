@@ -1323,20 +1323,82 @@ Snacks: Apple, almonds, green tea"
             <ScrollArea className="flex-1">
               <div className="p-3 sm:p-4">
                 {(isAnalyzing || isAnalyzingImages) ? (
-                  <div className={`rounded-xl border p-8 sm:p-12 text-center ${isDark ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'}`}>
-                    <div className="w-16 h-16 mx-auto mb-4 relative">
-                      <div className="w-16 h-16 rounded-full border-4 border-green-500/20 border-t-green-500 animate-spin" style={{ animationDuration: '1s', animationTimingFunction: 'linear' }} />
-                      <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-xl font-bold text-green-500">Π</span>
+                  <div className={`rounded-xl border p-6 sm:p-8 ${isDark ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'}`}>
+                    {/* Spinner and Title */}
+                    <div className="text-center mb-6">
+                      <div className="w-16 h-16 mx-auto mb-4 relative">
+                        <div className="w-16 h-16 rounded-full border-4 border-green-500/20 border-t-green-500 animate-spin" style={{ animationDuration: '1s', animationTimingFunction: 'linear' }} />
+                        <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-xl font-bold text-green-500">Π</span>
+                      </div>
+                      <h3 className={`text-base sm:text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                        PhiCor Deep Analysis
+                      </h3>
+                      <p className={`text-xs sm:text-sm mt-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                        {isAnalyzingImages ? 'Analyzing food images with AI vision...' : 'Analyzing nutrients at molecular, cellular & organ levels...'}
+                      </p>
                     </div>
-                    <h3 className={`text-base sm:text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                      PhiCor Deep Analysis
-                    </h3>
-                    <p className={`text-xs sm:text-sm mt-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
-                      {isAnalyzingImages ? 'Analyzing food images with AI vision...' : 'Analyzing nutrients at molecular, cellular & organ levels...'}
-                    </p>
-                    <p className={`text-[10px] mt-3 ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
-                      ⏱️ This may take 30-60 seconds for comprehensive analysis
-                    </p>
+                    
+                    {/* Did You Know? Fact Card */}
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={currentFactIndex}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.5 }}
+                        className={`rounded-lg p-4 mb-4 ${isDark ? 'bg-green-900/20 border border-green-500/20' : 'bg-green-50 border border-green-200'}`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="text-2xl">{foodFacts[currentFactIndex]?.organ.split(' ')[0]}</div>
+                          <div className="flex-1">
+                            <p className={`text-xs font-medium mb-1 ${isDark ? 'text-green-400' : 'text-green-700'}`}>
+                              💡 Did you know?
+                            </p>
+                            <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                              {foodFacts[currentFactIndex]?.fact}
+                            </p>
+                            <div className="flex gap-2 mt-2">
+                              <Badge variant="outline" className={`text-[10px] ${isDark ? 'border-green-500/30 text-green-400' : 'border-green-300 text-green-600'}`}>
+                                {foodFacts[currentFactIndex]?.organ}
+                              </Badge>
+                              <Badge variant="outline" className={`text-[10px] ${isDark ? 'border-purple-500/30 text-purple-400' : 'border-purple-300 text-purple-600'}`}>
+                                {foodFacts[currentFactIndex]?.nutrient}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    </AnimatePresence>
+                    
+                    {/* Progress dots */}
+                    <div className="flex justify-center gap-1 mb-4">
+                      {[0, 1, 2, 3, 4].map((i) => (
+                        <div 
+                          key={i} 
+                          className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                            (currentFactIndex % 5) === i 
+                              ? 'bg-green-500 w-4' 
+                              : isDark ? 'bg-gray-700' : 'bg-gray-300'
+                          }`} 
+                        />
+                      ))}
+                    </div>
+                    
+                    {/* Cancel Button */}
+                    <div className="text-center">
+                      <p className={`text-[10px] mb-3 ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
+                        ⏱️ Analysis typically takes 5-30 seconds
+                      </p>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={cancelAnalysis}
+                        className={`text-xs ${isDark ? 'border-gray-700 hover:bg-gray-800' : 'border-gray-300 hover:bg-gray-100'}`}
+                      >
+                        <X className="w-3 h-3 mr-1" />
+                        Cancel Analysis
+                      </Button>
+                    </div>
                   </div>
                 ) : analysisResult ? (
                   <div className="space-y-4">
