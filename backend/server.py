@@ -8652,16 +8652,27 @@ async def analyze_food_from_database(request: Dict[str, Any] = Body(...)):
                         elif quantified_change and direction == "increase":
                             quantified_change = abs(quantified_change)
                     
+                    # Get parameter reference data for normal ranges
+                    param_ref = get_parameter_reference(effect.get("parameter", ""))
+                    
                     organ_system_effects[organ_system]["parameters_affected"].append({
                         "parameter": effect.get("parameter"),
+                        "parameter_name": param_ref.get("name") if param_ref else effect.get("parameter", "").replace("_", " ").title(),
                         "direction": effect.get("direction"),
                         "mechanism": effect.get("mechanism"),
                         "magnitude": magnitude,
                         "quantified_change": quantified_change,
-                        "change_unit": change_unit,
+                        "change_unit": change_unit or (param_ref.get("unit") if param_ref else None),
                         "from_nutrient": nutrient_data.get("name"),
                         "amount": f"{amount} {nutrient_value.get('unit', '')}",
-                        "percent_dv": percent_dv
+                        "percent_dv": percent_dv,
+                        # Reference data for mathematical precision
+                        "reference": {
+                            "normal_range": param_ref.get("normal_range") if param_ref else None,
+                            "unit": param_ref.get("unit") if param_ref else change_unit,
+                            "normal_low": param_ref.get("normal", (None, None))[0] if param_ref else None,
+                            "normal_high": param_ref.get("normal", (None, None))[1] if param_ref else None,
+                        } if param_ref else None
                     })
                     
                     # Track contributing nutrients
