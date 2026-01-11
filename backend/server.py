@@ -9027,25 +9027,16 @@ async def analyze_food_from_database(request: Dict[str, Any] = Body(...)):
                     }
                 
                 for effect in effects:
-                    # Determine magnitude based on percent DV
-                    magnitude = "minimal"
-                    if percent_dv:
-                        if percent_dv >= 50:
-                            magnitude = "significant"
-                        elif percent_dv >= 20:
-                            magnitude = "moderate"
-                        elif percent_dv >= 10:
-                            magnitude = "mild"
-                    
-                    # Calculate quantified parameter change
+                    # Calculate quantified parameter change - UNIVERSAL QUANTIFICATION
+                    # Every parameter MUST have a numerical +/- value
                     quantified_change = None
                     change_unit = None
                     effect_magnitude_text = effect.get("magnitude", "")  # e.g., "2-4 mmHg per 1000mg increase"
+                    param_name = effect.get("parameter", "").lower()
+                    direction = effect.get("direction", "")
                     
-                    # Parse magnitude from nutrient database if available
+                    # STEP 1: Try to parse from nutrient database magnitude text
                     if effect_magnitude_text and amount > 0:
-                        # Try to extract numerical change from magnitude text
-                        # Examples: "2-4 mmHg per 1000mg increase", "10-40% increase"
                         import re
                         
                         # Pattern for "X-Y unit per Zmg" format
@@ -9058,12 +9049,10 @@ async def analyze_food_from_database(request: Dict[str, Any] = Body(...)):
                             change_unit = per_match.group(3)
                             per_amount = float(per_match.group(4))
                             
-                            # Calculate change based on actual amount
                             avg_change = (min_change + max_change) / 2
-                            quantified_change = round((amount / per_amount) * avg_change, 1)
+                            quantified_change = round((amount / per_amount) * avg_change, 2)
                             
-                            # Apply direction
-                            if effect.get("direction") == "decrease":
+                            if direction == "decrease":
                                 quantified_change = -quantified_change
                         else:
                             # Pattern for simple percentage or direct value
@@ -9075,58 +9064,85 @@ async def analyze_food_from_database(request: Dict[str, Any] = Body(...)):
                                 max_change = float(simple_match.group(2)) if simple_match.group(2) else min_change
                                 change_unit = simple_match.group(3)
                                 
-                                # Scale by percent DV if available
                                 if percent_dv:
                                     avg_change = (min_change + max_change) / 2
-                                    quantified_change = round((percent_dv / 100) * avg_change, 1)
+                                    quantified_change = round((percent_dv / 100) * avg_change, 2)
                                     
-                                    if effect.get("direction") == "decrease":
+                                    if direction == "decrease":
                                         quantified_change = -quantified_change
                     
-                    # Estimate change for common parameters if not calculated
-                    if quantified_change is None and percent_dv and percent_dv >= 5:
-                        param_name = effect.get("parameter", "").lower()
-                        direction = effect.get("direction", "")
+                    # STEP 2: Specific nutrient-parameter calculations
+                    if quantified_change is None and (percent_dv or amount > 0):
+                        effective_percent = percent_dv if percent_dv else (amount / 10)  # Fallback scaling
                         
-                        # Estimated effects per serving based on nutrient contribution
                         if "blood_pressure" in param_name or param_name in ["bp_systolic", "bp_diastolic"]:
-                            # Estimate based on potassium/sodium effect on BP
                             if nutrient_id == "potassium":
-                                quantified_change = round(-0.5 * (percent_dv / 10), 1)  # ~0.5 mmHg per 10% DV potassium
+                                quantified_change = round(-0.5 * (effective_percent / 10), 2)
                                 change_unit = "mmHg"
                             elif nutrient_id == "sodium":
-                                quantified_change = round(0.3 * (percent_dv / 10), 1)  # ~0.3 mmHg per 10% DV sodium
+                                quantified_change = round(0.3 * (effective_percent / 10), 2)
                                 change_unit = "mmHg"
                         elif "glucose" in param_name or "blood_sugar" in param_name:
                             if nutrient_id in ["sugar", "sugars", "carbohydrates"]:
-                                quantified_change = round(2 * (percent_dv / 10), 1)  # ~2 mg/dL per 10% DV
+                                quantified_change = round(2.0 * (effective_percent / 10), 2)
                                 change_unit = "mg/dL"
-                        elif "cholesterol" in param_name and "serum" not in param_name:
+                        elif "cholesterol" in param_name:
                             if nutrient_id == "cholesterol":
-                                quantified_change = round(1.5 * (percent_dv / 10), 1)
+                                quantified_change = round(1.5 * (effective_percent / 10), 2)
+                                change_unit = "mg/dL"
+                            elif nutrient_id in ["fiber", "fat_saturated"]:
+                                factor = -0.5 if nutrient_id == "fiber" else 0.8
+                                quantified_change = round(factor * (effective_percent / 10), 2)
                                 change_unit = "mg/dL"
                         elif param_name == "serum_potassium":
                             if nutrient_id == "potassium":
-                                quantified_change = round(0.05 * (percent_dv / 10), 2)  # ~0.05 mEq/L per 10% DV
+                                quantified_change = round(0.05 * (effective_percent / 10), 3)
                                 change_unit = "mEq/L"
+                        elif param_name == "serum_sodium":
+                            if nutrient_id == "sodium":
+                                quantified_change = round(0.1 * (effective_percent / 10), 2)
+                                change_unit = "mEq/L"
+                        elif "iron" in param_name or "ferritin" in param_name:
+                            if nutrient_id == "iron":
+                                quantified_change = round(1.0 * (effective_percent / 10), 2)
+                                change_unit = "µg/dL" if "iron" in param_name else "ng/mL"
+                        elif "hemoglobin" in param_name:
+                            if nutrient_id in ["iron", "vitamin_b12", "folate"]:
+                                quantified_change = round(0.05 * (effective_percent / 10), 3)
+                                change_unit = "g/dL"
                         
-                        # Apply direction modifier
-                        if quantified_change and direction == "decrease":
-                            quantified_change = -abs(quantified_change)
-                        elif quantified_change and direction == "increase":
-                            quantified_change = abs(quantified_change)
+                        # Apply direction modifier if calculated
+                        if quantified_change is not None:
+                            if direction == "decrease":
+                                quantified_change = -abs(quantified_change)
+                            elif direction == "increase":
+                                quantified_change = abs(quantified_change)
+                    
+                    # STEP 3: UNIVERSAL FALLBACK - Always calculate a value
+                    # This ensures NO parameter ever shows "minimal" or similar text
+                    if quantified_change is None:
+                        quantified_change, change_unit = calculate_universal_quantified_change(
+                            param_name=param_name,
+                            direction=direction,
+                            percent_dv=percent_dv,
+                            nutrient_id=nutrient_id,
+                            nutrient_amount=amount
+                        )
                     
                     # Get parameter reference data for normal ranges
                     param_ref = get_parameter_reference(effect.get("parameter", ""))
                     
+                    # Use reference unit if change_unit not set
+                    if not change_unit and param_ref:
+                        change_unit = param_ref.get("unit")
+                    
                     organ_system_effects[organ_system]["parameters_affected"].append({
                         "parameter": effect.get("parameter"),
                         "parameter_name": param_ref.get("name") if param_ref else effect.get("parameter", "").replace("_", " ").title(),
-                        "direction": effect.get("direction"),
+                        "direction": direction,
                         "mechanism": effect.get("mechanism"),
-                        "magnitude": magnitude,
                         "quantified_change": quantified_change,
-                        "change_unit": change_unit or (param_ref.get("unit") if param_ref else None),
+                        "change_unit": change_unit,
                         "from_nutrient": nutrient_data.get("name"),
                         "amount": f"{amount} {nutrient_value.get('unit', '')}",
                         "percent_dv": percent_dv,
