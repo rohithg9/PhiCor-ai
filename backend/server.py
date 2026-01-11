@@ -9273,13 +9273,347 @@ async def analyze_food_from_database(request: Dict[str, Any] = Body(...)):
             )
         
         if not food:
-            # Food not in database - return indicator to use AI endpoint
-            return {
-                "success": False,
-                "in_database": False,
-                "message": f"'{food_name}' not found in database. Use AI analysis endpoint.",
-                "suggestion": "POST /api/food/analyze-product"
-            }
+            # Food not in database - Use AI to break down into ingredients and analyze
+            # This handles international dishes, complex meals, and regional foods
+            logger.info(f"'{food_name}' not in database - using AI ingredient breakdown")
+            
+            llm_key = os.environ.get('EMERGENT_LLM_KEY')
+            if not llm_key:
+                return {
+                    "success": False,
+                    "in_database": False,
+                    "message": f"'{food_name}' not found in database.",
+                    "suggestion": "POST /api/food/analyze-product"
+                }
+            
+            try:
+                from emergentintegrations.llm.chat import LlmChat, UserMessage
+                import json as json_module
+                import re as re_module
+                
+                # Use AI to break down the dish into basic ingredients
+                chat = LlmChat(
+                    api_key=llm_key,
+                    session_id=f"ingredient-breakdown-{datetime.now().timestamp()}",
+                    system_message="""You are a culinary expert. When given a dish name, break it down into its basic ingredients with estimated amounts for a standard serving.
+
+Return ONLY valid JSON in this exact format:
+{
+  "dish_name": "original dish name",
+  "cuisine": "cuisine type (Indian, Italian, Chinese, etc.)",
+  "serving_size_g": estimated total weight in grams,
+  "ingredients": [
+    {"name": "basic ingredient name (e.g., chicken, rice, tomato)", "amount_g": weight in grams, "is_primary": true/false}
+  ],
+  "spices": ["spice1", "spice2"]
+}
+
+Use simple, basic ingredient names that would be in a food database (e.g., "chicken" not "chicken tikka", "rice" not "basmati pilaf").
+Include all main ingredients and secondary ingredients like oil, cream, butter, etc.
+is_primary should be true for main protein/carb/vegetable sources, false for oils, spices, garnishes."""
+                ).with_model("openai", "gpt-4o")
+                
+                breakdown_prompt = f"Break down this dish into basic ingredients: {food_name}"
+                response = await chat.send_message(UserMessage(text=breakdown_prompt))
+                
+                # Parse AI response
+                json_match = re_module.search(r'\{[\s\S]*\}', response)
+                if not json_match:
+                    raise ValueError("Could not parse ingredient breakdown")
+                
+                ai_breakdown = json_module.loads(json_match.group())
+                ai_ingredients = ai_breakdown.get("ingredients", [])
+                
+                if not ai_ingredients:
+                    raise ValueError("No ingredients found")
+                
+                # Now analyze each ingredient from the database (same logic as recipe analysis)
+                ingredient_analyses = []
+                aggregated_nutrients = {}
+                aggregated_organ_effects = {}
+                aggregated_disease_interactions = {"beneficial": [], "caution": [], "contraindicated": []}
+                aggregated_drug_interactions = []
+                total_calories = 0
+                
+                for ingredient in ai_ingredients:
+                    ing_name = ingredient.get("name", "")
+                    ing_amount_g = ingredient.get("amount_g", 50)
+                    is_primary = ingredient.get("is_primary", False)
+                    
+                    # Find ingredient in database
+                    ing_food = await db.foods.find_one(
+                        {
+                            "$and": [
+                                {"name": {"$regex": ing_name, "$options": "i"}},
+                                {"nutrients": {"$ne": {}}}
+                            ]
+                        },
+                        {"_id": 0}
+                    )
+                    
+                    if not ing_food:
+                        ing_food = await db.foods.find_one(
+                            {"name": {"$regex": ing_name, "$options": "i"}},
+                            {"_id": 0}
+                        )
+                    
+                    if ing_food:
+                        ing_nutrients = ing_food.get("nutrients", {})
+                        scale_factor = ing_amount_g / 100.0
+                        
+                        nutrient_ids = list(ing_nutrients.keys())
+                        nutrient_details = await db.nutrients.find(
+                            {"id": {"$in": nutrient_ids}},
+                            {"_id": 0}
+                        ).to_list(100)
+                        nutrient_lookup = {n["id"]: n for n in nutrient_details}
+                        
+                        ing_analysis = {
+                            "ingredient_name": f"{ing_amount_g}g {ing_name}",
+                            "amount_g": ing_amount_g,
+                            "is_primary": is_primary,
+                            "found_in_db": True,
+                            "matched_food": ing_food.get("name"),
+                            "nutrients": {},
+                            "parameter_effects": {}
+                        }
+                        
+                        for nut_id, nut_val in ing_nutrients.items():
+                            raw_value = nut_val.get("value", 0)
+                            try:
+                                value = float(raw_value) if raw_value else 0
+                            except:
+                                value = 0
+                            
+                            scaled_value = round(value * scale_factor, 2)
+                            unit = nut_val.get("unit", "")
+                            
+                            ing_analysis["nutrients"][nut_id] = {"value": scaled_value, "unit": unit}
+                            
+                            if nut_id not in aggregated_nutrients:
+                                aggregated_nutrients[nut_id] = {"value": 0, "unit": unit}
+                            aggregated_nutrients[nut_id]["value"] += scaled_value
+                            
+                            if nut_id in ["energy", "calories"]:
+                                total_calories += scaled_value
+                            
+                            if nut_id in nutrient_lookup:
+                                nut_data = nutrient_lookup[nut_id]
+                                daily_value = nut_data.get("daily_value")
+                                try:
+                                    daily_value = float(daily_value) if daily_value else None
+                                except:
+                                    daily_value = None
+                                
+                                percent_dv = None
+                                if daily_value and daily_value > 0 and scaled_value > 0:
+                                    percent_dv = round((scaled_value / daily_value) * 100, 1)
+                                
+                                param_effects = nut_data.get("parameter_effects", {})
+                                for organ_system, effects in param_effects.items():
+                                    if organ_system not in aggregated_organ_effects:
+                                        aggregated_organ_effects[organ_system] = {
+                                            "overall_effect": "neutral",
+                                            "parameters_affected": [],
+                                            "contributing_nutrients": [],
+                                            "contributing_ingredients": []
+                                        }
+                                    
+                                    for effect in effects:
+                                        param_name = effect.get("parameter", "").lower()
+                                        direction = effect.get("direction", "")
+                                        
+                                        qc, cu = calculate_universal_quantified_change(
+                                            param_name=param_name,
+                                            direction=direction,
+                                            percent_dv=percent_dv,
+                                            nutrient_id=nut_id,
+                                            nutrient_amount=scaled_value
+                                        )
+                                        
+                                        param_ref = get_parameter_reference(effect.get("parameter", ""))
+                                        
+                                        existing_param = next(
+                                            (p for p in aggregated_organ_effects[organ_system]["parameters_affected"] 
+                                             if p["parameter"] == effect.get("parameter")),
+                                            None
+                                        )
+                                        
+                                        if existing_param:
+                                            if existing_param["quantified_change"] is not None and qc is not None:
+                                                existing_param["quantified_change"] = round(
+                                                    existing_param["quantified_change"] + qc, 2
+                                                )
+                                            if ing_analysis["ingredient_name"] not in existing_param.get("from_ingredients", []):
+                                                existing_param.setdefault("from_ingredients", []).append(ing_analysis["ingredient_name"])
+                                        else:
+                                            aggregated_organ_effects[organ_system]["parameters_affected"].append({
+                                                "parameter": effect.get("parameter"),
+                                                "parameter_name": param_ref.get("name") if param_ref else effect.get("parameter", "").replace("_", " ").title(),
+                                                "direction": direction,
+                                                "mechanism": effect.get("mechanism"),
+                                                "quantified_change": qc,
+                                                "change_unit": cu or (param_ref.get("unit") if param_ref else None),
+                                                "from_nutrient": nut_data.get("name"),
+                                                "from_ingredients": [ing_analysis["ingredient_name"]],
+                                                "percent_dv": percent_dv,
+                                                "reference": {
+                                                    "normal_range": param_ref.get("normal_range") if param_ref else None,
+                                                    "unit": param_ref.get("unit") if param_ref else cu,
+                                                    "normal_low": param_ref.get("normal", (None, None))[0] if param_ref else None,
+                                                    "normal_high": param_ref.get("normal", (None, None))[1] if param_ref else None,
+                                                } if param_ref else None
+                                            })
+                                        
+                                        nut_name = nut_data.get("name")
+                                        if nut_name and nut_name not in aggregated_organ_effects[organ_system]["contributing_nutrients"]:
+                                            aggregated_organ_effects[organ_system]["contributing_nutrients"].append(nut_name)
+                                        if ing_analysis["ingredient_name"] not in aggregated_organ_effects[organ_system]["contributing_ingredients"]:
+                                            aggregated_organ_effects[organ_system]["contributing_ingredients"].append(ing_analysis["ingredient_name"])
+                                
+                                disease_int = nut_data.get("disease_interactions", {})
+                                for category in ["beneficial", "caution", "contraindicated"]:
+                                    for interaction in disease_int.get(category, []):
+                                        aggregated_disease_interactions[category].append({
+                                            **interaction,
+                                            "from_nutrient": nut_data.get("name"),
+                                            "from_ingredient": ing_analysis["ingredient_name"]
+                                        })
+                                
+                                for drug_int in nut_data.get("drug_interactions", []):
+                                    aggregated_drug_interactions.append({
+                                        **drug_int,
+                                        "from_nutrient": nut_data.get("name"),
+                                        "from_ingredient": ing_analysis["ingredient_name"]
+                                    })
+                        
+                        ingredient_analyses.append(ing_analysis)
+                    else:
+                        ingredient_analyses.append({
+                            "ingredient_name": f"{ing_amount_g}g {ing_name}",
+                            "amount_g": ing_amount_g,
+                            "is_primary": is_primary,
+                            "found_in_db": False,
+                            "matched_food": None,
+                            "nutrients": {},
+                            "parameter_effects": {}
+                        })
+                
+                # Calculate overall effects
+                for organ_system, data in aggregated_organ_effects.items():
+                    beneficial = sum(1 for p in data["parameters_affected"] 
+                                   if p["direction"] in ["increase", "maintain"] and abs(p.get("quantified_change") or 0) > 0.1)
+                    harmful = sum(1 for p in data["parameters_affected"] 
+                                if p["direction"] == "decrease" and "caution" in str(p.get("mechanism", "")).lower())
+                    
+                    if beneficial > harmful:
+                        data["overall_effect"] = "beneficial"
+                    elif harmful > beneficial:
+                        data["overall_effect"] = "caution"
+                    else:
+                        data["overall_effect"] = "neutral"
+                
+                # Calculate health score
+                health_score = 65
+                fiber_val = aggregated_nutrients.get("fiber", {}).get("value", 0)
+                protein_val = aggregated_nutrients.get("protein", {}).get("value", 0)
+                sodium_val = aggregated_nutrients.get("sodium", {}).get("value", 0)
+                sat_fat_val = aggregated_nutrients.get("fat_saturated", {}).get("value", 0)
+                
+                if fiber_val > 5: health_score += 5
+                if protein_val > 20: health_score += 5
+                if sodium_val > 800: health_score -= 10
+                if sat_fat_val > 10: health_score -= 10
+                
+                health_score = max(20, min(100, health_score))
+                
+                # Build response
+                serving_size_g = ai_breakdown.get("serving_size_g", 350)
+                analysis = {
+                    "product_name": food_name.title(),
+                    "product_type": "complex_dish",
+                    "category": ai_breakdown.get("cuisine", "International"),
+                    "description": f"A {ai_breakdown.get('cuisine', 'international')} dish composed of {len(ai_ingredients)} ingredients",
+                    "is_recipe": True,
+                    "serving_size": f"1 serving ({serving_size_g}g)",
+                    "serving_size_g": serving_size_g,
+                    "serving_unit": "g",
+                    "data_source": "PhiCor Ingredient Analysis",
+                    "ai_generated": False,
+                    
+                    "ingredient_breakdown": {
+                        "total_ingredients": len(ai_ingredients),
+                        "primary_ingredients": [i for i in ingredient_analyses if i["is_primary"]],
+                        "secondary_ingredients": [i for i in ingredient_analyses if not i["is_primary"]],
+                        "all_ingredients": ingredient_analyses,
+                        "spices_seasonings": ai_breakdown.get("spices", []),
+                        "ingredients_found_in_db": sum(1 for i in ingredient_analyses if i["found_in_db"]),
+                        "ingredients_not_found": sum(1 for i in ingredient_analyses if not i["found_in_db"]),
+                    },
+                    
+                    "complete_nutritional_profile": {
+                        "macronutrients": {
+                            "energy_kcal": round(aggregated_nutrients.get("energy", aggregated_nutrients.get("calories", {})).get("value", total_calories), 0),
+                            "protein_g": round(aggregated_nutrients.get("protein", {}).get("value", 0), 1),
+                            "carbohydrates_g": round(aggregated_nutrients.get("carbohydrates", {}).get("value", 0), 1),
+                            "fiber_g": round(aggregated_nutrients.get("fiber", {}).get("value", 0), 1),
+                            "sugars_g": round(aggregated_nutrients.get("sugars", aggregated_nutrients.get("sugar", {})).get("value", 0), 1),
+                            "fat_total_g": round(aggregated_nutrients.get("fat_total", aggregated_nutrients.get("fat", {})).get("value", 0), 1),
+                            "fat_saturated_g": round(aggregated_nutrients.get("fat_saturated", {}).get("value", 0), 1),
+                            "cholesterol_mg": round(aggregated_nutrients.get("cholesterol", {}).get("value", 0), 1),
+                        },
+                        "electrolytes": {
+                            "sodium_mg": round(aggregated_nutrients.get("sodium", {}).get("value", 0), 0),
+                            "potassium_mg": round(aggregated_nutrients.get("potassium", {}).get("value", 0), 0),
+                            "calcium_mg": round(aggregated_nutrients.get("calcium", {}).get("value", 0), 0),
+                            "magnesium_mg": round(aggregated_nutrients.get("magnesium", {}).get("value", 0), 0),
+                        },
+                        "aggregated_from_ingredients": True,
+                    },
+                    
+                    "organ_system_parameter_effects": aggregated_organ_effects,
+                    "disease_interactions": aggregated_disease_interactions,
+                    "drug_interactions": aggregated_drug_interactions,
+                    
+                    "clinical_summary": {
+                        "healthfulness_score": health_score,
+                        "key_benefits": [],
+                        "key_concerns": [],
+                        "analysis_note": f"Analysis from {len(ingredient_analyses)} identified ingredients"
+                    }
+                }
+                
+                # Generate benefits/concerns
+                if protein_val > 20:
+                    analysis["clinical_summary"]["key_benefits"].append(f"High protein ({round(protein_val, 1)}g)")
+                if fiber_val > 5:
+                    analysis["clinical_summary"]["key_benefits"].append(f"Good fiber content ({round(fiber_val, 1)}g)")
+                if aggregated_nutrients.get("potassium", {}).get("value", 0) > 300:
+                    analysis["clinical_summary"]["key_benefits"].append("Good potassium source")
+                
+                if sodium_val > 800:
+                    analysis["clinical_summary"]["key_concerns"].append(f"High sodium ({round(sodium_val, 0)}mg)")
+                if sat_fat_val > 10:
+                    analysis["clinical_summary"]["key_concerns"].append(f"High saturated fat ({round(sat_fat_val, 1)}g)")
+                if total_calories > 500:
+                    analysis["clinical_summary"]["key_concerns"].append(f"High calorie ({round(total_calories, 0)} kcal)")
+                
+                return {
+                    "success": True,
+                    "in_database": True,
+                    "is_recipe": True,
+                    "analysis": analysis,
+                    "analysis_type": "ai_ingredient_breakdown"
+                }
+                
+            except Exception as e:
+                logger.error(f"AI ingredient breakdown failed: {e}")
+                return {
+                    "success": False,
+                    "in_database": False,
+                    "message": f"Could not analyze '{food_name}'",
+                    "suggestion": "POST /api/food/analyze-product"
+                }
         
         # Food found in database - compute analysis from nutrients database
         nutrients = food.get("nutrients", {})
