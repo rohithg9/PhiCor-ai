@@ -1528,6 +1528,18 @@ Snacks: Apple, almonds, green tea"
                           })()}
                         </div>
                       </div>
+                      
+                      {/* Export PDF Button */}
+                      <div className="flex justify-end mt-3">
+                        <PDFExportButton 
+                          type="food"
+                          data={analysisResult}
+                          patientProfile={healthProfile}
+                          isDark={isDark}
+                          variant="outline"
+                          size="sm"
+                        />
+                      </div>
                     </div>
                     
                     {/* Overview Tab */}
