@@ -484,7 +484,7 @@
   message: "🔍 PHICOR.AI FRONTEND TESTING COMPLETED - PREVIEW MODE LIMITATIONS:
 
   **CRITICAL FINDING: Frontend in Preview Mode**
-  - External URL (https://phicorhealth.preview.emergentagent.com/) shows 'Frontend Preview Only' message
+  - External URL (https://foodparam.preview.emergentagent.com/) shows 'Frontend Preview Only' message
   - Backend functionality disabled with 'Wake up servers' button present
   - localhost:3000 not accessible during testing
   - This explains limited interactivity and missing dynamic content
