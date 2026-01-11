@@ -1566,6 +1566,24 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                         <FolderOpen className="w-3 h-3 mr-1" />
                         Cases
                       </Button>
+                      {/* PDF Export Button */}
+                      <PDFExportButton 
+                        type="diagnosis"
+                        data={{
+                          differentials: differentialResults,
+                          recommended_workup: phicorResults?.synthesis?.discriminating_tests || [],
+                          synthesis: phicorResults?.synthesis
+                        }}
+                        patientInput={clinicalText}
+                        patientProfile={{
+                          age: abnormalFindings.find(f => f.name?.toLowerCase().includes('age'))?.value,
+                          gender: abnormalFindings.find(f => f.name?.toLowerCase().includes('gender'))?.value
+                        }}
+                        isDark={isDark}
+                        variant="outline"
+                        size="sm"
+                        className="h-7"
+                      />
                     </>
                   )}
                 </div>
