@@ -102,6 +102,27 @@ PhiCor.ai is a unified, parameter-based health intelligence system that provides
 - Expand recipe coverage
 - Real-time parameter monitoring
 
+## January 15, 2025 - Food Engine Database Fix
+
+### Issue
+User reported the Food Analysis page showing "0 0" for all macronutrient values despite finding the dish (e.g., Chicken Tikka Masala with 9 ingredients).
+
+### Root Cause
+The MongoDB `foods` collection was **empty**. The platform stats showed 9,951 foods, but this was a cached/static value - the actual database had 0 food documents.
+
+### Fix Applied
+1. **Seeded nutrients database**: 38 nutrients with parameter effects, daily values, and health information
+2. **Added base ingredients**: 28 core ingredients (chicken, tomato, cream, onion, garlic, ginger, butter, yogurt, rice, lentils, spinach, paneer, beef, potato, etc.) with full nutrient data per 100g
+3. **Imported Open Food Facts data**: 200+ branded products for broader coverage
+
+### Current Database State
+- **Foods**: 234 items (base ingredients + branded products)
+- **Nutrients**: 38 nutrient definitions
+- **Verified Working**: Chicken Tikka Masala shows 950 kcal, 57.6g protein, 73.8g carbs, 35.1g fat
+
+### Note on External URL
+The external preview URL (https://phicor-ai.preview.emergentagent.com) may show 404 for API routes due to platform ingress routing. Internal services work correctly on localhost:8001 (backend) and localhost:3000 (frontend).
+
 ## Test Credentials
 - **Expert Login**: `/expert-login`
 - **Email**: admin@phicor.ai
