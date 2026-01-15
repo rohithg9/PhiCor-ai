@@ -10616,14 +10616,14 @@ is_primary should be true for main protein/carb/vegetable sources, false for oil
             "clinical_summary": {
                 "healthfulness_score": health_score,
                 "key_benefits": [
-                    f"Good source of {n['nutrient_name']}" 
+                    f"Good source of {n.get('nutrient_name', nid)}" 
                     for nid, n in nutrients.items() 
-                    if n.get("percent_daily_value", 0) >= 15
+                    if isinstance(n, dict) and (n.get("percent_daily_value") or 0) >= 15
                 ][:5],
                 "key_concerns": [
-                    f"High in {n['nutrient_name']}" 
+                    f"High in {n.get('nutrient_name', nid)}" 
                     for nid, n in nutrients.items() 
-                    if nid in ["sodium", "fat_saturated", "cholesterol", "sugars"] and n.get("percent_daily_value", 0) >= 20
+                    if isinstance(n, dict) and nid in ["sodium", "fat_saturated", "cholesterol", "sugars"] and (n.get("percent_daily_value") or 0) >= 20
                 ]
             }
         }
