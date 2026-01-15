@@ -9719,13 +9719,18 @@ async def analyze_food_from_database(request: Dict[str, Any] = Body(...)):
         
         # NOT A RECIPE - proceed with single food analysis
         # Search for food in database - prioritize foods with nutrient data
-        # First try exact match with nutrients
+        # Strategy: Try multiple search approaches to find the best match
+        
+        food = None
+        search_term = food_name.strip()
+        
+        # 1. Try exact match (case-insensitive)
         food = await db.foods.find_one(
             {
                 "$and": [
                     {"$or": [
-                        {"name": {"$regex": f"^{food_name}$", "$options": "i"}},
-                        {"name": {"$regex": f"^{food_name},", "$options": "i"}}  # Matches "Banana, raw"
+                        {"name": {"$regex": f"^{search_term}$", "$options": "i"}},
+                        {"name": {"$regex": f"^{search_term},", "$options": "i"}}  # Matches "Banana, raw"
                     ]},
                     {"nutrients": {"$ne": {}}}
                 ]
@@ -9733,22 +9738,47 @@ async def analyze_food_from_database(request: Dict[str, Any] = Body(...)):
             {"_id": 0}
         )
         
-        # If no exact match with nutrients, try partial match with nutrients
+        # 2. Try word-boundary match (e.g., "Salmon" matches "Salmon (Atlantic, cooked)")
         if not food:
             food = await db.foods.find_one(
                 {
                     "$and": [
-                        {"name": {"$regex": food_name, "$options": "i"}},
+                        {"name": {"$regex": f"^{search_term}\\b", "$options": "i"}},  # Word boundary at start
                         {"nutrients": {"$ne": {}}}
                     ]
                 },
                 {"_id": 0}
             )
         
-        # If still no match, try any food (including those without nutrients)
+        # 3. Try finding the best match from multiple results (prioritize shorter, simpler names)
+        if not food:
+            candidates = await db.foods.find(
+                {
+                    "$and": [
+                        {"name": {"$regex": search_term, "$options": "i"}},
+                        {"nutrients": {"$ne": {}}}
+                    ]
+                },
+                {"_id": 0}
+            ).limit(10).to_list(10)
+            
+            if candidates:
+                # Sort by: 1) Name starts with search term, 2) Shorter names (more basic foods)
+                def score_food(f):
+                    name = f.get('name', '').lower()
+                    search_lower = search_term.lower()
+                    starts_with = 0 if name.startswith(search_lower) else 100
+                    has_parentheses = 10 if '(' in name else 0  # Prefer foods with descriptions
+                    is_branded = 50 if f.get('source') == 'open_food_facts' else 0  # Prefer non-branded
+                    return starts_with + len(name) - has_parentheses + is_branded
+                
+                candidates.sort(key=score_food)
+                food = candidates[0]
+        
+        # 4. Last resort: any food matching (including those without nutrients)
         if not food:
             food = await db.foods.find_one(
-                {"name": {"$regex": food_name, "$options": "i"}},
+                {"name": {"$regex": search_term, "$options": "i"}},
                 {"_id": 0}
             )
         
