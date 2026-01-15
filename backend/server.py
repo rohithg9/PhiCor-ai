@@ -10128,6 +10128,38 @@ is_primary should be true for main protein/carb/vegetable sources, false for oil
         # Food found in database - compute analysis from nutrients database
         nutrients = food.get("nutrients", {})
         
+        # Normalize nutrient keys (different sources use different keys)
+        nutrient_key_mapping = {
+            "calories": "energy",
+            "kcal": "energy",
+            "energy_kcal": "energy",
+            "fat": "fat_total",
+            "total_fat": "fat_total",
+            "saturated_fat": "fat_saturated",
+            "saturatedfat": "fat_saturated",
+            "trans_fat": "fat_trans",
+            "carbs": "carbohydrates",
+            "carbohydrate": "carbohydrates",
+            "sugar": "sugars",
+            "sugars_total": "sugars",
+            "dietary_fiber": "fiber",
+            "fibre": "fiber",
+            "vit_a": "vitamin_a",
+            "vit_c": "vitamin_c",
+            "vit_d": "vitamin_d",
+            "vit_e": "vitamin_e",
+            "vit_k": "vitamin_k",
+            "vit_b12": "vitamin_b12",
+            "vit_b6": "vitamin_b6",
+        }
+        
+        # Normalize the nutrient keys
+        normalized_nutrients = {}
+        for key, value in nutrients.items():
+            normalized_key = nutrient_key_mapping.get(key.lower(), key.lower())
+            normalized_nutrients[normalized_key] = value
+        nutrients = normalized_nutrients
+        
         # Get all nutrient details from nutrients collection
         nutrient_ids = list(nutrients.keys())
         nutrient_details = await db.nutrients.find(
