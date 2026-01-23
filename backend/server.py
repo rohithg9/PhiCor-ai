@@ -2244,12 +2244,14 @@ async def get_drugs_from_db(
     category: Optional[str] = None,
     drug_class: Optional[str] = None,
     search: Optional[str] = None,
+    include_effects: bool = False,
     limit: int = 50,
     offset: int = 0
 ):
     """
     Get drugs from MongoDB database with filtering.
     This is the new endpoint that uses MongoDB for comprehensive drug data.
+    Set include_effects=true to include parameter_effects in response.
     """
     query = {}
     
@@ -2271,7 +2273,7 @@ async def get_drugs_from_db(
     # Return summary format for list
     summaries = []
     for drug in drugs:
-        summaries.append({
+        drug_data = {
             "id": drug.get("id"),
             "name": drug.get("name"),
             "brand_names": drug.get("brand_names", []),
@@ -2280,7 +2282,14 @@ async def get_drugs_from_db(
             "mechanism_short": drug.get("mechanism_short", ""),
             "indication_count": len(drug.get("indications", [])),
             "interaction_count": len(drug.get("interactions", []))
-        })
+        }
+        
+        # Include parameter effects if requested
+        if include_effects:
+            drug_data["parameter_effects"] = drug.get("parameter_effects", [])
+            drug_data["effect_count"] = len(drug.get("parameter_effects", []))
+        
+        summaries.append(drug_data)
     
     return {
         "drugs": summaries,
