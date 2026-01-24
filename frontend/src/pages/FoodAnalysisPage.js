@@ -1416,6 +1416,20 @@ Snacks: Apple, almonds, green tea"
                     </div>
                   )}
                 </div>
+                
+                {/* Food Browser Toggle */}
+                <Button
+                  variant={showFoodBrowser ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setShowFoodBrowser(!showFoodBrowser)}
+                  className={`ml-2 hidden lg:flex items-center gap-1.5 ${showFoodBrowser ? 'bg-green-500 hover:bg-green-600' : ''}`}
+                >
+                  <Apple className="w-4 h-4" />
+                  <span className="text-xs">Browse Foods</span>
+                  {foodBrowserData && (
+                    <Badge className="text-[9px] bg-white/20">{foodBrowserData.total_foods?.toLocaleString()}</Badge>
+                  )}
+                </Button>
               </div>
               
               {/* Profile badges */}
