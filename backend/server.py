@@ -10026,22 +10026,8 @@ is_primary should be true for main protein/carb/vegetable sources, false for oil
                     ing_amount_g = ingredient.get("amount_g", 50)
                     is_primary = ingredient.get("is_primary", False)
                     
-                    # Find ingredient in database
-                    ing_food = await db.foods.find_one(
-                        {
-                            "$and": [
-                                {"name": {"$regex": ing_name, "$options": "i"}},
-                                {"nutrients": {"$ne": {}}}
-                            ]
-                        },
-                        {"_id": 0}
-                    )
-                    
-                    if not ing_food:
-                        ing_food = await db.foods.find_one(
-                            {"name": {"$regex": ing_name, "$options": "i"}},
-                            {"_id": 0}
-                        )
+                    # Find ingredient in database using smart search
+                    ing_food = await smart_ingredient_search(db, ing_name)
                     
                     if ing_food:
                         ing_nutrients = ing_food.get("nutrients", {})
