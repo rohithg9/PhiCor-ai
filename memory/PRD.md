@@ -27,6 +27,30 @@ PhiCor.ai is a unified, parameter-based health intelligence system that provides
 
 ## What's Been Implemented
 
+### January 24, 2025 - Food Engine Bug Fix & Food Browser Feature
+
+#### Smart Ingredient Matching Fix (✅ COMPLETED)
+- **Issue**: Food analysis returned "0" values for recipes like "Lasagne" because ingredients weren't being matched correctly in the database
+- **Root Cause**: Simple regex search was matching complex dish names (e.g., "pasta" matched "Tomato Pasta Sauce" instead of actual pasta)
+- **Solution Implemented**:
+  - Created `INGREDIENT_ALIASES` map (80+ ingredient synonyms) for accurate matching
+  - Implemented `smart_ingredient_search()` function with prioritized matching:
+    1. Exact match on alias terms
+    2. Starts-with match (filtering out complex dishes)
+    3. Contains match with COMPLEX_DISH_INDICATORS filter
+    4. Fallback for unmatched ingredients
+  - Added `RECIPE_ALIASES` for common spelling variations (lasagne→lasagna, etc.)
+
+#### Food Browser Sidebar (✅ COMPLETED)
+- **New API Endpoint**: `GET /api/food/browse-all` - Returns all 17,709 foods categorized
+- **Features**:
+  - 13 food categories with icons: Meats (3637), Fruits (2677), Other (2082), Dairy (2073), Vegetables (1674), Grains (1579), Beverages (939), Seafood (921), Legumes (867), Condiments (537), Snacks (497), Dishes (205), Supplements (21)
+  - Category expansion to view food items
+  - Search functionality to filter foods
+  - Click-to-analyze: clicking any food triggers full analysis
+  - Desktop-only display (lg:flex) to maintain mobile usability
+- **Verified Working**: All 6 Lasagne ingredients now correctly matched (pasta→noodles, beef→beef, tomato→tomato, ricotta→Cheese ricotta, mozzarella→Mozzarella cheese, parmesan→Parmesan cheese grated)
+
 ### January 11, 2025 - Expert Dashboard Equations Browser Enhancement
 
 #### Comprehensive Mathematical Models Browser (✅ COMPLETED)
@@ -69,20 +93,21 @@ PhiCor.ai is a unified, parameter-based health intelligence system that provides
 - Smart serving sizes with scaling
 
 ## Database Collections
-- **foods**: ~9,951 foods with nutrient data
-- **drugs**: 415 drugs
-- **diseases**: 2,568 diseases
+- **foods**: 17,709 foods with nutrient data (~9,749 enriched with organ_effects)
+- **drugs**: 292 drugs (98.3% have 5+ parameter effects)
+- **diseases**: 2,568 diseases (all enriched with parameter_modifications)
 - **nutrients**: Nutrient definitions with parameter_effects, disease_interactions, drug_interactions
 - **mathematical_models**: 967+ models from diseases.parameter_modifications
 
 ## Key API Endpoints
+- `GET /api/food/browse-all` - Returns all foods categorized for Food Browser
+- `POST /api/food/analyze-from-db` - Analyzes foods with smart ingredient matching
 - `GET /api/expert/mathematical-models` - Returns all mathematical models with rich context
-- `POST /api/food/analyze-from-db` - Analyzes foods with AI ingredient breakdown fallback
 - `GET /api/platform/stats` - Platform statistics including model counts
 
 ## Key Files Modified This Session
-- `/app/frontend/src/pages/ExpertDashboard.js` - Enhanced Equations Browser with API integration, cleaned up orphaned code, added missing imports (Loader2, toast)
-- `/app/backend/server.py` - Contains mathematical-models endpoint (lines 1684-1760)
+- `/app/backend/server.py` - Added smart_ingredient_search(), INGREDIENT_ALIASES, browse_all_foods endpoint
+- `/app/frontend/src/pages/FoodAnalysisPage.js` - Added Food Browser sidebar component
 
 ## Prioritized Backlog
 
@@ -95,33 +120,13 @@ PhiCor.ai is a unified, parameter-based health intelligence system that provides
 
 ### P2 - Lower Priority  
 - **Slow Differential Diagnosis** - Add performance profiling to isolate bottleneck
-- **Refactor Large Files** - Break down server.py, FoodAnalysisPage.js, ExpertDashboard.js
+- **Refactor Large Files** - Break down server.py (~12,000 lines), FoodAnalysisPage.js (~2,800 lines)
 
 ### Future/Backlog
 - Enhanced Expert Knowledge Bank
 - Expand recipe coverage
 - Real-time parameter monitoring
-
-## January 15, 2025 - Food Engine Database Fix
-
-### Issue
-User reported the Food Analysis page showing "0 0" for all macronutrient values despite finding the dish (e.g., Chicken Tikka Masala with 9 ingredients).
-
-### Root Cause
-The MongoDB `foods` collection was **empty**. The platform stats showed 9,951 foods, but this was a cached/static value - the actual database had 0 food documents.
-
-### Fix Applied
-1. **Seeded nutrients database**: 38 nutrients with parameter effects, daily values, and health information
-2. **Added base ingredients**: 28 core ingredients (chicken, tomato, cream, onion, garlic, ginger, butter, yogurt, rice, lentils, spinach, paneer, beef, potato, etc.) with full nutrient data per 100g
-3. **Imported Open Food Facts data**: 200+ branded products for broader coverage
-
-### Current Database State
-- **Foods**: 234 items (base ingredients + branded products)
-- **Nutrients**: 38 nutrient definitions
-- **Verified Working**: Chicken Tikka Masala shows 950 kcal, 57.6g protein, 73.8g carbs, 35.1g fat
-
-### Note on External URL
-The external preview URL (https://bodylogic.preview.emergentagent.com) may show 404 for API routes due to platform ingress routing. Internal services work correctly on localhost:8001 (backend) and localhost:3000 (frontend).
+- Continue background food enrichment (currently at 50.4%)
 
 ## Test Credentials
 - **Expert Login**: `/expert-login`
@@ -131,3 +136,4 @@ The external preview URL (https://bodylogic.preview.emergentagent.com) may show 
 ## Test Reports
 - `/app/test_reports/iteration_1.json` - Food analysis P0 tests
 - `/app/test_reports/iteration_2.json` - Expert Dashboard Equations Browser tests (100% pass rate)
+- `/app/test_reports/iteration_3.json` - Food Analysis bug fix & Food Browser tests (100% pass rate)
