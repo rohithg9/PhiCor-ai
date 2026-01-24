@@ -12234,6 +12234,195 @@ async def get_food_categories():
         logger.error(f"Error getting categories: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# Food category mapping for intelligent categorization
+FOOD_CATEGORY_KEYWORDS = {
+    "Fruits": {
+        "icon": "🍎",
+        "keywords": ["apple", "banana", "orange", "mango", "berry", "grape", "melon", "pear", "peach", "plum", "cherry", "kiwi", "pineapple", "papaya", "fruit", "citrus", "lemon", "lime", "grapefruit", "pomegranate", "fig", "date", "apricot", "avocado", "coconut"],
+        "exclude": ["juice", "jam", "pie", "cake", "sauce"]
+    },
+    "Vegetables": {
+        "icon": "🥬",
+        "keywords": ["spinach", "broccoli", "carrot", "tomato", "potato", "onion", "pepper", "lettuce", "cabbage", "celery", "cucumber", "zucchini", "squash", "eggplant", "asparagus", "cauliflower", "kale", "arugula", "vegetable", "beet", "radish", "turnip", "peas", "bean", "corn", "artichoke", "mushroom", "leek", "garlic", "ginger"],
+        "exclude": ["chips", "fries", "fried", "casserole", "soup", "stew"]
+    },
+    "Meats & Poultry": {
+        "icon": "🥩",
+        "keywords": ["beef", "chicken", "pork", "lamb", "turkey", "duck", "veal", "steak", "ground meat", "bacon", "ham", "sausage", "salami", "prosciutto", "meat"],
+        "exclude": ["pizza", "sandwich", "burger", "soup"]
+    },
+    "Seafood": {
+        "icon": "🐟",
+        "keywords": ["salmon", "tuna", "cod", "shrimp", "lobster", "crab", "fish", "tilapia", "halibut", "mackerel", "sardine", "anchovy", "oyster", "mussel", "clam", "scallop", "squid", "octopus", "prawn", "trout", "bass", "herring", "seafood"],
+        "exclude": ["pizza", "sandwich", "soup"]
+    },
+    "Dairy & Eggs": {
+        "icon": "🥛",
+        "keywords": ["milk", "cheese", "yogurt", "butter", "cream", "egg", "dairy", "mozzarella", "cheddar", "parmesan", "ricotta", "feta", "brie", "cottage cheese", "sour cream", "whey", "casein", "kefir"],
+        "exclude": ["ice cream", "cake", "cookie"]
+    },
+    "Grains & Cereals": {
+        "icon": "🌾",
+        "keywords": ["rice", "wheat", "oat", "barley", "quinoa", "bread", "pasta", "noodle", "cereal", "grain", "flour", "corn", "maize", "millet", "rye", "buckwheat", "couscous", "bulgur", "tortilla", "wrap", "cracker"],
+        "exclude": ["pizza", "cake", "cookie", "pastry", "chicken"]
+    },
+    "Legumes & Nuts": {
+        "icon": "🥜",
+        "keywords": ["bean", "lentil", "chickpea", "peanut", "almond", "walnut", "cashew", "pistachio", "hazelnut", "pecan", "macadamia", "nut", "legume", "soy", "tofu", "tempeh", "hummus", "edamame", "pea"],
+        "exclude": ["sauce", "oil", "butter"]
+    },
+    "Beverages": {
+        "icon": "🥤",
+        "keywords": ["juice", "water", "tea", "coffee", "milk", "soda", "cola", "smoothie", "shake", "drink", "beverage", "wine", "beer", "cocktail", "espresso", "latte", "cappuccino", "kombucha"],
+        "exclude": []
+    },
+    "Prepared Dishes": {
+        "icon": "🍽️",
+        "keywords": ["pizza", "burger", "sandwich", "curry", "stew", "soup", "salad", "pasta dish", "casserole", "biryani", "tikka", "masala", "lasagna", "risotto", "paella", "tacos", "burrito", "sushi", "ramen", "pho", "bowl", "plate", "meal"],
+        "exclude": []
+    },
+    "Snacks & Sweets": {
+        "icon": "🍪",
+        "keywords": ["cookie", "cake", "candy", "chocolate", "ice cream", "chips", "crisp", "popcorn", "pretzel", "snack", "sweet", "dessert", "brownie", "muffin", "donut", "pastry", "pie", "pudding", "gelato", "sorbet"],
+        "exclude": []
+    },
+    "Condiments & Spices": {
+        "icon": "🧂",
+        "keywords": ["sauce", "ketchup", "mustard", "mayonnaise", "dressing", "vinegar", "oil", "salt", "pepper", "spice", "herb", "seasoning", "curry powder", "paprika", "cinnamon", "oregano", "basil", "thyme", "cumin"],
+        "exclude": []
+    },
+    "Supplements": {
+        "icon": "💊",
+        "keywords": ["vitamin", "supplement", "omega", "mineral", "probiotic", "protein powder", "creatine", "collagen", "multivitamin", "fish oil", "calcium", "iron", "zinc", "magnesium"],
+        "exclude": []
+    }
+}
+
+def categorize_food(food_name: str) -> str:
+    """Categorize a food item based on its name"""
+    name_lower = food_name.lower()
+    
+    # Check each category
+    for category, config in FOOD_CATEGORY_KEYWORDS.items():
+        # Skip if any exclude keyword matches
+        if any(excl in name_lower for excl in config.get("exclude", [])):
+            continue
+        # Check if any keyword matches
+        if any(kw in name_lower for kw in config["keywords"]):
+            return category
+    
+    return "Other"
+
+@api_router.get("/food/browse")
+async def browse_foods(
+    category: str = None,
+    search: str = None,
+    page: int = 1,
+    limit: int = 50
+):
+    """
+    Browse all foods in the database with categorization.
+    Returns foods grouped by category with icons.
+    """
+    try:
+        skip = (page - 1) * limit
+        
+        # Build query
+        query = {}
+        if search:
+            query["name"] = {"$regex": search, "$options": "i"}
+        
+        # Get total count
+        total_count = await db.foods.count_documents(query)
+        
+        # Get foods with nutrient data
+        foods_with_nutrients = await db.foods.count_documents({"nutrients": {"$ne": {}}})
+        foods_with_effects = await db.foods.count_documents({"organ_effects": {"$exists": True, "$ne": {}}})
+        
+        # Get foods
+        cursor = db.foods.find(query, {"_id": 0, "name": 1, "nutrients": 1, "organ_effects": 1}).skip(skip).limit(limit)
+        foods = await cursor.to_list(limit)
+        
+        # Categorize foods
+        categorized = {}
+        for food in foods:
+            cat = categorize_food(food["name"])
+            if cat not in categorized:
+                categorized[cat] = {
+                    "icon": FOOD_CATEGORY_KEYWORDS.get(cat, {}).get("icon", "🍴"),
+                    "foods": []
+                }
+            categorized[cat]["foods"].append({
+                "name": food["name"],
+                "has_nutrients": bool(food.get("nutrients")),
+                "has_effects": bool(food.get("organ_effects"))
+            })
+        
+        # Sort categories and get category stats
+        category_stats = []
+        for cat_name, cat_config in FOOD_CATEGORY_KEYWORDS.items():
+            # Count foods in this category (approximate)
+            count = len(categorized.get(cat_name, {}).get("foods", []))
+            category_stats.append({
+                "name": cat_name,
+                "icon": cat_config["icon"],
+                "count": count
+            })
+        
+        return {
+            "success": True,
+            "total_foods": total_count,
+            "foods_with_nutrients": foods_with_nutrients,
+            "foods_with_effects": foods_with_effects,
+            "page": page,
+            "limit": limit,
+            "categories": categorized,
+            "category_stats": category_stats
+        }
+    except Exception as e:
+        logger.error(f"Error browsing foods: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/food/all-categorized")
+async def get_all_foods_categorized():
+    """
+    Get all foods categorized for the Food Browser sidebar.
+    Returns a lightweight list with just names and categories.
+    """
+    try:
+        # Get all food names efficiently
+        cursor = db.foods.find({}, {"_id": 0, "name": 1})
+        foods = await cursor.to_list(20000)  # Limit to 20k for performance
+        
+        # Categorize all foods
+        categorized = {}
+        for food in foods:
+            name = food.get("name", "")
+            cat = categorize_food(name)
+            if cat not in categorized:
+                categorized[cat] = {
+                    "icon": FOOD_CATEGORY_KEYWORDS.get(cat, {}).get("icon", "🍴"),
+                    "foods": []
+                }
+            categorized[cat]["foods"].append(name)
+        
+        # Sort foods within each category
+        for cat in categorized:
+            categorized[cat]["foods"].sort()
+            categorized[cat]["count"] = len(categorized[cat]["foods"])
+        
+        # Get total count
+        total = sum(len(c["foods"]) for c in categorized.values())
+        
+        return {
+            "success": True,
+            "total_foods": total,
+            "categories": categorized
+        }
+    except Exception as e:
+        logger.error(f"Error getting categorized foods: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.post("/food/seed-database")
 async def seed_food_database():
     """Seed the food database with sample foods"""
