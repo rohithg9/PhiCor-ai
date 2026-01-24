@@ -594,6 +594,78 @@ const FoodAnalysisPage = () => {
     fetchDiseases();
   }, []);
   
+  // Food Browser state
+  const [showFoodBrowser, setShowFoodBrowser] = useState(false);
+  const [foodBrowserData, setFoodBrowserData] = useState(null);
+  const [foodBrowserLoading, setFoodBrowserLoading] = useState(false);
+  const [expandedCategories, setExpandedCategories] = useState({});
+  const [foodBrowserSearch, setFoodBrowserSearch] = useState('');
+  
+  // Fetch food browser data
+  const fetchFoodBrowserData = useCallback(async () => {
+    if (foodBrowserData) return; // Already loaded
+    setFoodBrowserLoading(true);
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/food/browse-all`);
+      if (response.ok) {
+        const data = await response.json();
+        setFoodBrowserData(data);
+      }
+    } catch (error) {
+      console.error('Error fetching food browser data:', error);
+    } finally {
+      setFoodBrowserLoading(false);
+    }
+  }, [foodBrowserData]);
+  
+  // Load food browser data when opened
+  useEffect(() => {
+    if (showFoodBrowser && !foodBrowserData) {
+      fetchFoodBrowserData();
+    }
+  }, [showFoodBrowser, foodBrowserData, fetchFoodBrowserData]);
+  
+  // Filter foods in browser based on search
+  const filteredFoodBrowserData = useMemo(() => {
+    if (!foodBrowserData?.categories) return null;
+    if (!foodBrowserSearch.trim()) return foodBrowserData;
+    
+    const searchLower = foodBrowserSearch.toLowerCase();
+    const filtered = { ...foodBrowserData, categories: {} };
+    let totalFiltered = 0;
+    
+    for (const [cat, data] of Object.entries(foodBrowserData.categories)) {
+      const matchingFoods = data.foods.filter(f => f.toLowerCase().includes(searchLower));
+      if (matchingFoods.length > 0) {
+        filtered.categories[cat] = {
+          ...data,
+          foods: matchingFoods,
+          count: matchingFoods.length
+        };
+        totalFiltered += matchingFoods.length;
+      }
+    }
+    
+    filtered.total_foods = totalFiltered;
+    return filtered;
+  }, [foodBrowserData, foodBrowserSearch]);
+  
+  // Handle clicking on a food in the browser
+  const handleFoodBrowserSelect = (foodName) => {
+    setSearchQuery(foodName);
+    setShowFoodBrowser(false);
+    // Trigger analysis
+    handleAnalyze(foodName);
+  };
+  
+  // Toggle category expansion
+  const toggleCategory = (category) => {
+    setExpandedCategories(prev => ({
+      ...prev,
+      [category]: !prev[category]
+    }));
+  };
+  
   // Filtered diseases from database
   const filteredDiseases = useMemo(() => {
     const diseases = allDiseases.length > 0 ? allDiseases : FALLBACK_DISEASES;
