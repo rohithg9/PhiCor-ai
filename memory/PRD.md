@@ -121,7 +121,7 @@ The MongoDB `foods` collection was **empty**. The platform stats showed 9,951 fo
 - **Verified Working**: Chicken Tikka Masala shows 950 kcal, 57.6g protein, 73.8g carbs, 35.1g fat
 
 ### Note on External URL
-The external preview URL (https://phicor-ai.preview.emergentagent.com) may show 404 for API routes due to platform ingress routing. Internal services work correctly on localhost:8001 (backend) and localhost:3000 (frontend).
+The external preview URL (https://bodylogic.preview.emergentagent.com) may show 404 for API routes due to platform ingress routing. Internal services work correctly on localhost:8001 (backend) and localhost:3000 (frontend).
 
 ## Test Credentials
 - **Expert Login**: `/expert-login`

@@ -8937,6 +8937,171 @@ def get_smart_serving_size(food_name: str, food_data: dict = None) -> tuple:
     return ('1 serving', 100, 'g')
 
 # =============================================================================
+# INGREDIENT ALIAS MAP - Maps recipe ingredients to database food names
+# =============================================================================
+# This ensures accurate matching of recipe ingredients to our food database
+INGREDIENT_ALIASES = {
+    # Pasta & Grains
+    "pasta": ["noodles", "spaghetti, dry", "pasta, dry", "macaroni, dry", "pasta, cooked"],
+    "noodles": ["noodles", "pasta, dry", "spaghetti, dry"],
+    "rice": ["rice", "white rice", "rice, white", "rice, cooked"],
+    "bread": ["bread", "bread, white", "wheat bread"],
+    "wheat flour": ["flour", "wheat flour", "flour, wheat"],
+    
+    # Meats
+    "chicken": ["chicken", "chicken breast", "chicken, breast", "chicken, raw"],
+    "beef": ["beef", "ground beef", "beef, ground", "beef, raw"],
+    "pork": ["pork", "pork, raw", "pork loin"],
+    "bacon": ["bacon", "pork bacon", "bacon, cooked"],
+    "lamb": ["lamb", "lamb, raw", "lamb, ground"],
+    "turkey": ["turkey", "turkey breast", "turkey, raw"],
+    
+    # Seafood
+    "salmon": ["salmon", "salmon, atlantic", "salmon, raw"],
+    "tuna": ["tuna", "tuna, raw", "tuna, canned"],
+    "shrimp": ["shrimp", "shrimp, raw", "prawns"],
+    "fish": ["fish", "cod", "tilapia"],
+    
+    # Dairy
+    "milk": ["milk", "milk, whole", "whole milk"],
+    "cream": ["cream", "heavy cream", "cream, heavy"],
+    "butter": ["butter", "butter, salted", "butter, unsalted"],
+    "cheese": ["cheese", "cheddar", "cheese, cheddar"],
+    "parmesan": ["parmesan", "cheese, parmesan", "parmesan cheese"],
+    "mozzarella": ["mozzarella", "cheese, mozzarella", "mozzarella cheese"],
+    "ricotta": ["ricotta", "cheese, ricotta", "ricotta cheese"],
+    "yogurt": ["yogurt", "yogurt, plain", "greek yogurt"],
+    "egg": ["egg", "eggs", "egg, whole", "egg, raw"],
+    "paneer": ["paneer", "cottage cheese", "cheese, cottage"],
+    
+    # Vegetables
+    "tomato": ["tomato", "tomatoes", "tomatoes, raw"],
+    "onion": ["onion", "onions", "onion, raw"],
+    "garlic": ["garlic", "garlic, raw", "garlic cloves"],
+    "carrot": ["carrot", "carrots", "carrot, raw"],
+    "potato": ["potato", "potatoes", "potato, raw"],
+    "spinach": ["spinach", "spinach, raw", "spinach leaves"],
+    "celery": ["celery", "celery, raw", "celery stalks"],
+    "pepper": ["bell pepper", "pepper", "peppers"],
+    "mushroom": ["mushroom", "mushrooms", "mushroom, raw"],
+    "broccoli": ["broccoli", "broccoli, raw"],
+    "lettuce": ["lettuce", "lettuce, raw", "romaine"],
+    "cabbage": ["cabbage", "cabbage, raw"],
+    "ginger": ["ginger", "ginger, raw", "ginger root"],
+    "cucumber": ["cucumber", "cucumber, raw"],
+    "zucchini": ["zucchini", "zucchini, raw", "courgette"],
+    "eggplant": ["eggplant", "eggplant, raw", "aubergine"],
+    "peas": ["peas", "green peas", "peas, green"],
+    "corn": ["corn", "sweet corn", "corn, sweet"],
+    "beans": ["beans", "kidney beans", "black beans"],
+    "lentils": ["lentils", "lentils, dry", "lentils, cooked"],
+    "chickpeas": ["chickpeas", "garbanzo beans", "chickpeas, cooked"],
+    
+    # Fruits
+    "apple": ["apple", "apples", "apple, raw"],
+    "banana": ["banana", "bananas", "banana, raw"],
+    "orange": ["orange", "oranges", "orange, raw"],
+    "lemon": ["lemon", "lemons", "lemon juice"],
+    "lime": ["lime", "limes", "lime juice"],
+    
+    # Oils & Fats
+    "vegetable oil": ["vegetable oil", "oil", "cooking oil"],
+    "olive oil": ["olive oil", "oil, olive", "extra virgin olive oil"],
+    "coconut oil": ["coconut oil", "oil, coconut"],
+    
+    # Nuts & Seeds
+    "almonds": ["almonds", "almond", "almonds, raw"],
+    "peanuts": ["peanuts", "peanut", "peanuts, raw"],
+    "cashews": ["cashews", "cashew", "cashews, raw"],
+    
+    # Seasonings (basic - often have minimal nutritional data)
+    "salt": ["salt", "table salt", "sodium chloride"],
+    "sugar": ["sugar", "white sugar", "granulated sugar"],
+    "black pepper": ["black pepper", "pepper, black", "pepper"],
+    "soy sauce": ["soy sauce", "soya sauce"],
+}
+
+# Words that indicate a food is a complex dish (not a base ingredient)
+COMPLEX_DISH_INDICATORS = [
+    "bolognese", "carbonara", "curry", "sauce", "soup", "stew", "casserole",
+    "pizza", "burger", "sandwich", "salad", "wrap", "bowl", "pie", "cake",
+    "smoothie", "shake", "biryani", "masala", "tikka", "teriyaki", "stir-fry",
+    "roast", "fried", "grilled", "baked", "cooked with", "with vegetables",
+    "flavour", "flavored", "style", "recipe", "(", ")"
+]
+
+async def smart_ingredient_search(db, ingredient_name: str):
+    """
+    Smart ingredient search with prioritized matching:
+    1. Exact match on base ingredient name
+    2. Alias/synonym lookup
+    3. Starts-with match (prioritizes simple names)
+    4. Contains match (filters out complex dishes)
+    """
+    ing_lower = ingredient_name.lower().strip()
+    
+    # Strategy 1: Check aliases first
+    aliases_to_try = INGREDIENT_ALIASES.get(ing_lower, [ing_lower])
+    
+    for alias in aliases_to_try:
+        # Try exact match
+        result = await db.foods.find_one(
+            {"name": {"$regex": f"^{re.escape(alias)}$", "$options": "i"}, "nutrients": {"$ne": {}}},
+            {"_id": 0}
+        )
+        if result:
+            logger.debug(f"Ingredient '{ingredient_name}' matched EXACT: {result.get('name')}")
+            return result
+    
+    # Strategy 2: Try starts-with match for each alias
+    for alias in aliases_to_try:
+        result = await db.foods.find_one(
+            {"name": {"$regex": f"^{re.escape(alias)}", "$options": "i"}, "nutrients": {"$ne": {}}},
+            {"_id": 0}
+        )
+        if result:
+            # Skip if it looks like a complex dish
+            result_name_lower = result.get('name', '').lower()
+            if not any(indicator in result_name_lower for indicator in COMPLEX_DISH_INDICATORS):
+                logger.debug(f"Ingredient '{ingredient_name}' matched STARTS-WITH: {result.get('name')}")
+                return result
+    
+    # Strategy 3: Contains match with filtering
+    for alias in aliases_to_try:
+        cursor = db.foods.find(
+            {"name": {"$regex": re.escape(alias), "$options": "i"}, "nutrients": {"$ne": {}}},
+            {"_id": 0}
+        ).limit(10)
+        
+        async for doc in cursor:
+            doc_name_lower = doc.get('name', '').lower()
+            # Skip complex dishes - we want base ingredients
+            if not any(indicator in doc_name_lower for indicator in COMPLEX_DISH_INDICATORS):
+                logger.debug(f"Ingredient '{ingredient_name}' matched CONTAINS: {doc.get('name')}")
+                return doc
+    
+    # Strategy 4: Fallback - any match with nutrients
+    result = await db.foods.find_one(
+        {"name": {"$regex": re.escape(ing_lower), "$options": "i"}, "nutrients": {"$ne": {}}},
+        {"_id": 0}
+    )
+    if result:
+        logger.debug(f"Ingredient '{ingredient_name}' FALLBACK match: {result.get('name')}")
+        return result
+    
+    # Final fallback - any match without nutrient requirement  
+    result = await db.foods.find_one(
+        {"name": {"$regex": re.escape(ing_lower), "$options": "i"}},
+        {"_id": 0}
+    )
+    if result:
+        logger.debug(f"Ingredient '{ingredient_name}' FINAL FALLBACK (no nutrients): {result.get('name')}")
+    else:
+        logger.warning(f"Ingredient '{ingredient_name}' NOT FOUND in database")
+    
+    return result
+
+# =============================================================================
 # RECIPE DATABASE - Complex dish ingredient breakdown
 # =============================================================================
 # Maps complex dishes to their constituent ingredients with proportions
