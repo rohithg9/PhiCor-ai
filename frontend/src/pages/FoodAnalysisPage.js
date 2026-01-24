@@ -2574,6 +2574,114 @@ Snacks: Apple, almonds, green tea"
               </div>
             </ScrollArea>
           </div>
+          
+          {/* Food Browser Sidebar - Right Panel */}
+          {showFoodBrowser && (
+            <div className={`hidden lg:flex flex-col w-80 flex-shrink-0 border-l overflow-hidden ${isDark ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'}`}>
+              <div className="p-4 border-b flex items-center justify-between" style={{ borderColor: isDark ? '#374151' : '#e5e7eb' }}>
+                <h3 className={`text-sm font-semibold flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  <Apple className="w-4 h-4 text-green-500" />
+                  Food Database
+                  {foodBrowserData && (
+                    <Badge className="text-[9px] bg-green-500/20 text-green-500 ml-1">
+                      {foodBrowserData.total_foods?.toLocaleString()} items
+                    </Badge>
+                  )}
+                </h3>
+                <Button variant="ghost" size="sm" onClick={() => setShowFoodBrowser(false)}>
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+              
+              {/* Search */}
+              <div className="p-3 border-b" style={{ borderColor: isDark ? '#374151' : '#e5e7eb' }}>
+                <div className="relative">
+                  <Input
+                    value={foodBrowserSearch}
+                    onChange={(e) => setFoodBrowserSearch(e.target.value)}
+                    placeholder="Search foods..."
+                    className={`pr-8 text-xs ${isDark ? 'bg-gray-800 border-gray-700' : ''}`}
+                  />
+                  <Search className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+                </div>
+                {foodBrowserSearch && filteredFoodBrowserData && (
+                  <p className={`text-[10px] mt-1.5 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                    Found {filteredFoodBrowserData.total_foods?.toLocaleString()} matching foods
+                  </p>
+                )}
+              </div>
+              
+              {/* Food List */}
+              <ScrollArea className="flex-1">
+                <div className="p-2">
+                  {foodBrowserLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="w-6 h-6 animate-spin text-green-500" />
+                      <span className={`ml-2 text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Loading foods...</span>
+                    </div>
+                  ) : filteredFoodBrowserData?.categories ? (
+                    Object.entries(filteredFoodBrowserData.categories)
+                      .sort((a, b) => b[1].count - a[1].count)
+                      .map(([category, data]) => (
+                        <Collapsible 
+                          key={category} 
+                          open={expandedCategories[category]} 
+                          onOpenChange={() => toggleCategory(category)}
+                          className="mb-1"
+                        >
+                          <CollapsibleTrigger className={`w-full flex items-center justify-between p-2 rounded-lg text-left transition-colors ${isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}>
+                            <div className="flex items-center gap-2">
+                              <span className="text-base">{data.icon}</span>
+                              <span className={`text-xs font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{category}</span>
+                              <Badge variant="outline" className="text-[9px] h-4 px-1.5">{data.count}</Badge>
+                            </div>
+                            {expandedCategories[category] ? (
+                              <ChevronUp className="w-3.5 h-3.5 text-gray-400" />
+                            ) : (
+                              <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
+                            )}
+                          </CollapsibleTrigger>
+                          <CollapsibleContent>
+                            <div className={`ml-6 mr-1 mt-1 max-h-48 overflow-y-auto rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-gray-50'}`}>
+                              {data.foods.slice(0, 100).map((food, idx) => (
+                                <button
+                                  key={idx}
+                                  onClick={() => handleFoodBrowserSelect(food)}
+                                  className={`w-full text-left p-1.5 text-[11px] border-b last:border-0 transition-colors truncate ${
+                                    isDark 
+                                      ? 'border-gray-700/50 hover:bg-gray-700/50 text-gray-300' 
+                                      : 'border-gray-200/50 hover:bg-gray-100 text-gray-700'
+                                  }`}
+                                  title={food}
+                                >
+                                  {food}
+                                </button>
+                              ))}
+                              {data.foods.length > 100 && (
+                                <div className={`p-2 text-center text-[10px] ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                                  + {data.foods.length - 100} more items
+                                </div>
+                              )}
+                            </div>
+                          </CollapsibleContent>
+                        </Collapsible>
+                      ))
+                  ) : (
+                    <div className={`text-center py-8 text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                      No foods found
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
+              
+              {/* Footer Stats */}
+              <div className={`p-3 border-t text-center ${isDark ? 'bg-gray-900/80 border-gray-800' : 'bg-gray-50 border-gray-200'}`}>
+                <p className={`text-[10px] ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                  Click any food to analyze its effects on your body
+                </p>
+              </div>
+            </div>
+          )}
         </div>
         
         {/* Mobile Panel */}
