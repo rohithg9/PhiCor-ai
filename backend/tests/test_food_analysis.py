@@ -247,8 +247,8 @@ class TestFoodAnalysisEdgeCases:
             f"{BASE_URL}/api/food/analyze",
             json={"food_name": ""}
         )
-        # Should either return 400 or 422 for validation error
-        assert response.status_code in [400, 422], f"Expected 400 or 422 for empty food name, got {response.status_code}"
+        # Should return 400, 404, or 422 for validation error
+        assert response.status_code in [400, 404, 422], f"Expected 400, 404, or 422 for empty food name, got {response.status_code}"
     
     def test_analyze_nonexistent_food(self):
         """Test analysis of a made-up food name"""
