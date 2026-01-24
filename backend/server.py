@@ -9600,23 +9600,8 @@ async def analyze_food_from_database(request: Dict[str, Any] = Body(...)):
                 ing_name = ingredient["name"]
                 ing_amount_g = ingredient["amount_g"]
                 
-                # Find ingredient in database
-                ing_food = await db.foods.find_one(
-                    {
-                        "$and": [
-                            {"name": {"$regex": ing_name, "$options": "i"}},
-                            {"nutrients": {"$ne": {}}}
-                        ]
-                    },
-                    {"_id": 0}
-                )
-                
-                if not ing_food:
-                    # Try without nutrient requirement
-                    ing_food = await db.foods.find_one(
-                        {"name": {"$regex": ing_name, "$options": "i"}},
-                        {"_id": 0}
-                    )
+                # Find ingredient in database using smart search
+                ing_food = await smart_ingredient_search(db, ing_name)
                 
                 if ing_food:
                     ing_nutrients = ing_food.get("nutrients", {})
