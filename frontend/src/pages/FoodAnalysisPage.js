@@ -655,7 +655,7 @@ const FoodAnalysisPage = () => {
     setSearchQuery(foodName);
     setShowFoodBrowser(false);
     // Trigger analysis
-    handleAnalyze(foodName);
+    analyzeFood(foodName);
   };
   
   // Toggle category expansion
