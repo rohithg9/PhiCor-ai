@@ -9419,6 +9419,23 @@ def find_recipe(food_name: str) -> dict:
     """
     name_lower = food_name.lower().strip()
     
+    # Recipe name aliases for common spelling variations
+    RECIPE_ALIASES = {
+        "lasagne": "lasagna",
+        "spaghetti bolognaise": "spaghetti bolognese",
+        "tikka masala": "chicken tikka masala",
+        "butter chicken curry": "butter chicken",
+        "pad thai noodles": "pad thai",
+        "phở": "pho",
+        "fried rice": "chinese fried rice",
+    }
+    
+    # Check aliases first
+    if name_lower in RECIPE_ALIASES:
+        alias_target = RECIPE_ALIASES[name_lower]
+        if alias_target in RECIPE_DATABASE:
+            return RECIPE_DATABASE[alias_target]
+    
     # Direct match
     if name_lower in RECIPE_DATABASE:
         return RECIPE_DATABASE[name_lower]
