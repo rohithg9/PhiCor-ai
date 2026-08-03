@@ -27,6 +27,42 @@ PhiCor.ai is a unified, parameter-based health intelligence system that provides
 
 ## What's Been Implemented
 
+### August 3, 2026 - Phase 3: Patient Profile System & Quantity Calculator
+
+#### Patient Profile System (✅ CREATED)
+- **New Files**:
+  - `/app/frontend/src/context/PatientContext.js` - Global patient context provider
+  - `/app/frontend/src/components/GlobalPatientPanel.js` - Patient panel UI component
+- **Features**:
+  - Global patient context accessible across all analysis pages
+  - Patient demographics: age, sex, height, weight, BMI (auto-calculated)
+  - Risk factors: smoking status, alcohol consumption, physical activity
+  - Medical conditions: quick toggles for Diabetes, Hypertension, CKD, Heart Failure, COPD, etc.
+  - Current medications: track Metformin, Lisinopril, Warfarin, etc.
+  - Automatic modifier calculations based on patient profile
+  - Save/load patient profiles to localStorage
+  - Patient list for switching between profiles
+- **Modifiers Calculated**:
+  - Cardiovascular risk (age, BMI, smoking, family history)
+  - Renal function (age, CKD, medications)
+  - Hepatic function (alcohol, liver disease)
+  - Metabolic risk (BMI, diabetes)
+  - Respiratory function (smoking, COPD)
+  - Drug interactions (warfarin → bleeding risk, metformin → lactic acidosis risk)
+
+#### Quantity Calculator - Food Analysis (✅ COMPLETED & TESTED)
+- **Location**: `/app/frontend/src/pages/FoodAnalysisPage.js`
+- **Features**:
+  - "Quantity" tab button with badge showing current multiplier (e.g., "1.25x")
+  - Serving Size Calculator panel with slider (0.25x to 5x)
+  - +/- buttons for precise adjustment (0.25 increments)
+  - Base serving display (e.g., "Base: 3 oz (85g)")
+  - Adjusted serving display (e.g., "Adjusted: 106g")
+  - **Scaled Macronutrients preview** showing real-time calculations:
+    - Calories, Protein, Carbs, Fat, Fiber all scale with serving size
+  - Reset button to return to 1x
+- **Test Report**: `/app/test_reports/iteration_7.json`
+
 ### August 3, 2026 - Phase 2: Visualization Integration (✅ COMPLETED & TESTED)
 
 #### Neural Network Visualization - Differential Diagnosis (✅ INTEGRATED)
@@ -224,6 +260,7 @@ PhiCor.ai is a unified, parameter-based health intelligence system that provides
 - `/app/test_reports/iteration_4.json` - Differential diagnosis probability bug fix (100% pass rate)
 - `/app/test_reports/iteration_5.json` - Drug Browser Panel tests (100% pass rate)
 - `/app/test_reports/iteration_6.json` - Visualization Integration tests (100% pass rate)
+- `/app/test_reports/iteration_7.json` - Quantity Calculator tests
 
 ## User Vision: Neural Network / Mind Map Visualization (August 3, 2026)
 

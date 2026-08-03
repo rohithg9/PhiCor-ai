@@ -617,6 +617,14 @@ const FoodAnalysisPage = () => {
     
     const scaled = { ...analysisResult };
     
+    // Get base serving in grams (parse from string like "100g" or "3 oz (85g)" or just use 100g default)
+    let baseServingGrams = 100;
+    const servingStr = analysisResult.serving_size || analysisResult.serving || '';
+    const gramsMatch = servingStr.match(/(\d+)\s*g/i);
+    if (gramsMatch) {
+      baseServingGrams = parseInt(gramsMatch[1]);
+    }
+    
     // Scale nutrients
     if (scaled.nutrients) {
       scaled.scaledNutrients = {};
@@ -633,16 +641,37 @@ const FoodAnalysisPage = () => {
       });
     }
     
-    // Scale macros
-    if (scaled.macronutrients) {
-      scaled.scaledMacros = {
-        calories: Math.round((scaled.macronutrients.calories || 0) * servingMultiplier),
-        protein: Math.round((scaled.macronutrients.protein || 0) * servingMultiplier * 10) / 10,
-        carbs: Math.round((scaled.macronutrients.carbs || 0) * servingMultiplier * 10) / 10,
-        fat: Math.round((scaled.macronutrients.fat || 0) * servingMultiplier * 10) / 10,
-        fiber: Math.round((scaled.macronutrients.fiber || 0) * servingMultiplier * 10) / 10
-      };
+    // Scale macros - check different possible field names and locations
+    const nutritionalProfile = scaled.complete_nutritional_profile || {};
+    const macrosFromProfile = nutritionalProfile.macronutrients || {};
+    const macros = scaled.macronutrients || scaled.macros || macrosFromProfile || {};
+    const foods = scaled.foods_analyzed || [];
+    
+    // If macros not directly available, try to get from first analyzed food
+    let calories = macros.energy_kcal || macros.calories || macros.energy;
+    let protein = macros.protein_g || macros.protein;
+    let carbs = macros.carbohydrates_g || macros.carbohydrates || macros.carbs;
+    let fat = macros.fat_total_g || macros.fat || macros.total_fat;
+    let fiber = macros.fiber_g || macros.fiber || macros.dietary_fiber;
+    
+    // Try to get from foods_analyzed if not in macros
+    if (foods.length > 0 && (!calories && !protein)) {
+      const food = foods[0];
+      const nutrients = food.nutrients || {};
+      calories = calories || nutrients.calories || nutrients.energy_kcal || 0;
+      protein = protein || nutrients.protein || 0;
+      carbs = carbs || nutrients.carbohydrates || nutrients.carbs || 0;
+      fat = fat || nutrients.fat || nutrients.total_fat || 0;
+      fiber = fiber || nutrients.fiber || nutrients.dietary_fiber || 0;
     }
+    
+    scaled.scaledMacros = {
+      calories: Math.round((calories || 0) * servingMultiplier),
+      protein: Math.round((protein || 0) * servingMultiplier * 10) / 10,
+      carbs: Math.round((carbs || 0) * servingMultiplier * 10) / 10,
+      fat: Math.round((fat || 0) * servingMultiplier * 10) / 10,
+      fiber: Math.round((fiber || 0) * servingMultiplier * 10) / 10
+    };
     
     // Scale organ effects (impact increases with quantity)
     if (scaled.organ_system_parameter_effects) {
@@ -658,8 +687,9 @@ const FoodAnalysisPage = () => {
     }
     
     scaled.servingMultiplier = servingMultiplier;
-    scaled.originalServing = analysisResult.serving_size || '100g';
-    scaled.adjustedServing = `${Math.round(100 * servingMultiplier)}g`;
+    scaled.baseServingGrams = baseServingGrams;
+    scaled.originalServing = servingStr || `${baseServingGrams}g`;
+    scaled.adjustedServing = `${Math.round(baseServingGrams * servingMultiplier)}g`;
     
     return scaled;
   }, [analysisResult, servingMultiplier]);
@@ -1715,9 +1745,9 @@ Snacks: Apple, almonds, green tea"
                         </div>
                         
                         {/* Quick preview of scaled values */}
-                        {scaledAnalysisResult?.scaledMacros && servingMultiplier !== 1 && (
+                        {servingMultiplier !== 1 && scaledAnalysisResult?.scaledMacros && (
                           <div className="mt-3 pt-3 border-t border-border/50">
-                            <div className="text-xs text-muted-foreground mb-2">Scaled Macronutrients:</div>
+                            <div className="text-xs text-muted-foreground mb-2">Scaled Macronutrients ({servingMultiplier}x serving):</div>
                             <div className="grid grid-cols-5 gap-2 text-center">
                               <div className={`p-2 rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-white'}`}>
                                 <div className="text-lg font-bold text-orange-500">{scaledAnalysisResult.scaledMacros.calories}</div>
