@@ -8,7 +8,7 @@ import {
   Beaker, Shield, Clock, Info, Loader2, X, ArrowLeft,
   User, Scale, Activity, FileText, Upload, Sliders,
   CheckCircle, XCircle, AlertCircle, Brain, Zap, LineChart,
-  Target, Check
+  Target, Check, Layers, Network
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../components/ui/button';
@@ -1448,11 +1448,72 @@ const DrugsPage = () => {
   const [selectedDrug, setSelectedDrug] = useState(null);
   const [drugDetail, setDrugDetail] = useState(null);
   
+  // Drug Browser state
+  const [showDrugBrowser, setShowDrugBrowser] = useState(false);
+  const [drugBrowserData, setDrugBrowserData] = useState(null);
+  const [drugBrowserLoading, setDrugBrowserLoading] = useState(false);
+  const [drugBrowserSearch, setDrugBrowserSearch] = useState('');
+  const [expandedBrowserCategories, setExpandedBrowserCategories] = useState({});
+  
   // Patient & Simulation state
   const [patient, setPatient] = useState({ ...DEFAULT_PATIENT });
   const [dosage, setDosage] = useState(20);
   const [simulation, setSimulation] = useState(null);
   const [isSimulating, setIsSimulating] = useState(false);
+
+  // Fetch Drug Browser data
+  const fetchDrugBrowserData = useCallback(async () => {
+    if (drugBrowserData) return; // Already loaded
+    setDrugBrowserLoading(true);
+    try {
+      const response = await fetch(`${API_URL}/api/drugs-db/browse-all`);
+      if (response.ok) {
+        const data = await response.json();
+        setDrugBrowserData(data);
+      }
+    } catch (err) {
+      console.error('Error fetching drug browser data:', err);
+    } finally {
+      setDrugBrowserLoading(false);
+    }
+  }, [drugBrowserData]);
+
+  // Load drug browser data when opened
+  useEffect(() => {
+    if (showDrugBrowser && !drugBrowserData) {
+      fetchDrugBrowserData();
+    }
+  }, [showDrugBrowser, drugBrowserData, fetchDrugBrowserData]);
+
+  // Filter drug browser data
+  const filteredDrugBrowserData = useMemo(() => {
+    if (!drugBrowserData?.categories || !drugBrowserSearch.trim()) {
+      return drugBrowserData;
+    }
+    const query = drugBrowserSearch.toLowerCase();
+    const filteredCategories = {};
+    let totalFiltered = 0;
+
+    Object.entries(drugBrowserData.categories).forEach(([cat, data]) => {
+      const filteredDrugs = data.drugs.filter(drug => 
+        drug.name?.toLowerCase().includes(query) ||
+        drug.drug_class?.toLowerCase().includes(query) ||
+        drug.brand_names?.some(bn => bn.toLowerCase().includes(query))
+      );
+      if (filteredDrugs.length > 0) {
+        filteredCategories[cat] = { ...data, drugs: filteredDrugs, count: filteredDrugs.length };
+        totalFiltered += filteredDrugs.length;
+      }
+    });
+
+    return { ...drugBrowserData, categories: filteredCategories, total_drugs: totalFiltered };
+  }, [drugBrowserData, drugBrowserSearch]);
+
+  // Handle drug selection from browser
+  const handleDrugBrowserSelect = (drugId) => {
+    setSelectedDrug(drugId);
+    setShowDrugBrowser(false);
+  };
 
   // Fetch drugs
   useEffect(() => {
@@ -1612,14 +1673,26 @@ const DrugsPage = () => {
         <div className="w-72 lg:w-80 border-r border-border/50 bg-card/20 flex flex-col">
           {/* Search */}
           <div className="p-3 border-b border-border/50" data-tutorial="drug-search">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Search drugs..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-9"
-              />
+            <div className="relative flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search drugs..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 h-9"
+                />
+              </div>
+              <Button
+                variant={showDrugBrowser ? "default" : "outline"}
+                size="sm"
+                onClick={() => setShowDrugBrowser(!showDrugBrowser)}
+                className={`h-9 hidden lg:flex items-center gap-1.5 ${showDrugBrowser ? 'bg-purple-500 hover:bg-purple-600' : ''}`}
+                data-testid="drug-browser-toggle"
+              >
+                <Layers className="w-4 h-4" />
+                <span className="text-xs">Browse All</span>
+              </Button>
             </div>
           </div>
           
@@ -1727,6 +1800,151 @@ const DrugsPage = () => {
           )}
         </div>
       </div>
+
+      {/* Drug Browser Sidebar */}
+      <AnimatePresence>
+        {showDrugBrowser && (
+          <motion.div
+            initial={{ x: 320, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: 320, opacity: 0 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            className="fixed right-0 top-0 h-full w-80 bg-card border-l border-border/50 shadow-2xl z-50 flex flex-col"
+            data-testid="drug-browser-sidebar"
+          >
+            {/* Header */}
+            <div className="p-4 border-b border-border/50 bg-gradient-to-r from-purple-500/10 to-indigo-500/10">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center">
+                    <Layers className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-sm">Drug Database</h3>
+                    <p className="text-xs text-muted-foreground">
+                      {drugBrowserData?.total_drugs?.toLocaleString() || '...'} drugs
+                    </p>
+                  </div>
+                </div>
+                <Button variant="ghost" size="sm" onClick={() => setShowDrugBrowser(false)}>
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+              
+              {/* Search */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by name, class, brand..."
+                  value={drugBrowserSearch}
+                  onChange={(e) => setDrugBrowserSearch(e.target.value)}
+                  className="pl-10 h-9 text-sm"
+                />
+              </div>
+              {drugBrowserSearch && filteredDrugBrowserData && (
+                <p className="text-xs text-muted-foreground mt-2">
+                  Found {filteredDrugBrowserData.total_drugs?.toLocaleString()} matching drugs
+                </p>
+              )}
+            </div>
+            
+            {/* Categories */}
+            <ScrollArea className="flex-1">
+              <div className="p-2">
+                {drugBrowserLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="w-6 h-6 animate-spin text-purple-500" />
+                  </div>
+                ) : filteredDrugBrowserData?.categories ? (
+                  Object.entries(filteredDrugBrowserData.categories)
+                    .sort((a, b) => b[1].count - a[1].count)
+                    .map(([categoryId, category]) => (
+                      <div key={categoryId} className="mb-2">
+                        <button
+                          onClick={() => setExpandedBrowserCategories(prev => ({
+                            ...prev,
+                            [categoryId]: !prev[categoryId]
+                          }))}
+                          className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-accent/50 transition-colors"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg">{category.icon}</span>
+                            <span className="text-sm font-medium">{category.name}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary" className="text-xs">
+                              {category.count}
+                            </Badge>
+                            {expandedBrowserCategories[categoryId] ? (
+                              <ChevronUp className="w-4 h-4 text-muted-foreground" />
+                            ) : (
+                              <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                            )}
+                          </div>
+                        </button>
+                        
+                        <AnimatePresence>
+                          {expandedBrowserCategories[categoryId] && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              className="overflow-hidden"
+                            >
+                              <div className="pl-8 pr-2 py-1 space-y-0.5 max-h-60 overflow-y-auto">
+                                {category.drugs.map((drug) => (
+                                  <button
+                                    key={drug.id}
+                                    onClick={() => handleDrugBrowserSelect(drug.id)}
+                                    className="w-full text-left p-2 text-xs rounded hover:bg-purple-500/10 transition-colors group"
+                                    data-testid={`drug-browser-item-${drug.id}`}
+                                  >
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-sm group-hover:text-purple-400 transition-colors truncate">
+                                        {drug.name}
+                                      </span>
+                                      {drug.effect_count > 0 && (
+                                        <Badge variant="outline" className="text-[10px] ml-1 shrink-0">
+                                          {drug.effect_count} effects
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    {drug.drug_class && (
+                                      <p className="text-[10px] text-muted-foreground truncate">
+                                        {drug.drug_class}
+                                      </p>
+                                    )}
+                                    {drug.brand_names?.length > 0 && (
+                                      <p className="text-[10px] text-muted-foreground/60 truncate">
+                                        {drug.brand_names.join(', ')}
+                                      </p>
+                                    )}
+                                  </button>
+                                ))}
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    ))
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground text-sm">
+                    No drugs found
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+            
+            {/* Footer with stats */}
+            <div className="p-3 border-t border-border/50 bg-muted/20">
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>Categories: {Object.keys(filteredDrugBrowserData?.categories || {}).length}</span>
+                <span>Total: {filteredDrugBrowserData?.total_drugs?.toLocaleString() || 0}</span>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

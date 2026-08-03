@@ -2358,6 +2358,102 @@ async def get_drug_categories_list():
     }
 
 
+@api_router.get("/drugs-db/browse-all")
+async def browse_all_drugs():
+    """
+    Get all drugs categorized for the Drug Browser sidebar.
+    Similar to food/browse-all but for drugs.
+    Returns drugs grouped by category with icons and counts.
+    """
+    try:
+        # Drug category configuration with icons
+        DRUG_CATEGORY_CONFIG = {
+            "cardiovascular": {"icon": "🫀", "name": "Cardiovascular", "color": "#ef4444"},
+            "antibiotics": {"icon": "🦠", "name": "Antibiotics", "color": "#22c55e"},
+            "cns_neurological": {"icon": "🧠", "name": "CNS/Neurological", "color": "#8b5cf6"},
+            "analgesics": {"icon": "💊", "name": "Analgesics/Pain", "color": "#ec4899"},
+            "respiratory": {"icon": "🫁", "name": "Respiratory", "color": "#3b82f6"},
+            "gastrointestinal": {"icon": "🔬", "name": "Gastrointestinal", "color": "#f97316"},
+            "endocrine": {"icon": "⚡", "name": "Endocrine/Metabolic", "color": "#eab308"},
+            "antivirals": {"icon": "🧬", "name": "Antivirals", "color": "#84cc16"},
+            "antifungals": {"icon": "🍄", "name": "Antifungals", "color": "#d97706"},
+            "immunosuppressants": {"icon": "🛡️", "name": "Immunosuppressants", "color": "#6366f1"},
+            "hematological": {"icon": "🩸", "name": "Hematological", "color": "#dc2626"},
+            "renal": {"icon": "🫘", "name": "Renal/Nephrology", "color": "#14b8a6"},
+            "oncology": {"icon": "🎗️", "name": "Oncology", "color": "#a855f7"},
+            "dermatological": {"icon": "🧴", "name": "Dermatological", "color": "#f59e0b"},
+            "ophthalmic": {"icon": "👁️", "name": "Ophthalmic", "color": "#10b981"},
+            "urological": {"icon": "💧", "name": "Urological", "color": "#0ea5e9"},
+            "psychiatric": {"icon": "🧩", "name": "Psychiatric", "color": "#7c3aed"},
+            "musculoskeletal": {"icon": "💪", "name": "Musculoskeletal", "color": "#ea580c"},
+        }
+        
+        # Get all drugs with their categories and effects
+        cursor = db.drugs.find({}, {
+            "_id": 0, 
+            "id": 1, 
+            "name": 1, 
+            "category": 1, 
+            "drug_class": 1,
+            "brand_names": 1,
+            "mechanism_short": 1,
+            "parameter_effects": 1
+        })
+        drugs = await cursor.to_list(500)
+        
+        # Group by category
+        categorized = {}
+        for cat, cfg in DRUG_CATEGORY_CONFIG.items():
+            categorized[cat] = {
+                "icon": cfg["icon"],
+                "name": cfg["name"],
+                "color": cfg["color"],
+                "drugs": [],
+                "count": 0
+            }
+        categorized["other"] = {
+            "icon": "💊",
+            "name": "Other",
+            "color": "#6b7280",
+            "drugs": [],
+            "count": 0
+        }
+        
+        for drug in drugs:
+            cat = drug.get("category", "other") or "other"
+            if cat not in categorized:
+                cat = "other"
+            
+            drug_info = {
+                "id": drug.get("id"),
+                "name": drug.get("name"),
+                "drug_class": drug.get("drug_class", ""),
+                "brand_names": drug.get("brand_names", [])[:3],  # First 3 brand names
+                "mechanism_short": drug.get("mechanism_short", ""),
+                "effect_count": len(drug.get("parameter_effects", []))
+            }
+            categorized[cat]["drugs"].append(drug_info)
+        
+        # Sort drugs within each category and update counts
+        for cat in categorized:
+            categorized[cat]["drugs"].sort(key=lambda x: x["name"])
+            categorized[cat]["count"] = len(categorized[cat]["drugs"])
+        
+        # Remove empty categories
+        categorized = {k: v for k, v in categorized.items() if v["count"] > 0}
+        
+        total = sum(c["count"] for c in categorized.values())
+        
+        return {
+            "success": True,
+            "total_drugs": total,
+            "categories": categorized
+        }
+    except Exception as e:
+        logger.error(f"Error browsing drugs: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # Hospital Priority Drug Categories - ordered by clinical importance
 HOSPITAL_PRIORITY_ORDER_EARLY = [
     "cardiovascular",      # Most critical in hospital settings
