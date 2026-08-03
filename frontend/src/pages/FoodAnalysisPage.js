@@ -130,6 +130,58 @@ const QUICK_FOODS = [
   'Vitamin D', 'Avocado', 'Oatmeal', 'Eggs', 'Almonds', 'Coffee', 'Rice'
 ];
 
+// Popular foods by category for the homepage
+const POPULAR_FOODS_BY_CATEGORY = [
+  {
+    category: 'Heart Healthy',
+    icon: '❤️',
+    color: 'from-red-500 to-pink-500',
+    bgLight: 'bg-red-50',
+    bgDark: 'bg-red-900/20',
+    foods: ['Salmon', 'Avocado', 'Walnuts', 'Olive Oil', 'Oatmeal']
+  },
+  {
+    category: 'Brain Boosters',
+    icon: '🧠',
+    color: 'from-purple-500 to-indigo-500',
+    bgLight: 'bg-purple-50',
+    bgDark: 'bg-purple-900/20',
+    foods: ['Blueberries', 'Dark Chocolate', 'Eggs', 'Turmeric', 'Broccoli']
+  },
+  {
+    category: 'Energy Foods',
+    icon: '⚡',
+    color: 'from-yellow-500 to-orange-500',
+    bgLight: 'bg-yellow-50',
+    bgDark: 'bg-yellow-900/20',
+    foods: ['Banana', 'Quinoa', 'Sweet Potato', 'Almonds', 'Coffee']
+  },
+  {
+    category: 'Immunity Boosters',
+    icon: '🛡️',
+    color: 'from-green-500 to-emerald-500',
+    bgLight: 'bg-green-50',
+    bgDark: 'bg-green-900/20',
+    foods: ['Citrus Fruits', 'Garlic', 'Ginger', 'Spinach', 'Green Tea']
+  },
+  {
+    category: 'Gut Health',
+    icon: '🦠',
+    color: 'from-teal-500 to-cyan-500',
+    bgLight: 'bg-teal-50',
+    bgDark: 'bg-teal-900/20',
+    foods: ['Yogurt', 'Kimchi', 'Sauerkraut', 'Kefir', 'Miso']
+  },
+  {
+    category: 'Protein Rich',
+    icon: '💪',
+    color: 'from-blue-500 to-indigo-500',
+    bgLight: 'bg-blue-50',
+    bgDark: 'bg-blue-900/20',
+    foods: ['Chicken Breast', 'Eggs', 'Lentils', 'Greek Yogurt', 'Tofu']
+  }
+];
+
 // Fallback diseases list (used if API fails)
 const FALLBACK_DISEASES = [
   'Diabetes Type 2', 'Diabetes Type 1', 'Hypertension', 'Heart Failure',
@@ -2872,23 +2924,88 @@ Snacks: Apple, almonds, green tea"
                     )}
                   </div>
                 ) : (
-                  /* Empty State */
-                  <div className={`rounded-xl border p-8 text-center ${isDark ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'}`}>
-                    <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-green-500/20 to-emerald-500/20 flex items-center justify-center mb-4">
-                      <span className="text-3xl font-bold text-green-500">Π</span>
+                  /* Empty State with Popular Foods */
+                  <div className="space-y-6">
+                    {/* Hero Section */}
+                    <div className={`rounded-xl border p-6 text-center ${isDark ? 'bg-gradient-to-br from-gray-900 to-gray-800 border-gray-700' : 'bg-gradient-to-br from-white to-gray-50 border-gray-200'}`}>
+                      <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center mb-4 shadow-lg">
+                        <span className="text-4xl font-bold text-white">Π</span>
+                      </div>
+                      <h2 className={`text-xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                        PhiCor Food Analysis
+                      </h2>
+                      <p className={`text-sm mb-4 max-w-md mx-auto ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                        Discover how any food affects your body at the molecular, cellular, and organ level. 
+                        Search any food or pick from popular choices below.
+                      </p>
+                      
+                      {/* Quick Search Suggestions */}
+                      <div className="flex flex-wrap gap-2 justify-center">
+                        {QUICK_FOODS.slice(0, 6).map(food => (
+                          <Button 
+                            key={food} 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => analyzeFood(food)} 
+                            className={`text-xs ${isDark ? 'border-gray-700 hover:bg-gray-800' : ''}`}
+                          >
+                            {getFoodIcon(food)} {food}
+                          </Button>
+                        ))}
+                      </div>
                     </div>
-                    <h3 className={`text-base font-semibold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                      PhiCor Food Analysis
-                    </h3>
-                    <p className={`text-xs mb-4 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
-                      Search any food, dish, supplement, or nutrient to see how it affects your body parameters
-                    </p>
-                    <div className="flex flex-wrap gap-2 justify-center max-w-md mx-auto">
-                      {QUICK_FOODS.slice(0, 8).map(food => (
-                        <Button key={food} variant="outline" size="sm" onClick={() => analyzeFood(food)} className="text-xs">
-                          {getFoodIcon(food)} {food}
-                        </Button>
-                      ))}
+                    
+                    {/* Popular Foods by Category */}
+                    <div>
+                      <h3 className={`text-sm font-semibold mb-4 flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                        <Sparkles className="w-4 h-4 text-yellow-500" />
+                        Popular Foods by Health Goal
+                      </h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {POPULAR_FOODS_BY_CATEGORY.map((category, idx) => (
+                          <div 
+                            key={category.category}
+                            className={`rounded-xl border p-4 transition-all hover:shadow-md ${
+                              isDark ? `${category.bgDark} border-gray-700 hover:border-gray-600` : `${category.bgLight} border-gray-200 hover:border-gray-300`
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 mb-3">
+                              <span className="text-xl">{category.icon}</span>
+                              <span className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                {category.category}
+                              </span>
+                            </div>
+                            <div className="flex flex-wrap gap-1.5">
+                              {category.foods.map(food => (
+                                <button
+                                  key={food}
+                                  onClick={() => analyzeFood(food)}
+                                  className={`px-2.5 py-1 rounded-full text-xs transition-all hover:scale-105 ${
+                                    isDark 
+                                      ? 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white'
+                                      : 'bg-white text-gray-700 hover:bg-gray-100 shadow-sm'
+                                  }`}
+                                >
+                                  {getFoodIcon(food)} {food}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    {/* Tips Section */}
+                    <div className={`rounded-xl border p-4 ${isDark ? 'bg-blue-900/10 border-blue-800/30' : 'bg-blue-50 border-blue-200'}`}>
+                      <h4 className={`text-xs font-semibold mb-2 flex items-center gap-2 ${isDark ? 'text-blue-400' : 'text-blue-700'}`}>
+                        💡 Pro Tips
+                      </h4>
+                      <ul className={`text-xs space-y-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                        <li>• Search for complex dishes like Chicken Tikka Masala - PhiCor breaks them down into ingredients</li>
+                        <li>• Try supplements like Vitamin D or Omega-3 to see their organ-level effects</li>
+                        <li>• Use the Quantity slider to see how serving size affects nutrient intake</li>
+                        <li>• Click the Body Map tab to visualize which organs are affected by each food</li>
+                      </ul>
                     </div>
                   </div>
                 )}

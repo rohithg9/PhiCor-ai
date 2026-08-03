@@ -26,6 +26,8 @@ import DifferentialDashboard from '../components/DifferentialDashboard';
 import ParameterDrillDownModal from '../components/ParameterDrillDownModal';
 import PDFExportButton from '../components/PDFExportButton';
 import NeuralNetworkVisualization from '../components/NeuralNetworkVisualization';
+import GlobalPatientPanel from '../components/GlobalPatientPanel';
+import { usePatient } from '../context/PatientContext';
 import { 
   getDifferentialDiagnosis, 
   parseClinicalText, 
@@ -69,6 +71,9 @@ const DifferentialPage = () => {
   const tutorial = useTutorial('differential');
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  
+  // Global Patient Context
+  const { activePatient, modifiers, applyModifiers } = usePatient();
   
   // State management
   const initialTab = searchParams.get('tab') || 'parameters';
@@ -1609,6 +1614,13 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                   <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                     Differential Diagnosis
                   </h3>
+                  {/* Patient Context Indicator */}
+                  {!activePatient?.isBaseline && (
+                    <Badge className="bg-cyan-500/20 text-cyan-400 text-[10px]">
+                      <User className="w-3 h-3 mr-1" />
+                      {activePatient.name || 'Patient'}
+                    </Badge>
+                  )}
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                   {differentialResults.length > 0 && (
@@ -1620,6 +1632,12 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                     <Badge className="bg-blue-500/20 text-blue-400 flex items-center gap-1">
                       <Zap className="w-3 h-3" />
                       {analysisTimeTaken}s
+                    </Badge>
+                  )}
+                  {/* Patient Modifiers Active */}
+                  {!activePatient?.isBaseline && modifiers && Object.keys(modifiers).length > 0 && (
+                    <Badge className="bg-orange-500/20 text-orange-400 text-[10px]">
+                      Modifiers Active
                     </Badge>
                   )}
                   {/* Show synthesizing indicator */}

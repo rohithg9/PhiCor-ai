@@ -19,6 +19,7 @@ import { Slider } from '../components/ui/slider';
 import { ORGAN_MODELS } from '../data/organModels';
 import PDFExportButton from '../components/PDFExportButton';
 import EnhancedBodyMap from '../components/EnhancedBodyMap';
+import { usePatient } from '../context/PatientContext';
 
 // Use relative URL if REACT_APP_BACKEND_URL is not set (for production)
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
@@ -1461,6 +1462,9 @@ const DrugsPage = () => {
   const [dosage, setDosage] = useState(20);
   const [simulation, setSimulation] = useState(null);
   const [isSimulating, setIsSimulating] = useState(false);
+  
+  // Global Patient Context
+  const { activePatient, modifiers } = usePatient();
 
   // Fetch Drug Browser data
   const fetchDrugBrowserData = useCallback(async () => {
