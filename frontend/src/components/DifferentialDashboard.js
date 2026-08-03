@@ -355,6 +355,8 @@ const DifferentialDashboard = ({
               const name = diff.diseaseName || diff.name;
               const stats = matchStats[name] || { matched: 0, total: 0, percentage: 0 };
               const isActive = selectedDifferential === idx;
+              // Get probability from PhiCor analysis or fallback to match percentage
+              const diagProb = diff.probabilityScore || diff.probability || stats.percentage || 0;
               
               return (
                 <TabsTrigger 
@@ -379,11 +381,11 @@ const DifferentialDashboard = ({
                     </span>
                     <div className="flex items-center gap-1 mt-1">
                       <Progress 
-                        value={stats.percentage} 
+                        value={diagProb} 
                         className={`h-1 w-12 ${isActive ? 'bg-white/30' : ''}`}
                       />
                       <span className={`text-[10px] font-bold ${isActive ? 'text-white' : 'text-emerald-500'}`}>
-                        {stats.matched}/{stats.total}
+                        {diagProb}%
                       </span>
                     </div>
                   </div>

@@ -808,7 +808,7 @@ export const generateDiagnosisPDF = (diagnosisData, patientInput = '', patientPr
     diagnoses.forEach((dx, i) => {
       y = checkPageBreak(doc, y, 35);
       
-      const probability = dx.probability || dx.confidence || dx.matchScore || 0;
+      const probability = dx.probability || dx.probabilityScore || dx.confidence || dx.matchScore || 0;
       const probPercent = probability > 1 ? probability : probability * 100;
       const probColor = probPercent >= 70 ? COLORS.danger : probPercent >= 40 ? COLORS.warning : COLORS.secondary;
       

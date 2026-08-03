@@ -1,0 +1,35 @@
+{
+  "summary": "Verified bug fix for differential diagnosis probability percentages (probabilityScore -> probability fallback). Ran full flow: entered clinical text, ran PhiCor Complete Analysis, verified diagnosis cards show correct XX% (not NaN% or 0/1), saved case, verified saved case detail page displays correct percentages, verified Export PDF (new tab print view) also displays correct probabilities.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/diagnosis/synthesize", "issue": "Returns 422 when called after Run Complete Analysis (unrelated to this bug fix - validation error on required fields). Console error visible but non-blocking."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [
+    "(Optional/unrelated) Investigate 422 on /api/diagnosis/synthesize - request payload validation mismatch shown in browser console after analysis"
+  ],
+  "critical_code_review_comments": [
+    "DifferentialPage.js line 787: probability fallback chain (probabilityScore || probability || matchScore || 0) correctly serialized in saved case payload.",
+    "DifferentialDashboard.js line 359: diagProb = diff.probabilityScore || diff.probability || stats.percentage || 0 correctly renders XX% in diagnosis tabs.",
+    "CasesPage.js lines 349 and 546: (d.probability || d.probabilityScore || 0)% correctly displays percentages in detail card and Export PDF HTML.",
+    "pdfExport.js line 811: probability = dx.probability || dx.probabilityScore || dx.confidence || dx.matchScore || 0 with proper *100 handling for 0-1 scaled values."
+  ],
+  "updated_files": [],
+  "success_rate": {
+    "backend": "N/A - frontend-only testing per request",
+    "frontend": "100% - all 4 bug-fix verification scenarios pass"
+  },
+  "test_credentials": "Not required - /differential and /cases are accessible without login",
+  "seed_data_creation": "Saved 1 test case: '65yo male - chest pain' via UI (persists in DB)",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Bug fix for NaN% probability display fully verified. Clinical text -> Run Complete Analysis: cards show 85/70/65/20/10%. Save case -> Cases page card visible. Case detail page shows correct percentages (90/60/75/40/35% - different run yields different LLM output but all valid numbers, no NaN). Export PDF opens new tab with HTML print view showing 'XX% probability' correctly. Note: unrelated 422 from /api/diagnosis/synthesize seen in console but does not affect probability display.",
+  "rca of the issue": "Prior bug: differentialResults objects use 'probabilityScore' internally; save() and downstream displays looked for 'probability' which was undefined -> NaN%. Fix adds fallback chain (probabilityScore || probability || matchScore || 0) in DifferentialPage save payload, and (d.probability || d.probabilityScore || 0) in CasesPage/pdfExport. Confirmed by direct UI observation: no 'NaN' substring found in any page or PDF output; all percentages are valid integers."
+}

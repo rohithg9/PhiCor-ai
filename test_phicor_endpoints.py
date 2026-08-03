@@ -7,7 +7,7 @@ import requests
 import json
 
 # Get the backend URL from frontend .env
-BACKEND_URL = "https://bodylogic.preview.emergentagent.com"
+BACKEND_URL = "https://health-intel-core-1.preview.emergentagent.com"
 
 def test_clinical_interpret():
     """Test POST /api/clinical/interpret"""

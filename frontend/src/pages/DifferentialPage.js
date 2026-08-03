@@ -784,7 +784,7 @@ const DifferentialPage = () => {
           rank: d.rank,
           name: d.diseaseName || d.name,
           diagnosis: d.diseaseName || d.name,
-          probability: d.probability || d.matchScore,
+          probability: d.probabilityScore || d.probability || d.matchScore || 0,
           role: d.role || 'Differential',
           clinical_reasoning: d.clinical_reasoning || d.reasoning,
           supporting_findings: d.matchingParameters || d.supporting_findings || [],

@@ -346,7 +346,7 @@ const CaseDetail = () => {
           <h2>🩺 Differential Diagnosis</h2>
           ${caseData.differentials.map((d, i) => `
             <div class="diagnosis">
-              <strong>#${d.rank || i+1}: ${d.name || d.diagnosis}</strong> - ${d.probability}% probability
+              <strong>#${d.rank || i+1}: ${d.name || d.diagnosis}</strong> - ${d.probability || d.probabilityScore || 0}% probability
               <br><small>${d.clinical_reasoning || d.role || ''}</small>
             </div>
           `).join('')}
@@ -543,7 +543,7 @@ const CaseDetail = () => {
                         </span>
                       </div>
                       <Badge className={idx === 0 ? 'bg-emerald-500' : ''}>
-                        {d.probability}%
+                        {d.probability || d.probabilityScore || 0}%
                       </Badge>
                     </div>
                     {d.clinical_reasoning && (
