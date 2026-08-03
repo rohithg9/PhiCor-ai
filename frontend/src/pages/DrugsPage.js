@@ -1892,9 +1892,9 @@ const DrugsPage = () => {
                               className="overflow-hidden"
                             >
                               <div className="pl-8 pr-2 py-1 space-y-0.5 max-h-60 overflow-y-auto">
-                                {category.drugs.map((drug) => (
+                                {category.drugs.map((drug, drugIdx) => (
                                   <button
-                                    key={drug.id}
+                                    key={`${categoryId}-${drug.id}-${drugIdx}`}
                                     onClick={() => handleDrugBrowserSelect(drug.id)}
                                     className="w-full text-left p-2 text-xs rounded hover:bg-purple-500/10 transition-colors group"
                                     data-testid={`drug-browser-item-${drug.id}`}
