@@ -8,7 +8,7 @@ import {
   TrendingUp, TrendingDown, Minus, Loader2, X, UtensilsCrossed, Leaf,
   Sparkles, Flame, Microscope, Atom, Gauge, Menu, Scale, Ruler,
   Calendar, Weight, HeartPulse, Beaker, TestTube, FileText, Plus,
-  Camera, Image, Upload, Trash2, ArrowLeft
+  Camera, Image, Upload, Trash2, ArrowLeft, Layers
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -21,6 +21,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../componen
 import { toast } from 'sonner';
 import FeatureNav from '../components/FeatureNav';
 import PDFExportButton from '../components/PDFExportButton';
+import EnhancedBodyMap from '../components/EnhancedBodyMap';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -600,6 +601,72 @@ const FoodAnalysisPage = () => {
   const [foodBrowserLoading, setFoodBrowserLoading] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState({});
   const [foodBrowserSearch, setFoodBrowserSearch] = useState('');
+  
+  // Body Map state
+  const [showBodyMap, setShowBodyMap] = useState(false);
+  
+  // Build body map effects from analysis result
+  const bodyMapEffects = useMemo(() => {
+    if (!analysisResult?.foods_analyzed) return [];
+    
+    const effects = [];
+    
+    // Collect organ effects from all analyzed foods
+    analysisResult.foods_analyzed.forEach(food => {
+      const organEffects = food.organ_effects || {};
+      
+      Object.entries(organEffects).forEach(([organ, data]) => {
+        if (data && typeof data === 'object') {
+          // Add each parameter effect
+          Object.entries(data).forEach(([param, value]) => {
+            if (param !== 'effect' && value !== null && value !== undefined) {
+              effects.push({
+                organ: organ,
+                parameter: param,
+                change: value > 0 ? 'increase' : value < 0 ? 'decrease' : 'neutral',
+                magnitude: Math.abs(value) * 10, // Scale for visibility
+                value: value,
+                unit: '%',
+                effect: data.effect || 'neutral',
+                source: food.name
+              });
+            }
+          });
+        }
+      });
+    });
+    
+    return effects;
+  }, [analysisResult]);
+  
+  // Build body map connections from analysis result
+  const bodyMapConnections = useMemo(() => {
+    if (!analysisResult?.foods_analyzed) return [];
+    
+    const connections = [];
+    
+    analysisResult.foods_analyzed.forEach(food => {
+      const organEffects = food.organ_effects || {};
+      
+      Object.entries(organEffects).forEach(([organ, data]) => {
+        if (data && typeof data === 'object') {
+          const effectType = data.effect || 'neutral';
+          // Calculate strength based on number of parameters affected
+          const paramCount = Object.keys(data).filter(k => k !== 'effect' && data[k]).length;
+          const strength = Math.min(100, paramCount * 20);
+          
+          connections.push({
+            source: food.name,
+            organ: organ,
+            strength: strength,
+            effect: effectType === 'beneficial' ? 'beneficial' : effectType === 'caution' ? 'harmful' : 'neutral'
+          });
+        }
+      });
+    });
+    
+    return connections;
+  }, [analysisResult]);
   
   // Fetch food browser data
   const fetchFoodBrowserData = useCallback(async () => {
@@ -1467,9 +1534,9 @@ Snacks: Apple, almonds, green tea"
                     .map(scale => (
                     <button
                       key={scale.id}
-                      onClick={() => setActiveScale(scale.id)}
+                      onClick={() => { setActiveScale(scale.id); setShowBodyMap(false); }}
                       className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap flex items-center gap-1 transition-all ${
-                        activeScale === scale.id
+                        activeScale === scale.id && !showBodyMap
                           ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg'
                           : isDark ? 'bg-gray-800 text-gray-400 hover:bg-gray-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                       }`}
@@ -1478,6 +1545,20 @@ Snacks: Apple, almonds, green tea"
                       <span className="hidden sm:inline">{scale.name}</span>
                     </button>
                   ))}
+                  
+                  {/* Body Map Toggle */}
+                  <button
+                    onClick={() => setShowBodyMap(!showBodyMap)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap flex items-center gap-1 transition-all ml-2 ${
+                      showBodyMap
+                        ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-lg'
+                        : isDark ? 'bg-gray-800 text-gray-400 hover:bg-gray-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                    data-testid="body-map-toggle"
+                  >
+                    <Layers className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Body Map</span>
+                  </button>
                 </div>
               </div>
             )}
@@ -1633,8 +1714,32 @@ Snacks: Apple, almonds, green tea"
                       </div>
                     </div>
                     
+                    {/* Body Map View */}
+                    {showBodyMap && (
+                      <div className="space-y-4">
+                        <EnhancedBodyMap
+                          effects={bodyMapEffects}
+                          connections={bodyMapConnections}
+                          sourceLabel={analysisResult.foods_analyzed?.[0]?.name || searchQuery}
+                          height={450}
+                          isDark={isDark}
+                          onOrganClick={(organ) => {
+                            // Navigate to the organ's detail view
+                            const organId = organ.id?.toLowerCase().replace(/\s+/g, '_');
+                            if (analysisResult.organ_system_parameter_effects?.[organId]) {
+                              setShowBodyMap(false);
+                              setActiveScale(organId);
+                            }
+                          }}
+                        />
+                        <div className={`text-center text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                          Click on organs to see detailed parameter effects
+                        </div>
+                      </div>
+                    )}
+                    
                     {/* Overview Tab */}
-                    {activeScale === 'overview' && (
+                    {activeScale === 'overview' && !showBodyMap && (
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         {/* Macros */}
                         <div className={`rounded-xl border p-4 ${isDark ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'}`}>
@@ -1877,7 +1982,7 @@ Snacks: Apple, almonds, green tea"
                     )}
                     
                     {/* Individual Food Items Scale - NEW */}
-                    {activeScale === 'items' && (
+                    {activeScale === 'items' && !showBodyMap && (
                       <div className="space-y-4">
                         {analysisResult.individual_food_items?.length > 0 ? (
                           <>
@@ -2020,7 +2125,7 @@ Snacks: Apple, almonds, green tea"
                     )}
                     
                     {/* Nutrients Scale - Detailed breakdown */}
-                    {activeScale === 'nutrients' && (
+                    {activeScale === 'nutrients' && !showBodyMap && (
                       <div className="space-y-4">
                         {/* Macronutrients */}
                         <div className={`rounded-xl border p-4 ${isDark ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'}`}>
@@ -2123,7 +2228,7 @@ Snacks: Apple, almonds, green tea"
                     )}
                     
                     {/* Molecular Scale - Bioactive compounds */}
-                    {activeScale === 'molecular' && (
+                    {activeScale === 'molecular' && !showBodyMap && (
                       <div className="space-y-4">
                         {/* For image analysis - show food composition breakdown */}
                         {analysisResult.individual_food_items?.length > 0 && (
@@ -2229,7 +2334,7 @@ Snacks: Apple, almonds, green tea"
                     )}
                     
                     {/* Cellular Scale */}
-                    {activeScale === 'cellular' && (
+                    {activeScale === 'cellular' && !showBodyMap && (
                       <div className="space-y-4">
                         {/* For image analysis with identified food items - show per-item cellular effects */}
                         {analysisResult.individual_food_items?.length > 0 && (
@@ -2309,7 +2414,7 @@ Snacks: Apple, almonds, green tea"
                     )}
                     
                     {/* Physiology Scale - Organ System Detail */}
-                    {activeScale === 'physiology' && (
+                    {activeScale === 'physiology' && !showBodyMap && (
                       <div className="space-y-4">
                         {ORGAN_SYSTEMS.map(sys => {
                           const sysData = analysisResult.organ_system_parameter_effects?.[sys.id];
@@ -2343,7 +2448,7 @@ Snacks: Apple, almonds, green tea"
                     )}
                     
                     {/* Individual Organ System View - when clicked from overview */}
-                    {analysisResult.organ_system_parameter_effects?.[activeScale] && !['overview', 'nutrients', 'molecular', 'cellular', 'physiology', 'clinical'].includes(activeScale) && (
+                    {analysisResult.organ_system_parameter_effects?.[activeScale] && !showBodyMap && !['overview', 'nutrients', 'molecular', 'cellular', 'physiology', 'clinical'].includes(activeScale) && (
                       <div 
                         className="space-y-4"
                         {...swipeHandlers}

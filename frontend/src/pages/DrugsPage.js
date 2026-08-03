@@ -18,6 +18,7 @@ import { ScrollArea } from '../components/ui/scroll-area';
 import { Slider } from '../components/ui/slider';
 import { ORGAN_MODELS } from '../data/organModels';
 import PDFExportButton from '../components/PDFExportButton';
+import EnhancedBodyMap from '../components/EnhancedBodyMap';
 
 // Use relative URL if REACT_APP_BACKEND_URL is not set (for production)
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
@@ -1952,6 +1953,86 @@ const DrugsPage = () => {
 // Drug Information View Component
 const DrugInfoView = ({ drug }) => {
   const [activeInfoTab, setActiveInfoTab] = useState('overview');
+  const { isDark } = useTheme();
+  
+  // Build body map data from drug parameter effects
+  const drugBodyMapEffects = useMemo(() => {
+    const effects = [];
+    
+    drug.therapeutic_effects?.forEach(te => {
+      te.organs?.forEach(organ => {
+        organ.scales?.forEach(scale => {
+          scale.parameters?.forEach(param => {
+            effects.push({
+              organ: organ.organ_id,
+              parameter: param.parameter_id,
+              change: param.multiplier > 1 ? 'increase' : 'decrease',
+              magnitude: Math.abs((param.multiplier - 1) * 100),
+              value: ((param.multiplier - 1) * 100).toFixed(0),
+              unit: '%',
+              effect: 'beneficial'
+            });
+          });
+        });
+      });
+    });
+    
+    drug.adverse_effects?.forEach(ae => {
+      ae.organs?.forEach(organ => {
+        organ.scales?.forEach(scale => {
+          scale.parameters?.forEach(param => {
+            effects.push({
+              organ: organ.organ_id,
+              parameter: param.parameter_id,
+              change: param.multiplier > 1 ? 'increase' : 'decrease',
+              magnitude: Math.abs((param.multiplier - 1) * 100),
+              value: ((param.multiplier - 1) * 100).toFixed(0),
+              unit: '%',
+              effect: 'harmful'
+            });
+          });
+        });
+      });
+    });
+    
+    return effects;
+  }, [drug]);
+  
+  const drugBodyMapConnections = useMemo(() => {
+    const connections = [];
+    const organMap = new Map();
+    
+    // Aggregate by organ
+    drug.therapeutic_effects?.forEach(te => {
+      te.organs?.forEach(organ => {
+        if (!organMap.has(organ.organ_id)) {
+          organMap.set(organ.organ_id, { beneficial: 0, harmful: 0 });
+        }
+        organMap.get(organ.organ_id).beneficial += organ.scales?.reduce((sum, s) => sum + (s.parameters?.length || 0), 0) || 0;
+      });
+    });
+    
+    drug.adverse_effects?.forEach(ae => {
+      ae.organs?.forEach(organ => {
+        if (!organMap.has(organ.organ_id)) {
+          organMap.set(organ.organ_id, { beneficial: 0, harmful: 0 });
+        }
+        organMap.get(organ.organ_id).harmful += organ.scales?.reduce((sum, s) => sum + (s.parameters?.length || 0), 0) || 0;
+      });
+    });
+    
+    organMap.forEach((counts, organId) => {
+      const total = counts.beneficial + counts.harmful;
+      connections.push({
+        source: drug.name,
+        organ: organId,
+        strength: Math.min(100, total * 20),
+        effect: counts.beneficial > counts.harmful ? 'beneficial' : counts.harmful > counts.beneficial ? 'harmful' : 'neutral'
+      });
+    });
+    
+    return connections;
+  }, [drug]);
   
   return (
     <div className="flex flex-col h-full">
@@ -1982,16 +2063,17 @@ const DrugInfoView = ({ drug }) => {
       
       {/* Tabs */}
       <div className="flex gap-1 p-2 border-b border-border/50 bg-card/30">
-        {['overview', 'effects', 'dosing', 'interactions'].map(tab => (
+        {['overview', 'effects', 'body map', 'dosing', 'interactions'].map(tab => (
           <button
             key={tab}
             onClick={() => setActiveInfoTab(tab)}
             className={`px-4 py-2 rounded-lg text-sm capitalize transition-all ${
               activeInfoTab === tab
-                ? 'bg-primary/20 text-primary font-medium'
+                ? tab === 'body map' ? 'bg-purple-500/20 text-purple-500 font-medium' : 'bg-primary/20 text-primary font-medium'
                 : 'text-muted-foreground hover:bg-accent/10'
             }`}
           >
+            {tab === 'body map' && <Layers className="w-3.5 h-3.5 inline mr-1" />}
             {tab}
           </button>
         ))}
@@ -2111,6 +2193,24 @@ const DrugInfoView = ({ drug }) => {
                 ))}
               </div>
             )}
+          </div>
+        )}
+        
+        {activeInfoTab === 'body map' && (
+          <div className="space-y-4">
+            <EnhancedBodyMap
+              effects={drugBodyMapEffects}
+              connections={drugBodyMapConnections}
+              sourceLabel={drug.name}
+              height={420}
+              isDark={isDark}
+              onOrganClick={(organ) => {
+                console.log('Organ clicked:', organ.name);
+              }}
+            />
+            <div className="text-center text-xs text-muted-foreground">
+              Click on organs to see detailed parameter effects • Green = therapeutic benefit, Red = potential adverse effect
+            </div>
           </div>
         )}
         

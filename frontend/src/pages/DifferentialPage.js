@@ -12,7 +12,7 @@ import {
   CheckCircle, ChevronDown, ChevronUp, Activity, User, Clipboard,
   TrendingUp, TrendingDown, Minus, Brain, FlaskConical, Heart,
   Stethoscope, Gauge, Info, Sparkles, Target, Zap, Shield, Pill, Calculator,
-  Save, Share2, FolderOpen
+  Save, Share2, FolderOpen, Network, LayoutList
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -25,6 +25,7 @@ import DiseaseComparisonDashboard from '../components/DiseaseComparisonDashboard
 import DifferentialDashboard from '../components/DifferentialDashboard';
 import ParameterDrillDownModal from '../components/ParameterDrillDownModal';
 import PDFExportButton from '../components/PDFExportButton';
+import NeuralNetworkVisualization from '../components/NeuralNetworkVisualization';
 import { 
   getDifferentialDiagnosis, 
   parseClinicalText, 
@@ -98,6 +99,9 @@ const DifferentialPage = () => {
   const [clinicalSynthesis, setClinicalSynthesis] = useState(null);
   const [isSynthesizing, setIsSynthesizing] = useState(false);
   const [synthesisExpanded, setSynthesisExpanded] = useState(true);
+  
+  // Neural Network Visualization state
+  const [showNeuralNetwork, setShowNeuralNetwork] = useState(false);
   
   // NEW: Parameter Drill-Down Modal state
   const [drillDownModal, setDrillDownModal] = useState({
@@ -244,6 +248,90 @@ const DifferentialPage = () => {
       default: return 'bg-gray-500';
     }
   };
+  
+  // Build Neural Network visualization data from differential results
+  const neuralNetworkData = useMemo(() => {
+    if (differentialResults.length === 0 && abnormalFindings.length === 0) {
+      return { nodes: [], connections: [] };
+    }
+
+    const nodes = [];
+    const connections = [];
+    
+    // Add patient node as central node
+    nodes.push({
+      id: 'patient',
+      label: 'Patient',
+      type: 'patient',
+      category: 'Central',
+      value: 100
+    });
+    
+    // Add abnormal findings as symptom/lab nodes
+    abnormalFindings.forEach((finding, idx) => {
+      const nodeId = `finding-${idx}`;
+      const isLab = finding.type === 'lab' || finding.unit;
+      nodes.push({
+        id: nodeId,
+        label: finding.name || finding.parameter,
+        type: isLab ? 'lab' : 'symptom',
+        category: isLab ? 'Lab Value' : 'Symptom',
+        value: Math.abs(finding.percentFromNormal || 50)
+      });
+      
+      // Connect finding to patient
+      connections.push({
+        source: 'patient',
+        target: nodeId,
+        strength: 80,
+        label: 'has'
+      });
+    });
+    
+    // Add differential diagnoses as diagnosis nodes
+    differentialResults.slice(0, 8).forEach((diff, idx) => {
+      const nodeId = `diagnosis-${idx}`;
+      const probability = diff.probabilityScore || diff.probability || diff.matchScore || 0;
+      
+      nodes.push({
+        id: nodeId,
+        label: diff.diseaseName || diff.name,
+        type: 'diagnosis',
+        category: `#${idx + 1} Differential`,
+        value: probability
+      });
+      
+      // Connect patient to diagnosis
+      connections.push({
+        source: 'patient',
+        target: nodeId,
+        strength: probability,
+        label: `${probability}%`
+      });
+      
+      // Connect matching findings to this diagnosis
+      const matchingParams = diff.matchingParameters || diff.supporting_findings || [];
+      matchingParams.forEach((param, pIdx) => {
+        const paramName = typeof param === 'string' ? param : param.name || param.parameter;
+        // Find corresponding finding node
+        const findingNode = nodes.find(n => 
+          n.label?.toLowerCase().includes(paramName?.toLowerCase()) ||
+          paramName?.toLowerCase().includes(n.label?.toLowerCase())
+        );
+        
+        if (findingNode) {
+          connections.push({
+            source: findingNode.id,
+            target: nodeId,
+            strength: 60 + (pIdx * -5),
+            label: 'supports'
+          });
+        }
+      });
+    });
+    
+    return { nodes, connections };
+  }, [differentialResults, abnormalFindings]);
   
   // Add abnormal finding
   const addFinding = useCallback(() => {
@@ -1584,6 +1672,30 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                         size="sm"
                         className="h-7"
                       />
+                      
+                      {/* View Toggle: List vs Neural Network */}
+                      <div className="flex items-center border rounded-lg overflow-hidden ml-1">
+                        <Button
+                          onClick={() => setShowNeuralNetwork(false)}
+                          size="sm"
+                          variant={!showNeuralNetwork ? "default" : "ghost"}
+                          className={`h-7 px-2 rounded-none ${!showNeuralNetwork ? 'bg-emerald-600' : ''}`}
+                          title="List View"
+                          data-testid="view-list-btn"
+                        >
+                          <LayoutList className="w-3.5 h-3.5" />
+                        </Button>
+                        <Button
+                          onClick={() => setShowNeuralNetwork(true)}
+                          size="sm"
+                          variant={showNeuralNetwork ? "default" : "ghost"}
+                          className={`h-7 px-2 rounded-none ${showNeuralNetwork ? 'bg-purple-600' : ''}`}
+                          title="Neural Network View"
+                          data-testid="view-network-btn"
+                        >
+                          <Network className="w-3.5 h-3.5" />
+                        </Button>
+                      </div>
                     </>
                   )}
                 </div>
@@ -1927,22 +2039,54 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                         <span>Analysis completed in <strong>{analysisTimeTaken}s</strong></span>
                       </div>
                     )}
-                    <DifferentialDashboard
-                      differentials={differentialResults}
-                      patientFindings={abnormalFindings}
-                      symptoms={abnormalFindings.filter(f => f.type === 'symptom')}
-                      onParameterClick={(paramName, type, expected) => {
-                        console.log('Parameter clicked:', paramName, type, expected);
-                        // Open Parameter Drill-Down Modal
-                        setDrillDownModal({
-                          isOpen: true,
-                          parameterName: paramName,
-                          parameterType: type,
-                          expectedValue: expected,
-                          currentDirection: expected?.direction || (type === 'symptom' ? 'present' : null)
-                        });
-                      }}
-                    />
+                    
+                    {/* Toggle between List View and Neural Network View */}
+                    {showNeuralNetwork ? (
+                      <div className="space-y-4">
+                        <NeuralNetworkVisualization
+                          nodes={neuralNetworkData.nodes}
+                          connections={neuralNetworkData.connections}
+                          centralNode="patient"
+                          mode="radial"
+                          title="Diagnostic Reasoning Map"
+                          height={520}
+                          isDark={isDark}
+                          onNodeClick={(node) => {
+                            if (node.type === 'diagnosis') {
+                              // Find and expand the diagnosis in the list
+                              const diagIndex = differentialResults.findIndex(d => 
+                                (d.diseaseName || d.name) === node.label
+                              );
+                              if (diagIndex !== -1) {
+                                setShowNeuralNetwork(false);
+                                // Could scroll to or expand this diagnosis
+                              }
+                            }
+                          }}
+                        />
+                        <div className={`text-center text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                          <Info className="w-3 h-3 inline mr-1" />
+                          Click nodes to see details • Toggle between views using the buttons above
+                        </div>
+                      </div>
+                    ) : (
+                      <DifferentialDashboard
+                        differentials={differentialResults}
+                        patientFindings={abnormalFindings}
+                        symptoms={abnormalFindings.filter(f => f.type === 'symptom')}
+                        onParameterClick={(paramName, type, expected) => {
+                          console.log('Parameter clicked:', paramName, type, expected);
+                          // Open Parameter Drill-Down Modal
+                          setDrillDownModal({
+                            isOpen: true,
+                            parameterName: paramName,
+                            parameterType: type,
+                            expectedValue: expected,
+                            currentDirection: expected?.direction || (type === 'symptom' ? 'present' : null)
+                          });
+                        }}
+                      />
+                    )}
                   </>
                 ) : (
                   <div className={`text-center py-12 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
