@@ -27,6 +27,18 @@ PhiCor.ai is a unified, parameter-based health intelligence system that provides
 
 ## What's Been Implemented
 
+### August 3, 2026 - Differential Diagnosis Probability Bug Fix
+
+#### Probability Display Fix (✅ COMPLETED & TESTED)
+- **Issue**: Differential diagnosis probability percentages showed as "NaN%" or didn't display at all on screen and in PDFs
+- **Root Cause**: Internal differential results used `probabilityScore` field, but save/display functions looked for `probability` (undefined) → NaN
+- **Solution Implemented**:
+  - Updated `/app/frontend/src/pages/DifferentialPage.js` line 787: Added fallback chain `probabilityScore || probability || matchScore || 0`
+  - Updated `/app/frontend/src/pages/CasesPage.js` lines 349, 546: Added `d.probability || d.probabilityScore || 0` fallbacks
+  - Updated `/app/frontend/src/components/DifferentialDashboard.js` line 356: Cards now show `diagProb%` instead of matched/total
+  - Updated `/app/frontend/src/utils/pdfExport.js` line 811: Added `probabilityScore` to fallback chain
+- **Test Report**: `/app/test_reports/iteration_4.json` - 100% frontend pass rate
+
 ### January 24, 2025 - Food Engine Bug Fix & Food Browser Feature
 
 #### Smart Ingredient Matching Fix (✅ COMPLETED)
@@ -137,3 +149,31 @@ PhiCor.ai is a unified, parameter-based health intelligence system that provides
 - `/app/test_reports/iteration_1.json` - Food analysis P0 tests
 - `/app/test_reports/iteration_2.json` - Expert Dashboard Equations Browser tests (100% pass rate)
 - `/app/test_reports/iteration_3.json` - Food Analysis bug fix & Food Browser tests (100% pass rate)
+- `/app/test_reports/iteration_4.json` - Differential diagnosis probability bug fix (100% pass rate)
+
+## User Vision: Super Strong Engines (August 3, 2026)
+
+The user wants to build a comprehensive, customizable health intelligence system:
+
+### Food Engine Vision
+- Display entire food database (17,709 foods) with browse/search
+- Individual nutrients with impact on every organ, system, and microscopic level
+- Quantity-based calculations for precise diet analysis
+- Patient-specific customization based on medical factors and modifiers
+
+### Core Engine Requirements
+- All engines (Food, Drug, Differential, Disease) must be equally comprehensive
+- Parameter-based analysis at organ system and microscopic levels
+- Patient profile integration for personalized assessments
+- All data must be visible and browsable to users
+
+### Drug Engine Requirements  
+- Complete drug database visibility (292 drugs)
+- Drug-drug interactions with parameter effects
+- Drug-disease interactions
+- Drug-food interactions
+
+### Differential Diagnosis Engine (✅ Probability Fix Complete)
+- Input: clinical text/lab values → Output: ranked diagnoses with % probability
+- Patient-specific modifiers for diagnosis probability
+- Comprehensive parameter matching against disease profiles
