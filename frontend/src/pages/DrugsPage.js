@@ -1738,9 +1738,9 @@ const DrugsPage = () => {
               </div>
             ) : (
               <div className="p-2 space-y-1">
-                {drugs.map((drug) => (
+                {drugs.map((drug, idx) => (
                   <button
-                    key={drug.id}
+                    key={`drug-list-${drug.id}-${idx}`}
                     onClick={() => setSelectedDrug(drug.id)}
                     className={`w-full p-3 rounded-lg text-left transition-all hover:bg-accent/10 ${
                       selectedDrug === drug.id ? 'bg-primary/10 border border-primary/30' : ''
@@ -2067,6 +2067,7 @@ const DrugInfoView = ({ drug }) => {
           <button
             key={tab}
             onClick={() => setActiveInfoTab(tab)}
+            data-testid={tab === 'body map' ? 'drug-body-map-toggle' : undefined}
             className={`px-4 py-2 rounded-lg text-sm capitalize transition-all ${
               activeInfoTab === tab
                 ? tab === 'body map' ? 'bg-purple-500/20 text-purple-500 font-medium' : 'bg-primary/20 text-primary font-medium'
