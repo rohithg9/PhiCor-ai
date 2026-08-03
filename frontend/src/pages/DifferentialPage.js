@@ -254,7 +254,7 @@ const DifferentialPage = () => {
     }
   };
   
-  // Build Neural Network visualization data from differential results
+  // Build comprehensive Neural Network visualization data with syndromes, organs, and many-to-many connections
   const neuralNetworkData = useMemo(() => {
     if (differentialResults.length === 0 && abnormalFindings.length === 0) {
       return { nodes: [], connections: [] };
@@ -262,81 +262,386 @@ const DifferentialPage = () => {
 
     const nodes = [];
     const connections = [];
+    const addedNodes = new Set();
+    const addedConnections = new Set();
     
-    // Add patient node as central node
-    nodes.push({
+    // Helper to add unique node
+    const addNode = (node) => {
+      if (!addedNodes.has(node.id)) {
+        nodes.push(node);
+        addedNodes.add(node.id);
+      }
+    };
+    
+    // Helper to add unique connection
+    const addConnection = (conn) => {
+      const connKey = `${conn.source}-${conn.target}`;
+      const reverseKey = `${conn.target}-${conn.source}`;
+      if (!addedConnections.has(connKey) && !addedConnections.has(reverseKey)) {
+        connections.push(conn);
+        addedConnections.add(connKey);
+      }
+    };
+    
+    // 1. PATIENT NODE - Central hub
+    addNode({
       id: 'patient',
       label: 'Patient',
       type: 'patient',
-      category: 'Central',
+      category: 'Central Hub',
       value: 100
     });
     
-    // Add abnormal findings as symptom/lab nodes
+    // 2. SYMPTOM & LAB NODES - First layer
+    const symptomNodes = [];
+    const labNodes = [];
+    
     abnormalFindings.forEach((finding, idx) => {
-      const nodeId = `finding-${idx}`;
       const isLab = finding.type === 'lab' || finding.unit;
-      nodes.push({
+      const nodeId = `finding-${idx}`;
+      const findingValue = Math.abs(finding.percentFromNormal || 50);
+      
+      const node = {
         id: nodeId,
         label: finding.name || finding.parameter,
         type: isLab ? 'lab' : 'symptom',
         category: isLab ? 'Lab Value' : 'Symptom',
-        value: Math.abs(finding.percentFromNormal || 50)
-      });
+        value: Math.min(findingValue, 100),
+        severity: finding.severity || 'moderate',
+        direction: finding.direction
+      };
       
-      // Connect finding to patient
-      connections.push({
+      addNode(node);
+      if (isLab) labNodes.push(node);
+      else symptomNodes.push(node);
+      
+      // Connect to patient with severity-based strength
+      const severityStrength = finding.severity === 'critical' ? 95 : 
+                              finding.severity === 'severe' ? 85 : 
+                              finding.severity === 'moderate' ? 70 : 55;
+      addConnection({
         source: 'patient',
         target: nodeId,
-        strength: 80,
-        label: 'has'
+        strength: severityStrength,
+        label: 'presents',
+        type: 'direct'
       });
     });
     
-    // Add differential diagnoses as diagnosis nodes
+    // 3. EXTRACT SYNDROMES from synthesis data (clinical patterns)
+    const syndromes = new Map();
+    
+    // Parse synthesis for clinical syndromes/patterns
+    if (clinicalSynthesis?.key_pattern || phicorResults?.dominant_syndromes?.[0]) {
+      const syndromeId = 'syndrome-primary';
+      const patternLabel = clinicalSynthesis?.key_pattern || 
+                          phicorResults?.dominant_syndromes?.[0]?.name ||
+                          'Primary Clinical Pattern';
+      syndromes.set(syndromeId, {
+        id: syndromeId,
+        label: patternLabel.substring(0, 35),
+        type: 'syndrome',
+        category: 'Clinical Pattern',
+        value: 85
+      });
+    }
+    
+    // Extract syndromes from differential reasoning
+    differentialResults.slice(0, 6).forEach((diff, idx) => {
+      const reasoning = diff.reasoning || diff.clinical_reasoning || '';
+      
+      // Look for pattern keywords to create syndrome nodes
+      const patterns = [
+        { keyword: 'acute', syndrome: 'Acute Presentation' },
+        { keyword: 'chronic', syndrome: 'Chronic Course' },
+        { keyword: 'inflammatory', syndrome: 'Inflammatory Process' },
+        { keyword: 'ischemic', syndrome: 'Ischemic Pattern' },
+        { keyword: 'infectious', syndrome: 'Infectious Pattern' },
+        { keyword: 'metabolic', syndrome: 'Metabolic Derangement' },
+        { keyword: 'cardiac', syndrome: 'Cardiac Involvement' },
+        { keyword: 'respiratory', syndrome: 'Respiratory Pattern' },
+        { keyword: 'neurological', syndrome: 'Neurological Pattern' },
+        { keyword: 'gastrointestinal', syndrome: 'GI Pattern' },
+      ];
+      
+      patterns.forEach(({ keyword, syndrome }) => {
+        if (reasoning.toLowerCase().includes(keyword) || 
+            diff.diseaseName?.toLowerCase().includes(keyword) ||
+            diff.name?.toLowerCase().includes(keyword)) {
+          const syndromeId = `syndrome-${keyword}`;
+          if (!syndromes.has(syndromeId)) {
+            syndromes.set(syndromeId, {
+              id: syndromeId,
+              label: syndrome,
+              type: 'syndrome',
+              category: 'Clinical Pattern',
+              value: 60 + Math.random() * 20
+            });
+          }
+        }
+      });
+    });
+    
+    // Add syndrome nodes
+    syndromes.forEach(syndrome => addNode(syndrome));
+    
+    // 4. ORGAN SYSTEM NODES - Affected body systems
+    const organSystems = new Map();
+    const organKeywords = {
+      heart: { name: 'Heart', system: 'Cardiovascular' },
+      cardiac: { name: 'Heart', system: 'Cardiovascular' },
+      coronary: { name: 'Coronary Arteries', system: 'Cardiovascular' },
+      lung: { name: 'Lungs', system: 'Respiratory' },
+      pulmonary: { name: 'Lungs', system: 'Respiratory' },
+      respiratory: { name: 'Respiratory System', system: 'Respiratory' },
+      liver: { name: 'Liver', system: 'Hepatic' },
+      hepatic: { name: 'Liver', system: 'Hepatic' },
+      kidney: { name: 'Kidneys', system: 'Renal' },
+      renal: { name: 'Kidneys', system: 'Renal' },
+      brain: { name: 'Brain', system: 'Neurological' },
+      neuro: { name: 'Nervous System', system: 'Neurological' },
+      stomach: { name: 'Stomach', system: 'GI' },
+      intestin: { name: 'Intestines', system: 'GI' },
+      pancrea: { name: 'Pancreas', system: 'GI' },
+      blood: { name: 'Blood', system: 'Hematologic' },
+      bone: { name: 'Bone Marrow', system: 'Hematologic' },
+      thyroid: { name: 'Thyroid', system: 'Endocrine' },
+      adrenal: { name: 'Adrenal Glands', system: 'Endocrine' },
+    };
+    
+    // Scan all text for organ mentions
+    const allText = [
+      ...abnormalFindings.map(f => f.name || f.parameter),
+      ...differentialResults.map(d => `${d.diseaseName || d.name} ${d.reasoning || ''}`),
+      clinicalSynthesis?.pathophysiological_connection || '',
+      phicorResults?.patient_summary || ''
+    ].join(' ').toLowerCase();
+    
+    Object.entries(organKeywords).forEach(([keyword, { name, system }]) => {
+      if (allText.includes(keyword)) {
+        const organId = `organ-${system.toLowerCase().replace(/\s/g, '-')}`;
+        if (!organSystems.has(organId)) {
+          organSystems.set(organId, {
+            id: organId,
+            label: name,
+            type: 'organ',
+            category: system,
+            value: 70
+          });
+        }
+      }
+    });
+    
+    // Add organ nodes
+    organSystems.forEach(organ => addNode(organ));
+    
+    // 5. DIAGNOSIS NODES - Final outcomes
     differentialResults.slice(0, 8).forEach((diff, idx) => {
       const nodeId = `diagnosis-${idx}`;
       const probability = diff.probabilityScore || diff.probability || diff.matchScore || 0;
       
-      nodes.push({
+      addNode({
         id: nodeId,
         label: diff.diseaseName || diff.name,
         type: 'diagnosis',
-        category: `#${idx + 1} Differential`,
-        value: probability
+        category: `#${idx + 1} Diagnosis`,
+        value: probability,
+        icd10: diff.icd10,
+        confidence: diff.confidence
       });
+    });
+    
+    // 6. BUILD CONNECTIONS - Many-to-many relationships
+    
+    // 6a. Symptoms/Labs → Syndromes (many-to-many)
+    abnormalFindings.forEach((finding, fIdx) => {
+      const findingId = `finding-${fIdx}`;
+      const findingText = (finding.name || finding.parameter || '').toLowerCase();
       
-      // Connect patient to diagnosis
-      connections.push({
-        source: 'patient',
-        target: nodeId,
-        strength: probability,
-        label: `${probability}%`
-      });
-      
-      // Connect matching findings to this diagnosis
-      const matchingParams = diff.matchingParameters || diff.supporting_findings || [];
-      matchingParams.forEach((param, pIdx) => {
-        const paramName = typeof param === 'string' ? param : param.name || param.parameter;
-        // Find corresponding finding node
-        const findingNode = nodes.find(n => 
-          n.label?.toLowerCase().includes(paramName?.toLowerCase()) ||
-          paramName?.toLowerCase().includes(n.label?.toLowerCase())
-        );
+      syndromes.forEach((syndrome, syndromeId) => {
+        const syndromeText = syndrome.label.toLowerCase();
+        // Check for semantic relationship
+        const relatedKeywords = {
+          'acute': ['sudden', 'severe', 'rapid', 'emergency'],
+          'inflammatory': ['elevated', 'high', 'crp', 'esr', 'wbc', 'fever', 'pain'],
+          'ischemic': ['troponin', 'chest', 'ecg', 'st', 'heart'],
+          'infectious': ['fever', 'wbc', 'culture', 'temperature'],
+          'cardiac': ['chest', 'heart', 'troponin', 'bnp', 'ecg', 'murmur'],
+          'respiratory': ['breath', 'oxygen', 'saturation', 'lung', 'cough', 'dyspnea'],
+        };
         
-        if (findingNode) {
-          connections.push({
-            source: findingNode.id,
-            target: nodeId,
-            strength: 60 + (pIdx * -5),
-            label: 'supports'
+        let matchStrength = 0;
+        Object.entries(relatedKeywords).forEach(([key, words]) => {
+          if (syndromeText.includes(key)) {
+            words.forEach(word => {
+              if (findingText.includes(word)) matchStrength += 15;
+            });
+          }
+        });
+        
+        if (matchStrength > 0) {
+          addConnection({
+            source: findingId,
+            target: syndromeId,
+            strength: Math.min(matchStrength + 30, 85),
+            label: 'indicates',
+            type: 'indirect'
+          });
+        }
+      });
+    });
+    
+    // 6b. Symptoms/Labs → Organs (direct impact)
+    abnormalFindings.forEach((finding, fIdx) => {
+      const findingId = `finding-${fIdx}`;
+      const findingText = (finding.name || finding.parameter || '').toLowerCase();
+      
+      organSystems.forEach((organ, organId) => {
+        const organText = organ.label.toLowerCase();
+        const systemText = organ.category.toLowerCase();
+        
+        // Check for organ-finding relationship
+        if (findingText.includes(organText) || 
+            organText.includes(findingText.split(' ')[0]) ||
+            (systemText === 'cardiovascular' && /troponin|bnp|chest|heart|ecg/i.test(findingText)) ||
+            (systemText === 'respiratory' && /oxygen|breath|lung|cough|saturation/i.test(findingText)) ||
+            (systemText === 'renal' && /creatinine|bun|gfr|kidney/i.test(findingText)) ||
+            (systemText === 'hepatic' && /alt|ast|bilirubin|liver|albumin/i.test(findingText))) {
+          addConnection({
+            source: findingId,
+            target: organId,
+            strength: 65,
+            label: 'affects',
+            type: 'causal'
+          });
+        }
+      });
+    });
+    
+    // 6c. Syndromes → Diagnoses (pattern matching)
+    syndromes.forEach((syndrome, syndromeId) => {
+      const syndromeText = syndrome.label.toLowerCase();
+      
+      differentialResults.slice(0, 8).forEach((diff, dIdx) => {
+        const diagId = `diagnosis-${dIdx}`;
+        const diagText = `${diff.diseaseName || diff.name} ${diff.reasoning || ''}`.toLowerCase();
+        
+        // Check for syndrome-diagnosis relationship
+        const syndromeKeyword = syndromeText.split(' ')[0];
+        if (diagText.includes(syndromeKeyword)) {
+          const probability = diff.probabilityScore || diff.probability || diff.matchScore || 50;
+          addConnection({
+            source: syndromeId,
+            target: diagId,
+            strength: Math.round(probability * 0.8),
+            label: 'suggests',
+            type: 'indirect'
+          });
+        }
+      });
+    });
+    
+    // 6d. Organs → Diagnoses (anatomical relationship)
+    organSystems.forEach((organ, organId) => {
+      const organText = organ.label.toLowerCase();
+      const systemText = organ.category.toLowerCase();
+      
+      differentialResults.slice(0, 8).forEach((diff, dIdx) => {
+        const diagId = `diagnosis-${dIdx}`;
+        const diagText = `${diff.diseaseName || diff.name}`.toLowerCase();
+        
+        if (diagText.includes(organText) ||
+            (systemText === 'cardiovascular' && /infarct|angina|heart|cardiac|coronary/i.test(diagText)) ||
+            (systemText === 'respiratory' && /pneumonia|emboli|copd|asthma|lung/i.test(diagText)) ||
+            (systemText === 'hepatic' && /hepat|cirrhos|liver/i.test(diagText)) ||
+            (systemText === 'renal' && /kidney|renal|nephr/i.test(diagText))) {
+          const probability = diff.probabilityScore || diff.probability || diff.matchScore || 50;
+          addConnection({
+            source: organId,
+            target: diagId,
+            strength: Math.round(probability * 0.7),
+            label: 'involves',
+            type: 'causal'
+          });
+        }
+      });
+    });
+    
+    // 6e. Direct Findings → Diagnoses (supporting evidence)
+    differentialResults.slice(0, 8).forEach((diff, dIdx) => {
+      const diagId = `diagnosis-${dIdx}`;
+      const probability = diff.probabilityScore || diff.probability || diff.matchScore || 0;
+      
+      // Get supporting findings
+      const supportingFindings = diff.matchingParameters || diff.supporting_findings || 
+                                diff.key_supporting_findings || [];
+      
+      supportingFindings.forEach((param, pIdx) => {
+        const paramName = typeof param === 'string' ? param : 
+                         param.name || param.parameter || param.finding || '';
+        
+        // Find matching finding node
+        abnormalFindings.forEach((finding, fIdx) => {
+          const findingName = (finding.name || finding.parameter || '').toLowerCase();
+          if (findingName.includes(paramName.toLowerCase()) ||
+              paramName.toLowerCase().includes(findingName)) {
+            const findingId = `finding-${fIdx}`;
+            const strength = Math.max(30, probability - (pIdx * 5));
+            addConnection({
+              source: findingId,
+              target: diagId,
+              strength: Math.min(strength, 90),
+              label: `+${Math.round(strength * 0.3)}%`,
+              type: 'direct'
+            });
+          }
+        });
+      });
+      
+      // Also connect patient directly to high-probability diagnoses
+      if (probability >= 50) {
+        addConnection({
+          source: 'patient',
+          target: diagId,
+          strength: probability,
+          label: `${probability}%`,
+          type: 'causal'
+        });
+      }
+    });
+    
+    // 6f. Cross-connections between diagnoses (differential relationships)
+    differentialResults.slice(0, 5).forEach((diff1, idx1) => {
+      differentialResults.slice(idx1 + 1, 6).forEach((diff2, idx2) => {
+        const diagId1 = `diagnosis-${idx1}`;
+        const diagId2 = `diagnosis-${idx1 + 1 + idx2}`;
+        
+        // Check for related diagnoses (shared organ system, similar names)
+        const name1 = (diff1.diseaseName || diff1.name || '').toLowerCase();
+        const name2 = (diff2.diseaseName || diff2.name || '').toLowerCase();
+        
+        // Check for shared keywords
+        const keywords1 = new Set(name1.split(/\s+/));
+        const keywords2 = new Set(name2.split(/\s+/));
+        const shared = [...keywords1].filter(k => keywords2.has(k) && k.length > 3);
+        
+        if (shared.length > 0) {
+          const prob1 = diff1.probabilityScore || diff1.probability || 50;
+          const prob2 = diff2.probabilityScore || diff2.probability || 50;
+          addConnection({
+            source: diagId1,
+            target: diagId2,
+            strength: Math.round((prob1 + prob2) / 4),
+            label: 'r=' + ((prob1 + prob2) / 200).toFixed(2),
+            type: 'correlation',
+            isCorrelation: true
           });
         }
       });
     });
     
     return { nodes, connections };
-  }, [differentialResults, abnormalFindings]);
+  }, [differentialResults, abnormalFindings, clinicalSynthesis, phicorResults]);
   
   // Add abnormal finding
   const addFinding = useCallback(() => {
