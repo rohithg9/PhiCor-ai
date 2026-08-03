@@ -22,6 +22,8 @@ import { toast } from 'sonner';
 import FeatureNav from '../components/FeatureNav';
 import PDFExportButton from '../components/PDFExportButton';
 import EnhancedBodyMap from '../components/EnhancedBodyMap';
+import GlobalPatientPanel from '../components/GlobalPatientPanel';
+import { usePatient } from '../context/PatientContext';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -604,6 +606,63 @@ const FoodAnalysisPage = () => {
   
   // Body Map state
   const [showBodyMap, setShowBodyMap] = useState(false);
+  
+  // Serving Size / Quantity Calculator state
+  const [servingMultiplier, setServingMultiplier] = useState(1);
+  const [showQuantityPanel, setShowQuantityPanel] = useState(false);
+  
+  // Calculate scaled nutrients based on serving multiplier
+  const scaledAnalysisResult = useMemo(() => {
+    if (!analysisResult || servingMultiplier === 1) return analysisResult;
+    
+    const scaled = { ...analysisResult };
+    
+    // Scale nutrients
+    if (scaled.nutrients) {
+      scaled.scaledNutrients = {};
+      Object.entries(scaled.nutrients).forEach(([key, value]) => {
+        if (typeof value === 'number') {
+          scaled.scaledNutrients[key] = Math.round(value * servingMultiplier * 10) / 10;
+        } else if (typeof value === 'object' && value?.value) {
+          scaled.scaledNutrients[key] = {
+            ...value,
+            value: Math.round(value.value * servingMultiplier * 10) / 10,
+            originalValue: value.value
+          };
+        }
+      });
+    }
+    
+    // Scale macros
+    if (scaled.macronutrients) {
+      scaled.scaledMacros = {
+        calories: Math.round((scaled.macronutrients.calories || 0) * servingMultiplier),
+        protein: Math.round((scaled.macronutrients.protein || 0) * servingMultiplier * 10) / 10,
+        carbs: Math.round((scaled.macronutrients.carbs || 0) * servingMultiplier * 10) / 10,
+        fat: Math.round((scaled.macronutrients.fat || 0) * servingMultiplier * 10) / 10,
+        fiber: Math.round((scaled.macronutrients.fiber || 0) * servingMultiplier * 10) / 10
+      };
+    }
+    
+    // Scale organ effects (impact increases with quantity)
+    if (scaled.organ_system_parameter_effects) {
+      scaled.scaledOrganEffects = {};
+      Object.entries(scaled.organ_system_parameter_effects).forEach(([organ, effects]) => {
+        scaled.scaledOrganEffects[organ] = {
+          ...effects,
+          impact_multiplier: servingMultiplier,
+          // Effects scale non-linearly (diminishing returns)
+          scaled_impact: Math.min(100, (effects.impact || 50) * Math.pow(servingMultiplier, 0.7))
+        };
+      });
+    }
+    
+    scaled.servingMultiplier = servingMultiplier;
+    scaled.originalServing = analysisResult.serving_size || '100g';
+    scaled.adjustedServing = `${Math.round(100 * servingMultiplier)}g`;
+    
+    return scaled;
+  }, [analysisResult, servingMultiplier]);
   
   // Build body map effects from analysis result
   const bodyMapEffects = useMemo(() => {
@@ -1559,7 +1618,134 @@ Snacks: Apple, almonds, green tea"
                     <Layers className="w-3.5 h-3.5" />
                     <span className="hidden sm:inline">Body Map</span>
                   </button>
+                  
+                  {/* Quantity Calculator Toggle */}
+                  <button
+                    onClick={() => setShowQuantityPanel(!showQuantityPanel)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap flex items-center gap-1 transition-all ${
+                      showQuantityPanel
+                        ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg'
+                        : isDark ? 'bg-gray-800 text-gray-400 hover:bg-gray-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                    data-testid="quantity-calculator-toggle"
+                  >
+                    <Scale className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Quantity</span>
+                    {servingMultiplier !== 1 && (
+                      <Badge className="ml-1 bg-white/20 text-white text-[10px] px-1">
+                        {servingMultiplier}x
+                      </Badge>
+                    )}
+                  </button>
                 </div>
+                
+                {/* Quantity Calculator Panel */}
+                <AnimatePresence>
+                  {showQuantityPanel && analysisResult && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className={`overflow-hidden border-t ${isDark ? 'border-gray-800' : 'border-gray-200'}`}
+                    >
+                      <div className={`p-3 ${isDark ? 'bg-gradient-to-r from-orange-900/20 to-amber-900/20' : 'bg-gradient-to-r from-orange-50 to-amber-50'}`}>
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <Scale className="w-4 h-4 text-orange-500" />
+                            <span className="text-sm font-medium">Serving Size Calculator</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs">
+                              Base: {scaledAnalysisResult?.originalServing || '100g'}
+                            </Badge>
+                            <Badge className="bg-orange-500 text-white text-xs">
+                              Adjusted: {scaledAnalysisResult?.adjustedServing || '100g'}
+                            </Badge>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-4">
+                          <div className="flex-1">
+                            <Slider
+                              value={[servingMultiplier]}
+                              onValueChange={(values) => setServingMultiplier(values[0])}
+                              min={0.25}
+                              max={5}
+                              step={0.25}
+                              className="w-full"
+                            />
+                            <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
+                              <span>¼</span>
+                              <span>1x</span>
+                              <span>2x</span>
+                              <span>3x</span>
+                              <span>5x</span>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => setServingMultiplier(Math.max(0.25, servingMultiplier - 0.25))}
+                              className={`w-8 h-8 rounded-lg flex items-center justify-center text-lg font-bold ${
+                                isDark ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'
+                              }`}
+                            >
+                              -
+                            </button>
+                            <div className={`w-16 text-center py-1.5 rounded-lg font-bold ${
+                              isDark ? 'bg-gray-800' : 'bg-white border'
+                            }`}>
+                              {servingMultiplier}x
+                            </div>
+                            <button
+                              onClick={() => setServingMultiplier(Math.min(5, servingMultiplier + 0.25))}
+                              className={`w-8 h-8 rounded-lg flex items-center justify-center text-lg font-bold ${
+                                isDark ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'
+                              }`}
+                            >
+                              +
+                            </button>
+                            <button
+                              onClick={() => setServingMultiplier(1)}
+                              className="text-xs text-muted-foreground hover:text-foreground"
+                            >
+                              Reset
+                            </button>
+                          </div>
+                        </div>
+                        
+                        {/* Quick preview of scaled values */}
+                        {scaledAnalysisResult?.scaledMacros && servingMultiplier !== 1 && (
+                          <div className="mt-3 pt-3 border-t border-border/50">
+                            <div className="text-xs text-muted-foreground mb-2">Scaled Macronutrients:</div>
+                            <div className="grid grid-cols-5 gap-2 text-center">
+                              <div className={`p-2 rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-white'}`}>
+                                <div className="text-lg font-bold text-orange-500">{scaledAnalysisResult.scaledMacros.calories}</div>
+                                <div className="text-[10px] text-muted-foreground">kcal</div>
+                              </div>
+                              <div className={`p-2 rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-white'}`}>
+                                <div className="text-lg font-bold text-red-500">{scaledAnalysisResult.scaledMacros.protein}g</div>
+                                <div className="text-[10px] text-muted-foreground">Protein</div>
+                              </div>
+                              <div className={`p-2 rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-white'}`}>
+                                <div className="text-lg font-bold text-blue-500">{scaledAnalysisResult.scaledMacros.carbs}g</div>
+                                <div className="text-[10px] text-muted-foreground">Carbs</div>
+                              </div>
+                              <div className={`p-2 rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-white'}`}>
+                                <div className="text-lg font-bold text-yellow-500">{scaledAnalysisResult.scaledMacros.fat}g</div>
+                                <div className="text-[10px] text-muted-foreground">Fat</div>
+                              </div>
+                              <div className={`p-2 rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-white'}`}>
+                                <div className="text-lg font-bold text-green-500">{scaledAnalysisResult.scaledMacros.fiber}g</div>
+                                <div className="text-[10px] text-muted-foreground">Fiber</div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             )}
             

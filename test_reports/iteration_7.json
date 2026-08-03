@@ -1,0 +1,29 @@
+{
+  "summary": "Frontend-only testing of PhiCor.ai Patient Context + Quantity Calculator on /food. Searched 'Salmon', opened Quantity Calculator via data-testid='quantity-calculator-toggle'. Verified Base/Adjusted badges, +/- buttons (0.25 step), Reset button, and mini badge on the toggle. GlobalPatientPanel (Subject Profile) renders in the left sidebar with Bio/Medical/Diet/Intake tabs. No console/page errors observed during interaction.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "FoodAnalysisPage - Quantity Calculator", "issue": "Scaled Macronutrients preview grid (calories/protein/carbs/fat/fiber) does not appear when servingMultiplier !== 1. Code renders it only if scaledAnalysisResult?.scaledMacros exists, but scaledMacros appears to be undefined in the produced scaledAnalysisResult, so the section is never shown. Verified at 2x on Salmon.", "selector": "quantity-calculator-toggle -> scaled macros grid", "priority": "MEDIUM"},
+      {"component": "FoodAnalysisPage - Base/Adjusted badges", "issue": "Base value is inconsistent with Adjusted scaling. Base shows the food's original serving (e.g. '3 oz (85g)') but Adjusted at 2x shows '200g' (implying a 100g base). At 0.75x Adjusted shows '75g'. After Reset, Base flips to '100g'. Scaling math and Base label reference different values.", "selector": "Base:/Adjusted: badges in Serving Size Calculator", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Investigate why scaledAnalysisResult.scaledMacros is undefined so the Scaled Macronutrients preview grid renders when servingMultiplier != 1.",
+    "Reconcile Base badge value with the actual base used for scaling (either display '100g' consistently or scale from the food's originalServing e.g. 85g)."
+  ],
+  "critical_code_review_comments": [
+    "FoodAnalysisPage.js is 3155 lines - exceeds 700-line guideline; should be split into smaller modules (QuantityCalculatorPanel, MacroSummary, OrganEffectsGrid, etc.).",
+    "Quantity panel: Base badge relies on originalServing but adjusted math uses a different base -> unify source of truth for baseServingGrams."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A", "frontend": "90%"},
+  "test_credentials": "N/A - no auth required",
+  "seed_data_creation": "None",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Search flow: fill 'Search food...' input with 'Salmon' then press Enter (or click suggestion). Quantity toggle only renders after analysisResult loads. Use data-testid='quantity-calculator-toggle'. +/- buttons increment 0.25, Reset returns to 1x. Base/Adjusted badges update, but 'Scaled Macronutrients' preview grid never displays because scaledMacros is missing in scaledAnalysisResult - see FoodAnalysisPage.js lines 608-658 (useMemo) and 1718-1744 (render).",
+  "rca of the issue": "Scaled Macros grid: conditional `scaledAnalysisResult?.scaledMacros && servingMultiplier !== 1` never true. Likely the useMemo in FoodAnalysisPage.js (lines 608-658) does not attach a `scaledMacros` object to the returned scaledAnalysisResult (field name mismatch or missing computation). Base/Adjusted inconsistency: Base badge uses `scaledAnalysisResult.originalServing` (from analysisResult.serving = '3 oz (85g)') while adjusted grams computed against a hardcoded/derived 100g base -> two different sources of truth."
+}

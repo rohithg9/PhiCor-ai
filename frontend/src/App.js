@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { ExpertProvider } from "./context/ExpertContext";
 import { RegionProvider } from "./context/RegionContext";
+import { PatientProvider } from "./context/PatientContext";
 import LandingPage from "./pages/LandingPage";
 import AuthPage from "./pages/AuthPage";
 import Dashboard from "./pages/DashboardMultiScale";
@@ -104,7 +105,9 @@ function App() {
             <RegionProvider>
               <AuthProvider>
                 <ExpertProvider>
-                  <AppContent />
+                  <PatientProvider>
+                    <AppContent />
+                  </PatientProvider>
                 </ExpertProvider>
               </AuthProvider>
             </RegionProvider>
