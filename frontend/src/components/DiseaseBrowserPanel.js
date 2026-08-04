@@ -25,11 +25,77 @@ const CATEGORY_CONFIG = {
     bgColor: 'bg-red-500/10',
     label: 'Cardiovascular'
   },
+  cardiac: { 
+    icon: Heart, 
+    color: 'text-red-500', 
+    bgColor: 'bg-red-500/10',
+    label: 'Cardiac'
+  },
+  vascular: { 
+    icon: Heart, 
+    color: 'text-red-400', 
+    bgColor: 'bg-red-400/10',
+    label: 'Vascular'
+  },
+  arrhythmia: { 
+    icon: Activity, 
+    color: 'text-red-600', 
+    bgColor: 'bg-red-600/10',
+    label: 'Arrhythmia'
+  },
+  valvular: { 
+    icon: Heart, 
+    color: 'text-rose-500', 
+    bgColor: 'bg-rose-500/10',
+    label: 'Valvular Heart'
+  },
+  cardiomyopathy: { 
+    icon: Heart, 
+    color: 'text-rose-600', 
+    bgColor: 'bg-rose-600/10',
+    label: 'Cardiomyopathy'
+  },
+  heartfailure: { 
+    icon: Heart, 
+    color: 'text-red-700', 
+    bgColor: 'bg-red-700/10',
+    label: 'Heart Failure'
+  },
+  ischemic: { 
+    icon: Heart, 
+    color: 'text-red-500', 
+    bgColor: 'bg-red-500/10',
+    label: 'Ischemic'
+  },
+  pericardial: { 
+    icon: Heart, 
+    color: 'text-red-400', 
+    bgColor: 'bg-red-400/10',
+    label: 'Pericardial'
+  },
+  hypertensive: { 
+    icon: Activity, 
+    color: 'text-red-500', 
+    bgColor: 'bg-red-500/10',
+    label: 'Hypertensive'
+  },
+  cerebrovascular: { 
+    icon: Brain, 
+    color: 'text-purple-600', 
+    bgColor: 'bg-purple-600/10',
+    label: 'Cerebrovascular'
+  },
   neurological: { 
     icon: Brain, 
     color: 'text-purple-500', 
     bgColor: 'bg-purple-500/10',
     label: 'Neurological'
+  },
+  psychiatric: { 
+    icon: Brain, 
+    color: 'text-violet-500', 
+    bgColor: 'bg-violet-500/10',
+    label: 'Psychiatric'
   },
   respiratory: { 
     icon: Wind, 
@@ -55,17 +121,35 @@ const CATEGORY_CONFIG = {
     bgColor: 'bg-green-500/10',
     label: 'Gastrointestinal'
   },
+  hepatic: { 
+    icon: Activity, 
+    color: 'text-green-600', 
+    bgColor: 'bg-green-600/10',
+    label: 'Hepatic'
+  },
   renal: { 
     icon: Droplet, 
     color: 'text-orange-500', 
     bgColor: 'bg-orange-500/10',
     label: 'Renal'
   },
+  urology: { 
+    icon: Droplet, 
+    color: 'text-orange-400', 
+    bgColor: 'bg-orange-400/10',
+    label: 'Urology'
+  },
   hematological: { 
     icon: FlaskConical, 
     color: 'text-rose-500', 
     bgColor: 'bg-rose-500/10',
     label: 'Hematological'
+  },
+  hematological_malignancy: { 
+    icon: FlaskConical, 
+    color: 'text-rose-600', 
+    bgColor: 'bg-rose-600/10',
+    label: 'Hematological Malignancy'
   },
   infectious: { 
     icon: Shield, 
@@ -79,17 +163,29 @@ const CATEGORY_CONFIG = {
     bgColor: 'bg-indigo-500/10',
     label: 'Autoimmune'
   },
+  rheumatological: { 
+    icon: Activity, 
+    color: 'text-indigo-400', 
+    bgColor: 'bg-indigo-400/10',
+    label: 'Rheumatological'
+  },
+  rheumatic: { 
+    icon: Activity, 
+    color: 'text-indigo-400', 
+    bgColor: 'bg-indigo-400/10',
+    label: 'Rheumatic'
+  },
   oncological: { 
     icon: Thermometer, 
     color: 'text-pink-500', 
     bgColor: 'bg-pink-500/10',
     label: 'Oncological'
   },
-  psychiatric: { 
-    icon: Brain, 
-    color: 'text-violet-500', 
-    bgColor: 'bg-violet-500/10',
-    label: 'Psychiatric'
+  oncology: { 
+    icon: Thermometer, 
+    color: 'text-pink-500', 
+    bgColor: 'bg-pink-500/10',
+    label: 'Oncology'
   },
   musculoskeletal: { 
     icon: Activity, 
@@ -102,6 +198,102 @@ const CATEGORY_CONFIG = {
     color: 'text-teal-500', 
     bgColor: 'bg-teal-500/10',
     label: 'Dermatological'
+  },
+  dermatology: { 
+    icon: Shield, 
+    color: 'text-teal-500', 
+    bgColor: 'bg-teal-500/10',
+    label: 'Dermatology'
+  },
+  pediatric: { 
+    icon: Heart, 
+    color: 'text-sky-500', 
+    bgColor: 'bg-sky-500/10',
+    label: 'Pediatric'
+  },
+  neonatology: { 
+    icon: Heart, 
+    color: 'text-sky-400', 
+    bgColor: 'bg-sky-400/10',
+    label: 'Neonatology'
+  },
+  geriatric: { 
+    icon: Stethoscope, 
+    color: 'text-slate-500', 
+    bgColor: 'bg-slate-500/10',
+    label: 'Geriatric'
+  },
+  obstetric_gynecologic: { 
+    icon: Heart, 
+    color: 'text-fuchsia-500', 
+    bgColor: 'bg-fuchsia-500/10',
+    label: 'OB/GYN'
+  },
+  obstetrics: { 
+    icon: Heart, 
+    color: 'text-fuchsia-500', 
+    bgColor: 'bg-fuchsia-500/10',
+    label: 'Obstetrics'
+  },
+  gynecology: { 
+    icon: Heart, 
+    color: 'text-fuchsia-400', 
+    bgColor: 'bg-fuchsia-400/10',
+    label: 'Gynecology'
+  },
+  obgyn: { 
+    icon: Heart, 
+    color: 'text-fuchsia-500', 
+    bgColor: 'bg-fuchsia-500/10',
+    label: 'OB/GYN'
+  },
+  genetic: { 
+    icon: Dna, 
+    color: 'text-lime-500', 
+    bgColor: 'bg-lime-500/10',
+    label: 'Genetic'
+  },
+  congenital: { 
+    icon: Dna, 
+    color: 'text-lime-400', 
+    bgColor: 'bg-lime-400/10',
+    label: 'Congenital'
+  },
+  emergency: { 
+    icon: Zap, 
+    color: 'text-red-600', 
+    bgColor: 'bg-red-600/10',
+    label: 'Emergency'
+  },
+  acute: { 
+    icon: Zap, 
+    color: 'text-red-500', 
+    bgColor: 'bg-red-500/10',
+    label: 'Acute'
+  },
+  ophthalmology: { 
+    icon: Activity, 
+    color: 'text-blue-400', 
+    bgColor: 'bg-blue-400/10',
+    label: 'Ophthalmology'
+  },
+  otolaryngology: { 
+    icon: Activity, 
+    color: 'text-blue-300', 
+    bgColor: 'bg-blue-300/10',
+    label: 'ENT'
+  },
+  ent: { 
+    icon: Activity, 
+    color: 'text-blue-300', 
+    bgColor: 'bg-blue-300/10',
+    label: 'ENT'
+  },
+  general: { 
+    icon: Stethoscope, 
+    color: 'text-gray-500', 
+    bgColor: 'bg-gray-500/10',
+    label: 'General'
   },
   other: { 
     icon: Stethoscope, 
@@ -157,14 +349,19 @@ const DiseaseBrowserPanel = ({
     const groups = {};
     
     diseases.forEach(disease => {
-      const category = disease.category?.toLowerCase() || 'other';
-      if (!groups[category]) {
-        groups[category] = {
-          config: CATEGORY_CONFIG[category] || CATEGORY_CONFIG.other,
+      const rawCategory = disease.category?.toLowerCase() || 'other';
+      
+      // Normalize unknown categories to 'other' to avoid duplicate "Other" groups
+      const categoryKey = CATEGORY_CONFIG[rawCategory] ? rawCategory : 'other';
+      
+      if (!groups[categoryKey]) {
+        groups[categoryKey] = {
+          config: CATEGORY_CONFIG[categoryKey],
+          originalCategory: rawCategory, // Keep original for display if needed
           diseases: []
         };
       }
-      groups[category].diseases.push(disease);
+      groups[categoryKey].diseases.push(disease);
     });
     
     // Sort diseases within each category by name
