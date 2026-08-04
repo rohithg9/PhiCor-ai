@@ -3935,9 +3935,9 @@ const DashboardMultiScale = () => {
             onOpenChange={setShowAllParams}
             className="border-b border-border/50"
           >
-            <CollapsibleTrigger asChild>
-              <button className="w-full px-3 lg:px-6 py-2 bg-gradient-to-r from-destructive/10 via-orange-500/5 to-amber-500/5 flex items-center justify-between hover:bg-destructive/15 transition-colors">
-                <div className="flex items-center gap-2">
+            <div className="w-full px-3 lg:px-6 py-2 bg-gradient-to-r from-destructive/10 via-orange-500/5 to-amber-500/5 flex items-center justify-between">
+              <CollapsibleTrigger asChild>
+                <button className="flex items-center gap-2 hover:bg-destructive/15 transition-colors px-2 py-1 rounded-lg">
                   <AlertTriangle className="w-4 h-4 text-destructive" />
                   <span className="text-sm font-semibold text-foreground">
                     Disease Impact Summary
@@ -3945,51 +3945,51 @@ const DashboardMultiScale = () => {
                   <Badge variant="destructive" className="text-[10px]">
                     {allModifiedParameters.length} affected parameters
                   </Badge>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground hidden sm:inline">
+                  <span className="text-xs text-muted-foreground hidden sm:inline ml-2">
                     {showAllParams ? 'Click to collapse' : 'Click to expand'}
                   </span>
-                  
-                  {/* View Toggle Buttons */}
-                  <div className="flex items-center border rounded-lg overflow-hidden mr-2">
-                    <Button
-                      onClick={(e) => { e.stopPropagation(); setShowMindMap(false); setShowBodyMap(false); }}
-                      size="sm"
-                      variant={!showMindMap && !showBodyMap ? "default" : "ghost"}
-                      className={`h-6 px-2 rounded-none text-xs ${!showMindMap && !showBodyMap ? 'bg-emerald-600' : ''}`}
-                      title="List View"
-                    >
-                      <LayoutList className="w-3 h-3" />
-                    </Button>
-                    <Button
-                      onClick={(e) => { e.stopPropagation(); setShowMindMap(true); setShowBodyMap(false); }}
-                      size="sm"
-                      variant={showMindMap ? "default" : "ghost"}
-                      className={`h-6 px-2 rounded-none text-xs ${showMindMap ? 'bg-purple-600' : ''}`}
-                      title="Mind Map"
-                    >
-                      <Network className="w-3 h-3" />
-                    </Button>
-                    <Button
-                      onClick={(e) => { e.stopPropagation(); setShowMindMap(false); setShowBodyMap(true); }}
-                      size="sm"
-                      variant={showBodyMap ? "default" : "ghost"}
-                      className={`h-6 px-2 rounded-none text-xs ${showBodyMap ? 'bg-cyan-600' : ''}`}
-                      title="Body Map"
-                    >
-                      <Layers className="w-3 h-3" />
-                    </Button>
-                  </div>
-                  
                   {showAllParams ? (
                     <ChevronUp className="w-4 h-4 text-muted-foreground" />
                   ) : (
                     <ChevronDown className="w-4 h-4 text-muted-foreground" />
                   )}
-                </div>
-              </button>
-            </CollapsibleTrigger>
+                </button>
+              </CollapsibleTrigger>
+              
+              {/* View Toggle Buttons - Outside CollapsibleTrigger */}
+              <div className="flex items-center border rounded-lg overflow-hidden">
+                <Button
+                  onClick={() => { setShowMindMap(false); setShowBodyMap(false); }}
+                  size="sm"
+                  variant={!showMindMap && !showBodyMap ? "default" : "ghost"}
+                  className={`h-6 px-2 rounded-none text-xs ${!showMindMap && !showBodyMap ? 'bg-emerald-600' : ''}`}
+                  title="List View"
+                  data-testid="view-list-btn"
+                >
+                  <LayoutList className="w-3 h-3" />
+                </Button>
+                <Button
+                  onClick={() => { setShowMindMap(true); setShowBodyMap(false); }}
+                  size="sm"
+                  variant={showMindMap ? "default" : "ghost"}
+                  className={`h-6 px-2 rounded-none text-xs ${showMindMap ? 'bg-purple-600' : ''}`}
+                  title="Mind Map"
+                  data-testid="view-network-btn"
+                >
+                  <Network className="w-3 h-3" />
+                </Button>
+                <Button
+                  onClick={() => { setShowMindMap(false); setShowBodyMap(true); }}
+                  size="sm"
+                  variant={showBodyMap ? "default" : "ghost"}
+                  className={`h-6 px-2 rounded-none text-xs ${showBodyMap ? 'bg-cyan-600' : ''}`}
+                  title="Body Map"
+                  data-testid="view-body-map-btn"
+                >
+                  <Layers className="w-3 h-3" />
+                </Button>
+              </div>
+            </div>
             <CollapsibleContent>
               <div className="px-3 lg:px-6 py-4 bg-gradient-to-r from-destructive/5 via-orange-500/5 to-amber-500/5">
                 
