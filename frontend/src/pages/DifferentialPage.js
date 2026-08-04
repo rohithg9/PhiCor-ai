@@ -12,7 +12,7 @@ import {
   CheckCircle, ChevronDown, ChevronUp, Activity, User, Clipboard,
   TrendingUp, TrendingDown, Minus, Brain, FlaskConical, Heart,
   Stethoscope, Gauge, Info, Sparkles, Target, Zap, Shield, Pill, Calculator,
-  Save, Share2, FolderOpen, Network, LayoutList
+  Save, Share2, FolderOpen, Network, LayoutList, Layers
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -26,6 +26,7 @@ import DifferentialDashboard from '../components/DifferentialDashboard';
 import ParameterDrillDownModal from '../components/ParameterDrillDownModal';
 import PDFExportButton from '../components/PDFExportButton';
 import NeuralNetworkVisualization from '../components/NeuralNetworkVisualization';
+import EnhancedBodyMap from '../components/EnhancedBodyMap';
 import GlobalPatientPanel from '../components/GlobalPatientPanel';
 import { usePatient } from '../context/PatientContext';
 import { 
@@ -107,6 +108,9 @@ const DifferentialPage = () => {
   
   // Neural Network Visualization state
   const [showNeuralNetwork, setShowNeuralNetwork] = useState(false);
+  
+  // Body Map Visualization state
+  const [showBodyMap, setShowBodyMap] = useState(false);
   
   // NEW: Parameter Drill-Down Modal state
   const [drillDownModal, setDrillDownModal] = useState({
@@ -642,6 +646,60 @@ const DifferentialPage = () => {
     
     return { nodes, connections };
   }, [differentialResults, abnormalFindings, clinicalSynthesis, phicorResults]);
+  
+  // Build Body Map data from differential diagnosis results
+  const bodyMapData = useMemo(() => {
+    const effects = [];
+    const connections = [];
+    
+    // Map findings to organ effects
+    abnormalFindings.forEach(finding => {
+      const organName = finding.organ || 'general';
+      const effect = {
+        organ: organName,
+        parameter: finding.parameterName || finding.name,
+        change: finding.direction === 'increase' ? 'elevated' : 'reduced',
+        value: finding.value,
+        unit: finding.unit || '',
+        severity: finding.severity || 'moderate'
+      };
+      effects.push(effect);
+    });
+    
+    // Add organ effects from top diagnoses
+    differentialResults.slice(0, 5).forEach(diagnosis => {
+      const diagName = diagnosis.diseaseName || diagnosis.name;
+      const probability = diagnosis.probabilityScore || diagnosis.probability || 0;
+      
+      // Extract affected organs from diagnosis name and reasoning
+      const diagText = `${diagName} ${diagnosis.reasoning || ''}`.toLowerCase();
+      
+      const organMappings = [
+        { keywords: ['heart', 'cardiac', 'coronary', 'myocardial', 'infarct'], organ: 'heart' },
+        { keywords: ['lung', 'pulmonary', 'respiratory', 'pneumo'], organ: 'lungs' },
+        { keywords: ['liver', 'hepatic', 'hepato'], organ: 'liver' },
+        { keywords: ['kidney', 'renal', 'nephro'], organ: 'kidneys' },
+        { keywords: ['brain', 'cerebral', 'neuro', 'stroke'], organ: 'brain' },
+        { keywords: ['stomach', 'gastric', 'gi', 'intestin', 'bowel'], organ: 'stomach' },
+        { keywords: ['pancrea'], organ: 'pancreas' },
+        { keywords: ['blood', 'anemia', 'hematol'], organ: 'blood' },
+        { keywords: ['thyroid'], organ: 'thyroid' },
+      ];
+      
+      organMappings.forEach(({ keywords, organ }) => {
+        if (keywords.some(kw => diagText.includes(kw))) {
+          connections.push({
+            source: diagName,
+            organ: organ,
+            strength: probability,
+            effect: probability > 60 ? 'primary' : 'secondary'
+          });
+        }
+      });
+    });
+    
+    return { effects, connections };
+  }, [differentialResults, abnormalFindings]);
   
   // Add abnormal finding
   const addFinding = useCallback(() => {
@@ -1996,27 +2054,37 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                         className="h-7"
                       />
                       
-                      {/* View Toggle: List vs Neural Network */}
+                      {/* View Toggle: List vs Mind Map vs Body Map */}
                       <div className="flex items-center border rounded-lg overflow-hidden ml-1">
                         <Button
-                          onClick={() => setShowNeuralNetwork(false)}
+                          onClick={() => { setShowNeuralNetwork(false); setShowBodyMap(false); }}
                           size="sm"
-                          variant={!showNeuralNetwork ? "default" : "ghost"}
-                          className={`h-7 px-2 rounded-none ${!showNeuralNetwork ? 'bg-emerald-600' : ''}`}
+                          variant={!showNeuralNetwork && !showBodyMap ? "default" : "ghost"}
+                          className={`h-7 px-2 rounded-none ${!showNeuralNetwork && !showBodyMap ? 'bg-emerald-600' : ''}`}
                           title="List View"
                           data-testid="view-list-btn"
                         >
                           <LayoutList className="w-3.5 h-3.5" />
                         </Button>
                         <Button
-                          onClick={() => setShowNeuralNetwork(true)}
+                          onClick={() => { setShowNeuralNetwork(true); setShowBodyMap(false); }}
                           size="sm"
                           variant={showNeuralNetwork ? "default" : "ghost"}
                           className={`h-7 px-2 rounded-none ${showNeuralNetwork ? 'bg-purple-600' : ''}`}
-                          title="Neural Network View"
+                          title="Mind Map View"
                           data-testid="view-network-btn"
                         >
                           <Network className="w-3.5 h-3.5" />
+                        </Button>
+                        <Button
+                          onClick={() => { setShowNeuralNetwork(false); setShowBodyMap(true); }}
+                          size="sm"
+                          variant={showBodyMap ? "default" : "ghost"}
+                          className={`h-7 px-2 rounded-none ${showBodyMap ? 'bg-cyan-600' : ''}`}
+                          title="Body Map View"
+                          data-testid="view-body-map-btn"
+                        >
+                          <Layers className="w-3.5 h-3.5" />
                         </Button>
                       </div>
                     </>
@@ -2363,7 +2431,7 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                       </div>
                     )}
                     
-                    {/* Toggle between List View and Neural Network View */}
+                    {/* Toggle between List View, Neural Network View, and Body Map View */}
                     {showNeuralNetwork ? (
                       <div className="space-y-4">
                         <NeuralNetworkVisualization
@@ -2390,6 +2458,24 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
                         <div className={`text-center text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
                           <Info className="w-3 h-3 inline mr-1" />
                           Click nodes to see details • Toggle between views using the buttons above
+                        </div>
+                      </div>
+                    ) : showBodyMap ? (
+                      <div className="space-y-4">
+                        <EnhancedBodyMap
+                          effects={bodyMapData.effects}
+                          connections={bodyMapData.connections}
+                          sourceLabel={differentialResults[0]?.diseaseName || 'Diagnosis'}
+                          height={520}
+                          isDark={isDark}
+                          onOrganClick={(organ) => {
+                            console.log('Organ clicked:', organ.name);
+                            // Could filter findings by organ
+                          }}
+                        />
+                        <div className={`text-center text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                          <Info className="w-3 h-3 inline mr-1" />
+                          Click organs to see detailed parameter effects • Green = positive, Red = concern
                         </div>
                       </div>
                     ) : (

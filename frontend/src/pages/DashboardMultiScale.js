@@ -9,7 +9,8 @@ import {
   AlertTriangle, Check, Menu, X, Stethoscope, FlaskConical,
   FileImage, Pill, Clock, TrendingUp, TrendingDown, Info, Microscope,
   Brain, Sparkles, Loader2, Search, Thermometer, HeartPulse,
-  TestTube, ScanLine, Syringe, ClipboardList, Calculator, Home, User, Users
+  TestTube, ScanLine, Syringe, ClipboardList, Calculator, Home, User, Users,
+  Network, LayoutList
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { ScrollArea } from '../components/ui/scroll-area';
@@ -32,6 +33,8 @@ import DiseaseDetailPanel from '../components/DiseaseDetailPanel';
 import FeatureNav from '../components/FeatureNav';
 import RegionSelector from '../components/RegionSelector';
 import PDFExportButton from '../components/PDFExportButton';
+import NeuralNetworkVisualization from '../components/NeuralNetworkVisualization';
+import EnhancedBodyMap from '../components/EnhancedBodyMap';
 import 'katex/dist/katex.min.css';
 import { BlockMath, InlineMath } from 'react-katex';
 
@@ -2802,6 +2805,10 @@ const DashboardMultiScale = () => {
   // Ref for scrolling to parameters section
   const parametersRef = useRef(null);
   const [leftPanelOpen, setLeftPanelOpen] = useState(false); // Left panel collapsed by default
+  
+  // Visualization view states
+  const [showMindMap, setShowMindMap] = useState(false);
+  const [showBodyMap, setShowBodyMap] = useState(false);
 
   // Helper function to determine primary organ from category - defined early for use in useEffect
   const getPrimaryOrganFromCategory = useCallback((category) => {
@@ -3943,6 +3950,38 @@ const DashboardMultiScale = () => {
                   <span className="text-xs text-muted-foreground hidden sm:inline">
                     {showAllParams ? 'Click to collapse' : 'Click to expand'}
                   </span>
+                  
+                  {/* View Toggle Buttons */}
+                  <div className="flex items-center border rounded-lg overflow-hidden mr-2">
+                    <Button
+                      onClick={(e) => { e.stopPropagation(); setShowMindMap(false); setShowBodyMap(false); }}
+                      size="sm"
+                      variant={!showMindMap && !showBodyMap ? "default" : "ghost"}
+                      className={`h-6 px-2 rounded-none text-xs ${!showMindMap && !showBodyMap ? 'bg-emerald-600' : ''}`}
+                      title="List View"
+                    >
+                      <LayoutList className="w-3 h-3" />
+                    </Button>
+                    <Button
+                      onClick={(e) => { e.stopPropagation(); setShowMindMap(true); setShowBodyMap(false); }}
+                      size="sm"
+                      variant={showMindMap ? "default" : "ghost"}
+                      className={`h-6 px-2 rounded-none text-xs ${showMindMap ? 'bg-purple-600' : ''}`}
+                      title="Mind Map"
+                    >
+                      <Network className="w-3 h-3" />
+                    </Button>
+                    <Button
+                      onClick={(e) => { e.stopPropagation(); setShowMindMap(false); setShowBodyMap(true); }}
+                      size="sm"
+                      variant={showBodyMap ? "default" : "ghost"}
+                      className={`h-6 px-2 rounded-none text-xs ${showBodyMap ? 'bg-cyan-600' : ''}`}
+                      title="Body Map"
+                    >
+                      <Layers className="w-3 h-3" />
+                    </Button>
+                  </div>
+                  
                   {showAllParams ? (
                     <ChevronUp className="w-4 h-4 text-muted-foreground" />
                   ) : (
@@ -3953,7 +3992,68 @@ const DashboardMultiScale = () => {
             </CollapsibleTrigger>
             <CollapsibleContent>
               <div className="px-3 lg:px-6 py-4 bg-gradient-to-r from-destructive/5 via-orange-500/5 to-amber-500/5">
-                {/* Grouped Parameters by Organ - No duplicate filter tabs */}
+                
+                {/* Mind Map View */}
+                {showMindMap && (
+                  <NeuralNetworkVisualization
+                    nodes={[
+                      { id: 'disease', label: currentDisease?.name || 'Disease', type: 'diagnosis', value: 100 },
+                      ...affectedOrgansSummary.map(organ => ({
+                        id: `organ-${organ.id}`,
+                        label: organ.name,
+                        type: 'organ',
+                        value: organ.isPrimary ? 90 : 60
+                      })),
+                      ...allModifiedParameters.slice(0, 20).map((param, idx) => ({
+                        id: `param-${idx}`,
+                        label: param.paramName,
+                        type: 'parameter',
+                        value: Math.abs(param.changePercent || 50)
+                      }))
+                    ]}
+                    connections={[
+                      ...affectedOrgansSummary.map(organ => ({
+                        source: 'disease',
+                        target: `organ-${organ.id}`,
+                        strength: organ.isPrimary ? 90 : 60
+                      })),
+                      ...allModifiedParameters.slice(0, 20).map((param, idx) => ({
+                        source: `organ-${param.organId}`,
+                        target: `param-${idx}`,
+                        strength: Math.abs(param.changePercent || 50)
+                      }))
+                    ]}
+                    centralNode="disease"
+                    title={`${currentDisease?.name || 'Disease'} - Parameter Impact Map`}
+                    height={450}
+                    isDark={isDark}
+                  />
+                )}
+                
+                {/* Body Map View */}
+                {showBodyMap && (
+                  <EnhancedBodyMap
+                    effects={allModifiedParameters.map(param => ({
+                      organ: param.organId,
+                      parameter: param.paramName,
+                      change: param.direction === 'increase' ? 'elevated' : 'reduced',
+                      value: param.changePercent,
+                      severity: param.isPrimary ? 'severe' : 'moderate'
+                    }))}
+                    connections={affectedOrgansSummary.map(organ => ({
+                      source: currentDisease?.name || 'Disease',
+                      organ: organ.id,
+                      strength: organ.isPrimary ? 90 : 60,
+                      effect: organ.isPrimary ? 'primary' : 'secondary'
+                    }))}
+                    sourceLabel={currentDisease?.name || 'Disease'}
+                    height={450}
+                    isDark={isDark}
+                  />
+                )}
+                
+                {/* List View - Original Parameters by Organ */}
+                {!showMindMap && !showBodyMap && (
                 <div className="space-y-4">
                   {affectedOrgansSummary.map((organ) => {
                     const organParams = allModifiedParameters.filter(p => p.organId === organ.id);
@@ -4052,6 +4152,7 @@ const DashboardMultiScale = () => {
                     );
                   })}
                 </div>
+                )}
                 
                 {/* Total Summary */}
                 <div className="mt-4 pt-3 border-t border-border/30 flex items-center justify-between flex-wrap gap-3">

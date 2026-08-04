@@ -1,0 +1,43 @@
+{
+  "summary": "Frontend testing of Mind Map & Body Map visualizations on Differential Diagnosis (/differential) and Core Engine (/dashboard) pages. All 9 requested test items PASS functionally. Screenshots verify List/Mind Map/Body Map toggles work on both pages, with correct titles, probability percentages, layers, rotation slider, zoom controls, and legend.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {"flow": "Differential clinical synthesis", "issue": "422 Unprocessable Entity from Synthesis API (`Synthesis API error (JSON): {detail: Array(3)}`). Does not block differentials rendering or visualizations, but the LLM-driven clinical synthesis panel silently fails validation. Likely Pydantic payload mismatch.", "affected_selectors": []}
+    ],
+    "design_issues": [
+      {"screen": "Core Engine - Disease Impact Summary", "issues": ["React hydration warning: `<button> cannot be a descendant of <button>` - the CollapsibleTrigger renders an outer <button>, and the three toggle buttons (List/Mind Map/Body Map) are nested inside it (DashboardMultiScale.js L3939-3991). Invalid HTML; functionally works but produces console errors and can cause hydration issues.", "Toggle buttons on Core Engine lack data-testid attributes (only `title` attributes). Add data-testid=\"view-list-btn\"/\"view-network-btn\"/\"view-body-map-btn\" for parity with DifferentialPage.", "Duplicate React keys in Disease Impact Summary parameter list: `heart-s3_gallop`, `lungs-pulmonary_edema`, `lungs-kerley_b_lines`, `lungs-crackles`, `lungs-wheezes`, `lungs-decreased_breath_sounds` (visible as repeated cards like 'S3 Gallop' appearing twice under Heart, 'Crackles/Wheezes/Kerley B Lines/Pulmonary Edema/Decreased Breath Sounds' twice under Lungs)."]}
+    ]
+  },
+  "test_results": {
+    "differential_three_toggles_visible": "PASS - List (LayoutList), Mind Map (Network), Body Map (Layers) toggles render after Run Complete Analysis (~50s). data-testid: view-list-btn / view-network-btn / view-body-map-btn all present.",
+    "differential_mindmap": "PASS - Shows 'Diagnostic Reasoning Map' with 19 nodes, 67 links, layers PATIENT/SYMPTOM/LAB/SYNDROME/ORGAN/DIAGNOSIS. Probability legend (70-100%, 50-70%, 30-50%, <30%) visible. Percentages rendered on connection edges (85%,79%,58%, etc). Zoom controls (-, 100%, +) and 3D rotation slider (0°) visible top-right.",
+    "differential_bodymap": "PASS - EnhancedBodyMap shows human silhouette with organs (Heart, Lungs, Kidneys etc) as colored bubbles. Legend 'Beneficial / Caution / Mixed' present. Impact title 'Acute Myocardial Infarction Impact Map'.",
+    "coreengine_three_toggles_after_disease": "PASS - After selecting 'Heart failure, unspecified' via Find Condition > Heart Failure category > disease item, Disease Impact Summary section appears with 3 toggle buttons (titles: List View / Mind Map / Body Map). '87 affected parameters' badge shown.",
+    "coreengine_mindmap": "PASS - Shows 'Heart failure, unspecified - Parameter Impact Map' with 27 nodes, 26 links across PARAMETER/ORGAN/DIAGNOSIS layers, probability legend, rotation slider (0°), zoom controls, drag-to-pan hint.",
+    "coreengine_bodymap": "PASS - Human body silhouette rendered with disease-affected organs as colored bubbles and Beneficial/Caution/Mixed legend. Title: 'Heart failure, unspecified Impact Map'.",
+    "probability_percentages_on_connections": "PASS - Verified programmatically: SVG text nodes contain '%' on both differential and core engine mind maps.",
+    "3d_rotation_slider_zoom_controls": "PASS - Both mind maps show rotation slider with '0°' indicator and zoom controls (- / 100% / +). Note: implemented as custom slider (not native <input type=range>) - functional but not detectable via range selector.",
+    "bodymap_color_coded_legend": "PASS - Legend text 'Beneficial' (green), 'Caution' (red), 'Mixed' (orange/yellow) present on both pages' body map views."
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Fix nested <button> HTML in DashboardMultiScale.js L3939-3991: move the view-toggle button group outside CollapsibleTrigger (or use asChild pattern properly / wrap in a <span role='group'>). Prevents React hydration warning.",
+    "Add data-testid attributes to Core Engine toggle buttons (view-list-btn / view-network-btn / view-body-map-btn) for consistency with DifferentialPage.",
+    "De-duplicate parameter keys in Disease Impact Summary rendering - either dedupe the affected-parameters list or make key include organ + param + index. Currently 'S3 Gallop', 'Crackles', 'Wheezes', 'Pulmonary Edema', 'Kerley B Lines', 'Decreased Breath Sounds' render twice.",
+    "Investigate 422 error from Synthesis API on /differential (payload validation failure - `detail: Array(3)` suggests 3 Pydantic errors)."
+  ],
+  "critical_code_review_comments": [
+    "DashboardMultiScale.js is 4605 lines - far exceeds 700-line guideline; recommend splitting DiseaseImpactSummary, ClinicalParametersPanel, and OrganSystemNav into their own components.",
+    "DifferentialPage.js is 2528 lines - also exceeds guideline; recommend extracting ClinicalTextTab, VisualizationPanel (with the toggle+neural+body switch), and SynthesisPanel.",
+    "The three toggle buttons pattern is duplicated across two pages - extract into a reusable <ViewToggle showMindMap showBodyMap onChange /> component."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A", "frontend": "100% (all 9 requested items pass functionally; 3 non-blocking console/HTML issues found)"},
+  "test_credentials": "None used - both /differential and /dashboard are public.",
+  "seed_data_creation": "None (used inline clinical text; disease selected via UI).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "To reach Core Engine visualization: /dashboard → click 'Heart Failure' text in Find Condition sidebar (Cardiac tab) to expand → click 'Heart failure, unspecified' → wait ~3s for Disease Impact Summary to render → toggle buttons at right of that summary header use title attributes only (no data-testid). For Differential: /differential → click 'Clinical Text' tab → fill textarea → click 'Run Complete Analysis' (takes ~50s) → toggles appear with data-testid view-list-btn/view-network-btn/view-body-map-btn. Duplicate-key & nested-<button> console warnings are pre-existing (not blocking)."
+}
