@@ -25,7 +25,9 @@ import { ScrollArea } from './ui/scroll-area';
  * - mode: 'effects' | 'connections' | 'both'
  */
 
-// Comprehensive organ definitions with positions
+// Comprehensive organ definitions with anatomically correct positions
+// Note: When viewing a body from the front, viewer's LEFT = patient's RIGHT
+// cx values: < 100 = viewer's left (patient's right), > 100 = viewer's right (patient's left)
 const ORGANS = {
   brain: {
     id: 'brain',
@@ -41,7 +43,7 @@ const ORGANS = {
     id: 'heart',
     name: 'Heart',
     icon: Heart,
-    position: { cx: 100, cy: 100, r: 16 },
+    position: { cx: 105, cy: 100, r: 16 }, // Slightly left of center (patient's left)
     color: '#ef4444',
     gradient: ['#f87171', '#dc2626'],
     parameters: ['heart_rate', 'cardiac_output', 'blood_pressure', 'ejection_fraction', 'stroke_volume'],
@@ -51,7 +53,7 @@ const ORGANS = {
     id: 'lungs',
     name: 'Lungs',
     icon: Wind,
-    position: { cx: 75, cy: 95, r: 14, paired: true, cx2: 125 },
+    position: { cx: 70, cy: 95, r: 14, paired: true, cx2: 130 }, // Both sides
     color: '#3b82f6',
     gradient: ['#60a5fa', '#2563eb'],
     parameters: ['oxygen_saturation', 'respiratory_rate', 'fev1', 'lung_capacity', 'gas_exchange'],
@@ -61,7 +63,7 @@ const ORGANS = {
     id: 'liver',
     name: 'Liver',
     icon: Activity,
-    position: { cx: 120, cy: 135, r: 18 },
+    position: { cx: 75, cy: 135, r: 18 }, // Patient's RIGHT side (viewer's left)
     color: '#a855f7',
     gradient: ['#c084fc', '#9333ea'],
     parameters: ['alt', 'ast', 'bilirubin', 'albumin', 'inr', 'drug_metabolism'],
@@ -71,7 +73,7 @@ const ORGANS = {
     id: 'kidneys',
     name: 'Kidneys',
     icon: Droplet,
-    position: { cx: 80, cy: 155, r: 12, paired: true, cx2: 120 },
+    position: { cx: 75, cy: 155, r: 12, paired: true, cx2: 125 }, // Both sides
     color: '#f59e0b',
     gradient: ['#fbbf24', '#d97706'],
     parameters: ['gfr', 'creatinine', 'bun', 'electrolytes', 'urine_output'],
@@ -81,7 +83,7 @@ const ORGANS = {
     id: 'pancreas',
     name: 'Pancreas',
     icon: Flame,
-    position: { cx: 100, cy: 150, r: 10 },
+    position: { cx: 100, cy: 145, r: 10 }, // Behind stomach, center
     color: '#ec4899',
     gradient: ['#f472b6', '#db2777'],
     parameters: ['glucose', 'insulin', 'glucagon', 'amylase', 'lipase'],
@@ -91,7 +93,7 @@ const ORGANS = {
     id: 'stomach',
     name: 'Stomach',
     icon: Activity,
-    position: { cx: 85, cy: 140, r: 14 },
+    position: { cx: 115, cy: 130, r: 14 }, // Patient's LEFT side (viewer's right)
     color: '#22c55e',
     gradient: ['#4ade80', '#16a34a'],
     parameters: ['gastric_acid', 'motility', 'absorption', 'digestion_rate'],
@@ -101,7 +103,7 @@ const ORGANS = {
     id: 'intestines',
     name: 'Intestines',
     icon: Activity,
-    position: { cx: 100, cy: 180, r: 16 },
+    position: { cx: 100, cy: 180, r: 16 }, // Center, lower abdomen
     color: '#14b8a6',
     gradient: ['#2dd4bf', '#0d9488'],
     parameters: ['absorption', 'motility', 'microbiome', 'inflammation'],
@@ -111,7 +113,7 @@ const ORGANS = {
     id: 'thyroid',
     name: 'Thyroid',
     icon: Zap,
-    position: { cx: 100, cy: 65, r: 8 },
+    position: { cx: 100, cy: 65, r: 8 }, // Neck, center
     color: '#06b6d4',
     gradient: ['#22d3ee', '#0891b2'],
     parameters: ['tsh', 't3', 't4', 'metabolism_rate', 'energy'],
@@ -121,7 +123,7 @@ const ORGANS = {
     id: 'spleen',
     name: 'Spleen',
     icon: Shield,
-    position: { cx: 75, cy: 145, r: 10 },
+    position: { cx: 130, cy: 140, r: 10 }, // Patient's LEFT side (viewer's right)
     color: '#6366f1',
     gradient: ['#818cf8', '#4f46e5'],
     parameters: ['wbc', 'platelets', 'immune_function', 'blood_filtering'],
