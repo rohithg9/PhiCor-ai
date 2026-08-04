@@ -35,6 +35,7 @@ import RegionSelector from '../components/RegionSelector';
 import PDFExportButton from '../components/PDFExportButton';
 import NeuralNetworkVisualization from '../components/NeuralNetworkVisualization';
 import EnhancedBodyMap from '../components/EnhancedBodyMap';
+import DiseaseBrowserPanel from '../components/DiseaseBrowserPanel';
 import 'katex/dist/katex.min.css';
 import { BlockMath, InlineMath } from 'react-katex';
 
@@ -2809,6 +2810,9 @@ const DashboardMultiScale = () => {
   // Visualization view states
   const [showMindMap, setShowMindMap] = useState(false);
   const [showBodyMap, setShowBodyMap] = useState(false);
+  
+  // Disease Browser state
+  const [showDiseaseBrowserPanel, setShowDiseaseBrowserPanel] = useState(false);
 
   // Helper function to determine primary organ from category - defined early for use in useEffect
   const getPrimaryOrganFromCategory = useCallback((category) => {
@@ -3674,6 +3678,17 @@ const DashboardMultiScale = () => {
                   />
                 </SheetContent>
               </Sheet>
+              
+              {/* Browse All Diseases Button */}
+              <Button 
+                variant={showDiseaseBrowserPanel ? "default" : "outline"} 
+                className={`gap-2 hidden lg:flex ${showDiseaseBrowserPanel ? 'bg-emerald-500 hover:bg-emerald-600' : ''}`}
+                onClick={() => setShowDiseaseBrowserPanel(!showDiseaseBrowserPanel)}
+                data-testid="disease-browser-toggle"
+              >
+                <Stethoscope className="w-4 h-4" />
+                <span>Browse All</span>
+              </Button>
               <TutorialButton onClick={tutorial.open} />
             </div>
           </div>
@@ -4595,6 +4610,17 @@ const DashboardMultiScale = () => {
           </aside>
         </div>
       </main>
+      
+      {/* Disease Browser Panel Sidebar */}
+      <DiseaseBrowserPanel
+        isOpen={showDiseaseBrowserPanel}
+        onClose={() => setShowDiseaseBrowserPanel(false)}
+        selectedDiseaseId={selectedDisease}
+        onSelectDisease={(disease) => {
+          handleDiseaseSelect(disease.id);
+          setShowDiseaseBrowserPanel(false);
+        }}
+      />
       </div>
     </div>
     </>

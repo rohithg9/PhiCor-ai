@@ -1,0 +1,45 @@
+{
+  "summary": "Verified Disease Browser Panel on Differential Diagnosis + Core Engine pages and PDF Export dropdown/download on Food Analysis page. All 9 target features PASS. Discovered one UX bug: multiple 'Other' rows in DiseaseBrowserPanel due to grouping-vs-label mismatch.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "DiseaseBrowserPanel.js",
+        "issue": "Sidebar shows 7+ rows all labeled 'Other' (counts 221, 122, 117, 80, 70, 23, 15, 15, 15). Root cause: grouping uses `disease.category?.toLowerCase()` as the group KEY, but CATEGORY_CONFIG only maps 15 known keys; unknown categories keep their unique lowercase key (so become separate groups) yet fall back to CATEGORY_CONFIG.other which sets label='Other' for all of them. Fix: either (a) normalize unknown categories to a single 'other' key before grouping, or (b) use the original category string as the label when config falls back to default. Total across the 7 'Other' rows equals ~558 diseases that are effectively unclassified.",
+        "selector": "[data-testid=\"disease-browser-sidebar\"]",
+        "priority": "MEDIUM"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "verifications": {
+    "differential_browse_diseases_button": "PASS - [data-testid=disease-browser-toggle] opens sidebar; header shows '2,568 diseases'.",
+    "categories_with_counts": "PASS - Categories rendered with badges: Gastrointestinal 374, Cardiovascular 243, Infectious 229, Respiratory 218, Psychiatric 172, Endocrine 131, Neurological 127, Hematological 112, Renal 97, Musculoskeletal 17, Dermatological 16, plus multiple 'Other' groups.",
+    "search_filter": "PASS - Typing 'diabetes' filters to 4 categories and shows 'Found N matching diseases'. ICD-10 code search field wired via disease.icd10_code lookup.",
+    "expand_category": "PASS - Clicking Gastrointestinal expands to 374 clickable disease items with data-testid=disease-browser-item-*.",
+    "select_disease_adds_to_clinical_text": "PASS - Clicking a disease appended 'Condition: <name> (ICD-10: N/A)' into the Clinical Text textarea, switched to Clinical Text tab, closed sidebar, and showed success toast.",
+    "core_engine_browse_all_button": "PASS - /dashboard [data-testid=disease-browser-toggle] labeled 'Browse All' opens the same sidebar with 2,568 diseases and 46 category groups.",
+    "food_export_pdf_dropdown": "PASS - After analyzing 'apple' on /food, Export PDF dropdown shows: Download PDF, Share..., Share via Email, Share via WhatsApp.",
+    "food_download_pdf": "PASS - Downloaded file 'PhiCor_food_Apple__Raw_2026-08-04.pdf' successfully generated via page.expect_download().",
+    "body_map_organ_positions": "PASS (verified in iteration_10) - liver cx=75 (patient RIGHT), stomach cx=115 (patient LEFT), spleen cx=130 (patient LEFT), heart cx=105."
+  },
+  "test_report_links": ["/app/test_reports/iteration_11.json"],
+  "action_items": [
+    "Fix DiseaseBrowserPanel.js grouping so unknown categories collapse into a single 'Other' bucket (or use the original category string as the label). Currently ~558 diseases appear as 7 duplicate 'Other' rows.",
+    "Optional: category strings returned by /api/diseases-db/list should be normalized on the backend to the 15 canonical CATEGORY_CONFIG keys to avoid this class of bug entirely."
+  ],
+  "critical_code_review_comments": [
+    "DiseaseBrowserPanel.js: category key logic is fragile - config lookup and group key must use the same normalization.",
+    "DashboardMultiScale.js is >4600 lines - continues to warrant a refactor split (already flagged in iteration_10).",
+    "DifferentialPage.js is >2550 lines - same maintainability concern.",
+    "PDFExportButton.jsx uses `window.location.href = mailto:...` for email share which can navigate the SPA away; consider window.open with _blank."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (frontend-only)", "frontend": "100% of requested features PASS (1 minor UX bug found)"},
+  "test_credentials": "admin@phicor.ai / admin123 (not required - all tested pages public)",
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Disease Browser sidebar works on /differential (Browse Diseases) and /dashboard (Browse All). Fetches /api/diseases-db/list -> 2,568 diseases. Only real issue is duplicate 'Other' labels caused by CATEGORY_CONFIG fallback. PDF export dropdown + download works on /food; button appears after searching a food (e.g., 'apple') and pressing Enter."
+}

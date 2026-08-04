@@ -12,7 +12,7 @@ import {
   CheckCircle, ChevronDown, ChevronUp, Activity, User, Clipboard,
   TrendingUp, TrendingDown, Minus, Brain, FlaskConical, Heart,
   Stethoscope, Gauge, Info, Sparkles, Target, Zap, Shield, Pill, Calculator,
-  Save, Share2, FolderOpen, Network, LayoutList, Layers
+  Save, Share2, FolderOpen, Network, LayoutList, Layers, BookOpen
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -28,6 +28,7 @@ import PDFExportButton from '../components/PDFExportButton';
 import NeuralNetworkVisualization from '../components/NeuralNetworkVisualization';
 import EnhancedBodyMap from '../components/EnhancedBodyMap';
 import GlobalPatientPanel from '../components/GlobalPatientPanel';
+import DiseaseBrowserPanel from '../components/DiseaseBrowserPanel';
 import { usePatient } from '../context/PatientContext';
 import { 
   getDifferentialDiagnosis, 
@@ -111,6 +112,9 @@ const DifferentialPage = () => {
   
   // Body Map Visualization state
   const [showBodyMap, setShowBodyMap] = useState(false);
+  
+  // Disease Browser Panel state
+  const [showDiseaseBrowser, setShowDiseaseBrowser] = useState(false);
   
   // NEW: Parameter Drill-Down Modal state
   const [drillDownModal, setDrillDownModal] = useState({
@@ -1330,7 +1334,19 @@ const DifferentialPage = () => {
                 </p>
               </div>
             </div>
-            <TutorialButton onClick={tutorial.open} />
+            <div className="flex items-center gap-2">
+              <Button
+                variant={showDiseaseBrowser ? "default" : "outline"}
+                size="sm"
+                onClick={() => setShowDiseaseBrowser(!showDiseaseBrowser)}
+                className={`hidden lg:flex items-center gap-1.5 ${showDiseaseBrowser ? 'bg-emerald-500 hover:bg-emerald-600' : ''}`}
+                data-testid="disease-browser-toggle"
+              >
+                <BookOpen className="w-4 h-4" />
+                <span>Browse Diseases</span>
+              </Button>
+              <TutorialButton onClick={tutorial.open} />
+            </div>
           </div>
         </div>
         
@@ -2518,6 +2534,21 @@ Echo: EF 35%, dilated LV, MR 2+, elevated PASP`}
         parameterType={drillDownModal.parameterType}
         expectedValue={drillDownModal.expectedValue}
         currentDirection={drillDownModal.currentDirection}
+      />
+      
+      {/* Disease Browser Sidebar */}
+      <DiseaseBrowserPanel
+        isOpen={showDiseaseBrowser}
+        onClose={() => setShowDiseaseBrowser(false)}
+        onSelectDisease={(disease) => {
+          // Add disease to clinical text or filter findings
+          const currentText = clinicalText || '';
+          const diseaseInfo = `${disease.name} (ICD-10: ${disease.icd10_code || 'N/A'})`;
+          setClinicalText(currentText ? `${currentText}\n\nCondition: ${diseaseInfo}` : `Condition: ${diseaseInfo}`);
+          setShowDiseaseBrowser(false);
+          setActiveTab('clinical');
+          toast.success(`Added ${disease.name} to clinical text`);
+        }}
       />
     </div>
     </>
