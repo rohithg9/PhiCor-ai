@@ -482,12 +482,23 @@ Patient: CKD G3b (eGFR 35), K+ 5.4, gastric ulcer history
 - 5 critical warnings requiring urgent review
 - Status: `CLINICIAN_REVIEW_REQUIRED`
 
+#### Test Results (7-medication prescription - from user screenshot)
+Input: Warfarin, Spironolactone, Potassium Chloride, Amiodarone, Simvastatin, Ramipril, Aspirin
+Patient: Age 58, eGFR 35, CKD, Gastric ulcer
+
+**Results:**
+- 2 CONTRAINDICATED: spironolactone+potassium, amiodarone+simvastatin
+- 4 Severe/Major interactions
+- 3 Patient-specific risks (hyperkalemia, GI bleeding)
+- Status: `CLINICIAN_REVIEW_REQUIRED` with URGENT REVIEW banner
+
 #### Image OCR (Implemented with Feature)
 - Uses GPT-4o Vision for prescription image extraction
 - Extracts: generic name, brand name, strength, route, frequency, duration, instructions
 - Extracts patient context: age, conditions, allergies, lab values
 - Returns confidence levels (HIGH/MEDIUM/LOW)
 - Requires user confirmation for uncertain extractions
+- Note: Image OCR requires valid prescription images; screenshots of app UI will not extract medications
 
 ### MEDIQ - Upcoming Tasks (P1)
 - Build out Patient Prescription Checker with OCR

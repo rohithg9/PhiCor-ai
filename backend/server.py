@@ -12642,12 +12642,16 @@ Also extract PATIENT CONTEXT if visible:
 - Allergies
 - Lab values (eGFR, potassium, creatinine, etc.)
 
-CRITICAL: You must extract EVERY medication visible. Missing medications is a safety failure.
+CRITICAL RULES:
+1. You MUST extract EVERY medication visible. Missing medications is a safety failure.
+2. You MUST ALWAYS respond with valid JSON - no other text before or after.
+3. If the image is unclear or you cannot extract medications, still return JSON with extraction_successful: false
+4. Never say "I cannot" or similar - just return the JSON structure.
 
-Respond ONLY with valid JSON in this exact format:
+ALWAYS respond with this exact JSON structure (no other text):
 {
-  "extraction_successful": true/false,
-  "extraction_confidence": "HIGH"/"MEDIUM"/"LOW",
+  "extraction_successful": true,
+  "extraction_confidence": "HIGH",
   "medications": [
     {
       "generic_name": "metformin",
@@ -12675,6 +12679,16 @@ Respond ONLY with valid JSON in this exact format:
   },
   "notes": "Any relevant notes from the prescription",
   "extraction_issues": ["List any issues or uncertainties"]
+}
+
+If the image is unreadable, return:
+{
+  "extraction_successful": false,
+  "extraction_confidence": "LOW",
+  "medications": [],
+  "patient_context": {},
+  "notes": "",
+  "extraction_issues": ["Image quality too low to extract medications"]
 }"""
         
         chat = LlmChat(
@@ -12684,13 +12698,18 @@ Respond ONLY with valid JSON in this exact format:
         ).with_model("openai", "gpt-4o")
         
         # Handle base64 image
+        logger.info(f"Image data starts with: {image_data[:50] if image_data else 'EMPTY'}...")
+        
         if image_data.startswith('data:'):
             # Extract base64 part from data URL
             base64_data = image_data.split(',')[1] if ',' in image_data else image_data
+            logger.info(f"Extracted base64 from data URL, length: {len(base64_data)}")
         else:
             base64_data = image_data
+            logger.info(f"Using raw base64, length: {len(base64_data)}")
         
         image_content = ImageContent(image_base64=base64_data)
+        logger.info("ImageContent created successfully")
         
         extraction_prompt = """Please carefully analyze this prescription image and extract ALL medications with complete details.
 
@@ -12707,14 +12726,30 @@ Return the structured JSON response."""
             file_contents=[image_content]
         ))
         
-        # Parse the JSON response
-        response_text = response.text.strip()
+        # Parse the JSON response - handle both response types
+        response_text = response.text if hasattr(response, 'text') else str(response)
+        response_text = response_text.strip()
+        
+        logger.info(f"Image extraction raw response: {response_text[:500]}...")
         
         # Handle markdown code blocks
         if "```json" in response_text:
             response_text = response_text.split("```json")[1].split("```")[0].strip()
         elif "```" in response_text:
-            response_text = response_text.split("```")[1].split("```")[0].strip()
+            parts = response_text.split("```")
+            if len(parts) >= 2:
+                response_text = parts[1].strip()
+        
+        # Check if response is actually JSON
+        if not response_text.startswith('{'):
+            # LLM returned text instead of JSON - no medications found or image unreadable
+            logger.warning(f"LLM returned non-JSON response: {response_text[:200]}")
+            return {
+                "success": False,
+                "error": f"Could not extract medications from image. AI response: {response_text[:300]}",
+                "medications": [],
+                "raw_response": response_text
+            }
         
         extracted_data = json.loads(response_text)
         

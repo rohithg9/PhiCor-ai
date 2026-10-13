@@ -281,9 +281,11 @@ BRAND_TO_GENERIC = {
     "aldactone": "spironolactone",
     # Potassium
     "slow-k": "potassium chloride",
+    "slowk": "potassium chloride",
     "k-dur": "potassium chloride",
     "klor-con": "potassium chloride",
     "k-tab": "potassium chloride",
+    "kay ciel": "potassium chloride",
     # Ibuprofen
     "brufen": "ibuprofen",
     "advil": "ibuprofen",
@@ -305,6 +307,9 @@ BRAND_TO_GENERIC = {
     # Omeprazole
     "losec": "omeprazole",
     "prilosec": "omeprazole",
+    # Lansoprazole
+    "prevacid": "lansoprazole",
+    "zoton": "lansoprazole",
     # Allopurinol
     "zyloric": "allopurinol",
     "zyloprim": "allopurinol",
@@ -313,6 +318,7 @@ BRAND_TO_GENERIC = {
     "ecosprin": "aspirin",
     "disprin": "aspirin",
     "bayer": "aspirin",
+    "ecotrin": "aspirin",
     # Lisinopril
     "prinivil": "lisinopril",
     "zestril": "lisinopril",
@@ -337,6 +343,28 @@ BRAND_TO_GENERIC = {
     "plavix": "clopidogrel",
     # Digoxin
     "lanoxin": "digoxin",
+    # Metoprolol
+    "lopressor": "metoprolol",
+    "toprol": "metoprolol",
+    "toprol xl": "metoprolol",
+    "metoprolol tartrate": "metoprolol",
+    "metoprolol succinate": "metoprolol",
+    "tartrate": "metoprolol",  # Common short form
+    # Carvedilol
+    "coreg": "carvedilol",
+    # Bisoprolol
+    "zebeta": "bisoprolol",
+    "concor": "bisoprolol",
+    # Atenolol
+    "tenormin": "atenolol",
+    # Propranolol
+    "inderal": "propranolol",
+    # Diltiazem
+    "cardizem": "diltiazem",
+    "tiazac": "diltiazem",
+    # Verapamil
+    "calan": "verapamil",
+    "isoptin": "verapamil",
 }
 
 # Patient-specific risk factors
@@ -392,6 +420,7 @@ HYPERKALEMIA_RISK_DRUGS = [
     "trimethoprim", "pentamidine",  # Antibiotics
     "heparin", "enoxaparin",  # Anticoagulants
     "ciclosporin", "tacrolimus",  # Immunosuppressants
+    "digoxin",  # Can mask hyperkalemia symptoms
 ]
 
 
@@ -400,16 +429,47 @@ def normalize_drug_name(name: str) -> str:
     if not name:
         return ""
     
+    import re
+    
     # Clean input
     cleaned = name.lower().strip()
     
+    # Extract name before parentheses (e.g., "Warfarin (Coumadin) 5mg" -> "warfarin")
+    # or extract name from parentheses if that's the generic
+    if '(' in cleaned:
+        # Get text before and inside parentheses
+        before_paren = cleaned.split('(')[0].strip()
+        inside_paren = re.search(r'\(([^)]+)\)', cleaned)
+        inside_paren = inside_paren.group(1).strip() if inside_paren else ""
+        
+        # Remove dosage numbers
+        before_paren = re.sub(r'\d+\.?\d*\s*(mg|ml|g|mcg)?\s*$', '', before_paren).strip()
+        inside_paren = re.sub(r'\d+\.?\d*\s*(mg|ml|g|mcg)?\s*$', '', inside_paren).strip()
+        
+        # Check if before_paren is a known generic or brand
+        if before_paren in BRAND_TO_GENERIC:
+            return BRAND_TO_GENERIC[before_paren]
+        if before_paren in set(BRAND_TO_GENERIC.values()):
+            return before_paren
+        
+        # Check if inside_paren is a known generic or brand
+        if inside_paren in BRAND_TO_GENERIC:
+            return BRAND_TO_GENERIC[inside_paren]
+        if inside_paren in set(BRAND_TO_GENERIC.values()):
+            return inside_paren
+        
+        # Default to before parentheses
+        cleaned = before_paren
+    
     # Remove common suffixes
-    for suffix in ["tablets", "tablet", "capsules", "capsule", "mg", "ml", "g", "mcg"]:
-        cleaned = cleaned.replace(suffix, "").strip()
+    for suffix in ["tablets", "tablet", "capsules", "capsule", "mg", "ml", "g", "mcg", "xr", "sr", "er", "cr"]:
+        cleaned = re.sub(rf'\b{suffix}\b', '', cleaned).strip()
     
     # Remove numbers (dosage)
-    import re
     cleaned = re.sub(r'\d+\.?\d*\s*', '', cleaned).strip()
+    
+    # Remove remaining punctuation
+    cleaned = re.sub(r'[^\w\s]', '', cleaned).strip()
     
     # Check brand mapping
     if cleaned in BRAND_TO_GENERIC:
