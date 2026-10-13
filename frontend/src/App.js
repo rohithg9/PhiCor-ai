@@ -22,6 +22,14 @@ import EquationsPage from "./pages/EquationsPage";
 import MathModelsAdmin from "./pages/MathModelsAdmin";
 import CasesPage from "./pages/CasesPage";
 import FoodAnalysisPage from "./pages/FoodAnalysisPage";
+// MEDIQ - Clinical Pharmacology Intelligence
+import MediqLandingPage from "./pages/MediqLandingPage";
+import MediqCheckerPage from "./pages/mediq/MediqCheckerPage";
+import MediqClinicalPage from "./pages/mediq/MediqClinicalPage";
+import MediqPrescribePage from "./pages/mediq/MediqPrescribePage";
+import MediqNursingPage from "./pages/mediq/MediqNursingPage";
+import MediqDischargePage from "./pages/mediq/MediqDischargePage";
+import MediqDevelopersPage from "./pages/mediq/MediqDevelopersPage";
 
 // Protected route wrapper
 const ProtectedRoute = ({ children }) => {
@@ -80,6 +88,15 @@ function AppContent() {
         {/* Food Analysis - Π (Pi) Tab */}
         <Route path="/food" element={<FoodAnalysisPage />} />
         <Route path="/nutrition" element={<FoodAnalysisPage />} />
+        
+        {/* MEDIQ - Clinical Pharmacology Intelligence */}
+        <Route path="/mediq" element={<MediqLandingPage />} />
+        <Route path="/mediq/check" element={<MediqCheckerPage />} />
+        <Route path="/mediq/clinical" element={<MediqClinicalPage />} />
+        <Route path="/mediq/prescribe" element={<MediqPrescribePage />} />
+        <Route path="/mediq/nursing" element={<MediqNursingPage />} />
+        <Route path="/mediq/discharge" element={<MediqDischargePage />} />
+        <Route path="/mediq/developers" element={<MediqDevelopersPage />} />
         
         {/* Expert Curation System Routes */}
         <Route path="/expert-login" element={<ExpertAuthPage />} />

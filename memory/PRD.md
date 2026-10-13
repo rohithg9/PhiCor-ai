@@ -400,3 +400,57 @@ The user wants to build a comprehensive, customizable health intelligence system
 - Input: clinical text/lab values → Output: ranked diagnoses with % probability
 - Patient-specific modifiers for diagnosis probability
 - Comprehensive parameter matching against disease profiles
+
+---
+
+## PHICOR MEDIQ - Clinical Pharmacology Intelligence (NEW PRODUCT)
+
+### October 13, 2026 - Phase 1: Foundation (✅ COMPLETED)
+
+#### MEDIQ Landing Page (✅ COMPLETED)
+- **Location**: `/app/frontend/src/pages/MediqLandingPage.js`
+- **Route**: `/mediq`
+- **Features**:
+  - Hero section with "Every Medicine. Every Patient. One Intelligence." tagline
+  - Six module cards: Medicine Checker, Clinical Workspace, Electronic Prescribing, Medication Administration, Discharge Reconciliation, API & SDK
+  - Intelligence layers: Pharmacist, Physician, AI Orchestration
+  - Regional coverage: UK, India (US planned)
+  - Enterprise enquiry form
+
+#### MEDIQ Navigation (✅ COMPLETED)
+- **Added Μ (Mu) button** to navigation in:
+  - Landing page Greek symbol buttons
+  - FeatureNav component (appears on all feature pages)
+- **Cyan/teal color theme** consistent with MEDIQ branding
+
+#### MEDIQ Sub-Routes (✅ COMPLETED)
+- **Medicine Checker**: `/mediq/check` - Public access for medication interaction checking
+- **Clinical Workspace**: `/mediq/clinical` - Coming Soon (feature flag)
+- **Electronic Prescribing**: `/mediq/prescribe` - Coming Soon (feature flag)
+- **Medication Administration**: `/mediq/nursing` - Coming Soon (feature flag)
+- **Discharge Reconciliation**: `/mediq/discharge` - Coming Soon (feature flag)
+- **API & SDK**: `/mediq/developers` - Developer documentation page
+
+#### MEDIQ Backend API (✅ COMPLETED)
+- **`POST /api/mediq/check`**: Public medication checker endpoint
+- **`GET /api/mediq/v1/drugs/search`**: Country-specific drug search
+- **`GET /api/mediq/v1/drugs/{drug_id}`**: Drug detail endpoint
+- **`POST /api/mediq/v1/safety/assess`**: Patient-specific safety assessment
+- **`POST /api/mediq/v1/monitoring/plan`**: Evidence-backed monitoring plan
+- **`GET /api/mediq/v1/data/coverage`**: Data coverage statistics
+
+### MEDIQ - Upcoming Tasks (P1)
+- Build out Patient Prescription Checker with OCR
+- Implement Drug-Drug/Drug-Disease Interaction Engine
+- Create Dosing Calculator with organ function adjustments
+- Add Clinical Monitoring Rules panel
+- Connect to licensed drug databases (NHS dm+d, RxNorm, CDSCO)
+
+### Global Drug Database Addendum (P2 - Future)
+Per the Implementation Addendum document:
+- PostgreSQL as system of record for clinical data
+- Multi-country drug catalogs: UK (dm+d), US (RxNorm/NDC), India (CDSCO)
+- ETL pipelines for drug data ingestion
+- Identity resolution for cross-market ingredient mapping
+- Coverage dashboards by country/source
+

@@ -10,6 +10,17 @@ import json
 from motor.motor_asyncio import AsyncIOMotorClient
 from datetime import datetime
 
+# Import LLM
+try:
+    from emergentintegrations.llm.chat import chat, LlmModel
+    EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
+    HAS_LLM = bool(EMERGENT_LLM_KEY)
+except ImportError:
+    HAS_LLM = False
+    chat = None
+    LlmModel = None
+    EMERGENT_LLM_KEY = ''
+
 MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
 DB_NAME = os.environ.get('DB_NAME', 'test_database')
 

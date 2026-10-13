@@ -374,6 +374,15 @@ const LandingPage = () => {
                 >
                   <span className="text-white font-serif text-base sm:text-lg md:text-xl font-bold">Π</span>
                 </button>
+                
+                {/* Μ - MEDIQ Clinical Pharmacology */}
+                <button
+                  onClick={() => navigate('/mediq')}
+                  className="w-8 h-8 sm:w-9 sm:h-9 md:w-11 md:h-11 rounded-lg bg-gradient-to-br from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 flex items-center justify-center transition-all shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 hover:scale-105"
+                  title="MEDIQ - Clinical Pharmacology"
+                >
+                  <span className="text-white font-serif text-base sm:text-lg md:text-xl font-bold">Μ</span>
+                </button>
               </div>
               
               {/* Region Selector - always visible */}

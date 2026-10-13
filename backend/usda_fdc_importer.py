@@ -459,7 +459,7 @@ async def import_usda_foods(max_foods=10000, batch_size=200):
                                 await db.foods.insert_one(food)
                                 imported += 1
                                 type_imported += 1
-                            except:
+                            except Exception:
                                 pass
                 
                 # Rate limiting

@@ -57,7 +57,7 @@ try:
     NUTRIENT_EFFECTS = {nid: ndata.get('parameter_effects', {}) 
                         for nid, ndata in NUTRIENTS_DATABASE.items() 
                         if ndata.get('parameter_effects')}
-except:
+except ImportError:
     NUTRIENT_EFFECTS = {}
 
 def compute_organ_effects(nutrients):

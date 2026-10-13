@@ -264,13 +264,13 @@ async def fast_import_usda(max_foods=10000, page_size=200):
                     await db.foods.insert_many(foods_to_insert, ordered=False)
                     imported += len(foods_to_insert)
                     type_imported += len(foods_to_insert)
-                except:
+                except Exception:
                     for f in foods_to_insert:
                         try:
                             await db.foods.insert_one(f)
                             imported += 1
                             type_imported += 1
-                        except:
+                        except Exception:
                             pass
             
             if imported % 500 == 0 and imported > 0:

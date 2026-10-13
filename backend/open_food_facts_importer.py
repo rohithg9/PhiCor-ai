@@ -223,7 +223,7 @@ def transform_off_product(product):
     if product.get("serving_quantity"):
         try:
             serving_size_g = float(product["serving_quantity"])
-        except:
+        except (ValueError, TypeError):
             pass
     
     # Calculate organ effects

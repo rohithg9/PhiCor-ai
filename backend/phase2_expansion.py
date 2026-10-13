@@ -343,7 +343,7 @@ Only include organs/parameters that this specific disease affects."""
         # Final stats
         total = await self.db.diseases.count_documents({})
         with_params = await self.db.diseases.count_documents({
-            'parameter_modifications': {'$exists': True, '$ne': {}, '$ne': None}
+            'parameter_modifications': {'$exists': True, '$ne': {}}
         })
         logger.info(f"Total diseases: {total}")
         logger.info(f"With parameters: {with_params}")

@@ -25,7 +25,7 @@ try:
     from emergentintegrations.llm.chat import chat, LlmModel
     EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
     HAS_LLM = bool(EMERGENT_LLM_KEY)
-except:
+except ImportError:
     HAS_LLM = False
     print("Warning: LLM not available, will use template fallback")
 

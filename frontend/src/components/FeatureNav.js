@@ -55,6 +55,15 @@ const features = [
     activeColor: 'bg-green-500',
     hoverColor: 'hover:bg-green-500/20',
   },
+  {
+    symbol: 'Μ',
+    name: 'MEDIQ',
+    description: 'Clinical pharmacology intelligence',
+    path: '/mediq',
+    color: 'from-cyan-500 to-teal-500',
+    activeColor: 'bg-cyan-500',
+    hoverColor: 'hover:bg-cyan-500/20',
+  },
 ];
 
 const FeatureNav = ({ showTitle = true, compact = false }) => {
