@@ -5,6 +5,7 @@ from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import re
+import json
 import logging
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
@@ -12571,6 +12572,22 @@ async def seed_food_database():
 # MEDIQ - CLINICAL PHARMACOLOGY INTELLIGENCE API
 # ============================================================================
 
+from enum import Enum
+from mediq_knowledge_base import (
+    find_interactions, normalize_drug_name, 
+    assess_renal_risks, assess_hyperkalemia_risk, assess_gi_risks,
+    BRAND_TO_GENERIC
+)
+
+class AnalysisStatus(str, Enum):
+    ANALYSIS_COMPLETE = "ANALYSIS_COMPLETE"
+    ANALYSIS_INCOMPLETE = "ANALYSIS_INCOMPLETE"
+    EXTRACTION_FAILED = "EXTRACTION_FAILED"
+    MEDICATION_UNRESOLVED = "MEDICATION_UNRESOLVED"
+    KNOWLEDGE_BASE_UNAVAILABLE = "KNOWLEDGE_BASE_UNAVAILABLE"
+    CLINICIAN_REVIEW_REQUIRED = "CLINICIAN_REVIEW_REQUIRED"
+    NO_MEDICATIONS_PROVIDED = "NO_MEDICATIONS_PROVIDED"
+
 class MediqCheckRequest(BaseModel):
     medications: List[str] = []
     images: List[dict] = []
@@ -12588,85 +12605,507 @@ class MediqDrugSearchResult(BaseModel):
     status: str
     confidence: float
 
+
+async def extract_medications_from_image(image_data: str) -> dict:
+    """
+    Extract medications from prescription image using GPT-4 Vision.
+    Returns structured medication data or extraction failure details.
+    """
+    try:
+        llm_key = os.environ.get('EMERGENT_LLM_KEY')
+        if not llm_key:
+            return {
+                "success": False,
+                "error": "LLM key not configured",
+                "medications": []
+            }
+        
+        from emergentintegrations.llm.chat import LlmChat, UserMessage, ImageContent
+        
+        system_message = """You are a clinical pharmacology AI specializing in medication extraction from prescriptions.
+
+Your task is to extract ALL medications from the prescription image with complete accuracy.
+
+For EACH medication, extract:
+1. Generic name (required)
+2. Brand name (if visible)
+3. Strength/dose (e.g., "500mg", "5mg")
+4. Route (oral, IV, topical, etc.)
+5. Frequency (e.g., "once daily", "twice daily", "three times daily")
+6. Duration (if specified)
+7. Instructions (e.g., "with food", "in the morning")
+8. Confidence level (HIGH, MEDIUM, LOW)
+
+Also extract PATIENT CONTEXT if visible:
+- Age, Gender, Weight
+- Medical conditions/diagnoses
+- Allergies
+- Lab values (eGFR, potassium, creatinine, etc.)
+
+CRITICAL: You must extract EVERY medication visible. Missing medications is a safety failure.
+
+Respond ONLY with valid JSON in this exact format:
+{
+  "extraction_successful": true/false,
+  "extraction_confidence": "HIGH"/"MEDIUM"/"LOW",
+  "medications": [
+    {
+      "generic_name": "metformin",
+      "brand_name": "Glucophage",
+      "strength": "500mg",
+      "route": "oral",
+      "frequency": "twice daily",
+      "duration": "long term",
+      "instructions": "with food",
+      "confidence": "HIGH",
+      "line_number": 1
+    }
+  ],
+  "patient_context": {
+    "age": 58,
+    "gender": "male",
+    "weight_kg": 82,
+    "conditions": ["Type 2 Diabetes", "Hypertension", "CKD"],
+    "allergies": ["Penicillin"],
+    "lab_values": {
+      "egfr": 35,
+      "potassium": 5.4,
+      "creatinine": null
+    }
+  },
+  "notes": "Any relevant notes from the prescription",
+  "extraction_issues": ["List any issues or uncertainties"]
+}"""
+        
+        chat = LlmChat(
+            api_key=llm_key,
+            session_id=f"mediq_extract_{datetime.now().strftime('%H%M%S%f')}",
+            system_message=system_message
+        ).with_model("openai", "gpt-4o")
+        
+        # Handle base64 image
+        if image_data.startswith('data:'):
+            # Extract base64 part from data URL
+            base64_data = image_data.split(',')[1] if ',' in image_data else image_data
+        else:
+            base64_data = image_data
+        
+        image_content = ImageContent(image_base64=base64_data)
+        
+        extraction_prompt = """Please carefully analyze this prescription image and extract ALL medications with complete details.
+
+IMPORTANT:
+1. Extract EVERY medication - missing any is a critical safety failure
+2. Include the generic name, brand name, strength, dose, route, and frequency for each
+3. Extract patient information if visible (age, conditions, allergies, lab values like eGFR and potassium)
+4. Note any uncertainties or unclear items
+
+Return the structured JSON response."""
+        
+        response = await chat.send_message(UserMessage(
+            text=extraction_prompt,
+            file_contents=[image_content]
+        ))
+        
+        # Parse the JSON response
+        response_text = response.text.strip()
+        
+        # Handle markdown code blocks
+        if "```json" in response_text:
+            response_text = response_text.split("```json")[1].split("```")[0].strip()
+        elif "```" in response_text:
+            response_text = response_text.split("```")[1].split("```")[0].strip()
+        
+        extracted_data = json.loads(response_text)
+        
+        return {
+            "success": extracted_data.get("extraction_successful", True),
+            "confidence": extracted_data.get("extraction_confidence", "MEDIUM"),
+            "medications": extracted_data.get("medications", []),
+            "patient_context": extracted_data.get("patient_context", {}),
+            "notes": extracted_data.get("notes", ""),
+            "issues": extracted_data.get("extraction_issues", [])
+        }
+        
+    except json.JSONDecodeError as e:
+        logger.error(f"Failed to parse LLM response: {e}")
+        return {
+            "success": False,
+            "error": f"Failed to parse extraction response: {str(e)}",
+            "medications": [],
+            "raw_response": response_text if 'response_text' in dir() else None
+        }
+    except Exception as e:
+        logger.error(f"Image extraction failed: {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "medications": []
+        }
+
+
 @api_router.post("/mediq/check")
 async def mediq_check_medications(request: MediqCheckRequest):
     """
-    Public medication checker endpoint.
+    Comprehensive medication safety checker.
+    
     Accepts manual medication list or images for OCR extraction.
-    Returns interaction checks and safety insights.
+    Returns interaction checks, patient-specific risks, and safety insights.
+    
+    NEVER returns "No interactions" unless:
+    1. All medications are resolved
+    2. All clinical checks completed
+    3. Result supported by validated knowledge
     """
     try:
+        # Initialize tracking
+        analysis_status = AnalysisStatus.ANALYSIS_COMPLETE
         medications_identified = []
         interactions = []
+        patient_risks = []
         warnings = []
+        extraction_results = []
+        unresolved_medications = []
+        coverage_limitations = []
         
-        # Process manual medications
-        for med in request.medications:
-            # Normalize and validate medication name
-            normalized = med.strip().title()
-            medications_identified.append({
-                "name": med,
-                "normalized_name": normalized,
-                "confidence": 0.95,
-                "status": "VERIFIED"
-            })
+        # Track patient context
+        patient_context = request.patient_context or {}
         
-        # Process images if provided (OCR extraction - placeholder)
-        for img in request.images:
-            # TODO: Implement OCR extraction
-            pass
-        
-        # Check for interactions (basic demo logic)
-        if len(medications_identified) > 1:
-            # Check drug database for known interactions
-            drug_names = [m["normalized_name"].lower() for m in medications_identified]
-            
-            # Known common interactions
-            known_interactions = {
-                ("warfarin", "aspirin"): {
-                    "severity": "high",
-                    "description": "Increased bleeding risk when combined.",
-                    "management": "Monitor INR closely. Consider alternative antiplatelet if possible."
-                },
-                ("metformin", "contrast"): {
-                    "severity": "moderate",
-                    "description": "Risk of lactic acidosis with iodinated contrast.",
-                    "management": "Hold metformin before and 48h after contrast administration."
-                },
-                ("lisinopril", "potassium"): {
-                    "severity": "moderate",
-                    "description": "Risk of hyperkalemia.",
-                    "management": "Monitor serum potassium levels regularly."
-                }
-            }
-            
-            # Check for matches
-            for (drug1, drug2), interaction_data in known_interactions.items():
-                if any(drug1 in d for d in drug_names) and any(drug2 in d for d in drug_names):
-                    interactions.append({
-                        "drugs": [drug1.title(), drug2.title()],
-                        **interaction_data,
-                        "evidence": "Standard clinical reference"
+        # ================================================================
+        # STEP 1: Process images if provided (OCR extraction)
+        # ================================================================
+        if request.images:
+            for idx, img in enumerate(request.images):
+                image_data = img.get('data', '')
+                if not image_data:
+                    extraction_results.append({
+                        "image_index": idx,
+                        "name": img.get('name', f'image_{idx}'),
+                        "status": "FAILED",
+                        "error": "No image data provided"
+                    })
+                    continue
+                
+                # Extract medications from image
+                extraction = await extract_medications_from_image(image_data)
+                
+                extraction_results.append({
+                    "image_index": idx,
+                    "name": img.get('name', f'image_{idx}'),
+                    "status": "SUCCESS" if extraction["success"] else "FAILED",
+                    "confidence": extraction.get("confidence", "UNKNOWN"),
+                    "medications_found": len(extraction.get("medications", [])),
+                    "issues": extraction.get("issues", []),
+                    "error": extraction.get("error") if not extraction["success"] else None
+                })
+                
+                if extraction["success"] and extraction.get("medications"):
+                    for med in extraction["medications"]:
+                        generic = med.get("generic_name", "")
+                        brand = med.get("brand_name", "")
+                        strength = med.get("strength", "")
+                        
+                        # Normalize drug name
+                        normalized = normalize_drug_name(generic) or normalize_drug_name(brand)
+                        
+                        # Determine resolution status
+                        is_resolved = normalized in set(BRAND_TO_GENERIC.values()) or \
+                                     normalized.lower() in [v.lower() for v in BRAND_TO_GENERIC.values()]
+                        
+                        med_entry = {
+                            "name": f"{generic} ({brand})" if brand and generic else (generic or brand),
+                            "generic_name": generic,
+                            "brand_name": brand,
+                            "normalized_name": normalized,
+                            "strength": strength,
+                            "route": med.get("route", "oral"),
+                            "frequency": med.get("frequency", ""),
+                            "duration": med.get("duration", ""),
+                            "instructions": med.get("instructions", ""),
+                            "confidence": med.get("confidence", "MEDIUM"),
+                            "status": "RESOLVED" if is_resolved else "UNRESOLVED",
+                            "source": "image_extraction",
+                            "requires_confirmation": med.get("confidence") != "HIGH"
+                        }
+                        
+                        medications_identified.append(med_entry)
+                        
+                        if not is_resolved:
+                            unresolved_medications.append(med_entry)
+                    
+                    # Extract patient context from image
+                    if extraction.get("patient_context"):
+                        img_context = extraction["patient_context"]
+                        if not patient_context.get("age") and img_context.get("age"):
+                            patient_context["age"] = img_context["age"]
+                        if not patient_context.get("conditions") and img_context.get("conditions"):
+                            patient_context["conditions"] = img_context["conditions"]
+                        if not patient_context.get("allergies") and img_context.get("allergies"):
+                            patient_context["allergies"] = img_context["allergies"]
+                        if img_context.get("lab_values"):
+                            if "lab_values" not in patient_context:
+                                patient_context["lab_values"] = {}
+                            patient_context["lab_values"].update({
+                                k: v for k, v in img_context["lab_values"].items() if v is not None
+                            })
+                
+                elif not extraction["success"]:
+                    analysis_status = AnalysisStatus.EXTRACTION_FAILED
+                    warnings.append({
+                        "type": "extraction_failure",
+                        "severity": "critical",
+                        "message": f"Failed to extract medications from image: {extraction.get('error', 'Unknown error')}",
+                        "action_required": "Please enter medications manually or upload a clearer image"
                     })
         
-        # Add general warning
-        warnings.append({
-            "type": "general",
-            "message": "Always consult your healthcare provider before making medication changes.",
-            "severity": "info"
-        })
+        # ================================================================
+        # STEP 2: Process manual medications
+        # ================================================================
+        for med in request.medications:
+            normalized = normalize_drug_name(med)
+            is_resolved = normalized in set(BRAND_TO_GENERIC.values()) or \
+                         normalized.lower() in [v.lower() for v in BRAND_TO_GENERIC.values()]
+            
+            med_entry = {
+                "name": med,
+                "normalized_name": normalized,
+                "confidence": "HIGH" if is_resolved else "MEDIUM",
+                "status": "RESOLVED" if is_resolved else "UNRESOLVED",
+                "source": "manual_entry",
+                "requires_confirmation": not is_resolved
+            }
+            medications_identified.append(med_entry)
+            
+            if not is_resolved:
+                unresolved_medications.append(med_entry)
         
-        return {
+        # ================================================================
+        # STEP 3: Check for empty medication list
+        # ================================================================
+        if not medications_identified:
+            return {
+                "success": False,
+                "analysis_status": AnalysisStatus.NO_MEDICATIONS_PROVIDED.value,
+                "analysis_complete": False,
+                "medications_identified": [],
+                "interactions": [],
+                "patient_risks": [],
+                "warnings": [{
+                    "type": "no_medications",
+                    "severity": "critical",
+                    "message": "No medications were identified or provided. Cannot perform safety analysis.",
+                    "action_required": "Please enter medications manually or upload a prescription image"
+                }],
+                "extraction_results": extraction_results,
+                "disclaimer": "SAFETY ANALYSIS NOT PERFORMED - No medications to analyze."
+            }
+        
+        # ================================================================
+        # STEP 4: Check for unresolved medications
+        # ================================================================
+        if unresolved_medications:
+            analysis_status = AnalysisStatus.MEDICATION_UNRESOLVED
+            warnings.append({
+                "type": "unresolved_medications",
+                "severity": "major",
+                "message": f"{len(unresolved_medications)} medication(s) could not be fully resolved in our database",
+                "unresolved": [m["name"] for m in unresolved_medications],
+                "action_required": "Please confirm these medication names are correct. Some interactions may be missed."
+            })
+        
+        # ================================================================
+        # STEP 5: Drug-Drug Interaction Analysis
+        # ================================================================
+        drug_names = [m.get("generic_name") or m.get("normalized_name") or m["name"] for m in medications_identified]
+        
+        # Use knowledge base for interactions
+        interactions = find_interactions(drug_names)
+        
+        # Categorize by severity
+        contraindicated = [i for i in interactions if i["severity"] == "contraindicated"]
+        severe = [i for i in interactions if i["severity"] == "severe"]
+        major = [i for i in interactions if i["severity"] == "major"]
+        moderate = [i for i in interactions if i["severity"] == "moderate"]
+        
+        if contraindicated:
+            analysis_status = AnalysisStatus.CLINICIAN_REVIEW_REQUIRED
+            for interaction in contraindicated:
+                warnings.append({
+                    "type": "contraindicated_combination",
+                    "severity": "critical",
+                    "message": f"CONTRAINDICATED: {interaction['drug1']} + {interaction['drug2']}",
+                    "details": interaction["clinical_effect"],
+                    "action_required": "URGENT CLINICIAN REVIEW REQUIRED"
+                })
+        
+        if severe:
+            if analysis_status != AnalysisStatus.CLINICIAN_REVIEW_REQUIRED:
+                analysis_status = AnalysisStatus.CLINICIAN_REVIEW_REQUIRED
+        
+        # ================================================================
+        # STEP 6: Patient-Specific Risk Assessment
+        # ================================================================
+        lab_values = patient_context.get("lab_values", {})
+        egfr = lab_values.get("egfr")
+        potassium = lab_values.get("potassium")
+        conditions = patient_context.get("conditions", [])
+        
+        # Check for gastric ulcer history
+        has_gi_ulcer = any("ulcer" in c.lower() or "gastric" in c.lower() for c in conditions)
+        
+        # Renal function assessment
+        if egfr is not None:
+            renal_risks = assess_renal_risks(drug_names, egfr)
+            patient_risks.extend(renal_risks)
+            
+            if any(r["severity"] == "contraindicated" for r in renal_risks):
+                analysis_status = AnalysisStatus.CLINICIAN_REVIEW_REQUIRED
+                for risk in renal_risks:
+                    if risk["severity"] == "contraindicated":
+                        warnings.append({
+                            "type": "renal_contraindication",
+                            "severity": "critical",
+                            "message": f"RENAL CONTRAINDICATION: {risk['medication']} with eGFR {egfr}",
+                            "details": risk["recommendation"],
+                            "action_required": "URGENT REVIEW REQUIRED"
+                        })
+        
+        # Hyperkalemia risk assessment
+        hyperkalemia_assessment = assess_hyperkalemia_risk(drug_names, potassium, egfr)
+        if hyperkalemia_assessment["risk_level"] in ["high", "severe"]:
+            patient_risks.append({
+                "type": "hyperkalemia_risk",
+                "severity": hyperkalemia_assessment["risk_level"],
+                "contributing_drugs": hyperkalemia_assessment["contributing_drugs"],
+                "patient_factors": hyperkalemia_assessment["patient_factors"],
+                "recommendations": hyperkalemia_assessment["recommendations"]
+            })
+            
+            if hyperkalemia_assessment["risk_level"] == "severe":
+                analysis_status = AnalysisStatus.CLINICIAN_REVIEW_REQUIRED
+                warnings.append({
+                    "type": "severe_hyperkalemia_risk",
+                    "severity": "critical",
+                    "message": f"SEVERE HYPERKALEMIA RISK with {len(hyperkalemia_assessment['contributing_drugs'])} potassium-elevating drugs" + 
+                              (f" and baseline K+ {potassium}" if potassium else ""),
+                    "action_required": "URGENT REVIEW - Check potassium within 24-48 hours"
+                })
+        
+        # GI risk assessment
+        gi_risks = assess_gi_risks(drug_names, has_gi_ulcer)
+        patient_risks.extend(gi_risks)
+        
+        if has_gi_ulcer and any(r["risk_level"] == "HIGH" for r in gi_risks):
+            warnings.append({
+                "type": "gi_risk_with_history",
+                "severity": "major",
+                "message": "Patient has gastric ulcer history and is prescribed high GI-risk medications",
+                "details": [r["medication"] for r in gi_risks if r["risk_level"] == "HIGH"],
+                "action_required": "Consider alternatives or ensure PPI cover"
+            })
+        
+        # ================================================================
+        # STEP 7: Coverage Limitations
+        # ================================================================
+        coverage_limitations = [
+            "This knowledge base covers common UK/US/India medications but is not exhaustive",
+            "Some regional brand names may not be recognized",
+            "Herbal medicines and supplements are not fully covered",
+            "This analysis should be verified against current BNF/FDA/clinical references"
+        ]
+        
+        # ================================================================
+        # STEP 8: Determine Final Status
+        # ================================================================
+        analysis_complete = analysis_status == AnalysisStatus.ANALYSIS_COMPLETE
+        
+        # Build safe message only if truly safe
+        if analysis_complete and not interactions and not patient_risks:
+            safe_message = {
+                "type": "no_significant_interactions",
+                "severity": "info",
+                "message": "No clinically significant interactions identified in our knowledge base",
+                "caveats": [
+                    f"Analysis based on {len(medications_identified)} identified medications",
+                    "Limited to interactions in our validated knowledge base",
+                    "Does not account for all possible interactions",
+                    "Patient-specific factors may not be fully captured"
+                ],
+                "action_required": "Verify with clinical references before making prescribing decisions"
+            }
+        else:
+            safe_message = None
+        
+        # ================================================================
+        # STEP 9: Build Response
+        # ================================================================
+        response = {
             "success": True,
+            "analysis_status": analysis_status.value,
+            "analysis_complete": analysis_complete,
+            "clinician_review_required": analysis_status == AnalysisStatus.CLINICIAN_REVIEW_REQUIRED,
+            
+            "summary": {
+                "total_medications": len(medications_identified),
+                "resolved_medications": len([m for m in medications_identified if m["status"] == "RESOLVED"]),
+                "unresolved_medications": len(unresolved_medications),
+                "contraindicated_interactions": len(contraindicated),
+                "severe_interactions": len(severe),
+                "major_interactions": len(major),
+                "moderate_interactions": len(moderate),
+                "patient_risks_identified": len(patient_risks)
+            },
+            
             "medications_identified": medications_identified,
-            "interactions": interactions,
+            
+            "interactions": {
+                "contraindicated": contraindicated,
+                "severe": severe,
+                "major": major,
+                "moderate": moderate,
+                "total": len(interactions)
+            },
+            
+            "patient_risks": patient_risks,
+            
+            "patient_context_used": {
+                "egfr": egfr,
+                "potassium": potassium,
+                "conditions": conditions,
+                "has_gi_ulcer_history": has_gi_ulcer
+            },
+            
             "warnings": warnings,
-            "disclaimer": "This is for informational purposes only. Not a substitute for professional medical advice."
+            
+            "safe_message": safe_message,
+            
+            "extraction_results": extraction_results if request.images else None,
+            
+            "coverage_limitations": coverage_limitations,
+            
+            "disclaimer": "CRITICAL: This is for informational purposes only. NOT intended for clinical decision-making without professional oversight. All findings must be verified against current clinical references (BNF, FDA labeling, etc.). Missing an interaction does not mean there is no interaction - our knowledge base has coverage limitations."
         }
         
+        return response
+        
     except Exception as e:
-        logger.error(f"MEDIQ check error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"MEDIQ check error: {e}", exc_info=True)
+        return {
+            "success": False,
+            "analysis_status": AnalysisStatus.KNOWLEDGE_BASE_UNAVAILABLE.value,
+            "analysis_complete": False,
+            "error": str(e),
+            "medications_identified": [],
+            "interactions": {"contraindicated": [], "severe": [], "major": [], "moderate": [], "total": 0},
+            "patient_risks": [],
+            "warnings": [{
+                "type": "system_error",
+                "severity": "critical",
+                "message": f"System error during analysis: {str(e)}",
+                "action_required": "Please try again or contact support"
+            }],
+            "disclaimer": "ANALYSIS FAILED - Cannot provide safety assessment due to system error."
+        }
 
 
 @api_router.get("/mediq/v1/drugs/search")
