@@ -571,10 +571,78 @@ Patient: Age 58, eGFR 35, CKD, Gastric ulcer
   - Dose limits for 4 medications displayed
   - Status: CLINICIAN_REVIEW_REQUIRED
 
+### October 13, 2026 - Phase 2: Advanced Safety Features (✅ COMPLETED)
+
+#### Feature 1: PDF/Image Record Upload with OCR (✅ COMPLETED)
+- **Backend**: `/app/backend/mediq_records.py` - Medical Records Service
+- **New API Endpoints**:
+  - `POST /api/mediq/records/upload` - Upload prescription (PDF/Image) with OCR extraction
+  - `GET /api/mediq/records/patient/{patient_id}` - Get all records for a patient
+  - `GET /api/mediq/records/patient/{patient_id}/timeline` - Longitudinal medication timeline
+  - `GET /api/mediq/records/{record_id}` - Get specific record
+- **Features**:
+  - PDF and Image upload support
+  - GPT-4o Vision OCR for medication extraction
+  - Document deduplication via SHA256 hash
+  - MongoDB storage for patient medication history
+  - Longitudinal timeline tracking (first seen, last seen, current status)
+- **Frontend**: Updated `/mediq/check` page to accept PDF uploads
+
+#### Feature 2: Allergy Cross-Reactivity Warnings (✅ COMPLETED)
+- **Backend Integration**: Enhanced `/api/mediq/check` with allergy warnings
+- **New API Endpoints**:
+  - `POST /api/mediq/allergy/check` - Check medications against allergies
+  - `GET /api/mediq/allergy/families` - Get all allergy cross-reactivity database
+  - `GET /api/mediq/allergy/info/{allergy}` - Get cross-reactive drugs for specific allergy
+- **Features**:
+  - Direct allergy match detection (CRITICAL severity)
+  - Cross-reactivity detection (HIGH severity)
+  - Allergy family information (penicillin→amoxicillin, ampicillin, etc.)
+  - Prominent visual warnings in UI (red section with ⚠️ icon)
+  - Summary card showing allergy warning count
+- **Test Result**: Penicillin allergy correctly flagged Amoxicillin as cross-reactive
+
+#### Feature 3: PhiCor Disease-Drug Integration (✅ COMPLETED)
+- **Backend Integration**: STEP 6C-2 in `/api/mediq/check`
+- **Features**:
+  - Queries PhiCor disease database for patient conditions
+  - Checks prescribed medications against disease contraindications
+  - Returns `disease_drug_warnings` in response
+  - Purple UI section for disease-drug contraindications
+- **Response Fields Added**:
+  - `disease_drug_warnings`: Array of disease-drug contraindication alerts
+  - `summary.disease_drug_warnings`: Count of disease-drug warnings
+
+#### Frontend UI Updates (✅ COMPLETED)
+- **File**: `/app/frontend/src/pages/mediq/MediqCheckerPage.js`
+- **New Sections**:
+  1. **Allergy Warnings Section** (red/critical styling with ⚠️ icon)
+     - Shows direct allergy matches and cross-reactivity warnings
+     - Severity badges (CRITICAL, HIGH)
+     - Type badges (DIRECT MATCH, CROSS-REACTIVITY)
+     - Action recommendations
+  2. **Disease-Drug Warnings Section** (purple styling with ⚕️ icon)
+     - Shows disease-drug contraindications
+     - Disease and medication linking
+     - Contraindication details from PhiCor database
+- **Updated Summary Cards**:
+  - Removed "Class Dups" card
+  - Added "Allergies" card (red when > 0)
+- **PDF Upload**: File input now accepts `image/*,.pdf,application/pdf`
+- **New data-testids**: `allergies-input`, `conditions-input`, `allergy-warnings-section`, `disease-drug-warnings-section`
+
+#### Test Results
+- 3 medications (Warfarin, Amoxicillin, Aspirin) with Penicillin allergy:
+  - 1 Allergy Warning (Penicillin → Amoxicillin cross-reactivity)
+  - 1 Major Interaction (warfarin + aspirin)
+  - Critical Warning displayed prominently
+  - Status: CLINICIAN_REVIEW_REQUIRED
+
 ### MEDIQ - Upcoming Tasks (P1)
-- Phase 2: Full medical record ingestion (multi-file uploads, lab data extraction)
-- Phase 3: PhiCor backend integration with existing clinical reasoning services
+- Phase 3: Enhanced medical record ingestion with longitudinal lab data tracking
+- Multi-file batch upload processing
 - Connect to licensed drug databases (NHS dm+d, RxNorm, CDSCO)
+- Monitoring calendar generation based on drug-specific requirements
 
 ### Global Drug Database Addendum (P2 - Future)
 Per the Implementation Addendum document:

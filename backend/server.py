@@ -12581,7 +12581,12 @@ from mediq_knowledge_base import (
 from mediq_adverse_effects import (
     get_adverse_effects, get_dose_limits, get_active_ingredients,
     detect_duplicate_ingredients, check_allergy_cross_reactivity,
-    detect_therapeutic_duplication, get_drug_class
+    detect_therapeutic_duplication, get_drug_class, ALLERGY_CROSS_REACTIVITY
+)
+from mediq_records import (
+    MedicalRecordsService, MedicalRecord, generate_record_id,
+    compute_document_hash, is_pdf_data, get_allergy_warnings,
+    get_allergy_family_info, ExtractionSource, RecordType
 )
 
 class AnalysisStatus(str, Enum):
@@ -13095,14 +13100,69 @@ async def mediq_check_medications(request: MediqCheckRequest):
                     })
         
         # ================================================================
+        # STEP 6C-2: Disease-Drug Intelligence (PhiCor Integration)
+        # ================================================================
+        disease_drug_warnings = []
+        
+        if conditions:
+            # Search for patient's conditions in PhiCor disease database
+            for condition in conditions:
+                condition_lower = condition.lower().strip()
+                
+                # Query MongoDB for disease with contraindications
+                disease = await db.diseases.find_one({
+                    "$or": [
+                        {"name": {"$regex": condition, "$options": "i"}},
+                        {"aliases": {"$regex": condition, "$options": "i"}}
+                    ]
+                }, {"_id": 0, "name": 1, "contraindications": 1, "drug_considerations": 1, "parameter_modifications": 1})
+                
+                if disease:
+                    contraindications = disease.get("contraindications", [])
+                    drug_considerations = disease.get("drug_considerations", {})
+                    
+                    # Check if any prescribed medications are contraindicated for this disease
+                    for med in drug_names:
+                        med_lower = med.lower()
+                        
+                        # Check direct contraindications
+                        for contra in contraindications:
+                            if med_lower in contra.lower() or any(
+                                term in med_lower for term in contra.lower().split()
+                                if len(term) > 3 and term not in ['the', 'and', 'for', 'with']
+                            ):
+                                disease_warning = {
+                                    "type": "disease_drug_contraindication",
+                                    "severity": "high",
+                                    "disease": disease.get("name", condition),
+                                    "medication": med,
+                                    "contraindication": contra,
+                                    "message": f"{med} may be contraindicated in patients with {disease.get('name', condition)}: {contra}",
+                                    "recommendation": "Review clinical necessity. Consider alternative medication."
+                                }
+                                disease_drug_warnings.append(disease_warning)
+                                patient_risks.append(disease_warning)
+                                
+                                analysis_status = AnalysisStatus.CLINICIAN_REVIEW_REQUIRED
+                                warnings.append({
+                                    "type": "disease_drug_warning",
+                                    "severity": "major",
+                                    "message": f"⚕️ DISEASE-DRUG ALERT: {med} may be contraindicated with {disease.get('name', condition)}",
+                                    "details": contra,
+                                    "action_required": "Clinical review required. Consider alternative."
+                                })
+        
+        # ================================================================
         # STEP 6D: Allergy Cross-Reactivity Check
         # ================================================================
         allergies = patient_context.get("allergies", [])
+        allergy_warnings = []
+        
         if allergies:
             allergy_alerts = check_allergy_cross_reactivity(allergies, drug_names)
             
             for alert in allergy_alerts:
-                patient_risks.append({
+                allergy_warning = {
                     "type": "allergy_cross_reactivity",
                     "severity": alert["severity"],
                     "allergy": alert["allergy"],
@@ -13110,7 +13170,9 @@ async def mediq_check_medications(request: MediqCheckRequest):
                     "cross_reactivity_type": alert["type"],
                     "message": alert["message"],
                     "recommendation": alert["recommendation"]
-                })
+                }
+                allergy_warnings.append(allergy_warning)
+                patient_risks.append(allergy_warning)
                 
                 if alert["severity"] == "high":
                     analysis_status = AnalysisStatus.CLINICIAN_REVIEW_REQUIRED
@@ -13120,6 +13182,33 @@ async def mediq_check_medications(request: MediqCheckRequest):
                         "message": alert["message"],
                         "action_required": alert["recommendation"]
                     })
+            
+            # Also check for direct allergy matches
+            for allergy in allergies:
+                allergy_lower = allergy.lower().strip() if isinstance(allergy, str) else ""
+                for med in drug_names:
+                    med_lower = med.lower()
+                    
+                    # Direct match - patient is allergic to this exact drug
+                    if allergy_lower and (allergy_lower in med_lower or med_lower in allergy_lower):
+                        direct_warning = {
+                            "type": "direct_allergy_match",
+                            "severity": "critical",
+                            "allergy": allergy,
+                            "medication": med,
+                            "message": f"ALLERGY ALERT: Patient is allergic to {allergy}. {med} contains or is this allergen.",
+                            "recommendation": "DO NOT administer. Find alternative medication."
+                        }
+                        allergy_warnings.append(direct_warning)
+                        patient_risks.append(direct_warning)
+                        
+                        analysis_status = AnalysisStatus.CLINICIAN_REVIEW_REQUIRED
+                        warnings.append({
+                            "type": "direct_allergy_alert",
+                            "severity": "critical",
+                            "message": f"DIRECT ALLERGY MATCH: {med} - Patient allergic to {allergy}",
+                            "action_required": "DO NOT ADMINISTER. Find alternative medication immediately."
+                        })
         
         # ================================================================
         # STEP 6E: Adverse Effects Information (per medication)
@@ -13193,7 +13282,8 @@ async def mediq_check_medications(request: MediqCheckRequest):
                 "patient_risks_identified": len(patient_risks),
                 "duplicate_ingredients": len(duplicate_ingredients),
                 "therapeutic_duplications": len(therapeutic_duplications),
-                "allergy_alerts": len(allergy_alerts) if allergies else 0,
+                "allergy_warnings": len(allergy_warnings),
+                "disease_drug_warnings": len(disease_drug_warnings),
                 "medications_with_adverse_effects": len(medication_adverse_effects),
                 "medications_with_dose_limits": len(medication_dose_limits)
             },
@@ -13210,6 +13300,8 @@ async def mediq_check_medications(request: MediqCheckRequest):
             
             "patient_risks": patient_risks,
             
+            "allergy_warnings": allergy_warnings,
+            
             "duplicate_ingredients": duplicate_ingredients,
             
             "therapeutic_duplications": therapeutic_duplications,
@@ -13217,6 +13309,8 @@ async def mediq_check_medications(request: MediqCheckRequest):
             "adverse_effects": medication_adverse_effects,
             
             "dose_limits": medication_dose_limits,
+            
+            "disease_drug_warnings": disease_drug_warnings,
             
             "patient_context_used": {
                 "egfr": egfr,
@@ -13507,6 +13601,293 @@ async def mediq_data_coverage(country: str = None):
         
     except Exception as e:
         logger.error(f"MEDIQ coverage error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ==============================================================================
+# MEDIQ MEDICAL RECORDS ENDPOINTS - Longitudinal patient record tracking
+# ==============================================================================
+
+class MediqRecordUploadRequest(BaseModel):
+    """Request model for uploading a medical record"""
+    patient_id: Optional[str] = None
+    record_type: str = "prescription"
+    document_data: str  # Base64 encoded image or PDF
+    document_name: Optional[str] = None
+    patient_context: Optional[dict] = None
+
+
+class MediqAllergyCheckRequest(BaseModel):
+    """Request model for checking allergy cross-reactivity"""
+    allergies: List[str]
+    medications: List[str]
+
+
+@api_router.post("/mediq/records/upload")
+async def mediq_upload_record(request: MediqRecordUploadRequest):
+    """
+    Upload a medical record (prescription image or PDF) for OCR extraction.
+    
+    Supports:
+    - JPEG/PNG/WebP images
+    - PDF documents (text and scanned)
+    
+    Returns extracted medications with option to save to patient timeline.
+    """
+    try:
+        records_service = MedicalRecordsService(db)
+        
+        # Determine document type
+        doc_data = request.document_data
+        is_pdf = is_pdf_data(doc_data)
+        doc_type = "pdf" if is_pdf else "image"
+        
+        logger.info(f"Processing {doc_type} upload for patient {request.patient_id}")
+        
+        # Compute hash for deduplication
+        if doc_data.startswith('data:'):
+            base64_part = doc_data.split(',')[1] if ',' in doc_data else doc_data
+        else:
+            base64_part = doc_data
+        
+        import base64 as b64
+        try:
+            doc_bytes = b64.b64decode(base64_part)
+            doc_hash = compute_document_hash(doc_bytes)
+        except Exception:
+            doc_hash = None
+        
+        # Extract medications using Vision OCR
+        # For PDFs, we still use Vision OCR as it handles scanned PDFs better
+        extraction = await extract_medications_from_image(doc_data)
+        
+        if not extraction["success"]:
+            return {
+                "success": False,
+                "error": extraction.get("error", "Extraction failed"),
+                "document_type": doc_type,
+                "raw_response": extraction.get("raw_response")
+            }
+        
+        # Create medical record
+        record = MedicalRecord(
+            record_id=generate_record_id(),
+            patient_id=request.patient_id,
+            record_type=request.record_type,
+            source=ExtractionSource.PDF_EXTRACTION.value if is_pdf else ExtractionSource.IMAGE_OCR.value,
+            created_at=datetime.now(timezone.utc).isoformat(),
+            medications=extraction.get("medications", []),
+            patient_context={
+                **(extraction.get("patient_context", {})),
+                **(request.patient_context or {})
+            },
+            document_name=request.document_name,
+            document_hash=doc_hash,
+            document_type=doc_type,
+            extraction_confidence=extraction.get("confidence", "MEDIUM"),
+            extraction_issues=extraction.get("issues", [])
+        )
+        
+        # Save to database if patient_id is provided
+        save_result = None
+        if request.patient_id:
+            save_result = await records_service.save_record(record)
+        
+        return {
+            "success": True,
+            "record_id": record.record_id,
+            "document_type": doc_type,
+            "extraction_confidence": extraction.get("confidence"),
+            "medications_extracted": len(extraction.get("medications", [])),
+            "medications": extraction.get("medications", []),
+            "patient_context": record.patient_context,
+            "extraction_issues": extraction.get("issues", []),
+            "saved_to_timeline": save_result.get("success") if save_result else False,
+            "duplicate_warning": save_result.get("error") == "duplicate_document" if save_result else False
+        }
+        
+    except Exception as e:
+        logger.error(f"Record upload error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/mediq/records/patient/{patient_id}")
+async def mediq_get_patient_records(patient_id: str, limit: int = 50):
+    """
+    Get all medical records for a patient.
+    Returns records sorted by date (newest first).
+    """
+    try:
+        records_service = MedicalRecordsService(db)
+        records = await records_service.get_patient_records(patient_id, limit)
+        
+        return {
+            "success": True,
+            "patient_id": patient_id,
+            "total_records": len(records),
+            "records": records
+        }
+        
+    except Exception as e:
+        logger.error(f"Get patient records error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/mediq/records/patient/{patient_id}/timeline")
+async def mediq_get_medication_timeline(patient_id: str):
+    """
+    Get longitudinal medication timeline for a patient.
+    Shows all medications with first/last seen dates and current status.
+    """
+    try:
+        records_service = MedicalRecordsService(db)
+        timeline = await records_service.get_patient_medication_timeline(patient_id)
+        
+        return {
+            "success": True,
+            **timeline
+        }
+        
+    except Exception as e:
+        logger.error(f"Get medication timeline error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/mediq/records/{record_id}")
+async def mediq_get_record(record_id: str):
+    """Get a specific medical record by ID."""
+    try:
+        records_service = MedicalRecordsService(db)
+        record = await records_service.get_record(record_id)
+        
+        if not record:
+            raise HTTPException(status_code=404, detail="Record not found")
+        
+        return {
+            "success": True,
+            "record": record
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Get record error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ==============================================================================
+# MEDIQ ALLERGY CROSS-REACTIVITY ENDPOINTS
+# ==============================================================================
+
+@api_router.post("/mediq/allergy/check")
+async def mediq_check_allergies(request: MediqAllergyCheckRequest):
+    """
+    Check medications against patient allergies for cross-reactivity warnings.
+    
+    Returns:
+    - Direct allergy matches (critical)
+    - Cross-reactive drugs (high risk)
+    - Related drug class warnings (moderate risk)
+    """
+    try:
+        if not request.allergies:
+            return {
+                "success": True,
+                "warnings": [],
+                "message": "No allergies provided to check"
+            }
+        
+        if not request.medications:
+            return {
+                "success": True,
+                "warnings": [],
+                "message": "No medications provided to check"
+            }
+        
+        # Get allergy warnings
+        warnings = get_allergy_warnings(request.allergies, request.medications)
+        
+        # Sort by severity (critical first)
+        severity_order = {"critical": 0, "high": 1, "moderate": 2, "low": 3}
+        warnings.sort(key=lambda x: severity_order.get(x.get("severity", "low"), 4))
+        
+        # Build allergy family info for each allergy
+        allergy_families = []
+        for allergy in request.allergies:
+            family_info = get_allergy_family_info(allergy)
+            if family_info:
+                allergy_families.append(family_info)
+        
+        return {
+            "success": True,
+            "allergies_checked": request.allergies,
+            "medications_checked": request.medications,
+            "total_warnings": len(warnings),
+            "critical_warnings": len([w for w in warnings if w.get("severity") == "critical"]),
+            "high_risk_warnings": len([w for w in warnings if w.get("severity") == "high"]),
+            "warnings": warnings,
+            "allergy_families": allergy_families,
+            "disclaimer": "This is a screening tool. Not all cross-reactivities are known. Clinical judgment required."
+        }
+        
+    except Exception as e:
+        logger.error(f"Allergy check error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/mediq/allergy/families")
+async def mediq_get_allergy_families():
+    """
+    Get the complete allergy cross-reactivity database.
+    Useful for displaying all known allergy families in the UI.
+    """
+    try:
+        families = []
+        
+        for allergy_key, info in ALLERGY_CROSS_REACTIVITY.items():
+            families.append({
+                "allergy": allergy_key,
+                "cross_reactive_drugs": info.get("cross_reactive", []),
+                "possible_cross_reactive": info.get("possible_cross", []),
+                "risk_level": info.get("risk_level", "unknown"),
+                "notes": info.get("notes", "")
+            })
+        
+        return {
+            "success": True,
+            "total_families": len(families),
+            "families": families
+        }
+        
+    except Exception as e:
+        logger.error(f"Get allergy families error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/mediq/allergy/info/{allergy}")
+async def mediq_get_allergy_info(allergy: str):
+    """
+    Get detailed information about a specific allergy including cross-reactive drugs.
+    """
+    try:
+        family_info = get_allergy_family_info(allergy)
+        
+        if not family_info:
+            return {
+                "success": True,
+                "found": False,
+                "message": f"No cross-reactivity data found for '{allergy}'. This does not mean it is safe.",
+                "allergy": allergy
+            }
+        
+        return {
+            "success": True,
+            "found": True,
+            **family_info
+        }
+        
+    except Exception as e:
+        logger.error(f"Get allergy info error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

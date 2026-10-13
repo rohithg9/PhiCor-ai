@@ -62,6 +62,8 @@ const MediqCheckerPage = () => {
   const [expandedSections, setExpandedSections] = useState({
     medications: true,
     interactions: true,
+    allergyWarnings: true,
+    diseaseDrugWarnings: true,
     duplicateIngredients: true,
     therapeuticDuplications: true,
     adverseEffects: false,
@@ -366,7 +368,7 @@ const MediqCheckerPage = () => {
                   >
                     <h3 className="font-semibold mb-4 flex items-center gap-2">
                       <Camera className="w-5 h-5 text-cyan-500" />
-                      Upload Prescription Photo
+                      Upload Prescription (Image or PDF)
                     </h3>
 
                     <label className={`block border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors ${
@@ -376,7 +378,7 @@ const MediqCheckerPage = () => {
                     }`}>
                       <input
                         type="file"
-                        accept="image/*"
+                        accept="image/*,.pdf,application/pdf"
                         multiple
                         onChange={handleImageUpload}
                         className="hidden"
@@ -387,7 +389,7 @@ const MediqCheckerPage = () => {
                         Click to upload or drag and drop
                       </p>
                       <p className={`text-sm ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
-                        PNG, JPG up to 10MB
+                        PNG, JPG, PDF up to 10MB
                       </p>
                     </label>
 
@@ -398,7 +400,16 @@ const MediqCheckerPage = () => {
                             key={img.id} 
                             className={`relative rounded-lg overflow-hidden ${isDark ? 'bg-gray-800' : 'bg-gray-100'}`}
                           >
-                            <img src={img.data} alt={img.name} className="w-full h-24 object-cover" />
+                            {img.name?.toLowerCase().endsWith('.pdf') ? (
+                              <div className="w-full h-24 flex items-center justify-center bg-red-500/10">
+                                <FileText className="w-8 h-8 text-red-500" />
+                              </div>
+                            ) : (
+                              <img src={img.data} alt={img.name} className="w-full h-24 object-cover" />
+                            )}
+                            <div className={`absolute bottom-0 left-0 right-0 px-2 py-1 text-xs truncate ${isDark ? 'bg-gray-900/80' : 'bg-white/80'}`}>
+                              {img.name}
+                            </div>
                             <button
                               onClick={() => removeImage(img.id)}
                               className="absolute top-1 right-1 p-1 bg-red-500 rounded-full text-white hover:bg-red-600"
@@ -488,6 +499,7 @@ const MediqCheckerPage = () => {
                         value={patientContext.conditions}
                         onChange={(e) => setPatientContext({...patientContext, conditions: e.target.value})}
                         className={`mt-1 ${isDark ? 'bg-gray-800 border-gray-700' : ''}`}
+                        data-testid="conditions-input"
                       />
                       <p className={`text-xs mt-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>Separate with commas</p>
                     </div>
@@ -499,6 +511,7 @@ const MediqCheckerPage = () => {
                         value={patientContext.allergies}
                         onChange={(e) => setPatientContext({...patientContext, allergies: e.target.value})}
                         className={`mt-1 ${isDark ? 'bg-gray-800 border-gray-700' : ''}`}
+                        data-testid="allergies-input"
                       />
                     </div>
                   </div>
@@ -580,10 +593,10 @@ const MediqCheckerPage = () => {
                         <div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Duplicates</div>
                       </div>
                       <div className={`p-4 rounded-lg ${isDark ? 'bg-gray-900 border border-gray-800' : 'bg-white border border-gray-200'}`}>
-                        <div className={`text-2xl font-bold ${analysisResults.summary.therapeutic_duplications > 0 ? 'text-purple-500' : 'text-green-500'}`}>
-                          {analysisResults.summary.therapeutic_duplications || 0}
+                        <div className={`text-2xl font-bold ${analysisResults.summary.allergy_warnings > 0 ? 'text-red-600' : 'text-green-500'}`}>
+                          {analysisResults.summary.allergy_warnings || 0}
                         </div>
-                        <div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Class Dups</div>
+                        <div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Allergies</div>
                       </div>
                       <div className={`p-4 rounded-lg ${isDark ? 'bg-gray-900 border border-gray-800' : 'bg-white border border-gray-200'}`}>
                         <div className={`text-2xl font-bold ${analysisResults.summary.patient_risks_identified > 0 ? 'text-yellow-500' : 'text-green-500'}`}>
@@ -732,6 +745,134 @@ const MediqCheckerPage = () => {
                                   {analysisResults.interactions.moderate.map((i, idx) => renderInteractionCard(i, idx))}
                                 </div>
                               )}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  )}
+
+                  {/* Allergy Warnings - HIGH PRIORITY SECTION */}
+                  {analysisResults.allergy_warnings && analysisResults.allergy_warnings.length > 0 && (
+                    <div className={`rounded-xl overflow-hidden ${isDark ? 'bg-red-950 border-2 border-red-500' : 'bg-red-50 border-2 border-red-400 shadow-md'}`} data-testid="allergy-warnings-section">
+                      <button
+                        onClick={() => toggleSection('allergyWarnings')}
+                        className={`w-full p-4 flex items-center justify-between ${isDark ? 'hover:bg-red-900/50' : 'hover:bg-red-100'}`}
+                      >
+                        <h3 className="font-bold flex items-center gap-2 text-red-500">
+                          <XCircle className="w-6 h-6 animate-pulse" />
+                          ⚠️ ALLERGY WARNINGS ({analysisResults.allergy_warnings.length})
+                        </h3>
+                        {expandedSections.allergyWarnings ? <ChevronUp className="w-5 h-5 text-red-500" /> : <ChevronDown className="w-5 h-5 text-red-500" />}
+                      </button>
+                      
+                      <AnimatePresence>
+                        {expandedSections.allergyWarnings && (
+                          <motion.div
+                            initial={{ height: 0 }}
+                            animate={{ height: 'auto' }}
+                            exit={{ height: 0 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="p-4 pt-0 space-y-3">
+                              {analysisResults.allergy_warnings.map((warning, idx) => (
+                                <div key={idx} className={`p-4 rounded-lg ${isDark ? 'bg-red-900/30' : 'bg-white'} border-l-4 ${
+                                  warning.severity === 'critical' ? 'border-red-600' : 'border-red-400'
+                                }`}>
+                                  <div className="flex items-start gap-3">
+                                    <XCircle className={`w-6 h-6 flex-shrink-0 mt-0.5 ${warning.severity === 'critical' ? 'text-red-600' : 'text-red-500'}`} />
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                                        <Badge className={warning.severity === 'critical' ? 'bg-red-600 text-white' : 'bg-red-500 text-white'}>
+                                          {warning.severity?.toUpperCase()}
+                                        </Badge>
+                                        <Badge className={warning.type === 'direct_allergy_match' ? 'bg-red-800 text-white' : 'bg-orange-500 text-white'}>
+                                          {warning.type === 'direct_allergy_match' ? 'DIRECT MATCH' : 'CROSS-REACTIVITY'}
+                                        </Badge>
+                                      </div>
+                                      
+                                      <p className={`text-sm font-semibold mb-1 ${isDark ? 'text-red-300' : 'text-red-700'}`}>
+                                        Allergy: <span className="uppercase">{warning.allergy}</span> → Medication: <span className="uppercase">{warning.medication}</span>
+                                      </p>
+                                      
+                                      <p className={`text-sm ${isDark ? 'text-red-200' : 'text-red-600'}`}>
+                                        {warning.message}
+                                      </p>
+                                      
+                                      <div className={`mt-3 p-3 rounded ${isDark ? 'bg-red-950' : 'bg-red-100'} border ${isDark ? 'border-red-800' : 'border-red-300'}`}>
+                                        <span className="font-bold text-red-500">⚡ ACTION: </span>
+                                        <span className={`font-medium ${isDark ? 'text-red-200' : 'text-red-700'}`}>{warning.recommendation}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  )}
+
+                  {/* Disease-Drug Warnings (PhiCor Integration) */}
+                  {analysisResults.disease_drug_warnings && analysisResults.disease_drug_warnings.length > 0 && (
+                    <div className={`rounded-xl overflow-hidden ${isDark ? 'bg-purple-950 border-2 border-purple-500' : 'bg-purple-50 border-2 border-purple-400 shadow-md'}`} data-testid="disease-drug-warnings-section">
+                      <button
+                        onClick={() => toggleSection('diseaseDrugWarnings')}
+                        className={`w-full p-4 flex items-center justify-between ${isDark ? 'hover:bg-purple-900/50' : 'hover:bg-purple-100'}`}
+                      >
+                        <h3 className="font-bold flex items-center gap-2 text-purple-500">
+                          <Heart className="w-6 h-6" />
+                          ⚕️ Disease-Drug Contraindications ({analysisResults.disease_drug_warnings.length})
+                        </h3>
+                        {expandedSections.diseaseDrugWarnings ? <ChevronUp className="w-5 h-5 text-purple-500" /> : <ChevronDown className="w-5 h-5 text-purple-500" />}
+                      </button>
+                      
+                      <AnimatePresence>
+                        {expandedSections.diseaseDrugWarnings && (
+                          <motion.div
+                            initial={{ height: 0 }}
+                            animate={{ height: 'auto' }}
+                            exit={{ height: 0 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="p-4 pt-0 space-y-3">
+                              {analysisResults.disease_drug_warnings.map((warning, idx) => (
+                                <div key={idx} className={`p-4 rounded-lg ${isDark ? 'bg-purple-900/30' : 'bg-white'} border-l-4 border-purple-500`}>
+                                  <div className="flex items-start gap-3">
+                                    <Heart className="w-6 h-6 flex-shrink-0 mt-0.5 text-purple-500" />
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                                        <Badge className="bg-purple-600 text-white">
+                                          {warning.severity?.toUpperCase()}
+                                        </Badge>
+                                        <Badge className="bg-indigo-500 text-white">
+                                          DISEASE-DRUG
+                                        </Badge>
+                                      </div>
+                                      
+                                      <p className={`text-sm font-semibold mb-1 ${isDark ? 'text-purple-300' : 'text-purple-700'}`}>
+                                        Disease: <span className="uppercase">{warning.disease}</span> → Medication: <span className="uppercase">{warning.medication}</span>
+                                      </p>
+                                      
+                                      <p className={`text-sm mb-2 ${isDark ? 'text-purple-200' : 'text-purple-600'}`}>
+                                        {warning.message}
+                                      </p>
+                                      
+                                      {warning.contraindication && (
+                                        <p className={`text-xs italic ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                                          Contraindication: {warning.contraindication}
+                                        </p>
+                                      )}
+                                      
+                                      <div className={`mt-3 p-3 rounded ${isDark ? 'bg-purple-950' : 'bg-purple-100'} border ${isDark ? 'border-purple-800' : 'border-purple-300'}`}>
+                                        <span className="font-bold text-purple-500">⚡ ACTION: </span>
+                                        <span className={`font-medium ${isDark ? 'text-purple-200' : 'text-purple-700'}`}>{warning.recommendation}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
                             </div>
                           </motion.div>
                         )}
