@@ -26,6 +26,15 @@ const STATUS_CONFIG = {
   NO_MEDICATIONS_PROVIDED: { color: 'gray', icon: Info, label: 'No Medications Provided' }
 };
 
+// Frequency labels for adverse effects
+const FREQUENCY_LABELS = {
+  very_common: { label: '>10%', color: 'bg-red-500 text-white' },
+  common: { label: '1-10%', color: 'bg-orange-500 text-white' },
+  uncommon: { label: '0.1-1%', color: 'bg-yellow-500 text-black' },
+  rare: { label: '<0.1%', color: 'bg-blue-500 text-white' },
+  very_rare: { label: '<0.01%', color: 'bg-gray-500 text-white' }
+};
+
 // Severity colors
 const SEVERITY_COLORS = {
   contraindicated: 'bg-red-600 text-white',
@@ -53,6 +62,10 @@ const MediqCheckerPage = () => {
   const [expandedSections, setExpandedSections] = useState({
     medications: true,
     interactions: true,
+    duplicateIngredients: true,
+    therapeuticDuplications: true,
+    adverseEffects: false,
+    doseLimits: false,
     patientRisks: true,
     warnings: true
   });
@@ -543,7 +556,7 @@ const MediqCheckerPage = () => {
 
                   {/* Summary Cards */}
                   {analysisResults.summary && (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                       <div className={`p-4 rounded-lg ${isDark ? 'bg-gray-900 border border-gray-800' : 'bg-white border border-gray-200'}`}>
                         <div className="text-2xl font-bold text-cyan-500">{analysisResults.summary.total_medications}</div>
                         <div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Medications</div>
@@ -559,6 +572,18 @@ const MediqCheckerPage = () => {
                           {analysisResults.summary.severe_interactions + analysisResults.summary.major_interactions}
                         </div>
                         <div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Severe/Major</div>
+                      </div>
+                      <div className={`p-4 rounded-lg ${isDark ? 'bg-gray-900 border border-gray-800' : 'bg-white border border-gray-200'}`}>
+                        <div className={`text-2xl font-bold ${analysisResults.summary.duplicate_ingredients > 0 ? 'text-orange-500' : 'text-green-500'}`}>
+                          {analysisResults.summary.duplicate_ingredients || 0}
+                        </div>
+                        <div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Duplicates</div>
+                      </div>
+                      <div className={`p-4 rounded-lg ${isDark ? 'bg-gray-900 border border-gray-800' : 'bg-white border border-gray-200'}`}>
+                        <div className={`text-2xl font-bold ${analysisResults.summary.therapeutic_duplications > 0 ? 'text-purple-500' : 'text-green-500'}`}>
+                          {analysisResults.summary.therapeutic_duplications || 0}
+                        </div>
+                        <div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Class Dups</div>
                       </div>
                       <div className={`p-4 rounded-lg ${isDark ? 'bg-gray-900 border border-gray-800' : 'bg-white border border-gray-200'}`}>
                         <div className={`text-2xl font-bold ${analysisResults.summary.patient_risks_identified > 0 ? 'text-yellow-500' : 'text-green-500'}`}>
@@ -707,6 +732,286 @@ const MediqCheckerPage = () => {
                                   {analysisResults.interactions.moderate.map((i, idx) => renderInteractionCard(i, idx))}
                                 </div>
                               )}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  )}
+
+                  {/* Duplicate Ingredients */}
+                  {analysisResults.duplicate_ingredients && analysisResults.duplicate_ingredients.length > 0 && (
+                    <div className={`rounded-xl overflow-hidden ${isDark ? 'bg-gray-900 border border-gray-800' : 'bg-white border border-gray-200 shadow-sm'}`} data-testid="duplicate-ingredients-section">
+                      <button
+                        onClick={() => toggleSection('duplicateIngredients')}
+                        className={`w-full p-4 flex items-center justify-between ${isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}
+                      >
+                        <h3 className="font-semibold flex items-center gap-2">
+                          <AlertTriangle className="w-5 h-5 text-orange-500" />
+                          Duplicate Ingredients ({analysisResults.duplicate_ingredients.length})
+                        </h3>
+                        {expandedSections.duplicateIngredients ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                      </button>
+                      
+                      <AnimatePresence>
+                        {expandedSections.duplicateIngredients && (
+                          <motion.div
+                            initial={{ height: 0 }}
+                            animate={{ height: 'auto' }}
+                            exit={{ height: 0 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="p-4 pt-0 space-y-3">
+                              {analysisResults.duplicate_ingredients.map((dup, idx) => (
+                                <div key={idx} className={`p-4 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-gray-50'} border-l-4 ${
+                                  dup.severity === 'major' ? 'border-orange-500' : 'border-yellow-500'
+                                }`}>
+                                  <div className="flex items-center gap-2 mb-2 flex-wrap">
+                                    <Badge className={dup.severity === 'major' ? 'bg-orange-500 text-white' : 'bg-yellow-500 text-black'}>
+                                      {dup.severity?.toUpperCase()}
+                                    </Badge>
+                                    <span className="font-semibold capitalize">{dup.ingredient}</span>
+                                  </div>
+                                  
+                                  <p className={`text-sm mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                                    <strong>Found in:</strong> {dup.found_in?.join(', ')}
+                                  </p>
+                                  
+                                  <p className={`text-sm ${isDark ? 'text-red-400' : 'text-red-600'}`}>
+                                    {dup.warning}
+                                  </p>
+                                  
+                                  <div className={`mt-2 p-2 rounded ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
+                                    <span className="font-medium text-cyan-500">Recommendation: </span>
+                                    <span className={isDark ? 'text-gray-300' : 'text-gray-700'}>{dup.recommendation}</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  )}
+
+                  {/* Therapeutic Duplications */}
+                  {analysisResults.therapeutic_duplications && analysisResults.therapeutic_duplications.length > 0 && (
+                    <div className={`rounded-xl overflow-hidden ${isDark ? 'bg-gray-900 border border-gray-800' : 'bg-white border border-gray-200 shadow-sm'}`} data-testid="therapeutic-duplications-section">
+                      <button
+                        onClick={() => toggleSection('therapeuticDuplications')}
+                        className={`w-full p-4 flex items-center justify-between ${isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}
+                      >
+                        <h3 className="font-semibold flex items-center gap-2">
+                          <Beaker className="w-5 h-5 text-purple-500" />
+                          Therapeutic Duplications ({analysisResults.therapeutic_duplications.length})
+                        </h3>
+                        {expandedSections.therapeuticDuplications ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                      </button>
+                      
+                      <AnimatePresence>
+                        {expandedSections.therapeuticDuplications && (
+                          <motion.div
+                            initial={{ height: 0 }}
+                            animate={{ height: 'auto' }}
+                            exit={{ height: 0 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="p-4 pt-0 space-y-3">
+                              {analysisResults.therapeutic_duplications.map((td, idx) => (
+                                <div key={idx} className={`p-4 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-gray-50'} border-l-4 ${
+                                  td.severity === 'high' ? 'border-red-500' : 'border-purple-500'
+                                }`}>
+                                  <div className="flex items-center gap-2 mb-2 flex-wrap">
+                                    <Badge className={td.severity === 'high' ? 'bg-red-500 text-white' : 'bg-purple-500 text-white'}>
+                                      {td.severity?.toUpperCase()}
+                                    </Badge>
+                                    <span className="font-semibold capitalize">{td.drug_class?.replace(/_/g, ' ')}</span>
+                                  </div>
+                                  
+                                  <p className={`text-sm mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                                    <strong>Medications:</strong> {td.medications?.join(', ')}
+                                  </p>
+                                  
+                                  <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                    {td.message}
+                                  </p>
+                                  
+                                  <div className={`mt-2 p-2 rounded ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
+                                    <span className="font-medium text-cyan-500">Recommendation: </span>
+                                    <span className={isDark ? 'text-gray-300' : 'text-gray-700'}>{td.recommendation}</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  )}
+
+                  {/* Adverse Effects (Per-Medication) */}
+                  {analysisResults.adverse_effects && Object.keys(analysisResults.adverse_effects).length > 0 && (
+                    <div className={`rounded-xl overflow-hidden ${isDark ? 'bg-gray-900 border border-gray-800' : 'bg-white border border-gray-200 shadow-sm'}`} data-testid="adverse-effects-section">
+                      <button
+                        onClick={() => toggleSection('adverseEffects')}
+                        className={`w-full p-4 flex items-center justify-between ${isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}
+                      >
+                        <h3 className="font-semibold flex items-center gap-2">
+                          <Activity className="w-5 h-5 text-rose-500" />
+                          Adverse Effects ({Object.keys(analysisResults.adverse_effects).length} medications)
+                        </h3>
+                        {expandedSections.adverseEffects ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                      </button>
+                      
+                      <AnimatePresence>
+                        {expandedSections.adverseEffects && (
+                          <motion.div
+                            initial={{ height: 0 }}
+                            animate={{ height: 'auto' }}
+                            exit={{ height: 0 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="p-4 pt-0 space-y-4">
+                              {Object.entries(analysisResults.adverse_effects).map(([medName, effects], medIdx) => (
+                                <div key={medIdx} className={`rounded-lg ${isDark ? 'bg-gray-800' : 'bg-gray-50'}`}>
+                                  <div className={`p-3 rounded-t-lg ${isDark ? 'bg-gray-700' : 'bg-gray-200'}`}>
+                                    <h4 className="font-semibold flex items-center gap-2">
+                                      <Pill className="w-4 h-4 text-cyan-500" />
+                                      {medName}
+                                    </h4>
+                                  </div>
+                                  <div className="p-3 space-y-2">
+                                    {effects.map((effect, effIdx) => (
+                                      <div key={effIdx} className={`p-3 rounded ${isDark ? 'bg-gray-900' : 'bg-white'} border-l-2 ${
+                                        effect.severity === 'life_threatening' ? 'border-red-600' :
+                                        effect.severity === 'serious' ? 'border-orange-500' :
+                                        effect.severity === 'moderate' ? 'border-yellow-500' :
+                                        'border-blue-500'
+                                      }`}>
+                                        <div className="flex items-start justify-between gap-2 mb-2">
+                                          <span className={`font-medium text-sm ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>
+                                            {effect.effect}
+                                          </span>
+                                          <div className="flex gap-1 flex-shrink-0">
+                                            <Badge className={FREQUENCY_LABELS[effect.frequency]?.color || 'bg-gray-500 text-white'}>
+                                              {FREQUENCY_LABELS[effect.frequency]?.label || effect.frequency}
+                                            </Badge>
+                                            <Badge className={
+                                              effect.severity === 'life_threatening' ? 'bg-red-600 text-white' :
+                                              effect.severity === 'serious' ? 'bg-orange-500 text-white' :
+                                              effect.severity === 'moderate' ? 'bg-yellow-500 text-black' :
+                                              'bg-blue-500 text-white'
+                                            }>
+                                              {effect.severity?.replace('_', ' ')}
+                                            </Badge>
+                                          </div>
+                                        </div>
+                                        
+                                        {effect.management && (
+                                          <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                            <strong className="text-cyan-500">Management:</strong> {effect.management}
+                                          </p>
+                                        )}
+                                        
+                                        {effect.monitoring && effect.monitoring.length > 0 && (
+                                          <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                            <strong className="text-purple-400">Monitor:</strong> {effect.monitoring.join(', ')}
+                                          </p>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  )}
+
+                  {/* Dose Limits */}
+                  {analysisResults.dose_limits && Object.keys(analysisResults.dose_limits).length > 0 && (
+                    <div className={`rounded-xl overflow-hidden ${isDark ? 'bg-gray-900 border border-gray-800' : 'bg-white border border-gray-200 shadow-sm'}`} data-testid="dose-limits-section">
+                      <button
+                        onClick={() => toggleSection('doseLimits')}
+                        className={`w-full p-4 flex items-center justify-between ${isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}
+                      >
+                        <h3 className="font-semibold flex items-center gap-2">
+                          <FileText className="w-5 h-5 text-indigo-500" />
+                          Dose Limits ({Object.keys(analysisResults.dose_limits).length} medications)
+                        </h3>
+                        {expandedSections.doseLimits ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                      </button>
+                      
+                      <AnimatePresence>
+                        {expandedSections.doseLimits && (
+                          <motion.div
+                            initial={{ height: 0 }}
+                            animate={{ height: 'auto' }}
+                            exit={{ height: 0 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="p-4 pt-0 space-y-4">
+                              {Object.entries(analysisResults.dose_limits).map(([medName, limits], medIdx) => (
+                                <div key={medIdx} className={`rounded-lg ${isDark ? 'bg-gray-800' : 'bg-gray-50'}`}>
+                                  <div className={`p-3 rounded-t-lg ${isDark ? 'bg-indigo-900/50' : 'bg-indigo-100'}`}>
+                                    <h4 className="font-semibold flex items-center gap-2">
+                                      <Pill className="w-4 h-4 text-indigo-500" />
+                                      {medName}
+                                    </h4>
+                                  </div>
+                                  <div className="p-3 space-y-3">
+                                    <div className="grid grid-cols-2 gap-3">
+                                      {limits.max_single_dose && (
+                                        <div className={`p-2 rounded ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
+                                          <span className={`text-xs block ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>Max Single Dose</span>
+                                          <span className={`font-semibold ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>{limits.max_single_dose}</span>
+                                        </div>
+                                      )}
+                                      {limits.max_daily_dose && (
+                                        <div className={`p-2 rounded ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
+                                          <span className={`text-xs block ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>Max Daily Dose</span>
+                                          <span className={`font-semibold ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>{limits.max_daily_dose}</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                    
+                                    {limits.renal_adjustments && Object.keys(limits.renal_adjustments).length > 0 && (
+                                      <div className={`p-2 rounded ${isDark ? 'bg-yellow-500/10 border border-yellow-500/30' : 'bg-yellow-50 border border-yellow-200'}`}>
+                                        <span className={`text-xs font-medium block mb-1 text-yellow-500`}>Renal Adjustments</span>
+                                        {Object.entries(limits.renal_adjustments).map(([condition, adjustment], i) => (
+                                          <p key={i} className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                                            <strong>{condition}:</strong> {adjustment}
+                                          </p>
+                                        ))}
+                                      </div>
+                                    )}
+                                    
+                                    {limits.hepatic_adjustments && Object.keys(limits.hepatic_adjustments).length > 0 && (
+                                      <div className={`p-2 rounded ${isDark ? 'bg-orange-500/10 border border-orange-500/30' : 'bg-orange-50 border border-orange-200'}`}>
+                                        <span className={`text-xs font-medium block mb-1 text-orange-500`}>Hepatic Adjustments</span>
+                                        {Object.entries(limits.hepatic_adjustments).map(([condition, adjustment], i) => (
+                                          <p key={i} className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                                            <strong>{condition}:</strong> {adjustment}
+                                          </p>
+                                        ))}
+                                      </div>
+                                    )}
+                                    
+                                    {limits.warnings && limits.warnings.length > 0 && (
+                                      <div className={`p-2 rounded ${isDark ? 'bg-red-500/10 border border-red-500/30' : 'bg-red-50 border border-red-200'}`}>
+                                        <span className={`text-xs font-medium block mb-1 text-red-500`}>Warnings</span>
+                                        <ul className={`text-xs list-disc list-inside ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                                          {limits.warnings.map((warning, i) => (
+                                            <li key={i}>{warning}</li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
                             </div>
                           </motion.div>
                         )}

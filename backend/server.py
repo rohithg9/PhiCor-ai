@@ -12578,6 +12578,11 @@ from mediq_knowledge_base import (
     assess_renal_risks, assess_hyperkalemia_risk, assess_gi_risks,
     BRAND_TO_GENERIC
 )
+from mediq_adverse_effects import (
+    get_adverse_effects, get_dose_limits, get_active_ingredients,
+    detect_duplicate_ingredients, check_allergy_cross_reactivity,
+    detect_therapeutic_duplication, get_drug_class
+)
 
 class AnalysisStatus(str, Enum):
     ANALYSIS_COMPLETE = "ANALYSIS_COMPLETE"
@@ -13040,6 +13045,103 @@ async def mediq_check_medications(request: MediqCheckRequest):
             })
         
         # ================================================================
+        # STEP 6B: Duplicate Ingredient Detection
+        # ================================================================
+        original_med_names = [m["name"] for m in medications_identified]
+        duplicate_ingredients = detect_duplicate_ingredients(original_med_names)
+        
+        if duplicate_ingredients:
+            for dup in duplicate_ingredients:
+                patient_risks.append({
+                    "type": "duplicate_ingredient",
+                    "severity": dup["severity"],
+                    "ingredient": dup["ingredient"],
+                    "found_in": dup["found_in"],
+                    "warning": dup["warning"],
+                    "recommendation": dup["recommendation"]
+                })
+                
+                if dup["severity"] == "major":
+                    analysis_status = AnalysisStatus.CLINICIAN_REVIEW_REQUIRED
+                    warnings.append({
+                        "type": "duplicate_ingredient_warning",
+                        "severity": "critical",
+                        "message": f"DUPLICATE {dup['ingredient'].upper()}: Found in {', '.join(dup['found_in'])}",
+                        "action_required": "Calculate total daily dose - risk of overdose"
+                    })
+        
+        # ================================================================
+        # STEP 6C: Therapeutic Duplication Detection
+        # ================================================================
+        therapeutic_duplications = detect_therapeutic_duplication(drug_names)
+        
+        if therapeutic_duplications:
+            for td in therapeutic_duplications:
+                patient_risks.append({
+                    "type": "therapeutic_duplication",
+                    "severity": td["severity"],
+                    "drug_class": td["drug_class"],
+                    "medications": td["medications"],
+                    "message": td["message"],
+                    "recommendation": td["recommendation"]
+                })
+                
+                if td["severity"] == "high":
+                    warnings.append({
+                        "type": "therapeutic_duplication_warning",
+                        "severity": "major",
+                        "message": td["message"],
+                        "action_required": "Review necessity of multiple agents from same class"
+                    })
+        
+        # ================================================================
+        # STEP 6D: Allergy Cross-Reactivity Check
+        # ================================================================
+        allergies = patient_context.get("allergies", [])
+        if allergies:
+            allergy_alerts = check_allergy_cross_reactivity(allergies, drug_names)
+            
+            for alert in allergy_alerts:
+                patient_risks.append({
+                    "type": "allergy_cross_reactivity",
+                    "severity": alert["severity"],
+                    "allergy": alert["allergy"],
+                    "medication": alert["medication"],
+                    "cross_reactivity_type": alert["type"],
+                    "message": alert["message"],
+                    "recommendation": alert["recommendation"]
+                })
+                
+                if alert["severity"] == "high":
+                    analysis_status = AnalysisStatus.CLINICIAN_REVIEW_REQUIRED
+                    warnings.append({
+                        "type": "allergy_alert",
+                        "severity": "critical",
+                        "message": alert["message"],
+                        "action_required": alert["recommendation"]
+                    })
+        
+        # ================================================================
+        # STEP 6E: Adverse Effects Information (per medication)
+        # ================================================================
+        medication_adverse_effects = {}
+        for med in medications_identified:
+            med_name = med.get("normalized_name") or med.get("generic_name") or med["name"]
+            effects = get_adverse_effects(med_name)
+            if effects:
+                medication_adverse_effects[med["name"]] = effects
+        
+        # ================================================================
+        # STEP 6F: Dose Limit Information (per medication)
+        # ================================================================
+        medication_dose_limits = {}
+        for med in medications_identified:
+            med_name = med.get("normalized_name") or med.get("generic_name") or med["name"]
+            limits = get_dose_limits(med_name)
+            if limits:
+                medication_dose_limits[med["name"]] = limits
+        
+        # ================================================================
         # STEP 7: Coverage Limitations
         # ================================================================
         coverage_limitations = [
@@ -13088,7 +13190,12 @@ async def mediq_check_medications(request: MediqCheckRequest):
                 "severe_interactions": len(severe),
                 "major_interactions": len(major),
                 "moderate_interactions": len(moderate),
-                "patient_risks_identified": len(patient_risks)
+                "patient_risks_identified": len(patient_risks),
+                "duplicate_ingredients": len(duplicate_ingredients),
+                "therapeutic_duplications": len(therapeutic_duplications),
+                "allergy_alerts": len(allergy_alerts) if allergies else 0,
+                "medications_with_adverse_effects": len(medication_adverse_effects),
+                "medications_with_dose_limits": len(medication_dose_limits)
             },
             
             "medications_identified": medications_identified,
@@ -13103,10 +13210,19 @@ async def mediq_check_medications(request: MediqCheckRequest):
             
             "patient_risks": patient_risks,
             
+            "duplicate_ingredients": duplicate_ingredients,
+            
+            "therapeutic_duplications": therapeutic_duplications,
+            
+            "adverse_effects": medication_adverse_effects,
+            
+            "dose_limits": medication_dose_limits,
+            
             "patient_context_used": {
                 "egfr": egfr,
                 "potassium": potassium,
                 "conditions": conditions,
+                "allergies": allergies,
                 "has_gi_ulcer_history": has_gi_ulcer
             },
             

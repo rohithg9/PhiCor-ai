@@ -286,6 +286,8 @@ BRAND_TO_GENERIC = {
     "klor-con": "potassium chloride",
     "k-tab": "potassium chloride",
     "kay ciel": "potassium chloride",
+    "sando-k": "potassium chloride",
+    "kay-cee-l": "potassium chloride",
     # Ibuprofen
     "brufen": "ibuprofen",
     "advil": "ibuprofen",
@@ -319,6 +321,17 @@ BRAND_TO_GENERIC = {
     "disprin": "aspirin",
     "bayer": "aspirin",
     "ecotrin": "aspirin",
+    # Paracetamol / Acetaminophen
+    "tylenol": "paracetamol",
+    "panadol": "paracetamol",
+    "calpol": "paracetamol",
+    "acetaminophen": "paracetamol",
+    # Combination products
+    "co-codamol": "co-codamol",
+    "cocodamol": "co-codamol",
+    "co-dydramol": "co-dydramol",
+    "codydramol": "co-dydramol",
+    "tramacet": "tramacet",
     # Lisinopril
     "prinivil": "lisinopril",
     "zestril": "lisinopril",
@@ -461,15 +474,21 @@ def normalize_drug_name(name: str) -> str:
         # Default to before parentheses
         cleaned = before_paren
     
-    # Remove common suffixes
-    for suffix in ["tablets", "tablet", "capsules", "capsule", "mg", "ml", "g", "mcg", "xr", "sr", "er", "cr"]:
-        cleaned = re.sub(rf'\b{suffix}\b', '', cleaned).strip()
+    # Remove dosage numbers first (e.g., "500mg" -> "mg", then we remove "mg")
+    cleaned = re.sub(r'\d+\.?\d*/?\d*\s*', '', cleaned).strip()
     
-    # Remove numbers (dosage)
-    cleaned = re.sub(r'\d+\.?\d*\s*', '', cleaned).strip()
+    # Remove common suffixes (units and formulations)
+    suffixes_pattern = r'\b(tablets?|capsules?|mg|mcg|ml|g|iu|xr|sr|er|cr|od|bd|tds|qds)\b'
+    cleaned = re.sub(suffixes_pattern, '', cleaned, flags=re.IGNORECASE).strip()
     
-    # Remove remaining punctuation
-    cleaned = re.sub(r'[^\w\s]', '', cleaned).strip()
+    # Remove remaining punctuation except hyphens in drug names
+    cleaned = re.sub(r'[^\w\s-]', '', cleaned).strip()
+    
+    # Collapse multiple spaces
+    cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+    
+    # Remove trailing hyphens
+    cleaned = cleaned.rstrip('-').strip()
     
     # Check brand mapping
     if cleaned in BRAND_TO_GENERIC:
