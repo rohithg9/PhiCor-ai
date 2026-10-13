@@ -12618,7 +12618,8 @@ class MediqDrugSearchResult(BaseModel):
 
 async def extract_medications_from_image(image_data: str) -> dict:
     """
-    Extract medications from prescription image using GPT-4 Vision.
+    Extract medications from prescription image or PDF using GPT-4 Vision.
+    PDFs are automatically converted to images first.
     Returns structured medication data or extraction failure details.
     """
     try:
@@ -12631,6 +12632,62 @@ async def extract_medications_from_image(image_data: str) -> dict:
             }
         
         from emergentintegrations.llm.chat import LlmChat, UserMessage, ImageContent
+        import base64 as b64
+        from io import BytesIO
+        
+        # Check if this is a PDF and convert to image
+        is_pdf = False
+        if image_data.startswith('data:application/pdf'):
+            is_pdf = True
+            logger.info("Detected PDF - converting to images for Vision OCR")
+        
+        if is_pdf:
+            try:
+                from pdf2image import convert_from_bytes
+                from PIL import Image
+                
+                # Extract base64 PDF data
+                if ',' in image_data:
+                    pdf_base64 = image_data.split(',')[1]
+                else:
+                    pdf_base64 = image_data
+                
+                pdf_bytes = b64.b64decode(pdf_base64)
+                
+                # Convert PDF pages to images
+                images = convert_from_bytes(pdf_bytes, dpi=150, first_page=1, last_page=5)  # Limit to 5 pages
+                logger.info(f"Converted PDF to {len(images)} page images")
+                
+                if not images:
+                    return {
+                        "success": False,
+                        "error": "Could not convert PDF to images",
+                        "medications": []
+                    }
+                
+                # Convert first page to base64 PNG for Vision
+                img_buffer = BytesIO()
+                images[0].save(img_buffer, format='PNG')
+                img_buffer.seek(0)
+                image_base64 = b64.b64encode(img_buffer.read()).decode('utf-8')
+                
+                # If multiple pages, we'll process just the first for now
+                # TODO: Could enhance to process all pages
+                logger.info(f"PDF page 1 converted, base64 length: {len(image_base64)}")
+                
+            except Exception as e:
+                logger.error(f"PDF conversion failed: {e}")
+                return {
+                    "success": False,
+                    "error": f"PDF conversion failed: {str(e)}",
+                    "medications": []
+                }
+        else:
+            # Regular image - extract base64
+            if image_data.startswith('data:'):
+                image_base64 = image_data.split(',')[1] if ',' in image_data else image_data
+            else:
+                image_base64 = image_data
         
         system_message = """You are a clinical pharmacology AI specializing in medication extraction from prescriptions.
 
@@ -12707,18 +12764,10 @@ If the image is unreadable, return:
             system_message=system_message
         ).with_model("openai", "gpt-4o")
         
-        # Handle base64 image
-        logger.info(f"Image data starts with: {image_data[:50] if image_data else 'EMPTY'}...")
+        # Use the image_base64 we prepared above (either from PDF conversion or original image)
+        logger.info(f"Sending image to Vision API, base64 length: {len(image_base64)}")
         
-        if image_data.startswith('data:'):
-            # Extract base64 part from data URL
-            base64_data = image_data.split(',')[1] if ',' in image_data else image_data
-            logger.info(f"Extracted base64 from data URL, length: {len(base64_data)}")
-        else:
-            base64_data = image_data
-            logger.info(f"Using raw base64, length: {len(base64_data)}")
-        
-        image_content = ImageContent(image_base64=base64_data)
+        image_content = ImageContent(image_base64=image_base64)
         logger.info("ImageContent created successfully")
         
         extraction_prompt = """Please carefully analyze this prescription image and extract ALL medications with complete details.
@@ -12993,10 +13042,21 @@ async def mediq_check_medications(request: MediqCheckRequest):
         lab_values = patient_context.get("lab_values", {})
         egfr = lab_values.get("egfr")
         potassium = lab_values.get("potassium")
-        conditions = patient_context.get("conditions", [])
+        
+        # Handle conditions - ensure it's a list of strings
+        raw_conditions = patient_context.get("conditions", [])
+        conditions = []
+        if isinstance(raw_conditions, list):
+            for c in raw_conditions:
+                if isinstance(c, str):
+                    conditions.append(c)
+                elif isinstance(c, dict) and c.get("name"):
+                    conditions.append(c["name"])
+        elif isinstance(raw_conditions, str):
+            conditions = [raw_conditions]
         
         # Check for gastric ulcer history
-        has_gi_ulcer = any("ulcer" in c.lower() or "gastric" in c.lower() for c in conditions)
+        has_gi_ulcer = any("ulcer" in str(c).lower() or "gastric" in str(c).lower() for c in conditions)
         
         # Renal function assessment
         if egfr is not None:
@@ -13155,8 +13215,19 @@ async def mediq_check_medications(request: MediqCheckRequest):
         # ================================================================
         # STEP 6D: Allergy Cross-Reactivity Check
         # ================================================================
-        allergies = patient_context.get("allergies", [])
+        raw_allergies = patient_context.get("allergies", [])
         allergy_warnings = []
+        
+        # Handle allergies - ensure it's a list of strings
+        allergies = []
+        if isinstance(raw_allergies, list):
+            for a in raw_allergies:
+                if isinstance(a, str):
+                    allergies.append(a)
+                elif isinstance(a, dict) and a.get("name"):
+                    allergies.append(a["name"])
+        elif isinstance(raw_allergies, str):
+            allergies = [raw_allergies]
         
         if allergies:
             allergy_alerts = check_allergy_cross_reactivity(allergies, drug_names)

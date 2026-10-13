@@ -638,6 +638,19 @@ Patient: Age 58, eGFR 35, CKD, Gastric ulcer
   - Critical Warning displayed prominently
   - Status: CLINICIAN_REVIEW_REQUIRED
 
+### October 13, 2026 - PDF Upload Bug Fix (✅ COMPLETED)
+
+#### Issue Fixed
+- **Error**: `'<' not supported between instances of 'list' and 'int'`
+- **Root Cause**: OCR extraction could return conditions/allergies as objects or mixed types
+- **Fix**: Added defensive type checking for `conditions` and `allergies` in STEP 6
+
+#### PDF to Image Conversion (✅ COMPLETED)
+- **Issue**: GPT-4o Vision only accepts images (PNG, JPEG, GIF, WebP), not PDFs
+- **Fix**: Added `pdf2image` library to convert PDF pages to images before Vision OCR
+- **Dependencies Added**: `pdf2image`, `poppler-utils` (system package)
+- **Test**: Successfully extracted 5 medications from 3-page PDF clinical record
+
 ### MEDIQ - Upcoming Tasks (P1)
 - Phase 3: Enhanced medical record ingestion with longitudinal lab data tracking
 - Multi-file batch upload processing
